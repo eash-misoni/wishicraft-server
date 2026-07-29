@@ -5,8 +5,9 @@ from __future__ import annotations
 from aws_cdk import Stack, Tags
 from constructs import Construct
 
+from infrastructure.constructs.minecraft_instance_role import MinecraftInstanceRole
 from infrastructure.constructs.network import Network
-from wishicraft.config import ProjectConfig, StageConfig
+from wishicraft.config import ProjectConfig, SecretsExampleConfig, StageConfig
 from wishicraft.naming import resource_tags
 
 
@@ -20,6 +21,7 @@ class MinecraftStack(Stack):
         *,
         project: ProjectConfig,
         stage: StageConfig,
+        secrets: SecretsExampleConfig,
         phase: int = 0,
     ) -> None:
         super().__init__(scope, construct_id)
@@ -32,3 +34,9 @@ class MinecraftStack(Stack):
 
         if phase >= 1:
             Network(self, "Network", stage=stage)
+            self.minecraft_instance_role = MinecraftInstanceRole(
+                self,
+                "MinecraftInstanceRole",
+                stage=stage,
+                rcon_parameter_name=secrets.rcon_password_parameter_name(stage.stage),
+            )

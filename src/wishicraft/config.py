@@ -77,6 +77,16 @@ class StageConfig:
         return _require_string(self.values, "aws.availability_zone")
 
     @property
+    def aws_account_id(self) -> str:
+        """Return the configured AWS account ID after phase validation."""
+        return _require_string(self.values, "aws.account_id")
+
+    @property
+    def aws_region(self) -> str:
+        """Return the configured AWS Region after phase validation."""
+        return _require_string(self.values, "aws.region")
+
+    @property
     def minecraft_port(self) -> int:
         """Return the configured public Minecraft TCP port after phase validation."""
         value = _lookup_path(self.values, "network.minecraft_port")
@@ -89,6 +99,12 @@ class SecretsExampleConfig:
     """Validated secret parameter-name configuration, never secret values."""
 
     values: ConfigMapping
+
+    def rcon_password_parameter_name(self, stage: str) -> str:
+        """Return the configured RCON SecureString name for one stage."""
+        return _require_string(
+            self.values, f"secure_parameters.rcon_password.{stage}_parameter_name"
+        )
 
 
 @dataclass(frozen=True)

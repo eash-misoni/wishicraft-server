@@ -21,6 +21,7 @@ def build_app(repository_root: Path, stage: str, *, phase: int = 0, action: str 
         f"{configuration.project.stack_name}-{stage}",
         project=configuration.project,
         stage=configuration.stage,
+        secrets=configuration.secrets,
         phase=phase,
     )
     return app
@@ -45,6 +46,7 @@ def main() -> None:
         f"{configuration.project.stack_name}-{stage}",
         project=configuration.project,
         stage=configuration.stage,
+        secrets=configuration.secrets,
         phase=phase,
     )
     app.synth()

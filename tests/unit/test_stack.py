@@ -13,6 +13,14 @@ from wishicraft.config import ConfigValidationError, load_configuration
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 
+def _action_list(value: object) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    assert isinstance(value, list)
+    assert all(isinstance(action, str) for action in value)
+    return cast(list[str], value)
+
+
 def test_dev_stack_is_empty_and_environment_agnostic() -> None:
     app = build_app(REPOSITORY_ROOT, "dev")
 
@@ -68,6 +76,79 @@ def test_phase_one_network_allows_only_configured_minecraft_tcp_ingress() -> Non
     ]
     assert template.find_resources("AWS::EC2::NatGateway") == {}
     assert template.find_resources("AWS::EC2::EIP") == {}
+
+
+def test_phase_one_minecraft_instance_role_has_only_required_ssm_permissions() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=1)
+    stack = cast(Stack, app.node.find_child("MinecraftStack-dev"))
+    template = Template.from_stack(stack)
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+
+    roles = template.find_resources("AWS::IAM::Role")
+    minecraft_role = next(
+        role
+        for role in roles.values()
+        if role["Properties"]["Description"] == "Minecraft EC2 managed node role"
+    )
+    principal = minecraft_role["Properties"]["AssumeRolePolicyDocument"]["Statement"][0][
+        "Principal"
+    ]
+    assert principal == {"Service": "ec2.amazonaws.com"}
+    assert "ManagedPolicyArns" not in minecraft_role["Properties"]
+
+    policies = template.find_resources("AWS::IAM::Policy")
+    policy = next(iter(policies.values()))["Properties"]["PolicyDocument"]
+    statements = policy["Statement"]
+    actions = {action for statement in statements for action in _action_list(statement["Action"])}
+
+    assert {
+        "ssm:DescribeAssociation",
+        "ssm:GetDocument",
+        "ssm:UpdateInstanceInformation",
+        "ssmmessages:CreateControlChannel",
+        "ssmmessages:OpenDataChannel",
+        "ec2messages:GetMessages",
+        "ec2messages:SendReply",
+    } <= actions
+    assert "ssm:GetParameter" in actions
+    assert (
+        not {
+            "ssm:GetParameters",
+            "ssm:GetParametersByPath",
+            "ssm:GetParameterHistory",
+            "ssm:DescribeParameters",
+        }
+        & actions
+    )
+    assert not any(
+        action.startswith(prefix)
+        for action in actions
+        for prefix in ("kms:", "ec2:", "iam:", "route53:", "s3:", "dynamodb:", "logs:")
+    )
+
+    parameter_statement = next(
+        statement
+        for statement in statements
+        if _action_list(statement["Action"]) == ["ssm:GetParameter"]
+    )
+    parameter_resource = parameter_statement["Resource"]
+    assert parameter_resource != "*"
+    parameter_resource_text = str(parameter_resource)
+    assert configuration.stage.aws_region in parameter_resource_text
+    assert configuration.stage.aws_account_id in parameter_resource_text
+    assert ":parameter/" in parameter_resource_text
+    assert "parameter//" not in parameter_resource_text
+    assert configuration.secrets.rcon_password_parameter_name("dev") in parameter_resource_text
+    assert "rcon-password" in parameter_resource_text
+    assert not any(
+        "ssm:GetParameter" in _action_list(statement["Action"]) and statement["Resource"] == "*"
+        for statement in statements
+    )
+
+    template_text = str(template.to_json())
+    assert "AmazonSSMManagedInstanceCore" not in template_text
+    assert "rcon-password" in template_text
+    assert "RCON_PASSWORD" not in template_text
 
 
 def test_phase_one_dev_deploy_validation_uses_confirmed_settings() -> None:
