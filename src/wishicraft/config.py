@@ -71,6 +71,18 @@ class StageConfig:
     def null_paths(self) -> tuple[str, ...]:
         return tuple(_find_null_paths(self.values))
 
+    @property
+    def availability_zone(self) -> str:
+        """Return the configured Availability Zone after phase validation."""
+        return _require_string(self.values, "aws.availability_zone")
+
+    @property
+    def minecraft_port(self) -> int:
+        """Return the configured public Minecraft TCP port after phase validation."""
+        value = _lookup_path(self.values, "network.minecraft_port")
+        assert isinstance(value, int) and not isinstance(value, bool)
+        return value
+
 
 @dataclass(frozen=True)
 class SecretsExampleConfig:
