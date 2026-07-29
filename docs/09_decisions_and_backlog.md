@@ -241,7 +241,7 @@
 
 - **状態:** Accepted
 - Regionは`ap-northeast-1`、CPU architectureは`x86_64`、初期instance typeは`t3a.medium`とする。
-- Amazon Linux 2023、Corretto 21 headless、Xms `1G`、Xmx `3G`を初期値とする。
+- Amazon Linux 2023、Corretto 25 headless、Xms `1G`、Xmx `3G`を初期値とする。
 - root EBSはgp3 16 GiB、data EBSはgp3 30 GiB、暗号化・保持とする。
 - 具体的なMinecraft versionとAvailability ZoneはPhase 1開始前に確定する。
 

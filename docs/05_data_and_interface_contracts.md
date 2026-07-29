@@ -153,7 +153,7 @@ package:
 
 runtime:
   class: initial
-  java_runtime: corretto-21-headless
+  java_runtime: corretto-25-headless
   java_xms: 1G
   java_xmx: 3G
   idle_shutdown_minutes: 30

@@ -26,7 +26,7 @@ region: ap-northeast-1
 architecture: x86_64
 instance_type: t3a.medium
 operating_system: amazon-linux-2023
-java_runtime: corretto-21-headless
+java_runtime: corretto-25-headless
 java_xms: 1G
 java_xmx: 3G
 root_ebs: gp3 16 GiB
