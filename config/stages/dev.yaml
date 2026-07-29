@@ -81,4 +81,4 @@ monitoring:
   ec2_running_warning_hours: 8
   desired_stopped_ec2_running_warning_minutes: 15
   desired_running_not_ready_warning_minutes: 20
-  dev_log_retention_days: 14
+  log_retention_days: 14
