@@ -772,6 +772,8 @@ Bot Token、Interaction Tokenそのものは保存しない。
 
 `null`または`TO_BE_CONFIRMED`の値を実装側で推測して埋めない。設計契約と設定値が矛盾する場合は、どちらかを暗黙に優先せずDecision候補として報告する。Parameter Store StringやLambda environmentへ配布された公開値がYAMLと異なる場合はdeploy driftとして扱い、手動値を新しい正本にしない。
 
+Phase 1のvanilla server artifactはstage YAMLの`minecraft_distribution.server_jar_url`と`minecraft_distribution.server_jar_sha1`を正本とする。これらは公開情報であり、versionとともに固定する。`latest`や可変URLを使用しない。
+
 ## 22. AWSリソース命名
 
 基本形式:

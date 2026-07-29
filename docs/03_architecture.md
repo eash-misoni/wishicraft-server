@@ -178,6 +178,12 @@ MVPの秘密情報を保存する。
 
 コードやCDKへ秘密値を渡さず、Parameter名だけを設定として保持する。実行時IAM roleで復号して取得する。
 
+Phase 1のRCON passwordは、EC2 roleだけが対象SecureStringの`ssm:GetParameter`を実行時に許可される。CDK、CloudFormation、user data、Git、通常ログへ実値を含めない。EC2内の許可済みbootstrap scriptはtraceを無効化して値を取得し、標準出力へ出さず、`server.properties`を`root:minecraft`所有・`0640`で作成する。Minecraft processは`minecraft` groupによるreadだけを持つ。RCON用のSecurity Group受信ルールは作成せず、RCONはlocalhostだけへbindする。
+
+### Minecraft server artifact
+
+Phase 1の初期vanilla serverは、stage設定に固定したMinecraft version、公式server.jar URL、公式SHA-1を使用する。`latest`や可変URLを使用しない。EC2 bootstrapは取得後にSHA-1を検証し、一致しないartifactを配置・起動しない。取得元、version、checksum、検証手順はPhase 1 runbookの正本に記録する。
+
 ### Secrets Manager
 
 自動rotationや高度な秘密管理が必要になった場合に再評価する。MVPの必須サービスにはしない。

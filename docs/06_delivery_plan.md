@@ -150,9 +150,18 @@ repository-root/
 
 ## 4. Phase 1 — Minecraft EC2の手動基盤
 
+- **状態:** In progress（2026-07-29）
+
 ### 目的
 
 制御系なしで、AWS上のMinecraftを人間が安全に起動・接続・停止できる状態にする。
+
+### 最初の作業単位（完了）
+
+- Phase 1 dev synth/deploy用required validationを追加した。
+- devのAWS接続先、Java 25、Minecraft 26.2、Hosted Zone、公式server.jar URL/SHA-1を設定の正本へ記録した。
+- AWS CLI profile、RCONの実行時配布、artifact検証、EULA承認gateの設計とrunbookを記録した。
+- CDK bootstrap、`cdk diff`、deploy、AWSリソース作成、server.jar取得、EULA設定、Minecraft起動は未実行である。
 
 ### 作業
 

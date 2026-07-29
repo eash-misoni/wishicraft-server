@@ -252,6 +252,16 @@ EBS volumeは同じAvailability ZoneのEC2へ接続する。Linux上のdevice na
 - EBS pricing/capacity
 - Public IPv4 pricing
 
+### Phase 1 dev artifact固定値（2026-07-29確認）
+
+- 公式version manifest: `https://piston-meta.mojang.com/mc/game/version_manifest_v2.json`
+- Minecraft 26.2 metadata: `https://piston-meta.mojang.com/v1/packages/3457237902814cca3f5c6f20b0c5db1b1f341512/26.2.json`
+- server.jar: `https://piston-data.mojang.com/v1/objects/823e2250d24b3ddac457a60c92a6a941943fcd6a/server.jar`
+- server.jar SHA-1: `823e2250d24b3ddac457a60c92a6a941943fcd6a`
+- metadataのJava runtime major version: 25
+
+これらは公式metadataから確認した固定値であり、server.jar本体はこの確認では取得していない。実際の取得・SHA-1検証・EULA設定・初回起動は、runbookの承認gate後にのみ行う。
+
 ### Web Phase
 
 - Discord OAuth2仕様

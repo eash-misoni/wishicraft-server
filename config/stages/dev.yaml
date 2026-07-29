@@ -2,7 +2,7 @@ schema_version: 1
 stage: dev
 
 aws:
-  account_id: 385526546525
+  account_id: "385526546525"
   region: ap-northeast-1
   availability_zone: ap-northeast-1a
 
@@ -18,6 +18,10 @@ compute:
   java_xms: 1G
   java_xmx: 3G
 
+minecraft_distribution:
+  server_jar_url: https://piston-data.mojang.com/v1/objects/823e2250d24b3ddac457a60c92a6a941943fcd6a/server.jar
+  server_jar_sha1: 823e2250d24b3ddac457a60c92a6a941943fcd6a
+
 storage:
   root:
     volume_type: gp3
@@ -31,7 +35,7 @@ storage:
     mount_path: /srv/minecraft
 
 route53:
-  hosted_zone_id: null
+  hosted_zone_id: Z077818024BJUAUBFMTKV
   record_name: mc-dev.wishicraft.net
   # record type/TTL/delete policyはconfig/project.yamlのdomainを使用する。
 

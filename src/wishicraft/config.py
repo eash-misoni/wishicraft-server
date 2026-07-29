@@ -33,6 +33,7 @@ STAGE_REQUIRED_MAPPINGS: Final = (
     "billing",
     "monitoring",
 )
+OPTIONAL_STAGE_MAPPINGS: Final = ("minecraft_distribution",)
 
 
 class ConfigValidationError(ValueError):
@@ -112,6 +113,7 @@ def load_stage_config(path: Path, expected_stage: str) -> StageConfig:
     values = _load_mapping(path)
     errors = _schema_errors(values, f"stages/{expected_stage}.yaml", STAGE_REQUIRED_MAPPINGS)
     errors.extend(_expect_schema_version(values, f"stages/{expected_stage}.yaml"))
+    errors.extend(_expect_optional_mappings(values, f"stages/{expected_stage}.yaml"))
     stage = values.get("stage")
     if not isinstance(stage, str):
         errors.append(f"stages/{expected_stage}.yaml: stage must be a string")
@@ -125,6 +127,7 @@ def load_stage_config(path: Path, expected_stage: str) -> StageConfig:
     errors.extend(
         _expect_positive_int_paths(values, f"stages/{expected_stage}.yaml", _POSITIVE_STAGE_INTS)
     )
+    errors.extend(_expect_sha1_paths(values, f"stages/{expected_stage}.yaml"))
     if errors:
         raise ConfigValidationError(errors)
     return StageConfig(stage=expected_stage, values=values)
@@ -163,6 +166,56 @@ def load_secrets_example_config(path: Path) -> SecretsExampleConfig:
 # requirements without treating today's complete set of null placeholders as permanent.
 REQUIRED_PATHS: Final[dict[tuple[int, str, str], tuple[str, ...]]] = {
     (0, "dev", "synth"): (),
+    (1, "dev", "synth"): (
+        "aws.account_id",
+        "aws.region",
+        "aws.availability_zone",
+        "network.minecraft_port",
+        "compute.architecture",
+        "compute.instance_type",
+        "compute.operating_system",
+        "compute.java_runtime",
+        "compute.minecraft_version",
+        "compute.java_xms",
+        "compute.java_xmx",
+        "minecraft_distribution.server_jar_url",
+        "minecraft_distribution.server_jar_sha1",
+        "storage.root.volume_type",
+        "storage.root.size_gib",
+        "storage.root.encrypted",
+        "storage.data.volume_type",
+        "storage.data.size_gib",
+        "storage.data.encrypted",
+        "storage.data.retain_on_delete",
+        "storage.data.mount_path",
+        "route53.hosted_zone_id",
+        "route53.record_name",
+    ),
+    (1, "dev", "deploy"): (
+        "aws.account_id",
+        "aws.region",
+        "aws.availability_zone",
+        "network.minecraft_port",
+        "compute.architecture",
+        "compute.instance_type",
+        "compute.operating_system",
+        "compute.java_runtime",
+        "compute.minecraft_version",
+        "compute.java_xms",
+        "compute.java_xmx",
+        "minecraft_distribution.server_jar_url",
+        "minecraft_distribution.server_jar_sha1",
+        "storage.root.volume_type",
+        "storage.root.size_gib",
+        "storage.root.encrypted",
+        "storage.data.volume_type",
+        "storage.data.size_gib",
+        "storage.data.encrypted",
+        "storage.data.retain_on_delete",
+        "storage.data.mount_path",
+        "route53.hosted_zone_id",
+        "route53.record_name",
+    ),
 }
 
 
@@ -201,6 +254,8 @@ _OPTIONAL_STAGE_STRINGS: Final = (
     "compute.minecraft_version",
     "compute.java_xms",
     "compute.java_xmx",
+    "minecraft_distribution.server_jar_url",
+    "minecraft_distribution.server_jar_sha1",
     "route53.hosted_zone_id",
     "route53.record_name",
     "discord.environment_label",
@@ -231,6 +286,15 @@ _POSITIVE_STAGE_INTS: Final = (
     "runtime.idle_shutdown_minutes",
     "monitoring.log_retention_days",
 )
+
+
+def _expect_optional_mappings(values: ConfigMapping, filename: str) -> list[str]:
+    errors: list[str] = []
+    for path in OPTIONAL_STAGE_MAPPINGS:
+        value = _lookup_path(values, path)
+        if value is not None and not isinstance(value, dict):
+            errors.append(f"{filename}: {path} must be a mapping or null")
+    return errors
 
 
 def _load_mapping(path: Path) -> ConfigMapping:
@@ -304,6 +368,21 @@ def _expect_positive_int_paths(
         ):
             errors.append(f"{filename}: {path} must be a positive integer or null")
     return errors
+
+
+def _expect_sha1_paths(values: ConfigMapping, filename: str) -> list[str]:
+    path = "minecraft_distribution.server_jar_sha1"
+    value = _lookup_path(values, path)
+    if value is None:
+        return []
+    is_lowercase_sha1 = (
+        isinstance(value, str)
+        and len(value) == 40
+        and all(char in "0123456789abcdef" for char in value)
+    )
+    if not is_lowercase_sha1:
+        return [f"{filename}: {path} must be a lowercase SHA-1 hex string or null"]
+    return []
 
 
 def _lookup_path(values: Mapping[str, ConfigValue], path: str) -> ConfigValue:

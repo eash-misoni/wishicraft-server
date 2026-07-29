@@ -8,7 +8,7 @@ Phase 0で、Python、AWS CDK、設定検証、テスト、CIを整備しまし�
 
 `config/project.yaml`、`config/stages/<stage>.yaml`、`config/secrets.example.yaml`がGit管理された設定の正本です。秘密値は含めず、`secrets.example.yaml`にはParameter Store SecureStringのParameter名だけを置きます。
 
-`null`は未確定値であり、コードは補完しません。Phase 0ではdevの空CDK stackはenvironment-agnosticにsynthでき、AWS Account IDやAWS profileを必要としません。AWS Account IDとprofileの解決方式は、最初のdev deploy前に決定します。
+`null`は未確定値であり、コードは補完しません。Phase 0のdev空CDK stackはenvironment-agnosticにsynthでき、AWS Account IDやAWS profileを必要としません。Phase 1以降の手動AWS操作は、runbookで定めたIAM Identity Center profileとSTS Account ID照合方針に従います。
 
 prod設定はplaceholderとして読み込めますが、Phase 0でprod向けsynthを行うと、現在の`null`値をパス付きで列挙して失敗します。この一時的な安全ゲートは、すべての`null`を将来永続的に必須とするものではありません。Phase 1開始前にstage・処理・Phaseごとの必須値を定義します。
 

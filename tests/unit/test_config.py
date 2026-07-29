@@ -6,6 +6,7 @@ import pytest
 
 from wishicraft.config import (
     ConfigValidationError,
+    StageConfig,
     load_configuration,
     load_project_config,
     load_secrets_example_config,
@@ -30,6 +31,27 @@ def test_dev_phase_zero_synth_allows_known_nulls() -> None:
     config = load_configuration(REPOSITORY_ROOT, "dev")
 
     validate_stage_for_action(config.stage, phase=0, action="synth")
+
+
+@pytest.mark.parametrize("action", ("synth", "deploy"))
+def test_dev_phase_one_validation_accepts_confirmed_settings(action: str) -> None:
+    config = load_configuration(REPOSITORY_ROOT, "dev")
+
+    validate_stage_for_action(config.stage, phase=1, action=action)
+
+
+def test_dev_phase_one_validation_rejects_missing_server_checksum() -> None:
+    config = load_configuration(REPOSITORY_ROOT, "dev")
+    values = {**config.stage.values}
+    raw_distribution = values["minecraft_distribution"]
+    assert isinstance(raw_distribution, dict)
+    distribution = dict(raw_distribution)
+    distribution["server_jar_sha1"] = None
+    values["minecraft_distribution"] = distribution
+    incomplete_stage = StageConfig(stage="dev", values=values)
+
+    with pytest.raises(ConfigValidationError, match="minecraft_distribution.server_jar_sha1"):
+        validate_stage_for_action(incomplete_stage, phase=1, action="synth")
 
 
 def test_prod_phase_zero_synth_rejects_each_current_null() -> None:

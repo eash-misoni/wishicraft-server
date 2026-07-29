@@ -20,7 +20,7 @@ system_id: wishicraft-main
 initial_game_id: game-vanilla-main
 initial_game_display_name: Wishicraft Vanilla
 initial_minecraft_profile_name: NEWISHIN_
-preferred_domain: wishicraft.net  # 取得前の予定値
+preferred_domain: wishicraft.net
 minecraft_fqdn: mc.wishicraft.net
 region: ap-northeast-1
 architecture: x86_64
@@ -35,7 +35,7 @@ data_ebs: gp3 30 GiB
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みとする。Application IDとPublic Keyを含むDiscordの公開IDは秘密情報ではないが、文書へ重複記載せずstage設定を正本とする。
 
-Minecraftの具体的version、Availability Zone、Minecraft port、AWS Account ID、Hosted Zone IDは、確定するまで該当stage設定で`null`を維持する。prod用Discord Guild/channel/role/Application ID/Public Keyも、prod環境を準備するまで`config/stages/prod.yaml`で`null`を維持する。
+devのAWS Account ID、Availability Zone、Minecraft port/version、Route 53 Hosted Zone IDは`config/stages/dev.yaml`へ反映済みとする。prodを含む未確定値は該当stage設定で`null`を維持する。prod用Discord Guild/channel/role/Application ID/Public Keyも、prod環境を準備するまで`config/stages/prod.yaml`で`null`を維持する。
 
 ## 3. 設定ファイルの責務
 
@@ -98,6 +98,8 @@ MVPではAWS Systems Manager Parameter Storeの`SecureString`を基本とする�
 
 設定ファイルへ保存しない。人間の開発環境はAWS IAM Identity CenterまたはAWS CLI profileを使用する。GitHub Actionsからdeployする場合はOIDCによる短期credentialを使う。
 
+devのローカル認証はIAM Identity Centerの`wishicraft-dev` profileを使用する。このprofileは認証取得専用であり、Account IDとRegionの正本ではない。AWS CLIおよびCDKの手動コマンドでは`--profile wishicraft-dev`を明示し、deploy前にSTS caller identityのAccount IDと`config/stages/dev.yaml`の`aws.account_id`を照合する。不一致ならdeployを中止する。profile名やSSO roleをstage YAMLやCDKアプリケーションコードへ保存しない。
+
 ## 7. ローカル専用ファイル
 
 以下は`.gitignore`へ追加する。
@@ -128,18 +130,16 @@ secrets.yaml
 
 最初のdev deploy前:
 
-- AWS Account ID。CDK bootstrap/profileから安全に解決する方式を採る場合は、設定の`null`を維持してよい。
+- AWS profileの解決方式。AWS Account IDは`config/stages/dev.yaml`へ反映済みである。
 
 Phase 1前:
 
-- `wishicraft.net`の取得結果
-- Route 53 Hosted Zone ID
-- Minecraftの具体的version
-- Minecraft port
-- Availability Zone
-- RCON passwordを生成し、dev用SecureStringへ登録する
 - RCON passwordをEC2へ安全に配布する方式
 - Minecraft EULAへの同意手順とserver配布元
+
+dev用RCON passwordはSecureStringへ登録済みである。実値は取得・表示・Gitへの保存を行わない。Minecraft 26.2の公式server.jar URLとSHA-1は`config/stages/dev.yaml`へ固定した。server.jarの取得、checksum検証、`eula=true`の設定、Minecraft初回起動は、人間が別途明示承認するまで実行しない。
+
+`mc-dev.wishicraft.net`のAレコードはPhase 0で手動作成しない。Phase 1でEC2起動後に現在の動的パブリックIPv4へUPSERTし、EC2停止完了後に削除する。
 
 Phase 7前:
 
@@ -161,4 +161,4 @@ Phase 0は2026-07-29に完了した。設定schema validationは、YAMLの型・
 - devのPhase 0空stack synthはenvironment-agnosticであり、AWS Account IDやAWS profileを要求しない。Phase 1以降で必要になるAWS Account ID、Availability Zone、Minecraft port/version、Route 53 Hosted Zone IDも要求しない。
 - prod設定はplaceholderとして読込可能に維持する。Phase 0のprod synthは現在の全`null`値をパス付きで表示して拒否する。
 - このprod拒否は、現在の全`null`を将来も必須とする定義ではない。Phase 1開始前にstage・処理・Phaseごとのrequired settingを定義する。
-- AWS Account IDとprofileの解決方式は、最初のdev deploy前に決定する未完了項目として残す。
+- AWS Account IDはstage設定の正本とし、local profileの利用・STS照合方針はD-050と本書のAWS credential節へ確定済みとして記録する。実際のIAM Identity Center認証とSTS照合は最初のdev deploy直前に実行する。

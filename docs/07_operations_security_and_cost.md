@@ -139,6 +139,8 @@ Discord public key、Guild ID、Channel ID、Role IDは秘密ではないが、�
 - CDKとアプリケーションへ渡す値: 秘密値ではなくParameter名
 - Secrets Manager: 自動rotation等が必要になった場合に再評価
 
+Phase 1では、EC2 instance roleの`ssm:GetParameter`をdev用RCON SecureStringへ限定する。CDK、user data、CloudFormation、Git、通常ログに実値を含めない。EC2内では復号値を標準出力へ出さず、RCONを含む`server.properties`を`root:minecraft`・`0640`で作成する。RCONのインターネット向け受信ルールは作成しない。
+
 推奨Parameter名:
 
 ```text

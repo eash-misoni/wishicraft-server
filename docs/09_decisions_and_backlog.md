@@ -243,7 +243,8 @@
 - Regionは`ap-northeast-1`、CPU architectureは`x86_64`、初期instance typeは`t3a.medium`とする。
 - Amazon Linux 2023、Corretto 25 headless、Xms `1G`、Xmx `3G`を初期値とする。
 - root EBSはgp3 16 GiB、data EBSはgp3 30 GiB、暗号化・保持とする。
-- 具体的なMinecraft versionとAvailability ZoneはPhase 1開始前に確定する。
+- devのAvailability Zoneは`ap-northeast-1a`、Minecraft versionは`26.2`として`config/stages/dev.yaml`へ確定した。Minecraft 26.2はJava 25を要求する。
+- 公式server.jar URLとSHA-1は同stage設定へ固定し、`latest`追従を行わない。prodは設定確定までplaceholderを維持する。
 
 ### D-039 設定ファイルを具体値の正本とする
 
@@ -259,11 +260,12 @@
 - コードとCDKには実値ではなくParameter名だけを渡す。
 - Secrets Managerは自動rotation等が必要になった場合に再評価する。
 
-### D-041 Wishicraft固定FQDN候補
+### D-041 Wishicraft固定FQDN
 
 - **状態:** Accepted
-- 希望ドメインを`wishicraft.net`、Minecraft固定FQDNを`mc.wishicraft.net`とする。
-- ドメイン取得前は予定値として設定し、Phase 1開始前に取得結果とHosted Zone IDを確定する。
+- 取得済みドメインを`wishicraft.net`、Minecraft固定FQDNを`mc.wishicraft.net`とする。
+- devのHosted Zone IDは`config/stages/dev.yaml`を正本とする。prodはprod設定が確定するまで`null`を維持する。
+- `mc-dev.wishicraft.net`のAレコードはPhase 0では作成しない。Phase 1で起動中EC2の現在の動的パブリックIPv4へ更新し、停止後に削除する。
 
 ### D-042 公開設定の正本と実行時配布
 
@@ -318,6 +320,21 @@
 - Phase 0のdev空stack synthはenvironment-agnosticとし、AWS Account ID、Availability Zone、Minecraft port/version、Route 53 Hosted Zone IDを要求しない。
 - prodのPhase 0 synthはplaceholderを読込可能とした上で、現在の`null`値を全てパス付きで表示して拒否する。
 - このprod拒否はPhase 0の一時的な安全gateであり、全ての`null`を永続的な必須項目と定義しない。Phase 1以降はstage・処理・Phaseごとのrequired pathを明示する。
+
+### D-050 dev AWS CLI profileと接続先照合
+
+- **状態:** Accepted
+- ローカル開発者はIAM Identity Centerの`wishicraft-dev` profileを認証取得だけに使用する。
+- Account IDとRegionの正本は`config/stages/dev.yaml`とし、profile名やSSO roleをstage設定の必須項目にしない。
+- AWS CLIおよびCDKの手動コマンドでは`--profile wishicraft-dev`を明示する。CDKアプリケーションコードへprofile名を埋め込まない。
+- deploy前にSTS caller identityのAccount IDをstage設定のAccount IDと照合し、不一致なら処理を中止する。
+
+### D-051 Phase 1 RCON secretとserver artifactの安全条件
+
+- **状態:** Accepted
+- RCON passwordは登録済みSecureStringをEC2 roleが実行時に取得する。実値をCDK、user data、CloudFormation、Git、ログへ含めない。
+- EC2 roleの`ssm:GetParameter`は対象Parameterへ限定し、復号した値を標準出力へ出さない。RCONはlocalhost限定で、インターネット向け受信ルールを作成しない。
+- Minecraft 26.2 server.jarは公式version manifestで確認したURLとSHA-1をstage設定へ固定し、取得後に検証する。EULA同意、artifact取得、初回起動は人間の明示承認前に実行しない。
 
 
 ## 3. 却下した案
@@ -406,7 +423,7 @@
 
 ## 5. Current blockers
 
-Phase 0開始前の重大blockerはない。
+Phase 0開始前の重大blockerはなく、Phase 0は完了した。Phase 1は準備作業を完了し、AWSリソース実装を開始していない。
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みであり、blockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
 
@@ -414,11 +431,8 @@ Phase別に決める事項:
 
 | 項目 | 決定期限 |
 |---|---|
-| `wishicraft.net`取得結果 / Route 53 Hosted Zone ID | Phase 1開始前 |
-| 対象Minecraft version | Phase 1開始前 |
-| Availability Zone | Phase 1開始前 |
-| Minecraft port / EULA / server取得方法 | Phase 1開始前 |
-| RCON passwordのSecureString登録と配布方式 | Phase 1開始前 |
+| EULA同意、server.jar取得、checksum検証、初回起動の実行承認 | Phase 1 bootstrap検証前 |
+| RCON password安全配布方式のEC2実装 | Phase 1 EC2 bootstrap実装時 |
 | RCON client/library | Phase 2開始前 |
 | dev Discord Bot TokenのSecureString登録とApplication/command設定確認 | Phase 7開始前 |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |
