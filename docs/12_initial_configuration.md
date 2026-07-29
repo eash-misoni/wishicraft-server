@@ -32,6 +32,10 @@ java_xmx: 3G
 root_ebs: gp3 16 GiB
 data_ebs: gp3 30 GiB
 data_ebs_filesystem: xfs
+minecraft_version: "26.2" # dev stage only
+minecraft_server_jar_size: 60894273 # dev stage only
+minecraft_server_jar_sha256: cdacdfb25898de5e4b4b0e5ddcc2722f77067e46605709c2d886c000ebb63ec5
+initial_minecraft_profile_uuid: e912ab95758e4b7fb32e292eda293104
 ```
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みとする。Application IDとPublic Keyを含むDiscordの公開IDは秘密情報ではないが、文書へ重複記載せずstage設定を正本とする。
@@ -139,7 +143,7 @@ Phase 1前:
 - RCON passwordをEC2へ安全に配布する方式
 - Minecraft EULAへの同意手順とserver配布元
 
-dev用RCON passwordはSecureStringへ登録済みである。実値は取得・表示・Gitへの保存を行わない。Minecraft 26.2の公式server.jar URLとSHA-1は`config/stages/dev.yaml`へ固定した。server.jarの取得、checksum検証、`eula=true`の設定、Minecraft初回起動は、人間が別途明示承認するまで実行しない。
+dev用RCON passwordはSecureStringへ登録済みである。実値は取得・表示・Gitへの保存を行わない。Minecraft 26.2の公式server.jar URL、SHA-1、SHA-256、sizeは`config/stages/dev.yaml`へ固定した。初期GameのEULA同意は明示済みであるが、server.jarのEC2取得、checksum検証、Minecraft初回起動はdeploy後の別途手動確認として扱う。
 
 `mc-dev.wishicraft.net`のAレコードはPhase 0で手動作成しない。Phase 1でEC2起動後に現在の動的パブリックIPv4へUPSERTし、EC2停止完了後に削除する。
 

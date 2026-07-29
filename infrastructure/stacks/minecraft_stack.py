@@ -61,5 +61,6 @@ class MinecraftStack(Stack):
                 "DataVolumeBootstrap",
                 instance=self.minecraft_instance,
                 data_volume=self.minecraft_data_volume,
+                project=project,
                 stage=stage,
             )

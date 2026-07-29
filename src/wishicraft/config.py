@@ -60,6 +60,22 @@ class ProjectConfig:
     def stack_name(self) -> str:
         return _require_string(self.values, "toolchain.initial_stack_name")
 
+    @property
+    def initial_game_id(self) -> str:
+        return _require_string(self.values, "initial_game.game_id")
+
+    @property
+    def initial_minecraft_profile_name(self) -> str:
+        profiles = _lookup_path(self.values, "initial_game.minecraft_profile_names")
+        assert isinstance(profiles, list) and len(profiles) == 1 and isinstance(profiles[0], str)
+        return profiles[0]
+
+    @property
+    def initial_minecraft_profile_uuid(self) -> str:
+        profiles = _lookup_path(self.values, "initial_game.minecraft_profile_uuids")
+        assert isinstance(profiles, list) and len(profiles) == 1 and isinstance(profiles[0], str)
+        return profiles[0]
+
 
 @dataclass(frozen=True)
 class StageConfig:
@@ -110,6 +126,38 @@ class StageConfig:
     def java_runtime(self) -> str:
         """Return the configured Java runtime after phase validation."""
         return _require_string(self.values, "compute.java_runtime")
+
+    @property
+    def minecraft_version(self) -> str:
+        return _require_string(self.values, "compute.minecraft_version")
+
+    @property
+    def java_xms(self) -> str:
+        return _require_string(self.values, "compute.java_xms")
+
+    @property
+    def java_xmx(self) -> str:
+        return _require_string(self.values, "compute.java_xmx")
+
+    @property
+    def minecraft_server_jar_url(self) -> str:
+        return _require_string(self.values, "minecraft_distribution.server_jar_url")
+
+    @property
+    def minecraft_server_jar_sha1(self) -> str:
+        return _require_string(self.values, "minecraft_distribution.server_jar_sha1")
+
+    @property
+    def minecraft_server_jar_sha256(self) -> str:
+        return _require_string(self.values, "minecraft_distribution.server_jar_sha256")
+
+    @property
+    def minecraft_server_jar_size(self) -> int:
+        return _require_positive_int(self.values, "minecraft_distribution.server_jar_size")
+
+    @property
+    def minecraft_normal_stop_timeout_seconds(self) -> int:
+        return _require_positive_int(self.values, "timeouts_seconds.minecraft_normal_stop")
 
     @property
     def root_volume_type(self) -> str:
@@ -202,6 +250,22 @@ def load_project_config(path: Path) -> ProjectConfig:
         _expect_string_paths(values, "project.yaml", ("project.slug", "project.resource_prefix"))
     )
     errors.extend(_expect_list_of_strings(values, "project.yaml", "project.stages"))
+    errors.extend(
+        _expect_list_of_strings(values, "project.yaml", "initial_game.minecraft_profile_names")
+    )
+    errors.extend(
+        _expect_list_of_strings(values, "project.yaml", "initial_game.minecraft_profile_uuids")
+    )
+    profile_uuids = _lookup_path(values, "initial_game.minecraft_profile_uuids")
+    if isinstance(profile_uuids, list):
+        errors.extend(
+            "project.yaml: initial_game.minecraft_profile_uuids["
+            f"{index}] must be a lowercase UUID hex string"
+            for index, value in enumerate(profile_uuids)
+            if not isinstance(value, str)
+            or len(value) != 32
+            or any(character not in "0123456789abcdef" for character in value)
+        )
     if errors:
         raise ConfigValidationError(errors)
     return ProjectConfig(values)
@@ -226,6 +290,7 @@ def load_stage_config(path: Path, expected_stage: str) -> StageConfig:
         _expect_positive_int_paths(values, f"stages/{expected_stage}.yaml", _POSITIVE_STAGE_INTS)
     )
     errors.extend(_expect_sha1_paths(values, f"stages/{expected_stage}.yaml"))
+    errors.extend(_expect_sha256_paths(values, f"stages/{expected_stage}.yaml"))
     if errors:
         raise ConfigValidationError(errors)
     return StageConfig(stage=expected_stage, values=values)
@@ -278,6 +343,8 @@ REQUIRED_PATHS: Final[dict[tuple[int, str, str], tuple[str, ...]]] = {
         "compute.java_xmx",
         "minecraft_distribution.server_jar_url",
         "minecraft_distribution.server_jar_sha1",
+        "minecraft_distribution.server_jar_sha256",
+        "minecraft_distribution.server_jar_size",
         "storage.root.volume_type",
         "storage.root.size_gib",
         "storage.root.encrypted",
@@ -304,6 +371,8 @@ REQUIRED_PATHS: Final[dict[tuple[int, str, str], tuple[str, ...]]] = {
         "compute.java_xmx",
         "minecraft_distribution.server_jar_url",
         "minecraft_distribution.server_jar_sha1",
+        "minecraft_distribution.server_jar_sha256",
+        "minecraft_distribution.server_jar_size",
         "storage.root.volume_type",
         "storage.root.size_gib",
         "storage.root.encrypted",
@@ -356,6 +425,7 @@ _OPTIONAL_STAGE_STRINGS: Final = (
     "compute.java_xmx",
     "minecraft_distribution.server_jar_url",
     "minecraft_distribution.server_jar_sha1",
+    "minecraft_distribution.server_jar_sha256",
     "route53.hosted_zone_id",
     "route53.record_name",
     "discord.environment_label",
@@ -379,6 +449,7 @@ _POSITIVE_STAGE_INTS: Final = (
     "network.minecraft_port",
     "storage.root.size_gib",
     "storage.data.size_gib",
+    "minecraft_distribution.server_jar_size",
     "timeouts_seconds.ec2_running",
     "timeouts_seconds.ssm_online",
     "timeouts_seconds.minecraft_ready",
@@ -483,6 +554,20 @@ def _expect_sha1_paths(values: ConfigMapping, filename: str) -> list[str]:
     )
     if not is_lowercase_sha1:
         return [f"{filename}: {path} must be a lowercase SHA-1 hex string or null"]
+    return []
+
+
+def _expect_sha256_paths(values: ConfigMapping, filename: str) -> list[str]:
+    path = "minecraft_distribution.server_jar_sha256"
+    value = _lookup_path(values, path)
+    if value is None:
+        return []
+    if not (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    ):
+        return [f"{filename}: {path} must be a lowercase SHA-256 hex string or null"]
     return []
 
 

@@ -293,8 +293,14 @@ def test_phase_one_data_volume_bootstrap_uses_volume_ref_and_preserves_ec2_invar
     assert configuration.stage.java_runtime in user_data_text
     assert "java-25-amazon-corretto-headless" in user_data_text
     assert "java-runtime-install" in user_data_text
+    assert "minecraft-artifact-install" in user_data_text
+    assert "minecraft-game-setup" in user_data_text
+    assert "minecraft.service" in user_data_text
     service_enable = "systemctl enable --now wishicraft-data-volume.service"
     assert user_data_text.index(service_enable) < user_data_text.index("JAVA_RUNTIME=")
+    assert user_data_text.index("JAVA_RUNTIME=") < user_data_text.rindex(
+        "minecraft-artifact-install"
+    )
     assert "/dev/sdf" not in user_data_text
     assert "rcon-password" not in user_data_text
     assert len(user_data_text.encode("utf-8")) < 16 * 1024
@@ -309,6 +315,29 @@ def test_phase_one_data_volume_bootstrap_uses_volume_ref_and_preserves_ec2_invar
     assert template.find_resources("AWS::IAM::ManagedPolicy") == {}
     assert template.find_resources("AWS::KMS::Key") == {}
     assert len(template.find_resources("AWS::EC2::SecurityGroup")) == 1
+
+
+def test_phase_one_minecraft_service_uses_mount_guard_and_fixed_runtime_settings() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=1)
+    stack = cast(Stack, app.node.find_child("MinecraftStack-dev"))
+    template = Template.from_stack(stack)
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+    instance = next(iter(template.find_resources("AWS::EC2::Instance").values()))["Properties"]
+    user_data = str(instance["UserData"])
+
+    assert "Requires=wishicraft-data-volume.service" in user_data
+    assert "After=wishicraft-data-volume.service" in user_data
+    assert "ExecStartPre=/usr/local/lib/wishicraft/data-volume-mount --verify" in user_data
+    assert "ExecStartPre=/usr/local/lib/wishicraft/minecraft-game-setup --verify" in user_data
+    assert f"-Xms{configuration.stage.java_xms} -Xmx{configuration.stage.java_xmx}" in user_data
+    assert " -jar /srv/minecraft/packages/vanilla/26.2/server.jar nogui" in user_data
+    assert "User=minecraft" in user_data
+    assert "enable-rcon=false" in user_data
+    assert "management-server-enabled=false" in user_data
+    assert "online-mode=true" in user_data
+    assert "white-list=true" in user_data
+    assert "enforce-whitelist=true" in user_data
+    assert "TimeoutStopSec=180" in user_data
 
 
 def test_phase_one_dev_deploy_validation_uses_confirmed_settings() -> None:

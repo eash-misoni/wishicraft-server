@@ -47,6 +47,25 @@ def test_data_volume_filesystem_settings_are_loaded_from_stage_configuration() -
     assert config.stage.data_volume_mount_path == "/srv/minecraft"
 
 
+def test_dev_minecraft_artifact_and_initial_profile_are_fully_fixed() -> None:
+    config = load_configuration(REPOSITORY_ROOT, "dev")
+
+    assert config.stage.minecraft_version == "26.2"
+    assert config.stage.java_runtime == "corretto-25-headless"
+    assert (config.stage.java_xms, config.stage.java_xmx, config.stage.minecraft_port) == (
+        "1G",
+        "3G",
+        25565,
+    )
+    assert config.stage.minecraft_server_jar_size == 60894273
+    assert config.stage.minecraft_server_jar_sha1 == "823e2250d24b3ddac457a60c92a6a941943fcd6a"
+    assert config.stage.minecraft_server_jar_sha256 == (
+        "cdacdfb25898de5e4b4b0e5ddcc2722f77067e46605709c2d886c000ebb63ec5"
+    )
+    assert config.project.initial_minecraft_profile_name == "NEWISHIN_"
+    assert config.project.initial_minecraft_profile_uuid == "e912ab95758e4b7fb32e292eda293104"
+
+
 def test_rejects_non_string_data_volume_filesystem_type(tmp_path: Path) -> None:
     source = (REPOSITORY_ROOT / "config" / "stages" / "dev.yaml").read_text(encoding="utf-8")
     path = tmp_path / "dev.yaml"

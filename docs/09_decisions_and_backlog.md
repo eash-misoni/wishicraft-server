@@ -260,6 +260,12 @@
 - XFS以外、partition table、その他のsignatureは消去・変換せず停止する。Nitro上の実deviceはEBS volume IDとNVMe serialの一致で特定する。
 - `/etc/fstab`はUUIDと`defaults,nofail`を使う。mount準備serviceは実volume・UUID・XFSのmountを検証し、失敗時はfailedとする。将来のMinecraft、backup、resetはこのserviceとmount guardを必須依存にする。
 
+### D-054 Phase 1初期vanilla Gameの固定artifactと起動基盤
+
+- **状態:** Accepted
+- 初期PackageはMinecraft Java Edition 26.2 vanilla、初期Gameは`game-vanilla-main`とする。Corretto 25 headlessで実行し、公式version metadataのURL・SHA-1・sizeとリポジトリ固定SHA-256をすべて検証する。runtimeで`latest`やmanifestを参照しない。
+- 初期Gameはdata EBS上へ配置し、`online-mode`、静的ホワイトリスト、EULA同意を必須にする。RCONとMinecraft Management Protocolはこの作業単位では無効のままとする。
+
 ### D-040 MVP secret store
 
 - **状態:** Accepted
@@ -342,6 +348,7 @@
 - RCON passwordは登録済みSecureStringをEC2 roleが実行時に取得する。実値をCDK、user data、CloudFormation、Git、ログへ含めない。
 - EC2 roleの`ssm:GetParameter`は対象Parameterへ限定し、復号した値を標準出力へ出さない。RCONはlocalhost限定で、インターネット向け受信ルールを作成しない。
 - Minecraft 26.2 server.jarは公式version manifestで確認したURLとSHA-1をstage設定へ固定し、取得後に検証する。EULA同意、artifact取得、初回起動は人間の明示承認前に実行しない。
+- 初期GameのEULA同意は明示済みである。artifact取得と初回起動はdeploy後の手動確認として引き続き分離する。
 
 ### D-052 Minecraft EC2のinstance metadata保護
 

@@ -27,6 +27,8 @@ initial_game:
   display_name: Wishicraft Vanilla
   minecraft_profile_names:
     - NEWISHIN_
+  minecraft_profile_uuids:
+    - e912ab95758e4b7fb32e292eda293104
 
 domain:
   preferred_domain: wishicraft.net

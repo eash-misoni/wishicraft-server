@@ -38,18 +38,18 @@
 
 ## 4. Minecraft 26.2 artifact取得・検証（明示承認後のみ）
 
-設定の正本は`config/stages/dev.yaml`である。version、URL、SHA-1を手入力で変更したり、`latest`を使用したりしない。
+設定の正本は`config/stages/dev.yaml`である。version、URL、SHA-1、SHA-256、sizeを手入力で変更したり、`latest`を使用したりしない。
 
 1. 明示承認を記録する。
 2. stage設定の固定URLからserver.jarを取得する。
-3. `shasum -a 1`でSHA-1を計算し、stage設定の`minecraft_distribution.server_jar_sha1`と完全一致することを確認する。
+3. `stat -c '%s'`、`sha1sum`、`sha256sum`でsizeと両checksumを計算し、stage設定と完全一致することを確認する。
 4. 不一致ならartifactを使用せず、原因を記録して中止する。
 5. 一致後にだけ許可済みdata volume pathへ配置する。
 
 ## 5. EULAと初回起動（明示承認後のみ）
 
 1. EULAの現行条件を公式情報で再確認する。
-2. 人間がEULA同意を明示確認するまで`eula=true`を書き込まない。
+2. 人間がEULA同意を明示確認するまで`eula=true`を書き込まない。今回の初期Gameは明示同意済みである。
 3. data volumeがUUIDで期待するmount pathへmount済みであることを確認する。
 4. RCON設定ファイルの権限、RCON localhost限定、Minecraftポートだけの受信規則、static whitelist、`online-mode=true`を確認する。
 5. systemd経由で初回起動し、journal、memory、CPU credit、data volume、SSM接続を確認する。
@@ -69,3 +69,11 @@
 
 1. `rpm -q java-25-amazon-corretto-headless`でheadless packageが導入済みであることを確認する。
 2. `java -version`でmajor versionが25であり、Corretto runtimeであることを確認する。異なる既定Javaが選ばれている場合は、Minecraftを導入・起動せず原因を調査する。
+
+## 9. Minecraft service確認
+
+1. `findmnt /srv/minecraft`と`systemctl status wishicraft-data-volume.service`を確認してから、`systemctl status minecraft.service`を確認する。
+2. `server.properties`で`server-port=25565`、`online-mode=true`、`white-list=true`、`enforce-whitelist=true`、`enable-rcon=false`、`management-server-enabled=false`を確認する。
+3. `whitelist.json`に`NEWISHIN_`とUUID `e912ab95758e4b7fb32e292eda293104`だけが初期登録されていることを確認する。
+4. `journalctl -u minecraft.service`、`ps`、listening portを確認する。RCONとManagement Protocolがlistenしていないことも確認する。
+5. `systemctl stop minecraft.service`で正常停止とワールド保存を実EC2で確認し、再起動後にワールドがdata EBS上で保持されることを確認する。これらはdeploy後の手動確認であり、CIでは検証しない。

@@ -112,6 +112,12 @@ EC2から他instanceのstart/stopやIAM変更を許可しない。
 - mount確認失敗時はMinecraft、backup、resetを実行しない。
 - XFS以外のfilesystem、partition table、未知signatureでは再formatせず、SSM Session Managerでmount準備serviceのjournal、`findmnt`、`blkid`、fstabを調査する。
 
+### Minecraft runtime
+
+- `minecraft.service`は`wishicraft-data-volume.service`とmount guardに依存し、data EBS未mountでは起動しない。
+- server jarは固定した公式URLから一時ファイルへ取得し、size、SHA-1、SHA-256のすべてが一致した場合だけ配置する。不正な既存jarを自動上書き・実行しない。
+- Minecraftはinteractive login不能な専用`minecraft` user/groupで動かし、RCONとManagement Protocolは有効化しない。
+
 ## 5. Secret管理
 
 秘密情報:

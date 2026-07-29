@@ -204,7 +204,19 @@ Amazon Linux 2023では標準package managerで`java-25-amazon-corretto-headless
 
 - [Amazon Corretto 25 Installation Instructions for Amazon Linux 2023](https://docs.aws.amazon.com/corretto/latest/corretto-25-ug/amazon-linux-install.html)
 
-## 11. AWS料金・quota
+## 11. Minecraft Java server artifactとEULA
+
+Minecraft Java Edition 26.2のserver artifactは、公式release page、Mojang version manifest、同version metadataを照合して固定する。runtimeでmanifestや`latest`を参照せず、download時にmetadataのSHA-1とsize、およびリポジトリ固定SHA-256を確認する。
+
+EULA同意は人間の明示承認を必要とし、`eula=true`の設定はその承認を受けた初期Gameに限定する。
+
+公式資料:
+
+- [Minecraft Java Edition 26.2](https://www.minecraft.net/en-us/article/minecraft-java-edition-26-2)
+- [Minecraft EULA](https://www.minecraft.net/en-us/eula)
+- [Mojang version manifest](https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
+
+## 12. AWS料金・quota
 
 料金、free tier、service quotaは変更される。
 
@@ -271,9 +283,11 @@ Amazon Linux 2023では標準package managerで`java-25-amazon-corretto-headless
 - Minecraft 26.2 metadata: `https://piston-meta.mojang.com/v1/packages/3457237902814cca3f5c6f20b0c5db1b1f341512/26.2.json`
 - server.jar: `https://piston-data.mojang.com/v1/objects/823e2250d24b3ddac457a60c92a6a941943fcd6a/server.jar`
 - server.jar SHA-1: `823e2250d24b3ddac457a60c92a6a941943fcd6a`
+- server.jar size: `60894273`
+- server.jar SHA-256: `cdacdfb25898de5e4b4b0e5ddcc2722f77067e46605709c2d886c000ebb63ec5`
 - metadataのJava runtime major version: 25
 
-これらは公式metadataから確認した固定値であり、server.jar本体はこの確認では取得していない。実際の取得・SHA-1検証・EULA設定・初回起動は、runbookの承認gate後にのみ行う。
+これらは公式metadataとartifact照合で確認した固定値であり、server.jar本体はGit管理しない。EC2での取得・検証・初回起動はdeploy後のrunbook手順として実施する。
 
 ### Web Phase
 

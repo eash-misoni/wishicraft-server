@@ -182,7 +182,7 @@ Phase 1のRCON passwordは、EC2 roleだけが対象SecureStringの`ssm:GetParam
 
 ### Minecraft server artifact
 
-Phase 1の初期vanilla serverは、stage設定に固定したMinecraft version、公式server.jar URL、公式SHA-1を使用する。`latest`や可変URLを使用しない。EC2 bootstrapは取得後にSHA-1を検証し、一致しないartifactを配置・起動しない。取得元、version、checksum、検証手順はPhase 1 runbookの正本に記録する。
+Phase 1の初期vanilla serverは、stage設定に固定したMinecraft version、公式server.jar URL、公式SHA-1、size、リポジトリ固定SHA-256を使用する。`latest`や可変URLを使用しない。EC2 bootstrapはdata EBS mount guard後に同一filesystem上の一時ファイルへ取得し、すべてを検証してから原子的に配置する。不一致の既存artifactは上書き・起動しない。
 
 ### Secrets Manager
 
