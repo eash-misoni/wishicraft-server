@@ -107,6 +107,11 @@ class StageConfig:
         return _require_string(self.values, "compute.operating_system")
 
     @property
+    def java_runtime(self) -> str:
+        """Return the configured Java runtime after phase validation."""
+        return _require_string(self.values, "compute.java_runtime")
+
+    @property
     def root_volume_type(self) -> str:
         """Return the configured root EBS volume type after phase validation."""
         return _require_string(self.values, "storage.root.volume_type")

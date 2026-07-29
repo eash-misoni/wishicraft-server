@@ -64,3 +64,8 @@
 2. `findmnt /srv/minecraft`、`blkid`、`/etc/fstab`のUUID entryを確認し、XFSと期待するdata EBS volumeがmountされていることを確認する。
 3. mount準備serviceがfailedなら、再format、`wipefs`、強制mountを実行しない。SSM Session ManagerでNVMe serialとEBS volume ID、fstab競合、mount pathの内容を調査する。
 4. `nofail`はOSとSSMの復旧経路を維持するための設定であり、Minecraftやbackup/resetのmount確認を緩和しない。
+
+## 8. Java runtime確認
+
+1. `rpm -q java-25-amazon-corretto-headless`でheadless packageが導入済みであることを確認する。
+2. `java -version`でmajor versionが25であり、Corretto runtimeであることを確認する。異なる既定Javaが選ばれている場合は、Minecraftを導入・起動せず原因を調査する。

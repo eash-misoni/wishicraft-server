@@ -191,7 +191,20 @@ EBS volumeは同じAvailability ZoneのEC2へ接続する。Linux上のdevice na
 - [Make an Amazon EBS volume available for use](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-using-volumes.html)
 - [Attach an Amazon EBS volume to an instance](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-attaching-volume.html)
 
-## 10. AWS料金・quota
+## 10. Amazon Corretto 25 on Amazon Linux 2023
+
+Amazon Linux 2023では標準package managerで`java-25-amazon-corretto-headless`を導入できる。headless variantはserver workload向けで、headful、devel、JModsは初期構成へ含めない。
+
+設計への影響:
+
+- stage設定のlogical runtimeをallowlistで固定package名へ解決する。
+- package確認に加え、既定`java -version`がmajor 25かつCorrettoであることを確認する。
+
+公式資料:
+
+- [Amazon Corretto 25 Installation Instructions for Amazon Linux 2023](https://docs.aws.amazon.com/corretto/latest/corretto-25-ug/amazon-linux-install.html)
+
+## 11. AWS料金・quota
 
 料金、free tier、service quotaは変更される。
 
@@ -216,7 +229,7 @@ EBS volumeは同じAvailability ZoneのEC2へ接続する。Linux上のdevice na
 - EC2 running時間を監視する。
 - S3 lifecycleを設定する。
 
-## 11. 実装前再確認チェック
+## 12. 実装前再確認チェック
 
 各Phase開始時に次を確認する。
 

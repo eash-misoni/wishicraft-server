@@ -290,6 +290,11 @@ def test_phase_one_data_volume_bootstrap_uses_volume_ref_and_preserves_ec2_invar
     assert "wishicraft-data-volume.service" in user_data_text
     assert "DATA_VOLUME_ID=" in user_data_text
     assert "mkfs.xfs" in user_data_text
+    assert configuration.stage.java_runtime in user_data_text
+    assert "java-25-amazon-corretto-headless" in user_data_text
+    assert "java-runtime-install" in user_data_text
+    service_enable = "systemctl enable --now wishicraft-data-volume.service"
+    assert user_data_text.index(service_enable) < user_data_text.index("JAVA_RUNTIME=")
     assert "/dev/sdf" not in user_data_text
     assert "rcon-password" not in user_data_text
     assert len(user_data_text.encode("utf-8")) < 16 * 1024

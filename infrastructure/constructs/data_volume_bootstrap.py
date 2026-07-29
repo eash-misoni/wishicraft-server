@@ -7,11 +7,13 @@ from pathlib import Path
 from aws_cdk import Fn
 from constructs import Construct
 
+from infrastructure.constructs.java_runtime import resolve_java_package
 from infrastructure.constructs.minecraft_data_volume import MinecraftDataVolume
 from infrastructure.constructs.minecraft_instance import MinecraftInstance
 from wishicraft.config import StageConfig
 
 _SCRIPT_PATH = Path(__file__).parents[1] / "bootstrap" / "data_volume_mount.sh"
+_JAVA_SCRIPT_PATH = Path(__file__).parents[1] / "bootstrap" / "java_runtime_install.sh"
 
 
 class DataVolumeBootstrap(Construct):
@@ -27,6 +29,7 @@ class DataVolumeBootstrap(Construct):
         stage: StageConfig,
     ) -> None:
         super().__init__(scope, construct_id)
+        self.java_package = resolve_java_package(stage.java_runtime)
         if stage.data_volume_filesystem_type != "xfs":
             raise ValueError(
                 f"Unsupported Phase 1 data filesystem type: {stage.data_volume_filesystem_type}"
@@ -45,6 +48,11 @@ class DataVolumeBootstrap(Construct):
                         _SCRIPT_PATH.read_text(encoding="utf-8"),
                         "WISHICRAFT_DATA_VOLUME_SCRIPT\n"
                         "chmod 0755 /usr/local/lib/wishicraft/data-volume-mount\n",
+                        "cat > /usr/local/lib/wishicraft/java-runtime-install "
+                        "<<'WISHICRAFT_JAVA_RUNTIME_SCRIPT'\n",
+                        _JAVA_SCRIPT_PATH.read_text(encoding="utf-8"),
+                        "WISHICRAFT_JAVA_RUNTIME_SCRIPT\n"
+                        "chmod 0755 /usr/local/lib/wishicraft/java-runtime-install\n",
                         "cat > /etc/wishicraft/data-volume.env "
                         "<<'WISHICRAFT_DATA_VOLUME_ENV'\nDATA_VOLUME_ID=",
                         data_volume.volume.ref,
@@ -65,7 +73,10 @@ class DataVolumeBootstrap(Construct):
                         "RemainAfterExit=yes\n\n",
                         "[Install]\nWantedBy=multi-user.target\nWISHICRAFT_DATA_VOLUME_UNIT\n",
                         "systemctl daemon-reload\n"
-                        "systemctl enable --now wishicraft-data-volume.service\n",
+                        "systemctl enable --now wishicraft-data-volume.service\n"
+                        "JAVA_RUNTIME=",
+                        stage.java_runtime,
+                        " /usr/local/lib/wishicraft/java-runtime-install\n",
                     ],
                 )
             ),
