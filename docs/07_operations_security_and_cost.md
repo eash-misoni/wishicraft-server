@@ -110,6 +110,7 @@ EC2から他instanceのstart/stopやIAM変更を許可しない。
 - filesystemが存在しない場合だけ初期化する。
 - filesystem UUIDでmountする。
 - mount確認失敗時はMinecraft、backup、resetを実行しない。
+- XFS以外のfilesystem、partition table、未知signatureでは再formatせず、SSM Session Managerでmount準備serviceのjournal、`findmnt`、`blkid`、fstabを調査する。
 
 ## 5. Secret管理
 

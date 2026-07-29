@@ -173,7 +173,7 @@ def test_phase_one_minecraft_instance_uses_existing_network_role_and_root_ebs() 
     ]
     assert network_interface["AssociatePublicIpAddress"] is True
     assert "KeyName" not in instance
-    assert "UserData" not in instance
+    assert "UserData" in instance
     assert instance["InstanceInitiatedShutdownBehavior"] == "stop"
     assert instance["Monitoring"] is False
     assert instance["MetadataOptions"] == {
@@ -268,10 +268,42 @@ def test_phase_one_minecraft_data_volume_is_retained_and_attached_to_the_instanc
     }
     assert "DeletionPolicy" not in attachment
     assert "UpdateReplacePolicy" not in attachment
-    assert "UserData" not in instance_properties
     assert len(template.find_resources("AWS::IAM::Role")) == 1
     assert len(template.find_resources("AWS::EC2::SecurityGroup")) == 1
     assert template.find_resources("AWS::KMS::Key") == {}
+
+
+def test_phase_one_data_volume_bootstrap_uses_volume_ref_and_preserves_ec2_invariants() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=1)
+    stack = cast(Stack, app.node.find_child("MinecraftStack-dev"))
+    template = Template.from_stack(stack)
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+
+    volume_id = next(iter(template.find_resources("AWS::EC2::Volume")))
+    instance = next(iter(template.find_resources("AWS::EC2::Instance").values()))["Properties"]
+    user_data = instance["UserData"]
+    user_data_text = str(user_data)
+    assert {"Fn::Base64"} == set(user_data)
+    assert volume_id in user_data_text
+    assert configuration.stage.data_volume_mount_path in user_data_text
+    assert configuration.stage.data_volume_filesystem_type in user_data_text
+    assert "wishicraft-data-volume.service" in user_data_text
+    assert "DATA_VOLUME_ID=" in user_data_text
+    assert "mkfs.xfs" in user_data_text
+    assert "/dev/sdf" not in user_data_text
+    assert "rcon-password" not in user_data_text
+    assert len(user_data_text.encode("utf-8")) < 16 * 1024
+
+    assert instance["InstanceInitiatedShutdownBehavior"] == "stop"
+    assert instance["MetadataOptions"] == {
+        "HttpTokens": "required",
+        "InstanceMetadataTags": "disabled",
+    }
+    assert len(instance["BlockDeviceMappings"]) == 1
+    assert template.find_resources("AWS::IAM::Role")
+    assert template.find_resources("AWS::IAM::ManagedPolicy") == {}
+    assert template.find_resources("AWS::KMS::Key") == {}
+    assert len(template.find_resources("AWS::EC2::SecurityGroup")) == 1
 
 
 def test_phase_one_dev_deploy_validation_uses_confirmed_settings() -> None:

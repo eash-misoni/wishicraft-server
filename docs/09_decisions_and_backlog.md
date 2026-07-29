@@ -253,6 +253,13 @@
 - `docs/12_initial_configuration.md`で設定と秘密情報の扱いを定義する。
 - `null`や`TO_BE_CONFIRMED`をCodexや実装が推測して埋めない。
 
+### D-053 Data EBSのXFS初期化とfail-closed mount
+
+- **状態:** Accepted
+- data EBSはpartitionを作らずvolume全体をXFSとして使用する。filesystemがない空volumeだけを初回formatし、既存XFSは再利用する。
+- XFS以外、partition table、その他のsignatureは消去・変換せず停止する。Nitro上の実deviceはEBS volume IDとNVMe serialの一致で特定する。
+- `/etc/fstab`はUUIDと`defaults,nofail`を使う。mount準備serviceは実volume・UUID・XFSのmountを検証し、失敗時はfailedとする。将来のMinecraft、backup、resetはこのserviceとmount guardを必須依存にする。
+
 ### D-040 MVP secret store
 
 - **状態:** Accepted

@@ -148,6 +148,16 @@ class StageConfig:
             raise ConfigValidationError(["storage.data.retain_on_delete must be true for Phase 1"])
         return value
 
+    @property
+    def data_volume_filesystem_type(self) -> str:
+        """Return the configured filesystem type for the retained data EBS volume."""
+        return _require_string(self.values, "storage.data.filesystem_type")
+
+    @property
+    def data_volume_mount_path(self) -> str:
+        """Return the configured mount path for the retained data EBS volume."""
+        return _require_string(self.values, "storage.data.mount_path")
+
 
 @dataclass(frozen=True)
 class SecretsExampleConfig:
@@ -270,6 +280,7 @@ REQUIRED_PATHS: Final[dict[tuple[int, str, str], tuple[str, ...]]] = {
         "storage.data.size_gib",
         "storage.data.encrypted",
         "storage.data.retain_on_delete",
+        "storage.data.filesystem_type",
         "storage.data.mount_path",
         "route53.hosted_zone_id",
         "route53.record_name",
@@ -295,6 +306,7 @@ REQUIRED_PATHS: Final[dict[tuple[int, str, str], tuple[str, ...]]] = {
         "storage.data.size_gib",
         "storage.data.encrypted",
         "storage.data.retain_on_delete",
+        "storage.data.filesystem_type",
         "storage.data.mount_path",
         "route53.hosted_zone_id",
         "route53.record_name",
@@ -354,6 +366,7 @@ _OPTIONAL_STAGE_STRINGS: Final = (
     "operation.global_lock_name",
     "storage.root.volume_type",
     "storage.data.volume_type",
+    "storage.data.filesystem_type",
     "storage.data.mount_path",
     "billing.dynamodb_mode",
 )

@@ -40,6 +40,24 @@ def test_dev_phase_one_validation_accepts_confirmed_settings(action: str) -> Non
     validate_stage_for_action(config.stage, phase=1, action=action)
 
 
+def test_data_volume_filesystem_settings_are_loaded_from_stage_configuration() -> None:
+    config = load_configuration(REPOSITORY_ROOT, "dev")
+
+    assert config.stage.data_volume_filesystem_type == "xfs"
+    assert config.stage.data_volume_mount_path == "/srv/minecraft"
+
+
+def test_rejects_non_string_data_volume_filesystem_type(tmp_path: Path) -> None:
+    source = (REPOSITORY_ROOT / "config" / "stages" / "dev.yaml").read_text(encoding="utf-8")
+    path = tmp_path / "dev.yaml"
+    path.write_text(source.replace("filesystem_type: xfs", "filesystem_type: 1"), encoding="utf-8")
+
+    with pytest.raises(
+        ConfigValidationError, match="storage.data.filesystem_type must be a string"
+    ):
+        load_stage_config(path, "dev")
+
+
 def test_dev_phase_one_validation_rejects_missing_server_checksum() -> None:
     config = load_configuration(REPOSITORY_ROOT, "dev")
     values = {**config.stage.values}

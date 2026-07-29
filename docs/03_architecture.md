@@ -256,6 +256,7 @@ LambdaからEC2へ直接TCP接続せず、SSMを管理経路にすることでVP
 - 暗号化し、CDK削除やEC2置換で自動削除しない保持方針を設定する。
 - filesystemがない場合だけ初期化し、UUIDで`/srv/minecraft`へmountする。
 - mountされていない場合、Minecraft serviceと破壊的スクリプトを起動しない。
+- mount準備oneshot serviceはEBS volume IDから実deviceを特定し、空volumeだけをXFS化してUUID mountを検証する。`minecraft.service`など後続unitはこのserviceとmount guardへ依存する。
 - Gameディレクトリ
 - ワールド
 - server.properties

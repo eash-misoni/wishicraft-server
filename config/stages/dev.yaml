@@ -32,6 +32,7 @@ storage:
     size_gib: 30
     encrypted: true
     retain_on_delete: true
+    filesystem_type: xfs
     mount_path: /srv/minecraft
 
 route53:

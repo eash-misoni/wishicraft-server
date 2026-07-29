@@ -31,6 +31,7 @@ java_xms: 1G
 java_xmx: 3G
 root_ebs: gp3 16 GiB
 data_ebs: gp3 30 GiB
+data_ebs_filesystem: xfs
 ```
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みとする。Application IDとPublic Keyを含むDiscordの公開IDは秘密情報ではないが、文書へ重複記載せずstage設定を正本とする。
@@ -55,6 +56,7 @@ stageごとの公開設定の正本とする。
 
 - AWS Account、Region、Availability Zone
 - compute、runtime、storage
+- data EBSのfilesystem種別とmount path
 - Route 53
 - Discordの公開ID
 - timeout、lock、monitoring、cost設定

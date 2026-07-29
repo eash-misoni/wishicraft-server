@@ -57,3 +57,10 @@
 ## 6. DNS確認
 
 `mc-dev.wishicraft.net`のAレコードはPhase 0では作成しない。Phase 1のEC2起動後に現在のpublic IPv4へUPSERTし、Route 53 changeの`INSYNC`とDNS解決を確認する。EC2停止完了後はAレコードを削除し、再度`INSYNC`を確認する。
+
+## 7. Data EBS mount準備service
+
+1. `systemctl status wishicraft-data-volume.service`と`journalctl -u wishicraft-data-volume.service`で準備結果を確認する。
+2. `findmnt /srv/minecraft`、`blkid`、`/etc/fstab`のUUID entryを確認し、XFSと期待するdata EBS volumeがmountされていることを確認する。
+3. mount準備serviceがfailedなら、再format、`wipefs`、強制mountを実行しない。SSM Session ManagerでNVMe serialとEBS volume ID、fstab競合、mount pathの内容を調査する。
+4. `nofail`はOSとSSMの復旧経路を維持するための設定であり、Minecraftやbackup/resetのmount確認を緩和しない。

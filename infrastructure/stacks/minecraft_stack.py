@@ -5,6 +5,7 @@ from __future__ import annotations
 from aws_cdk import Stack, Tags
 from constructs import Construct
 
+from infrastructure.constructs.data_volume_bootstrap import DataVolumeBootstrap
 from infrastructure.constructs.minecraft_data_volume import MinecraftDataVolume
 from infrastructure.constructs.minecraft_instance import MinecraftInstance
 from infrastructure.constructs.minecraft_instance_role import MinecraftInstanceRole
@@ -53,5 +54,12 @@ class MinecraftStack(Stack):
                 self,
                 "MinecraftDataVolume",
                 instance=self.minecraft_instance,
+                stage=stage,
+            )
+            self.data_volume_bootstrap = DataVolumeBootstrap(
+                self,
+                "DataVolumeBootstrap",
+                instance=self.minecraft_instance,
+                data_volume=self.minecraft_data_volume,
                 stage=stage,
             )
