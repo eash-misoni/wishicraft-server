@@ -336,6 +336,11 @@
 - EC2 roleの`ssm:GetParameter`は対象Parameterへ限定し、復号した値を標準出力へ出さない。RCONはlocalhost限定で、インターネット向け受信ルールを作成しない。
 - Minecraft 26.2 server.jarは公式version manifestで確認したURLとSHA-1をstage設定へ固定し、取得後に検証する。EULA同意、artifact取得、初回起動は人間の明示承認前に実行しない。
 
+### D-052 Minecraft EC2のinstance metadata保護
+
+- **状態:** Accepted
+- Minecraft EC2はIMDSv2を必須とし、instance metadata tagsを有効にしない。
+
 
 ## 3. 却下した案
 

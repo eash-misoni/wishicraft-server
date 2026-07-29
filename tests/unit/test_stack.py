@@ -151,6 +151,81 @@ def test_phase_one_minecraft_instance_role_has_only_required_ssm_permissions() -
     assert "RCON_PASSWORD" not in template_text
 
 
+def test_phase_one_minecraft_instance_uses_existing_network_role_and_root_ebs() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=1)
+    stack = cast(Stack, app.node.find_child("MinecraftStack-dev"))
+    template = Template.from_stack(stack)
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+
+    instances = template.find_resources("AWS::EC2::Instance")
+    assert len(instances) == 1
+    instance = next(iter(instances.values()))["Properties"]
+    assert instance["InstanceType"] == configuration.stage.instance_type
+    assert "ami-" not in str(instance["ImageId"])
+    image_parameter_id = instance["ImageId"]["Ref"]
+    image_parameter = template.to_json()["Parameters"][image_parameter_id]
+    assert image_parameter["Default"] == (
+        "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64"
+    )
+    network_interface = instance["NetworkInterfaces"][0]
+    assert network_interface["SubnetId"] in [
+        {"Ref": subnet_id} for subnet_id in template.find_resources("AWS::EC2::Subnet")
+    ]
+    assert network_interface["AssociatePublicIpAddress"] is True
+    assert "KeyName" not in instance
+    assert "UserData" not in instance
+    assert instance["InstanceInitiatedShutdownBehavior"] == "stop"
+    assert instance["Monitoring"] is False
+    assert instance["MetadataOptions"] == {
+        "HttpTokens": "required",
+        "InstanceMetadataTags": "disabled",
+    }
+
+    security_groups = template.find_resources("AWS::EC2::SecurityGroup")
+    minecraft_security_group_id = next(
+        logical_id
+        for logical_id, group in security_groups.items()
+        if group["Properties"]["GroupDescription"] == "Minecraft client ingress only"
+    )
+    assert network_interface["GroupSet"] == [
+        {"Fn::GetAtt": [minecraft_security_group_id, "GroupId"]}
+    ]
+    assert template.find_resources("AWS::EC2::EIP") == {}
+    assert template.find_resources("AWS::EC2::Volume") == {}
+
+    instance_profiles = template.find_resources("AWS::IAM::InstanceProfile")
+    assert len(instance_profiles) == 1
+    profile_id, profile = next(iter(instance_profiles.items()))
+    role_id = next(
+        logical_id
+        for logical_id, role in template.find_resources("AWS::IAM::Role").items()
+        if role["Properties"]["Description"] == "Minecraft EC2 managed node role"
+    )
+    assert profile["Properties"]["Roles"] == [{"Ref": role_id}]
+    assert instance["IamInstanceProfile"] == {"Ref": profile_id}
+    assert len(template.find_resources("AWS::IAM::Role")) == 1
+    assert (
+        "ManagedPolicyArns"
+        not in next(
+            role
+            for role in template.find_resources("AWS::IAM::Role").values()
+            if role["Properties"]["Description"] == "Minecraft EC2 managed node role"
+        )["Properties"]
+    )
+
+    root_volume = instance["BlockDeviceMappings"]
+    assert len(root_volume) == 1
+    assert root_volume[0]["DeviceName"] == "/dev/xvda"
+    root_ebs = root_volume[0]["Ebs"]
+    assert root_ebs == {
+        "DeleteOnTermination": True,
+        "Encrypted": configuration.stage.root_volume_encrypted,
+        "VolumeSize": configuration.stage.root_volume_size_gib,
+        "VolumeType": configuration.stage.root_volume_type,
+    }
+    assert "rcon-password" not in str(instance)
+
+
 def test_phase_one_dev_deploy_validation_uses_confirmed_settings() -> None:
     app = build_app(REPOSITORY_ROOT, "dev", phase=1, action="deploy")
 

@@ -89,8 +89,38 @@ class StageConfig:
     @property
     def minecraft_port(self) -> int:
         """Return the configured public Minecraft TCP port after phase validation."""
-        value = _lookup_path(self.values, "network.minecraft_port")
-        assert isinstance(value, int) and not isinstance(value, bool)
+        return _require_positive_int(self.values, "network.minecraft_port")
+
+    @property
+    def instance_type(self) -> str:
+        """Return the configured EC2 instance type after phase validation."""
+        return _require_string(self.values, "compute.instance_type")
+
+    @property
+    def architecture(self) -> str:
+        """Return the configured CPU architecture after phase validation."""
+        return _require_string(self.values, "compute.architecture")
+
+    @property
+    def operating_system(self) -> str:
+        """Return the configured operating system after phase validation."""
+        return _require_string(self.values, "compute.operating_system")
+
+    @property
+    def root_volume_type(self) -> str:
+        """Return the configured root EBS volume type after phase validation."""
+        return _require_string(self.values, "storage.root.volume_type")
+
+    @property
+    def root_volume_size_gib(self) -> int:
+        """Return the configured root EBS size after phase validation."""
+        return _require_positive_int(self.values, "storage.root.size_gib")
+
+    @property
+    def root_volume_encrypted(self) -> bool:
+        """Return the configured root EBS encryption setting after phase validation."""
+        value = _lookup_path(self.values, "storage.root.encrypted")
+        assert isinstance(value, bool)
         return value
 
 
@@ -425,6 +455,12 @@ def _lookup_path(values: Mapping[str, ConfigValue], path: str) -> ConfigValue:
 def _require_string(values: Mapping[str, ConfigValue], path: str) -> str:
     value = _lookup_path(values, path)
     assert isinstance(value, str)
+    return value
+
+
+def _require_positive_int(values: Mapping[str, ConfigValue], path: str) -> int:
+    value = _lookup_path(values, path)
+    assert isinstance(value, int) and not isinstance(value, bool) and value > 0
     return value
 
 

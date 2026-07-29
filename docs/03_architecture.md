@@ -229,6 +229,7 @@ Phase 1の初期vanilla serverは、stage設定に固定したMinecraft version�
 - Minecraftは`online-mode`と静的ホワイトリストをMVPから有効にする。
 - SSH、RCON、管理Webポートを公開しない。
 - outbound HTTPSを許可し、SSM、S3、DynamoDB等へ到達できるようにする。
+- EC2はIMDSv2を必須とし、instance metadata tagsを有効にしない。
 
 ### Lambda
 
