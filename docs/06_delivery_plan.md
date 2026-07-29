@@ -54,6 +54,8 @@
 
 ## 3. Phase 0 — リポジトリと設計土台
 
+- **状態:** Completed（2026-07-29）
+
 ### 目的
 
 コードを書く場所、依存関係、テスト、デプロイ単位を確定する。
@@ -137,6 +139,14 @@ repository-root/
 - AWSリソースの本番作成
 - Discord接続
 - Minecraftインストール
+
+### 完了記録
+
+- `6a9b8c0 feat: implement Phase 0 project foundation`で完了した。
+- Python 3.12環境でpytest 11件、Ruff、mypy、dev向けenvironment-agnostic `cdk synth`が成功した。
+- prod向けsynthは、現在の`null`値をパス付きで列挙して意図的に拒否することを確認した。
+- GitHub Actions CI run #1が成功した。
+- deploy、`cdk diff`、AWS credential/profile設定、Phase 1実装は未実行である。
 
 ## 4. Phase 1 — Minecraft EC2の手動基盤
 

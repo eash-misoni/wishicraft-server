@@ -153,3 +153,12 @@ Phase 7前:
 - prod Discord Bot Tokenをprod用SecureStringへ登録する
 
 未確定値があってもPhase 0のrepository bootstrap、validation、dev向け`cdk synth`は開始できる。未確定値が必要なstageのsynth、deploy、integration testは開始しない。
+
+## 10. Phase 0完了時点のvalidation
+
+Phase 0は2026-07-29に完了した。設定schema validationは、YAMLの型・必須構造・Parameter Store名だけを検証し、`null`を補完しない。required validationはschema validationと別に、stage・Phase・処理ごとに適用する。
+
+- devのPhase 0空stack synthはenvironment-agnosticであり、AWS Account IDやAWS profileを要求しない。Phase 1以降で必要になるAWS Account ID、Availability Zone、Minecraft port/version、Route 53 Hosted Zone IDも要求しない。
+- prod設定はplaceholderとして読込可能に維持する。Phase 0のprod synthは現在の全`null`値をパス付きで表示して拒否する。
+- このprod拒否は、現在の全`null`を将来も必須とする定義ではない。Phase 1開始前にstage・処理・Phaseごとのrequired settingを定義する。
+- AWS Account IDとprofileの解決方式は、最初のdev deploy前に決定する未完了項目として残す。

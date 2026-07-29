@@ -311,6 +311,14 @@
 - Phase 8の検証済みS3 backup完成まではPhase 7環境を試験運用とする。
 - 初回利用前と重要変更前にdata EBS snapshot runbookを実行可能にする。
 
+### D-049 Phase 0設定validation gate
+
+- **状態:** Accepted
+- 設定schema validationと、stage・Phase・処理ごとのrequired validationを分離する。
+- Phase 0のdev空stack synthはenvironment-agnosticとし、AWS Account ID、Availability Zone、Minecraft port/version、Route 53 Hosted Zone IDを要求しない。
+- prodのPhase 0 synthはplaceholderを読込可能とした上で、現在の`null`値を全てパス付きで表示して拒否する。
+- このprod拒否はPhase 0の一時的な安全gateであり、全ての`null`を永続的な必須項目と定義しない。Phase 1以降はstage・処理・Phaseごとのrequired pathを明示する。
+
 
 ## 3. 却下した案
 

@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## Phase 0
 
-Phase 0では、Python、AWS CDK、設定検証、テスト、CIだけを整備します。AWSリソース、Discord接続、Minecraftのインストールはまだ行いません。
+Phase 0で、Python、AWS CDK、設定検証、テスト、CIを整備しました。AWSリソース、Discord接続、Minecraftのインストールはまだ行いません。
 
 `config/project.yaml`、`config/stages/<stage>.yaml`、`config/secrets.example.yaml`がGit管理された設定の正本です。秘密値は含めず、`secrets.example.yaml`にはParameter Store SecureStringのParameter名だけを置きます。
 
