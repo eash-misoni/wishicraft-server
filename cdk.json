@@ -1,0 +1,6 @@
+{
+  "app": ".venv/bin/python -m infrastructure.app",
+  "context": {
+    "stage": "dev"
+  }
+}

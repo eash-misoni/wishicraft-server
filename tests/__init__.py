@@ -1,0 +1,1 @@
+"""Wishicraft test package."""

@@ -1,0 +1,80 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from wishicraft.config import (
+    ConfigValidationError,
+    load_configuration,
+    load_project_config,
+    load_secrets_example_config,
+    load_stage_config,
+    validate_stage_for_action,
+)
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_project_dev_prod_and_secrets_load() -> None:
+    dev = load_configuration(REPOSITORY_ROOT, "dev")
+    prod = load_configuration(REPOSITORY_ROOT, "prod")
+
+    assert dev.project.resource_prefix == "wc"
+    assert dev.stage.stage == "dev"
+    assert prod.stage.stage == "prod"
+    assert "secure_parameters" in dev.secrets.values
+
+
+def test_dev_phase_zero_synth_allows_known_nulls() -> None:
+    config = load_configuration(REPOSITORY_ROOT, "dev")
+
+    validate_stage_for_action(config.stage, phase=0, action="synth")
+
+
+def test_prod_phase_zero_synth_rejects_each_current_null() -> None:
+    config = load_configuration(REPOSITORY_ROOT, "prod")
+
+    with pytest.raises(ConfigValidationError) as error:
+        validate_stage_for_action(config.stage, phase=0, action="synth")
+
+    assert error.value.errors == [
+        f"stage 'prod' is not ready for Phase 0 synth: {path} is null"
+        for path in config.stage.null_paths()
+    ]
+    assert "aws.account_id" in str(error.value)
+    assert "discord.public_key" in str(error.value)
+
+
+def test_rejects_wrong_type_without_coercion(tmp_path: Path) -> None:
+    path = tmp_path / "dev.yaml"
+    path.write_text("schema_version: 1\nstage: dev\naws: not-a-mapping\n", encoding="utf-8")
+
+    with pytest.raises(ConfigValidationError, match="aws must be a mapping"):
+        load_stage_config(path, "dev")
+
+
+def test_rejects_missing_required_project_structure(tmp_path: Path) -> None:
+    path = tmp_path / "project.yaml"
+    path.write_text("schema_version: 1\nproject: {}\n", encoding="utf-8")
+
+    with pytest.raises(ConfigValidationError, match="branding must be a mapping"):
+        load_project_config(path)
+
+
+def test_rejects_secret_values_in_the_secrets_example(tmp_path: Path) -> None:
+    path = tmp_path / "secrets.example.yaml"
+    path.write_text(
+        """schema_version: 1
+secure_parameters:
+  discord_bot_token:
+    dev_parameter_name: /wishicraft/dev/secret/discord-bot-token
+    prod_parameter_name: /wishicraft/prod/secret/discord-bot-token
+    value: should-not-be-stored-here
+future_secure_parameters: {}
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError, match="must contain only"):
+        load_secrets_example_config(path)
