@@ -1,0 +1,49 @@
+schema_version: 1
+
+project:
+  display_name: Wishicraft
+  repository_name: wishicraft-server
+  slug: wishicraft
+  resource_prefix: wc
+  system_id: wishicraft-main
+  stages:
+    - dev
+    - prod
+  internal_timezone: UTC
+  display_timezone: Asia/Tokyo
+
+branding:
+  discord_bot_name: "ゐしクラくん"
+  discord_dev_bot_name: "ゐしクラくん Dev"
+  discord_category_name: Wishicraft
+  discord_operation_channel_name: wishicraft
+  discord_admin_channel_name: wishicraft-admin
+  discord_chat_channel_name: wishicraft-chat
+  discord_player_role_name: Wishicraft Player
+  discord_admin_role_name: Wishicraft Admin
+
+initial_game:
+  game_id: game-vanilla-main
+  display_name: Wishicraft Vanilla
+  minecraft_profile_names:
+    - NEWISHIN_
+
+domain:
+  preferred_domain: wishicraft.net
+  record_type: A
+  dns_ttl_seconds: 60
+  delete_record_when_stopped: true
+
+toolchain:
+  python_version: "3.12"
+  dependency_manager: uv
+  lint_and_format: ruff
+  type_checker: mypy
+  test_framework: pytest
+  infrastructure_as_code: aws-cdk-v2
+  initial_stack_name: MinecraftStack
+
+resource_tags:
+  Project: wishicraft
+  ManagedBy: cdk
+  Owner: project-owner

@@ -1,0 +1,84 @@
+schema_version: 1
+stage: prod
+
+aws:
+  account_id: null
+  region: ap-northeast-1
+  availability_zone: null
+
+network:
+  minecraft_port: null
+
+compute:
+  architecture: x86_64
+  instance_type: t3a.medium
+  operating_system: amazon-linux-2023
+  java_runtime: corretto-21-headless
+  minecraft_version: null
+  java_xms: 1G
+  java_xmx: 3G
+
+storage:
+  root:
+    volume_type: gp3
+    size_gib: 16
+    encrypted: true
+  data:
+    volume_type: gp3
+    size_gib: 30
+    encrypted: true
+    retain_on_delete: true
+    mount_path: /srv/minecraft
+
+route53:
+  hosted_zone_id: null
+  record_name: mc.wishicraft.net
+  # record type/TTL/delete policyはconfig/project.yamlのdomainを使用する。
+
+discord:
+  environment_label: production
+  bot_display_name: "ゐしクラくん"
+  command_scope: guild
+  guild_id: null
+  operation_channel_id: null
+  admin_channel_id: null
+  player_role_id: null
+  admin_role_id: null
+  application_id: null
+  public_key: null
+
+timeouts_seconds:
+  ec2_running: 300
+  ssm_online: 300
+  minecraft_ready: 600
+  minecraft_normal_stop: 180
+  ec2_stopped: 300
+  route53_insync: 120
+  ssm_probe: 60
+  start_workflow: 1800
+  stop_workflow: 1200
+  status: 120
+  backup: 900
+
+operation:
+  global_lock_name: minecraft-control
+  lock_lease_seconds: 900
+  lock_renew_interval_seconds: 120
+
+runtime:
+  idle_shutdown_minutes: 30
+
+billing:
+  dynamodb_mode: on_demand
+
+monitoring:
+  monthly_budget_usd: 15
+  budget_threshold_percentages:
+    - 50
+    - 80
+    - 100
+  notify_forecasted_100_percent: true
+  ec2_running_warning_hours: 8
+  desired_stopped_ec2_running_warning_minutes: 15
+  desired_running_not_ready_warning_minutes: 20
+  prod_log_retention_days: 30
