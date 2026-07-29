@@ -123,6 +123,31 @@ class StageConfig:
         assert isinstance(value, bool)
         return value
 
+    @property
+    def data_volume_type(self) -> str:
+        """Return the configured data EBS volume type after phase validation."""
+        return _require_string(self.values, "storage.data.volume_type")
+
+    @property
+    def data_volume_size_gib(self) -> int:
+        """Return the configured data EBS size after phase validation."""
+        return _require_positive_int(self.values, "storage.data.size_gib")
+
+    @property
+    def data_volume_encrypted(self) -> bool:
+        """Return the configured data EBS encryption setting after phase validation."""
+        value = _lookup_path(self.values, "storage.data.encrypted")
+        assert isinstance(value, bool)
+        return value
+
+    @property
+    def data_volume_retain_on_delete(self) -> bool:
+        """Require the configured data EBS retention policy to remain enabled."""
+        value = _lookup_path(self.values, "storage.data.retain_on_delete")
+        if value is not True:
+            raise ConfigValidationError(["storage.data.retain_on_delete must be true for Phase 1"])
+        return value
+
 
 @dataclass(frozen=True)
 class SecretsExampleConfig:
