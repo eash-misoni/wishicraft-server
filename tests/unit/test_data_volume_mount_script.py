@@ -25,13 +25,16 @@ def _command_stubs(path: Path) -> None:
     _write_stub(
         path,
         "blkid",
-        'if [[ "${*: -2:1}" == "TYPE" ]]; then\n'
+        'printf "%s\\n" "$*" >> "$TEST_STATE/blkid_calls"\n'
+        'if [[ "$*" == *"--match-tag TYPE"* ]]; then\n'
         '  value="$(cat "$TEST_STATE/filesystem_type")"\n'
         '  [[ -n "$value" ]] || exit 2\n'
         '  printf "%s\\n" "$value"\n'
-        "else\n"
+        'elif [[ "$*" == *"--match-tag UUID"* ]]; then\n'
         '  [[ -n "$(cat "$TEST_STATE/filesystem_type")" ]] || exit 2\n'
         '  cat "$TEST_STATE/uuid"\n'
+        "else\n"
+        "  exit 64\n"
         "fi",
     )
     _write_stub(path, "wipefs", 'cat "$TEST_STATE/signatures"')
@@ -72,6 +75,7 @@ def _run_script(
     fstab: str = "",
     mounted: bool = False,
     mount_path_contents: bool = False,
+    uuid: str = "uuid-data",
     rows: str = "/dev/nvme0n1 volroot\n/dev/nvme1n1 voldata",
     extra_environment: dict[str, str] | None = None,
 ) -> tuple[subprocess.CompletedProcess[str], Path, Path]:
@@ -83,8 +87,9 @@ def _run_script(
     _command_stubs(stubs)
     (state / "filesystem_type").write_text(filesystem_type, encoding="utf-8")
     (state / "signatures").write_text(signatures, encoding="utf-8")
-    (state / "uuid").write_text("uuid-data", encoding="utf-8")
+    (state / "uuid").write_text(uuid, encoding="utf-8")
     (state / "mkfs_calls").write_text("", encoding="utf-8")
+    (state / "blkid_calls").write_text("", encoding="utf-8")
     (state / "mount_calls").write_text("", encoding="utf-8")
     if mounted:
         (state / "mounted").touch()
@@ -134,6 +139,9 @@ def test_empty_expected_volume_is_formatted_once_and_mounted_idempotently(tmp_pa
         f"UUID=uuid-data {tmp_path / 'mount'} xfs defaults,nofail 0 2 # wishicraft-data-volume"
     ]
     assert (state / "marker").exists()
+    assert "--match-token" not in (state / "blkid_calls").read_text(encoding="utf-8")
+    assert (state / "blkid_calls").read_text(encoding="utf-8").count("--match-tag TYPE") == 2
+    assert "--match-tag UUID" in (state / "blkid_calls").read_text(encoding="utf-8")
 
     rerun, rerun_state, rerun_fstab = _run_script(
         tmp_path,
@@ -172,6 +180,14 @@ def test_existing_xfs_is_reused_without_formatting(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     assert (state / "mkfs_calls").read_text(encoding="utf-8") == ""
     assert (state / "mount_calls").read_text(encoding="utf-8")
+
+
+def test_missing_uuid_fails_before_fstab_or_mount(tmp_path: Path) -> None:
+    result, state, fstab = _run_script(tmp_path, filesystem_type="xfs", signatures="xfs", uuid="")
+
+    assert result.returncode != 0
+    assert (state / "mount_calls").read_text(encoding="utf-8") == ""
+    assert fstab.read_text(encoding="utf-8") == ""
 
 
 def test_missing_or_other_volume_never_selects_root_device(tmp_path: Path) -> None:

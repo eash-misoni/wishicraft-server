@@ -50,11 +50,13 @@ wait_for_expected_device() {
 ensure_expected_filesystem() {
   local device filesystem_type signatures
   device="$1"
-  filesystem_type="$(blkid --output value --match-token TYPE "$device" 2>/dev/null || true)"
+  filesystem_type="$(blkid --output value --match-tag TYPE "$device" 2>/dev/null || true)"
   signatures="$(wipefs --noheadings --output TYPE "$device")"
 
   if [[ -z "$filesystem_type" && -z "$signatures" ]]; then
     mkfs.xfs "$device"
+    filesystem_type="$(blkid --output value --match-tag TYPE "$device" 2>/dev/null || true)"
+    [[ "$filesystem_type" == "$FILESYSTEM_TYPE" ]] || fail "expected filesystem type is missing after format"
     return 0
   fi
   if [[ "$filesystem_type" == "$FILESYSTEM_TYPE" && "$signatures" == "$FILESYSTEM_TYPE" ]]; then
@@ -113,7 +115,7 @@ main() {
 
   device="$(wait_for_expected_device)"
   ensure_expected_filesystem "$device"
-  uuid="$(blkid --output value --match-token UUID "$device")"
+  uuid="$(blkid --output value --match-tag UUID "$device")"
   [[ -n "$uuid" ]] || fail "expected filesystem UUID is missing"
 
   if findmnt --noheadings --target "$MOUNT_PATH" >/dev/null 2>&1; then
@@ -136,9 +138,9 @@ verify_only() {
   local device uuid filesystem_type
   [[ "$FILESYSTEM_TYPE" == "xfs" ]] || fail "unsupported filesystem type: $FILESYSTEM_TYPE"
   device="$(wait_for_expected_device)"
-  filesystem_type="$(blkid --output value --match-token TYPE "$device" 2>/dev/null || true)"
+  filesystem_type="$(blkid --output value --match-tag TYPE "$device" 2>/dev/null || true)"
   [[ "$filesystem_type" == "$FILESYSTEM_TYPE" ]] || fail "expected filesystem type is missing"
-  uuid="$(blkid --output value --match-token UUID "$device")"
+  uuid="$(blkid --output value --match-tag UUID "$device")"
   [[ -n "$uuid" ]] || fail "expected filesystem UUID is missing"
   findmnt --noheadings --target "$MOUNT_PATH" >/dev/null 2>&1 || fail "mount path is not mounted"
   verify_mount "$device" "$uuid"
