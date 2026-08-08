@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -14,6 +15,14 @@ def _write_command(path: Path, name: str, body: str) -> None:
     command = path / name
     command.write_text(f"#!/usr/bin/env bash\nset -eu\n{body}\n", encoding="utf-8")
     command.chmod(0o755)
+
+
+def _link_required_host_commands(path: Path) -> None:
+    """Expose only non-firewall shell utilities the script needs through the test PATH."""
+    for name in ("bash", "cat", "dirname", "mkdir", "mktemp", "mv", "rm"):
+        executable = shutil.which(name)
+        assert executable is not None, name
+        (path / name).symlink_to(executable)
 
 
 def _nft_body() -> str:
@@ -35,9 +44,13 @@ def _nft_body() -> str:
 
 def _firewall_environment(
     tmp_path: Path, *, nft_available: bool = True, dnf_exit: int = 0
-) -> tuple[dict[str, str], Path]:
+) -> tuple[dict[str, str], Path, Path]:
     stubs = tmp_path / "stubs"
     stubs.mkdir()
+    _link_required_host_commands(stubs)
+    host_tools = tmp_path / "host-tools"
+    host_tools.mkdir()
+    _write_command(host_tools, "nft", 'printf host-nft >> "$HOST_NFT_LOG"\nexit 1')
     if nft_available:
         _write_command(stubs, "nft", _nft_body())
     _write_command(
@@ -60,15 +73,16 @@ def _firewall_environment(
     rules_path = tmp_path / "nftables" / "wishicraft-rcon.nft"
     environment = {
         **os.environ,
-        "PATH": f"{stubs}:{os.environ['PATH']}",
+        "PATH": str(stubs),
         "STUB_DIRECTORY": str(stubs),
+        "HOST_NFT_LOG": str(tmp_path / "host-nft-log"),
         "DNF_LOG": str(tmp_path / "dnf-log"),
         "NFT_LOG": str(tmp_path / "nft-log"),
         "NFT_RULES": str(tmp_path / "nft-rules"),
         "RCON_PORT": "25575",
         "WISHICRAFT_RCON_NFT_RULES_PATH": str(rules_path),
     }
-    return environment, rules_path
+    return environment, rules_path, host_tools
 
 
 def test_rcon_firewall_script_has_valid_shell_syntax() -> None:
@@ -78,7 +92,7 @@ def test_rcon_firewall_script_has_valid_shell_syntax() -> None:
 def test_rcon_firewall_installs_nftables_when_missing_and_applies_loopback_only_rules(
     tmp_path: Path,
 ) -> None:
-    environment, rules_path = _firewall_environment(tmp_path, nft_available=False)
+    environment, rules_path, host_tools = _firewall_environment(tmp_path, nft_available=False)
 
     first = subprocess.run(
         ["bash", str(SCRIPT)], text=True, capture_output=True, env=environment, check=False
@@ -92,6 +106,8 @@ def test_rcon_firewall_installs_nftables_when_missing_and_applies_loopback_only_
     assert (tmp_path / "dnf-log").read_text(encoding="utf-8").splitlines() == [
         "install -y nftables"
     ]
+    assert str(host_tools) not in environment["PATH"].split(os.pathsep)
+    assert not (tmp_path / "host-nft-log").exists()
     rules = rules_path.read_text(encoding="utf-8")
     assert "destroy table inet wishicraft_rcon" in rules
     assert "table inet wishicraft_rcon" in rules
@@ -114,7 +130,7 @@ def test_rcon_firewall_installs_nftables_when_missing_and_applies_loopback_only_
 def test_rcon_firewall_fails_closed_without_persisting_rules(
     tmp_path: Path, nft_available: bool, dnf_exit: int, check_exit: int, apply_exit: int
 ) -> None:
-    environment, rules_path = _firewall_environment(
+    environment, rules_path, _ = _firewall_environment(
         tmp_path, nft_available=nft_available, dnf_exit=dnf_exit
     )
     environment["NFT_CHECK_EXIT"] = str(check_exit)
