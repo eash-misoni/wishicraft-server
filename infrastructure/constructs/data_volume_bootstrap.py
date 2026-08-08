@@ -82,6 +82,11 @@ class DataVolumeBootstrap(Construct):
                         "<<'WISHICRAFT_MINECRAFT_ENV'\n"
                         "MOUNT_GUARD=/usr/local/lib/wishicraft/data_volume_mount.sh\n"
                         "GAME_SETUP=/usr/local/lib/wishicraft/minecraft_game_setup.sh\n"
+                        "DATA_VOLUME_ID=",
+                        data_volume.volume.ref,
+                        "\nFILESYSTEM_TYPE=",
+                        stage.data_volume_filesystem_type,
+                        "\n",
                         "MOUNT_PATH=",
                         stage.data_volume_mount_path,
                         "\nGAME_ID=",

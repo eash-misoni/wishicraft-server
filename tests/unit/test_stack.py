@@ -345,8 +345,22 @@ def test_phase_one_data_volume_bootstrap_uses_volume_ref_and_preserves_ec2_invar
     assert "WISHICRAFT_MINECRAFT_GAME_SCRIPT" not in user_data_text
     assert "WISHICRAFT_MINECRAFT_RCON_SCRIPT" not in user_data_text
     assert "minecraft.service" in user_data_text
+    minecraft_environment_start = user_data_text.index("cat > /etc/wishicraft/minecraft.env ")
+    minecraft_environment_end = user_data_text.index(
+        "WISHICRAFT_MINECRAFT_ENV\n", minecraft_environment_start
+    )
+    minecraft_environment = user_data_text[minecraft_environment_start:minecraft_environment_end]
+    assert "DATA_VOLUME_ID=vol-00000000000000000" in minecraft_environment
+    assert (
+        f"FILESYSTEM_TYPE={configuration.stage.data_volume_filesystem_type}"
+        in minecraft_environment
+    )
+    prepare_call = "/usr/local/lib/wishicraft/minecraft_game_setup.sh --prepare"
+    exported_minecraft_environment = "set -a\n. /etc/wishicraft/minecraft.env\nset +a\n"
     service_enable = "systemctl enable --now wishicraft-data-volume.service"
+    assert exported_minecraft_environment + prepare_call in user_data_text
     assert user_data_text.index(service_enable) < user_data_text.index("JAVA_RUNTIME=")
+    assert user_data_text.index("JAVA_RUNTIME=") < user_data_text.index(prepare_call)
     assert user_data_text.index("JAVA_RUNTIME=") < user_data_text.rindex(
         "minecraft_artifact_install.sh"
     )
