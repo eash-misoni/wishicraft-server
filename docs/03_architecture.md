@@ -1,7 +1,7 @@
 # 03. Architecture
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-07-29
+- **最終更新:** 2026-08-08
 
 ## 1. アーキテクチャ方針
 
@@ -178,7 +178,7 @@ MVPの秘密情報を保存する。
 
 コードやCDKへ秘密値を渡さず、Parameter名だけを設定として保持する。実行時IAM roleで復号して取得する。
 
-Phase 1のRCON passwordは、EC2 roleだけが対象SecureStringの`ssm:GetParameter`を実行時に許可される。CDK、CloudFormation、user data、Git、通常ログへ実値を含めない。EC2内の許可済みbootstrap scriptはtraceを無効化して値を取得し、標準出力へ出さず、`server.properties`を`root:minecraft`所有・`0640`で作成する。Minecraft processは`minecraft` groupによるreadだけを持つ。RCON用のSecurity Group受信ルールは作成せず、RCONはlocalhostだけへbindする。
+Phase 1のRCON passwordは、EC2 roleだけが対象SecureStringの`ssm:GetParameter`を実行時に許可される。CDK、CloudFormation、user data、Git、通常ログへ実値を含めない。EC2内の許可済みbootstrap scriptはtraceを無効化して値を取得し、標準出力へ出さず、`server.properties`を`root:minecraft`所有・`0640`で作成する。Minecraft processは`minecraft` groupによるreadだけを持つ。RCON用のSecurity Group受信ルールは作成せず、Vanillaに専用bind address設定がないためhost firewallでIPv4の`127.0.0.1`およびIPv6の`::1`以外への到達を拒否する。
 
 ### Minecraft server artifact
 

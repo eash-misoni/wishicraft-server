@@ -25,6 +25,10 @@ def test_project_dev_prod_and_secrets_load() -> None:
     assert dev.stage.stage == "dev"
     assert prod.stage.stage == "prod"
     assert "secure_parameters" in dev.secrets.values
+    assert dev.secrets.rcon_password_parameter_name("dev") == "/wishicraft/dev/secret/rcon-password"
+    assert (
+        prod.secrets.rcon_password_parameter_name("prod") == "/wishicraft/prod/secret/rcon-password"
+    )
 
 
 def test_dev_phase_zero_synth_allows_known_nulls() -> None:
@@ -57,6 +61,7 @@ def test_dev_minecraft_artifact_and_initial_profile_are_fully_fixed() -> None:
         "3G",
         25565,
     )
+    assert config.stage.rcon_port == 25575
     assert config.stage.minecraft_server_jar_size == 60894273
     assert config.stage.minecraft_server_jar_sha1 == "823e2250d24b3ddac457a60c92a6a941943fcd6a"
     assert config.stage.minecraft_server_jar_sha256 == (

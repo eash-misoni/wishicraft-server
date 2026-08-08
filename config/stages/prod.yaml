@@ -8,6 +8,7 @@ aws:
 
 network:
   minecraft_port: null
+  rcon_port: null
 
 compute:
   architecture: x86_64

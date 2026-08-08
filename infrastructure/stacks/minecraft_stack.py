@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from aws_cdk import Stack, Tags
+from aws_cdk import CfnOutput, Stack, Tags
 from constructs import Construct
 
 from infrastructure.constructs.data_volume_bootstrap import DataVolumeBootstrap
@@ -63,4 +63,6 @@ class MinecraftStack(Stack):
                 data_volume=self.minecraft_data_volume,
                 project=project,
                 stage=stage,
+                rcon_parameter_name=secrets.rcon_password_parameter_name(stage.stage),
             )
+            CfnOutput(self, "MinecraftInstanceId", value=self.minecraft_instance.instance.ref)

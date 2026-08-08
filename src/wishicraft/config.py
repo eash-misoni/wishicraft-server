@@ -76,6 +76,14 @@ class ProjectConfig:
         assert isinstance(profiles, list) and len(profiles) == 1 and isinstance(profiles[0], str)
         return profiles[0]
 
+    @property
+    def route53_record_type(self) -> str:
+        return _require_string(self.values, "domain.record_type")
+
+    @property
+    def route53_ttl_seconds(self) -> int:
+        return _require_positive_int(self.values, "domain.dns_ttl_seconds")
+
 
 @dataclass(frozen=True)
 class StageConfig:
@@ -106,6 +114,28 @@ class StageConfig:
     def minecraft_port(self) -> int:
         """Return the configured public Minecraft TCP port after phase validation."""
         return _require_positive_int(self.values, "network.minecraft_port")
+
+    @property
+    def rcon_port(self) -> int:
+        """Return the explicitly configured host-local RCON port."""
+        port = _require_positive_int(self.values, "network.rcon_port")
+        if port > 65535 or port == self.minecraft_port:
+            raise ConfigValidationError(
+                ["network.rcon_port must differ from minecraft_port and be <= 65535"]
+            )
+        return port
+
+    @property
+    def route53_hosted_zone_id(self) -> str:
+        return _require_string(self.values, "route53.hosted_zone_id")
+
+    @property
+    def route53_record_name(self) -> str:
+        return _require_string(self.values, "route53.record_name")
+
+    @property
+    def route53_insync_timeout_seconds(self) -> int:
+        return _require_positive_int(self.values, "timeouts_seconds.route53_insync")
 
     @property
     def instance_type(self) -> str:
@@ -334,6 +364,7 @@ REQUIRED_PATHS: Final[dict[tuple[int, str, str], tuple[str, ...]]] = {
         "aws.region",
         "aws.availability_zone",
         "network.minecraft_port",
+        "network.rcon_port",
         "compute.architecture",
         "compute.instance_type",
         "compute.operating_system",
@@ -362,6 +393,7 @@ REQUIRED_PATHS: Final[dict[tuple[int, str, str], tuple[str, ...]]] = {
         "aws.region",
         "aws.availability_zone",
         "network.minecraft_port",
+        "network.rcon_port",
         "compute.architecture",
         "compute.instance_type",
         "compute.operating_system",
@@ -447,6 +479,7 @@ _OPTIONAL_STAGE_STRINGS: Final = (
 )
 _POSITIVE_STAGE_INTS: Final = (
     "network.minecraft_port",
+    "network.rcon_port",
     "storage.root.size_gib",
     "storage.data.size_gib",
     "minecraft_distribution.server_jar_size",

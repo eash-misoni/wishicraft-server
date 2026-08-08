@@ -2,7 +2,7 @@
 
 - **文書状態:** Canonical
 - **対象:** dev Phase 1の手動基盤検証
-- **最終更新:** 2026-07-29
+- **最終更新:** 2026-08-08
 
 ## 1. 禁止事項と承認gate
 
@@ -54,9 +54,53 @@
 4. RCON設定ファイルの権限、RCON localhost限定、Minecraftポートだけの受信規則、static whitelist、`online-mode=true`を確認する。
 5. systemd経由で初回起動し、journal、memory、CPU credit、data volume、SSM接続を確認する。
 
-## 6. DNS確認
+## 6. Route 53固定FQDN管理
 
-`mc-dev.wishicraft.net`のAレコードはPhase 0では作成しない。Phase 1のEC2起動後に現在のpublic IPv4へUPSERTし、Route 53 changeの`INSYNC`とDNS解決を確認する。EC2停止完了後はAレコードを削除し、再度`INSYNC`を確認する。
+`mc-dev.wishicraft.net`のAレコードはPhase 0では作成しない。Phase 1ではCDK resourceとして固定作成せず、リポジトリの限定管理CLIだけで管理する。CLIの利用前に、EC2が`running`、SSM、data volume、`minecraft.service`が確認済みであることを確認する。
+
+```sh
+.venv/bin/python -m wishicraft.route53_cli UPSERT --stage dev --profile wishicraft-dev
+```
+
+CLIは`config/project.yaml`と`config/stages/dev.yaml`からrecord type、TTL、Hosted Zone、FQDN、timeout、account、regionを取得する。利用者はIP address、Hosted Zone ID、record name、TTL、stack name、instance ID、timeoutを指定してはならない。CLIはcaller account、固定stack名`MinecraftStack-dev`のCloudFormation output `MinecraftInstanceId`、単一の`running` instance、Project/Stage tag、グローバルなpublic IPv4を確認する。scanやName tag検索は行わない。
+
+Hosted Zoneが設定FQDNの親zoneであること、および対象recordが単純な単一値A recordであることを確認する。Alias、weighted、latency、failover、geolocation、multi-value、CIDR、health check、複数valueのrecordは変更・削除しない。同一のTTLとIPv4を持つrecordへのUPSERTは変更しない成功となる。変更した場合、CLIは`GetChange`で設定値`timeouts_seconds.route53_insync`（devでは120秒）まで`INSYNC`を待ち、最終的にTTLとIPv4が一致することを再読取で確認する。
+
+成功時stdoutはsecretを含まないJSONであり、少なくとも`stage`、`action`、`account`、`region`、`stack`、`instance_id`、`hosted_zone_id`、`record_name`、`record_type`、`ttl`、`public_ipv4`、`changed`、`change_id`、`final_status`を含む。診断はstderrへ出る。非zero終了時は成功JSONとして扱わない。DNS解決結果がCLI出力の`public_ipv4`と一致し、Minecraft接続を人間が確認してからオンライン完了とする。この確認はAWS実地検証であり、CIまたはsynthで完了扱いにしない。
+
+Minecraftを安全に保存・停止し、EC2が`stopped`となったことを確認した後にだけ削除する。
+
+```sh
+.venv/bin/python -m wishicraft.route53_cli DELETE --stage dev --profile wishicraft-dev
+```
+
+recordが存在しないDELETEは変更しない成功となる。存在する場合は、読み取った完全な単純record setだけをDELETEし、`INSYNC`後に対象A recordが存在しないことを再確認する。古いIPv4のDNS解決がTTLを超えて残らないことも人間が確認する。
+
+### 6.1 管理者の最小IAM policy（dev例）
+
+新しいIAM user、role、長期access keyを作らない。IAM Identity Center等の短期credentialに、次のpolicyと同等の最小権限を付与する。account、stack、Hosted Zone、record nameはdev設定の正本から得た値であり、prodへコピー・推測しない。EC2の`DescribeInstances`はAWSのread API制約によりResourceを限定できないため`*`だが、CLI側でCloudFormation output、instance ID、tagを三重に限定する。
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Sid":"CallerIdentity","Effect":"Allow","Action":"sts:GetCallerIdentity","Resource":"*"},
+    {"Sid":"ReadMinecraftStack","Effect":"Allow","Action":"cloudformation:DescribeStacks","Resource":"arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftStack-dev/*"},
+    {"Sid":"ReadResolvedMinecraftInstance","Effect":"Allow","Action":"ec2:DescribeInstances","Resource":"*"},
+    {"Sid":"ReadConfiguredHostedZone","Effect":"Allow","Action":["route53:GetHostedZone","route53:ListResourceRecordSets"],"Resource":"arn:aws:route53:::hostedzone/Z077818024BJUAUBFMTKV"},
+    {
+      "Sid":"ChangeOnlyConfiguredMinecraftARecord",
+      "Effect":"Allow",
+      "Action":"route53:ChangeResourceRecordSets",
+      "Resource":"arn:aws:route53:::hostedzone/Z077818024BJUAUBFMTKV",
+      "Condition":{"ForAllValues:StringEquals":{"route53:ChangeResourceRecordSetsNormalizedRecordNames":"mc-dev.wishicraft.net","route53:ChangeResourceRecordSetsRecordTypes":"A","route53:ChangeResourceRecordSetsActions":["UPSERT","DELETE"]}}
+    },
+    {"Sid":"WaitForOwnRoute53Changes","Effect":"Allow","Action":"route53:GetChange","Resource":"arn:aws:route53:::change/*"}
+  ]
+}
+```
+
+policy適用前に、組織SCP、permission boundary、AWS IAM action/resource/condition supportを確認する。`GetChange`のresource-level制約を組織のIAM検証が受け付けない場合だけ、そのactionを単独statementの`Resource: "*"`へ狭く例外化する。Route 53変更statementを`*`へ拡大してはならない。
 
 ## 7. Data EBS mount準備service
 
@@ -73,7 +117,7 @@
 ## 9. Minecraft service確認
 
 1. `findmnt /srv/minecraft`と`systemctl status wishicraft-data-volume.service`を確認してから、`systemctl status minecraft.service`を確認する。
-2. `server.properties`で`server-port=25565`、`online-mode=true`、`white-list=true`、`enforce-whitelist=true`、`enable-rcon=false`、`management-server-enabled=false`を確認する。
+2. `server.properties`で`server-port=25565`、`online-mode=true`、`white-list=true`、`enforce-whitelist=true`、`enable-rcon=true`、`rcon.port=25575`、`broadcast-rcon-to-ops=false`、`management-server-enabled=false`を確認する。RCON passwordの実値は表示・記録しない。
 3. `whitelist.json`に`NEWISHIN_`とUUID `e912ab95758e4b7fb32e292eda293104`だけが初期登録されていることを確認する。
-4. `journalctl -u minecraft.service`、`ps`、listening portを確認する。RCONとManagement Protocolがlistenしていないことも確認する。
+4. `journalctl -u minecraft.service`、`ps`、listening portを確認する。Management Protocolがlistenしていないこと、RCON portへの非loopback IPv4/IPv6到達がnftablesで拒否され、Security GroupにRCON ingressがないことを確認する。
 5. `systemctl stop minecraft.service`で正常停止とワールド保存を実EC2で確認し、再起動後にワールドがdata EBS上で保持されることを確認する。これらはdeploy後の手動確認であり、CIでは検証しない。

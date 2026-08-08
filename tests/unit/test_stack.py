@@ -13,6 +13,36 @@ from wishicraft.config import ConfigValidationError, load_configuration
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 
+def _find_key(value: object, key: str, path: str = "$") -> list[tuple[str, object]]:
+    matches: list[tuple[str, object]] = []
+    if isinstance(value, dict):
+        for child_key, child_value in value.items():
+            child_path = f"{path}.{child_key}"
+            if child_key == key:
+                matches.append((child_path, child_value))
+            matches.extend(_find_key(child_value, key, child_path))
+    elif isinstance(value, list):
+        for index, child_value in enumerate(value):
+            matches.extend(_find_key(child_value, key, f"{path}[{index}]"))
+    return matches
+
+
+def _resolve_user_data(value: object, references: dict[str, str]) -> str:
+    if isinstance(value, str):
+        return value
+    assert isinstance(value, dict)
+    if set(value) == {"Fn::Join"}:
+        delimiter, values = value["Fn::Join"]
+        assert isinstance(delimiter, str)
+        assert isinstance(values, list)
+        return delimiter.join(_resolve_user_data(item, references) for item in values)
+    if set(value) == {"Ref"}:
+        reference = value["Ref"]
+        assert isinstance(reference, str)
+        return references[reference]
+    raise AssertionError(f"Unsupported UserData expression: {value!r}")
+
+
 def _action_list(value: object) -> list[str]:
     if isinstance(value, str):
         return [value]
@@ -159,7 +189,9 @@ def test_phase_one_minecraft_instance_uses_existing_network_role_and_root_ebs() 
 
     instances = template.find_resources("AWS::EC2::Instance")
     assert len(instances) == 1
-    instance = next(iter(instances.values()))["Properties"]
+    instance_id, instance_resource = next(iter(instances.items()))
+    instance = instance_resource["Properties"]
+    template.has_output("MinecraftInstanceId", {"Value": {"Ref": instance_id}})
     assert instance["InstanceType"] == configuration.stage.instance_type
     assert "ami-" not in str(instance["ImageId"])
     image_parameter_id = instance["ImageId"]["Ref"]
@@ -222,7 +254,8 @@ def test_phase_one_minecraft_instance_uses_existing_network_role_and_root_ebs() 
         "VolumeSize": configuration.stage.root_volume_size_gib,
         "VolumeType": configuration.stage.root_volume_type,
     }
-    assert "rcon-password" not in str(instance)
+    assert "/wishicraft/dev/secret/rcon-password" in str(instance)
+    assert "{{resolve:ssm-secure:" not in str(instance)
 
 
 def test_phase_one_minecraft_data_volume_is_retained_and_attached_to_the_instance() -> None:
@@ -282,28 +315,51 @@ def test_phase_one_data_volume_bootstrap_uses_volume_ref_and_preserves_ec2_invar
     volume_id = next(iter(template.find_resources("AWS::EC2::Volume")))
     instance = next(iter(template.find_resources("AWS::EC2::Instance").values()))["Properties"]
     user_data = instance["UserData"]
-    user_data_text = str(user_data)
+    user_data_matches = _find_key(template.to_json(), "UserData")
+    assert len(user_data_matches) == 1, user_data_matches
+    user_data_path, synthesized_user_data = user_data_matches[0]
+    assert user_data_path.endswith(".Properties.UserData")
+    assert synthesized_user_data == user_data
     assert {"Fn::Base64"} == set(user_data)
-    assert volume_id in user_data_text
+    user_data_text = _resolve_user_data(
+        user_data["Fn::Base64"],
+        {volume_id: "vol-00000000000000000"},
+    )
+    assert any(reference == volume_id for _, reference in _find_key(user_data["Fn::Base64"], "Ref"))
     assert configuration.stage.data_volume_mount_path in user_data_text
     assert configuration.stage.data_volume_filesystem_type in user_data_text
     assert "wishicraft-data-volume.service" in user_data_text
     assert "DATA_VOLUME_ID=" in user_data_text
-    assert "mkfs.xfs" in user_data_text
     assert configuration.stage.java_runtime in user_data_text
-    assert "java-25-amazon-corretto-headless" in user_data_text
-    assert "java-runtime-install" in user_data_text
-    assert "minecraft-artifact-install" in user_data_text
-    assert "minecraft-game-setup" in user_data_text
+    assert "base64 -d" in user_data_text
+    assert "sha256sum -c -" in user_data_text
+    assert "data_volume_mount.sh" in user_data_text
+    assert "java_runtime_install.sh" in user_data_text
+    assert "minecraft_artifact_install.sh" in user_data_text
+    assert "minecraft_game_setup.sh" in user_data_text
+    assert "minecraft_rcon_configure.sh" in user_data_text
+    assert "minecraft_rcon_firewall.sh" in user_data_text
+    assert "WISHICRAFT_DATA_VOLUME_SCRIPT" not in user_data_text
+    assert "WISHICRAFT_JAVA_RUNTIME_SCRIPT" not in user_data_text
+    assert "WISHICRAFT_MINECRAFT_ARTIFACT_SCRIPT" not in user_data_text
+    assert "WISHICRAFT_MINECRAFT_GAME_SCRIPT" not in user_data_text
+    assert "WISHICRAFT_MINECRAFT_RCON_SCRIPT" not in user_data_text
     assert "minecraft.service" in user_data_text
     service_enable = "systemctl enable --now wishicraft-data-volume.service"
     assert user_data_text.index(service_enable) < user_data_text.index("JAVA_RUNTIME=")
     assert user_data_text.index("JAVA_RUNTIME=") < user_data_text.rindex(
-        "minecraft-artifact-install"
+        "minecraft_artifact_install.sh"
+    )
+    assert user_data_text.index("minecraft_rcon_configure.sh\n") < user_data_text.index(
+        "wishicraft-rcon-firewall.service"
+    )
+    assert user_data_text.index("wishicraft-rcon-firewall.service") < user_data_text.rindex(
+        "systemctl enable --now minecraft.service"
     )
     assert "/dev/sdf" not in user_data_text
-    assert "rcon-password" not in user_data_text
-    assert len(user_data_text.encode("utf-8")) < 16 * 1024
+    assert configuration.secrets.rcon_password_parameter_name("dev") in user_data_text
+    assert "{{resolve:ssm-secure:" not in user_data_text
+    assert len(user_data_text.encode("utf-8")) <= 16 * 1024
 
     assert instance["InstanceInitiatedShutdownBehavior"] == "stop"
     assert instance["MetadataOptions"] == {
@@ -323,20 +379,21 @@ def test_phase_one_minecraft_service_uses_mount_guard_and_fixed_runtime_settings
     template = Template.from_stack(stack)
     configuration = load_configuration(REPOSITORY_ROOT, "dev")
     instance = next(iter(template.find_resources("AWS::EC2::Instance").values()))["Properties"]
-    user_data = str(instance["UserData"])
+    user_data = _resolve_user_data(
+        instance["UserData"]["Fn::Base64"],
+        {next(iter(template.find_resources("AWS::EC2::Volume"))): ("vol-00000000000000000")},
+    )
 
     assert "Requires=wishicraft-data-volume.service" in user_data
     assert "After=wishicraft-data-volume.service" in user_data
-    assert "ExecStartPre=/usr/local/lib/wishicraft/data-volume-mount --verify" in user_data
-    assert "ExecStartPre=/usr/local/lib/wishicraft/minecraft-game-setup --verify" in user_data
+    assert "Requires=wishicraft-rcon-firewall.service" in user_data
+    assert "After=wishicraft-data-volume.service wishicraft-rcon-firewall.service" in user_data
+    assert "Before=minecraft.service" in user_data
+    assert "ExecStartPre=/usr/local/lib/wishicraft/data_volume_mount.sh --verify" in user_data
+    assert "ExecStartPre=/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify" in user_data
     assert f"-Xms{configuration.stage.java_xms} -Xmx{configuration.stage.java_xmx}" in user_data
     assert " -jar /srv/minecraft/packages/vanilla/26.2/server.jar nogui" in user_data
     assert "User=minecraft" in user_data
-    assert "enable-rcon=false" in user_data
-    assert "management-server-enabled=false" in user_data
-    assert "online-mode=true" in user_data
-    assert "white-list=true" in user_data
-    assert "enforce-whitelist=true" in user_data
     assert "TimeoutStopSec=180" in user_data
 
 

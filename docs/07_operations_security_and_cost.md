@@ -1,7 +1,7 @@
 # 07. Operations, Security, and Cost
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-07-29
+- **最終更新:** 2026-08-08
 
 ## 1. 運用原則
 
@@ -116,7 +116,7 @@ EC2から他instanceのstart/stopやIAM変更を許可しない。
 
 - `minecraft.service`は`wishicraft-data-volume.service`とmount guardに依存し、data EBS未mountでは起動しない。
 - server jarは固定した公式URLから一時ファイルへ取得し、size、SHA-1、SHA-256のすべてが一致した場合だけ配置する。不正な既存jarを自動上書き・実行しない。
-- Minecraftはinteractive login不能な専用`minecraft` user/groupで動かし、RCONとManagement Protocolは有効化しない。
+- Minecraftはinteractive login不能な専用`minecraft` user/groupで動かす。Management Protocolは有効化しない。RCONはSecureStringから設定するが、Security Groupにingressを設けず、host firewallでIPv4の`127.0.0.1`およびIPv6の`::1`以外への到達を拒否する。
 
 ## 5. Secret管理
 

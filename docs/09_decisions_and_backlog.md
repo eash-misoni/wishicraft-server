@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-07-29
+- **最終更新:** 2026-08-08
 
 ## 1. Decision logの使い方
 
@@ -73,7 +73,7 @@
 
 - **状態:** Accepted
 - Session ManagerとRun Commandを使用する。
-- RCONもlocalhost限定。
+- VanillaにはRCON専用のbind address設定がないため、socketがwildcard bindし得ることを前提にする。Wishicraft専用host firewall tableでIPv4の`127.0.0.1`およびIPv6の`::1`以外へ宛てたRCON port通信を拒否し、Security GroupにもRCON ingressを設けない。「localhost限定」はsocket bindではなく実効的な到達性を意味する。
 
 ### D-012 LambdaをVPCへ接続しない
 
@@ -264,7 +264,7 @@
 
 - **状態:** Accepted
 - 初期PackageはMinecraft Java Edition 26.2 vanilla、初期Gameは`game-vanilla-main`とする。Corretto 25 headlessで実行し、公式version metadataのURL・SHA-1・sizeとリポジトリ固定SHA-256をすべて検証する。runtimeで`latest`やmanifestを参照しない。
-- 初期Gameはdata EBS上へ配置し、`online-mode`、静的ホワイトリスト、EULA同意を必須にする。RCONとMinecraft Management Protocolはこの作業単位では無効のままとする。
+- 初期Gameはdata EBS上へ配置し、`online-mode`、静的ホワイトリスト、EULA同意を必須にする。Minecraft Management Protocolは無効のままとする。RCONはSecureStringから設定し、Security Group ingressなしとhost firewallによる実効的localhost限定を必須にする。
 
 ### D-040 MVP secret store
 

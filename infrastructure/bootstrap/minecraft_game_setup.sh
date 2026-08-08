@@ -50,7 +50,6 @@ verify() {
   verify_property online-mode 'online-mode=true'
   verify_property white-list 'white-list=true'
   verify_property enforce-whitelist 'enforce-whitelist=true'
-  verify_property enable-rcon 'enable-rcon=false'
   verify_property management-server-enabled 'management-server-enabled=false'
   grep -Fqx "$expected_whitelist" "$SERVER_DIRECTORY/whitelist.json" || fail "whitelist differs"
 }
@@ -83,7 +82,6 @@ ensure_exact_file "$SERVER_DIRECTORY/server.properties" "server-port=$MINECRAFT_
 online-mode=true
 white-list=true
 enforce-whitelist=true
-enable-rcon=false
 management-server-enabled=false"
 whitelist_content="$(printf '[{\"uuid\":\"%s\",\"name\":\"%s\"}]' "$PROFILE_UUID" "$PROFILE_NAME")"
 ensure_exact_file "$SERVER_DIRECTORY/whitelist.json" "$whitelist_content"
