@@ -84,6 +84,103 @@ def test_bootstrap_bundle_is_deterministic_and_runner_extracts_only_allowlisted_
     assert list(temp_root.iterdir()) == []
 
 
+def test_bootstrap_runner_accepts_canonical_members_without_rewriting_them(
+    tmp_path: Path,
+) -> None:
+    archive = build_bundle(BOOTSTRAP_DIRECTORY)
+    first, destination, temporary = _run_runner(tmp_path, archive)
+    assert first.returncode == 0, first.stderr
+    before = {
+        name: ((destination / name).read_bytes(), (destination / name).stat().st_mtime_ns)
+        for name in FILES
+    }
+    environment = {
+        **os.environ,
+        "BUNDLE_BASE64": base64.b64encode(archive).decode("ascii"),
+        "BUNDLE_SHA256": hashlib.sha256(archive).hexdigest(),
+        "BUNDLE_MEMBERS": "\n".join(FILES),
+        "BUNDLE_DEST": str(destination),
+        "BUNDLE_TEMP_ROOT": str(temporary),
+        "RUNNER_TEST_MODE": "1",
+        "MARKER": str(tmp_path / "bootstrap-ran"),
+    }
+
+    second = subprocess.run(
+        ["bash", str(RUNNER)], text=True, capture_output=True, env=environment, check=False
+    )
+
+    assert second.returncode == 0, second.stderr
+    assert {
+        name: ((destination / name).read_bytes(), (destination / name).stat().st_mtime_ns)
+        for name in FILES
+    } == before
+
+
+def test_bootstrap_runner_stops_before_writing_when_a_member_conflicts(tmp_path: Path) -> None:
+    archive = build_bundle(BOOTSTRAP_DIRECTORY)
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    conflict = destination / FILES[0]
+    conflict.write_bytes(b"not the canonical bootstrap script\n")
+    conflict.chmod(0o755)
+    before = (conflict.read_bytes(), conflict.stat().st_mtime_ns)
+    temporary = tmp_path / "temporary"
+    temporary.mkdir()
+    environment = {
+        **os.environ,
+        "BUNDLE_BASE64": base64.b64encode(archive).decode("ascii"),
+        "BUNDLE_SHA256": hashlib.sha256(archive).hexdigest(),
+        "BUNDLE_MEMBERS": "\n".join(FILES),
+        "BUNDLE_DEST": str(destination),
+        "BUNDLE_TEMP_ROOT": str(temporary),
+        "RUNNER_TEST_MODE": "1",
+        "MARKER": str(tmp_path / "bootstrap-ran"),
+    }
+
+    result = subprocess.run(
+        ["bash", str(RUNNER)], text=True, capture_output=True, env=environment, check=False
+    )
+
+    assert result.returncode != 0
+    assert (conflict.read_bytes(), conflict.stat().st_mtime_ns) == before
+    assert sorted(path.name for path in destination.iterdir()) == [FILES[0]]
+    assert not (tmp_path / "bootstrap-ran").exists()
+    assert list(temporary.iterdir()) == []
+
+
+def test_bootstrap_runner_rejects_existing_symlink_without_replacing_it(tmp_path: Path) -> None:
+    archive = build_bundle(BOOTSTRAP_DIRECTORY)
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    outside = tmp_path / "outside"
+    outside.write_bytes(b"outside\n")
+    link = destination / FILES[0]
+    link.symlink_to(outside)
+    temporary = tmp_path / "temporary"
+    temporary.mkdir()
+    environment = {
+        **os.environ,
+        "BUNDLE_BASE64": base64.b64encode(archive).decode("ascii"),
+        "BUNDLE_SHA256": hashlib.sha256(archive).hexdigest(),
+        "BUNDLE_MEMBERS": "\n".join(FILES),
+        "BUNDLE_DEST": str(destination),
+        "BUNDLE_TEMP_ROOT": str(temporary),
+        "RUNNER_TEST_MODE": "1",
+        "MARKER": str(tmp_path / "bootstrap-ran"),
+    }
+
+    result = subprocess.run(
+        ["bash", str(RUNNER)], text=True, capture_output=True, env=environment, check=False
+    )
+
+    assert result.returncode != 0
+    assert link.is_symlink()
+    assert outside.read_bytes() == b"outside\n"
+    assert sorted(path.name for path in destination.iterdir()) == [FILES[0]]
+    assert not (tmp_path / "bootstrap-ran").exists()
+    assert list(temporary.iterdir()) == []
+
+
 @pytest.mark.parametrize(
     "archive",
     [

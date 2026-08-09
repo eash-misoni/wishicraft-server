@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-09
+- **最終更新:** 2026-08-10
 
 ## 1. Decision logの使い方
 
@@ -361,6 +361,13 @@
 - firewall migrationは、既存script、unit、drop-in、rules file、enable symlinkを個別に不在・正本一致・衝突へ分類する。正本一致物は書き換えず再利用し、不一致物は削除・修復・上書きせず、永続変更前に停止する。
 - target nft tableが既存の場合は、全persistent artifactとtable ruleが正本一致する完成状態だけを受容する。tableだけ、またはrules fileだけが残る部分適用状態は安全停止する。
 - 初期bootstrapは新規instanceの作成経路であり、既存hostの再開は一回限りのmigrationを正本とする。bootstrap再実行を衝突解消手段にしない。
+
+### D-054 RCON firewall dependency verificationとbootstrap既設物
+
+- **状態:** Accepted
+- firewall migrationは`systemctl show`の複数unit propertyを全体文字列や順序で比較しない。commandの取得失敗、空値、対象unit欠落を別checkpointでfail-closedし、完全なunit名のtoken membershipだけを確認する。
+- `minecraft.service`が`not-found`の部分適用状態では、daemon-reload後に正本hash・metadataのdrop-inが存在することまでを確認して停止境界を越える。Minecraftを起動せず、unitが後から配置された際にsystemdがdrop-inを取り込む。
+- bootstrap bundleは既設regular memberを無条件に上書きしない。absenceだけを排他的に配置し、正本content・mode・owner/groupの一致物はmtimeを含め無変更で受容し、不一致またはsymlinkは書込み前に停止する。
 
 
 ## 3. 却下した案
