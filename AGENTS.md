@@ -18,3 +18,11 @@
 テスト・lint・型検査・CDK synthの結果を報告する。
 実行していない確認を成功扱いしない。
 devを基本とし、prod deployや破壊的操作を勝手に行わない。
+
+## 自律ローカル検証
+
+- ローカルのtest-only harness、fixture、証跡は新しい専用temporary rootへ作成し、過去のrootと正式結果を上書きしない。
+- fixture失敗は既存結果を補正せず、新しいversionで原因診断・修正・再検証する。
+- production wrapper、payload、oracle、selection logicを変える必要が生じたら、根拠と影響を示して停止する。
+- AWS、SSM、EC2、host、deploy、DNS、secret、破壊的操作、またはセキュリティ動作変更の直前では停止して明示承認を求める。
+- 詳細な自律実行・証跡・停止境界は`docs/10_codex_working_agreement.md`を正本とする。

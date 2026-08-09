@@ -289,3 +289,14 @@ bug修正時は、可能な限り再現testを先に追加する。
 
 ## 実行してはいけない操作
 ```
+
+## 14. 自律ローカル検証と外部操作境界
+
+ユーザーが自律実行を明示承認した場合、Codexはローカルのtest-only harness、fixture、証跡、静的検査、repository内の通常変更、commit/push、CI確認を、完了条件に達するまで継続してよい。
+
+- 各検証versionは新しい一意なtemporary rootを使い、既存version、正式結果、frozen artifactを変更・再利用・補正しない。
+- 失敗を成功として扱わず、結果JSONを手作業で補正しない。失敗時は新versionで原因を記録し、最小のtest-only修正と再検証を行う。
+- evidence runnerはwrapperが実際に比較する表現と、runner外側の比較表現が一致することを証明可能にする。capture、state、sidecar、audit、nonce、output rootはinvocationごとに分離する。
+- production wrapper、payload、oracle、fixture selection logic、実機のセキュリティ動作を変える必要が判明した時点で、変更前に影響と根拠を報告して停止する。
+- ローカル検証が合格しても、AWS CLI/SDK、SSO login、SSM/EC2/host接続、Run Command送信、deploy、DNS操作、実機変更、local production path変更、secret取得・表示、破壊的操作は自動実行しない。次に実行する外部command、影響、rollback方針を簡潔に示して明示承認を得る。
+- 外部境界以外では、単なるtest failureを理由に途中停止せず、過去の証跡を保持した新versionで原因診断・修正・再検証を続ける。
