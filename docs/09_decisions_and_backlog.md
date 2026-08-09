@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-08
+- **最終更新:** 2026-08-09
 
 ## 1. Decision logの使い方
 
@@ -354,6 +354,13 @@
 
 - **状態:** Accepted
 - Minecraft EC2はIMDSv2を必須とし、instance metadata tagsを有効にしない。
+
+### D-053 RCON firewallの部分適用再開
+
+- **状態:** Accepted
+- firewall migrationは、既存script、unit、drop-in、rules file、enable symlinkを個別に不在・正本一致・衝突へ分類する。正本一致物は書き換えず再利用し、不一致物は削除・修復・上書きせず、永続変更前に停止する。
+- target nft tableが既存の場合は、全persistent artifactとtable ruleが正本一致する完成状態だけを受容する。tableだけ、またはrules fileだけが残る部分適用状態は安全停止する。
+- 初期bootstrapは新規instanceの作成経路であり、既存hostの再開は一回限りのmigrationを正本とする。bootstrap再実行を衝突解消手段にしない。
 
 
 ## 3. 却下した案
