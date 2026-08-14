@@ -181,6 +181,36 @@ def test_bootstrap_runner_rejects_existing_symlink_without_replacing_it(tmp_path
     assert list(temporary.iterdir()) == []
 
 
+def test_bootstrap_runner_rejects_canonical_content_with_wrong_mode(tmp_path: Path) -> None:
+    archive = build_bundle(BOOTSTRAP_DIRECTORY)
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    target = destination / FILES[0]
+    target.write_bytes((BOOTSTRAP_DIRECTORY / FILES[0]).read_bytes())
+    target.chmod(0o744)
+    before = (target.read_bytes(), target.stat().st_mode & 0o777, target.stat().st_mtime_ns)
+    temporary = tmp_path / "temporary"
+    temporary.mkdir()
+    environment = {
+        **os.environ,
+        "BUNDLE_BASE64": base64.b64encode(archive).decode("ascii"),
+        "BUNDLE_SHA256": hashlib.sha256(archive).hexdigest(),
+        "BUNDLE_MEMBERS": "\n".join(FILES),
+        "BUNDLE_DEST": str(destination),
+        "BUNDLE_TEMP_ROOT": str(temporary),
+        "RUNNER_TEST_MODE": "1",
+        "MARKER": str(tmp_path / "bootstrap-ran"),
+    }
+
+    result = subprocess.run(
+        ["bash", str(RUNNER)], text=True, capture_output=True, env=environment, check=False
+    )
+
+    assert result.returncode != 0
+    assert (target.read_bytes(), target.stat().st_mode & 0o777, target.stat().st_mtime_ns) == before
+    assert sorted(path.name for path in destination.iterdir()) == [FILES[0]]
+
+
 @pytest.mark.parametrize(
     "archive",
     [
