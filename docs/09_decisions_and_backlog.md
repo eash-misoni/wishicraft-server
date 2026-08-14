@@ -368,6 +368,7 @@
 - firewall migrationは`systemctl show`の複数unit propertyを全体文字列や順序で比較しない。commandの取得失敗、空値、対象unit欠落を別checkpointでfail-closedし、完全なunit名のtoken membershipだけを確認する。
 - `minecraft.service`が`not-found`の部分適用状態では、daemon-reload後に正本hash・metadataのdrop-inが存在することまでを確認して停止境界を越える。Minecraftを起動せず、unitが後から配置された際にsystemdがdrop-inを取り込む。
 - bootstrap bundleは既設regular memberを無条件に上書きしない。absenceだけを排他的に配置し、正本content・mode・owner/groupの一致物はmtimeを含め無変更で受容し、不一致またはsymlinkは書込み前に停止する。
+- EC2 user dataの16 KiB上限を維持するため、bootstrap runner自体はmtime=0の決定的gzipとBase64で輸送し、host上で復元して0700にする。allowlisted bundleのSHA-256検証と既設物判定は復元された同一runner内で従来どおり行う。
 
 ### D-055 systemd enable linkの正本判定
 
@@ -382,9 +383,11 @@
 - **状態:** Accepted
 - **日付:** 2026-08-15
 - Amazon Linux 2023のnftables 1.0.4をproduction下限とし、1.0.7で追加された`destroy` commandをrulesへ含めない。
-- target tableの新規適用は`create table`を先頭にした単一batchとし、`nft --check --file`、table不存在race check、transactionalな`nft --file`、live table検証、persistent fileのatomic確定の順で行う。raceでtableが出現した場合はbatch全体を失敗させ、既存tableへruleを追加しない。
+- target tableの新規適用は、`create table`、`add chain`、IPv4/IPv6の`add rule`をtop-levelに並べた単一batchとする。`nft --check --file`、table不存在race check、transactionalな`nft --file`、JSON semantic live検証、persistent fileのatomic確定の順で行う。nftables 1.0.4でnested object定義がstatus 0のまま空tableだけを作る挙動を正本fixtureとして固定し、nested構文をproduction rulesへ使用しない。
 - target tableとpersistent rulesは、双方不存在、rulesのみ正本、tableのみ正本、双方正本を安全な再開状態として扱う。正本でないfile/table、由来を証明できないtemporary fileは削除・flush・上書きせず停止する。
-- firewall scriptの更新は、現行正本または明示した直前正本だけを許可する。v14 predecessorはpath、regular/non-symlink、bytes、SHA-256、root:root、0755、構文、およびrace時の再検査が全一致し、unit processが非稼働の場合だけ同一directory内の検証済みtemporary fileからatomic replaceする。任意の旧内容は受容しない。
+- v15が残した正確なempty target tableは、v15 script/hash/metadata、systemd failed status 39、package version、rules/temp不在、Minecraft/Java/RCON停止、およびJSON内の全object不存在が一致する場合だけ`approved_empty_v15_partial`とする。適用直前の同一fingerprint再検査後、`create chain`と2つの`add rule`だけの単一recovery transactionでforward migrationし、tableのdelete/flushは行わない。
+- live tableの正本判定は`nft -j`をPython 3で構文解析し、table identity、chain metadata、2 ruleのport/address/verdict、重複、未知object/expressionを個別にfail-closedする。human-readable出力やexpression順序の文字列一致を正本判定に使わない。
+- firewall scriptの更新は、現行正本または明示した直前正本だけを許可する。v15 predecessorはpath、regular/non-symlink、2589 bytes、固定SHA-256、root:root、0755、構文、およびrace時の再検査が全一致し、unit processが非稼働の場合だけ同一directory内の検証済みtemporary fileからatomic replaceする。任意の旧内容は受容しない。
 - scriptはsecret-freeな安定step/failure markerと固有exit statusをjournalへ残す。password、Environment全体、credentialは出力しない。
 
 

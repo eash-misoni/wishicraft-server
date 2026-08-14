@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import gzip
 from pathlib import Path
 
 from aws_cdk import Fn
@@ -44,6 +45,9 @@ class DataVolumeBootstrap(Construct):
         runner = (Path(__file__).parents[1] / "bootstrap" / "bootstrap_runner.sh").read_text(
             encoding="utf-8"
         )
+        runner_base64 = base64.b64encode(gzip.compress(runner.encode("utf-8"), mtime=0)).decode(
+            "ascii"
+        )
         self.artifact = resolve_minecraft_artifact(stage)
         if stage.data_volume_filesystem_type != "xfs":
             raise ValueError(
@@ -58,10 +62,10 @@ class DataVolumeBootstrap(Construct):
                     [
                         "#!/bin/bash\nset -eu\n"
                         "install -d -m 0755 /usr/local/lib/wishicraft /etc/wishicraft\n",
-                        "cat > /usr/local/sbin/wishicraft-bootstrap-runner "
-                        "<<'WISHICRAFT_BOOTSTRAP_RUNNER'\n",
-                        runner,
-                        "\nWISHICRAFT_BOOTSTRAP_RUNNER\n"
+                        "printf '%s' '",
+                        runner_base64,
+                        "' | base64 -d | gzip -d > "
+                        "/usr/local/sbin/wishicraft-bootstrap-runner\n"
                         "chmod 0700 /usr/local/sbin/wishicraft-bootstrap-runner\n"
                         "BUNDLE_BASE64='",
                         bundle_base64,

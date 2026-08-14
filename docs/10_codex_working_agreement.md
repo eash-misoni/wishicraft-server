@@ -304,4 +304,6 @@ bug修正時は、可能な限り再現testを先に追加する。
 - systemd enable symlinkの`canonical`判定はraw link文字列やbasenameではなく、正確なlink path、symlink type、非dangling、および解決後targetのcanonical unit file完全一致を使用する。絶対linkと相対linkを受容し、query failureとpredicate mismatchを別checkpointにする。
 - test-only comparatorはwrapper内部で実際に比較した完全表現を同時に保存し、外側のstate comparatorだけで成功を主張しない。
 - nftables migrationは対象production versionで利用可能なsyntaxを固定し、`--check`とrace checkを先行させる。既存target tableへ推測的なdelete/flush/repairを行わず、正本table/rulesの安全な部分適用だけを明示的に再開する。
+- nftablesの正本性は、対象versionのJSON出力をsemanticに検証する。human-readable文字列の整形や順序を安全性predicateにせず、table/chain/rule/object/expressionの件数と意味を個別に検証し、未知要素はfail-closedする。
+- 既存target tableへforward migrationする例外は、由来を固定hash・metadata・service failure status・artifact不在・全object fingerprintで証明したversioned partial stateだけに限定する。一般のempty/partial tableを受容しない。
 - production artifactの制御upgradeは、明示したpredecessorのpath、type、bytes、hash、owner/group、mode、syntaxを完全一致で検証し、race再検査後にatomic replaceする。任意のcontent mismatchを旧versionとして受容しない。

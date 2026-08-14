@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import gzip
 from pathlib import Path
 from typing import cast
 
@@ -332,7 +334,13 @@ def test_phase_one_data_volume_bootstrap_uses_volume_ref_and_preserves_ec2_invar
     assert "DATA_VOLUME_ID=" in user_data_text
     assert configuration.stage.java_runtime in user_data_text
     assert "base64 -d" in user_data_text
-    assert "sha256sum -c -" in user_data_text
+    assert "| gzip -d > /usr/local/sbin/wishicraft-bootstrap-runner" in user_data_text
+    encoded_runner = user_data_text.split("printf '%s' '", 1)[1].split("' | base64 -d", 1)[0]
+    runner = gzip.decompress(base64.b64decode(encoded_runner)).decode("utf-8")
+    assert runner == (REPOSITORY_ROOT / "infrastructure/bootstrap/bootstrap_runner.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "sha256sum -c -" in runner
     assert "data_volume_mount.sh" in user_data_text
     assert "java_runtime_install.sh" in user_data_text
     assert "minecraft_artifact_install.sh" in user_data_text

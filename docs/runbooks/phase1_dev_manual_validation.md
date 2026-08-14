@@ -124,7 +124,9 @@ policy適用前に、組織SCP、permission boundary、AWS IAM action/resource/c
 
 ### Firewall migrationの再開条件
 
-- AL2023のnftables 1.0.4互換rulesは`create table inet wishicraft_rcon`を使用し、`destroy`、`flush ruleset`、推測的なtarget table削除を含めない。
+- AL2023のnftables 1.0.4互換rulesは、top-levelの`create table`、`add chain`、IPv4/IPv6 `add rule`を1つのtransactionにし、`destroy`、nested object定義、`flush ruleset`、推測的なtarget table削除を含めない。
+- v15由来のempty tableを再開する場合は、v15 script 2589 bytesと固定SHA-256、root:root 0755、unit/drop-in/link正本、nftables 1.0.4、Result=exit-code、ExecMainStatus=39、rules/temp不在、Minecraft/Java/RCON停止、およびJSON上でchain/rule/set/map/flowtable等がすべて0であることを確認する。条件が1つでも違えば送信しない。
+- postflightは`nft -j list table inet wishicraft_rcon`をsemanticに検証し、input chain 1件、IPv4/IPv6 drop rule各1件、loopback例外、port一致、未知object/expression 0件を確認する。persistent rules fileが正本になる前にmigration完了としない。
 - script、unit、drop-in、enable link、rules、live tableを個別分類し、正本だけを無変更で再利用する。tableのみ正本の場合はrulesだけを確定し、rulesのみ正本の場合は同じbytesを検証してlive tableを復元する。
-- v14 scriptからの更新は記録済みv14 hash・1529 bytes・root:root・0755・regular/non-symlink・構文正常がすべて一致する場合だけ許可する。不一致物や残存temporary fileは変更せず停止する。
+- v15 scriptからの更新は記録済みv15 hash・2589 bytes・root:root・0755・regular/non-symlink・構文正常がすべて一致する場合だけ許可する。不一致物や残存temporary fileは変更せず停止する。
 - `WCRF:STEP:*`、`WCRF:FAIL:*`とexit statusで失敗段階を確認する。RCON passwordやEnvironment全体はjournalへ出力しない。
