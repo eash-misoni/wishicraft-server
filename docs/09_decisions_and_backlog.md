@@ -390,6 +390,14 @@
 - firewall scriptの更新は、現行正本または明示した直前正本だけを許可する。v15 predecessorはpath、regular/non-symlink、2589 bytes、固定SHA-256、root:root、0755、構文、およびrace時の再検査が全一致し、unit processが非稼働の場合だけ同一directory内の検証済みtemporary fileからatomic replaceする。任意の旧内容は受容しない。
 - scriptはsecret-freeな安定step/failure markerと固有exit statusをjournalへ残す。password、Environment全体、credentialは出力しない。
 
+### D-057 live target table存在時のpersistent rules postflight
+
+- **状態:** Accepted
+- **日付:** 2026-08-15
+- persistent rulesは再起動後のtable不存在状態から構築する`create table` batchであるため、live canonical tableの存在中に同じfileを`nft --check --file`すると、正本でも既存table衝突として失敗する。
+- runtime postflightではroot:root・0600・固定bytes・固定SHA-256を再検証し、live tableは別途JSON semantic verifierで完全検証する。`nft --check --file`はtable不存在時のservice適用経路で、実適用前に実行する。
+- この変更はrules bytes、live firewall semantics、transaction、selection logicを変更せず、既に完成したv16状態を無変更で受容する。
+
 
 ## 3. 却下した案
 
