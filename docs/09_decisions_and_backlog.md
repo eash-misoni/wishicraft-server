@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-10
+- **最終更新:** 2026-08-14
 
 ## 1. Decision logの使い方
 
@@ -368,6 +368,14 @@
 - firewall migrationは`systemctl show`の複数unit propertyを全体文字列や順序で比較しない。commandの取得失敗、空値、対象unit欠落を別checkpointでfail-closedし、完全なunit名のtoken membershipだけを確認する。
 - `minecraft.service`が`not-found`の部分適用状態では、daemon-reload後に正本hash・metadataのdrop-inが存在することまでを確認して停止境界を越える。Minecraftを起動せず、unitが後から配置された際にsystemdがdrop-inを取り込む。
 - bootstrap bundleは既設regular memberを無条件に上書きしない。absenceだけを排他的に配置し、正本content・mode・owner/groupの一致物はmtimeを含め無変更で受容し、不一致またはsymlinkは書込み前に停止する。
+
+### D-055 systemd enable linkの正本判定
+
+- **状態:** Accepted
+- firewall migrationのenable linkは、`WantedBy=multi-user.target`に対応する正確な`.wants` pathにあるsymlinkだけを対象とする。
+- systemdはunit fileへのlinkを絶対pathまたは相対pathで作成し得るため、`readlink`のraw文字列を固定値と比較しない。symlinkが非danglingであり、解決後targetが正確なcanonical unit fileと完全一致する場合だけ正本として受容する。
+- wrong target、類似unit名、dangling link、regular file、directoryは衝突として変更前に停止する。link query失敗、`systemctl enable`失敗、enable成功後のpredicate不一致は別checkpointで記録する。
+- 正本linkはraw target形式やmtimeを含め書き換えない。preflightからenable直前までの状態・形式変化はraceとして停止する。
 
 
 ## 3. 却下した案

@@ -1,7 +1,7 @@
 # 10. Codex Working Agreement
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-09
+- **最終更新:** 2026-08-14
 
 ## 1. 目的
 
@@ -301,4 +301,5 @@ bug修正時は、可能な限り再現testを先に追加する。
 - ローカル検証が合格しても、AWS CLI/SDK、SSO login、SSM/EC2/host接続、Run Command送信、deploy、DNS操作、実機変更、local production path変更、secret取得・表示、破壊的操作は自動実行しない。次に実行する外部command、影響、rollback方針を簡潔に示して明示承認を得る。
 - 外部境界以外では、単なるtest failureを理由に途中停止せず、過去の証跡を保持した新versionで原因診断・修正・再検証を続ける。
 - 部分適用を再開するhost migrationでは、script、unit、drop-in、rules file、enable symlinkを個別に`absent`、`canonical`、`conflict`へ分類する。`canonical`はmtimeを含め書き換えず、`absent`だけをno-clobberで配置し、`conflict`または整合しない既存nft tableは永続変更前に停止する。
+- systemd enable symlinkの`canonical`判定はraw link文字列やbasenameではなく、正確なlink path、symlink type、非dangling、および解決後targetのcanonical unit file完全一致を使用する。絶対linkと相対linkを受容し、query failureとpredicate mismatchを別checkpointにする。
 - test-only comparatorはwrapper内部で実際に比較した完全表現を同時に保存し、外側のstate comparatorだけで成功を主張しない。
