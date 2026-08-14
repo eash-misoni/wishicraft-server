@@ -7,139 +7,192 @@ from pathlib import Path
 
 import pytest
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPOSITORY_ROOT / "infrastructure" / "bootstrap" / "minecraft_rcon_firewall.sh"
+ROOT = Path(__file__).resolve().parents[2]
+SCRIPT = ROOT / "infrastructure/bootstrap/minecraft_rcon_firewall.sh"
 
 
-def _write_command(path: Path, name: str, body: str) -> None:
-    command = path / name
-    command.write_text(f"#!/usr/bin/env bash\nset -eu\n{body}\n", encoding="utf-8")
-    command.chmod(0o755)
+def _command(directory: Path, name: str, body: str) -> None:
+    path = directory / name
+    path.write_text(f"#!/usr/bin/env bash\nset -eu\n{body}\n", encoding="utf-8")
+    path.chmod(0o755)
 
 
-def _link_required_host_commands(path: Path) -> None:
-    """Expose only non-firewall shell utilities the script needs through the test PATH."""
-    for name in ("bash", "cat", "dirname", "mkdir", "mktemp", "mv", "rm"):
+def _environment(tmp_path: Path, *, nft_available: bool = True) -> tuple[dict[str, str], Path]:
+    commands = tmp_path / "commands"
+    commands.mkdir()
+    for name in ("bash", "cat", "cmp", "cp", "dirname", "grep", "mktemp", "mv", "rm"):
         executable = shutil.which(name)
-        assert executable is not None, name
-        (path / name).symlink_to(executable)
+        assert executable
+        (commands / name).symlink_to(executable)
 
-
-def _nft_body() -> str:
-    return (
-        'printf "%s\\n" "$*" >> "$NFT_LOG"\n'
-        'if [[ "$1" == "--check" ]]; then\n'
-        '  [[ "${NFT_CHECK_EXIT:-0}" == 0 ]] || exit "$NFT_CHECK_EXIT"\n'
-        '  cat "$3" > "$NFT_RULES"\n'
-        'elif [[ "$1" == "--file" ]]; then\n'
-        '  [[ "${NFT_APPLY_EXIT:-0}" == 0 ]] || exit "$NFT_APPLY_EXIT"\n'
-        '  cat "$2" > "$NFT_RULES"\n'
-        'elif [[ "$1" == "list" && "$2" == "table" ]]; then\n'
-        '  exit "${NFT_LIST_EXIT:-0}"\n'
-        "else\n"
-        "  exit 1\n"
-        "fi"
+    rules = tmp_path / "etc/nftables/wishicraft-rcon.nft"
+    rules.parent.mkdir(parents=True, mode=0o700)
+    rules.parent.chmod(0o700)
+    state = tmp_path / "nft-state"
+    log = tmp_path / "nft-log"
+    _command(
+        commands,
+        "stat",
+        "if [[ $1 == -c && $2 == %U:%G:%a ]]; then "
+        "case $3 in */nftables) printf root:root:700;; *) printf root:root:600;; esac; "
+        "else exit 2; fi",
     )
-
-
-def _firewall_environment(
-    tmp_path: Path, *, nft_available: bool = True, dnf_exit: int = 0
-) -> tuple[dict[str, str], Path, Path]:
-    stubs = tmp_path / "stubs"
-    stubs.mkdir()
-    _link_required_host_commands(stubs)
-    host_tools = tmp_path / "host-tools"
-    host_tools.mkdir()
-    _write_command(host_tools, "nft", 'printf host-nft >> "$HOST_NFT_LOG"\nexit 1')
+    _command(commands, "chown", ":")
+    _command(commands, "chmod", ":")
+    _command(commands, "install", 'mkdir -p "${@: -1}"; chmod 0700 "${@: -1}"')
+    nft_body = r"""
+printf '%s\n' "$*" >> "$NFT_LOG"
+case "$*" in
+  "list table inet wishicraft_rcon")
+    count=0; [[ ! -f "$NFT_LIST_COUNT" ]] || count=$(cat "$NFT_LIST_COUNT")
+    count=$((count+1)); printf '%s' "$count" > "$NFT_LIST_COUNT"
+    if [[ ${NFT_RACE:-0} == 1 && $count -ge 2 ]]; then printf race-table > "$NFT_STATE"; exit 0; fi
+    [[ -f "$NFT_STATE" ]] || exit 1
+    cat "$NFT_STATE"
+    ;;
+  "--check --file "*)
+    grep -q '^destroy ' "$3" && exit 1
+    [[ ${NFT_CHECK_EXIT:-0} == 0 ]] || exit "$NFT_CHECK_EXIT"
+    ;;
+  "--file "*)
+    [[ ${NFT_APPLY_EXIT:-0} == 0 ]] || exit "$NFT_APPLY_EXIT"
+    cat > "$NFT_STATE" <<EOF
+table inet wishicraft_rcon {
+ chain input {
+  type filter hook input priority filter; policy accept;
+  tcp dport 25575 ip daddr != 127.0.0.1 drop
+  tcp dport 25575 ip6 daddr != ::1 drop
+ }
+}
+EOF
+    ;;
+  *) exit 2;;
+esac"""
     if nft_available:
-        _write_command(stubs, "nft", _nft_body())
-    _write_command(
-        stubs,
+        _command(commands, "nft", nft_body)
+    _command(
+        commands,
         "dnf",
-        'printf "%s\\n" "$*" >> "$DNF_LOG"\n'
-        f'[[ "{dnf_exit}" == 0 ]] || exit {dnf_exit}\n'
-        "cat > \"$STUB_DIRECTORY/nft\" <<'NFT'\n"
-        "#!/usr/bin/env bash\n"
-        "set -eu\n" + _nft_body() + '\nNFT\n/bin/chmod 0755 "$STUB_DIRECTORY/nft"',
+        'printf "%s\\n" "$*" >> "$DNF_LOG"; '
+        '[[ ${DNF_EXIT:-0} == 0 ]] || exit "$DNF_EXIT"; '
+        'cp "$NFT_TEMPLATE" "$COMMANDS/nft"; chmod 0755 "$COMMANDS/nft"',
     )
-    _write_command(stubs, "chown", ":")
-    _write_command(stubs, "chmod", ":")
-    _write_command(stubs, "stat", "printf 'root:root:600'")
-    _write_command(
-        stubs,
-        "install",
-        'for argument in "$@"; do\n  [[ "$argument" == /* ]] && mkdir -p "$argument"\ndone',
-    )
-    rules_path = tmp_path / "nftables" / "wishicraft-rcon.nft"
-    environment = {
+    template = tmp_path / "nft-template"
+    template.write_text(f"#!/usr/bin/env bash\nset -eu\n{nft_body}\n", encoding="utf-8")
+    template.chmod(0o755)
+    env = {
         **os.environ,
-        "PATH": str(stubs),
-        "STUB_DIRECTORY": str(stubs),
-        "HOST_NFT_LOG": str(tmp_path / "host-nft-log"),
+        "PATH": str(commands),
+        "COMMANDS": str(commands),
+        "NFT_TEMPLATE": str(template),
+        "NFT_STATE": str(state),
+        "NFT_LOG": str(log),
+        "NFT_LIST_COUNT": str(tmp_path / "nft-list-count"),
         "DNF_LOG": str(tmp_path / "dnf-log"),
-        "NFT_LOG": str(tmp_path / "nft-log"),
-        "NFT_RULES": str(tmp_path / "nft-rules"),
         "RCON_PORT": "25575",
-        "WISHICRAFT_RCON_NFT_RULES_PATH": str(rules_path),
+        "WISHICRAFT_RCON_NFT_RULES_PATH": str(rules),
     }
-    return environment, rules_path, host_tools
+    return env, rules
 
 
-def test_rcon_firewall_script_has_valid_shell_syntax() -> None:
+def _run(env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["bash", str(SCRIPT)], text=True, capture_output=True, env=env, check=False
+    )
+
+
+def test_shell_syntax_and_nftables_104_contract() -> None:
     subprocess.run(["bash", "-n", str(SCRIPT)], check=True)
+    source = SCRIPT.read_text(encoding="utf-8")
+    assert "create table inet wishicraft_rcon" in source
+    assert "destroy table" not in source
+    assert not any(line.lstrip().startswith("flush ruleset") for line in source.splitlines())
+    assert "delete table" not in source
 
 
-def test_rcon_firewall_installs_nftables_when_missing_and_applies_loopback_only_rules(
-    tmp_path: Path,
-) -> None:
-    environment, rules_path, host_tools = _firewall_environment(tmp_path, nft_available=False)
+def test_absent_state_applies_once_then_is_noop(tmp_path: Path) -> None:
+    env, rules = _environment(tmp_path)
+    first = _run(env)
+    before = rules.stat().st_mtime_ns
+    second = _run(env)
+    assert first.returncode == second.returncode == 0, (first.stderr, second.stderr)
+    assert "WCRF:COMPLETE" in first.stderr
+    assert rules.stat().st_mtime_ns == before
+    assert rules.read_text().startswith("create table inet wishicraft_rcon")
+    log = Path(env["NFT_LOG"]).read_text()
+    assert log.count("--file") == 2  # one check and one apply; second run applies neither
 
-    first = subprocess.run(
-        ["bash", str(SCRIPT)], text=True, capture_output=True, env=environment, check=False
-    )
-    second = subprocess.run(
-        ["bash", str(SCRIPT)], text=True, capture_output=True, env=environment, check=False
-    )
 
-    assert first.returncode == 0, first.stderr
-    assert second.returncode == 0, second.stderr
-    assert (tmp_path / "dnf-log").read_text(encoding="utf-8").splitlines() == [
-        "install -y nftables"
-    ]
-    assert str(host_tools) not in environment["PATH"].split(os.pathsep)
-    assert not (tmp_path / "host-nft-log").exists()
-    rules = rules_path.read_text(encoding="utf-8")
-    assert "destroy table inet wishicraft_rcon" in rules
-    assert "table inet wishicraft_rcon" in rules
-    assert "tcp dport 25575 ip daddr != 127.0.0.1 drop" in rules
-    assert "tcp dport 25575 ip6 daddr != ::1 drop" in rules
-    assert "25565" not in rules
-    assert "flush ruleset" not in rules
-    assert (tmp_path / "nft-log").read_text(encoding="utf-8").count("--check --file") == 2
-    assert not list(rules_path.parent.glob("wishicraft-rcon.nft.*"))
+def test_boot_restore_reuses_canonical_rules(tmp_path: Path) -> None:
+    env, rules = _environment(tmp_path)
+    assert _run(env).returncode == 0
+    Path(env["NFT_STATE"]).unlink()
+    before = rules.stat().st_mtime_ns
+    assert _run(env).returncode == 0
+    assert rules.stat().st_mtime_ns == before
+
+
+def test_canonical_table_without_rules_only_finalizes_file(tmp_path: Path) -> None:
+    env, rules = _environment(tmp_path)
+    assert _run(env).returncode == 0
+    rules.unlink()
+    before_state = Path(env["NFT_STATE"]).read_bytes()
+    assert _run(env).returncode == 0
+    assert rules.is_file()
+    assert Path(env["NFT_STATE"]).read_bytes() == before_state
 
 
 @pytest.mark.parametrize(
-    ("nft_available", "dnf_exit", "check_exit", "apply_exit"),
+    ("setting", "value", "marker"),
     (
-        (False, 1, 0, 0),
-        (True, 0, 1, 0),
-        (True, 0, 0, 1),
+        ("NFT_CHECK_EXIT", "1", "NFT_CHECK"),
+        ("NFT_APPLY_EXIT", "1", "NFT_APPLY"),
+        ("NFT_RACE", "1", "TABLE_RACE"),
     ),
 )
-def test_rcon_firewall_fails_closed_without_persisting_rules(
-    tmp_path: Path, nft_available: bool, dnf_exit: int, check_exit: int, apply_exit: int
-) -> None:
-    environment, rules_path, _ = _firewall_environment(
-        tmp_path, nft_available=nft_available, dnf_exit=dnf_exit
-    )
-    environment["NFT_CHECK_EXIT"] = str(check_exit)
-    environment["NFT_APPLY_EXIT"] = str(apply_exit)
-
-    result = subprocess.run(
-        ["bash", str(SCRIPT)], text=True, capture_output=True, env=environment, check=False
-    )
-
+def test_nft_failure_is_fail_closed(tmp_path: Path, setting: str, value: str, marker: str) -> None:
+    env, rules = _environment(tmp_path)
+    env[setting] = value
+    result = _run(env)
     assert result.returncode != 0
-    assert not rules_path.exists()
-    assert not list(rules_path.parent.glob("wishicraft-rcon.nft.*"))
+    assert f"WCRF:FAIL:{marker}" in result.stderr
+    assert not rules.exists()
+
+
+def test_stale_temporary_file_stops_before_apply(tmp_path: Path) -> None:
+    env, rules = _environment(tmp_path)
+    stale = rules.with_name(rules.name + ".stale")
+    stale.write_text("unknown provenance", encoding="utf-8")
+    result = _run(env)
+    assert result.returncode != 0
+    assert "WCRF:FAIL:TEMP_CONFLICT" in result.stderr
+    assert not Path(env["NFT_STATE"]).exists()
+    assert stale.read_text() == "unknown provenance"
+
+
+def test_package_is_installed_only_when_nft_is_missing(tmp_path: Path) -> None:
+    env, _ = _environment(tmp_path, nft_available=False)
+    assert _run(env).returncode == 0
+    assert Path(env["DNF_LOG"]).read_text().splitlines() == ["install -y nftables"]
+
+
+def test_conflicting_live_table_is_not_changed(tmp_path: Path) -> None:
+    env, rules = _environment(tmp_path)
+    state = Path(env["NFT_STATE"])
+    state.write_text("table inet wishicraft_rcon { chain other {} }\n", encoding="utf-8")
+    before = state.read_bytes()
+    result = _run(env)
+    assert result.returncode != 0
+    assert "WCRF:FAIL:TABLE_CONFLICT" in result.stderr
+    assert state.read_bytes() == before
+    assert not rules.exists()
+
+
+def test_rules_conflict_is_not_replaced(tmp_path: Path) -> None:
+    env, rules = _environment(tmp_path)
+    rules.write_text("conflict\n", encoding="utf-8")
+    before = rules.read_bytes()
+    result = _run(env)
+    assert result.returncode != 0
+    assert "WCRF:FAIL:RULES_CONFLICT" in result.stderr
+    assert rules.read_bytes() == before

@@ -359,7 +359,7 @@
 
 - **状態:** Accepted
 - firewall migrationは、既存script、unit、drop-in、rules file、enable symlinkを個別に不在・正本一致・衝突へ分類する。正本一致物は書き換えず再利用し、不一致物は削除・修復・上書きせず、永続変更前に停止する。
-- target nft tableが既存の場合は、全persistent artifactとtable ruleが正本一致する完成状態だけを受容する。tableだけ、またはrules fileだけが残る部分適用状態は安全停止する。
+- target nft tableまたはrules fileだけが残る状態は、D-056で定める正本検証と状態遷移を満たす場合に限り安全に再開する。正本性を証明できないpartial stateは従来どおり変更せず停止する。
 - 初期bootstrapは新規instanceの作成経路であり、既存hostの再開は一回限りのmigrationを正本とする。bootstrap再実行を衝突解消手段にしない。
 
 ### D-054 RCON firewall dependency verificationとbootstrap既設物
@@ -376,6 +376,16 @@
 - systemdはunit fileへのlinkを絶対pathまたは相対pathで作成し得るため、`readlink`のraw文字列を固定値と比較しない。symlinkが非danglingであり、解決後targetが正確なcanonical unit fileと完全一致する場合だけ正本として受容する。
 - wrong target、類似unit名、dangling link、regular file、directoryは衝突として変更前に停止する。link query失敗、`systemctl enable`失敗、enable成功後のpredicate不一致は別checkpointで記録する。
 - 正本linkはraw target形式やmtimeを含め書き換えない。preflightからenable直前までの状態・形式変化はraceとして停止する。
+
+### D-056 nftables 1.0.4互換とfirewall scriptの制御upgrade
+
+- **状態:** Accepted
+- **日付:** 2026-08-15
+- Amazon Linux 2023のnftables 1.0.4をproduction下限とし、1.0.7で追加された`destroy` commandをrulesへ含めない。
+- target tableの新規適用は`create table`を先頭にした単一batchとし、`nft --check --file`、table不存在race check、transactionalな`nft --file`、live table検証、persistent fileのatomic確定の順で行う。raceでtableが出現した場合はbatch全体を失敗させ、既存tableへruleを追加しない。
+- target tableとpersistent rulesは、双方不存在、rulesのみ正本、tableのみ正本、双方正本を安全な再開状態として扱う。正本でないfile/table、由来を証明できないtemporary fileは削除・flush・上書きせず停止する。
+- firewall scriptの更新は、現行正本または明示した直前正本だけを許可する。v14 predecessorはpath、regular/non-symlink、bytes、SHA-256、root:root、0755、構文、およびrace時の再検査が全一致し、unit processが非稼働の場合だけ同一directory内の検証済みtemporary fileからatomic replaceする。任意の旧内容は受容しない。
+- scriptはsecret-freeな安定step/failure markerと固有exit statusをjournalへ残す。password、Environment全体、credentialは出力しない。
 
 
 ## 3. 却下した案

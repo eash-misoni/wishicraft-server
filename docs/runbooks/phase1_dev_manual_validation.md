@@ -121,3 +121,10 @@ policy適用前に、組織SCP、permission boundary、AWS IAM action/resource/c
 3. `whitelist.json`に`NEWISHIN_`とUUID `e912ab95758e4b7fb32e292eda293104`だけが初期登録されていることを確認する。
 4. `journalctl -u minecraft.service`、`ps`、listening portを確認する。Management Protocolがlistenしていないこと、RCON portへの非loopback IPv4/IPv6到達がnftablesで拒否され、Security GroupにRCON ingressがないことを確認する。
 5. `systemctl stop minecraft.service`で正常停止とワールド保存を実EC2で確認し、再起動後にワールドがdata EBS上で保持されることを確認する。これらはdeploy後の手動確認であり、CIでは検証しない。
+
+### Firewall migrationの再開条件
+
+- AL2023のnftables 1.0.4互換rulesは`create table inet wishicraft_rcon`を使用し、`destroy`、`flush ruleset`、推測的なtarget table削除を含めない。
+- script、unit、drop-in、enable link、rules、live tableを個別分類し、正本だけを無変更で再利用する。tableのみ正本の場合はrulesだけを確定し、rulesのみ正本の場合は同じbytesを検証してlive tableを復元する。
+- v14 scriptからの更新は記録済みv14 hash・1529 bytes・root:root・0755・regular/non-symlink・構文正常がすべて一致する場合だけ許可する。不一致物や残存temporary fileは変更せず停止する。
+- `WCRF:STEP:*`、`WCRF:FAIL:*`とexit statusで失敗段階を確認する。RCON passwordやEnvironment全体はjournalへ出力しない。

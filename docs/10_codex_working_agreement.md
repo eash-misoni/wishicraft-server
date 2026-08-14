@@ -303,3 +303,5 @@ bug修正時は、可能な限り再現testを先に追加する。
 - 部分適用を再開するhost migrationでは、script、unit、drop-in、rules file、enable symlinkを個別に`absent`、`canonical`、`conflict`へ分類する。`canonical`はmtimeを含め書き換えず、`absent`だけをno-clobberで配置し、`conflict`または整合しない既存nft tableは永続変更前に停止する。
 - systemd enable symlinkの`canonical`判定はraw link文字列やbasenameではなく、正確なlink path、symlink type、非dangling、および解決後targetのcanonical unit file完全一致を使用する。絶対linkと相対linkを受容し、query failureとpredicate mismatchを別checkpointにする。
 - test-only comparatorはwrapper内部で実際に比較した完全表現を同時に保存し、外側のstate comparatorだけで成功を主張しない。
+- nftables migrationは対象production versionで利用可能なsyntaxを固定し、`--check`とrace checkを先行させる。既存target tableへ推測的なdelete/flush/repairを行わず、正本table/rulesの安全な部分適用だけを明示的に再開する。
+- production artifactの制御upgradeは、明示したpredecessorのpath、type、bytes、hash、owner/group、mode、syntaxを完全一致で検証し、race再検査後にatomic replaceする。任意のcontent mismatchを旧versionとして受容しない。

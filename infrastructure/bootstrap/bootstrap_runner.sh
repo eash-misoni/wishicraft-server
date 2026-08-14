@@ -35,7 +35,6 @@ if destination.is_symlink() or not destination.is_dir():
 
 
 def canonical_member(target: Path, expected: bytes) -> bool:
-    """Return true only for an untouched, regular canonical member."""
     try:
         fd = os.open(target, os.O_RDONLY | os.O_NOFOLLOW)
     except FileNotFoundError:
@@ -57,7 +56,6 @@ def canonical_member(target: Path, expected: bytes) -> bool:
 
 
 def place_absent_member(source: Path, target: Path) -> None:
-    """Create one absent member without replacing a concurrent or conflicting file."""
     expected = source.read_bytes()
     try:
         fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o755)
