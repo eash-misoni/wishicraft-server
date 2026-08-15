@@ -27,7 +27,7 @@ def build(source: Path, output_root: Path) -> None:
     payload_path.write_bytes(payload_bytes)
     payload_path.chmod(0o644)
     manifest = {
-        "version": "minecraft-whitelist-repair-v1",
+        "version": "minecraft-whitelist-repair-v2",
         "wrapper": {"bytes": len(wrapper), "sha256": hashlib.sha256(wrapper).hexdigest()},
         "payload": {
             "bytes": len(payload_bytes),

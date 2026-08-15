@@ -64,6 +64,12 @@ hash_state() {
   local path="$1" meta="$2" bytes="$3" sha="$4"
   regular_meta "$path" "$meta" && [[ "$(stat -c %s "$path")" == "$bytes" ]] && [[ "$(sha256sum "$path"|awk '{print $1}')" == "$sha" ]]
 }
+upgrade_state() {
+  local path="$1" meta="$2" predecessor_bytes="$3" predecessor_sha="$4" canonical_bytes="$5" canonical_sha="$6"
+  hash_state "$path" "$meta" "$canonical_bytes" "$canonical_sha" && { printf canonical; return; }
+  hash_state "$path" "$meta" "$predecessor_bytes" "$predecessor_sha" && { printf approved_predecessor; return; }
+  printf conflict
+}
 atomic_content() {
   local path="$1" owner="$2" group="$3" mode="$4" content="$5" bytes="$6" sha="$7" tmp
   tmp="$(mktemp "${path}.XXXXXX")" || fail TEMP_CREATE 50
@@ -91,7 +97,7 @@ path.write_bytes(data.replace(old,new,1))
 PY
   chown root:root "$tmp" && chmod 0755 "$tmp" || fail TEMP_META 52
   hash_state "$tmp" root:root:755 "$GAME_SETUP_BYTES" "$GAME_SETUP_SHA" || fail TEMP_VERIFY 53
-  hash_state "$GAME_SETUP" root:root:755 "$GAME_SETUP_PREDECESSOR_BYTES" "$GAME_SETUP_PREDECESSOR_SHA" || fail GAME_SETUP_RACE 55
+  [[ "$(upgrade_state "$GAME_SETUP" root:root:755 "$GAME_SETUP_PREDECESSOR_BYTES" "$GAME_SETUP_PREDECESSOR_SHA" "$GAME_SETUP_BYTES" "$GAME_SETUP_SHA")" == approved_predecessor ]] || fail GAME_SETUP_RACE 55
   mv "$tmp" "$GAME_SETUP" || fail ATOMIC_PLACE 54
   tmp=; trap - RETURN
 }
@@ -127,6 +133,11 @@ verify_runtime() {
   [[ "$(ss -H -ltn|awk '$4~/:25575$/{n++} END{print n+0}')" == 1 ]] || return 1
   [[ "$(ss -H -ltn|awk '$4~/:25585$/{n++} END{print n+0}')" == 0 ]] || return 1
 }
+verify_stopped() {
+  [[ "$(systemctl show minecraft.service -p ActiveState --value)" == inactive ]] || return 1
+  [[ "$(pgrep -u minecraft -f 'java.*server\.jar' 2>/dev/null | wc -l | tr -d ' ')" == 0 ]] || return 1
+  [[ "$(ss -H -ltn|awk '$4~/(25565|25575|25585)$/ {n++} END{print n+0}')" == 0 ]] || return 1
+}
 verify_static() {
   findmnt -rn --target /srv/minecraft >/dev/null && [[ "$(findmnt -rn -o FSTYPE --target /srv/minecraft)" == xfs ]] || return 1
   hash_state "$JAR" root:root:644 "$JAR_BYTES" "$JAR_SHA" || return 1
@@ -141,25 +152,38 @@ verify_static() {
 
 checkpoint P00_START
 [[ "$(id -u)" == 0 ]] || fail NOT_ROOT 10
-verify_runtime || fail RUNTIME 11
 verify_static || fail STATIC 12
-hash_state "$WHITELIST" minecraft:minecraft:640 "$WHITELIST_PREDECESSOR_BYTES" "$WHITELIST_PREDECESSOR_SHA" || fail WHITELIST_PREDECESSOR 13
-hash_state "$ENV_FILE" root:root:644 "$ENV_PREDECESSOR_BYTES" "$ENV_PREDECESSOR_SHA" || fail ENV_PREDECESSOR 14
-hash_state "$GAME_SETUP" root:root:755 "$GAME_SETUP_PREDECESSOR_BYTES" "$GAME_SETUP_PREDECESSOR_SHA" || fail GAME_SETUP_PREDECESSOR 15
+WHITELIST_STATE="$(upgrade_state "$WHITELIST" minecraft:minecraft:640 "$WHITELIST_PREDECESSOR_BYTES" "$WHITELIST_PREDECESSOR_SHA" "$WHITELIST_BYTES" "$WHITELIST_SHA")"
+ENV_STATE="$(upgrade_state "$ENV_FILE" root:root:644 "$ENV_PREDECESSOR_BYTES" "$ENV_PREDECESSOR_SHA" "$ENV_BYTES" "$ENV_SHA")"
+GAME_SETUP_STATE="$(upgrade_state "$GAME_SETUP" root:root:755 "$GAME_SETUP_PREDECESSOR_BYTES" "$GAME_SETUP_PREDECESSOR_SHA" "$GAME_SETUP_BYTES" "$GAME_SETUP_SHA")"
+[[ "$WHITELIST_STATE" != conflict ]] || fail WHITELIST_PREDECESSOR 13
+[[ "$ENV_STATE" != conflict ]] || fail ENV_PREDECESSOR 14
+[[ "$GAME_SETUP_STATE" != conflict ]] || fail GAME_SETUP_PREDECESSOR 15
+checkpoint "STATE:whitelist=$WHITELIST_STATE"
+checkpoint "STATE:env=$ENV_STATE"
+checkpoint "STATE:game_setup=$GAME_SETUP_STATE"
+if verify_runtime; then
+  RUNTIME_STATE=active
+elif verify_stopped && [[ "$WHITELIST_STATE" == canonical || "$ENV_STATE" == canonical || "$GAME_SETUP_STATE" == canonical ]]; then
+  RUNTIME_STATE=stopped_partial
+else
+  fail RUNTIME 11
+fi
+checkpoint "STATE:runtime=$RUNTIME_STATE"
 NON_TARGET_BEFORE="$(non_target_fingerprint)" || fail NON_TARGET_QUERY 16
 pass P01_PREFLIGHT
-verify_runtime && verify_static || fail RACE 17
-hash_state "$WHITELIST" minecraft:minecraft:640 "$WHITELIST_PREDECESSOR_BYTES" "$WHITELIST_PREDECESSOR_SHA" || fail WHITELIST_RACE 18
-hash_state "$ENV_FILE" root:root:644 "$ENV_PREDECESSOR_BYTES" "$ENV_PREDECESSOR_SHA" || fail ENV_RACE 19
+verify_static || fail RACE 17
+if [[ "$RUNTIME_STATE" == active ]]; then verify_runtime || fail RACE 17; else verify_stopped || fail RACE 17; fi
+[[ "$(upgrade_state "$WHITELIST" minecraft:minecraft:640 "$WHITELIST_PREDECESSOR_BYTES" "$WHITELIST_PREDECESSOR_SHA" "$WHITELIST_BYTES" "$WHITELIST_SHA")" == "$WHITELIST_STATE" ]] || fail WHITELIST_RACE 18
+[[ "$(upgrade_state "$ENV_FILE" root:root:644 "$ENV_PREDECESSOR_BYTES" "$ENV_PREDECESSOR_SHA" "$ENV_BYTES" "$ENV_SHA")" == "$ENV_STATE" ]] || fail ENV_RACE 19
+[[ "$(upgrade_state "$GAME_SETUP" root:root:755 "$GAME_SETUP_PREDECESSOR_BYTES" "$GAME_SETUP_PREDECESSOR_SHA" "$GAME_SETUP_BYTES" "$GAME_SETUP_SHA")" == "$GAME_SETUP_STATE" ]] || fail GAME_SETUP_RACE 55
 checkpoint C00_CHANGE_BEGIN
-systemctl stop minecraft.service || fail STOP 20
-[[ "$(systemctl show minecraft.service -p ActiveState --value)" == inactive ]] || fail STOP_STATE 21
-[[ "$(pgrep -u minecraft -f 'java.*server\.jar' 2>/dev/null | wc -l | tr -d ' ')" == 0 ]] || fail PROCESS_STOP 22
-[[ "$(ss -H -ltn|awk '$4~/(25565|25575)$/ {n++} END{print n+0}')" == 0 ]] || fail LISTENER_STOP 23
+if [[ "$RUNTIME_STATE" == active ]]; then systemctl stop minecraft.service || fail STOP 20; fi
+verify_stopped || fail STOP_STATE 21
 pass C01_STOPPED
-atomic_game_setup
-atomic_content "$ENV_FILE" root root 0644 "$ENV_CONTENT" "$ENV_BYTES" "$ENV_SHA"
-atomic_content "$WHITELIST" minecraft minecraft 0640 "$WHITELIST_CONTENT" "$WHITELIST_BYTES" "$WHITELIST_SHA"
+[[ "$GAME_SETUP_STATE" == canonical ]] || atomic_game_setup
+[[ "$ENV_STATE" == canonical ]] || atomic_content "$ENV_FILE" root root 0644 "$ENV_CONTENT" "$ENV_BYTES" "$ENV_SHA"
+[[ "$WHITELIST_STATE" == canonical ]] || atomic_content "$WHITELIST" minecraft minecraft 0640 "$WHITELIST_CONTENT" "$WHITELIST_BYTES" "$WHITELIST_SHA"
 pass C02_ATOMIC_UPDATE
 hash_state "$GAME_SETUP" root:root:755 "$GAME_SETUP_BYTES" "$GAME_SETUP_SHA" || fail GAME_SETUP_POST 24
 hash_state "$ENV_FILE" root:root:644 "$ENV_BYTES" "$ENV_SHA" || fail ENV_POST 25

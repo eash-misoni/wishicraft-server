@@ -22,7 +22,7 @@ def test_repair_is_fail_closed_and_uses_known_predecessors() -> None:
         "e912ab95-758e-4b7f-b32e-292eda293104",
     ):
         assert value in source
-    assert source.index("verify_runtime || fail RUNTIME") < source.index(
+    assert source.index('checkpoint "STATE:runtime=$RUNTIME_STATE"') < source.index(
         "checkpoint C00_CHANGE_BEGIN"
     )
     assert source.index("systemctl stop minecraft.service") < source.index(
@@ -35,6 +35,12 @@ def test_repair_is_fail_closed_and_uses_known_predecessors() -> None:
     assert "rm -rf" not in source
     assert "rcon-cli" not in source
     assert "aws ssm get-parameter" not in source
+    assert "upgrade_state" in source
+    assert '[[ "$GAME_SETUP_STATE" == canonical ]] || atomic_game_setup' in source
+    assert '[[ "$ENV_STATE" == canonical ]] || atomic_content' in source
+    assert '[[ "$WHITELIST_STATE" == canonical ]] || atomic_content' in source
+    assert "RUNTIME_STATE=stopped_partial" in source
+    assert "verify_stopped" in source
 
 
 def test_repair_generator_is_deterministic_and_roundtrips(tmp_path: Path) -> None:
