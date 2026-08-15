@@ -498,6 +498,7 @@
 - Run14 read-only診断で、data EBS、Corretto 25、固定26.2 server.jar、minecraft account、Game directory、EULA、properties、whitelistが存在し、Minecraft unit、world、logs、process、listenerは不存在と確認した。
 - 初回起動は、artifactごとの不在・正本・承認済みpredecessor・衝突を変更前に分類する専用migrationで行う。未知world、symlink、metadata/hash drift、mount/firewall driftでは変更せず停止する。
 - 固定jarはsize/SHA-1/SHA-256検証後だけatomic配置し、secret値を出力せずpropertiesを確定する。Minecraftは全起動前predicate合格後にsystemd経由でのみ起動する。
+- 第15回Run Commandは変更開始前のfirewall classifier呼出しで停止した。原因はreadonly `RCON_PORT`へのtemporary assignmentであり、実機firewall driftではない。後継candidateは`env`経由で子processへ値を渡し、この誤配線を再現testで固定する。
 
 ## 5. Current blockers
 

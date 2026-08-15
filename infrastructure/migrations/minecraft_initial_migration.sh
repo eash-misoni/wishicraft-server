@@ -139,7 +139,7 @@ verify_firewall() {
   regular_meta "$FIREWALL_RULES" root:root:600 || fail FIREWALL_RULES_META 34
   [[ "$(sha256sum "$FIREWALL_RULES" | awk '{print $1}')" == "$FIREWALL_RULES_SHA" ]] || fail FIREWALL_RULES_HASH 35
   [[ "$(systemctl show wishicraft-rcon-firewall.service -p ActiveState --value)" == active ]] || fail FIREWALL_UNIT 36
-  [[ "$(RCON_PORT=$RCON_PORT "$FIREWALL_SCRIPT" --classify-table)" == canonical ]] || fail FIREWALL_TABLE 37
+  [[ "$(env RCON_PORT="$RCON_PORT" "$FIREWALL_SCRIPT" --classify-table)" == canonical ]] || fail FIREWALL_TABLE 37
 }
 verify_bootstrap_dependencies() {
   regular_meta "$MOUNT_GUARD" root:root:755 || fail MOUNT_GUARD_META 13

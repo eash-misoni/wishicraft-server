@@ -43,6 +43,34 @@ def test_fail_closed_order_and_no_forbidden_firewall_or_rcon_operation() -> None
     assert "mcrcon" not in source
 
 
+def test_readonly_rcon_port_is_passed_to_firewall_classifier_without_reassignment() -> None:
+    source = SCRIPT.read_text(encoding="utf-8")
+    assert 'env RCON_PORT="$RCON_PORT" "$FIREWALL_SCRIPT" --classify-table' in source
+    assert '$(RCON_PORT=$RCON_PORT "$FIREWALL_SCRIPT" --classify-table)' not in source
+    rejected = subprocess.run(
+        ["bash", "-c", "readonly RCON_PORT=25575; RCON_PORT=$RCON_PORT env"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    accepted = subprocess.run(
+        [
+            "bash",
+            "-c",
+            (
+                "readonly RCON_PORT=25575; "
+                "env RCON_PORT=$RCON_PORT bash -c '[[ $RCON_PORT == 25575 ]]'"
+            ),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert "readonly variable" in rejected.stderr
+    assert "RCON_PORT=25575" not in rejected.stdout
+    assert accepted.returncode == 0
+
+
 @pytest.mark.parametrize(
     "fixture",
     (

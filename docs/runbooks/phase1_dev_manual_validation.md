@@ -123,6 +123,7 @@ policy適用前に、組織SCP、permission boundary、AWS IAM action/resource/c
 - 初回起動candidateは、mount、Java、firewall、process/listenerを最初に検証し、既設artifactを個別分類する。未知world、temporary file、metadata/hash不一致、symlink、raceを検出したらdaemon-reload、enable、start前に停止する。
 - server.jarは設定の固定URL・size・SHA-1・SHA-256をすべて確認してからatomic配置する。RCON SecureString値、properties本文、environment本文をstdout/stderrへ出さない。
 - start後はREADY marker、service/process、25565/25575 listener、management listener不存在、data EBS上のworld、firewall JSON semantics、non-target nft fingerprintを確認し、completion markerは最終行に1件だけ出す。
+- 第15回は`P03_JAVA`後、readonly変数へのenvironment prefix代入により`FAIL:FIREWALL_TABLE`で変更前停止した。後継版では`env RCON_PORT="$RCON_PORT"`でclassifierへ渡す。`C00_CHANGE_BEGIN`が存在しない結果ではMinecraft artifactやserviceを変更済みと扱わない。
 
 1. `findmnt /srv/minecraft`と`systemctl status wishicraft-data-volume.service`を確認してから、`systemctl status minecraft.service`を確認する。
 2. `server.properties`で`server-port=25565`、`online-mode=true`、`white-list=true`、`enforce-whitelist=true`、`enable-rcon=true`、`rcon.port=25575`、`broadcast-rcon-to-ops=false`、`management-server-enabled=false`を確認する。RCON passwordの実値は表示・記録しない。
