@@ -147,7 +147,10 @@ verify_static() {
   [[ "$(env RCON_PORT=25575 "$FIREWALL_SCRIPT" --classify-table)" == canonical ]] || return 1
   verify_properties || return 1
   [[ -d "$SERVER/world" && -d "$SERVER/logs" && ! -L "$SERVER/world" && ! -L "$SERVER/logs" ]] || return 1
-  compgen -G "$SERVER/*.tmp.*" >/dev/null && return 1
+  if compgen -G "$SERVER/*.tmp.*" >/dev/null; then
+    return 1
+  fi
+  return 0
 }
 
 checkpoint P00_START

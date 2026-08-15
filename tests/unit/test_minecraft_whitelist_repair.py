@@ -41,6 +41,15 @@ def test_repair_is_fail_closed_and_uses_known_predecessors() -> None:
     assert '[[ "$WHITELIST_STATE" == canonical ]] || atomic_content' in source
     assert "RUNTIME_STATE=stopped_partial" in source
     assert "verify_stopped" in source
+    assert (
+        """if compgen -G "$SERVER/*.tmp.*" >/dev/null; then
+    return 1
+  fi
+  return 0
+}"""
+        in source
+    )
+    assert 'compgen -G "$SERVER/*.tmp.*" >/dev/null && return 1' not in source
 
 
 def test_repair_generator_is_deterministic_and_roundtrips(tmp_path: Path) -> None:
