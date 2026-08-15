@@ -298,7 +298,16 @@ def test_artifact_bootstrap_rejects_each_checksum_or_size_mismatch(
     assert not Path(environment["ARTIFACT_PATH"]).exists()
 
 
-def test_game_setup_writes_only_the_initial_game_configuration(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "profile_uuid",
+    (
+        "e912ab95758e4b7fb32e292eda293104",
+        "e912ab95-758e-4b7f-b32e-292eda293104",
+    ),
+)
+def test_game_setup_writes_only_the_initial_game_configuration(
+    tmp_path: Path, profile_uuid: str
+) -> None:
     stubs = tmp_path / "stubs"
     stubs.mkdir()
     for name, body in {
@@ -333,7 +342,7 @@ def test_game_setup_writes_only_the_initial_game_configuration(tmp_path: Path) -
         "ARTIFACT_PATH": str(artifact),
         "MINECRAFT_PORT": "25565",
         "PROFILE_NAME": "NEWISHIN_",
-        "PROFILE_UUID": "e912ab95758e4b7fb32e292eda293104",
+        "PROFILE_UUID": profile_uuid,
     }
 
     result = subprocess.run(
@@ -350,7 +359,7 @@ def test_game_setup_writes_only_the_initial_game_configuration(tmp_path: Path) -
     assert "enable-rcon" not in properties
     assert "management-server-enabled=false" in properties
     assert (server / "whitelist.json").read_text(encoding="utf-8") == (
-        '[{"uuid":"e912ab95758e4b7fb32e292eda293104","name":"NEWISHIN_"}]\n'
+        '[{"uuid":"e912ab95-758e-4b7f-b32e-292eda293104","name":"NEWISHIN_"}]\n'
     )
 
     with (server / "server.properties").open("a", encoding="utf-8") as properties_file:

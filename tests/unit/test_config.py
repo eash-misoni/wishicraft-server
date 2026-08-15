@@ -69,6 +69,10 @@ def test_dev_minecraft_artifact_and_initial_profile_are_fully_fixed() -> None:
     )
     assert config.project.initial_minecraft_profile_name == "NEWISHIN_"
     assert config.project.initial_minecraft_profile_uuid == "e912ab95758e4b7fb32e292eda293104"
+    assert (
+        config.project.initial_minecraft_profile_uuid_hyphenated
+        == "e912ab95-758e-4b7f-b32e-292eda293104"
+    )
 
 
 def test_rejects_non_string_data_volume_filesystem_type(tmp_path: Path) -> None:

@@ -116,7 +116,7 @@ class DataVolumeBootstrap(Construct):
                         "\nPROFILE_NAME=",
                         project.initial_minecraft_profile_name,
                         "\nPROFILE_UUID=",
-                        project.initial_minecraft_profile_uuid,
+                        project.initial_minecraft_profile_uuid_hyphenated,
                         "\nRCON_PARAMETER_NAME=",
                         rcon_parameter_name,
                         "\nRCON_PORT=",

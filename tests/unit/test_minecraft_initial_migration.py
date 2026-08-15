@@ -21,7 +21,7 @@ def test_shell_syntax_and_fixed_contract() -> None:
         "25565",
         "25575",
         "NEWISHIN_",
-        "e912ab95758e4b7fb32e292eda293104",
+        "e912ab95-758e-4b7f-b32e-292eda293104",
         "cdacdfb25898de5e4b4b0e5ddcc2722f77067e46605709c2d886c000ebb63ec5",
     ):
         assert fixed in source
@@ -75,7 +75,7 @@ def test_exec_start_pre_runs_privileged_read_only_verifiers() -> None:
     source = SCRIPT.read_text(encoding="utf-8")
     assert "ExecStartPre=+/usr/local/lib/wishicraft/data_volume_mount.sh --verify" in source
     assert "ExecStartPre=+/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify" in source
-    assert "GAME_SETUP_PREDECESSOR_SHA=8836bd8a" in source
+    assert "GAME_SETUP_PREDECESSOR_SHA=6d42df50" in source
     assert "UNIT_PREDECESSOR_SHA=9377a424" in source
     assert "quiesce_known_failed_service" in source
     assert "activating:auto-restart" in source

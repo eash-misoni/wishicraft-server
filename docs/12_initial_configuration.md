@@ -38,6 +38,8 @@ minecraft_server_jar_sha256: cdacdfb25898de5e4b4b0e5ddcc2722f77067e46605709c2d88
 initial_minecraft_profile_uuid: e912ab95758e4b7fb32e292eda293104
 ```
 
+Minecraft profile UUIDの設定正本は、Mojang profile APIと同じhyphenなし32桁lowercase形式とする。`whitelist.json`などMinecraftの永続JSON境界では、`8-4-4-4-12`のhyphen付きlowercase形式へ決定的に変換する。比較時はhyphenを除去した32桁形式へ正規化し、表現差とUUID値の差を区別する。
+
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みとする。Application IDとPublic Keyを含むDiscordの公開IDは秘密情報ではないが、文書へ重複記載せずstage設定を正本とする。
 
 devのAWS Account ID、Availability Zone、Minecraft port/version、Route 53 Hosted Zone IDは`config/stages/dev.yaml`へ反映済みとする。prodを含む未確定値は該当stage設定で`null`を維持する。prod用Discord Guild/channel/role/Application ID/Public Keyも、prod環境を準備するまで`config/stages/prod.yaml`で`null`を維持する。

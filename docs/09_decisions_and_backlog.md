@@ -10,6 +10,15 @@
 
 ## 2. 採用済み決定
 
+### D-058 Minecraft profile UUIDの正本形式とwhitelist永続形式
+
+- **状態:** Accepted
+- **日付:** 2026-08-15
+- Mojang公式profile APIで`NEWISHIN_`はUUID `e912ab95758e4b7fb32e292eda293104`と確認した。project設定はAPIと同じhyphenなし32桁lowercaseを正本とする。
+- 第20回read-only診断（Command ID `d4143514-0ebf-4565-94b6-9045e84bdf33`）で、接続時profile UUIDは同じ値のhyphen付き表現だった一方、既設`whitelist.json`はhyphenなし表現であり、6回のwhitelist拒否を確認した。
+- Minecraftの`whitelist.json`境界ではUUIDを`8-4-4-4-12`形式へ決定的に変換する。比較はhyphenを除去した32桁lowercaseで行い、値の不一致とserialization不一致を分ける。
+- 稼働中hostの修復は、whitelist、environment、game setupが承認済みpredecessorのbytes・SHA-256・metadataへ完全一致する場合だけ、通常停止とlistener停止確認後にatomic更新する。world、properties、secret、firewallは変更しない。
+
 ### D-035 Minecraft初回起動のExecStartPreはprivileged read-only verifierに限定する
 
 - 第16回Run Command（Command ID `59a9d587-fde1-4b41-b194-afe64d649ecf`）はartifact配置とenable後の`systemctl start`で停止し、Minecraft Java process、listener、world、logsは生成されなかった。

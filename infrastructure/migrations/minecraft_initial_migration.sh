@@ -23,7 +23,7 @@ readonly MINECRAFT_PORT=25565
 readonly RCON_PORT=25575
 readonly RCON_PARAMETER=/wishicraft/dev/secret/rcon-password
 readonly PLAYER=NEWISHIN_
-readonly PLAYER_UUID=e912ab95758e4b7fb32e292eda293104
+readonly PLAYER_UUID=e912ab95-758e-4b7f-b32e-292eda293104
 readonly UNIT=/etc/systemd/system/minecraft.service
 readonly ENABLE_LINK=/etc/systemd/system/multi-user.target.wants/minecraft.service
 readonly ENV_FILE=/etc/wishicraft/minecraft.env
@@ -35,10 +35,10 @@ readonly RCON_DROPIN=/etc/systemd/system/minecraft.service.d/wishicraft-rcon-fir
 readonly MOUNT_GUARD=/usr/local/lib/wishicraft/data_volume_mount.sh
 readonly MOUNT_GUARD_SHA=31a74e772514846a6646ca7efba632eab283d29de01992cb6d8010a235b90a3f
 readonly GAME_SETUP=/usr/local/lib/wishicraft/minecraft_game_setup.sh
-readonly GAME_SETUP_SHA=6d42df504412818f807046afa0c2caa082d3d636d71f035a53de90d4cdab2e9b
-readonly GAME_SETUP_BYTES=3349
-readonly GAME_SETUP_PREDECESSOR_SHA=8836bd8a6c5fb123de397c5fdab255c80fd5ce92b3f678447c82e368432f78c6
-readonly GAME_SETUP_PREDECESSOR_BYTES=3340
+readonly GAME_SETUP_SHA=e068a6409cee01ab8a84ab9f82cf1dc958a34e8bbbed382fd7e88c771bfc1350
+readonly GAME_SETUP_BYTES=3765
+readonly GAME_SETUP_PREDECESSOR_SHA=6d42df504412818f807046afa0c2caa082d3d636d71f035a53de90d4cdab2e9b
+readonly GAME_SETUP_PREDECESSOR_BYTES=3349
 readonly UNIT_PREDECESSOR_SHA=9377a424367281f4a0ff9311c6b1efcb6be727b95ad0319d7b4daf4a4e91f038
 readonly UNIT_PREDECESSOR_BYTES=889
 
@@ -86,12 +86,12 @@ ARTIFACT_SIZE=60894273
 ARTIFACT_PATH=/srv/minecraft/packages/vanilla/26.2/server.jar
 MINECRAFT_PORT=25565
 PROFILE_NAME=NEWISHIN_
-PROFILE_UUID=e912ab95758e4b7fb32e292eda293104
+PROFILE_UUID=e912ab95-758e-4b7f-b32e-292eda293104
 RCON_PARAMETER_NAME=/wishicraft/dev/secret/rcon-password
 RCON_PORT=25575
 SERVER_PROPERTIES=/srv/minecraft/games/game-vanilla-main/server/server.properties'
 readonly EULA_CONTENT=eula=true
-readonly WHITELIST_CONTENT='[{"uuid":"e912ab95758e4b7fb32e292eda293104","name":"NEWISHIN_"}]'
+readonly WHITELIST_CONTENT='[{"uuid":"e912ab95-758e-4b7f-b32e-292eda293104","name":"NEWISHIN_"}]'
 
 regular_meta() { [[ -f "$1" && ! -L "$1" && "$(stat -c '%U:%G:%a' "$1")" == "$2" ]]; }
 exact_content() { [[ "$(cat "$1")" == "$2" ]]; }
@@ -198,11 +198,31 @@ upgrade_game_setup() {
   python3 - "$GAME_SETUP" "$tmp" <<'PY' || fail GAME_SETUP_BUILD 88
 import pathlib,sys
 source=pathlib.Path(sys.argv[1]).read_bytes()
-old=b'  "$MOUNT_GUARD"\n  [[ -r "$ARTIFACT_PATH" ]]'
-new=b'  "$MOUNT_GUARD" --verify\n  [[ -r "$ARTIFACT_PATH" ]]'
-if source.count(old) != 1:
-    raise SystemExit(1)
-pathlib.Path(sys.argv[2]).write_bytes(source.replace(old,new,1))
+changes=(
+ (b'fail() { printf \'%s\\n\' "wishicraft Minecraft game: $*" >&2; exit 1; }\n', b'''fail() { printf '%s\\n' "wishicraft Minecraft game: $*" >&2; exit 1; }
+
+normalize_uuid() {
+  local value
+  value="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  value="${value//-/}"
+  [[ "$value" =~ ^[0-9a-f]{32}$ ]] || return 1
+  printf '%s' "$value"
+}
+
+hyphenate_uuid() {
+  local value
+  value="$(normalize_uuid "$1")" || return 1
+  printf '%s-%s-%s-%s-%s' "${value:0:8}" "${value:8:4}" "${value:12:4}" "${value:16:4}" "${value:20:12}"
+}
+'''),
+ (b'''  expected_whitelist="$(printf '[{\\"uuid\\":\\"%s\\",\\"name\\":\\"%s\\"}]' "$PROFILE_UUID" "$PROFILE_NAME")"''', b'''  expected_whitelist="$(printf '[{\\"uuid\\":\\"%s\\",\\"name\\":\\"%s\\"}]' "$(hyphenate_uuid "$PROFILE_UUID")" "$PROFILE_NAME")"'''),
+ (b'''  [[ "$PROFILE_UUID" =~ ^[0-9a-f]{32}$ ]] || fail "invalid profile UUID"''', b'''  normalize_uuid "$PROFILE_UUID" >/dev/null || fail "invalid profile UUID"'''),
+ (b'''whitelist_content="$(printf '[{\\"uuid\\":\\"%s\\",\\"name\\":\\"%s\\"}]' "$PROFILE_UUID" "$PROFILE_NAME")"''', b'''whitelist_content="$(printf '[{\\"uuid\\":\\"%s\\",\\"name\\":\\"%s\\"}]' "$(hyphenate_uuid "$PROFILE_UUID")" "$PROFILE_NAME")"'''),
+)
+for old,new in changes:
+ if source.count(old)!=1: raise SystemExit(1)
+ source=source.replace(old,new,1)
+pathlib.Path(sys.argv[2]).write_bytes(source)
 PY
   chown root:root "$tmp" && chmod 0755 "$tmp" || fail GAME_SETUP_META 89
   [[ "$(stat -c %s "$tmp")" == "$GAME_SETUP_BYTES" && "$(sha256sum "$tmp"|awk '{print $1}')" == "$GAME_SETUP_SHA" ]] || fail GAME_SETUP_VERIFY 90

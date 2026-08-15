@@ -130,7 +130,8 @@ policy適用前に、組織SCP、permission boundary、AWS IAM action/resource/c
 
 1. `findmnt /srv/minecraft`と`systemctl status wishicraft-data-volume.service`を確認してから、`systemctl status minecraft.service`を確認する。
 2. `server.properties`で`server-port=25565`、`online-mode=true`、`white-list=true`、`enforce-whitelist=true`、`enable-rcon=true`、`rcon.port=25575`、`broadcast-rcon-to-ops=false`、`management-server-enabled=false`を確認する。RCON passwordの実値は表示・記録しない。
-3. `whitelist.json`に`NEWISHIN_`とUUID `e912ab95758e4b7fb32e292eda293104`だけが初期登録されていることを確認する。
+3. Mojang profile APIの正規化UUID `e912ab95758e4b7fb32e292eda293104`が`NEWISHIN_`に対応することを確認する。`whitelist.json`では同じUUIDが`e912ab95-758e-4b7f-b32e-292eda293104`として永続化され、hyphen除去後の比較が一致することを確認する。
+4. whitelist serialization修復時は、既知predecessorのwhitelist／environment／game setupだけを受容する。Minecraftを通常停止してworld保存とlistener停止を確認し、atomic更新後に再起動する。world、server.properties、RCON secret、firewallを変更しない。
 4. `journalctl -u minecraft.service`、`ps`、listening portを確認する。Management Protocolがlistenしていないこと、RCON portへの非loopback IPv4/IPv6到達がnftablesで拒否され、Security GroupにRCON ingressがないことを確認する。
 5. `systemctl stop minecraft.service`で正常停止とワールド保存を実EC2で確認し、再起動後にワールドがdata EBS上で保持されることを確認する。これらはdeploy後の手動確認であり、CIでは検証しない。
 

@@ -77,6 +77,11 @@ class ProjectConfig:
         return profiles[0]
 
     @property
+    def initial_minecraft_profile_uuid_hyphenated(self) -> str:
+        value = self.initial_minecraft_profile_uuid
+        return f"{value[:8]}-{value[8:12]}-{value[12:16]}-{value[16:20]}-{value[20:]}"
+
+    @property
     def route53_record_type(self) -> str:
         return _require_string(self.values, "domain.record_type")
 

@@ -14,6 +14,20 @@ readonly SERVER_DIRECTORY="$GAME_DIRECTORY/server"
 
 fail() { printf '%s\n' "wishicraft Minecraft game: $*" >&2; exit 1; }
 
+normalize_uuid() {
+  local value
+  value="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  value="${value//-/}"
+  [[ "$value" =~ ^[0-9a-f]{32}$ ]] || return 1
+  printf '%s' "$value"
+}
+
+hyphenate_uuid() {
+  local value
+  value="$(normalize_uuid "$1")" || return 1
+  printf '%s-%s-%s-%s-%s' "${value:0:8}" "${value:8:4}" "${value:12:4}" "${value:16:4}" "${value:20:12}"
+}
+
 ensure_exact_file() {
   local path="$1" content="$2" temporary
   if [[ -e "$path" ]]; then
@@ -40,7 +54,7 @@ verify_property() {
 
 verify() {
   local expected_whitelist
-  expected_whitelist="$(printf '[{\"uuid\":\"%s\",\"name\":\"%s\"}]' "$PROFILE_UUID" "$PROFILE_NAME")"
+  expected_whitelist="$(printf '[{\"uuid\":\"%s\",\"name\":\"%s\"}]' "$(hyphenate_uuid "$PROFILE_UUID")" "$PROFILE_NAME")"
   "$MOUNT_GUARD" --verify
   [[ -r "$ARTIFACT_PATH" ]] || fail "verified server artifact is missing"
   [[ -d "$SERVER_DIRECTORY" ]] || fail "server directory is missing"
@@ -58,7 +72,7 @@ prepare() {
   "$MOUNT_GUARD"
   [[ "$GAME_ID" =~ ^[a-z0-9-]+$ ]] || fail "invalid game ID"
   [[ "$MINECRAFT_PORT" =~ ^[1-9][0-9]{0,4}$ ]] || fail "invalid Minecraft port"
-  [[ "$PROFILE_UUID" =~ ^[0-9a-f]{32}$ ]] || fail "invalid profile UUID"
+  normalize_uuid "$PROFILE_UUID" >/dev/null || fail "invalid profile UUID"
   getent group minecraft >/dev/null || groupadd --system minecraft
   id -u minecraft >/dev/null 2>&1 || useradd --system --gid minecraft --no-create-home --shell /sbin/nologin minecraft
   install -d -o root -g root -m 0755 "$MOUNT_PATH/games" "$GAME_DIRECTORY"
@@ -83,6 +97,6 @@ online-mode=true
 white-list=true
 enforce-whitelist=true
 management-server-enabled=false"
-whitelist_content="$(printf '[{\"uuid\":\"%s\",\"name\":\"%s\"}]' "$PROFILE_UUID" "$PROFILE_NAME")"
+whitelist_content="$(printf '[{\"uuid\":\"%s\",\"name\":\"%s\"}]' "$(hyphenate_uuid "$PROFILE_UUID")" "$PROFILE_NAME")"
 ensure_exact_file "$SERVER_DIRECTORY/whitelist.json" "$whitelist_content"
 verify
