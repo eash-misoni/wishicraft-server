@@ -174,8 +174,8 @@ class DataVolumeBootstrap(Construct):
                         "/games/",
                         project.initial_game_id,
                         "/server\n"
-                        "ExecStartPre=/usr/local/lib/wishicraft/data_volume_mount.sh --verify\n"
-                        "ExecStartPre=/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify\n"
+                        "ExecStartPre=+/usr/local/lib/wishicraft/data_volume_mount.sh --verify\n"
+                        "ExecStartPre=+/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify\n"
                         "ExecStart=/usr/bin/java -Xms",
                         stage.java_xms,
                         " -Xmx",

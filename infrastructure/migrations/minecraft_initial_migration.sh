@@ -35,7 +35,12 @@ readonly RCON_DROPIN=/etc/systemd/system/minecraft.service.d/wishicraft-rcon-fir
 readonly MOUNT_GUARD=/usr/local/lib/wishicraft/data_volume_mount.sh
 readonly MOUNT_GUARD_SHA=31a74e772514846a6646ca7efba632eab283d29de01992cb6d8010a235b90a3f
 readonly GAME_SETUP=/usr/local/lib/wishicraft/minecraft_game_setup.sh
-readonly GAME_SETUP_SHA=8836bd8a6c5fb123de397c5fdab255c80fd5ce92b3f678447c82e368432f78c6
+readonly GAME_SETUP_SHA=6d42df504412818f807046afa0c2caa082d3d636d71f035a53de90d4cdab2e9b
+readonly GAME_SETUP_BYTES=3349
+readonly GAME_SETUP_PREDECESSOR_SHA=8836bd8a6c5fb123de397c5fdab255c80fd5ce92b3f678447c82e368432f78c6
+readonly GAME_SETUP_PREDECESSOR_BYTES=3340
+readonly UNIT_PREDECESSOR_SHA=9377a424367281f4a0ff9311c6b1efcb6be727b95ad0319d7b4daf4a4e91f038
+readonly UNIT_PREDECESSOR_BYTES=889
 
 readonly UNIT_CONTENT='[Unit]
 Description=Wishicraft Minecraft server
@@ -49,8 +54,8 @@ User=minecraft
 Group=minecraft
 EnvironmentFile=/etc/wishicraft/minecraft.env
 WorkingDirectory=/srv/minecraft/games/game-vanilla-main/server
-ExecStartPre=/usr/local/lib/wishicraft/data_volume_mount.sh --verify
-ExecStartPre=/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify
+ExecStartPre=+/usr/local/lib/wishicraft/data_volume_mount.sh --verify
+ExecStartPre=+/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify
 ExecStart=/usr/bin/java -Xms1G -Xmx3G -jar /srv/minecraft/packages/vanilla/26.2/server.jar nogui
 TimeoutStopSec=30
 KillSignal=SIGTERM
@@ -102,6 +107,29 @@ classify_dir() {
   [[ -d "$path" && ! -L "$path" && "$(stat -c '%U:%G:%a' "$path")" == "$meta" ]] && { printf canonical; return; }
   printf conflict
 }
+classify_hash_file() {
+  local path="$1" meta="$2" bytes="$3" sha="$4"
+  [[ -e "$path" || -L "$path" ]] || { printf absent; return; }
+  regular_meta "$path" "$meta" && [[ "$(stat -c %s "$path")" == "$bytes" ]] &&
+    [[ "$(sha256sum "$path"|awk '{print $1}')" == "$sha" ]] && { printf canonical; return; }
+  printf conflict
+}
+unit_state() {
+  local state
+  state="$(classify_exact_file "$UNIT" root:root:644 "$UNIT_CONTENT")"
+  [[ "$state" != conflict ]] && { printf '%s' "$state"; return; }
+  [[ "$(classify_hash_file "$UNIT" root:root:644 "$UNIT_PREDECESSOR_BYTES" "$UNIT_PREDECESSOR_SHA")" == canonical ]] &&
+    { printf approved_predecessor; return; }
+  printf conflict
+}
+game_setup_state() {
+  local state
+  state="$(classify_hash_file "$GAME_SETUP" root:root:755 "$GAME_SETUP_BYTES" "$GAME_SETUP_SHA")"
+  [[ "$state" != conflict ]] && { printf '%s' "$state"; return; }
+  [[ "$(classify_hash_file "$GAME_SETUP" root:root:755 "$GAME_SETUP_PREDECESSOR_BYTES" "$GAME_SETUP_PREDECESSOR_SHA")" == canonical ]] &&
+    { printf approved_predecessor; return; }
+  printf conflict
+}
 atomic_file() {
   local path="$1" owner="$2" group="$3" mode="$4" content="$5" tmp
   tmp="$(mktemp "${path}.XXXXXX")" || fail TEMP_CREATE 61
@@ -144,8 +172,43 @@ verify_firewall() {
 verify_bootstrap_dependencies() {
   regular_meta "$MOUNT_GUARD" root:root:755 || fail MOUNT_GUARD_META 13
   [[ "$(sha256sum "$MOUNT_GUARD"|awk '{print $1}')" == "$MOUNT_GUARD_SHA" ]] || fail MOUNT_GUARD_HASH 14
-  regular_meta "$GAME_SETUP" root:root:755 || fail GAME_SETUP_META 15
-  [[ "$(sha256sum "$GAME_SETUP"|awk '{print $1}')" == "$GAME_SETUP_SHA" ]] || fail GAME_SETUP_HASH 16
+  [[ "$(game_setup_state)" != conflict && "$(game_setup_state)" != absent ]] || fail GAME_SETUP_HASH 16
+}
+quiesce_known_failed_service() {
+  local load active sub
+  load="$(systemctl show minecraft.service -p LoadState --value 2>/dev/null || true)"
+  [[ "$load" == loaded ]] || return 0
+  active="$(systemctl show minecraft.service -p ActiveState --value 2>/dev/null || true)"
+  sub="$(systemctl show minecraft.service -p SubState --value 2>/dev/null || true)"
+  case "$active:$sub" in
+    inactive:dead|failed:failed) return 0 ;;
+    activating:auto-restart)
+      systemctl stop minecraft.service || fail QUIESCE_STOP 84
+      [[ "$(systemctl show minecraft.service -p ActiveState --value)" == inactive ]] || fail QUIESCE_STATE 85
+      assert_no_processes
+      pass C00_QUIESCE
+      ;;
+    *) fail SERVICE_STATE_CONFLICT 86 ;;
+  esac
+}
+upgrade_game_setup() {
+  local tmp
+  tmp="$(mktemp "${GAME_SETUP}.XXXXXX")" || fail GAME_SETUP_TEMP 87
+  trap 'rm -f "${tmp:-}"' RETURN
+  python3 - "$GAME_SETUP" "$tmp" <<'PY' || fail GAME_SETUP_BUILD 88
+import pathlib,sys
+source=pathlib.Path(sys.argv[1]).read_bytes()
+old=b'  "$MOUNT_GUARD"\n  [[ -r "$ARTIFACT_PATH" ]]'
+new=b'  "$MOUNT_GUARD" --verify\n  [[ -r "$ARTIFACT_PATH" ]]'
+if source.count(old) != 1:
+    raise SystemExit(1)
+pathlib.Path(sys.argv[2]).write_bytes(source.replace(old,new,1))
+PY
+  chown root:root "$tmp" && chmod 0755 "$tmp" || fail GAME_SETUP_META 89
+  [[ "$(stat -c %s "$tmp")" == "$GAME_SETUP_BYTES" && "$(sha256sum "$tmp"|awk '{print $1}')" == "$GAME_SETUP_SHA" ]] || fail GAME_SETUP_VERIFY 90
+  [[ "$(game_setup_state)" == approved_predecessor ]] || fail GAME_SETUP_RACE 91
+  mv "$tmp" "$GAME_SETUP" || fail GAME_SETUP_PLACE 92
+  tmp=; trap - RETURN
 }
 non_target_fingerprint() {
   nft -j list ruleset | python3 -c 'import hashlib,json,sys
@@ -210,6 +273,7 @@ env_state() {
 completed_state() {
   [[ "$(systemctl show minecraft.service -p ActiveState --value 2>/dev/null)" == active ]] || return 1
   verify_mount && verify_java && verify_firewall && verify_bootstrap_dependencies && verify_jar || return 1
+  [[ "$(game_setup_state)" == canonical ]] || return 1
   [[ "$(account_state)" == canonical && "$(properties_state)" == canonical ]] || return 1
   [[ "$(classify_exact_file "$ENV_FILE" root:root:644 "$ENV_CONTENT")" == canonical ]] || return 1
   [[ "$(classify_exact_file "$UNIT" root:root:644 "$UNIT_CONTENT")" == canonical ]] || return 1
@@ -255,9 +319,10 @@ states[eula]="$(classify_exact_file "$SERVER_DIR/eula.txt" minecraft:minecraft:6
 states[whitelist]="$(classify_exact_file "$SERVER_DIR/whitelist.json" minecraft:minecraft:640 "$WHITELIST_CONTENT")"
 states[properties]="$(properties_state)"
 states[env]="$(env_state)"
-states[unit]="$(classify_exact_file "$UNIT" root:root:644 "$UNIT_CONTENT")"
+states[unit]="$(unit_state)"
 states[dropin]="$(classify_exact_file "$RCON_DROPIN" root:root:644 "$DROPIN_CONTENT")"
 states[enable]="$(enable_state)"
+states[game_setup]="$(game_setup_state)"
 for key in "${!states[@]}"; do checkpoint "STATE:$key=${states[$key]}"; [[ "${states[$key]}" != conflict ]] || fail "${key^^}_CONFLICT" 40; done
 if [[ -e "$JAR" || -L "$JAR" ]]; then verify_jar || fail JAR_CONFLICT 41; states[jar]=canonical; else states[jar]=absent; fi
 compgen -G "$MOUNT_PATH/packages/vanilla/26.2/.server.jar.*" >/dev/null && fail JAR_TEMP_CONFLICT 42
@@ -269,13 +334,18 @@ pass P05_ARTIFACT_CLASSIFICATION
 assert_no_processes; verify_mount; verify_firewall
 [[ "$(properties_state)" == "${states[properties]}" ]] || fail PROPERTIES_RACE 45
 [[ "$(env_state)" == "${states[env]}" ]] || fail ENV_RACE 46
-[[ "$(classify_exact_file "$UNIT" root:root:644 "$UNIT_CONTENT")" == "${states[unit]}" ]] || fail UNIT_RACE 80
+[[ "$(unit_state)" == "${states[unit]}" ]] || fail UNIT_RACE 80
+[[ "$(game_setup_state)" == "${states[game_setup]}" ]] || fail GAME_SETUP_RACE 91
 [[ "$(classify_exact_file "$RCON_DROPIN" root:root:644 "$DROPIN_CONTENT")" == "${states[dropin]}" ]] || fail DROPIN_RACE 81
 [[ "$(enable_state)" == "${states[enable]}" ]] || fail ENABLE_RACE 82
 if [[ "${states[jar]}" == canonical ]]; then verify_jar || fail JAR_RACE 55; else [[ ! -e "$JAR" && ! -L "$JAR" ]] || fail JAR_RACE 55; fi
 for path in "$SERVER_DIR/world" "$SERVER_DIR/world_nether" "$SERVER_DIR/world_the_end" "$SERVER_DIR/logs"; do [[ ! -e "$path" && ! -L "$path" ]] || fail RUNTIME_RACE 83; done
 pass P06_RACE
 checkpoint C00_CHANGE_BEGIN
+quiesce_known_failed_service
+
+if [[ "${states[game_setup]}" == approved_predecessor ]]; then upgrade_game_setup; fi
+[[ "$(game_setup_state)" == canonical ]] || fail GAME_SETUP_POST 93
 
 if [[ "${states[account]}" == absent ]]; then
   groupadd --system minecraft || fail GROUP_CREATE 47
@@ -321,7 +391,10 @@ management-server-enabled=false"
 fi
 [[ "$(properties_state)" == canonical ]] || fail PROPERTIES_POST 60
 [[ "${states[env]}" == canonical ]] || atomic_file "$ENV_FILE" root root 0644 "$ENV_CONTENT"
-[[ "${states[unit]}" == canonical ]] || atomic_file "$UNIT" root root 0644 "$UNIT_CONTENT"
+if [[ "${states[unit]}" != canonical ]]; then
+  [[ "$(unit_state)" == "${states[unit]}" ]] || fail UNIT_RACE 80
+  atomic_file "$UNIT" root root 0644 "$UNIT_CONTENT"
+fi
 pass C03_CONFIGURATION
 
 assert_no_processes; verify_mount; verify_java; verify_firewall; verify_jar

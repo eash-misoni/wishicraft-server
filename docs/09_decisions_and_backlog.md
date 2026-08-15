@@ -2,12 +2,20 @@
 
 - **文書状態:** Canonical
 - **最終更新:** 2026-08-14
+- **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
 
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-035 Minecraft初回起動のExecStartPreはprivileged read-only verifierに限定する
+
+- 第16回Run Command（Command ID `59a9d587-fde1-4b41-b194-afe64d649ecf`）はartifact配置とenable後の`systemctl start`で停止し、Minecraft Java process、listener、world、logsは生成されなかった。
+- 第17回read-only診断（Command ID `c1876839-66ca-4383-b1db-8a27f9c4c95b`）では、JVM起動前のExecStartPre control process status 1とauto-restart状態を確認した。秘密値の出力は0件だった。
+- mount verifierはblock device metadataを読むため、systemdの`+` prefixでroot権限のread-only ExecStartPreとして実行する。game setupの`--verify`はmount guardを必ず`--verify`で呼び、通常のmount準備経路へ入らない。
+- 既知の第16回部分適用だけは、Java process、listener、world、logsがないことを確認してauto-restartを停止し、正本hash・metadataの旧game setup／unitだけをatomic upgradeする。任意の不一致artifactはconflictとして停止する。
 
 ### D-001 新規実装として開始
 

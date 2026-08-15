@@ -71,6 +71,18 @@ def test_readonly_rcon_port_is_passed_to_firewall_classifier_without_reassignmen
     assert accepted.returncode == 0
 
 
+def test_exec_start_pre_runs_privileged_read_only_verifiers() -> None:
+    source = SCRIPT.read_text(encoding="utf-8")
+    assert "ExecStartPre=+/usr/local/lib/wishicraft/data_volume_mount.sh --verify" in source
+    assert "ExecStartPre=+/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify" in source
+    assert "GAME_SETUP_PREDECESSOR_SHA=8836bd8a" in source
+    assert "UNIT_PREDECESSOR_SHA=9377a424" in source
+    assert "quiesce_known_failed_service" in source
+    assert "activating:auto-restart" in source
+    assert "systemctl stop minecraft.service" in source
+    assert "GAME_SETUP_RACE" in source
+
+
 @pytest.mark.parametrize(
     "fixture",
     (
@@ -132,7 +144,7 @@ def test_required_fixture_contract_is_explicit(fixture: str) -> None:
         "non_target_unchanged": "verify_firewall",
         "secret_non_exposure": "set +x",
         "idempotency": "canonical",
-        "mtime_unchanged": '[[ "${states[unit]}" == canonical ]]',
+        "mtime_unchanged": '[[ "${states[unit]}" != canonical ]]',
         "checkpoint_unique": "checkpoint()",
         "completion_unique": "OK:minecraft_initial_game_completed",
     }

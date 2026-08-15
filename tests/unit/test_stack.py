@@ -411,8 +411,8 @@ def test_phase_one_minecraft_service_uses_mount_guard_and_fixed_runtime_settings
     assert "Requires=wishicraft-rcon-firewall.service" in user_data
     assert "After=wishicraft-data-volume.service wishicraft-rcon-firewall.service" in user_data
     assert "Before=minecraft.service" in user_data
-    assert "ExecStartPre=/usr/local/lib/wishicraft/data_volume_mount.sh --verify" in user_data
-    assert "ExecStartPre=/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify" in user_data
+    assert "ExecStartPre=+/usr/local/lib/wishicraft/data_volume_mount.sh --verify" in user_data
+    assert "ExecStartPre=+/usr/local/lib/wishicraft/minecraft_game_setup.sh --verify" in user_data
     assert f"-Xms{configuration.stage.java_xms} -Xmx{configuration.stage.java_xmx}" in user_data
     assert " -jar /srv/minecraft/packages/vanilla/26.2/server.jar nogui" in user_data
     assert "User=minecraft" in user_data

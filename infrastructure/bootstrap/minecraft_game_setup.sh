@@ -41,7 +41,7 @@ verify_property() {
 verify() {
   local expected_whitelist
   expected_whitelist="$(printf '[{\"uuid\":\"%s\",\"name\":\"%s\"}]' "$PROFILE_UUID" "$PROFILE_NAME")"
-  "$MOUNT_GUARD"
+  "$MOUNT_GUARD" --verify
   [[ -r "$ARTIFACT_PATH" ]] || fail "verified server artifact is missing"
   [[ -d "$SERVER_DIRECTORY" ]] || fail "server directory is missing"
   [[ -r "$SERVER_DIRECTORY/eula.txt" ]] || fail "EULA file is missing"

@@ -10,6 +10,15 @@ import pytest
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 ARTIFACT_SCRIPT = REPOSITORY_ROOT / "infrastructure" / "bootstrap" / "minecraft_artifact_install.sh"
 GAME_SCRIPT = REPOSITORY_ROOT / "infrastructure" / "bootstrap" / "minecraft_game_setup.sh"
+
+
+def test_game_verify_invokes_mount_guard_in_verify_mode() -> None:
+    source = GAME_SCRIPT.read_text(encoding="utf-8")
+    verify_body = source.split("verify() {", 1)[1].split("prepare() {", 1)[0]
+    assert '"$MOUNT_GUARD" --verify' in verify_body
+    assert '\n  "$MOUNT_GUARD"\n' not in verify_body
+
+
 RCON_SCRIPT = REPOSITORY_ROOT / "infrastructure" / "bootstrap" / "minecraft_rcon_configure.sh"
 FIREWALL_SCRIPT = REPOSITORY_ROOT / "infrastructure" / "bootstrap" / "minecraft_rcon_firewall.sh"
 

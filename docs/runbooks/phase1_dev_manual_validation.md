@@ -3,6 +3,7 @@
 - **文書状態:** Canonical
 - **対象:** dev Phase 1の手動基盤検証
 - **最終更新:** 2026-08-08
+- **追記:** 2026-08-15 Minecraft初回起動の既知部分適用再開
 
 ## 1. 禁止事項と承認gate
 
@@ -13,6 +14,8 @@
 - server.jarのダウンロード
 - `eula=true`の設定
 - Minecraft serverの初回起動
+
+初回起動migrationが`systemctl start`で失敗した場合は、再送前に`Result`とExecStartPreの失敗を分離する。mount／game setup verifierはroot権限のread-only ExecStartPreで動作し、game setup verifierからmount guardの変更経路を呼ばないことを正本hashとunit bytesで確認する。既知のauto-restart部分適用からの再開では、Java processと25565／25575 listenerが0件であることを確認してからserviceをquiesceし、承認済みpredecessorだけをatomic upgradeする。
 
 ## 2. AWS接続先の事前照合
 
