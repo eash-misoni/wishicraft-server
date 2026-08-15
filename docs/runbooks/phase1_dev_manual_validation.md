@@ -116,6 +116,14 @@ policy適用前に、組織SCP、permission boundary、AWS IAM action/resource/c
 
 ## 9. Minecraft service確認
 
+### 9.0 初回起動migrationの停止境界
+
+- 第13回Run Command `1b62638b-8d69-4f4f-8dfb-183496a62449`でRCON firewall migrationは完了済みである。target tableやpersistent rulesを初回起動のために再適用しない。
+- Run14 read-only診断 `ccdba675-2ef5-44d1-b917-86e0a5f7c7d1`で、data EBS mount、Corretto 25、固定26.2 jar、account/directory、EULA、properties、whitelistの既設状態と、Minecraft unit/world/logs/process/listenerの不存在を確認した。
+- 初回起動candidateは、mount、Java、firewall、process/listenerを最初に検証し、既設artifactを個別分類する。未知world、temporary file、metadata/hash不一致、symlink、raceを検出したらdaemon-reload、enable、start前に停止する。
+- server.jarは設定の固定URL・size・SHA-1・SHA-256をすべて確認してからatomic配置する。RCON SecureString値、properties本文、environment本文をstdout/stderrへ出さない。
+- start後はREADY marker、service/process、25565/25575 listener、management listener不存在、data EBS上のworld、firewall JSON semantics、non-target nft fingerprintを確認し、completion markerは最終行に1件だけ出す。
+
 1. `findmnt /srv/minecraft`と`systemctl status wishicraft-data-volume.service`を確認してから、`systemctl status minecraft.service`を確認する。
 2. `server.properties`で`server-port=25565`、`online-mode=true`、`white-list=true`、`enforce-whitelist=true`、`enable-rcon=true`、`rcon.port=25575`、`broadcast-rcon-to-ops=false`、`management-server-enabled=false`を確認する。RCON passwordの実値は表示・記録しない。
 3. `whitelist.json`に`NEWISHIN_`とUUID `e912ab95758e4b7fb32e292eda293104`だけが初期登録されていることを確認する。

@@ -307,3 +307,4 @@ bug修正時は、可能な限り再現testを先に追加する。
 - nftablesの正本性は、対象versionのJSON出力をsemanticに検証する。human-readable文字列の整形や順序を安全性predicateにせず、table/chain/rule/object/expressionの件数と意味を個別に検証し、未知要素はfail-closedする。
 - 既存target tableへforward migrationする例外は、由来を固定hash・metadata・service failure status・artifact不在・全object fingerprintで証明したversioned partial stateだけに限定する。一般のempty/partial tableを受容しない。
 - production artifactの制御upgradeは、明示したpredecessorのpath、type、bytes、hash、owner/group、mode、syntaxを完全一致で検証し、race再検査後にatomic replaceする。任意のcontent mismatchを旧versionとして受容しない。
+- Minecraft初回起動migrationは、data mount、Java、firewall、process/listenerを変更前に検証し、jar、Game設定、environment、unit、world/logsを個別分類する。未知worldやartifact driftでは自動修復せず停止し、固定jarはsize/SHA-1/SHA-256検証後だけ、secretを含む設定は値を出力せずatomicに確定する。

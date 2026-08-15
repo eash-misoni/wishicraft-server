@@ -483,9 +483,25 @@
 - **状態:** Superseded by D-040
 - MVPの保存方式はParameter Store SecureStringへ確定した。
 
+### D-055 dev RCON firewall migration完了
+
+- **状態:** Accepted
+- **日付:** 2026-08-15
+- 第13回Run Command（`1b62638b-8d69-4f4f-8dfb-183496a62449`）で、RCON firewall migrationはcompletion marker 1件、full postflight成功で完了した。
+- firewall script、unit、drop-in、enable link、persistent rules、およびlive `inet wishicraft_rcon` tableは正本である。Minecraftは起動せず、Java processとRCON listenerは存在しなかった。
+- RCON firewallを再構築せず、この状態をMinecraft初回起動のpreconditionとして扱う。
+
+### D-056 既設部分適用からのMinecraft初回起動migration
+
+- **状態:** Accepted
+- **日付:** 2026-08-15
+- Run14 read-only診断で、data EBS、Corretto 25、固定26.2 server.jar、minecraft account、Game directory、EULA、properties、whitelistが存在し、Minecraft unit、world、logs、process、listenerは不存在と確認した。
+- 初回起動は、artifactごとの不在・正本・承認済みpredecessor・衝突を変更前に分類する専用migrationで行う。未知world、symlink、metadata/hash drift、mount/firewall driftでは変更せず停止する。
+- 固定jarはsize/SHA-1/SHA-256検証後だけatomic配置し、secret値を出力せずpropertiesを確定する。Minecraftは全起動前predicate合格後にsystemd経由でのみ起動する。
+
 ## 5. Current blockers
 
-Phase 0開始前の重大blockerはなく、Phase 0は完了した。Phase 1は準備作業を完了し、AWSリソース実装を開始していない。
+Phase 0は完了した。Phase 1 dev基盤はdeploy済みで、data EBSとRCON firewallは検証済みである。現在の停止境界は、固定済みMinecraft初回起動migrationを実機へ送信する明示承認である。
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みであり、blockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
 

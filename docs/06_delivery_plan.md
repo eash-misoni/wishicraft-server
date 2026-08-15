@@ -156,6 +156,8 @@ repository-root/
 
 制御系なしで、AWS上のMinecraftを人間が安全に起動・接続・停止できる状態にする。
 
+2026-08-15時点でdevのRCON firewall migrationは第13回Run Commandで完了した。Run14 read-only診断ではdata mount、Corretto 25、固定server.jarと初期設定の部分適用を確認し、Minecraft service/process/listenerは未起動である。次の作業単位は、専用migration candidateによる初回起動であり、別の明示承認まで実機へ送信しない。
+
 ### 最初の作業単位（完了）
 
 - Phase 1 dev synth/deploy用required validationを追加した。
