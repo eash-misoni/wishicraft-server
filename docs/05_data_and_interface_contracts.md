@@ -495,7 +495,9 @@ Task Lambdaは1責務に限定する。
 
 共通Outputは入力を保持しつつ、Task結果を`context`へ追加する方式を基本とする。ただしStep Functions payloadが肥大化しないよう、大きなログやarchive情報はDynamoDB/S3参照へ置く。
 
-## 14. EC2スクリプト契約
+## 14. Host Runtime操作契約
+
+Phase 1の直接Java/systemd操作はas-builtとして維持する。Phase 2以降はSSMから許可済みHost Runtime interfaceを呼び、Host Runtimeがcontainer-localなitzg/runtime interfaceへ接続する形へ再設計する。以下のCLI名とpayloadはPhase 2で置換可否を決める既存案である。
 
 実装言語はPythonを基本とする。
 
@@ -535,7 +537,7 @@ Output data:
 }
 ```
 
-### `start_game.py`
+### `start_game.py`（再設計対象）
 
 ```bash
 python /opt/minecraft-control/start_game.py \
@@ -550,12 +552,13 @@ python /opt/minecraft-control/start_game.py \
 - data volume確認
 - 別game稼働確認
 - runtime metadata設定
-- systemd start
+- desired stateをitzg入力へmapping/apply
+- Host Runtime経由のcontainer start要求
 - 起動要求まで
 
 READY待機はStep Functions/reconcile側が行う。
 
-### `stop_game.py`
+### `stop_game.py`（再設計対象）
 
 引数:
 
@@ -568,8 +571,8 @@ READY待機はStep Functions/reconcile側が行う。
 責務:
 
 - active game一致確認
-- RCON save
-- RCON stop
+- container-local command pathによるsave
+- itzg/runtimeへのgraceful stop要求
 - process終了待機
 - runtime情報更新
 
@@ -611,9 +614,9 @@ Input追加:
 
 DynamoDBの代替正本ではなく、実アクティブゲームを確認する観測材料として使用する。
 
-## 16. systemd契約
+## 16. lifecycle / systemd契約
 
-Unit名:
+Phase 1の直接起動unit名:
 
 ```text
 minecraft.service
@@ -621,7 +624,18 @@ minecraft-heartbeat.service
 minecraft-heartbeat.timer
 ```
 
-`minecraft.service`はGame resolverが設定した安全なenvironment fileまたはactive game symlinkを参照する。Discord入力やDynamoDB文字列を直接`ExecStart`へ埋め込まない。
+`minecraft.service`はPhase 1 as-builtの契約である。Phase 2以降はsystemd、Docker/Compose、itzgが独立にrestartしないよう、Host Runtimeをcontainer lifecycle ownerとする。systemdはmount後の起動・停止順序を統括し、Composeのrestart policyはControl Planeの停止意図を打ち消さないものとする。具体的unit、restart値、stop timeoutはDecision Neededである。Discord入力やDynamoDB文字列を直接`ExecStart`やshellへ埋め込まない。
+
+### Desired state mapping / apply（Phase 2で確定）
+
+- logical desired stateの正本はControl Planeが保持する。
+- mapping層はitzgの公開environment/file/command interfaceだけを生成し、Minecraft内部ファイルを直接編集しない。
+- boot-time configurationとrunning serverへのruntime operationを明示的に分類する。
+- 保存済みdesiredとrunning serverへ反映済みのapplied stateを同一視しない。
+- RCON等の管理portはhostへpublishせず、command pathはhost-local / container-localに閉じる。
+- command認可はControl Plane、secret injectionはHost Runtime、Minecraft固有command実行はitzg/runtimeが担当する。
+
+具体的なdesired/applied schema、idempotency、apply result、command adapter、secret受渡しはDecision Neededであり、本節から推測しない。
 
 ## 17. Package Manifest v1
 
@@ -772,7 +786,7 @@ Bot Token、Interaction Tokenそのものは保存しない。
 
 `null`または`TO_BE_CONFIRMED`の値を実装側で推測して埋めない。設計契約と設定値が矛盾する場合は、どちらかを暗黙に優先せずDecision候補として報告する。Parameter Store StringやLambda environmentへ配布された公開値がYAMLと異なる場合はdeploy driftとして扱い、手動値を新しい正本にしない。
 
-Phase 1のvanilla server artifactはstage YAMLの`minecraft_distribution.server_jar_url`と`minecraft_distribution.server_jar_sha1`を正本とする。これらは公開情報であり、versionとともに固定する。`latest`や可変URLを使用しない。
+Phase 1のvanilla server artifactはstage YAMLの`minecraft_distribution.server_jar_url`と`minecraft_distribution.server_jar_sha1`を正本として構築した。これはas-built履歴であり、itzg移行後のdistribution取得契約ではない。target architectureでは、deploy/基盤固定値はGit、運用中に変更するdesired stateはControl Plane store、secretはAWS secret store、Minecraft実ファイルはdata EBS上のrealization結果とする。同一キーをGitとDynamoDBの双方へ正本化してはならない。
 
 ## 22. AWSリソース命名
 

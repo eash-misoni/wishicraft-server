@@ -1,7 +1,7 @@
 # 02. Requirements
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-07-23
+- **最終更新:** 2026-08-22
 
 ## 1. 要件の読み方
 
@@ -34,6 +34,12 @@ Minecraftクライアントは固定FQDNを一度登録すれば、EC2の再起�
 ### SYS-005 サーバーレス制御 `MUST / MVP`
 
 Discord受付、状態管理、ワークフロー制御は、常駐コントローラーEC2を必要としない構成とする。
+
+### SYS-006 Runtime責務分離 `MUST / MVP`
+
+Phase 2以降はWishicraftをControl Plane、EC2上のDocker/Compose/systemd等をHost Runtime、itzg/docker-minecraft-serverをMinecraft Runtimeとして分離する。WishicraftはMinecraft固有runtimeを再実装せず、desired stateからitzg公開入力へのmapping、apply timing、認可、policy、AWS状態遷移を担当する。
+
+Phase 1の実装と検証記録はas-builtとして維持し、target architectureへの移行を理由に履歴を書き換えない。
 
 ## 3. 状態確認要件
 
@@ -339,6 +345,14 @@ Gameデータ用EBSはEC2とは別リソースとして同一Availability Zone�
 
 filesystemは初回だけ作成し、UUIDでmountする。`/srv/minecraft`が期待するdata volumeへmountされていない場合、Minecraft起動、保存、backup、resetを実行しない。
 
+### EC2-011 管理command path `MUST / MVP`
+
+RCON等の管理portをhostまたはInternetへpublishしない。Control PlaneからのMinecraft commandはSSM等の管理経路からhost-local / container-localに閉じ、認可、secret injection、Minecraft固有実行の責務を分離する。
+
+### EC2-012 lifecycle owner `MUST / MVP`
+
+systemd、Docker/Compose、itzgが独立にrestartを判断してControl Planeの停止意図を打ち消してはならない。container lifecycle owner、restart policy、graceful stop timeout、正常終了判定を明示する。
+
 ## 9. バックアップ要件
 
 ### BAK-001 実装時期 `MUST`
@@ -526,3 +540,11 @@ backup失敗、heartbeat stale、data volume使用率はPhase 8の機能導入�
 ### NFR-009 Backup導入前の試験運用保護 `MUST / MVP`
 
 Phase 8の検証済みS3 backupが完成するまでは、Phase 7を試験運用として扱い、初回利用前および重要変更前に管理者用EBS snapshot runbookを実行できる状態にする。
+
+### NFR-010 設定の単一正本 `MUST`
+
+同じ設定値をGitとDynamoDB等へ独立に保存して二重に正本化しない。deploy/基盤固定値、運用中desired state、secret、Minecraft runtime dataの所有者をschema上で明示する。Wishicraftとitzgが同じMinecraft実ファイルを双方から直接編集してはならない。
+
+### NFR-011 EULA operator gate `MUST`
+
+itzg採用後もMinecraft EULA同意をoperator policy/gateとして扱い、人間の承認済み事実がある場合だけruntimeへ同意入力を渡す。runtime入力の存在だけを承認記録の代替にしない。

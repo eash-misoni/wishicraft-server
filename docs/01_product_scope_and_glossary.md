@@ -1,7 +1,7 @@
 # 01. Product Scope and Glossary
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-07-23
+- **最終更新:** 2026-08-22
 
 ## 1. プロジェクト目的
 
@@ -209,6 +209,14 @@ AWS API、SSM、systemd、Minecraft応答等から観測した実状態。
 Desired State、保存済みObserved State、現在の実測結果の差を確認し、観測値を更新する処理。
 
 初期版では、状態不一致を見つけても無条件に自動修復せず、正確な観測と通知を優先する。
+
+### Control Plane / Host Runtime / Minecraft Runtime
+
+- Control PlaneはWishicraftのユーザー操作、認可、状態遷移、AWS resource、desired state、運用policy、mapping/apply orchestrationを指す。
+- Host RuntimeはEC2上のAL2023、EBS mount、Docker/Compose、systemd、secret injection、container lifecycle、host-local command pathを指す。
+- Minecraft Runtimeはitzg/docker-minecraft-serverへ委譲するJava、distribution、Minecraft固有設定・形式・command・processを指す。
+
+Phase 1の直接Java/systemd実装は完了済みas-builtとして維持し、この用語はPhase 2以降のtarget architectureへ適用する。
 
 ### Generation
 

@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-14
+- **最終更新:** 2026-08-22
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -9,6 +9,19 @@
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-059 Phase 1後のMinecraft Runtimeにitzgを採用する
+
+- **状態:** Accepted
+- **日付:** 2026-08-22
+- **背景:** Phase 1はhost Java、固定server.jar、直接`minecraft.service`、独自whitelist配置・修復、host firewallによるRCON制限で正式完了した。Phase 2開始前に、独自Minecraft Runtimeを継続するか、成熟したruntimeへ委譲するかを見直した。
+- **決定:** Phase 1の実装と検証記録はas-built履歴として維持し、Phase 2以降のtarget architectureはControl Plane（Wishicraft）、Host Runtime、Minecraft Runtime（itzg/docker-minecraft-server）の3層とする。詳細な責務、migration inventory、安全原則は`docs/architecture/itzg-responsibility-boundary.md`を正本とする。
+- **責務:** Wishicraftはユーザー操作、認可、状態遷移、AWS resource、desired state、運用policy、desired stateからitzg入力へのmapping/apply orchestrationを持つ。Host RuntimeはAL2023、EBS mount、Docker/Compose、systemd、secret injection、container lifecycle、host-local command pathを持つ。itzgはJava、distribution、Minecraft固有設定、whitelist/ops形式、RCON/runtime command、process、graceful shutdownを持つ。
+- **安全条件:** boot-time configurationとrunning server operationを分離する。RCON等の管理portはhost / Internetへpublishしない。command pathはSSM等からhost-local / container-localに閉じる。EULA同意はoperator policy/gateとして残す。systemd、Docker/Compose、itzg間のlifecycle ownerを一意にし、Control Planeの停止意図とrestart policyを競合させない。
+- **設定所有権:** deploy/基盤固定値はGit、運用中desired stateはControl Plane store、secretはAWS secret store、Minecraft実ファイルはdata EBS上のrealization結果とし、同じ値をGitとDynamoDB等で二重に正本化しない。
+- **移行:** VPC/SG、IAM/SSM、data EBS/Retain、XFS/UUID mount guard、Discord認可/desired state、Step Functions/DynamoDBは維持する。直接Minecraft systemdとRCON firewallは再設計・置換する。host Corretto、独自server.jar downloader、whitelist artifact独自配置・修復は、新経路で代替確認後の退役候補とする。sunk costを維持理由にしない。
+- **対象外:** 本DecisionはDocker/itzg導入、既存runtime削除、AWS/EC2変更を承認しない。これらはPhase 2の個別作業とする。
+- **関連文書:** `docs/03_architecture.md`、`docs/05_data_and_interface_contracts.md`、`docs/06_delivery_plan.md`、`docs/07_operations_security_and_cost.md`、`docs/12_initial_configuration.md`
 
 ### D-058 Minecraft profile UUIDの正本形式とwhitelist永続形式
 
@@ -532,7 +545,24 @@
 
 ## 5. Current blockers
 
-Phase 0とPhase 1は完了した。Phase 2の自動停止実装前に、Minecraftの意図的SIGTERM終了をsystemd上でもsuccessとして扱う契約を決定する。
+Phase 0とPhase 1は完了した。Phase 1の意図的SIGTERM終了契約はas-built課題として履歴を維持するが、直接Java process向け解決を先行しない。Phase 2ではitzg移行後のgraceful shutdown、container exit、Host Runtime service結果を一体で定義する。
+
+Phase 2開始前のDecision Needed:
+
+| 項目 | 決める内容 |
+|---|---|
+| itzg image | release tag / digest、更新・rollback policy |
+| Docker / Compose | AL2023への導入元、version固定、更新方法 |
+| identity / storage | container UID/GID、data EBS所有権、既存worldの安全な接続方法 |
+| resource limits | t3a.medium上のcontainer memory、JVM heap、OOM条件 |
+| lifecycle | systemd/Compose/itzgのowner、restart値、stop timeout、正常終了判定 |
+| desired state | Git固定値とControl Plane storeのkey境界、desired/applied schema |
+| apply | boot-time設定とruntime operationの分類、idempotency、反映確認 |
+| command path | SSM→host-local→container-localの具体方式、RCON client/library |
+| secret injection | SecureString取得後の最小露出方式、更新・破棄方法 |
+| whitelist | 起動時同期と稼働中即時反映の使い分け、実反映確認 |
+| backup | itzg/docker-mc-backup等のruntime mechanismとWishicraft policy、S3/EBS snapshotの分担 |
+| migration | Phase 1 world/configの互換性、同等性gate、rollback、独自runtime退役順序 |
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みであり、blockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
 
@@ -542,7 +572,7 @@ Phase別に決める事項:
 |---|---|
 | EULA同意、server.jar取得、checksum検証、初回起動の実行承認 | Phase 1 bootstrap検証前 |
 | RCON password安全配布方式のEC2実装 | Phase 1 EC2 bootstrap実装時 |
-| RCON client/library | Phase 2開始前 |
+| RCON client/library / container-local command path | Phase 2開始前 |
 | dev Discord Bot TokenのSecureString登録とApplication/command設定確認 | Phase 7開始前 |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |
 | backup整合方式 | Phase 8開始前 |

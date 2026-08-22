@@ -114,9 +114,11 @@ EC2から他instanceのstart/stopやIAM変更を許可しない。
 
 ### Minecraft runtime
 
-- `minecraft.service`は`wishicraft-data-volume.service`とmount guardに依存し、data EBS未mountでは起動しない。
-- server jarは固定した公式URLから一時ファイルへ取得し、size、SHA-1、SHA-256のすべてが一致した場合だけ配置する。不正な既存jarを自動上書き・実行しない。
-- Minecraftはinteractive login不能な専用`minecraft` user/groupで動かす。Management Protocolは有効化しない。RCONはSecureStringから設定するが、Security Groupにingressを設けず、host firewallでIPv4の`127.0.0.1`およびIPv6の`::1`以外への到達を拒否する。
+Phase 1では`minecraft.service`、固定server.jar、専用user/group、host firewallによるRCON到達制限を使用し、安全性を実地確認した。この段落はas-built記録である。
+
+Phase 2以降は、systemdがdata EBS mount完了後のHost Runtime起動順序を保証し、Docker/Composeがcontainer lifecycleを一元管理し、itzgがMinecraft processとgraceful shutdownを担当する。RCON等の管理portはhostへpublishせず、SSMからhost-local / container-localに閉じたcommand pathだけを使用する。Minecraft接続port以外を外部公開しない。
+
+systemd、Docker/Compose、itzgのrestart policyを重ねず、Control Planeの停止要求を下位restartが打ち消さない構成にする。具体値はPhase 2 Decisionで確定する。
 
 ## 5. Secret管理
 
@@ -146,7 +148,7 @@ Discord public key、Guild ID、Channel ID、Role IDは秘密ではないが、�
 - CDKとアプリケーションへ渡す値: 秘密値ではなくParameter名
 - Secrets Manager: 自動rotation等が必要になった場合に再評価
 
-Phase 1では、EC2 instance roleの`ssm:GetParameter`をdev用RCON SecureStringへ限定する。CDK、user data、CloudFormation、Git、通常ログに実値を含めない。EC2内では復号値を標準出力へ出さず、RCONを含む`server.properties`を`root:minecraft`・`0640`で作成する。RCONのインターネット向け受信ルールは作成しない。
+Phase 1では、EC2 instance roleの`ssm:GetParameter`をdev用RCON SecureStringへ限定し、`server.properties`へ安全に反映した。target architectureでもParameter Store SecureStringと最小権限を維持するが、Host Runtimeからcontainerへの具体的なsecret injection方法はPhase 2 Decision Neededとする。secretをComposeのGit管理値、DynamoDB平文、log、shell history、environment dumpへ残さない。
 
 推奨Parameter名:
 

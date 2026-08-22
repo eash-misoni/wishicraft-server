@@ -2,7 +2,7 @@
 
 - **文書状態:** Canonical
 - **対象:** Phase 0開始時点の初期設定
-- **最終更新:** 2026-07-29
+- **最終更新:** 2026-08-22
 
 ## 1. 目的
 
@@ -40,6 +40,8 @@ initial_minecraft_profile_uuid: e912ab95758e4b7fb32e292eda293104
 
 Minecraft profile UUIDの設定正本は、Mojang profile APIと同じhyphenなし32桁lowercase形式とする。`whitelist.json`などMinecraftの永続JSON境界では、`8-4-4-4-12`のhyphen付きlowercase形式へ決定的に変換する。比較時はhyphenを除去した32桁形式へ正規化し、表現差とUUID値の差を区別する。
 
+上記の`java_runtime`、server.jar checksum、初期profileのMinecraftファイル表現はPhase 1 as-builtの設定である。itzg移行後も履歴として残すが、host Javaや独自artifact downloaderを今後のtargetとしない。
+
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みとする。Application IDとPublic Keyを含むDiscordの公開IDは秘密情報ではないが、文書へ重複記載せずstage設定を正本とする。
 
 devのAWS Account ID、Availability Zone、Minecraft port/version、Route 53 Hosted Zone IDは`config/stages/dev.yaml`へ反映済みとする。prodを含む未確定値は該当stage設定で`null`を維持する。prod用Discord Guild/channel/role/Application ID/Public Keyも、prod環境を準備するまで`config/stages/prod.yaml`で`null`を維持する。
@@ -74,6 +76,17 @@ stageごとの公開設定の正本とする。
 秘密値そのものではなく、Parameter Store `SecureString`へ保存するParameter名だけを定義する。
 
 Git管理されたYAMLを設計・デプロイ時の正本とする。CDKがLambda environment、SSM Parameter Store、EC2設定等へ値を配布しても、それらを人間が独立して編集する第二の正本にはしない。変更はYAMLまたはCDK定義へ戻してdeployする。
+
+Phase 2以降は設定所有権をさらに分離する。
+
+| 種別 | 唯一の正本 |
+|---|---|
+| itzg image、Docker/Compose、基盤policy、immutable default | Git管理設定（具体的schemaはDecision Needed） |
+| Discord等から運用中に変更するdesired state | DynamoDB等のControl Plane store（具体的schemaはDecision Needed） |
+| RCON等のsecret | AWS secret store |
+| world、Minecraft実ファイル | data EBS上のruntime data。desired stateの正本ではなくrealization結果 |
+
+同じ設定キーをGitとDynamoDBへ重複して正本化せず、Wishicraftとitzgが同じMinecraft実ファイルを双方から直接編集しない。
 
 CDKが作成したinstance ID、table名、ARN等の実行時resource identifierは、CloudFormation output、Lambda environment、必要なParameter Store String等へ配布してよい。これらは手入力する設計設定ではなく、deploy結果から生成される値として扱う。
 
@@ -148,6 +161,10 @@ Phase 1前:
 dev用RCON passwordはSecureStringへ登録済みである。実値は取得・表示・Gitへの保存を行わない。Minecraft 26.2の公式server.jar URL、SHA-1、SHA-256、sizeは`config/stages/dev.yaml`へ固定した。初期GameのEULA同意は明示済みであるが、server.jarのEC2取得、checksum検証、Minecraft初回起動はdeploy後の別途手動確認として扱う。
 
 `mc-dev.wishicraft.net`のAレコードはPhase 0で手動作成しない。Phase 1でEC2起動後に現在の動的パブリックIPv4へUPSERTし、EC2停止完了後に削除する。
+
+itzg採用後もEULA同意はoperator policy/gateとして維持する。承認主体と事実はWishicraft/operator側で管理し、承認済みの場合だけitzgへ同意入力を渡す。itzgの`EULA`入力自体を人間の承認記録の代替にしない。
+
+Phase 2開始前に、itzg image tag/digest、Docker Engine / Compose固定方法、container UID/GID、memory/JVM heap、lifecycle ownerとrestart/stop timeout、command path、secret injection、desired/applied schemaをDecisionとして確定する。既存値や`null`から推測しない。
 
 Phase 7前:
 

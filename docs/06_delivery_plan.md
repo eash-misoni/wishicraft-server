@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-07-29
+- **最終更新:** 2026-08-22
 
 ## 1. 開発原則
 
@@ -18,7 +18,7 @@
 |---:|---|---|
 | 0 | リポジトリと設計土台 | Python/CDK/pytest、文書、CI |
 | 1 | Minecraft EC2手動起動 | EC2、EBS、Route 53、SSM、systemd、バニラ1個 |
-| 2 | EC2内操作契約 | probe/start/stopスクリプト |
+| 2 | itzg Host Runtime境界 | migration contract、mapping/apply、probe/start/stop command path |
 | 3 | 実測status | Reconcile Lambda、SystemState |
 | 4 | Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
 | 5 | 安全なstart | Start Step Functions |
@@ -40,7 +40,7 @@
 |---:|---|
 | 0 | SYS-004、NFR-005〜007 |
 | 1 | SYS-001、SYS-003、EC2-001〜010 |
-| 2 | STA-001、START-006、STOP-001〜005、EC2-007 |
+| 2 | SYS-006、STA-001、START-006、STOP-001〜005、EC2-007/011/012、NFR-010/011 |
 | 3 | STA-001〜006 |
 | 4 | SYS-002、OPR-001〜010、NFR-002、NFR-003 |
 | 5 | START-001〜008、EC2-008 |
@@ -242,21 +242,43 @@ EC2起動
 - 複数Game
 - MOD/Paper
 
-## 5. Phase 2 — EC2内部操作スクリプト
+## 5. Phase 2 — itzg Host Runtime境界
+
+- **状態:** Not Started（Phase 1完了後のitzg設計移行を先行）
 
 ### 目的
 
-AWS制御面から呼び出す、安定したEC2内部インターフェースを作る。
+AWS制御面から呼び出す安定したHost Runtime interfaceを、itzg/docker-minecraft-serverをMinecraft Runtimeとして作る。Phase 1の直接Java/systemd実装は完了履歴として維持し、このPhaseで無条件に削除しない。
 
 ### 実装順
 
-1. game resolver
-2. runtime state file helper
-3. `probe_game.py`
-4. `start_game.py`
-5. `stop_game.py`
-6. script unit tests
-7. SSM Run Commandから手動実行
+1. Phase 2 Decision Neededを解消する（image tag/digest、Docker/Compose、UID/GID、resource limit、lifecycle owner、timeout、command path、secret injection、desired/applied schema）。
+2. Phase 1 runtimeを「維持 / 再設計・置換 / 退役候補」に固定し、rollback可能な移行・同等性条件を定義する。
+3. desired stateのsource of truthと、boot-time / runtime operation別のmapping/apply契約を確定する。
+4. data EBS mount guard後にのみ起動できるHost Runtime（systemd / Docker / Compose）契約を作る。
+5. 管理portをpublishしないhost-local / container-local command pathを作る。
+6. itzg最小構成でprobe、start、READY、save、graceful stop、world永続性のinterfaceを検証する。
+7. Control Plane向けの`probe_game` / `start_game` / `stop_game`相当adapterとunit testを作る。
+8. SSM Run Commandによるdev確認は明示承認を得て別作業で実施する。
+9. 新経路で代替済みの独自Minecraft Runtimeだけを個別に退役する。
+
+### Phase 1 migration inventory
+
+| 分類 | Phase 1実装 | Phase 2以降の扱い |
+|---|---|---|
+| 維持 | VPC / subnet / IGW / Security Group | Control PlaneのAWS基盤。SGはMinecraft接続portだけを公開する。 |
+| 維持 | EC2 IAM Role / SSM | Control PlaneからHost Runtimeへの管理経路。権限は最小化を維持する。 |
+| 維持 | data EBS / Retain | worldとruntime realizationの永続基盤。container layerを正本にしない。 |
+| 維持・強化 | XFS / UUID mount / mount guard | Host Runtimeの前提。container起動前のfail-closed gateにする。 |
+| 維持 | Discord whitelist操作 | 認可と許可プレイヤーdesired stateはControl Planeに残す。Minecraft固有反映はitzgへ委譲する。 |
+| 維持 | Step Functions / DynamoDB | 状態遷移、排他、operation、desired stateを担当する。Minecraft実状態の正本にはしない。 |
+| 再設計・置換 | Minecraft systemd service | Java直接起動からHost Runtime / Compose lifecycle制御へ置換する。 |
+| 再設計・置換 | RCON用host firewall | 管理port非publishのcontainer-local設計へ置換し、代替確認後に独自nftablesを退役する。 |
+| 退役候補 | Corretto 25 host installer | Java runtimeをitzg imageへ委譲する。 |
+| 退役候補 | server.jar URL / SHA-1 downloader | Minecraft distribution取得をitzgへ委譲する。 |
+| 退役候補 | whitelist artifact独自配置・修復 | 許可者の正本はControl Planeに残し、Minecraft形式への反映をitzg/runtimeへ委譲する。 |
+
+分類はtarget architectureでの扱いであり、Phase 1の完了事実や証跡を変更しない。退役は新経路の機能同等性とrollback条件をdevで確認した後の別作業とする。
 
 ### 確認ケース
 
@@ -279,6 +301,10 @@ AWS制御面から呼び出す、安定したEC2内部インターフェース�
 - startは起動要求まで、READY判定はprobeで行う。
 - stopは保存成功とプロセス終了を確認する。
 - SSM経由で実行できる。
+- management portがhost / Internetへpublishされていない。
+- boot-time設定とrunning server操作が契約上区別されている。
+- lifecycle ownerが一意で、下位restartがControl Planeの停止意図を打ち消さない。
+- GitとControl Plane storeに同じ設定キーを二重に正本化していない。
 
 ## 6. Phase 3 — 実測status
 

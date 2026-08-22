@@ -1,11 +1,15 @@
 # 03. Architecture
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-08
+- **最終更新:** 2026-08-22
 
 ## 1. アーキテクチャ方針
 
 制御系をサーバーレスにし、常時稼働するコンピュートを持たない。Minecraft本体を動かすEC2だけを必要時に起動する。
+
+Phase 1はhost上のJava、固定server.jar、`minecraft.service`、host firewallでlocalhost到達性を保証するRCONとして実装・検証し、2026-08-22に正式完了した。この実装とPhase 1 runbookはas-built履歴であり、書き換えない。
+
+Phase 2以降は[itzg責務境界](architecture/itzg-responsibility-boundary.md)を正本とし、Control Plane（Wishicraft）、Host Runtime、Minecraft Runtime（itzg/docker-minecraft-server）の3層へ移行する。Wishicraftはdesired state、policy、認可、状態遷移、AWS resource、mapping/apply orchestrationを持つ。Host RuntimeはAL2023、EBS mount、Docker/Compose、systemd、secret injection、container lifecycleを持つ。Minecraft固有の取得・設定・互換性・起動停止は原則itzgへ委譲する。
 
 初回実用版では、複数ゲームやWeb管理画面を実装せず、単一バニラゲームのDiscord start/status/stopを端から端まで完成させる。
 
@@ -38,11 +42,11 @@ EventBridge
 Route 53
   └─ 固定FQDN → 起動中EC2の動的パブリックIPv4
 
-Minecraft EC2
-  ├─ systemd
-  ├─ Java / Minecraft
-  ├─ RCON localhost only
-  ├─ runtime scripts
+Minecraft EC2 / Host Runtime
+  ├─ systemd / Docker / Compose
+  ├─ itzg/docker-minecraft-server
+  ├─ container-local management path（管理port非publish）
+  ├─ desired state mapping/apply scripts
   ├─ heartbeat agent or systemd timer
   ├─ root EBS
   └─ data EBS
@@ -137,11 +141,14 @@ DynamoDBは実世界の状態そのものではなく、次を保存する。
 
 ### Minecraft EC2
 
-- Minecraftプロセスをsystemdで管理する。
+- systemdはEBS mount後のHost Runtime起動順序を管理し、container lifecycleはHost Runtimeで一元化する。
+- Minecraftプロセス、Java、distribution、Minecraft固有設定はitzg containerに委譲する。
 - データEBSを`/srv/minecraft`等へマウントする。
 - `active_game_id`等のruntime情報を保持する。
-- localhost RCONでsave、stop、list、OP等を行う。
+- SSMからhost-local、container-localの順に管理commandを実行し、RCON等の管理portをhostやInternetへpublishしない。
 - heartbeatをDynamoDBまたは専用受付先へ送る。
+
+Wishicraftのdesired stateをitzgの公開入力へ変換し、boot-time configurationかrunning serverへのruntime operationかを選択する処理はControl Plane / Host Runtime側に残す。同じ設定をGitとDynamoDBの双方で独立管理せず、Minecraft実ファイルはitzgによるrealization結果として扱う。
 
 ### S3
 
@@ -182,7 +189,7 @@ Phase 1のRCON passwordは、EC2 roleだけが対象SecureStringの`ssm:GetParam
 
 ### Minecraft server artifact
 
-Phase 1の初期vanilla serverは、stage設定に固定したMinecraft version、公式server.jar URL、公式SHA-1、size、リポジトリ固定SHA-256を使用する。`latest`や可変URLを使用しない。EC2 bootstrapはdata EBS mount guard後に同一filesystem上の一時ファイルへ取得し、すべてを検証してから原子的に配置する。不一致の既存artifactは上書き・起動しない。
+Phase 1の初期vanilla serverは、stage設定に固定したMinecraft version、公式server.jar URL、公式SHA-1、size、リポジトリ固定SHA-256を使用した。これは完了済みas-builtである。Phase 2以降はdistribution取得をitzgへ委譲し、Wishicraft独自downloaderは新経路の同等性確認後の退役候補とする。itzg imageとMinecraft versionは浮動参照にせず、具体的な固定方法をPhase 2開始前Decisionで定める。
 
 ### Secrets Manager
 
@@ -244,7 +251,7 @@ LambdaからEC2へ直接TCP接続せず、SSMを管理経路にすることでVP
 ### Root EBS
 
 - OS
-- Java
+- Docker Engine / Compose等のHost Runtime（target architecture）
 - SSM Agent
 - systemd unit
 - runtime code
@@ -290,6 +297,8 @@ LambdaからEC2へ直接TCP接続せず、SSMを管理経路にすることでVP
 ```
 
 ゲームデータをroot volumeだけに置かない。
+
+`server.properties`、whitelist等のMinecraft実ファイルをWishicraftとitzgの双方から直接編集しない。Gitはdeploy/基盤固定値、Control Plane storeは運用中desired state、AWS secret storeはsecret、data EBSはworldとrealization結果の所有者とする。
 
 ### Operation Admission service
 
