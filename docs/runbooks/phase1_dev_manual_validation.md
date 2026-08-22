@@ -133,6 +133,7 @@ policy適用前に、組織SCP、permission boundary、AWS IAM action/resource/c
 3. Mojang profile APIの正規化UUID `e912ab95758e4b7fb32e292eda293104`が`NEWISHIN_`に対応することを確認する。`whitelist.json`では同じUUIDが`e912ab95-758e-4b7f-b32e-292eda293104`として永続化され、hyphen除去後の比較が一致することを確認する。
 4. whitelist serialization修復時は、既知predecessorのwhitelist／environment／game setupだけを受容する。Minecraftを通常停止してworld保存とlistener停止を確認し、atomic更新後に再起動する。world、server.properties、RCON secret、firewallを変更しない。
    第21回は変更開始前の`FAIL:STATIC`で停止し、第22回read-only診断でhost predicateはすべて正常だった。temporary glob不存在時の`compgen` statusを関数失敗へ漏らさず、明示的な正常returnを持つ修正版だけを次回候補とする。
+   第26回では通常停止後、Java／listenerは停止済みでもsystemdがSIGTERM status 143を`failed`として保持し`STOP_STATE`になった。再開候補は`inactive`／`failed`のいずれでもMainPID、Java process、全Minecraft関連listenerが0の場合だけ停止完了として受容する。
 4. `journalctl -u minecraft.service`、`ps`、listening portを確認する。Management Protocolがlistenしていないこと、RCON portへの非loopback IPv4/IPv6到達がnftablesで拒否され、Security GroupにRCON ingressがないことを確認する。
 5. `systemctl stop minecraft.service`で正常停止とワールド保存を実EC2で確認し、再起動後にワールドがdata EBS上で保持されることを確認する。これらはdeploy後の手動確認であり、CIでは検証しない。
 

@@ -19,6 +19,7 @@
 - Minecraftの`whitelist.json`境界ではUUIDを`8-4-4-4-12`形式へ決定的に変換する。比較はhyphenを除去した32桁lowercaseで行い、値の不一致とserialization不一致を分ける。
 - 稼働中hostの修復は、whitelist、environment、game setupが承認済みpredecessorのbytes・SHA-256・metadataへ完全一致する場合だけ、通常停止とlistener停止確認後にatomic更新する。world、properties、secret、firewallは変更しない。
 - 第21回Run Commandは変更開始前の`FAIL:STATIC`で停止した。第22回read-only診断で全static predicateが正常と確認され、原因はtemporary file不存在時の`compgen` status 1が`verify_static`の戻り値へ漏れたshell制御不具合と確定した。正常時は明示的に0を返し、temporary file存在時だけ拒否する。
+- 第26回は通常停止後の`FAIL:STOP_STATE`でartifact更新前停止した。第27回read-only診断でJava／listenerは0、MainPID 0、world／firewallは正常だが、SIGTERM終了をsystemdが`failed`／status 143として保持したことを確認した。停止完了判定は`inactive`または`failed`を許容する一方、MainPID、Java process、25565／25575／25585 listenerが全て0であることを必須とする。
 
 ### D-035 Minecraft初回起動のExecStartPreはprivileged read-only verifierに限定する
 

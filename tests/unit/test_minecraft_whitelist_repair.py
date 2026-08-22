@@ -41,6 +41,8 @@ def test_repair_is_fail_closed_and_uses_known_predecessors() -> None:
     assert '[[ "$WHITELIST_STATE" == canonical ]] || atomic_content' in source
     assert "RUNTIME_STATE=stopped_partial" in source
     assert "verify_stopped" in source
+    assert '[[ "$active_state" == inactive || "$active_state" == failed ]]' in source
+    assert "systemctl show minecraft.service -p MainPID --value" in source
     assert (
         """if compgen -G "$SERVER/*.tmp.*" >/dev/null; then
     return 1

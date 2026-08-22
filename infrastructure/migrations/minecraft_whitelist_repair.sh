@@ -134,7 +134,10 @@ verify_runtime() {
   [[ "$(ss -H -ltn|awk '$4~/:25585$/{n++} END{print n+0}')" == 0 ]] || return 1
 }
 verify_stopped() {
-  [[ "$(systemctl show minecraft.service -p ActiveState --value)" == inactive ]] || return 1
+  local active_state
+  active_state="$(systemctl show minecraft.service -p ActiveState --value)" || return 1
+  [[ "$active_state" == inactive || "$active_state" == failed ]] || return 1
+  [[ "$(systemctl show minecraft.service -p MainPID --value)" == 0 ]] || return 1
   [[ "$(pgrep -u minecraft -f 'java.*server\.jar' 2>/dev/null | wc -l | tr -d ' ')" == 0 ]] || return 1
   [[ "$(ss -H -ltn|awk '$4~/(25565|25575|25585)$/ {n++} END{print n+0}')" == 0 ]] || return 1
 }
