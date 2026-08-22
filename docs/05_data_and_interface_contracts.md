@@ -674,6 +674,21 @@ save 60
 
 値はPhase 2 dev初期tuningであり、実測後に再評価する。通常stopはsave失敗、exit 137、SIGKILL、process/listener残存、mount不明でEC2停止へ進まない。
 
+### Phase 2b-1 ownership migration contract
+
+既存`server.properties`は`0:993` / `0640`であり、UID/GID drop後のitzgからはread可能だがwrite不能である。実dataへの最初のitzg起動前に、Host Runtimeは次をすべて満たす場合だけ対象一件のownerを`993:993`へ変更し、mode `0640`とcontentを維持する。
+
+- Phase 1 Minecraft、Java/cgroup process、25565/25575/25585 listenerがすべて停止済み。
+- data EBS、UUID、XFS mountが期待値と一致する。
+- 対象pathがallowlist内の`server.properties`そのもの。
+- regular file、non-symlink、`0:993` / `0640`、extended ACLなしが完全一致する。
+- recursive chown、directory/world/他fileのownership変更、properties本文の編集を行わない。
+- postflightで`993:993` / `0640`、regular/non-symlink、content digest不変を確認する。
+
+rollback時は同じ停止・mount条件下で対象一件をcontent不変のまま`0:993` / `0640`へ戻す。これはMinecraft内部形式の管理ではなくHost RuntimeのLinux ownership migrationであり、migration後のproperties realizationはitzgの公開入力へ委譲する。
+
+Phase 2b current memory inputはcontainer `2816MiB`、`INIT_MEMORY=1G`、`MAX_MEMORY=2G`とする。値はminimal Vanilla実測用のProvisional tuningであり、恒久的resource classではない。
+
 ## 17. Package Manifest v1
 
 複数ゲームフェーズで正式導入する。

@@ -101,9 +101,9 @@ host_runtime:
     gid: null # Observation Required from the existing data EBS.
     skip_chown_data: true
   memory:
-    container_limit: 3GiB
+    container_limit: 2816MiB
     jvm_initial: 1G
-    jvm_maximum: 2304M
+    jvm_maximum: 2G
   timeouts:
     explicit_save: 60
     itzg_stop_duration: 120

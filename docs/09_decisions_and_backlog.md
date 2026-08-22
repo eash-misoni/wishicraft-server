@@ -10,6 +10,18 @@
 
 ## 2. 採用済み決定
 
+### D-061 Phase 2b-1 server.properties ownership migrationと安全側memory初期値
+
+- **状態:** Accepted（一部はProvisional / Deferred）
+- **日付:** 2026-08-22
+- **観測:** 既存game directoryはnumeric `993:993`、通常fileの大半も`993:993`だが、`server.properties`だけが`0:993` / `0640`だった。extended ACL、symlink、special fileは存在しない。固定itzg release `2026.7.2`はroot entrypointから`gosu`でUID/GID 993へdropした後にmc-image-helper 1.62.1でpropertiesを更新するため、既存`0:993` / `0640`は読めても変更時にpermission errorとなる。
+- **Decision:** Phase 1 Minecraft完全停止後、一回限りのHost Runtime Linux ownership migrationとして`server.properties`一件だけを`0:993` / `0640`から`993:993` / `0640`へ変更する。regular file、non-symlink、expected owner/mode完全一致、extended ACLなしをpreconditionとし、contentを変更せず、recursive chownを禁止し、postflightでowner/modeを再確認する。以後のMinecraft内部形式realizationはitzgへ委譲する。
+- **Rollback:** Phase 2停止、process/listener消滅、mount identity正常を確認した後、contentを変更せず`server.properties`一件を`0:993` / `0640`へ戻せることをrollback契約とする。Phase 1 artifactは新経路の同等性確認までdisable/removeしない。
+- **Provisional memory:** Phase 2b dev最小Vanillaのcurrent targetをcontainer `2816 MiB`、Xms `1G`、Xmx `2G`とする。D-060の`3 GiB` / `2304M`初期案を置き換えるが、恒久的architecture invariantではない。target host上のDocker/itzg起動peak、native memory、OOM event、save/stopを実測して再評価する。
+- **Validation:** 実data適用前に、固定tag+digest、linux/amd64、synthetic fixtureだけを使うCI integration testを必須とする。`0:993` / `0640`のpermission failure、`993:993` / `0640`での更新、inode/mode/ACL、`SKIP_CHOWN_DATA=true` sentinel、同一input restart、RCON disabled時のsecret artifact不存在を検証する。
+- **Deferred:** `RCON_PASSWORD_FILE`、`UMASK=0077`、`.rcon-cli.env`、`.rcon-cli.yaml`のsecurity integrationはRCON command path導入前に決定・検証し、Phase 2b最小起動のblockerにしない。
+- **Decision Needed:** Phase 2 target lock `2023.12.20260724`はPhase 1 as-built `2023.12.20260803.3`より古い。target EC2作成直前に現在のAmazon公式AL2023 release/AMIをread-onlyで再確認し、旧lockを意図的に維持するか、新releaseへlock更新して再validationするかを人間reviewする。その停止境界までreleaseを暗黙に変更しない。
+
 ### D-060 Phase 2a Host Runtime static contract
 
 - **状態:** Accepted（一部の値はProvisional / Observation Required）

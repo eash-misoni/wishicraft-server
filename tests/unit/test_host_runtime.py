@@ -14,6 +14,7 @@ from wishicraft.host_runtime import RenderedHostRuntime, render_boot_time_artifa
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 HOST_RUNTIME = REPOSITORY_ROOT / "infrastructure" / "host_runtime"
+INTEGRATION_TEST = REPOSITORY_ROOT / "tests" / "integration" / "test_itzg_ownership.sh"
 
 
 def _render() -> RenderedHostRuntime:
@@ -71,7 +72,7 @@ def test_rendered_compose_has_only_the_minecraft_public_port_and_safe_lifecycle(
     assert service["image"].startswith("ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:")
     assert service["pull_policy"] == "never"
     assert service["restart"] == "no"
-    assert service["mem_limit"] == "3GiB"
+    assert service["mem_limit"] == "2816MiB"
     assert service["stop_grace_period"] == "150s"
     assert service["ports"] == ["25565:25565/tcp"]
     assert service["volumes"] == [
@@ -86,7 +87,7 @@ def test_rendered_compose_has_only_the_minecraft_public_port_and_safe_lifecycle(
         "VERSION=26.2",
         "TYPE=VANILLA",
         "INIT_MEMORY=1G",
-        "MAX_MEMORY=2304M",
+        "MAX_MEMORY=2G",
         "SKIP_CHOWN_DATA=true",
         "STOP_DURATION=120",
         "ENABLE_RCON=false",
@@ -110,7 +111,7 @@ def test_renderer_rejects_unpinned_image_and_insufficient_memory() -> None:
             configuration.project, unpinned, observed_uid=991, observed_gid=991
         )
 
-    unsafe_memory = _changed_stage("host_runtime.memory.container_limit", "2304M")
+    unsafe_memory = _changed_stage("host_runtime.memory.container_limit", "2G")
     with pytest.raises(ConfigValidationError, match="greater than JVM"):
         render_boot_time_artifacts(
             configuration.project, unsafe_memory, observed_uid=991, observed_gid=991
@@ -237,3 +238,16 @@ def test_static_shutdown_artifacts_match_provisional_timeout_contract() -> None:
     assert "TimeoutStopSec=180" in (HOST_RUNTIME / "wishicraft-host-runtime.service").read_text(
         encoding="utf-8"
     )
+
+
+def test_docker_integration_contract_is_fixed_and_synthetic() -> None:
+    script = INTEGRATION_TEST.read_text(encoding="utf-8")
+
+    assert "2026.7.2-java25@sha256:6ec1110e" in script
+    assert "--platform linux/amd64" in script
+    assert "SKIP_CHOWN_DATA=true" in script
+    assert "SETUP_ONLY=true" in script
+    assert "ENABLE_RCON=false" in script
+    assert "/srv/minecraft" not in script
+    assert "RCON_PASSWORD" not in script
+    assert "chown -R" not in script

@@ -266,6 +266,12 @@ AWS制御面から呼び出す安定したHost Runtime interfaceを、itzg/docke
 
 AWS適用前のrepository-only単位として、platform/runtime lock、AL2023標準Docker + checksum固定Compose installer、numeric identity/filesystem preflight、restartなしCompose/systemd artifact、timeout scope、secret-free canonical renderer、static/local testを作る。AMI IDと既存EBS UID/GIDはObservation Requiredのまま推測しない。RCON command path、secret injection、desired/rendered/appliedの永続化、旧runtime退役は後続単位とする。
 
+### Phase 2b-1 scope
+
+実data変更前のcompatibility gateとして、GitHub-hosted Linux x86_64 runner上で固定itzg tag+digestを使用するsynthetic Docker integration testを行う。`SETUP_ONLY=true`でMinecraft processを起動せず、既存`server.properties` ownershipの失敗再現、一件migration後の更新、`SKIP_CHOWN_DATA`、restart idempotency、RCON disabled時のsecret artifact不存在を検証する。実world、実properties、AWS、EC2、SSM、secretは使用しない。
+
+Phase 2b実機適用前には、target AL2023 lock `2023.12.20260724`がPhase 1 instanceの`2023.12.20260803.3`より古いことをreviewし、現在の公式releaseをread-only再確認してlock維持または更新を決定する。review前にtarget EC2を作成しない。
+
 ### Phase 1 migration inventory
 
 | 分類 | Phase 1実装 | Phase 2以降の扱い |

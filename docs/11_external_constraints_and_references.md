@@ -197,6 +197,8 @@ EBS volumeは同じAvailability ZoneのEC2へ接続する。Linux上のdevice na
 - Docker Engineは固定AL2023 releaseの標準repositoryに含まれる`docker` packageを使用し、導入されたNEVRAを記録する。
 - Composeは公式CLI pluginを使用する。Phase 2a lockはDocker公式repositoryでも固定値が確認できるv5.4.0 x86_64とSHA-256を使用する。
 - itzgは`2026.7.2-java25`のGHCR manifest digestを固定する。Minecraft 26.2はJava 25を要求する。
+- 固定releaseのentrypointはrootでUID/GIDを設定し、`SKIP_CHOWN_DATA=true`なら`/data`のrecursive chownをskipした後、`gosu`でruntime UID/GIDへdropする。server.properties setupとmc-image-helperはdrop後に実行される。
+- `SETUP_ONLY=true`はserver artifactとconfigurationを準備した後、Minecraft Java process起動前に正常終了する。Phase 2b-1ではこの公式境界をsynthetic ownership testに使用する。
 
 公式資料:
 
@@ -208,6 +210,9 @@ EBS volumeは同じAvailability ZoneのEC2へ接続する。Linux上のdevice na
 - [itzg Java image variants](https://docker-minecraft-server.readthedocs.io/en/latest/versions/java/)
 - [itzg data directory](https://docker-minecraft-server.readthedocs.io/en/latest/data-directory/)
 - [itzg stop duration](https://docker-minecraft-server.readthedocs.io/en/latest/configuration/misc-options/)
+- [itzg 2026.7.2 startup identity](https://github.com/itzg/docker-minecraft-server/blob/2026.7.2/scripts/start)
+- [itzg 2026.7.2 server.properties setup](https://github.com/itzg/docker-minecraft-server/blob/2026.7.2/scripts/start-setupServerProperties)
+- [mc-image-helper 1.62.1 properties writer](https://github.com/itzg/mc-image-helper/blob/1.62.1/src/main/java/me/itzg/helpers/properties/SetPropertiesCommand.java)
 
 ## 11. Amazon Corretto 25 on Amazon Linux 2023
 

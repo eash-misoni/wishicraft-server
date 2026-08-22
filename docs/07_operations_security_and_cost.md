@@ -122,6 +122,8 @@ systemd、Docker/Compose、itzgのrestart policyを重ねず、Control Planeの�
 
 Phase 2aではHost Runtime unitをboot enableせず、systemd `Restart=no`、Compose `restart: "no"`、`pull_policy: never`とする。start前にdata mount guard、filesystem preflight、Phase 1 `minecraft.service`非activeを確認する。既存worldへrecursive chownを行わず、観測済みnumeric UID/GIDと`SKIP_CHOWN_DATA=true`を使用する。memoryと停止timeoutはD-060のProvisional初期値であり、恒久的制約ではない。
 
+Phase 2b-1の観測と固定image検証により、`server.properties`一件だけを`0:993` / `0640`から`993:993` / `0640`へ移すD-061を採用した。contentを変更せず、Phase 1完全停止、mount identity、regular/non-symlink、owner/mode、ACLをfail-closedで照合する。current memory targetはcontainer `2816 MiB`、Xms `1G`、Xmx `2G`へ安全側に下げるが、実負荷/OOM観測までProvisionalとする。
+
 ## 5. Secret管理
 
 秘密情報:

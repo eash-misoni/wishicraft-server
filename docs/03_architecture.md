@@ -13,6 +13,8 @@ Phase 2以降は[itzg責務境界](architecture/itzg-responsibility-boundary.md)
 
 Phase 2aはAWS適用前のstatic Host Runtime契約である。固定AL2023 release、Compose checksum、itzg release tag/digest、initial tuning値からsecret-free artifactをrenderし、mount/identity/Phase 1 interlockを満たした場合だけ明示的なCompose操作を許す。Phase 1 `minecraft.service`はrollback先として残し、新unitはboot enableも自動restartも行わない。region固有AMI name/IDと既存EBS UID/GIDはObservation Requiredであり、未観測のままhostへ適用しない。
 
+Phase 2b-1では既存EBSのnumeric identity `993:993`を観測済みとし、`server.properties`だけに存在する`0:993` / `0640`を、Phase 1完全停止後の一回限りのHost Runtime migrationで`993:993` / `0640`へ変更する。Minecraft properties本文は編集せず、以後のrealizationはitzgへ委譲する。current dev memory targetはProvisionalなcontainer `2816 MiB`、Xms `1G`、Xmx `2G`である。
+
 初回実用版では、複数ゲームやWeb管理画面を実装せず、単一バニラゲームのDiscord start/status/stopを端から端まで完成させる。
 
 ## 2. 初回実用版の全体構成

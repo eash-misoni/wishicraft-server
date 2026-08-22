@@ -168,6 +168,10 @@ Phase 2開始前に、itzg image tag/digest、Docker Engine / Compose固定方�
 
 Phase 2aではD-060により、devのAL2023 release、architecture、Compose release/checksum、itzg Java 25 release tag/digest、Minecraft 26.2、initial memory、停止timeoutを`host_runtime`へ記録した。region固有AMI name/IDと既存data EBSのnumeric UID/GIDはObservation Requiredとして`null`を維持する。Docker packageは固定AL2023標準repositoryを正本とし、RPM NEVRAを独立したユーザー設定として二重管理せず、導入時の検証結果として記録する。Phase 1 `compute`と`minecraft_distribution`はas-built値として維持する。
 
+Phase 2b-1ではD-061により、dev current memory targetをcontainer `2816MiB`、Xms `1G`、Xmx `2G`へ更新した。これはminimal Vanilla用Provisional tuningであり、Phase 1 `compute.java_xmx=3G`とは別のtarget値である。既存EBS identityは`993:993`と観測したがstage設定のUID/GID `null`は、実機apply artifactへ観測値を明示入力する現行契約を維持するため自動補完しない。
+
+Phase 2 target AL2023 `2023.12.20260724`はPhase 1 as-built AMI release `2023.12.20260803.3`より古い。次のtarget EC2作成前にAmazon公式の現在release/AMIをread-onlyで再確認し、lock維持または更新をreviewする。今回のcompatibility passでは値を変更しない。
+
 Phase 7前:
 
 - `config/stages/dev.yaml`のGuild/channel/role/Application ID/Public KeyがDiscord Developer Portalと実際のGuild設定に一致することを確認する

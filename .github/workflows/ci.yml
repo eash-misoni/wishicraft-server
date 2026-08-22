@@ -26,3 +26,13 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run mypy src infrastructure tests
       - run: npx --no-install cdk synth --context stage=dev
+
+  host-runtime-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shellcheck integration harness
+        run: shellcheck tests/integration/test_itzg_ownership.sh
+      - name: Verify fixed itzg image and synthetic ownership migration
+        run: tests/integration/test_itzg_ownership.sh
