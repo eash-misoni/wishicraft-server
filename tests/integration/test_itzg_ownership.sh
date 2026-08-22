@@ -4,7 +4,13 @@ set -euo pipefail
 readonly IMAGE='ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77'
 readonly EXPECTED_DIGEST='sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77'
 
-fail() { printf '%s\n' "Phase 2b-1 integration failure: $*" >&2; exit 1; }
+fail() {
+  printf '%s\n' "Phase 2b-1 integration failure: $*" >&2
+  if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+    printf '::error::Phase 2b-1 integration failure: %s\n' "$*" >&2
+  fi
+  exit 1
+}
 fail_with_container_log() {
   tail -n 80 "$failure_log" >&2
   fail "$1"
@@ -18,6 +24,7 @@ require_meta() {
 
 command -v docker >/dev/null || fail 'Docker is required'
 command -v getfacl >/dev/null || fail 'getfacl is required on the CI runner'
+docker buildx version >/dev/null || fail 'Docker Buildx is required for manifest verification'
 
 test_root=$(mktemp -d "${RUNNER_TEMP:-/tmp}/wishicraft-itzg.XXXXXX")
 data_dir="$test_root/data"
@@ -31,13 +38,17 @@ cleanup() {
 }
 trap cleanup EXIT
 
+remote_inspect=$(docker buildx imagetools inspect "$IMAGE") || \
+  fail 'fixed image manifest inspection failed'
+awk -v digest="$EXPECTED_DIGEST" '$1 == "Digest:" && $2 == digest {found=1} END {exit !found}' \
+  <<<"$remote_inspect" || \
+  fail 'remote manifest did not report the fixed top-level digest'
+
 pull_output=$(docker pull --platform linux/amd64 "$IMAGE" 2>&1) || {
   printf '%s\n' "$pull_output" >&2
   fail 'fixed image pull failed'
 }
 printf '%s\n' "$pull_output"
-grep -F "Digest: $EXPECTED_DIGEST" <<<"$pull_output" >/dev/null || \
-  fail 'pull result did not report the fixed digest'
 inspect_arch=$(docker image inspect --format '{{.Architecture}}' "$IMAGE")
 [[ "$inspect_arch" == amd64 ]] || fail "image architecture is $inspect_arch, expected amd64"
 
