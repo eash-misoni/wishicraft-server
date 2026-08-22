@@ -299,7 +299,7 @@
 - 取得済みドメインを`wishicraft.net`、Minecraft固定FQDNを`mc.wishicraft.net`とする。
 - devのHosted Zone IDは`config/stages/dev.yaml`を正本とする。prodはprod設定が確定するまで`null`を維持する。
 - `mc-dev.wishicraft.net`のAレコードはPhase 0では作成しない。Phase 1で起動中EC2の現在の動的パブリックIPv4へ更新し、停止後に削除する。
-- 2026-08-22のread-only確認では`wishicraft.net`はdev AccountのRoute 53 Registered Domainsに存在し、登録operationは成功済み、auto-renewは有効である。一方、`.net` TLD authoritative serverは`NXDOMAIN`を返し、Hosted Zoneの4 NSへpublic delegationされていない。Hosted Zone内のAレコードが`INSYNC`でも、TLD delegationと通常resolverの一致を別gateとして確認する。
+- 2026-08-22、`wishicraft.net`の登録者メール確認後にcontact reachability `DONE`、domain status `ACTIVE`、`clientHold`解除を確認した。Registered DomainとHosted Zoneの4 NS、`.net`親委任、Hosted Zone authoritative回答、public resolverの`mc-dev.wishicraft.net A 13.231.152.70`が一致し、未完了operationとDSがないためPhase 1のDNS公開試験は合格とする。Hosted Zone内のAレコードが`INSYNC`でも、TLD delegationと通常resolverの一致を引き続き別gateとして扱う。
 - 同日のPhase 1検証では、第33回・第34回の正常保存証跡、第35回の再起動後host診断、およびクライアント目視により、停止前のworld変更がdata EBS上に保持されたことを確認した。data EBS／world永続化試験は合格とする。
 
 ### D-042 公開設定の正本と実行時配布

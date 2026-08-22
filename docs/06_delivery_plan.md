@@ -156,7 +156,7 @@ repository-root/
 
 制御系なしで、AWS上のMinecraftを人間が安全に起動・接続・停止できる状態にする。
 
-2026-08-22時点でdevのRCON firewall migration、Minecraft 26.2初回起動、whitelist修復、正常保存・停止、EC2停止・再起動を完了した。第33回・第34回でworld保存完了とprocess/listener消滅を確認し、再起動後の第35回read-only診断とクライアント目視で、停止前のworld変更が同じdata EBS上に保持されたことを確認した。data EBS／world永続化試験は合格である。固定FQDNはHosted Zone内のAレコードまで作成済みだが、public `.net` delegationが未成立のため公開DNS確認は未完了である。
+2026-08-22時点でdevのRCON firewall migration、Minecraft 26.2初回起動、whitelist修復、正常保存・停止、EC2停止・再起動を完了した。第33回・第34回でworld保存完了とprocess/listener消滅を確認し、再起動後の第35回read-only診断とクライアント目視で、停止前のworld変更が同じdata EBS上に保持されたことを確認した。data EBS／world永続化試験は合格である。登録者メール確認後に`clientHold`解除、`.net`親委任、Hosted Zone authoritative回答、public resolverのAレコード一致をread-onlyで確認し、固定FQDNのDNS公開試験も合格した。
 
 ### 最初の作業単位（完了）
 

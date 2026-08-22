@@ -71,7 +71,7 @@ Hosted Zoneが設定FQDNの親zoneであること、および対象recordが単�
 
 成功時stdoutはsecretを含まないJSONであり、少なくとも`stage`、`action`、`account`、`region`、`stack`、`instance_id`、`hosted_zone_id`、`record_name`、`record_type`、`ttl`、`public_ipv4`、`changed`、`change_id`、`final_status`を含む。診断はstderrへ出る。非zero終了時は成功JSONとして扱わない。DNS解決結果がCLI出力の`public_ipv4`と一致し、Minecraft接続を人間が確認してからオンライン完了とする。この確認はAWS実地検証であり、CIまたはsynthで完了扱いにしない。
 
-2026-08-22の実地確認では、Route 53 Hosted Zoneの4 authoritative NSは`mc-dev.wishicraft.net`を現在のEC2 IPv4へ解決したが、`.net` TLD authoritative serverと通常resolverは`wishicraft.net`を`NXDOMAIN`とした。Registered Domains上の登録成功とHosted Zone内のAレコードだけではオンライン完了にせず、registrar側nameserver設定、TLD delegation、通常resolverの順で一致を確認する。個人連絡先は診断ログへ出力しない。
+2026-08-22、登録者メール確認後にcontact reachability `DONE`、domain status `ACTIVE`、`clientHold`解除を確認した。Registered DomainとHosted Zoneの4 NSが一致し、`.net`親委任、4 authoritative NS、通常resolverのいずれも期待するDNS状態を返し、未完了operationとDSがないためPhase 1のDNS公開試験は合格である。今後もRegistered Domains上の登録成功とHosted Zone内のAレコードだけではオンライン完了にせず、registrar側nameserver設定、TLD delegation、通常resolverの順で一致を確認する。個人連絡先は診断ログへ出力しない。
 
 同日、第33回・第34回でMinecraft 26.2の`Saving chunks for level`、`All chunks are saved`、`All dimensions are saved`、MainPID／Java／listener 0を確認して正常停止とし、EC2停止後に再起動した。第35回read-only診断とクライアント目視で既存worldと停止前の変更が同じdata EBS上に保持されたため、Phase 1のdata EBS／world永続化試験は合格である。未生成のNether／Endを独立directoryとして要求しない。
 
