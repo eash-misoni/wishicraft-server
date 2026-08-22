@@ -141,6 +141,12 @@ verify_stopped() {
   [[ "$(pgrep -u minecraft -f 'java.*server\.jar' 2>/dev/null | wc -l | tr -d ' ')" == 0 ]] || return 1
   [[ "$(ss -H -ltn|awk '$4~/(25565|25575|25585)$/ {n++} END{print n+0}')" == 0 ]] || return 1
 }
+verify_approved_failed_stop() {
+  verify_stopped || return 1
+  [[ "$(systemctl show minecraft.service -p ActiveState --value)" == failed ]] || return 1
+  [[ "$(systemctl show minecraft.service -p Result --value)" == exit-code ]] || return 1
+  [[ "$(systemctl show minecraft.service -p ExecMainStatus --value)" == 143 ]] || return 1
+}
 verify_static() {
   findmnt -rn --target /srv/minecraft >/dev/null && [[ "$(findmnt -rn -o FSTYPE --target /srv/minecraft)" == xfs ]] || return 1
   hash_state "$JAR" root:root:644 "$JAR_BYTES" "$JAR_SHA" || return 1
@@ -172,6 +178,8 @@ if verify_runtime; then
   RUNTIME_STATE=active
 elif verify_stopped && [[ "$WHITELIST_STATE" == canonical || "$ENV_STATE" == canonical || "$GAME_SETUP_STATE" == canonical ]]; then
   RUNTIME_STATE=stopped_partial
+elif verify_approved_failed_stop && [[ "$WHITELIST_STATE" == approved_predecessor && "$ENV_STATE" == approved_predecessor && "$GAME_SETUP_STATE" == approved_predecessor ]]; then
+  RUNTIME_STATE=approved_failed_predecessor
 else
   fail RUNTIME 11
 fi

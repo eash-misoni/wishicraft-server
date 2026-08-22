@@ -20,6 +20,7 @@
 - 稼働中hostの修復は、whitelist、environment、game setupが承認済みpredecessorのbytes・SHA-256・metadataへ完全一致する場合だけ、通常停止とlistener停止確認後にatomic更新する。world、properties、secret、firewallは変更しない。
 - 第21回Run Commandは変更開始前の`FAIL:STATIC`で停止した。第22回read-only診断で全static predicateが正常と確認され、原因はtemporary file不存在時の`compgen` status 1が`verify_static`の戻り値へ漏れたshell制御不具合と確定した。正常時は明示的に0を返し、temporary file存在時だけ拒否する。
 - 第26回は通常停止後の`FAIL:STOP_STATE`でartifact更新前停止した。第27回read-only診断でJava／listenerは0、MainPID 0、world／firewallは正常だが、SIGTERM終了をsystemdが`failed`／status 143として保持したことを確認した。停止完了判定は`inactive`または`failed`を許容する一方、MainPID、Java process、25565／25575／25585 listenerが全て0であることを必須とする。
+- 第28回は3 artifactが全てapproved predecessorのままの既知停止状態を、旧`stopped_partial`分岐が受容せず`FAIL:RUNTIME`で変更前停止した。全predecessorに加え、systemd `failed`／`exit-code`／143、MainPID 0、Java／listener 0が完全一致する場合だけ`approved_failed_predecessor`として再開する。
 
 ### D-035 Minecraft初回起動のExecStartPreはprivileged read-only verifierに限定する
 

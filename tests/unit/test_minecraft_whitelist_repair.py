@@ -43,6 +43,10 @@ def test_repair_is_fail_closed_and_uses_known_predecessors() -> None:
     assert "verify_stopped" in source
     assert '[[ "$active_state" == inactive || "$active_state" == failed ]]' in source
     assert "systemctl show minecraft.service -p MainPID --value" in source
+    assert "verify_approved_failed_stop" in source
+    assert 'systemctl show minecraft.service -p ExecMainStatus --value)" == 143' in source
+    assert "RUNTIME_STATE=approved_failed_predecessor" in source
+    assert '"$WHITELIST_STATE" == approved_predecessor' in source
     assert (
         """if compgen -G "$SERVER/*.tmp.*" >/dev/null; then
     return 1
