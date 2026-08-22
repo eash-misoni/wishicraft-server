@@ -87,6 +87,11 @@ desired_state
 desired_game_id
 requested_operation_id
 desired_updated_at
+desired_revision
+rendered_revision
+render_digest
+applied_revision
+convergence_status
 ```
 
 規則:
@@ -104,6 +109,15 @@ desired_updated_at
 - start失敗後はDesired `RUNNING`と未達のObserved Stateを保持し、Health、Discrepancy、Last Errorで表す。
 - stop失敗後はDesired `STOPPED`と残存するEC2/MinecraftのObserved Stateを保持する。
 - 初期版では失敗を理由にDesired Stateを自動で元へ戻さず、無期限の自動修復も行わない。
+
+### Desired / Rendered / Applied revision
+
+- 妥当な変更要求をControl Planeが受理したtransactionで`desired_revision`を進める。apply成功まで旧revisionへ留めず、失敗時もrollbackしない。
+- canonicalなnon-secret itzg入力のrenderとvalidationが成功した後だけ`rendered_revision`と`render_digest`を進める。secret実値とその単純hashはdigest対象にしない。
+- runtimeへの反映をprobe等で実測した後だけ`applied_revision`を進める。
+- `desired_revision=N`、`applied_revision=N-1`、`convergence_status=APPLY_FAILED`のように未収束を保持できる。
+- convergence statusは`CONVERGED`、`PENDING_RENDER`、`RENDER_FAILED`、`PENDING_APPLY`、`APPLYING`、`APPLY_FAILED`、`VERIFYING`、`VERIFY_FAILED`、`UNKNOWN`を候補とする。詳細schemaと永続化はPhase 2後段で確定する。
+- Phase 2aはrender artifactとdigest生成までとし、DynamoDB更新やreconciliation state machineを実装しない。
 
 
 ## 4. Observed Infrastructure State

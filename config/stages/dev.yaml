@@ -76,6 +76,43 @@ operation:
 runtime:
   idle_shutdown_minutes: 30
 
+# Phase 2 target Host Runtime lock. Phase 1 compute/java/artifact values above remain as-built.
+host_runtime:
+  platform:
+    operating_system: amazon-linux-2023
+    al2023_release: "2023.12.20260724"
+    ami_name: null # Observation Required with the region-specific AMI ID.
+    ami_id: null # Observation Required before any AWS/EC2 application.
+    architecture: x86_64
+  compose:
+    version: "5.4.0"
+    url: https://github.com/docker/compose/releases/download/v5.4.0/docker-compose-linux-x86_64
+    sha256: 837fd1d35bf6a494f41b5b5988269a7be79de337cf1a1a6ff0e45ab51bb4e9be
+  image:
+    reference: ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77
+    release: 2026.7.2
+    java_variant: java25
+  minecraft:
+    version: "26.2"
+    type: VANILLA
+    eula_accepted: true
+  identity:
+    uid: null # Observation Required from the existing data EBS.
+    gid: null # Observation Required from the existing data EBS.
+    skip_chown_data: true
+  memory:
+    container_limit: 3GiB
+    jvm_initial: 1G
+    jvm_maximum: 2304M
+  timeouts:
+    explicit_save: 60
+    itzg_stop_duration: 120
+    compose_stop_grace_period: 150
+    systemd_stop: 180
+    host_runtime_wrapper: 300
+    ssm: 360
+    control_plane_wait: 420
+
 billing:
   dynamodb_mode: on_demand
 

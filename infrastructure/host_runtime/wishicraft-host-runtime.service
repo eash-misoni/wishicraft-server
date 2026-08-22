@@ -1,0 +1,16 @@
+[Unit]
+Description=Wishicraft itzg Host Runtime
+Requires=wishicraft-data-volume.service docker.service
+After=wishicraft-data-volume.service docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/wishicraft/host-runtime.env
+ExecStart=/usr/local/lib/wishicraft-host-runtime/start.sh
+ExecStop=/usr/local/lib/wishicraft-host-runtime/stop.sh
+TimeoutStartSec=300
+TimeoutStopSec=180
+Restart=no
+
+# Deliberately no [Install] section: Control Plane/Host Runtime starts it explicitly.

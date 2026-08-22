@@ -166,6 +166,8 @@ itzg採用後もEULA同意はoperator policy/gateとして維持する。承認�
 
 Phase 2開始前に、itzg image tag/digest、Docker Engine / Compose固定方法、container UID/GID、memory/JVM heap、lifecycle ownerとrestart/stop timeout、command path、secret injection、desired/applied schemaをDecisionとして確定する。既存値や`null`から推測しない。
 
+Phase 2aではD-060により、devのAL2023 release、architecture、Compose release/checksum、itzg Java 25 release tag/digest、Minecraft 26.2、initial memory、停止timeoutを`host_runtime`へ記録した。region固有AMI name/IDと既存data EBSのnumeric UID/GIDはObservation Requiredとして`null`を維持する。Docker packageは固定AL2023標準repositoryを正本とし、RPM NEVRAを独立したユーザー設定として二重管理せず、導入時の検証結果として記録する。Phase 1 `compute`と`minecraft_distribution`はas-built値として維持する。
+
 Phase 7前:
 
 - `config/stages/dev.yaml`のGuild/channel/role/Application ID/Public KeyがDiscord Developer Portalと実際のGuild設定に一致することを確認する

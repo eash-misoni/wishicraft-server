@@ -191,7 +191,25 @@ EBS volumeは同じAvailability ZoneのEC2へ接続する。Linux上のdevice na
 - [Make an Amazon EBS volume available for use](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-using-volumes.html)
 - [Attach an Amazon EBS volume to an instance](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-attaching-volume.html)
 
-## 10. Amazon Corretto 25 on Amazon Linux 2023
+## 10. Phase 2 Host Runtime artifacts
+
+- AL2023 `2023.12.20260724` releaseはdeterministic repository update modelを持つ。Phase 2aではreleaseを固定し、region固有AMI name/IDはAWSアクセス前のObservation Requiredとする。
+- Docker Engineは固定AL2023 releaseの標準repositoryに含まれる`docker` packageを使用し、導入されたNEVRAを記録する。
+- Composeは公式CLI pluginを使用する。Phase 2a lockはDocker公式repositoryでも固定値が確認できるv5.4.0 x86_64とSHA-256を使用する。
+- itzgは`2026.7.2-java25`のGHCR manifest digestを固定する。Minecraft 26.2はJava 25を要求する。
+
+公式資料:
+
+- [AL2023 2023.12.20260724 release notes](https://docs.aws.amazon.com/linux/al2023/release-notes/relnotes-2023.12.20260724.html)
+- [AL2023 repository updates](https://docs.aws.amazon.com/linux/al2023/ug/managing-repos-os-updates.html)
+- [Docker Compose plugin installation](https://docs.docker.com/compose/install/linux/)
+- [Docker Compose v5.4.0 artifact lock](https://github.com/docker-library/repo-info/blob/master/repos/docker/remote/dind-rootless.md)
+- [itzg image versions](https://github.com/itzg/docker-minecraft-server/pkgs/container/minecraft-server/versions?filters%5Bversion_type%5D=tagged)
+- [itzg Java image variants](https://docker-minecraft-server.readthedocs.io/en/latest/versions/java/)
+- [itzg data directory](https://docker-minecraft-server.readthedocs.io/en/latest/data-directory/)
+- [itzg stop duration](https://docker-minecraft-server.readthedocs.io/en/latest/configuration/misc-options/)
+
+## 11. Amazon Corretto 25 on Amazon Linux 2023
 
 Amazon Linux 2023では標準package managerで`java-25-amazon-corretto-headless`を導入できる。headless variantはserver workload向けで、headful、devel、JModsは初期構成へ含めない。
 
@@ -204,7 +222,7 @@ Amazon Linux 2023では標準package managerで`java-25-amazon-corretto-headless
 
 - [Amazon Corretto 25 Installation Instructions for Amazon Linux 2023](https://docs.aws.amazon.com/corretto/latest/corretto-25-ug/amazon-linux-install.html)
 
-## 11. Minecraft Java server artifactとEULA
+## 12. Minecraft Java server artifactとEULA
 
 Minecraft Java Edition 26.2のserver artifactは、公式release page、Mojang version manifest、同version metadataを照合して固定する。runtimeでmanifestや`latest`を参照せず、download時にmetadataのSHA-1とsize、およびリポジトリ固定SHA-256を確認する。
 
@@ -216,7 +234,7 @@ EULA同意は人間の明示承認を必要とし、`eula=true`の設定はそ�
 - [Minecraft EULA](https://www.minecraft.net/en-us/eula)
 - [Mojang version manifest](https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)
 
-## 12. AWS料金・quota
+## 13. AWS料金・quota
 
 料金、free tier、service quotaは変更される。
 
@@ -241,7 +259,7 @@ EULA同意は人間の明示承認を必要とし、`eula=true`の設定はそ�
 - EC2 running時間を監視する。
 - S3 lifecycleを設定する。
 
-## 12. 実装前再確認チェック
+## 14. 実装前再確認チェック
 
 各Phase開始時に次を確認する。
 

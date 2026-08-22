@@ -637,6 +637,43 @@ minecraft-heartbeat.timer
 
 具体的なdesired/applied schema、idempotency、apply result、command adapter、secret受渡しはDecision Neededであり、本節から推測しない。
 
+### Phase 2a canonical boot-time artifact
+
+Phase 2aのrendererはGit管理lock、operator EULA gate、観測済みnumeric UID/GIDから、決定的なCompose YAML、runtime environment、canonical JSON manifestを生成する。
+
+- `VERSION=26.2`、`TYPE=VANILLA`、Java 25 release image + digestを必須とする。
+- `LATEST`、`SNAPSHOT`、digestなしimageを拒否する。
+- `/srv/minecraft/games/game-vanilla-main/server`だけをcontainer `/data`へbind mountする。
+- secret実値、RCON password、secretの単純hashをartifactまたはrender digestへ含めない。
+- manifestは非secret artifactそれぞれのSHA-256を持ち、canonical JSON自体のSHA-256をrender digestとする。
+- UID/GIDは既存data EBSのread-only観測値を引数として要求し、stage設定のnullを推測で補完しない。
+- Phase 2aではRCONを明示的に無効化する。container-local command pathとsecret injectionを導入する後続作業で再評価する。
+
+apply分類は次を維持する。
+
+| 分類 | Phase 2a |
+|---|---|
+| boot-time | canonical rendererとstatic artifactを実装 |
+| restart-required | 分類境界のみ。Control Plane orchestrationはDeferred |
+| runtime operation | 分類境界のみ。RCON/whitelist command pathはDeferred |
+
+### Phase 2a shutdown scope
+
+explicit save 60秒はsystemd stopの外側で将来の`stop_game` adapterが実行する。systemd `ExecStop`はCompose stopだけを包み、Composeはitzg/Minecraft graceful stopを包む。
+
+```text
+save 60
+→ systemd stop 180
+   → Compose grace 150
+      → itzg STOP_DURATION 120
+→ verification 30
+→ Host wrapper 300
+→ SSM 360
+→ Control Plane wait 420
+```
+
+値はPhase 2 dev初期tuningであり、実測後に再評価する。通常stopはsave失敗、exit 137、SIGKILL、process/listener残存、mount不明でEC2停止へ進まない。
+
 ## 17. Package Manifest v1
 
 複数ゲームフェーズで正式導入する。

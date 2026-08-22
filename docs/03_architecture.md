@@ -11,6 +11,8 @@ Phase 1はhost上のJava、固定server.jar、`minecraft.service`、host firewal
 
 Phase 2以降は[itzg責務境界](architecture/itzg-responsibility-boundary.md)を正本とし、Control Plane（Wishicraft）、Host Runtime、Minecraft Runtime（itzg/docker-minecraft-server）の3層へ移行する。Wishicraftはdesired state、policy、認可、状態遷移、AWS resource、mapping/apply orchestrationを持つ。Host RuntimeはAL2023、EBS mount、Docker/Compose、systemd、secret injection、container lifecycleを持つ。Minecraft固有の取得・設定・互換性・起動停止は原則itzgへ委譲する。
 
+Phase 2aはAWS適用前のstatic Host Runtime契約である。固定AL2023 release、Compose checksum、itzg release tag/digest、initial tuning値からsecret-free artifactをrenderし、mount/identity/Phase 1 interlockを満たした場合だけ明示的なCompose操作を許す。Phase 1 `minecraft.service`はrollback先として残し、新unitはboot enableも自動restartも行わない。region固有AMI name/IDと既存EBS UID/GIDはObservation Requiredであり、未観測のままhostへ適用しない。
+
 初回実用版では、複数ゲームやWeb管理画面を実装せず、単一バニラゲームのDiscord start/status/stopを端から端まで完成させる。
 
 ## 2. 初回実用版の全体構成

@@ -244,7 +244,7 @@ EC2起動
 
 ## 5. Phase 2 — itzg Host Runtime境界
 
-- **状態:** Not Started（Phase 1完了後のitzg設計移行を先行）
+- **状態:** In Progress（Phase 2a repository-only Host Runtime static contract）
 
 ### 目的
 
@@ -261,6 +261,10 @@ AWS制御面から呼び出す安定したHost Runtime interfaceを、itzg/docke
 7. Control Plane向けの`probe_game` / `start_game` / `stop_game`相当adapterとunit testを作る。
 8. SSM Run Commandによるdev確認は明示承認を得て別作業で実施する。
 9. 新経路で代替済みの独自Minecraft Runtimeだけを個別に退役する。
+
+### Phase 2a scope
+
+AWS適用前のrepository-only単位として、platform/runtime lock、AL2023標準Docker + checksum固定Compose installer、numeric identity/filesystem preflight、restartなしCompose/systemd artifact、timeout scope、secret-free canonical renderer、static/local testを作る。AMI IDと既存EBS UID/GIDはObservation Requiredのまま推測しない。RCON command path、secret injection、desired/rendered/appliedの永続化、旧runtime退役は後続単位とする。
 
 ### Phase 1 migration inventory
 

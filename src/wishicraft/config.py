@@ -30,6 +30,7 @@ STAGE_REQUIRED_MAPPINGS: Final = (
     "timeouts_seconds",
     "operation",
     "runtime",
+    "host_runtime",
     "billing",
     "monitoring",
 )
@@ -481,6 +482,22 @@ _OPTIONAL_STAGE_STRINGS: Final = (
     "storage.data.filesystem_type",
     "storage.data.mount_path",
     "billing.dynamodb_mode",
+    "host_runtime.platform.operating_system",
+    "host_runtime.platform.al2023_release",
+    "host_runtime.platform.ami_name",
+    "host_runtime.platform.ami_id",
+    "host_runtime.platform.architecture",
+    "host_runtime.compose.version",
+    "host_runtime.compose.url",
+    "host_runtime.compose.sha256",
+    "host_runtime.image.reference",
+    "host_runtime.image.release",
+    "host_runtime.image.java_variant",
+    "host_runtime.minecraft.version",
+    "host_runtime.minecraft.type",
+    "host_runtime.memory.container_limit",
+    "host_runtime.memory.jvm_initial",
+    "host_runtime.memory.jvm_maximum",
 )
 _POSITIVE_STAGE_INTS: Final = (
     "network.minecraft_port",
@@ -495,6 +512,15 @@ _POSITIVE_STAGE_INTS: Final = (
     "operation.lock_renew_interval_seconds",
     "runtime.idle_shutdown_minutes",
     "monitoring.log_retention_days",
+    "host_runtime.identity.uid",
+    "host_runtime.identity.gid",
+    "host_runtime.timeouts.explicit_save",
+    "host_runtime.timeouts.itzg_stop_duration",
+    "host_runtime.timeouts.compose_stop_grace_period",
+    "host_runtime.timeouts.systemd_stop",
+    "host_runtime.timeouts.host_runtime_wrapper",
+    "host_runtime.timeouts.ssm",
+    "host_runtime.timeouts.control_plane_wait",
 )
 
 

@@ -10,6 +10,20 @@
 
 ## 2. 採用済み決定
 
+### D-060 Phase 2a Host Runtime static contract
+
+- **状態:** Accepted（一部の値はProvisional / Observation Required）
+- **日付:** 2026-08-22
+- **決定:** Phase 1 runtimeをrollback先として維持したまま、Phase 2aでitzg向けHost Runtimeのplatform lock、Docker/Compose installer、filesystem preflight、Compose/systemd lifecycle、secret-free canonical rendererをrepository内に構築する。AWS/EC2への適用、Docker install、image pull、container起動、既存world変更は別作業とする。
+- **Accepted:** itzgはJava 25のrelease tag + digest、Minecraft `VERSION=26.2`、既存data EBSの観測済みnumeric UID/GIDを使用、recursive chown禁止、`SKIP_CHOWN_DATA=true`、`restart: "no"`、Host Runtimeだけがcontainer lifecycleを実行する。管理portをpublishせず、boot-time / restart-required / runtime operationを分離する。
+- **Desired/applied:** Control Planeが妥当な要求を受理した時点でdesired revisionを進める。render成功後だけrendered revision/digest、runtime反映を実測した後だけapplied revisionを進める。Phase 2aはcanonical renderとnon-secret digestまでとし、revision永続化は後続Phaseへ送る。
+- **Provisional:** dev初期値はcontainer 3 GiB、Xms 1G、Xmx 2304M。停止budgetはexplicit save 60秒、itzg 120秒、Compose 150秒、systemd 180秒、Host wrapper 300秒、SSM 360秒、Control Plane 420秒。恒久的architecture invariantではなくdev実測後に再評価する。
+- **Platform lock:** AL2023 release/AMI、architecture、Compose version/checksum、itzg tag/digestをGitで固定する。Docker Engineは固定AL2023 releaseの標準repositoryから導入し、NEVRAを独立した設定正本にせず、実際の導入結果を検証・記録する。
+- **Observation Required:** dev既存EBSのUID/GID、ACL/owner/file type、ap-northeast-1のrelease-specific AMI name/ID、導入Docker NEVRA、dev停止時間・memory/OOM余裕。未知値は推測せずhost適用前に停止する。
+- **Deferred:** RCON command path/client、secret injection、whitelist runtime apply、desired/rendered/applied永続schema、backup、Mod/Plugin/Modpack、旧runtime退役順序。
+- **移行境界:** Phase 1 `minecraft.service`がactiveならCompose start前にfail-closedする。新unitをboot enableせず、自動restartしない。新経路のdev同等性とrollback検証前にPhase 1 artifactをdisable/removeしない。
+- **公式根拠:** `docs/11_external_constraints_and_references.md`のHost Runtime節。
+
 ### D-059 Phase 1後のMinecraft Runtimeにitzgを採用する
 
 - **状態:** Accepted
@@ -547,16 +561,14 @@
 
 Phase 0とPhase 1は完了した。Phase 1の意図的SIGTERM終了契約はas-built課題として履歴を維持するが、直接Java process向け解決を先行しない。Phase 2ではitzg移行後のgraceful shutdown、container exit、Host Runtime service結果を一体で定義する。
 
-Phase 2開始前のDecision Needed:
+Phase 2aでD-060へ確定した項目を除くDecision Needed:
 
 | 項目 | 決める内容 |
 |---|---|
-| itzg image | release tag / digest、更新・rollback policy |
-| Docker / Compose | AL2023への導入元、version固定、更新方法 |
-| identity / storage | container UID/GID、data EBS所有権、既存worldの安全な接続方法 |
-| resource limits | t3a.medium上のcontainer memory、JVM heap、OOM条件 |
-| lifecycle | systemd/Compose/itzgのowner、restart値、stop timeout、正常終了判定 |
-| desired state | Git固定値とControl Plane storeのkey境界、desired/applied schema |
+| identity observation | containerへ渡す既存data EBSのnumeric UID/GID、ACL/owner/file type |
+| platform observation | release-specific AMI ID、導入Docker NEVRA |
+| resource tuning | dev実測に基づくmemory/timeout/OOM初期値の確定 |
+| desired state | desired/rendered/applied revisionの永続schemaとControl Plane統合 |
 | apply | boot-time設定とruntime operationの分類、idempotency、反映確認 |
 | command path | SSM→host-local→container-localの具体方式、RCON client/library |
 | secret injection | SecureString取得後の最小露出方式、更新・破棄方法 |

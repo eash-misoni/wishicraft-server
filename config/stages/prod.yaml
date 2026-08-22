@@ -70,6 +70,42 @@ operation:
 runtime:
   idle_shutdown_minutes: 30
 
+host_runtime:
+  platform:
+    operating_system: amazon-linux-2023
+    al2023_release: null
+    ami_name: null
+    ami_id: null
+    architecture: x86_64
+  compose:
+    version: null
+    url: null
+    sha256: null
+  image:
+    reference: null
+    release: null
+    java_variant: java25
+  minecraft:
+    version: null
+    type: VANILLA
+    eula_accepted: null
+  identity:
+    uid: null
+    gid: null
+    skip_chown_data: true
+  memory:
+    container_limit: null
+    jvm_initial: null
+    jvm_maximum: null
+  timeouts:
+    explicit_save: 60
+    itzg_stop_duration: 120
+    compose_stop_grace_period: 150
+    systemd_stop: 180
+    host_runtime_wrapper: 300
+    ssm: 360
+    control_plane_wait: 420
+
 billing:
   dynamodb_mode: on_demand
 

@@ -32,3 +32,9 @@ prod synthとdeployは初期リリース直前まで行いません。deploy、s
 ## CI
 
 GitHub ActionsはPython 3.12、lock済みCDK CLIでpytest、Ruff、mypy、dev向けCDK synthを実行します。AWS credential、secret、prod deployは使用しません。
+
+## Phase 2a Host Runtime static artifacts
+
+`config/stages/dev.yaml`の`host_runtime`は、AL2023 release、Compose checksum、itzg release image digest、Minecraft 26.2、initial memory/timeoutを固定する。`wishicraft.host_runtime.render_boot_time_artifacts`は、実機preflightで観測したnumeric UID/GIDを受け取り、secretを含まないcanonicalな`compose.yaml`、`runtime.env`、manifest、render digestを新しい専用output rootへ生成する。
+
+Phase 2aのrepository validationはDocker Engineを必要としない。Dockerが既に存在する環境では生成後の`docker compose config`を追加確認できるが、validationのためにDockerをinstall、image pull、container起動してはならない。AMI name/IDと既存data EBS UID/GIDはObservation Requiredであり、未観測のままAWS/hostへ適用しない。

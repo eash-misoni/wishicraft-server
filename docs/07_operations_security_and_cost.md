@@ -120,6 +120,8 @@ Phase 2以降は、systemdがdata EBS mount完了後のHost Runtime起動順序�
 
 systemd、Docker/Compose、itzgのrestart policyを重ねず、Control Planeの停止要求を下位restartが打ち消さない構成にする。具体値はPhase 2 Decisionで確定する。
 
+Phase 2aではHost Runtime unitをboot enableせず、systemd `Restart=no`、Compose `restart: "no"`、`pull_policy: never`とする。start前にdata mount guard、filesystem preflight、Phase 1 `minecraft.service`非activeを確認する。既存worldへrecursive chownを行わず、観測済みnumeric UID/GIDと`SKIP_CHOWN_DATA=true`を使用する。memoryと停止timeoutはD-060のProvisional初期値であり、恒久的制約ではない。
+
 ## 5. Secret管理
 
 秘密情報:
