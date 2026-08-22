@@ -150,13 +150,13 @@ repository-root/
 
 ## 4. Phase 1 — Minecraft EC2の手動基盤
 
-- **状態:** In progress（2026-07-29）
+- **状態:** Completed（2026-08-22）
 
 ### 目的
 
 制御系なしで、AWS上のMinecraftを人間が安全に起動・接続・停止できる状態にする。
 
-2026-08-22時点でdevのRCON firewall migration、Minecraft 26.2初回起動、whitelist修復、正常保存・停止、EC2停止・再起動を完了した。第33回・第34回でworld保存完了とprocess/listener消滅を確認し、再起動後の第35回read-only診断とクライアント目視で、停止前のworld変更が同じdata EBS上に保持されたことを確認した。data EBS／world永続化試験は合格である。登録者メール確認後に`clientHold`解除、`.net`親委任、Hosted Zone authoritative回答、public resolverのAレコード一致をread-onlyで確認し、固定FQDNのDNS公開試験も合格した。
+2026-08-22時点でdevのRCON firewall migration、Minecraft 26.2初回起動、whitelist修復、正常保存・停止、EC2停止・再起動を完了した。第33回・第34回でworld保存完了とprocess/listener消滅を確認し、再起動後の第35回read-only診断とクライアント目視で、停止前のworld変更が同じdata EBS上に保持されたことを確認した。登録者メール確認後に固定FQDNのDNS公開を検証し、ユーザーが`mc-dev.wishicraft.net:25565`から接続できることを確認した。CI run `32570087910`はsuccessである。終了時はAレコードを正常削除し、Minecraftのprocess/listener消滅、XFS data EBS上のworld保持を確認してEC2を通常停止した。全受入条件が合格したためPhase 1を正式完了とする。
 
 ### 最初の作業単位（完了）
 

@@ -522,9 +522,17 @@
 - 固定jarはsize/SHA-1/SHA-256検証後だけatomic配置し、secret値を出力せずpropertiesを確定する。Minecraftは全起動前predicate合格後にsystemd経由でのみ起動する。
 - 第15回Run Commandは変更開始前のfirewall classifier呼出しで停止した。原因はreadonly `RCON_PORT`へのtemporary assignmentであり、実機firewall driftではない。後継candidateは`env`経由で子processへ値を渡し、この誤配線を再現testで固定する。
 
+### D-057 Phase 1手動基盤検証完了
+
+- **状態:** Accepted
+- **日付:** 2026-08-22
+- 固定FQDNによるユーザー接続、停止・再起動後のworld永続化、DNS公開、RCON localhost制限、正常停止とdata EBS保持を実地確認し、CI run `32570087910`のsuccessを確認したためPhase 1を正式完了とする。
+- 終了時は限定CLIで`mc-dev.wishicraft.net`のAレコードを削除して`INSYNC`を確認した。MinecraftはMainPID、Java/cgroup process、25565／25575／25585 listenerが0、mount guard・XFS rw mount・world・`level.dat`が正常であることを確認後、EC2を通常停止した。data EBSはattachmentと`DeleteOnTermination=false`を維持する。
+- 現行unitでは意図的なSIGTERM停止がsystemd上で`failed / exit-code / 143`として残る。今回はprocess/listener消滅とdata EBS正常性を組み合わせて停止済みと判定したが、Phase 2の自動停止実装前に、起動wrapper、終了コード伝播、`SuccessExitStatus=143`の妥当性を比較し、意図的停止をsuccessとして表現する方法を決定する。
+
 ## 5. Current blockers
 
-Phase 0は完了した。Phase 1 dev基盤はdeploy済みで、data EBSとRCON firewallは検証済みである。現在の停止境界は、固定済みMinecraft初回起動migrationを実機へ送信する明示承認である。
+Phase 0とPhase 1は完了した。Phase 2の自動停止実装前に、Minecraftの意図的SIGTERM終了をsystemd上でもsuccessとして扱う契約を決定する。
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みであり、blockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
 
@@ -547,6 +555,7 @@ Phase別に決める事項:
 
 ### 高優先
 
+- 意図的Minecraft停止のsystemd success表現（起動wrapper、終了コード伝播、`SuccessExitStatus=143`を比較してPhase 2前に決定）
 - backup workflow
 - 無人自動停止
 - Minecraft EC2停止漏れalarm

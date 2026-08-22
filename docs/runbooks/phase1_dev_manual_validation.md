@@ -75,6 +75,8 @@ Hosted Zoneが設定FQDNの親zoneであること、および対象recordが単�
 
 同日、第33回・第34回でMinecraft 26.2の`Saving chunks for level`、`All chunks are saved`、`All dimensions are saved`、MainPID／Java／listener 0を確認して正常停止とし、EC2停止後に再起動した。第35回read-only診断とクライアント目視で既存worldと停止前の変更が同じdata EBS上に保持されたため、Phase 1のdata EBS／world永続化試験は合格である。未生成のNether／Endを独立directoryとして要求しない。
 
+Phase 1最終受入では、ユーザーが`mc-dev.wishicraft.net:25565`から接続し、停止・再起動前のworld変更が保持されていることを確認した。CI run `32570087910`のsuccess、DNS公開、AレコードDELETEの`INSYNC`、Minecraft process/listener 0、mount guard、XFS rw mount、world／`level.dat`保持を確認し、EC2を通常停止した。現行unitは意図的SIGTERMを`failed / exit-code / 143`として保持するため、MainPID、Java/cgroup process、全listener、NRestarts、I/O/OOM状態を組み合わせて停止済みと判定する。`reset-failed`で証跡を補正しない。次回起動時は新しいPublic IPv4へ限定CLIでAレコードをUPSERTする。
+
 Minecraftを安全に保存・停止し、EC2が`stopped`となったことを確認した後にだけ削除する。
 
 ```sh
