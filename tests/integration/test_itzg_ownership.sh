@@ -119,7 +119,9 @@ require_meta "$data_dir/server.properties" '993:993:640:regular file'
 
 docker run --name "${container_prefix}-migrated" "${common_args[@]}" "$IMAGE"
 require_meta "$data_dir/server.properties" '993:993:640:regular file'
-sudo test ! -L "$data_dir/server.properties" || fail 'server.properties became a symlink'
+if sudo test -L "$data_dir/server.properties"; then
+  fail 'server.properties became a symlink'
+fi
 [[ "$(sudo stat -c %i "$data_dir/server.properties")" == "$server_inode_before" ]] || \
   fail 'server.properties inode was replaced'
 [[ "$(sudo getfacl -cp "$data_dir/server.properties" | awk '/^$/ {next} /^(user::|group::|other::)/ {next} {n++} END{print n+0}')" == 0 ]] || \
@@ -128,8 +130,9 @@ sudo grep -Fx 'difficulty=hard' "$data_dir/server.properties" >/dev/null || \
   fail 'server.properties was not realized'
 sudo grep -Fx 'enable-rcon=false' "$data_dir/server.properties" >/dev/null || \
   fail 'RCON was not disabled'
-sudo test ! -e "$data_dir/.rcon-cli.env" && sudo test ! -e "$data_dir/.rcon-cli.yaml" || \
+if sudo test -e "$data_dir/.rcon-cli.env" || sudo test -e "$data_dir/.rcon-cli.yaml"; then
   fail 'RCON secret artifacts exist while RCON is disabled'
+fi
 
 preexisting_after=$(sudo find "$data_dir/preexisting" -xdev -printf '%P|%U:%G|%m|%y\n' | sort)
 [[ "$preexisting_after" == "$preexisting_before" ]] || \
@@ -145,8 +148,9 @@ docker run --name "${container_prefix}-restart" "${common_args[@]}" "$IMAGE"
   fail 'identical restart changed server.properties metadata or inode'
 [[ "$(sudo find "$data_dir/preexisting" -xdev -printf '%P|%U:%G|%m|%y\n' | sort)" == "$preexisting_before" ]] || \
   fail 'identical restart changed pre-existing fixture metadata'
-sudo test ! -e "$data_dir/.rcon-cli.env" && sudo test ! -e "$data_dir/.rcon-cli.yaml" || \
+if sudo test -e "$data_dir/.rcon-cli.env" || sudo test -e "$data_dir/.rcon-cli.yaml"; then
   fail 'identical restart created RCON secret artifacts'
+fi
 
 printf '%s\n' \
   'PASS:image-digest-and-architecture' \
