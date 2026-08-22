@@ -15,6 +15,13 @@ fail_with_container_log() {
   tail -n 80 "$failure_log" >&2
   fail "$1"
 }
+unexpected_error() {
+  local rc=$? line=$1
+  printf '::error::Unexpected Phase 2b-1 harness failure at line %s with status %s\n' \
+    "$line" "$rc" >&2
+  exit "$rc"
+}
+trap 'unexpected_error "$LINENO"' ERR
 require_meta() {
   local path=$1 expected=$2
   local actual
@@ -90,10 +97,12 @@ common_args=(
 )
 
 set +e
+trap - ERR
 docker run --name "${container_prefix}-incompatible" "${common_args[@]}" "$IMAGE" \
   >"$failure_log" 2>&1
 incompatible_rc=$?
 set -e
+trap 'unexpected_error "$LINENO"' ERR
 [[ "$incompatible_rc" -ne 0 ]] || fail 'root:993/0640 unexpectedly allowed property update'
 grep -F 'Failed to update server.properties' "$failure_log" >/dev/null || \
   fail_with_container_log 'failure was not identified at server.properties update'
