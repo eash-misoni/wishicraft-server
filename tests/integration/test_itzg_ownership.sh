@@ -25,7 +25,7 @@ trap 'unexpected_error "$LINENO"' ERR
 require_meta() {
   local path=$1 expected=$2
   local actual
-  actual=$(stat -c '%u:%g:%a:%F' "$path")
+  actual=$(sudo stat -c '%u:%g:%a:%F' "$path")
   [[ "$actual" == "$expected" ]] || fail "$path metadata is $actual, expected $expected"
 }
 
@@ -69,16 +69,16 @@ sudo chown 993:993 "$data_dir" "$data_dir/eula.txt" \
 sudo chown 4242:4343 "$data_dir/preexisting/nested" \
   "$data_dir/preexisting/nested/sentinel.txt"
 sudo chown 0:993 "$data_dir/server.properties"
-chmod 0750 "$data_dir"
-chmod 0644 "$data_dir/eula.txt"
-chmod 0755 "$data_dir/preexisting"
-chmod 0644 "$data_dir/preexisting/ordinary.txt"
-chmod 0710 "$data_dir/preexisting/nested"
-chmod 0600 "$data_dir/preexisting/nested/sentinel.txt"
-chmod 0640 "$data_dir/server.properties"
+sudo chmod 0750 "$data_dir"
+sudo chmod 0644 "$data_dir/eula.txt"
+sudo chmod 0755 "$data_dir/preexisting"
+sudo chmod 0644 "$data_dir/preexisting/ordinary.txt"
+sudo chmod 0710 "$data_dir/preexisting/nested"
+sudo chmod 0600 "$data_dir/preexisting/nested/sentinel.txt"
+sudo chmod 0640 "$data_dir/server.properties"
 
-preexisting_before=$(find "$data_dir/preexisting" -xdev -printf '%P|%U:%G|%m|%y\n' | sort)
-server_inode_before=$(stat -c %i "$data_dir/server.properties")
+preexisting_before=$(sudo find "$data_dir/preexisting" -xdev -printf '%P|%U:%G|%m|%y\n' | sort)
+server_inode_before=$(sudo stat -c %i "$data_dir/server.properties")
 
 common_args=(
   --platform linux/amd64
@@ -111,41 +111,41 @@ grep -E 'AccessDeniedException|Permission denied' "$failure_log" >/dev/null || \
 require_meta "$data_dir/server.properties" '0:993:640:regular file'
 
 # The real migration changes exactly one inode's ownership and preserves its mode/content.
-server_hash_before=$(sha256sum "$data_dir/server.properties" | awk '{print $1}')
+server_hash_before=$(sudo sha256sum "$data_dir/server.properties" | awk '{print $1}')
 sudo chown 993:993 "$data_dir/server.properties"
 require_meta "$data_dir/server.properties" '993:993:640:regular file'
-[[ "$(sha256sum "$data_dir/server.properties" | awk '{print $1}')" == "$server_hash_before" ]] || \
+[[ "$(sudo sha256sum "$data_dir/server.properties" | awk '{print $1}')" == "$server_hash_before" ]] || \
   fail 'ownership migration changed server.properties content'
 
 docker run --name "${container_prefix}-migrated" "${common_args[@]}" "$IMAGE"
 require_meta "$data_dir/server.properties" '993:993:640:regular file'
-[[ ! -L "$data_dir/server.properties" ]] || fail 'server.properties became a symlink'
-[[ "$(stat -c %i "$data_dir/server.properties")" == "$server_inode_before" ]] || \
+sudo test ! -L "$data_dir/server.properties" || fail 'server.properties became a symlink'
+[[ "$(sudo stat -c %i "$data_dir/server.properties")" == "$server_inode_before" ]] || \
   fail 'server.properties inode was replaced'
-[[ "$(getfacl -cp "$data_dir/server.properties" | awk '/^$/ {next} /^(user::|group::|other::)/ {next} {n++} END{print n+0}')" == 0 ]] || \
+[[ "$(sudo getfacl -cp "$data_dir/server.properties" | awk '/^$/ {next} /^(user::|group::|other::)/ {next} {n++} END{print n+0}')" == 0 ]] || \
   fail 'server.properties gained an extended ACL'
-grep -Fx 'difficulty=hard' "$data_dir/server.properties" >/dev/null || \
+sudo grep -Fx 'difficulty=hard' "$data_dir/server.properties" >/dev/null || \
   fail 'server.properties was not realized'
-grep -Fx 'enable-rcon=false' "$data_dir/server.properties" >/dev/null || \
+sudo grep -Fx 'enable-rcon=false' "$data_dir/server.properties" >/dev/null || \
   fail 'RCON was not disabled'
-[[ ! -e "$data_dir/.rcon-cli.env" && ! -e "$data_dir/.rcon-cli.yaml" ]] || \
+sudo test ! -e "$data_dir/.rcon-cli.env" && sudo test ! -e "$data_dir/.rcon-cli.yaml" || \
   fail 'RCON secret artifacts exist while RCON is disabled'
 
-preexisting_after=$(find "$data_dir/preexisting" -xdev -printf '%P|%U:%G|%m|%y\n' | sort)
+preexisting_after=$(sudo find "$data_dir/preexisting" -xdev -printf '%P|%U:%G|%m|%y\n' | sort)
 [[ "$preexisting_after" == "$preexisting_before" ]] || \
   fail 'SKIP_CHOWN_DATA did not preserve pre-existing fixture metadata'
 require_meta "$data_dir/preexisting/nested/sentinel.txt" '4242:4343:600:regular file'
 
-realized_hash=$(sha256sum "$data_dir/server.properties" | awk '{print $1}')
-realized_meta=$(stat -c '%u:%g:%a:%F:%i' "$data_dir/server.properties")
+realized_hash=$(sudo sha256sum "$data_dir/server.properties" | awk '{print $1}')
+realized_meta=$(sudo stat -c '%u:%g:%a:%F:%i' "$data_dir/server.properties")
 docker run --name "${container_prefix}-restart" "${common_args[@]}" "$IMAGE"
-[[ "$(sha256sum "$data_dir/server.properties" | awk '{print $1}')" == "$realized_hash" ]] || \
+[[ "$(sudo sha256sum "$data_dir/server.properties" | awk '{print $1}')" == "$realized_hash" ]] || \
   fail 'identical restart changed realized server.properties'
-[[ "$(stat -c '%u:%g:%a:%F:%i' "$data_dir/server.properties")" == "$realized_meta" ]] || \
+[[ "$(sudo stat -c '%u:%g:%a:%F:%i' "$data_dir/server.properties")" == "$realized_meta" ]] || \
   fail 'identical restart changed server.properties metadata or inode'
-[[ "$(find "$data_dir/preexisting" -xdev -printf '%P|%U:%G|%m|%y\n' | sort)" == "$preexisting_before" ]] || \
+[[ "$(sudo find "$data_dir/preexisting" -xdev -printf '%P|%U:%G|%m|%y\n' | sort)" == "$preexisting_before" ]] || \
   fail 'identical restart changed pre-existing fixture metadata'
-[[ ! -e "$data_dir/.rcon-cli.env" && ! -e "$data_dir/.rcon-cli.yaml" ]] || \
+sudo test ! -e "$data_dir/.rcon-cli.env" && sudo test ! -e "$data_dir/.rcon-cli.yaml" || \
   fail 'identical restart created RCON secret artifacts'
 
 printf '%s\n' \
