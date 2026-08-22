@@ -5,6 +5,10 @@ readonly IMAGE='ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9
 readonly EXPECTED_DIGEST='sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77'
 
 fail() { printf '%s\n' "Phase 2b-1 integration failure: $*" >&2; exit 1; }
+fail_with_container_log() {
+  tail -n 80 "$failure_log" >&2
+  fail "$1"
+}
 require_meta() {
   local path=$1 expected=$2
   local actual
@@ -27,10 +31,15 @@ cleanup() {
 }
 trap cleanup EXIT
 
-docker pull --platform linux/amd64 "$IMAGE"
-inspect=$(docker image inspect --format '{{.Architecture}} {{json .RepoDigests}}' "$IMAGE")
-[[ "$inspect" == amd64* ]] || fail "image architecture verification failed: $inspect"
-[[ "$inspect" == *"$EXPECTED_DIGEST"* ]] || fail "image digest verification failed: $inspect"
+pull_output=$(docker pull --platform linux/amd64 "$IMAGE" 2>&1) || {
+  printf '%s\n' "$pull_output" >&2
+  fail 'fixed image pull failed'
+}
+printf '%s\n' "$pull_output"
+grep -F "Digest: $EXPECTED_DIGEST" <<<"$pull_output" >/dev/null || \
+  fail 'pull result did not report the fixed digest'
+inspect_arch=$(docker image inspect --format '{{.Architecture}}' "$IMAGE")
+[[ "$inspect_arch" == amd64 ]] || fail "image architecture is $inspect_arch, expected amd64"
 
 mkdir -p "$data_dir/preexisting/nested"
 printf '%s\n' 'difficulty=easy' 'enable-rcon=true' > "$data_dir/server.properties"
@@ -76,9 +85,9 @@ incompatible_rc=$?
 set -e
 [[ "$incompatible_rc" -ne 0 ]] || fail 'root:993/0640 unexpectedly allowed property update'
 grep -F 'Failed to update server.properties' "$failure_log" >/dev/null || \
-  fail 'failure was not identified at server.properties update'
+  fail_with_container_log 'failure was not identified at server.properties update'
 grep -E 'AccessDeniedException|Permission denied' "$failure_log" >/dev/null || \
-  fail 'failure did not contain a permission error'
+  fail_with_container_log 'failure did not contain a permission error'
 require_meta "$data_dir/server.properties" '0:993:640:regular file'
 
 # The real migration changes exactly one inode's ownership and preserves its mode/content.
