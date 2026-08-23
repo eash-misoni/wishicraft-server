@@ -244,7 +244,7 @@ EC2起動
 
 ## 5. Phase 2 — itzg Host Runtime境界
 
-- **状態:** In Progress（Phase 2b real-data migration完了、attachment Resource Import reconciliation中）
+- **状態:** In Progress（Phase 2b real-data migrationとattachment Resource Import reconciliation完了）
 
 ### 目的
 

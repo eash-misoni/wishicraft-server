@@ -615,10 +615,12 @@
 
 - **状態:** Accepted
 - **日付:** 2026-08-23
-- `AWS::EC2::VolumeAttachment`はResource Import対応だがstack refactoring非対応であるため、手動でtargetへattach済みのphysical identity `vol-03ac9f534326c345c|i-04fc0629dc4ea466e`を`MinecraftTargetStack-dev/TargetDataVolumeAttachment`へIMPORTする。
+- `AWS::EC2::VolumeAttachment`はResource Import対応だがstack refactoring非対応であるため、手動でtargetへattach済みのattachmentを`MinecraftTargetStack-dev/TargetDataVolumeAttachment`へIMPORTする。import後のCloudFormation physical IDは`i-04fc0629dc4ea466e|vol-03ac9f534326c345c`である。
 - resource schemaのprimary identifierは`VolumeId`と`InstanceId`である。import identifierは両方を明示し、Device `/dev/sdf`はtemplate propertyとして一致させる。
 - target stackにはVolumeAttachment一件だけを追加し、`AWS::EC2::Volume`は追加しない。DeletionPolicy/UpdateReplacePolicyはRetainとし、通常deployによる新規attachを禁止する。
 - data EBS volume本体はPhase 1 stackのRetain resourceとして維持する。Phase 1 stackとold logical attachment `MinecraftDataVolumeAttachmentE11BB55A`はFrozenかつknown driftのままにし、今回更新・削除しない。
+- IMPORT change set `phase2-target-attachment-import-74d9e8f`はattachment一件の`Action=Import`だけを含むことを確認してexecuteし、Target Stackは`IMPORT_COMPLETE`となった。実attachment timeはmigration時のままで、物理detach/reattachは発生していない。
+- import後の`TargetDataVolumeAttachment` driftは`IN_SYNC`、`cdk diff`は0である。stack全体のdriftはstopped EC2のpublic IPv4解放により`AssociatePublicIpAddress` actualがfalseとなる既知差分だけで、attachment、IAM/profile、SGはIN_SYNCである。
 
 ## 5. Current blockers
 
