@@ -591,6 +591,16 @@
 - 終了時は限定CLIで`mc-dev.wishicraft.net`のAレコードを削除して`INSYNC`を確認した。MinecraftはMainPID、Java/cgroup process、25565／25575／25585 listenerが0、mount guard・XFS rw mount・world・`level.dat`が正常であることを確認後、EC2を通常停止した。data EBSはattachmentと`DeleteOnTermination=false`を維持する。
 - 現行unitでは意図的なSIGTERM停止がsystemd上で`failed / exit-code / 143`として残る。今回はprocess/listener消滅とdata EBS正常性を組み合わせて停止済みと判定したが、Phase 2の自動停止実装前に、起動wrapper、終了コード伝播、`SuccessExitStatus=143`の妥当性を比較し、意図的停止をsuccessとして表現する方法を決定する。
 
+### D-064 Phase 2b real-data migration boundary
+
+- **状態:** Accepted
+- **日付:** 2026-08-23
+- Phase 1 stackと停止済みEC2をrollback先として維持し、snapshot完了後に既存data EBSを独立target EC2へ通常detach/attachする。
+- 既存XFSは固定volume/AZ/UUID/NVMe identityをmount前に照合し、filesystem作成・repair・force detachを許可しない。
+- `server.properties`一件だけをprecondition付きで`0:993 / 0640`から`993:993 / 0640`へ移行する。inode、内容hash、modeを維持し、再帰的ownership変更を禁止する。
+- real-world起動はportless、RCON無効、restartなしの固定Host Runtimeで2回のREADY・正常停止・永続性を確認する。初回起動後の失敗は自動rollbackせず、target停止・snapshot保持・attachment記録で停止する。
+- 手動detach/attachによるPhase 1 VolumeAttachmentの一時driftは既知状態とし、この作業ではstack update/import/reconciliationを行わない。
+
 ## 5. Current blockers
 
 Phase 0とPhase 1は完了した。Phase 1の意図的SIGTERM終了契約はas-built課題として履歴を維持するが、直接Java process向け解決を先行しない。Phase 2ではitzg移行後のgraceful shutdown、container exit、Host Runtime service結果を一体で定義する。

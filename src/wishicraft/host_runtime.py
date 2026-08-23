@@ -51,6 +51,7 @@ def render_boot_time_artifacts(
     *,
     observed_uid: int,
     observed_gid: int,
+    publish_minecraft_port: bool = True,
 ) -> RenderedHostRuntime:
     """Render one canonical boot-time configuration from validated sources of truth."""
     runtime = _runtime_mapping(stage.values)
@@ -78,27 +79,27 @@ def render_boot_time_artifacts(
         "UID": str(observed_uid),
         "VERSION": version,
     }
+    service: dict[str, object] = {
+        "image": image,
+        "pull_policy": "never",
+        "restart": "no",
+        "mem_limit": container_memory,
+        "stop_grace_period": f"{compose_stop}s",
+        "env_file": ["runtime.env"],
+        "volumes": [
+            {
+                "type": "bind",
+                "source": game_directory,
+                "target": "/data",
+            }
+        ],
+    }
     compose = {
         "name": "wishicraft-host-runtime",
-        "services": {
-            "minecraft": {
-                "image": image,
-                "pull_policy": "never",
-                "restart": "no",
-                "mem_limit": container_memory,
-                "stop_grace_period": f"{compose_stop}s",
-                "env_file": ["runtime.env"],
-                "ports": [f"{stage.minecraft_port}:25565/tcp"],
-                "volumes": [
-                    {
-                        "type": "bind",
-                        "source": game_directory,
-                        "target": "/data",
-                    }
-                ],
-            }
-        },
+        "services": {"minecraft": service},
     }
+    if publish_minecraft_port:
+        service["ports"] = [f"{stage.minecraft_port}:25565/tcp"]
     compose_yaml = yaml.safe_dump(compose, sort_keys=True, default_flow_style=False)
     runtime_env = "".join(f"{key}={environment[key]}\n" for key in sorted(environment))
     manifest = {

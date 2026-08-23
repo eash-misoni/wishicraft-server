@@ -95,6 +95,22 @@ def test_rendered_compose_has_only_the_minecraft_public_port_and_safe_lifecycle(
     } <= set(rendered.runtime_env.splitlines())
 
 
+def test_real_data_validation_renderer_can_omit_all_published_ports() -> None:
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+    rendered = render_boot_time_artifacts(
+        configuration.project,
+        configuration.stage,
+        observed_uid=993,
+        observed_gid=993,
+        publish_minecraft_port=False,
+    )
+    service = yaml.safe_load(rendered.compose_yaml)["services"]["minecraft"]
+
+    assert "ports" not in service
+    assert service["restart"] == "no"
+    assert service["volumes"][0]["source"] == ("/srv/minecraft/games/game-vanilla-main/server")
+
+
 @pytest.mark.parametrize("version", ("LATEST", "SNAPSHOT", "snapshot"))
 def test_renderer_rejects_floating_minecraft_versions(version: str) -> None:
     configuration = load_configuration(REPOSITORY_ROOT, "dev")

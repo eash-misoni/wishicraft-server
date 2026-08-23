@@ -276,6 +276,12 @@ Phase 2 target platform reviewはD-062で完了し、AL2023 `2023.12.20260803` /
 
 以下を順序どおり個別の承認・検証単位として進める。D-063で1〜5は独立target stack上のroot-only validationとして実施し、Phase 1と実data EBSから隔離する。5の完了後はtargetを停止し、6より前、すなわち実data EBS migration直前で停止する。
 
+Phase 2b real-data migrationは、固定instance/volume/AZ/UUIDを検証する
+`infrastructure/migrations/phase2_real_data_migration.sh`と
+`docs/runbooks/phase2_real_data_migration.md`を正本とする。既存XFSを初期化せず、
+`server.properties`一件だけを`0:993`から`993:993`へ移行する。最初のreal-world
+起動後は自動rollbackせず、snapshotとattachmentを保持して停止する。
+
 1. target EC2作成前preflight
 2. target host UID/GID 993 collision確認
 3. Docker / Compose install

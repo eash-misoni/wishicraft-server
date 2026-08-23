@@ -1,0 +1,12 @@
+[Unit]
+Description=Wishicraft Phase 2 existing data volume mount guard
+Before=wishicraft-host-runtime.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/lib/wishicraft/phase2-real-data-migration.sh --mount-existing
+ExecStart=/usr/local/lib/wishicraft/phase2-real-data-migration.sh --mount-verify
+Restart=no
+
+# Deliberately no [Install] section. The Host Runtime starts this dependency explicitly.
