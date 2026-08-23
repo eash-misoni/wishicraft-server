@@ -134,7 +134,7 @@ DynamoDBは実世界の状態そのものではなく、次を保存する。
 
 - EC2 APIでインスタンス状態を取得する。
 - running時だけSSM状態を確認する。
-- SSM online時だけEC2内probeを実行する。
+- SSM online時だけEC2内のPhase 2 Host Runtime probeを実行し、systemd、Docker container、itzg/Minecraft状態を正規化する。
 - 観測結果を正規化する。
 - 保存済みObserved Stateを条件付き更新する。
 - 不一致や異常をoperation/logへ記録する。

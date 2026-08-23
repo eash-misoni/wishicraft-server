@@ -413,6 +413,7 @@ record_last_error(...)
     "dns_target_ipv4": "203.0.113.10",
     "connection_endpoint_state": "ready",
     "ssm_state": "online",
+    "host_runtime_state": "running",
     "minecraft_service_state": "active",
     "minecraft_protocol_state": "ready",
     "active_game_id": "game-vanilla-main",
@@ -424,6 +425,24 @@ record_last_error(...)
   "discrepancies": []
 }
 ```
+
+Phase 3 first sliceのrepository-only outputはTarget EC2 identityを呼出元から明示的に受け取り、EC2 `DescribeInstances`の実測だけを正規化する。EC2が`stopped`なら次を返し、SSM APIまたはRun Commandを呼ばない。
+
+```json
+{
+  "schema_version": 1,
+  "instance_id": "i-...",
+  "ec2_state": "stopped",
+  "ssm_state": "not-applicable",
+  "host_runtime_state": "not-running",
+  "minecraft_service_state": "not-applicable",
+  "minecraft_protocol_state": "not-applicable",
+  "ready": false,
+  "observed_at": "2026-08-23T00:00:00Z"
+}
+```
+
+API failure、missing/duplicate instance、未知EC2 state、response schema不一致は`ec2_state=unknown`とし、下位stateも`unknown`、`ready=false`とする。Target instance IDをGitへ新しい物理ID正本として埋め込まず、将来のLambda environmentまたはCDK output wiringからadapterへ渡す。
 
 
 ## 12. Operation Admission契約
@@ -497,7 +516,7 @@ Task Lambdaは1責務に限定する。
 
 ## 14. Host Runtime操作契約
 
-Phase 1の直接Java/systemd操作はas-builtとして維持する。Phase 2以降はSSMから許可済みHost Runtime interfaceを呼び、Host Runtimeがcontainer-localなitzg/runtime interfaceへ接続する形へ再設計する。以下のCLI名とpayloadはPhase 2で置換可否を決める既存案である。
+Phase 1の直接Java/systemd操作はas-builtとして維持する。Phase 2以降はSSMから許可済みHost Runtime interfaceを呼び、Host Runtimeがcontainer-localなitzg/runtime interfaceへ接続する。以下のCLI名とpayloadは旧案を含むため、Phase 3以降はPhase 2 Host Runtimeのsystemd unit、Docker/Compose、itzg containerを観測・操作するinterfaceへ読み替える。
 
 実装言語はPythonを基本とする。
 

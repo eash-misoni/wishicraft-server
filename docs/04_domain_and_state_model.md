@@ -151,6 +151,19 @@ unknown
 - EC2 stopped時は`not-applicable`を使用できる。
 - API失敗や判定不能は`unknown`。
 
+### Host Runtime State
+
+```text
+not-running
+running
+degraded
+unknown
+```
+
+- EC2が`stopped`または`terminated`なら、SSMやhost probeを呼ばず`not-running`とする。
+- EC2 API失敗、response schema不一致、またはrunning hostをまだprobeしていない場合は`unknown`とし、`not-running`へ読み替えない。
+- running時はPhase 2 Host Runtimeのsystemd、Docker container、itzg runtimeをhost-local probeで観測する。Phase 1の直接Java `minecraft.service`をtargetの観測契約へ流用しない。
+
 
 ### Connection Endpoint State
 
@@ -218,6 +231,8 @@ observed_player_count: integer | null
 ```
 
 判定不能時は0ではなくnullとする。
+
+Phase 3の最初のvertical sliceではTarget EC2が`stopped`の場合だけ、SSMを`not-applicable`、Host Runtimeを`not-running`、Minecraft service/protocolを`not-applicable`へ段階的に短絡する。EC2 APIまたはresponse解析に失敗した場合は、すべての未観測下位stateを`unknown`とし、停止・READYを推測しない。
 
 ### READY判定
 

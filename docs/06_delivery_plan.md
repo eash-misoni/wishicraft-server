@@ -355,6 +355,8 @@ public ingress、旧host退役は後続単位とする。
 
 ## 6. Phase 3 — 実測status
 
+- **状態:** In Progress（repository-only stopped target observation slice）
+
 ### 目的
 
 AWS側から実状態を取得し、DynamoDBへ安全に保存する。
@@ -372,6 +374,8 @@ AWS側から実状態を取得し、DynamoDBへ安全に保存する。
 9. Reconcile Lambda
 10. unit tests
 11. AWS integration test
+
+最初のvertical sliceはTarget instance IDを明示inputとするEC2 adapterである。EC2が`stopped`なら到達不能なSSM/Host Runtime/Minecraft probeを実行せず、canonical `not-applicable` / `not-running` stateとUTC `observed_at`を返す。AWS API/schema failureは`unknown`へfail-closedし、DynamoDB、Lambda、running host probe、AWS deployは後続sliceとする。
 
 ### 確認ケース
 
