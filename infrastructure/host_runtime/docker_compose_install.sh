@@ -3,6 +3,7 @@ set -euo pipefail
 umask 077
 
 : "${AL2023_RELEASE:?AL2023_RELEASE is required}"
+: "${EXPECTED_DOCKER_NEVRA:?EXPECTED_DOCKER_NEVRA is required}"
 : "${COMPOSE_VERSION:?COMPOSE_VERSION is required}"
 : "${COMPOSE_URL:?COMPOSE_URL is required}"
 : "${COMPOSE_SHA256:?COMPOSE_SHA256 is required}"
@@ -18,12 +19,21 @@ sha256_of() { sha256sum "$1" | awk '{print $1}'; }
 [[ "$COMPOSE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "invalid Compose version"
 [[ "$COMPOSE_URL" == "https://github.com/docker/compose/releases/download/v${COMPOSE_VERSION}/docker-compose-linux-x86_64" ]] || fail "unexpected Compose URL"
 [[ "$COMPOSE_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail "invalid Compose SHA-256"
+[[ "$EXPECTED_DOCKER_NEVRA" =~ ^docker-[0-9].*\.x86_64$ ]] || fail "invalid Docker NEVRA"
 
 installed_release="$(rpm -q system-release --qf '%{VERSION}')"
 [[ "$installed_release" == "$AL2023_RELEASE" ]] || fail "AL2023 release mismatch"
 
+available_docker_nevra="$(
+  dnf --releasever="$AL2023_RELEASE" repoquery --arch=x86_64 \
+    --qf '%{name}-%{version}-%{release}.%{arch}' docker | sort -V | tail -n 1
+)"
+[[ "$available_docker_nevra" == "$EXPECTED_DOCKER_NEVRA" ]] || \
+  fail "Docker repository NEVRA mismatch: $available_docker_nevra"
+
 dnf --releasever="$AL2023_RELEASE" install -y docker
 docker_nevra="$(rpm -q docker --qf '%{NEVRA}')" || fail "Docker package is not installed"
+[[ "$docker_nevra" == "$EXPECTED_DOCKER_NEVRA" ]] || fail "installed Docker NEVRA mismatch"
 
 if [[ -e "$PLUGIN_PATH" ]]; then
   [[ -f "$PLUGIN_PATH" && ! -L "$PLUGIN_PATH" ]] || fail "Compose plugin path is not a regular file"

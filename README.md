@@ -25,6 +25,7 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy src infrastructure tests
 npx --no-install cdk synth --context stage=dev
+npx --no-install cdk synth MinecraftTargetStack-dev --context stage=dev --context deployment=target
 ```
 
 prod synthとdeployは初期リリース直前まで行いません。deploy、secret登録、AWS profileの指定はこのPhase 0の手順に含めません。
@@ -32,6 +33,8 @@ prod synthとdeployは初期リリース直前まで行いません。deploy、s
 ## CI
 
 GitHub ActionsはPython 3.12、lock済みCDK CLIでpytest、Ruff、mypy、dev向けCDK synthを実行します。AWS credential、secret、prod deployは使用しません。
+
+Phase 2 target hostは`deployment=target`で独立assemblyとしてsynthし、deploy時も`MinecraftTargetStack-dev`を必ず明示する。通常のPhase 1 assemblyと`--all` deployは使用しない。
 
 ## Phase 2a Host Runtime static artifacts
 

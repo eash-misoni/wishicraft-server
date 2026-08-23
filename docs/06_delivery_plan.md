@@ -272,9 +272,9 @@ AWS適用前のrepository-only単位として、platform/runtime lock、AL2023�
 
 Phase 2 target platform reviewはD-062で完了し、AL2023 `2023.12.20260803` / kernel 6.18 / ap-northeast-1公式x86_64 AMIを固定した。Phase 1 instanceのas-built `2023.12.20260803.3` / kernel 6.1は変更しない。
 
-### 次の実機migration gate
+### 実機migration gate
 
-以下を順序どおり個別の承認・検証単位として進める。本platform lock finalizationでは1の開始前で停止し、EC2、runtime、data EBSへ操作しない。
+以下を順序どおり個別の承認・検証単位として進める。D-063で1〜5は独立target stack上のroot-only validationとして実施し、Phase 1と実data EBSから隔離する。5の完了後はtargetを停止し、6より前、すなわち実data EBS migration直前で停止する。
 
 1. target EC2作成前preflight
 2. target host UID/GID 993 collision確認

@@ -7,23 +7,36 @@ from pathlib import Path
 from aws_cdk import App
 
 from infrastructure.stacks.minecraft_stack import MinecraftStack
+from infrastructure.stacks.minecraft_target_stack import MinecraftTargetStack
 from wishicraft.config import load_configuration, validate_stage_for_action
 
 
-def build_app(repository_root: Path, stage: str, *, phase: int = 0, action: str = "synth") -> App:
+def build_app(
+    repository_root: Path,
+    stage: str,
+    *,
+    phase: int = 0,
+    action: str = "synth",
+    deployment: str = "phase1",
+) -> App:
     """Build an environment-agnostic CDK app after phase-specific validation."""
     configuration = load_configuration(repository_root, stage)
     validate_stage_for_action(configuration.stage, phase=phase, action=action)
 
     app = App()
-    MinecraftStack(
-        app,
-        f"{configuration.project.stack_name}-{stage}",
-        project=configuration.project,
-        stage=configuration.stage,
-        secrets=configuration.secrets,
-        phase=phase,
-    )
+    if deployment == "target":
+        MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
+    elif deployment == "phase1":
+        MinecraftStack(
+            app,
+            f"{configuration.project.stack_name}-{stage}",
+            project=configuration.project,
+            stage=configuration.stage,
+            secrets=configuration.secrets,
+            phase=phase,
+        )
+    else:
+        raise ValueError("deployment must be phase1 or target")
     return app
 
 
@@ -33,6 +46,7 @@ def main() -> None:
     stage = app.node.try_get_context("stage") or "dev"
     phase_context = app.node.try_get_context("phase") or "0"
     validation_action = app.node.try_get_context("validation_action") or "synth"
+    deployment = app.node.try_get_context("deployment") or "phase1"
     try:
         phase = int(phase_context)
     except (TypeError, ValueError) as error:
@@ -41,14 +55,19 @@ def main() -> None:
         raise ValueError("CDK context validation_action must be synth or deploy")
     configuration = load_configuration(repository_root, stage)
     validate_stage_for_action(configuration.stage, phase=phase, action=validation_action)
-    MinecraftStack(
-        app,
-        f"{configuration.project.stack_name}-{stage}",
-        project=configuration.project,
-        stage=configuration.stage,
-        secrets=configuration.secrets,
-        phase=phase,
-    )
+    if deployment == "target":
+        MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
+    elif deployment == "phase1":
+        MinecraftStack(
+            app,
+            f"{configuration.project.stack_name}-{stage}",
+            project=configuration.project,
+            stage=configuration.stage,
+            secrets=configuration.secrets,
+            phase=phase,
+        )
+    else:
+        raise ValueError("CDK context deployment must be phase1 or target")
     app.synth()
 
 

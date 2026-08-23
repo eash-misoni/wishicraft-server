@@ -26,6 +26,12 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run mypy src infrastructure tests
       - run: npx --no-install cdk synth --context stage=dev
+      - run: >-
+          npx --no-install cdk synth MinecraftTargetStack-dev
+          --context stage=dev --context deployment=target
+      - run: >-
+          shellcheck infrastructure/host_runtime/docker_compose_install.sh
+          infrastructure/host_runtime/target_host_validation.sh
 
   host-runtime-integration:
     runs-on: ubuntu-latest

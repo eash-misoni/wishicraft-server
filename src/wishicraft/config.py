@@ -247,6 +247,10 @@ class StageConfig:
         """Return the configured mount path for the retained data EBS volume."""
         return _require_string(self.values, "storage.data.mount_path")
 
+    def host_runtime_value(self, path: str) -> ConfigValue:
+        """Return one validated public Host Runtime value."""
+        return _lookup_path(self.values, f"host_runtime.{path}")
+
 
 @dataclass(frozen=True)
 class SecretsExampleConfig:
@@ -483,6 +487,11 @@ _OPTIONAL_STAGE_STRINGS: Final = (
     "storage.data.mount_path",
     "billing.dynamodb_mode",
     "host_runtime.platform.operating_system",
+    "host_runtime.target_host.stack_name",
+    "host_runtime.target_host.vpc_id",
+    "host_runtime.target_host.subnet_id",
+    "host_runtime.target_host.instance_type",
+    "host_runtime.target_host.root_volume_type",
     "host_runtime.platform.al2023_release",
     "host_runtime.platform.kernel_variant",
     "host_runtime.platform.ami_name",
@@ -517,6 +526,7 @@ _POSITIVE_STAGE_INTS: Final = (
     "monitoring.log_retention_days",
     "host_runtime.identity.uid",
     "host_runtime.identity.gid",
+    "host_runtime.target_host.root_volume_size_gib",
     "host_runtime.timeouts.explicit_save",
     "host_runtime.timeouts.itzg_stop_duration",
     "host_runtime.timeouts.compose_stop_grace_period",

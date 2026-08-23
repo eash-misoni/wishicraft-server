@@ -10,6 +10,17 @@
 
 ## 2. 採用済み決定
 
+### D-063 Phase 2 target hostを独立stackで作成する
+
+- **状態:** Accepted
+- **日付:** 2026-08-23
+- **Decision:** Phase 1 rollback hostをCloudFormation replacementから隔離するため、Phase 2 target hostは`MinecraftTargetStack-dev`として作成する。CDK assemblyは`deployment=target`でtarget stackだけを含め、`MinecraftStack-dev`と同時deployできない構造にする。
+- **Target:** 既存dev VPC `vpc-0c3cca1e65696ed8e`のap-northeast-1a public subnet `subnet-0a70e5682ea8d0bd3`へ、固定AMIの`t3a.medium`、暗号化gp3 16 GiB root、public IPv4、ingress 0の専用SG、`AmazonSSMManagedInstanceCore`だけを持つ専用role/profileを作る。boot UserDataは持たない。
+- **Data boundary:** target stackはdata EBS、volume ID、`AWS::EC2::Volume`、`AWS::EC2::VolumeAttachment`、`/dev/sdf`、data mount path、secret、DNSを参照しない。実data migration前はroot EBS上のsynthetic dataだけを使用する。
+- **Deploy gate:** repository validation、CI、Phase 1既知差分以外の追加差分なし、targetが新規resourceだけ、SG ingress 0、secret/data権限なしを確認後、stack名を明示してtargetだけをdeployする。Phase 1はstopped/frozenのrollback先として維持する。
+- **Observed package lock:** target host installは固定AL2023 repositoryの`docker-25.0.16-1.amzn2023.0.3.x86_64`以外なら変更前停止する。Composeとitzg/Minecraft lockはD-062を維持する。
+- **停止境界:** target hostのplatform、993:993 identity、Docker/Compose/image、synthetic setup/READY/memory/lifecycle/graceful stopを検証してtarget EC2を停止した後、実data EBS migration直前で停止する。
+
 ### D-062 Phase 2 target platform lock finalization
 
 - **状態:** Accepted

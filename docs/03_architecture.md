@@ -15,6 +15,8 @@ Phase 2aはAWS適用前のstatic Host Runtime契約である。D-062で固定し
 
 Phase 2b-1では既存EBSのnumeric identity `993:993`を観測済みとし、`server.properties`だけに存在する`0:993` / `0640`を、Phase 1完全停止後の一回限りのHost Runtime migrationで`993:993` / `0640`へ変更する。Minecraft properties本文は編集せず、以後のrealizationはitzgへ委譲する。current dev memory targetはProvisionalなcontainer `2816 MiB`、Xms `1G`、Xmx `2G`である。
 
+Phase 2 target hostはD-063により独立した`MinecraftTargetStack-dev`で作成する。target stackは既存VPC/subnetだけを明示IDで利用し、専用IAM role/profile、ingress 0の専用SG、固定AMIのroot-only EC2だけを所有する。Phase 1 stack、data EBS、VolumeAttachment、DNS、secretとのCloudFormation referenceを持たない。実data migrationまではPhase 1 EC2をstoppedのrollback先として保持し、targetではroot EBS上のsynthetic dataだけを使う。
+
 初回実用版では、複数ゲームやWeb管理画面を実装せず、単一バニラゲームのDiscord start/status/stopを端から端まで完成させる。
 
 ## 2. 初回実用版の全体構成

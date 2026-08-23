@@ -15,6 +15,7 @@ from wishicraft.host_runtime import RenderedHostRuntime, render_boot_time_artifa
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 HOST_RUNTIME = REPOSITORY_ROOT / "infrastructure" / "host_runtime"
 INTEGRATION_TEST = REPOSITORY_ROOT / "tests" / "integration" / "test_itzg_ownership.sh"
+TARGET_VALIDATION = HOST_RUNTIME / "target_host_validation.sh"
 
 
 def _render() -> RenderedHostRuntime:
@@ -134,7 +135,8 @@ def test_host_runtime_artifacts_never_recursive_chown_or_enable_restart() -> Non
     assert "chown -R" not in artifact_text
     assert "restart: always" not in artifact_text
     assert "Restart=no" in artifact_text
-    assert "systemctl enable" not in artifact_text
+    assert "systemctl enable wishicraft" not in artifact_text
+    assert "systemctl enable minecraft" not in artifact_text
     assert "docker compose" in artifact_text
 
 
@@ -214,6 +216,8 @@ def test_installer_uses_locked_al2023_repository_and_records_docker_version() ->
     installer = (HOST_RUNTIME / "docker_compose_install.sh").read_text(encoding="utf-8")
 
     assert 'dnf --releasever="$AL2023_RELEASE" install -y docker' in installer
+    assert 'dnf --releasever="$AL2023_RELEASE" repoquery --arch=x86_64' in installer
+    assert "EXPECTED_DOCKER_NEVRA" in installer
     assert "dnf upgrade" not in installer
     assert "docker_nevra=" in installer
     assert '"docker_nevra"' in installer
@@ -285,5 +289,24 @@ def test_docker_integration_contract_is_fixed_and_synthetic() -> None:
     assert "SETUP_ONLY=true" in script
     assert "ENABLE_RCON=false" in script
     assert "/srv/minecraft" not in script
+    assert "RCON_PASSWORD" not in script
+    assert "chown -R" not in script
+
+
+def test_target_host_validation_is_root_only_synthetic_and_fail_closed() -> None:
+    script = TARGET_VALIDATION.read_text(encoding="utf-8")
+
+    assert "EXPECTED_DOCKER_NEVRA" in script
+    assert "uid-993-already-used" in script
+    assert "gid-993-already-used" in script
+    assert "--uid 993 --gid 993" in script
+    assert "SETUP_ONLY=true" in script
+    assert 'restart: "no"' in script
+    assert "mem_limit: 2816MiB" in script
+    assert 'ENABLE_RCON: "false"' in script
+    assert "systemctl restart docker" in script
+    assert "docker compose" in script
+    assert "/srv/minecraft" not in script
+    assert "/dev/sdf" not in script
     assert "RCON_PASSWORD" not in script
     assert "chown -R" not in script

@@ -428,3 +428,76 @@ def test_phase_one_dev_deploy_validation_uses_confirmed_settings() -> None:
 def test_prod_stack_is_rejected_before_synthesis() -> None:
     with pytest.raises(ConfigValidationError, match="aws.account_id"):
         build_app(REPOSITORY_ROOT, "prod")
+
+
+def test_target_stack_is_root_only_and_isolated_from_phase_one() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", deployment="target")
+    assert app.node.try_find_child("MinecraftStack-dev") is None
+    stack = cast(Stack, app.node.find_child("MinecraftTargetStack-dev"))
+    template = Template.from_stack(stack)
+
+    template.resource_count_is("AWS::EC2::Instance", 1)
+    template.resource_count_is("AWS::EC2::SecurityGroup", 1)
+    template.resource_count_is("AWS::IAM::Role", 1)
+    template.resource_count_is("AWS::IAM::InstanceProfile", 1)
+    assert template.find_resources("AWS::EC2::Volume") == {}
+    assert template.find_resources("AWS::EC2::VolumeAttachment") == {}
+    assert template.find_resources("AWS::Route53::RecordSet") == {}
+
+    instance = next(iter(template.find_resources("AWS::EC2::Instance").values()))["Properties"]
+    assert instance["ImageId"] == "ami-0b4d2909a55ed2c78"
+    assert instance["InstanceType"] == "t3a.medium"
+    assert "UserData" not in instance
+    assert instance["NetworkInterfaces"][0]["SubnetId"] == "subnet-0a70e5682ea8d0bd3"
+    assert instance["NetworkInterfaces"][0]["AssociatePublicIpAddress"] is True
+    assert instance["BlockDeviceMappings"] == [
+        {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+                "DeleteOnTermination": True,
+                "Encrypted": True,
+                "VolumeSize": 16,
+                "VolumeType": "gp3",
+            },
+        }
+    ]
+
+    security_group = next(iter(template.find_resources("AWS::EC2::SecurityGroup").values()))[
+        "Properties"
+    ]
+    assert "SecurityGroupIngress" not in security_group
+    assert security_group["VpcId"] == "vpc-0c3cca1e65696ed8e"
+    assert security_group["SecurityGroupEgress"] == [
+        {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "HTTPS for SSM, AL2023 repositories, GitHub, and GHCR",
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+        }
+    ]
+
+    role = next(iter(template.find_resources("AWS::IAM::Role").values()))["Properties"]
+    assert role["ManagedPolicyArns"] == [
+        {
+            "Fn::Join": [
+                "",
+                [
+                    "arn:",
+                    {"Ref": "AWS::Partition"},
+                    ":iam::aws:policy/AmazonSSMManagedInstanceCore",
+                ],
+            ]
+        }
+    ]
+    template_text = str(template.to_json())
+    for forbidden in (
+        "VolumeAttachment",
+        "/dev/sdf",
+        "/srv/minecraft",
+        "rcon-password",
+        "ssm:GetParameter",
+        "route53:",
+        "ec2:AttachVolume",
+    ):
+        assert forbidden not in template_text

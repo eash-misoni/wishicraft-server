@@ -78,6 +78,14 @@ runtime:
 
 # Phase 2 target Host Runtime lock. Phase 1 compute/java/artifact values above remain as-built.
 host_runtime:
+  target_host:
+    stack_name: MinecraftTargetStack-dev
+    vpc_id: vpc-0c3cca1e65696ed8e
+    subnet_id: subnet-0a70e5682ea8d0bd3
+    instance_type: t3a.medium
+    root_volume_type: gp3
+    root_volume_size_gib: 16
+    root_volume_encrypted: true
   platform:
     operating_system: amazon-linux-2023
     al2023_release: "2023.12.20260803"
@@ -100,8 +108,8 @@ host_runtime:
     type: VANILLA
     eula_accepted: true
   identity:
-    uid: null # Observation Required from the existing data EBS.
-    gid: null # Observation Required from the existing data EBS.
+    uid: 993
+    gid: 993
     skip_chown_data: true
   memory:
     container_limit: 2816MiB
