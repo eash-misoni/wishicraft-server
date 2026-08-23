@@ -220,6 +220,23 @@ def test_filesystem_preflight_rejects_symlink_without_modifying_it(tmp_path: Pat
     assert link.is_symlink()
 
 
+def test_filesystem_preflight_accepts_empty_regular_files_without_stat_wording() -> None:
+    script = (HOST_RUNTIME / "filesystem_preflight.sh").read_text(encoding="utf-8")
+
+    assert '[[ -d "$path" || -f "$path" ]]' in script
+    assert "file_type=" not in script
+
+
+def test_real_data_service_environment_is_secret_free_and_fixed() -> None:
+    environment = (HOST_RUNTIME / "phase2-real-data.env").read_text(encoding="utf-8")
+
+    assert "phase2-real-data-migration.sh" in environment
+    assert "GAME_DIRECTORY=/srv/minecraft/games/game-vanilla-main/server" in environment
+    assert "EXPECTED_UID=993" in environment
+    assert "EXPECTED_GID=993" in environment
+    assert "PASSWORD" not in environment
+
+
 def test_phase_one_interlock_precedes_compose_start() -> None:
     start = (HOST_RUNTIME / "start.sh").read_text(encoding="utf-8")
     assert start.index("systemctl is-active --quiet minecraft.service") < start.index(

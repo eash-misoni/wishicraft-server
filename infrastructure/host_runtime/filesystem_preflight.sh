@@ -21,12 +21,12 @@ if [[ -n "$(find "$GAME_DIRECTORY" -xdev -type l -print -quit)" ]]; then
 fi
 
 while IFS= read -r -d '' path; do
-  file_type="$(stat -c '%F' -- "$path")"
-  [[ "$file_type" == "directory" || "$file_type" == "regular file" ]] || fail "unexpected file type"
+  [[ ! -L "$path" ]] || fail "symlink is not allowed in game directory"
+  [[ -d "$path" || -f "$path" ]] || fail "unexpected file type"
   uid="$(stat -c '%u' -- "$path")"
   gid="$(stat -c '%g' -- "$path")"
   if [[ "$uid" != "$EXPECTED_UID" || "$gid" != "$EXPECTED_GID" ]]; then
-    [[ "$file_type" == "regular file" && "$uid" == 0 && "$gid" == "$EXPECTED_GID" ]] || fail "unknown owner"
+    [[ -f "$path" && "$uid" == 0 && "$gid" == "$EXPECTED_GID" ]] || fail "unknown owner"
   fi
   if command -v getfacl >/dev/null 2>&1; then
     getfacl -cp -- "$path" | awk '

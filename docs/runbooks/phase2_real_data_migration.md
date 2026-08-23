@@ -64,3 +64,7 @@ secret properties in command output.
 Manual detach/attach intentionally creates temporary drift for the Phase 1
 `VolumeAttachment`. Do not reconcile, import, or deploy either stack during this
 migration. IaC attachment ownership is a separate follow-up phase.
+
+The systemd wrapper environment is the secret-free repository artifact
+`infrastructure/host_runtime/phase2-real-data.env`; do not synthesize different
+paths or identities on the host.
