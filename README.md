@@ -35,6 +35,6 @@ GitHub ActionsはPython 3.12、lock済みCDK CLIでpytest、Ruff、mypy、dev向
 
 ## Phase 2a Host Runtime static artifacts
 
-`config/stages/dev.yaml`の`host_runtime`は、AL2023 release、Compose checksum、itzg release image digest、Minecraft 26.2、initial memory/timeoutを固定する。`wishicraft.host_runtime.render_boot_time_artifacts`は、実機preflightで観測したnumeric UID/GIDを受け取り、secretを含まないcanonicalな`compose.yaml`、`runtime.env`、manifest、render digestを新しい専用output rootへ生成する。
+`config/stages/dev.yaml`の`host_runtime`は、AL2023 release/kernel/公式AMI identity、Compose checksum、itzg release image digest、Minecraft 26.2、initial memory/timeoutを固定する。`wishicraft.host_runtime.render_boot_time_artifacts`は、実機preflightで観測したnumeric UID/GIDを受け取り、secretを含まないcanonicalな`compose.yaml`、`runtime.env`、manifest、render digestを新しい専用output rootへ生成する。
 
 Phase 2aのrepository validationはDocker Engineを必要としない。Phase 2b-1ではGitHub-hosted Linux x86_64 runnerの既設Dockerだけを使い、固定digest imageを`SETUP_ONLY=true`で実行するsynthetic ownership integration testを追加した。local開発環境へDockerをinstallせず、実world、実`server.properties`、secret、AWSを使用しない。

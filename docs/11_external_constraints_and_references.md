@@ -1,7 +1,7 @@
 # 11. External Constraints and References
 
 - **文書状態:** Canonical reference
-- **最終確認:** 2026-07-23
+- **最終確認:** 2026-08-23
 
 ## 1. 目的
 
@@ -193,8 +193,9 @@ EBS volumeは同じAvailability ZoneのEC2へ接続する。Linux上のdevice na
 
 ## 10. Phase 2 Host Runtime artifacts
 
-- AL2023 `2023.12.20260724` releaseはdeterministic repository update modelを持つ。Phase 2aではreleaseを固定し、region固有AMI name/IDはAWSアクセス前のObservation Requiredとする。
-- Docker Engineは固定AL2023 releaseの標準repositoryに含まれる`docker` packageを使用し、導入されたNEVRAを記録する。
+- Phase 2 targetはAL2023 `2023.12.20260803`へ固定する。AWSのdeterministic repository update modelを使用し、ap-northeast-1 / x86_64 / kernel 6.18の公式AMI name、ID、owner、creation dateもstage設定へ固定する。
+- AWSは2026-08-17からkernel 6.18をAL2023 defaultとし、最新kernelとして推奨している。AL2023は6.1、6.12、6.18を同じuserspace packageと互換性でsupportする。WishicraftはFIPS要件や6.1固有kernel依存を持たないため6.18を採用する。
+- Docker Engineは固定AL2023 releaseの標準repositoryに含まれる`docker` packageを使用する。20260803で確認したpackageはx86_64対応の`25.0.16-1.amzn2023.0.3`である。20260608の`.0.1`に記録されたmulti-network regression後の更新buildであり、現行Host Runtimeは単一Compose networkを使用する。RPM NEVRAを独立した恒久設定正本にはせず、導入時に実値を記録・照合する。
 - Composeは公式CLI pluginを使用する。Phase 2a lockはDocker公式repositoryでも固定値が確認できるv5.4.0 x86_64とSHA-256を使用する。
 - itzgは`2026.7.2-java25`のGHCR manifest digestを固定する。Minecraft 26.2はJava 25を要求する。
 - 固定releaseのentrypointはrootでUID/GIDを設定し、`SKIP_CHOWN_DATA=true`なら`/data`のrecursive chownをskipした後、`gosu`でruntime UID/GIDへdropする。server.properties setupとmc-image-helperはdrop後に実行される。
@@ -202,7 +203,10 @@ EBS volumeは同じAvailability ZoneのEC2へ接続する。Linux上のdevice na
 
 公式資料:
 
-- [AL2023 2023.12.20260724 release notes](https://docs.aws.amazon.com/linux/al2023/release-notes/relnotes-2023.12.20260724.html)
+- [AL2023 2023.12.20260803 release notes](https://docs.aws.amazon.com/linux/al2023/release-notes/relnotes-2023.12.20260803.html)
+- [AL2023 kernel selection and compatibility](https://docs.aws.amazon.com/linux/al2023/ug/kernel-update.html)
+- [AL2023.12 package list](https://docs.aws.amazon.com/linux/al2023/release-notes/all-packages-AL2023.12.html)
+- [AL2023 20260608 Docker regression notice](https://docs.aws.amazon.com/linux/al2023/release-notes/relnotes-2023.12.20260608.html)
 - [AL2023 repository updates](https://docs.aws.amazon.com/linux/al2023/ug/managing-repos-os-updates.html)
 - [Docker Compose plugin installation](https://docs.docker.com/compose/install/linux/)
 - [Docker Compose v5.4.0 artifact lock](https://github.com/docker-library/repo-info/blob/master/repos/docker/remote/dind-rootless.md)

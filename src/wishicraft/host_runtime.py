@@ -126,6 +126,33 @@ def _runtime_mapping(values: ConfigMapping) -> ConfigMapping:
 
 def _validate_runtime_lock(runtime: ConfigMapping, *, observed_uid: int, observed_gid: int) -> None:
     errors: list[str] = []
+    release = _optional_string(runtime, "platform.al2023_release")
+    kernel = _optional_string(runtime, "platform.kernel_variant")
+    architecture = _optional_string(runtime, "platform.architecture")
+    ami_name = _optional_string(runtime, "platform.ami_name")
+    ami_id = _optional_string(runtime, "platform.ami_id")
+    owner_id = _optional_string(runtime, "platform.ami_owner_id")
+    creation_date = _optional_string(runtime, "platform.ami_creation_date")
+    expected_ami_name = (
+        f"al2023-ami-{release}.3-kernel-{kernel}-{architecture}"
+        if release and kernel and architecture
+        else None
+    )
+    if expected_ami_name is None or ami_name != expected_ami_name:
+        errors.append("host_runtime platform AMI name must match release, kernel, and architecture")
+    if ami_id is None or re.fullmatch(r"ami-[0-9a-f]{17}", ami_id) is None:
+        errors.append("host_runtime.platform.ami_id must be a fixed AMI ID")
+    if owner_id != "137112412989":
+        errors.append("host_runtime.platform.ami_owner_id must be the Amazon AL2023 owner")
+    if (
+        creation_date is None
+        or re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.000Z",
+            creation_date,
+        )
+        is None
+    ):
+        errors.append("host_runtime.platform.ami_creation_date must be fixed in UTC")
     image = _optional_string(runtime, "image.reference")
     match = _IMAGE_PATTERN.fullmatch(image or "")
     if match is None:

@@ -2,7 +2,7 @@
 
 - **文書状態:** Canonical
 - **対象:** Phase 0開始時点の初期設定
-- **最終更新:** 2026-08-22
+- **最終更新:** 2026-08-23
 
 ## 1. 目的
 
@@ -166,11 +166,11 @@ itzg採用後もEULA同意はoperator policy/gateとして維持する。承認�
 
 Phase 2開始前に、itzg image tag/digest、Docker Engine / Compose固定方法、container UID/GID、memory/JVM heap、lifecycle ownerとrestart/stop timeout、command path、secret injection、desired/applied schemaをDecisionとして確定する。既存値や`null`から推測しない。
 
-Phase 2aではD-060により、devのAL2023 release、architecture、Compose release/checksum、itzg Java 25 release tag/digest、Minecraft 26.2、initial memory、停止timeoutを`host_runtime`へ記録した。region固有AMI name/IDと既存data EBSのnumeric UID/GIDはObservation Requiredとして`null`を維持する。Docker packageは固定AL2023標準repositoryを正本とし、RPM NEVRAを独立したユーザー設定として二重管理せず、導入時の検証結果として記録する。Phase 1 `compute`と`minecraft_distribution`はas-built値として維持する。
+Phase 2aではD-060により、devのAL2023 release、architecture、Compose release/checksum、itzg Java 25 release tag/digest、Minecraft 26.2、initial memory、停止timeoutを`host_runtime`へ記録した。既存data EBSのnumeric UID/GIDはObservation Requiredとして`null`を維持する。Docker packageは固定AL2023標準repositoryを正本とし、RPM NEVRAを独立したユーザー設定として二重管理せず、導入時の検証結果として記録する。Phase 1 `compute`と`minecraft_distribution`はas-built値として維持する。
 
 Phase 2b-1ではD-061により、dev current memory targetをcontainer `2816MiB`、Xms `1G`、Xmx `2G`へ更新した。これはminimal Vanilla用Provisional tuningであり、Phase 1 `compute.java_xmx=3G`とは別のtarget値である。既存EBS identityは`993:993`と観測したがstage設定のUID/GID `null`は、実機apply artifactへ観測値を明示入力する現行契約を維持するため自動補完しない。
 
-Phase 2 target AL2023 `2023.12.20260724`はPhase 1 as-built AMI release `2023.12.20260803.3`より古い。次のtarget EC2作成前にAmazon公式の現在release/AMIをread-onlyで再確認し、lock維持または更新をreviewする。今回のcompatibility passでは値を変更しない。
+D-062でPhase 2 target platform lockを最終確定した。targetはAL2023 `2023.12.20260803`、kernel 6.18、ap-northeast-1の公式x86_64 AMI `al2023-ami-2023.12.20260803.3-kernel-6.18-x86_64` / `ami-0b4d2909a55ed2c78`である。Phase 1 as-built `2023.12.20260803.3` / kernel 6.1は履歴として変更しない。固定releaseの標準repositoryで確認したDockerは`docker-25.0.16-1.amzn2023.0.3.x86_64`だが、RPM NEVRAは独立した設定正本にせず実機install時にも記録・照合する。
 
 Phase 7前:
 

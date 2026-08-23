@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-22
+- **最終更新:** 2026-08-23
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -9,6 +9,17 @@
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-062 Phase 2 target platform lock finalization
+
+- **状態:** Accepted
+- **日付:** 2026-08-23
+- **比較:** AL2023 `2023.12.20260724`維持と`2023.12.20260803`更新を比較した。旧releaseを必要とするHost Runtime互換性またはrollback理由はなく、`20260803`はOpenSSH、OpenSSL、kernel等の後続security/maintenance updateを含み、release固定による再現性も維持できるため更新する。
+- **Kernel:** 6.1、6.12、6.18を比較し、AWSが2026-08-17からdefaultとし現在推奨するkernel 6.18を採用する。WishicraftはFIPS validated kernelを要件とせず、Docker/Compose、XFS、bind mount、systemd、itzgに6.1固有依存がない。AL2023は3 variantへ同じuserspace packageと互換性を提供し、6.18を最新security/maintenance経路とする。target host実動作はmigration gateで検証する。
+- **AMI lock:** ap-northeast-1のAmazon公式public x86_64 AMI `al2023-ami-2023.12.20260803.3-kernel-6.18-x86_64` / `ami-0b4d2909a55ed2c78` / owner `137112412989` / creation `2026-08-03T17:39:23.000Z`を固定する。release、kernel、name、ID、architecture、owner、creation dateの整合をrepository validation対象にする。
+- **Docker observation:** 固定releaseのAL2023標準repositoryは`docker` `25.0.16-1.amzn2023.0.3`をx86_64へ提供する。既知のmulti-network regressionが記録された`.0.1`ではなく後続buildであり、現行Host Runtimeは単一Compose networkを使う。RPM versionを独立した恒久設定正本にはせず、このDecisionと公式referenceに観測値を記録し、実機install時は導入NEVRAをartifactへ記録して一致を確認する。
+- **維持lock:** Compose `v5.4.0` + SHA-256 `837fd1d35bf6a494f41b5b5988269a7be79de337cf1a1a6ff0e45ab51bb4e9be`、itzg `2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77`、Minecraft `VERSION=26.2` / `TYPE=VANILLA`を変更しない。
+- **対象外:** 本DecisionはEC2作成、deploy、Docker/Compose install、image pull/run、EBSまたはPhase 1 runtimeへの操作を承認しない。
 
 ### D-061 Phase 2b-1 server.properties ownership migrationと安全側memory初期値
 
@@ -20,7 +31,7 @@
 - **Provisional memory:** Phase 2b dev最小Vanillaのcurrent targetをcontainer `2816 MiB`、Xms `1G`、Xmx `2G`とする。D-060の`3 GiB` / `2304M`初期案を置き換えるが、恒久的architecture invariantではない。target host上のDocker/itzg起動peak、native memory、OOM event、save/stopを実測して再評価する。
 - **Validation:** 実data適用前に、固定tag+digest、linux/amd64、synthetic fixtureだけを使うCI integration testを必須とする。`0:993` / `0640`のpermission failure、`993:993` / `0640`での更新、inode/mode/ACL、`SKIP_CHOWN_DATA=true` sentinel、同一input restart、RCON disabled時のsecret artifact不存在を検証する。
 - **Deferred:** `RCON_PASSWORD_FILE`、`UMASK=0077`、`.rcon-cli.env`、`.rcon-cli.yaml`のsecurity integrationはRCON command path導入前に決定・検証し、Phase 2b最小起動のblockerにしない。
-- **Decision Needed:** Phase 2 target lock `2023.12.20260724`はPhase 1 as-built `2023.12.20260803.3`より古い。target EC2作成直前に現在のAmazon公式AL2023 release/AMIをread-onlyで再確認し、旧lockを意図的に維持するか、新releaseへlock更新して再validationするかを人間reviewする。その停止境界までreleaseを暗黙に変更しない。
+- **Resolved:** Phase 2 target platform lock reviewはD-062で完了した。Phase 1 as-built `2023.12.20260803.3` / kernel 6.1の履歴は変更しない。
 
 ### D-060 Phase 2a Host Runtime static contract
 
@@ -31,7 +42,7 @@
 - **Desired/applied:** Control Planeが妥当な要求を受理した時点でdesired revisionを進める。render成功後だけrendered revision/digest、runtime反映を実測した後だけapplied revisionを進める。Phase 2aはcanonical renderとnon-secret digestまでとし、revision永続化は後続Phaseへ送る。
 - **Provisional:** dev初期値はcontainer 3 GiB、Xms 1G、Xmx 2304M。停止budgetはexplicit save 60秒、itzg 120秒、Compose 150秒、systemd 180秒、Host wrapper 300秒、SSM 360秒、Control Plane 420秒。恒久的architecture invariantではなくdev実測後に再評価する。
 - **Platform lock:** AL2023 release/AMI、architecture、Compose version/checksum、itzg tag/digestをGitで固定する。Docker Engineは固定AL2023 releaseの標準repositoryから導入し、NEVRAを独立した設定正本にせず、実際の導入結果を検証・記録する。
-- **Observation Required:** dev既存EBSのUID/GID、ACL/owner/file type、ap-northeast-1のrelease-specific AMI name/ID、導入Docker NEVRA、dev停止時間・memory/OOM余裕。未知値は推測せずhost適用前に停止する。
+- **Observation Required:** dev既存EBSのUID/GID、ACL/owner/file type、導入Docker NEVRA、dev停止時間・memory/OOM余裕。ap-northeast-1のrelease-specific AMI lockはD-062で解消した。未知値は推測せずhost適用前に停止する。
 - **Deferred:** RCON command path/client、secret injection、whitelist runtime apply、desired/rendered/applied永続schema、backup、Mod/Plugin/Modpack、旧runtime退役順序。
 - **移行境界:** Phase 1 `minecraft.service`がactiveならCompose start前にfail-closedする。新unitをboot enableせず、自動restartしない。新経路のdev同等性とrollback検証前にPhase 1 artifactをdisable/removeしない。
 - **公式根拠:** `docs/11_external_constraints_and_references.md`のHost Runtime節。

@@ -256,13 +256,11 @@ systemd、Docker/Compose、itzg、Minecraft の複数層が独立に restart を
 
 ## 16. 現時点の未確定事項
 
-- 採用する itzg image の具体的 release tag / digest。
+AL2023 release/kernel/AMI、itzg image tag/digest、Docker Engine/Composeの導入・固定方法、synthetic fixtureで必要と確認したownership migration、および最小構成のinitial memoryはD-060〜D-062で確定またはProvisional化した。残る実機観測・設計事項は次のとおりである。
 
-- Docker Engine / Compose の導入・version 固定方法。
+- target host上のUID/GID 993 collisionとdata EBS identityの再確認。
 
-- container UID/GID と data EBS 上の所有権。
-
-- t3a.medium 上での container memory / JVM heap。
+- t3a.medium上でのcontainer memory / JVM heap、Docker/itzg起動peak、OOM余裕の実測。
 
 - systemd と Compose の具体的な起動・停止・restart policy、および lifecycle owner の最終設定。
 

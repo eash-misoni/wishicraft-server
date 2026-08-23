@@ -244,7 +244,7 @@ EC2起動
 
 ## 5. Phase 2 — itzg Host Runtime境界
 
-- **状態:** In Progress（Phase 2a repository-only Host Runtime static contract）
+- **状態:** In Progress（Phase 2 target platform lock確定、実機migration前）
 
 ### 目的
 
@@ -264,13 +264,29 @@ AWS制御面から呼び出す安定したHost Runtime interfaceを、itzg/docke
 
 ### Phase 2a scope
 
-AWS適用前のrepository-only単位として、platform/runtime lock、AL2023標準Docker + checksum固定Compose installer、numeric identity/filesystem preflight、restartなしCompose/systemd artifact、timeout scope、secret-free canonical renderer、static/local testを作る。AMI IDと既存EBS UID/GIDはObservation Requiredのまま推測しない。RCON command path、secret injection、desired/rendered/appliedの永続化、旧runtime退役は後続単位とする。
+AWS適用前のrepository-only単位として、platform/runtime lock、AL2023標準Docker + checksum固定Compose installer、numeric identity/filesystem preflight、restartなしCompose/systemd artifact、timeout scope、secret-free canonical renderer、static/local testを作る。既存EBS UID/GIDはObservation Requiredのまま推測しない。release-specific AMI identityはD-062で確定した。RCON command path、secret injection、desired/rendered/appliedの永続化、旧runtime退役は後続単位とする。
 
 ### Phase 2b-1 scope
 
 実data変更前のcompatibility gateとして、GitHub-hosted Linux x86_64 runner上で固定itzg tag+digestを使用するsynthetic Docker integration testを行う。`SETUP_ONLY=true`でMinecraft processを起動せず、既存`server.properties` ownershipの失敗再現、一件migration後の更新、`SKIP_CHOWN_DATA`、restart idempotency、RCON disabled時のsecret artifact不存在を検証する。実world、実properties、AWS、EC2、SSM、secretは使用しない。
 
-Phase 2b実機適用前には、target AL2023 lock `2023.12.20260724`がPhase 1 instanceの`2023.12.20260803.3`より古いことをreviewし、現在の公式releaseをread-only再確認してlock維持または更新を決定する。review前にtarget EC2を作成しない。
+Phase 2 target platform reviewはD-062で完了し、AL2023 `2023.12.20260803` / kernel 6.18 / ap-northeast-1公式x86_64 AMIを固定した。Phase 1 instanceのas-built `2023.12.20260803.3` / kernel 6.1は変更しない。
+
+### 次の実機migration gate
+
+以下を順序どおり個別の承認・検証単位として進める。本platform lock finalizationでは1の開始前で停止し、EC2、runtime、data EBSへ操作しない。
+
+1. target EC2作成前preflight
+2. target host UID/GID 993 collision確認
+3. Docker / Compose install
+4. itzg image pull/digest確認
+5. Docker/Compose/Host Runtime実動作確認
+6. Phase 1完全停止
+7. data EBS migration
+8. `server.properties` ownership migration
+9. itzg最小起動
+10. READY / world persistence / graceful stop
+11. rollback確認
 
 ### Phase 1 migration inventory
 

@@ -220,6 +220,42 @@ def test_installer_uses_locked_al2023_repository_and_records_docker_version() ->
     assert "COMPOSE_SHA256" in installer
 
 
+def test_target_platform_lock_is_complete_and_internally_consistent() -> None:
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+    runtime = configuration.stage.values["host_runtime"]
+    assert isinstance(runtime, dict)
+    platform = runtime["platform"]
+
+    assert platform == {
+        "operating_system": "amazon-linux-2023",
+        "al2023_release": "2023.12.20260803",
+        "kernel_variant": "6.18",
+        "ami_name": "al2023-ami-2023.12.20260803.3-kernel-6.18-x86_64",
+        "ami_id": "ami-0b4d2909a55ed2c78",
+        "architecture": "x86_64",
+        "ami_owner_id": "137112412989",
+        "ami_creation_date": "2026-08-03T17:39:23.000Z",
+    }
+
+
+@pytest.mark.parametrize(
+    ("path", "value", "message"),
+    (
+        ("host_runtime.platform.kernel_variant", "6.1", "AMI name must match"),
+        ("host_runtime.platform.ami_id", "ami-unknown", "fixed AMI ID"),
+        ("host_runtime.platform.ami_owner_id", "000000000000", "Amazon AL2023 owner"),
+    ),
+)
+def test_renderer_rejects_inconsistent_target_platform_lock(
+    path: str, value: str, message: str
+) -> None:
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+    stage = _changed_stage(path, value)
+
+    with pytest.raises(ConfigValidationError, match=message):
+        render_boot_time_artifacts(configuration.project, stage, observed_uid=991, observed_gid=991)
+
+
 def test_static_shutdown_artifacts_match_provisional_timeout_contract() -> None:
     configuration = load_configuration(REPOSITORY_ROOT, "dev")
     timeouts = configuration.stage.values["host_runtime"]
