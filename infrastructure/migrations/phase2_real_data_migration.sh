@@ -53,7 +53,7 @@ raw_preflight() {
   [[ "$size" == "$EXPECTED_SIZE_BYTES" ]] || fail DEVICE_SIZE
   type="$(blkid -s TYPE -o value "$device" 2>/dev/null || true)"
   uuid="$(blkid -s UUID -o value "$device" 2>/dev/null || true)"
-  signatures="$(wipefs -n --noheadings -o TYPE "$device" | awk '{$1=$1} NF' | sort -u)"
+  signatures="$(wipefs -n --noheadings --output TYPE "$device" | awk '{$1=$1} NF' | sort -u)"
   [[ "$type" == xfs ]] || fail FILESYSTEM_TYPE
   [[ "$uuid" == "$EXPECTED_UUID" ]] || fail FILESYSTEM_UUID
   [[ "$signatures" == xfs ]] || fail FILESYSTEM_SIGNATURES

@@ -35,7 +35,8 @@ def test_real_data_migration_forbids_destructive_filesystem_and_broad_ownership_
 
 def test_real_data_migration_mounts_only_expected_existing_xfs_uuid() -> None:
     script = SCRIPT.read_text(encoding="utf-8")
-    assert "wipefs -n" in script
+    assert "wipefs -n --noheadings --output TYPE" in script
+    assert "wipefs -n --noheadings -o TYPE" not in script
     assert '[[ "$type" == xfs ]]' in script
     assert '[[ "$uuid" == "$EXPECTED_UUID" ]]' in script
     assert '[[ "$signatures" == xfs ]]' in script

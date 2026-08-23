@@ -21,6 +21,9 @@ recursive ownership operation. It validates the target instance through IMDS, ma
 the EBS volume by NVMe serial, rejects partitions and additional signatures, and
 mounts only the fixed UUID.
 
+AL2023 util-linux 2.37.4 uses `--output TYPE` for signature output; short `-o`
+means an erase offset and is forbidden by the reviewed artifact.
+
 ## Ordered execution gate
 
 1. Validate the repository, commit/push it, and require successful CI.
