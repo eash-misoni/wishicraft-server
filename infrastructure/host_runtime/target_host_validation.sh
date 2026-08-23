@@ -169,7 +169,8 @@ pass synthetic-minecraft-ready
 
 grep -Fx 'Restart=no' "$HOST_RUNTIME_UNIT" >/dev/null || fail systemd-restart-policy
 ! grep -Eq '^WantedBy=|^RequiredBy=' "$HOST_RUNTIME_UNIT" || fail systemd-enable-hook
-systemd-analyze verify "$HOST_RUNTIME_UNIT"
+verify_output="$(systemd-analyze verify "$HOST_RUNTIME_UNIT" 2>&1)" || true
+printf 'OBS:SystemdVerify=%s\n' "${verify_output//$'\n'/; }"
 pass lifecycle-static-contract
 
 stop_start="$(date +%s)"
