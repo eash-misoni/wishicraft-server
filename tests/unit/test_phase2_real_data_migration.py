@@ -58,3 +58,9 @@ def test_real_data_migration_properties_contract_is_content_preserving() -> None
     assert "PROPERTIES_PRECONDITION" in script
     assert "PROPERTIES_POSTCONDITION" in script
     assert "no_extended_acl" in script
+
+
+def test_world_evidence_is_independent_of_minecraft_dimension_layout() -> None:
+    script = SCRIPT.read_text(encoding="utf-8")
+    assert script.count("find \"$world\" -xdev -type f -name '*.mca'") == 2
+    assert 'find "$world/region"' not in script

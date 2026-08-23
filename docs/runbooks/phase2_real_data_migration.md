@@ -25,6 +25,9 @@ AL2023 util-linux 2.37.4 uses `--output TYPE` for signature output; short `-o`
 means an erase offset and is forbidden by the reviewed artifact.
 Filesystem classification uses file tests rather than GNU `stat %F` wording because
 AL2023 reports an empty regular file as `regular empty file`.
+World evidence fixes the `world` directory inode and counts `.mca` files recursively;
+Minecraft 26.2 stores overworld region data below `dimensions/minecraft/overworld`
+rather than requiring the legacy top-level `world/region` layout.
 
 ## Ordered execution gate
 

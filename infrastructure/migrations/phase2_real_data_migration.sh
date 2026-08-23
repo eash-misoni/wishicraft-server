@@ -157,7 +157,7 @@ world_record() {
   local world="$SERVER_DIR/world" regions
   filesystem_preflight
   [[ -d "$world" && ! -L "$world" && -f "$world/level.dat" ]] || fail WORLD_STRUCTURE
-  regions="$(find "$world/region" -maxdepth 1 -type f -name '*.mca' | wc -l | tr -d ' ')"
+  regions="$(find "$world" -xdev -type f -name '*.mca' | wc -l | tr -d ' ')"
   [[ "$regions" -gt 0 ]] || fail WORLD_REGION_EMPTY
   install -d -o root -g root -m 0700 "$STATE_DIR"
   printf '%s:%s\n' "$(stat -c %i "$world")" "$regions" >"$STATE_DIR/world.before"
@@ -171,7 +171,7 @@ world_verify() {
   [[ -f "$STATE_DIR/world.before" ]] || fail WORLD_EVIDENCE_MISSING
   expected="$(cut -d: -f1 "$STATE_DIR/world.before")"
   [[ -d "$world" && "$(stat -c %i "$world")" == "$expected" && -f "$world/level.dat" ]] || fail WORLD_IDENTITY
-  regions="$(find "$world/region" -maxdepth 1 -type f -name '*.mca' | wc -l | tr -d ' ')"
+  regions="$(find "$world" -xdev -type f -name '*.mca' | wc -l | tr -d ' ')"
   [[ "$regions" -gt 0 ]] || fail WORLD_REGION_EMPTY
   printf 'OBS:world_inode=%s region_files=%s\n' "$expected" "$regions"
   pass EXISTING_WORLD_PERSISTED
