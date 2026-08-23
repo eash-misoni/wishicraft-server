@@ -601,6 +601,16 @@
 - real-world起動はportless、RCON無効、restartなしの固定Host Runtimeで2回のREADY・正常停止・永続性を確認する。初回起動後の失敗は自動rollbackせず、target停止・snapshot保持・attachment記録で停止する。
 - 手動detach/attachによるPhase 1 VolumeAttachmentの一時driftは既知状態とし、この作業ではstack update/import/reconciliationを行わない。
 
+### D-065 Phase 2b real-data migration validation完了
+
+- **状態:** Accepted
+- **日付:** 2026-08-23
+- rollback anchor `snap-0b1d9536e9c476c0f`のcompleted後、data EBS `vol-03ac9f534326c345c`を停止済みPhase 1 EC2から停止済みtarget EC2へforceなしで移動した。XFS UUID、NVMe identity、30 GiB、partitionなしをmount前に確認した。
+- `server.properties`一件を`0:993 / 0640`から`993:993 / 0640`へ変更し、ownership変更時のinode、size、mode、SHA-256維持を確認した。他entryのunknown owner、ACL、symlink、special fileは0だった。
+- 固定itzg imageで既存worldを2回READYにし、同じworld inode、data EBS bind、Minecraft 26.2、Java 25、healthy、restart 0、OOMなしを確認した。2回ともformal Host Runtime stopは1秒、exit 0、全dimension保存、listener/process残存なしだった。
+- 終了時はPhase 1 EC2とtarget EC2がstopped、data EBSはtargetへ`/dev/sdf`・DeleteOnTermination=falseでattached、snapshot保持、target SG ingress 0、DNS recordなしである。両CloudFormation stackは更新していない。
+- Phase 1 stackのVolumeAttachment logical resourceと実attachmentには意図的な一時driftがある。次工程でtarget側のattachment ownership、Phase 1側resourceの扱い、rollback boundary、旧EC2退役順序を設計・reviewしてからreconciliationする。
+
 ## 5. Current blockers
 
 Phase 0とPhase 1は完了した。Phase 1の意図的SIGTERM終了契約はas-built課題として履歴を維持するが、直接Java process向け解決を先行しない。Phase 2ではitzg移行後のgraceful shutdown、container exit、Host Runtime service結果を一体で定義する。

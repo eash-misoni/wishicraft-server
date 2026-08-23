@@ -244,7 +244,7 @@ EC2起動
 
 ## 5. Phase 2 — itzg Host Runtime境界
 
-- **状態:** In Progress（Phase 2 target platform lock確定、実機migration前）
+- **状態:** In Progress（Phase 2b real-data migration validation完了、IaC attachment ownership reconciliation前）
 
 ### 目的
 
@@ -281,6 +281,12 @@ Phase 2b real-data migrationは、固定instance/volume/AZ/UUIDを検証する
 `docs/runbooks/phase2_real_data_migration.md`を正本とする。既存XFSを初期化せず、
 `server.properties`一件だけを`0:993`から`993:993`へ移行する。最初のreal-world
 起動後は自動rollbackせず、snapshotとattachmentを保持して停止する。
+
+2026-08-23にsnapshot `snap-0b1d9536e9c476c0f`をrollback anchorとして保持し、
+data EBSを独立targetへ移してreal-world READY・正常停止・再起動後の永続性・
+再度の正常停止を確認した。終了時は両EC2 stopped、data EBSはtargetへattached、
+target ingress 0、DNSなしである。Phase 1 VolumeAttachmentの一時drift解消、RCON、
+public ingress、旧host退役は後続単位とする。
 
 1. target EC2作成前preflight
 2. target host UID/GID 993 collision確認
