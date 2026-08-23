@@ -622,6 +622,27 @@
 - IMPORT change set `phase2-target-attachment-import-74d9e8f`はattachment一件の`Action=Import`だけを含むことを確認してexecuteし、Target Stackは`IMPORT_COMPLETE`となった。実attachment timeはmigration時のままで、物理detach/reattachは発生していない。
 - import後の`TargetDataVolumeAttachment` driftは`IN_SYNC`、`cdk diff`は0である。stack全体のdriftはstopped EC2のpublic IPv4解放により`AssociatePublicIpAddress` actualがfalseとなる既知差分だけで、attachment、IAM/profile、SGはIN_SYNCである。
 
+### D-067 Phase 1 retirementとData EBS ownership移管
+
+- **状態:** Accepted（retirement executionはDeferred）
+- **日付:** 2026-08-23
+- `MinecraftStack-dev`は`CREATE_COMPLETE`で、termination protectionを有効化した。stack policyは未設定である。rollback window中はPhase 1 stackをFrozenのまま維持し、通常CDK deploy/update/deleteを禁止する。
+- current resource schemaでは`AWS::EC2::Volume`は`FULLY_MUTABLE`、primary identifierは`VolumeId`であり、stack refactoringのunsupported resource一覧にも含まれない。一方、source templateではold `VolumeAttachment`とPhase 1 EC2 UserDataがVolumeを`Ref`している。VolumeだけのMOVEにはこれらのproperty変更が必要となり、configuration変更を許さないstack refactoringとして有効に成立しないため、refactor previewは作成しなかった。
+- `AWS::EC2::VolumeAttachment`は`IMMUTABLE`で、primary identifierは`VolumeId + InstanceId`である。Cloud Controlのreadではold identifier `vol-03ac9f534326c345c|i-021eaa7f33ddaf0a6`はNotFound、current target identifier `vol-03ac9f534326c345c|i-04fc0629dc4ea466e`だけが実在した。ただしEC2 `DetachVolume` APIでは`InstanceId`がoptionalで、CloudFormation providerのdelete request mappingを一次情報から完全には証明できなかったため、stale old attachmentの通常deleteは採用しない。
+- deployed Phase 1 templateを基準に、Phase 1 EC2の`ImageId`をcurrent physical AMI `ami-016923362cc95896d`へliteral固定し、old attachmentへ`DeletionPolicy: Retain`と`UpdateReplacePolicy: Retain`だけを追加する非実行change set `phase1-retirement-preflight-20260823-1`を作成した。previewの唯一のactionはold attachmentの`Modify`（replacement false、policy attributesのみ）で、EC2、root EBS、IAM、SG、Data EBSのactionは0だった。change setは一度もexecuteせず、同じdeployed templateから再作成可能なことを確認したためcloseout時に削除した。
+- retirementはrollback window終了まで実行しない。将来の正本候補は、target runtimeの通常運用確認後に、(1) deployed-template based surgical updateでold attachmentへRetainを追加、(2) Retain済みold attachmentとData EBS Volumeをsource管理からremove、(3) physical Volumeをtarget stackへResource Import、(4) target側drift/diffとsnapshotを確認、(5) Phase 1 EC2/rootを退役、(6) Phase 1 stackを解体、の順とする。各updateはcurrent physical AMIとeffective UserDataを固定し、EC2 replacement/restart、attachment detach、Volume mutationが0でなければ実行しない。
+- 人間reviewとrollback window終了までは、Target Stackがcurrent attachment、Phase 1 StackがRetain付きVolume本体を所有する現状を安全な暫定状態として維持する。Data EBS ownership、stale attachment、Phase 1 EC2/stackはretirement debtであり、実証済みPhase 2 Host Runtime／real-world migrationの技術的成立を覆すblockerではない。RCON、public 25565、DNS、Control Plane integrationも後続機能でありPhase 1 retirementの前提にしない。
+- rollback snapshot `snap-0b1d9536e9c476c0f`は、Data EBS ownership移管、Phase 1 retirement、targetの通常運用確認がすべて完了し、別途削除承認が得られるまで保持する。stopped targetのpublic IPv4 releaseによるdriftはAWSの停止時address lifecycleに起因するknown benign observationであり、この差分だけを直すstack/EC2変更を行わない。
+
+### D-068 Phase 2 technical migration closeout
+
+- **状態:** Accepted
+- **日付:** 2026-08-23
+- Phase 2 targetは固定AL2023 `2023.12.20260803` / kernel 6.18 / x86_64 AMI、AL2023標準Docker `25.0.16`、Compose `5.4.0`、固定itzg `2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77`で実機検証を完了した。
+- existing data EBS上のMinecraft 26.2 Vanilla worldを2回READYにし、同じworld/data EBSのrestart persistence、2回のgraceful shutdown、container exit 0、OOMKilled=false、restart 0を確認した。`server.properties`一件のownershipはcontent、inode、modeを維持して`993:993 / 0640`へ移行済みである。
+- current physical attachmentは`TargetDataVolumeAttachment`としてTarget StackへResource Import済みで`IN_SYNC`、post-import target `cdk diff`は0である。closeout時はPhase 1 EC2とtarget EC2がともにstopped、snapshot `snap-0b1d9536e9c476c0f`はcompleted/retained、Phase 1 stackはtermination protection有効のFrozen rollback environmentである。
+- Data EBS Volume本体のstack ownership移管、stale Phase 1 attachment logical resource、Phase 1 EC2/root退役、Phase 1 stack削除はDeferred retirement debtでありPhase 2 blockerではない。RCON、public 25565、DNS automation、Control Plane integrationも後続Phaseのscopeとする。
+
 ## 5. Current blockers
 
 Phase 0とPhase 1は完了した。Phase 1の意図的SIGTERM終了契約はas-built課題として履歴を維持するが、直接Java process向け解決を先行しない。Phase 2ではitzg移行後のgraceful shutdown、container exit、Host Runtime service結果を一体で定義する。

@@ -17,6 +17,8 @@ Phase 2b-1では既存EBSのnumeric identity `993:993`を観測済みとし、`s
 
 Phase 2 target hostはD-063により独立した`MinecraftTargetStack-dev`で作成する。target stackは既存VPC/subnetだけを明示IDで利用し、専用IAM role/profile、ingress 0の専用SG、固定AMIのEC2を所有する。D-066以降は、手動migration済みexisting data EBSの`AWS::EC2::VolumeAttachment`だけをResource Importでtarget stackへ取り込む。data EBSの`AWS::EC2::Volume`本体はPhase 1 stack所有のまま、Phase 1 stackはFrozenとし、DNSやsecretとのCloudFormation referenceは追加しない。
 
+Phase 2 technical migrationはD-068で完了した。Data EBS Volume本体のownership移管とPhase 1 EC2/root/stack退役はrollback window終了後のDeferred cleanupであり、Phase 3の実測status実装を妨げない。Phase 3はTarget EC2を観測対象とし、Phase 1の直接Java `minecraft.service`ではなくHost Runtime、Docker container、itzgの実状態を段階的にprobeする。
+
 初回実用版では、複数ゲームやWeb管理画面を実装せず、単一バニラゲームのDiscord start/status/stopを端から端まで完成させる。
 
 ## 2. 初回実用版の全体構成

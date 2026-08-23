@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-22
+- **最終更新:** 2026-08-23
 
 ## 1. 開発原則
 
@@ -244,7 +244,7 @@ EC2起動
 
 ## 5. Phase 2 — itzg Host Runtime境界
 
-- **状態:** In Progress（Phase 2b real-data migrationとattachment Resource Import reconciliation完了）
+- **状態:** Completed（2026-08-23）
 
 ### 目的
 
@@ -287,6 +287,15 @@ data EBSを独立targetへ移してreal-world READY・正常停止・再起動�
 再度の正常停止を確認した。終了時は両EC2 stopped、data EBSはtargetへattached、
 target ingress 0、DNSなしである。Phase 1 VolumeAttachmentの一時drift解消、RCON、
 public ingress、旧host退役は後続単位とする。
+
+### 完了記録
+
+- D-062の固定AL2023 platform、AL2023標準Docker、固定Compose、固定itzg tag/digestをtarget実機で検証した。
+- existing data EBSとMinecraft 26.2 Vanilla worldを使用し、2回のREADY、restart persistence、2回のgraceful shutdown、exit 0、OOMなしを確認した。
+- `server.properties`一件のownership migrationを完了し、`993:993 / 0640`、content/inode/mode維持を確認した。
+- current attachmentをTarget StackへResource Importし、resource drift `IN_SYNC`、target `cdk diff` 0を確認した。
+- closeout時はPhase 1 EC2とtarget EC2がstopped、migration snapshotがretained、Phase 1 stackがtermination protection有効のFrozen rollback environmentである。
+- Data EBS Volume ownership、stale Phase 1 attachment、Phase 1 EC2/root/stack retirementはD-067のDeferred cleanupとする。RCON、public 25565、DNS automation、Control Plane integrationは後続Phaseへ送る。
 
 1. target EC2作成前preflight
 2. target host UID/GID 993 collision確認
