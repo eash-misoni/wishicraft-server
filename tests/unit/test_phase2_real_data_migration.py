@@ -44,6 +44,13 @@ def test_real_data_migration_mounts_only_expected_existing_xfs_uuid() -> None:
     assert "--mount-existing" in script
 
 
+def test_filesystem_classifier_accepts_empty_regular_files_without_stat_wording() -> None:
+    script = SCRIPT.read_text(encoding="utf-8")
+    assert '[[ ! -L "$path" ]] || fail SYMLINK' in script
+    assert '[[ -d "$path" || -f "$path" ]] || fail SPECIAL_FILE' in script
+    assert 'type="$(stat -c %F -- "$path")"' not in script
+
+
 def test_real_data_migration_properties_contract_is_content_preserving() -> None:
     script = SCRIPT.read_text(encoding="utf-8")
     assert "server-properties.before" in script

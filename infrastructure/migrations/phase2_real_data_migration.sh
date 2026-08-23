@@ -104,16 +104,15 @@ no_extended_acl() {
 }
 
 filesystem_preflight() {
-  local path type uid gid unknown=0 count=0
+  local path uid gid unknown=0 count=0
   verify_mount
   command -v getfacl >/dev/null || fail GETFACL_MISSING
   [[ -d "$SERVER_DIR" && ! -L "$SERVER_DIR" ]] || fail SERVER_DIRECTORY
   [[ "$(stat -c '%u:%g:%a:%F' "$SERVER_DIR")" == '993:993:750:directory' ]] || fail SERVER_DIRECTORY_META
   while IFS= read -r -d '' path; do
     ((count += 1))
-    type="$(stat -c %F -- "$path")"
-    [[ "$type" == directory || "$type" == 'regular file' ]] || fail SPECIAL_FILE
     [[ ! -L "$path" ]] || fail SYMLINK
+    [[ -d "$path" || -f "$path" ]] || fail SPECIAL_FILE
     no_extended_acl "$path" || fail EXTENDED_ACL
     uid="$(stat -c %u -- "$path")"; gid="$(stat -c %g -- "$path")"
     if [[ "$path" == "$PROPERTIES" ]]; then

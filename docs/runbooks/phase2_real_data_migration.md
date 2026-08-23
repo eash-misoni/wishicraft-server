@@ -23,6 +23,8 @@ mounts only the fixed UUID.
 
 AL2023 util-linux 2.37.4 uses `--output TYPE` for signature output; short `-o`
 means an erase offset and is forbidden by the reviewed artifact.
+Filesystem classification uses file tests rather than GNU `stat %F` wording because
+AL2023 reports an empty regular file as `regular empty file`.
 
 ## Ordered execution gate
 
