@@ -86,6 +86,8 @@ host_runtime:
     root_volume_type: gp3
     root_volume_size_gib: 16
     root_volume_encrypted: true
+    existing_data_volume_id: vol-03ac9f534326c345c
+    existing_data_volume_device: /dev/sdf
   platform:
     operating_system: amazon-linux-2023
     al2023_release: "2023.12.20260803"

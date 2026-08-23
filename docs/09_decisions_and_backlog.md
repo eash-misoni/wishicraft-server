@@ -611,6 +611,15 @@
 - 終了時はPhase 1 EC2とtarget EC2がstopped、data EBSはtargetへ`/dev/sdf`・DeleteOnTermination=falseでattached、snapshot保持、target SG ingress 0、DNS recordなしである。両CloudFormation stackは更新していない。
 - Phase 1 stackのVolumeAttachment logical resourceと実attachmentには意図的な一時driftがある。次工程でtarget側のattachment ownership、Phase 1側resourceの扱い、rollback boundary、旧EC2退役順序を設計・reviewしてからreconciliationする。
 
+### D-066 Target VolumeAttachmentのResource Import
+
+- **状態:** Accepted
+- **日付:** 2026-08-23
+- `AWS::EC2::VolumeAttachment`はResource Import対応だがstack refactoring非対応であるため、手動でtargetへattach済みのphysical identity `vol-03ac9f534326c345c|i-04fc0629dc4ea466e`を`MinecraftTargetStack-dev/TargetDataVolumeAttachment`へIMPORTする。
+- resource schemaのprimary identifierは`VolumeId`と`InstanceId`である。import identifierは両方を明示し、Device `/dev/sdf`はtemplate propertyとして一致させる。
+- target stackにはVolumeAttachment一件だけを追加し、`AWS::EC2::Volume`は追加しない。DeletionPolicy/UpdateReplacePolicyはRetainとし、通常deployによる新規attachを禁止する。
+- data EBS volume本体はPhase 1 stackのRetain resourceとして維持する。Phase 1 stackとold logical attachment `MinecraftDataVolumeAttachmentE11BB55A`はFrozenかつknown driftのままにし、今回更新・削除しない。
+
 ## 5. Current blockers
 
 Phase 0とPhase 1は完了した。Phase 1の意図的SIGTERM終了契約はas-built課題として履歴を維持するが、直接Java process向け解決を先行しない。Phase 2ではitzg移行後のgraceful shutdown、container exit、Host Runtime service結果を一体で定義する。

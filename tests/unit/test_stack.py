@@ -430,7 +430,7 @@ def test_prod_stack_is_rejected_before_synthesis() -> None:
         build_app(REPOSITORY_ROOT, "prod")
 
 
-def test_target_stack_is_root_only_and_isolated_from_phase_one() -> None:
+def test_target_stack_owns_only_the_imported_existing_data_attachment() -> None:
     app = build_app(REPOSITORY_ROOT, "dev", deployment="target")
     assert app.node.try_find_child("MinecraftStack-dev") is None
     stack = cast(Stack, app.node.find_child("MinecraftTargetStack-dev"))
@@ -441,7 +441,8 @@ def test_target_stack_is_root_only_and_isolated_from_phase_one() -> None:
     template.resource_count_is("AWS::IAM::Role", 1)
     template.resource_count_is("AWS::IAM::InstanceProfile", 1)
     assert template.find_resources("AWS::EC2::Volume") == {}
-    assert template.find_resources("AWS::EC2::VolumeAttachment") == {}
+    attachments = template.find_resources("AWS::EC2::VolumeAttachment")
+    assert list(attachments) == ["TargetDataVolumeAttachment"]
     assert template.find_resources("AWS::Route53::RecordSet") == {}
 
     instance = next(iter(template.find_resources("AWS::EC2::Instance").values()))["Properties"]
@@ -461,6 +462,21 @@ def test_target_stack_is_root_only_and_isolated_from_phase_one() -> None:
             },
         }
     ]
+    instance_id = next(iter(template.find_resources("AWS::EC2::Instance")))
+    attachment = attachments["TargetDataVolumeAttachment"]
+    assert attachment["Properties"] == {
+        "Device": "/dev/sdf",
+        "InstanceId": {"Ref": instance_id},
+        "VolumeId": "vol-03ac9f534326c345c",
+    }
+    assert attachment["DeletionPolicy"] == "Retain"
+    assert attachment["UpdateReplacePolicy"] == "Retain"
+    assert template.to_json()["Resources"]["CDKMetadata"]["Properties"]["Analytics"] == (
+        "v2:deflate64:H4sIAAAAAAAA/03KQQrCMBBA0bN0n4w0FS/QhbiytAeQGBMcm05KMqGUk"
+        "LuLiODq8eErUCcFbaO3JM1jlh7vUCbWZhZ6S7eCeoEyBm9F7+jnhRJrMnaIwaG3V"
+        "VijoPSOJmtyRN7PMeT1/6z1U9fMa+Yqhp2fgQ4dtAqOzSshypiJcbEwfn0D8wPMUp"
+        "cAAAA="
+    )
 
     security_group = next(iter(template.find_resources("AWS::EC2::SecurityGroup").values()))[
         "Properties"
@@ -492,8 +508,6 @@ def test_target_stack_is_root_only_and_isolated_from_phase_one() -> None:
     ]
     template_text = str(template.to_json())
     for forbidden in (
-        "VolumeAttachment",
-        "/dev/sdf",
         "/srv/minecraft",
         "rcon-password",
         "ssm:GetParameter",
@@ -501,3 +515,4 @@ def test_target_stack_is_root_only_and_isolated_from_phase_one() -> None:
         "ec2:AttachVolume",
     ):
         assert forbidden not in template_text
+    assert "i-021eaa7f33ddaf0a6" not in template_text

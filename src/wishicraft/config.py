@@ -492,6 +492,8 @@ _OPTIONAL_STAGE_STRINGS: Final = (
     "host_runtime.target_host.subnet_id",
     "host_runtime.target_host.instance_type",
     "host_runtime.target_host.root_volume_type",
+    "host_runtime.target_host.existing_data_volume_id",
+    "host_runtime.target_host.existing_data_volume_device",
     "host_runtime.platform.al2023_release",
     "host_runtime.platform.kernel_variant",
     "host_runtime.platform.ami_name",

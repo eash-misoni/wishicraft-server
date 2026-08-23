@@ -1,8 +1,8 @@
-"""Isolated Phase 2 target host stack with no data-volume dependency."""
+"""Isolated Phase 2 target host and imported existing-volume attachment."""
 
 from __future__ import annotations
 
-from aws_cdk import CfnOutput, Environment, Stack, Tags
+from aws_cdk import CfnOutput, CfnResource, Environment, RemovalPolicy, Stack, Tags
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
 from constructs import Construct
@@ -31,6 +31,8 @@ class MinecraftTargetStack(Stack):
                 "target_host.root_volume_type",
                 "target_host.root_volume_size_gib",
                 "target_host.root_volume_encrypted",
+                "target_host.existing_data_volume_id",
+                "target_host.existing_data_volume_device",
                 "platform.ami_id",
                 "platform.architecture",
             )
@@ -41,6 +43,8 @@ class MinecraftTargetStack(Stack):
             "target_host.root_volume_type": "gp3",
             "target_host.root_volume_size_gib": 16,
             "target_host.root_volume_encrypted": True,
+            "target_host.existing_data_volume_id": "vol-03ac9f534326c345c",
+            "target_host.existing_data_volume_device": "/dev/sdf",
             "platform.architecture": "x86_64",
         }
         errors = [
@@ -48,7 +52,12 @@ class MinecraftTargetStack(Stack):
             for key, value in expected.items()
             if values[key] != value
         ]
-        for key in ("target_host.vpc_id", "target_host.subnet_id", "platform.ami_id"):
+        for key in (
+            "target_host.vpc_id",
+            "target_host.subnet_id",
+            "target_host.existing_data_volume_id",
+            "platform.ami_id",
+        ):
             if not isinstance(values[key], str) or not values[key]:
                 errors.append(f"host_runtime.{key} must be a non-empty explicit ID")
         if errors:
@@ -59,6 +68,7 @@ class MinecraftTargetStack(Stack):
             str(values["target_host.stack_name"]),
             env=Environment(account=stage.aws_account_id, region=stage.aws_region),
             description="Isolated root-only Phase 2 target host; no Minecraft data EBS",
+            analytics_reporting=False,
         )
         raw_tags = project.values["resource_tags"]
         assert isinstance(raw_tags, dict)
@@ -127,6 +137,34 @@ class MinecraftTargetStack(Stack):
             ),
             monitoring=False,
         )
+        attachment = ec2.CfnVolumeAttachment(
+            self,
+            "TargetDataVolumeAttachment",
+            device=str(values["target_host.existing_data_volume_device"]),
+            instance_id=instance.ref,
+            volume_id=str(values["target_host.existing_data_volume_id"]),
+        )
+        attachment.override_logical_id("TargetDataVolumeAttachment")
+        attachment.apply_removal_policy(RemovalPolicy.RETAIN)
+        # Preserve the deployed metadata resource byte-for-byte so the IMPORT change set
+        # contains no unrelated Modify action caused by CDK construct telemetry.
+        cdk_metadata = CfnResource(
+            self,
+            "CDKMetadata",
+            type="AWS::CDK::Metadata",
+            properties={
+                "Analytics": (
+                    "v2:deflate64:H4sIAAAAAAAA/03KQQrCMBBA0bN0n4w0FS/QhbiytAeQGBMcm05KMqGUk"
+                    "LuLiODq8eErUCcFbaO3JM1jlh7vUCbWZhZ6S7eCeoEyBm9F7+jnhRJrMnaIwaG3V"
+                    "VijoPSOJmtyRN7PMeT1/6z1U9fMa+Yqhp2fgQ4dtAqOzSshypiJcbEwfn0D8wPMUp"
+                    "cAAAA="
+                )
+            },
+        )
+        cdk_metadata.override_logical_id("CDKMetadata")
+        cdk_metadata.cfn_options.metadata = {
+            "aws:cdk:path": "MinecraftTargetStack-dev/CDKMetadata/Default"
+        }
         CfnOutput(self, "TargetInstanceId", value=instance.ref)
         CfnOutput(self, "TargetSecurityGroupId", value=security_group.attr_group_id)
         CfnOutput(self, "TargetRoleName", value=role.role_name)

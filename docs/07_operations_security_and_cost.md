@@ -111,7 +111,7 @@ EC2から他instanceのstart/stopやIAM変更を許可しない。
 - filesystem UUIDでmountする。
 - mount確認失敗時はMinecraft、backup、resetを実行しない。
 - XFS以外のfilesystem、partition table、未知signatureでは再formatせず、SSM Session Managerでmount準備serviceのjournal、`findmnt`、`blkid`、fstabを調査する。
-- Phase 2 target host validationではdata EBSをdetach/attach/mountせず、target stackにもvolume IDまたはattachment resourceを含めない。targetのsynthetic dataはroot EBS上のinvocation固有`/var/tmp/wishicraft-phase2-validation-*`だけに作成し、検証後に削除する。
+- Phase 2 target hostのroot-only validationではdata EBSをdetach/attach/mountせず、synthetic dataはroot EBS上のinvocation固有`/var/tmp/wishicraft-phase2-validation-*`だけに作成した。real-data migration成功後は、既にtargetへ物理attach済みのexisting attachmentだけをCloudFormation Resource Importし、volume本体はPhase 1 stack所有のまま維持する。通常deployによるattachment作成、stack refactoring、物理detach/reattachを行わない。
 
 ### Minecraft runtime
 
