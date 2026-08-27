@@ -1,7 +1,7 @@
 # 05. Data and Interface Contracts
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-07-29
+- **最終更新:** 2026-08-27
 
 ## 1. 契約変更ルール
 
@@ -443,6 +443,8 @@ Phase 3 first sliceのrepository-only outputはTarget EC2 identityを呼出元�
 ```
 
 API failure、missing/duplicate instance、未知EC2 state、response schema不一致は`ec2_state=unknown`とし、下位stateも`unknown`、`ready=false`とする。Target instance IDをGitへ新しい物理ID正本として埋め込まず、将来のLambda environmentまたはCDK output wiringからadapterへ渡す。
+
+Phase 3 second sliceはEC2が`running`の場合だけSSM `DescribeInstanceInformation`をTarget instance IDでfilterする。単一の一致nodeについて`PingStatus=Online`を`online`、`Inactive`を`offline`、`ConnectionLost`を`connection-lost`へ正規化する。API failure、response schema不一致、missing/duplicate node、未知`PingStatus`、未処理paginationは`unknown`へfail-closedする。SSMがonlineでない場合はRun CommandまたはHost Runtime probeを実行せず、Host RuntimeとMinecraft stateを`unknown`のまま返す。
 
 
 ## 12. Operation Admission契約

@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-23
+- **最終更新:** 2026-08-27
 
 ## 1. 開発原則
 
@@ -355,7 +355,7 @@ public ingress、旧host退役は後続単位とする。
 
 ## 6. Phase 3 — 実測status
 
-- **状態:** In Progress（repository-only stopped target observation slice）
+- **状態:** In Progress（repository-only EC2 / SSM observation slices）
 
 ### 目的
 
@@ -376,6 +376,8 @@ AWS側から実状態を取得し、DynamoDBへ安全に保存する。
 11. AWS integration test
 
 最初のvertical sliceはTarget instance IDを明示inputとするEC2 adapterである。EC2が`stopped`なら到達不能なSSM/Host Runtime/Minecraft probeを実行せず、canonical `not-applicable` / `not-running` stateとUTC `observed_at`を返す。AWS API/schema failureは`unknown`へfail-closedし、DynamoDB、Lambda、running host probe、AWS deployは後続sliceとする。
+
+次のvertical sliceはEC2が`running`の場合だけSSM managed-node状態を取得する。`Online` / `Inactive` / `ConnectionLost`をcanonical `online` / `offline` / `connection-lost`へ正規化し、API/schema failure、missing/duplicate、未知値は`unknown`へfail-closedする。SSMがonlineでない場合はHost Runtime probeへ進まない。Run Command、Host Runtime probe、DynamoDB、Lambda、AWS deployは後続sliceとする。
 
 ### 確認ケース
 

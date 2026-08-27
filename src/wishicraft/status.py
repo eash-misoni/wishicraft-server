@@ -26,6 +26,9 @@ class Ec2State(StrEnum):
 class SsmState(StrEnum):
     """Canonical SSM managed-node states."""
 
+    ONLINE = "online"
+    OFFLINE = "offline"
+    CONNECTION_LOST = "connection-lost"
     NOT_APPLICABLE = "not-applicable"
     UNKNOWN = "unknown"
 
@@ -50,6 +53,12 @@ class Ec2Api(Protocol):
     """Narrow EC2 API boundary used by the first status slice."""
 
     def describe_instances(self, *, InstanceIds: list[str]) -> object: ...
+
+
+class SsmApi(Protocol):
+    """Narrow SSM API boundary used to observe one managed node."""
+
+    def describe_instance_information(self, *, Filters: list[dict[str, object]]) -> object: ...
 
 
 @dataclass(frozen=True)
@@ -88,11 +97,12 @@ class TargetStatus:
 class TargetStatusObserver:
     """Observe the target EC2 and stop before unreachable lower layers."""
 
-    def __init__(self, *, instance_id: str, ec2: Ec2Api) -> None:
+    def __init__(self, *, instance_id: str, ec2: Ec2Api, ssm: SsmApi) -> None:
         if INSTANCE_ID_PATTERN.fullmatch(instance_id) is None:
             raise ValueError("invalid target EC2 instance ID")
         self._instance_id = instance_id
         self._ec2 = ec2
+        self._ssm = ssm
 
     def observe(self, *, observed_at: datetime) -> TargetStatus:
         """Return UNKNOWN on API/schema failure; never infer STOPPED."""
@@ -114,10 +124,20 @@ class TargetStatusObserver:
                 observed_at=observed_at,
             )
 
+        ssm_state = SsmState.UNKNOWN
+        if ec2_state is Ec2State.RUNNING:
+            try:
+                response = self._ssm.describe_instance_information(
+                    Filters=[{"Key": "InstanceIds", "Values": [self._instance_id]}]
+                )
+                ssm_state = _parse_ssm_state(response, self._instance_id)
+            except Exception:  # noqa: BLE001 - AWS boundary is normalized without details.
+                ssm_state = SsmState.UNKNOWN
+
         return TargetStatus(
             instance_id=self._instance_id,
             ec2_state=ec2_state,
-            ssm_state=SsmState.UNKNOWN,
+            ssm_state=ssm_state,
             host_runtime_state=HostRuntimeState.UNKNOWN,
             minecraft_service_state=MinecraftState.UNKNOWN,
             minecraft_protocol_state=MinecraftState.UNKNOWN,
@@ -157,3 +177,33 @@ def _parse_ec2_state(response: object, expected_instance_id: str) -> Ec2State:
         return Ec2State(matched_states[0])
     except ValueError:
         return Ec2State.UNKNOWN
+
+
+def _parse_ssm_state(response: object, expected_instance_id: str) -> SsmState:
+    if not isinstance(response, dict):
+        return SsmState.UNKNOWN
+    next_token = response.get("NextToken")
+    if next_token is not None and next_token != "":
+        return SsmState.UNKNOWN
+    information_list = response.get("InstanceInformationList")
+    if not isinstance(information_list, list):
+        return SsmState.UNKNOWN
+
+    matched_statuses: list[str] = []
+    for raw_information in information_list:
+        if not isinstance(raw_information, dict):
+            continue
+        information = cast(dict[object, object], raw_information)
+        if information.get("InstanceId") != expected_instance_id:
+            continue
+        ping_status = information.get("PingStatus")
+        if isinstance(ping_status, str):
+            matched_statuses.append(ping_status)
+
+    if len(matched_statuses) != 1:
+        return SsmState.UNKNOWN
+    return {
+        "Online": SsmState.ONLINE,
+        "Inactive": SsmState.OFFLINE,
+        "ConnectionLost": SsmState.CONNECTION_LOST,
+    }.get(matched_statuses[0], SsmState.UNKNOWN)

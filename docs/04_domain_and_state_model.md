@@ -1,7 +1,7 @@
 # 04. Domain and State Model
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-07-23
+- **最終更新:** 2026-08-27
 
 ## 1. 設計原則
 
@@ -232,7 +232,7 @@ observed_player_count: integer | null
 
 判定不能時は0ではなくnullとする。
 
-Phase 3の最初のvertical sliceではTarget EC2が`stopped`の場合だけ、SSMを`not-applicable`、Host Runtimeを`not-running`、Minecraft service/protocolを`not-applicable`へ段階的に短絡する。EC2 APIまたはresponse解析に失敗した場合は、すべての未観測下位stateを`unknown`とし、停止・READYを推測しない。
+Phase 3の最初のvertical sliceではTarget EC2が`stopped`の場合だけ、SSMを`not-applicable`、Host Runtimeを`not-running`、Minecraft service/protocolを`not-applicable`へ段階的に短絡する。次のsliceではEC2が`running`の場合だけSSM managed-node状態を照会し、AWS `PingStatus`の`Online`を`online`、`Inactive`を`offline`、`ConnectionLost`を`connection-lost`へ正規化する。SSM APIまたはresponse解析に失敗した場合とmissing/duplicate nodeは`unknown`とする。SSMがonlineでない限りHost Runtime以下は`unknown`のままとし、停止・READYを推測しない。
 
 ### READY判定
 
