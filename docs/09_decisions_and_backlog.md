@@ -18,6 +18,9 @@
 - **Safety:** Control Planeが任意shellを渡すinterface、Minecraft内部file/world、environment/log、RCON、secretの観測、probeによるrepair/lifecycle/filesystem/Docker mutationを禁止する。transport/schema/identity/command failureはHost Runtime以下を`unknown`へfail-closedする。
 - **READY:** container runningやDocker healthだけではREADYにしない。Minecraft protocol-aware observationを後続sliceで実装するまでschema v1の`ready`は常にfalseとする。
 - **Timeout:** stage正本のstatus用`ssm_probe=60`秒を使い、script executionは45秒とする。start/stop用Host Runtime timeoutを流用しない。
+- **Runtime compatibility:** SSMで転送するprobeはControl Plane packageのPython targetではなくTarget AMIの標準interpreterでも実行可能でなければならない。v1.0.0の初回実機試行はAL2023のPython 3.9に`datetime.UTC`がなくcommand failureとなったため成功扱いせず、Python 3.9 syntax/API compatibility testを追加したv1.0.1を正本とする。
+- **Dev observation:** repository validationとCI成功後、Targetを一時起動してSSM Onlineを確認した。固定probe v1.0.1はexit 0、schema v1、stderr空で、expected XFS/UUID mount、Docker active、Host Runtime inactive、固定digestのcontainer stopped、restart policy no、OOMKilled false、RestartCount 0、Minecraft not-running、protocol not-applicable、ready falseを返した。status経路も同じcanonical stateへ正規化した。
+- **No mutation / closeout:** 直接probeとstatus経路の前後で、`observed_at`以外のprobe事実、mount root metadata、EBS attachment、Target SGに変化はなかった。container/Host Runtime停止を確認してTarget EC2を通常停止し、停止後status経路がRun Commandを送らずEC2 stopped / SSM not-applicable / Host Runtime not-running / ready falseを返すことを確認した。Phase 1/Target stacks、data EBS、snapshot、ingress、DNSは変更していない。
 
 ### D-063 Phase 2 target hostを独立stackで作成する
 

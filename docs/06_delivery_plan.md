@@ -355,7 +355,7 @@ public ingress、旧host退役は後続単位とする。
 
 ## 6. Phase 3 — 実測status
 
-- **状態:** In Progress（repository-only EC2 / SSM / Host Runtime observation slices）
+- **状態:** In Progress（EC2 / SSM / Host Runtime observation slicesはdev実測まで完了）
 
 ### 目的
 
@@ -380,6 +380,12 @@ AWS側から実状態を取得し、DynamoDBへ安全に保存する。
 次のvertical sliceはEC2が`running`の場合だけSSM managed-node状態を取得する。`Online` / `Inactive` / `ConnectionLost`をcanonical `online` / `offline` / `connection-lost`へ正規化し、API/schema failure、missing/duplicate、未知値は`unknown`へfail-closedする。SSMがonlineでない場合はHost Runtime probeへ進まない。Run Command、Host Runtime probe、DynamoDB、Lambda、AWS deployは後続sliceとする。
 
 Host Runtime observation sliceはSSM pagination、固定read-only probe、Run Command transport、strict JSON parser、status normalizationをrepositoryで実装する。probeはmount/systemd/Docker/対象containerだけを観測し、Minecraft内部fileやprotocolを観測しない。protocol-aware observation未実装中は`ready=false`を維持する。repository/CI成功後に限り、停止済みdev Targetを一時起動してruntime-stopped状態を実測し、Targetを通常停止して終端確認する。DynamoDB、Lambda、Route 53、Minecraft起動は対象外とする。
+
+2026-08-27にHost Runtime observation sliceのdev実測を完了した。Targetを一時起動し、SSM Online後の固定probe v1.0.1とstatus経路の両方で、期待data EBS、Docker active、Host Runtime inactive、container stopped、Minecraft not-running、protocol not-applicable、`ready=false`を確認した。直接probeとstatus経路の前後でmount identity/ownership/mode、service/container state、EBS attachment、SGに変化はなく、終了時はTargetを通常停止した。停止後statusはEC2 stopped、SSM not-applicable、Host Runtime not-runningとなり、Run Commandを送信しなかった。
+
+最初の実機試行でprobe v1.0.0はTarget標準Python 3.9に`datetime.UTC`がないためcommand failureとなった。Targetを停止してから、Python 3.9構文/API互換を回帰検査するv1.0.1へ更新し、repository validation/CI成功後に新しい実測として再実行した。v1.0.0の失敗結果は成功扱いしない。
+
+この時点で完了したのはEC2 stopped/running、SSM managed-node、Host Runtime read-only、Docker/container stopped、transport/parser fail-closedの観測である。Minecraft running、protocol READY、`ready=true`、discrepancy、Reconcile domain service、DynamoDB、Lambda、public IPv4/Route 53は未完了とする。
 
 ### 確認ケース
 
