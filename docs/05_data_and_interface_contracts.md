@@ -460,7 +460,7 @@ probeは引数を持たず、stdoutへ次のversioned JSON一件だけを出力�
 ```json
 {
   "schema_version": 1,
-  "probe_version": "1.0.1",
+  "probe_version": "1.1.0",
   "observed_at": "2026-08-27T00:00:00Z",
   "identity": {
     "instance_id": "i-...",
@@ -499,13 +499,28 @@ probeは引数を持たず、stdoutへ次のversioned JSON一件だけを出力�
   "minecraft": {
     "runtime_state": "not-running",
     "protocol_state": "not-applicable",
+    "protocol": {
+      "attempted": false,
+      "result": "not-applicable",
+      "compatible_response": false,
+      "host": "localhost",
+      "port": 25565,
+      "reported_version": null,
+      "protocol_version": null,
+      "version_match": null,
+      "observed_at": null
+    },
     "ready": false
   },
   "errors": []
 }
 ```
 
-probeはIMDSv2 instance ID、固定mount path/type/UUID、systemd unit state、Docker daemon、固定Compose project/service labelに一致するcontainerだけを観測する。`systemctl`/Docker/Composeのstart・stop・restart、mount変更、filesystem mutation、package/image操作、secret取得、environment/log出力、Minecraft内部file/world/RCONへのアクセスを禁止する。containerが正常に存在しない場合は`not-found`、停止済みなら`stopped`、観測不能なら`unknown`を区別する。container非running時はMinecraft runtimeを`not-running`、protocolを`not-applicable`、readyをfalseとする。schema version、required field、enum、type、UTC timestamp、instance/runtime identity、impossible combinationをstrict parserで検証し、未知schemaをbest-effort parseしない。
+probeはIMDSv2 instance ID、固定mount path/type/UUID、systemd unit state、Docker daemon、固定Compose project/service labelに一致するcontainerだけを観測する。`systemctl`/Docker/Composeのstart・stop・restart、mount変更、filesystem mutation、package/image操作、secret取得、environment/log出力、Minecraft内部file/world/RCONへのアクセスを禁止する。containerが正常に存在しない場合は`not-found`、停止済みなら`stopped`、観測不能なら`unknown`を区別する。container非running時はMinecraft runtimeを`not-running`、protocolを`not-applicable`、readyをfalseとする。
+
+container running時だけ、一意に解決したcontainer IDへ固定`docker exec <id> mc-monitor status --json --host localhost --port 25565 --timeout 3s`を実行する。外部command、host、port、timeoutをControl Plane inputにしない。probeはraw responseからhost/port、version name、protocol versionだけをstrictに抽出し、MOTD、favicon、player sample、raw JSONを出力しない。`result`は`success` / `failed` / `unavailable` / `unknown` / `not-applicable`を取り、試行時だけprotocol固有`observed_at`をUTCで持つ。nonzeroは`not-ready`、timeout/実行不能/schema異常は`unknown`、container非runningは`not-applicable`とする。
+
+期待version `26.2`との比較は、report nameが`26.2`または`Minecraft 26.2`等の独立したversion tokenを含む場合を一致とし、`1.26.2`や`26.20`は一致させない。protocol成功、version一致、mount expected、Docker active、Host Runtime active、container running、component errorなしをすべて満たす場合だけPhase 3 runtime `ready=true`とする。これはSTART-005全体の完了ではなく、active gameとconnection endpoint/DNSは後続Reconcile sliceで追加検証する。schema version、required field、enum、type、UTC timestamp、instance/runtime identity、impossible combinationをstrict parserで検証し、未知schemaをbest-effort parseしない。
 
 
 ## 12. Operation Admission契約

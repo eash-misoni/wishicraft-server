@@ -20,7 +20,7 @@ from typing import Any, Optional
 # compatible with that interpreter even though the control-plane package targets 3.12.
 
 SCHEMA_VERSION = 1
-PROBE_VERSION = "1.0.1"
+PROBE_VERSION = "1.1.0"
 MOUNT_PATH = "/srv/minecraft"
 EXPECTED_FILESYSTEM_TYPE = "xfs"
 EXPECTED_FILESYSTEM_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"
@@ -29,13 +29,19 @@ HOST_RUNTIME_UNIT = "wishicraft-host-runtime.service"
 RUNTIME_ID = "wishicraft-host-runtime"
 COMPOSE_PROJECT = "wishicraft-host-runtime"
 COMPOSE_SERVICE = "minecraft"
+EXPECTED_MINECRAFT_VERSION = "26.2"
+MINECRAFT_HOST = "localhost"
+MINECRAFT_PORT = 25565
+PROTOCOL_TIMEOUT = "3s"
 _DIGEST_PATTERN = re.compile(r"@(?P<digest>sha256:[0-9a-f]{64})$")
 
 
 def run(*command: str) -> subprocess.CompletedProcess[str]:
     try:
         return subprocess.run(command, check=False, capture_output=True, text=True, timeout=10)
-    except (OSError, subprocess.TimeoutExpired):
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(command, 124, "", "")
+    except OSError:
         return subprocess.CompletedProcess(command, 127, "", "")
 
 
@@ -134,7 +140,7 @@ def absent_container() -> dict[str, Any]:
         "health": "not-applicable",
         "oom_killed": None,
         "restart_count": None,
-        "published_ports": [],
+        "published_ports": {},
     }
 
 
@@ -221,6 +227,96 @@ def observe_container(docker_state: str) -> tuple[dict[str, Any], Optional[str]]
         return result, "CONTAINER_SCHEMA_INVALID"
 
 
+def protocol_not_applicable() -> dict[str, Any]:
+    return {
+        "attempted": False,
+        "result": "not-applicable",
+        "compatible_response": False,
+        "host": MINECRAFT_HOST,
+        "port": MINECRAFT_PORT,
+        "reported_version": None,
+        "protocol_version": None,
+        "version_match": None,
+        "observed_at": None,
+    }
+
+
+def version_matches_expected(reported_version: str) -> bool:
+    pattern = rf"(?:^|[^0-9.]){re.escape(EXPECTED_MINECRAFT_VERSION)}(?:$|[^0-9.])"
+    return re.search(pattern, reported_version) is not None
+
+
+def observe_protocol(container_id: str) -> tuple[dict[str, Any], str, bool]:
+    observed_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    observation: dict[str, Any] = {
+        "attempted": True,
+        "result": "unknown",
+        "compatible_response": False,
+        "host": MINECRAFT_HOST,
+        "port": MINECRAFT_PORT,
+        "reported_version": None,
+        "protocol_version": None,
+        "version_match": None,
+        "observed_at": observed_at,
+    }
+    probe = run(
+        "docker",
+        "exec",
+        container_id,
+        "mc-monitor",
+        "status",
+        "--json",
+        "--host",
+        MINECRAFT_HOST,
+        "--port",
+        str(MINECRAFT_PORT),
+        "--timeout",
+        PROTOCOL_TIMEOUT,
+    )
+    if probe.returncode in {124, 127}:
+        observation["result"] = "unavailable"
+        return observation, "unknown", False
+    if probe.returncode != 0:
+        observation["result"] = "failed"
+        return observation, "not-ready", False
+    try:
+        document = json.loads(probe.stdout)
+        if not isinstance(document, dict):
+            raise ValueError
+        if document.get("host") != MINECRAFT_HOST or document.get("port") != MINECRAFT_PORT:
+            raise ValueError
+        server_info = document.get("server_info")
+        if not isinstance(server_info, dict):
+            raise ValueError
+        version = server_info.get("version")
+        if not isinstance(version, dict):
+            raise ValueError
+        reported_version = version.get("name")
+        protocol_version = version.get("protocol")
+        if (
+            not isinstance(reported_version, str)
+            or not reported_version
+            or len(reported_version) > 128
+            or not isinstance(protocol_version, int)
+            or isinstance(protocol_version, bool)
+            or protocol_version <= 0
+        ):
+            raise ValueError
+    except (ValueError, json.JSONDecodeError):
+        return observation, "unknown", False
+    version_match = version_matches_expected(reported_version)
+    observation.update(
+        {
+            "result": "success",
+            "compatible_response": True,
+            "reported_version": reported_version,
+            "protocol_version": protocol_version,
+            "version_match": version_match,
+        }
+    )
+    return observation, "ready" if version_match else "not-ready", version_match
+
+
 def main() -> int:
     errors: list[str] = []
     observed_instance_id, identity_error = instance_id()
@@ -242,10 +338,27 @@ def main() -> int:
         minecraft = {
             "runtime_state": "not-running",
             "protocol_state": "not-applicable",
+            "protocol": protocol_not_applicable(),
             "ready": False,
         }
+    elif container["state"] == "running" and isinstance(container["container_id"], str):
+        protocol, protocol_state, ready = observe_protocol(container["container_id"])
+        minecraft = {
+            "runtime_state": "running",
+            "protocol_state": protocol_state,
+            "protocol": protocol,
+            "ready": ready,
+        }
     else:
-        minecraft = {"runtime_state": "unknown", "protocol_state": "unknown", "ready": False}
+        minecraft = {
+            "runtime_state": "unknown",
+            "protocol_state": "unknown",
+            "protocol": {
+                **protocol_not_applicable(),
+                "result": "unknown",
+            },
+            "ready": False,
+        }
     document = {
         "schema_version": SCHEMA_VERSION,
         "probe_version": PROBE_VERSION,

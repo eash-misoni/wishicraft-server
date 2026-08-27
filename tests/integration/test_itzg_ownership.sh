@@ -58,6 +58,16 @@ pull_output=$(docker pull --platform linux/amd64 "$IMAGE" 2>&1) || {
 printf '%s\n' "$pull_output"
 inspect_arch=$(docker image inspect --format '{{.Architecture}}' "$IMAGE")
 [[ "$inspect_arch" == amd64 ]] || fail "image architecture is $inspect_arch, expected amd64"
+mc_monitor_version=$(docker run --rm --platform linux/amd64 --entrypoint mc-monitor "$IMAGE" version) || \
+  fail 'fixed image does not provide mc-monitor'
+[[ -n "$mc_monitor_version" ]] || fail 'mc-monitor version output was empty'
+mc_monitor_help=$(docker run --rm --platform linux/amd64 --entrypoint mc-monitor "$IMAGE" status --help 2>&1) || \
+  fail 'mc-monitor status help failed'
+for expected_flag in -json -host -port -timeout; do
+  grep -F -- "$expected_flag" <<<"$mc_monitor_help" >/dev/null || \
+    fail "mc-monitor status does not provide $expected_flag"
+done
+printf 'OBS:McMonitorVersion=%s\n' "$mc_monitor_version"
 
 mkdir -p "$data_dir/preexisting/nested"
 printf '%s\n' 'difficulty=easy' 'enable-rcon=true' > "$data_dir/server.properties"
@@ -154,6 +164,7 @@ fi
 
 printf '%s\n' \
   'PASS:image-digest-and-architecture' \
+  'PASS:mc-monitor-fixed-status-contract' \
   'PASS:root-owned-properties-fails-with-permission-error' \
   'PASS:migrated-properties-realized-with-stable-metadata' \
   'PASS:skip-chown-data-preserves-sentinels' \

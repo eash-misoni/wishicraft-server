@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from tests.probe_fixtures import runtime_stopped_json
+from tests.probe_fixtures import runtime_running_json, runtime_stopped_json
 from wishicraft.probe import ContainerState, DockerState, MountState
 from wishicraft.status import (
     Ec2Api,
@@ -218,6 +218,59 @@ def test_ssm_pagination_finds_target_on_second_page_and_runs_probe() -> None:
     assert status.container_state is ContainerState.NOT_FOUND
     assert status.minecraft_service_state is MinecraftState.NOT_RUNNING
     assert status.minecraft_protocol_state is MinecraftState.NOT_APPLICABLE
+    assert status.ready is False
+
+
+def test_online_running_protocol_ready_normalizes_to_ready() -> None:
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {"Instances": [{"InstanceId": TARGET_INSTANCE_ID, "State": {"Name": "running"}}]}
+            ]
+        }
+    )
+    ssm = FakeSsm(
+        {"InstanceInformationList": [{"InstanceId": TARGET_INSTANCE_ID, "PingStatus": "Online"}]}
+    )
+    probe = FakeProbe(runtime_running_json())
+
+    status = observer(ec2, ssm, probe).observe(observed_at=OBSERVED_AT)
+
+    assert probe.calls == [TARGET_INSTANCE_ID]
+    assert status.host_runtime_state is HostRuntimeState.RUNNING
+    assert status.container_state is ContainerState.RUNNING
+    assert status.minecraft_service_state is MinecraftState.RUNNING
+    assert status.minecraft_protocol_state is MinecraftState.READY
+    assert status.ready is True
+
+
+@pytest.mark.parametrize("protocol_result", ["failed", "unavailable", "unknown"])
+def test_running_container_without_protocol_success_is_not_ready(protocol_result: str) -> None:
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {"Instances": [{"InstanceId": TARGET_INSTANCE_ID, "State": {"Name": "running"}}]}
+            ]
+        }
+    )
+    ssm = FakeSsm(
+        {"InstanceInformationList": [{"InstanceId": TARGET_INSTANCE_ID, "PingStatus": "Online"}]}
+    )
+    probe = FakeProbe(
+        runtime_running_json(
+            protocol_result=protocol_result,
+            reported_version=None,
+            protocol_version=None,
+            version_match=None,
+        )
+    )
+
+    status = observer(ec2, ssm, probe).observe(observed_at=OBSERVED_AT)
+
+    assert status.host_runtime_state is HostRuntimeState.RUNNING
+    assert status.container_state is ContainerState.RUNNING
+    assert status.minecraft_service_state is MinecraftState.RUNNING
+    assert status.minecraft_protocol_state in {MinecraftState.NOT_READY, MinecraftState.UNKNOWN}
     assert status.ready is False
 
 

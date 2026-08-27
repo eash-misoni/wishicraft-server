@@ -13,6 +13,7 @@ from wishicraft.probe import (
     DockerState,
     HostRuntimeProbe,
     MountState,
+    ProtocolState,
     UnitState,
     parse_host_runtime_probe,
 )
@@ -54,6 +55,9 @@ class HostRuntimeState(StrEnum):
 class MinecraftState(StrEnum):
     """Minecraft state at the current observation depth."""
 
+    RUNNING = "running"
+    READY = "ready"
+    NOT_READY = "not-ready"
     NOT_RUNNING = "not-running"
     NOT_APPLICABLE = "not-applicable"
     UNKNOWN = "unknown"
@@ -289,13 +293,17 @@ def _status_from_probe(
     minecraft_state = (
         MinecraftState.NOT_RUNNING
         if probe.minecraft_runtime_state == "not-running"
+        else MinecraftState.RUNNING
+        if probe.minecraft_runtime_state == "running"
         else MinecraftState.UNKNOWN
     )
-    protocol_state = (
-        MinecraftState.NOT_APPLICABLE
-        if probe.protocol_state == "not-applicable"
-        else MinecraftState.UNKNOWN
-    )
+    protocol_state = {
+        ProtocolState.READY: MinecraftState.READY,
+        ProtocolState.NOT_READY: MinecraftState.NOT_READY,
+        ProtocolState.NOT_APPLICABLE: MinecraftState.NOT_APPLICABLE,
+        ProtocolState.UNKNOWN: MinecraftState.UNKNOWN,
+    }[probe.protocol_state]
+    ready = probe.ready and host_runtime_state is HostRuntimeState.RUNNING
     return TargetStatus(
         instance_id=instance_id,
         ec2_state=ec2_state,
@@ -306,7 +314,7 @@ def _status_from_probe(
         container_state=probe.container.state,
         minecraft_service_state=minecraft_state,
         minecraft_protocol_state=protocol_state,
-        ready=False,
+        ready=ready,
         observed_at=observed_at,
     )
 

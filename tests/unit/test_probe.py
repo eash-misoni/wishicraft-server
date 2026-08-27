@@ -7,12 +7,18 @@ import json
 
 import pytest
 
-from tests.probe_fixtures import TARGET_INSTANCE_ID, runtime_stopped_document
+from tests.probe_fixtures import (
+    TARGET_INSTANCE_ID,
+    runtime_running_document,
+    runtime_stopped_document,
+)
 from wishicraft.probe import (
     ContainerState,
     DockerState,
     MountState,
     ProbeContractError,
+    ProtocolResult,
+    ProtocolState,
     UnitState,
     parse_host_runtime_probe,
 )
@@ -58,13 +64,82 @@ def test_missing_required_field_is_rejected() -> None:
         parse(document)
 
 
-def test_ready_true_is_impossible_for_probe_v1() -> None:
-    document = copy.deepcopy(runtime_stopped_document())
+def test_running_protocol_success_establishes_ready() -> None:
+    probe = parse_host_runtime_probe(
+        json.dumps(runtime_running_document()), expected_instance_id=TARGET_INSTANCE_ID
+    )
+
+    assert probe.container.state is ContainerState.RUNNING
+    assert probe.minecraft_runtime_state == "running"
+    assert probe.protocol_state is ProtocolState.READY
+    assert probe.protocol.result is ProtocolResult.SUCCESS
+    assert probe.protocol.reported_version == "26.2"
+    assert probe.protocol.protocol_version == 772
+    assert probe.protocol.version_match is True
+    assert probe.ready is True
+
+
+@pytest.mark.parametrize("result", ["failed", "unavailable", "unknown"])
+def test_protocol_failure_never_establishes_ready(result: str) -> None:
+    probe = parse_host_runtime_probe(
+        json.dumps(
+            runtime_running_document(
+                protocol_result=result,
+                reported_version=None,
+                protocol_version=None,
+                version_match=None,
+            )
+        ),
+        expected_instance_id=TARGET_INSTANCE_ID,
+    )
+
+    assert probe.protocol.result.value == result
+    assert probe.ready is False
+
+
+def test_protocol_version_mismatch_is_explicitly_not_ready() -> None:
+    probe = parse_host_runtime_probe(
+        json.dumps(
+            runtime_running_document(reported_version="Minecraft 26.3", version_match=False)
+        ),
+        expected_instance_id=TARGET_INSTANCE_ID,
+    )
+
+    assert probe.protocol.compatible_response is True
+    assert probe.protocol.version_match is False
+    assert probe.protocol_state is ProtocolState.NOT_READY
+    assert probe.ready is False
+
+
+def test_version_comparison_accepts_expected_version_with_label() -> None:
+    probe = parse_host_runtime_probe(
+        json.dumps(runtime_running_document(reported_version="Minecraft 26.2")),
+        expected_instance_id=TARGET_INSTANCE_ID,
+    )
+
+    assert probe.protocol.version_match is True
+    assert probe.ready is True
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        {"host": "public.example.test"},
+        {"port": 25566},
+        {"observed_at": None},
+        {"protocol_version": "772"},
+        {"reported_version": None},
+    ],
+)
+def test_malformed_protocol_contract_is_rejected(mutation: dict[str, object]) -> None:
+    document = runtime_running_document()
     minecraft = document["minecraft"]
     assert isinstance(minecraft, dict)
-    minecraft["ready"] = True
+    protocol = minecraft["protocol"]
+    assert isinstance(protocol, dict)
+    protocol.update(mutation)
 
-    with pytest.raises(ProbeContractError, match="cannot establish Minecraft READY"):
+    with pytest.raises(ProbeContractError):
         parse(document)
 
 
@@ -85,6 +160,9 @@ def test_docker_unavailable_requires_unknown_container() -> None:
         }
     )
     minecraft.update({"runtime_state": "unknown", "protocol_state": "unknown", "ready": False})
+    protocol = minecraft["protocol"]
+    assert isinstance(protocol, dict)
+    protocol["result"] = "unknown"
 
     probe = parse_host_runtime_probe(json.dumps(document), expected_instance_id=TARGET_INSTANCE_ID)
 

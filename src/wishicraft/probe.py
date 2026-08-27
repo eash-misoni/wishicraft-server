@@ -12,6 +12,7 @@ from typing import cast
 INSTANCE_ID_PATTERN = re.compile(r"^i-[0-9a-f]{17}$")
 SHA256_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 ERROR_CODE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
+EXPECTED_MINECRAFT_VERSION = "26.2"
 
 
 class ProbeContractError(ValueError):
@@ -50,6 +51,21 @@ class ContainerState(StrEnum):
     UNKNOWN = "unknown"
 
 
+class ProtocolState(StrEnum):
+    READY = "ready"
+    NOT_READY = "not-ready"
+    NOT_APPLICABLE = "not-applicable"
+    UNKNOWN = "unknown"
+
+
+class ProtocolResult(StrEnum):
+    SUCCESS = "success"
+    UNAVAILABLE = "unavailable"
+    FAILED = "failed"
+    NOT_APPLICABLE = "not-applicable"
+    UNKNOWN = "unknown"
+
+
 @dataclass(frozen=True)
 class MountObservation:
     state: MountState
@@ -78,6 +94,19 @@ class ContainerObservation:
 
 
 @dataclass(frozen=True)
+class ProtocolObservation:
+    attempted: bool
+    result: ProtocolResult
+    compatible_response: bool
+    host: str
+    port: int
+    reported_version: str | None
+    protocol_version: int | None
+    version_match: bool | None
+    observed_at: datetime | None
+
+
+@dataclass(frozen=True)
 class HostRuntimeProbe:
     observed_at: datetime
     instance_id: str
@@ -90,7 +119,8 @@ class HostRuntimeProbe:
     host_runtime_state: UnitState
     container: ContainerObservation
     minecraft_runtime_state: str
-    protocol_state: str
+    protocol_state: ProtocolState
+    protocol: ProtocolObservation
     ready: bool
     errors: tuple[str, ...]
 
@@ -106,7 +136,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     document = _mapping(raw, "document")
     if _integer(document, "schema_version") != 1:
         raise ProbeContractError("unsupported probe schema version")
-    if _string(document, "probe_version") != "1.0.1":
+    if _string(document, "probe_version") != "1.1.0":
         raise ProbeContractError("unsupported probe version")
     observed_at = _timestamp(document, "observed_at")
 
@@ -135,19 +165,53 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     container = _parse_container(_mapping(document.get("container"), "container"))
     minecraft = _mapping(document.get("minecraft"), "minecraft")
     minecraft_runtime_state = _string(minecraft, "runtime_state")
-    protocol_state = _string(minecraft, "protocol_state")
+    protocol_state = _enum(ProtocolState, minecraft, "protocol_state")
+    protocol = _parse_protocol(_mapping(minecraft.get("protocol"), "minecraft.protocol"))
     ready = _boolean(minecraft, "ready")
     errors = _errors(document.get("errors"))
 
-    if ready:
-        raise ProbeContractError("probe v1 cannot establish Minecraft READY")
     if docker_state is not DockerState.ACTIVE and container.state is not ContainerState.UNKNOWN:
         raise ProbeContractError("container state requires an active Docker daemon")
     if container.state in {ContainerState.STOPPED, ContainerState.NOT_FOUND}:
-        if minecraft_runtime_state != "not-running" or protocol_state != "not-applicable":
+        if (
+            minecraft_runtime_state != "not-running"
+            or protocol_state is not ProtocolState.NOT_APPLICABLE
+            or protocol.attempted
+            or protocol.result is not ProtocolResult.NOT_APPLICABLE
+            or ready
+        ):
             raise ProbeContractError("stopped container has impossible Minecraft state")
-    elif minecraft_runtime_state != "unknown" or protocol_state != "unknown":
+    elif container.state is ContainerState.RUNNING:
+        if minecraft_runtime_state != "running" or not protocol.attempted:
+            raise ProbeContractError("running container requires protocol observation")
+        if protocol.result is ProtocolResult.SUCCESS:
+            expected_state = (
+                ProtocolState.READY if protocol.version_match else ProtocolState.NOT_READY
+            )
+            if protocol_state is not expected_state or ready is not protocol.version_match:
+                raise ProbeContractError("protocol success has inconsistent READY state")
+        elif protocol.result is ProtocolResult.FAILED:
+            if protocol_state is not ProtocolState.NOT_READY or ready:
+                raise ProbeContractError("protocol failure has inconsistent state")
+        elif protocol_state is not ProtocolState.UNKNOWN or ready:
+            raise ProbeContractError("unavailable protocol must remain unknown")
+    elif (
+        minecraft_runtime_state != "unknown"
+        or protocol_state is not ProtocolState.UNKNOWN
+        or protocol.attempted
+        or protocol.result is not ProtocolResult.UNKNOWN
+        or ready
+    ):
         raise ProbeContractError("unprobed Minecraft state must remain unknown")
+    if ready and (
+        mount.state is not MountState.EXPECTED
+        or docker_state is not DockerState.ACTIVE
+        or host_runtime_state is not UnitState.ACTIVE
+        or container.state is not ContainerState.RUNNING
+        or protocol_state is not ProtocolState.READY
+        or errors
+    ):
+        raise ProbeContractError("READY requires every observed runtime layer")
     if errors and not _has_unknown_observation(
         mount, docker_state, host_runtime_state, container.state
     ):
@@ -166,6 +230,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
         container=container,
         minecraft_runtime_state=minecraft_runtime_state,
         protocol_state=protocol_state,
+        protocol=protocol,
         ready=ready,
         errors=errors,
     )
@@ -263,6 +328,54 @@ def _parse_container(value: dict[str, object]) -> ContainerObservation:
     )
 
 
+def _parse_protocol(value: dict[str, object]) -> ProtocolObservation:
+    attempted = _boolean(value, "attempted")
+    result = _enum(ProtocolResult, value, "result")
+    compatible_response = _boolean(value, "compatible_response")
+    host = _string(value, "host")
+    port = _integer(value, "port")
+    reported_version = _optional_string(value, "reported_version")
+    protocol_version = _optional_integer(value, "protocol_version")
+    version_match = _optional_boolean(value, "version_match")
+    observed_at = _optional_timestamp(value, "observed_at")
+    if host != "localhost" or port != 25565:
+        raise ProbeContractError("protocol observation must remain container-local")
+    if attempted is not (observed_at is not None):
+        raise ProbeContractError("protocol attempt requires its own observed_at")
+    response_fields = (reported_version, protocol_version, version_match)
+    if result is ProtocolResult.SUCCESS:
+        if not compatible_response or any(item is None for item in response_fields):
+            raise ProbeContractError("protocol success lacks compatible response metadata")
+        assert reported_version is not None
+        if version_match is not _version_matches_expected(reported_version):
+            raise ProbeContractError("protocol version comparison is inconsistent")
+    elif compatible_response or any(item is not None for item in response_fields):
+        raise ProbeContractError("unsuccessful protocol observation contains response metadata")
+    if result is ProtocolResult.NOT_APPLICABLE and attempted:
+        raise ProbeContractError("not-applicable protocol cannot be attempted")
+    if (
+        result in {ProtocolResult.SUCCESS, ProtocolResult.FAILED, ProtocolResult.UNAVAILABLE}
+        and not attempted
+    ):
+        raise ProbeContractError("protocol result requires an attempt")
+    return ProtocolObservation(
+        attempted=attempted,
+        result=result,
+        compatible_response=compatible_response,
+        host=host,
+        port=port,
+        reported_version=reported_version,
+        protocol_version=protocol_version,
+        version_match=version_match,
+        observed_at=observed_at,
+    )
+
+
+def _version_matches_expected(reported_version: str) -> bool:
+    pattern = rf"(?:^|[^0-9.]){re.escape(EXPECTED_MINECRAFT_VERSION)}(?:$|[^0-9.])"
+    return re.search(pattern, reported_version) is not None
+
+
 def _has_unknown_observation(
     mount: MountObservation,
     docker: DockerState,
@@ -342,6 +455,12 @@ def _timestamp(values: dict[str, object], key: str) -> datetime:
     if parsed.tzinfo is None or parsed.utcoffset() != UTC.utcoffset(parsed):
         raise ProbeContractError("observed_at must be UTC")
     return parsed
+
+
+def _optional_timestamp(values: dict[str, object], key: str) -> datetime | None:
+    if values.get(key) is None:
+        return None
+    return _timestamp(values, key)
 
 
 def _enum[T: StrEnum](enum_type: type[T], values: dict[str, object], key: str) -> T:

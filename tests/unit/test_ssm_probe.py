@@ -158,6 +158,10 @@ def test_probe_artifact_contains_no_mutation_or_minecraft_file_access() -> None:
     )
 
     assert all(token not in source.lower() for token in forbidden)
+    assert '"docker",\n        "exec"' in source
+    assert '"mc-monitor",\n        "status"' in source
+    assert 'MINECRAFT_HOST = "localhost"' in source
+    assert "MINECRAFT_PORT = 25565" in source
 
 
 def test_probe_artifact_supports_target_python_3_9_syntax() -> None:

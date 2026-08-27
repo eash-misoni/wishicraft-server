@@ -385,7 +385,7 @@ Host Runtime observation sliceはSSM pagination、固定read-only probe、Run Co
 
 最初の実機試行でprobe v1.0.0はTarget標準Python 3.9に`datetime.UTC`がないためcommand failureとなった。Targetを停止してから、Python 3.9構文/API互換を回帰検査するv1.0.1へ更新し、repository validation/CI成功後に新しい実測として再実行した。v1.0.0の失敗結果は成功扱いしない。
 
-この時点で完了したのはEC2 stopped/running、SSM managed-node、Host Runtime read-only、Docker/container stopped、transport/parser fail-closedの観測である。Minecraft running、protocol READY、`ready=true`、discrepancy、Reconcile domain service、DynamoDB、Lambda、public IPv4/Route 53は未完了とする。
+この時点で完了したのはEC2 stopped/running、SSM managed-node、Host Runtime read-only、Docker/container stopped、transport/parser fail-closedの観測である。次のprotocol-aware sliceは、fixed itzg container内の`mc-monitor`からlocalhost:25565へJava Server List Pingを送り、Minecraft running、protocol READY、runtime `ready=true`を観測する。外部port公開、RCON、Minecraft内部file、Reconcile/DynamoDB/Lambdaは含めない。discrepancy、Reconcile domain service、DynamoDB、Lambda、public IPv4/Route 53は引き続き未完了とする。
 
 ### 確認ケース
 

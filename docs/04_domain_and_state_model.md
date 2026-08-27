@@ -207,7 +207,7 @@ unknown
 
 ### Protocol State
 
-localhost RCON等、Minecraftが管理操作へ応答するかを示す。
+Minecraft Java Server List Ping等、Minecraft protocolへ互換応答できるかを示す。RCONはREADY判定へ使用しない。
 
 ```text
 not-ready
@@ -215,6 +215,11 @@ ready
 not-applicable
 unknown
 ```
+
+- container非running時は`not-applicable`。
+- protocol pingのnonzero応答は`not-ready`、実行不能・timeout・出力schema異常は`unknown`。
+- `ready`はprotocol response成功と期待Minecraft version一致を必要とし、Docker health、Java process、log、listenerだけから導出しない。
+- Phase 3の`TargetStatus.ready`はruntime観測範囲のREADYである。START-005の最終起動成功には、後続sliceのactive game一致とconnection endpoint/DNS一致も別途必要である。
 
 ### Active Game ID
 

@@ -10,13 +10,23 @@
 
 ## 2. 採用済み決定
 
+### D-070 Phase 3 runtime READYはcontainer-local Java protocol ping成功を必須とする
+
+- **状態:** Accepted
+- **日付:** 2026-08-27
+- **Decision:** 一意に解決したrunning container内の固定`mc-monitor status --json --host localhost --port 25565 --timeout 3s`だけをHost Runtime read-only probeから実行する。host/port/timeout/commandをControl Plane inputにせず、Minecraft portのhost publish、SG ingress、DNS、RCONを必要としない。
+- **Normalization:** container非runningはprotocol not-applicable、nonzeroはnot-ready、timeout/実行不能/malformed responseはunknownとし、すべてready falseとする。protocol success時も期待version token `26.2`が一致しなければnot-readyとする。
+- **Data minimization:** raw JSON、MOTD、favicon、player sampleを伝播せず、attempt/result、互換応答有無、reported version、protocol version、version match、protocol observed_atだけをversioned probe JSONへ正規化する。
+- **READY boundary:** protocol success/version一致に加え、mount expected、Docker active、Host Runtime active、container running、component errorなしの場合だけPhase 3 runtime `TargetStatus.ready=true`とする。START-005のoperation成功には後続sliceのactive gameとconnection endpoint/DNS一致も必要であり、本sliceだけでstart workflow完成とはしない。
+- **Safety:** protocol status pingはread-onlyとし、RCON、Minecraft command、properties/world/log read、container/network mutationを禁止する。
+
 ### D-069 Phase 3 Host Runtime observationは固定read-only probeとstrict parserに分離する
 
 - **状態:** Accepted
 - **日付:** 2026-08-27
 - **Decision:** SSM online時だけ、引数なしのrepository-packaged probeを固定Run Command operationで実行する。probeはIMDSv2 identity、期待mount、systemd、Docker daemon、Compose labelで一意に識別したcontainerだけをhost-localに観測する。SSM transport、probe JSON schema v1 parser、status normalizationを分離する。
 - **Safety:** Control Planeが任意shellを渡すinterface、Minecraft内部file/world、environment/log、RCON、secretの観測、probeによるrepair/lifecycle/filesystem/Docker mutationを禁止する。transport/schema/identity/command failureはHost Runtime以下を`unknown`へfail-closedする。
-- **READY:** container runningやDocker healthだけではREADYにしない。Minecraft protocol-aware observationを後続sliceで実装するまでschema v1の`ready`は常にfalseとする。
+- **READY:** container runningやDocker healthだけではREADYにしない。v1.0.xで`ready=false`へ固定していた契約は、D-070のprotocol-aware probe v1.1.0で拡張する。
 - **Timeout:** stage正本のstatus用`ssm_probe=60`秒を使い、script executionは45秒とする。start/stop用Host Runtime timeoutを流用しない。
 - **Runtime compatibility:** SSMで転送するprobeはControl Plane packageのPython targetではなくTarget AMIの標準interpreterでも実行可能でなければならない。v1.0.0の初回実機試行はAL2023のPython 3.9に`datetime.UTC`がなくcommand failureとなったため成功扱いせず、Python 3.9 syntax/API compatibility testを追加したv1.0.1を正本とする。
 - **Dev observation:** repository validationとCI成功後、Targetを一時起動してSSM Onlineを確認した。固定probe v1.0.1はexit 0、schema v1、stderr空で、expected XFS/UUID mount、Docker active、Host Runtime inactive、固定digestのcontainer stopped、restart policy no、OOMKilled false、RestartCount 0、Minecraft not-running、protocol not-applicable、ready falseを返した。status経路も同じcanonical stateへ正規化した。
