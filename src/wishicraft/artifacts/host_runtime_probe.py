@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: UP017, UP045
 """Wishicraft Host Runtime read-only probe v1.
 
 This artifact intentionally has no arguments and performs no repair or lifecycle action.
@@ -12,11 +13,14 @@ import re
 import stat
 import subprocess
 import urllib.request
-from datetime import UTC, datetime
-from typing import Any
+from datetime import datetime, timezone
+from typing import Any, Optional
+
+# The Target AMI currently provides Python 3.9. Keep this transported artifact
+# compatible with that interpreter even though the control-plane package targets 3.12.
 
 SCHEMA_VERSION = 1
-PROBE_VERSION = "1.0.0"
+PROBE_VERSION = "1.0.1"
 MOUNT_PATH = "/srv/minecraft"
 EXPECTED_FILESYSTEM_TYPE = "xfs"
 EXPECTED_FILESYSTEM_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"
@@ -35,7 +39,7 @@ def run(*command: str) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(command, 127, "", "")
 
 
-def instance_id() -> tuple[str | None, str | None]:
+def instance_id() -> tuple[Optional[str], Optional[str]]:
     try:
         token_request = urllib.request.Request(
             "http://169.254.169.254/latest/api/token",
@@ -57,7 +61,7 @@ def instance_id() -> tuple[str | None, str | None]:
         return None, "INSTANCE_ID_UNAVAILABLE"
 
 
-def observe_mount() -> tuple[dict[str, Any], str | None]:
+def observe_mount() -> tuple[dict[str, Any], Optional[str]]:
     result: dict[str, Any] = {
         "state": "unknown",
         "mount_path": MOUNT_PATH,
@@ -97,7 +101,7 @@ def observe_mount() -> tuple[dict[str, Any], str | None]:
     return result, None
 
 
-def observe_unit(unit: str) -> tuple[str, str | None]:
+def observe_unit(unit: str) -> tuple[str, Optional[str]]:
     probe = run(
         "systemctl",
         "show",
@@ -134,7 +138,7 @@ def absent_container() -> dict[str, Any]:
     }
 
 
-def observe_container(docker_state: str) -> tuple[dict[str, Any], str | None]:
+def observe_container(docker_state: str) -> tuple[dict[str, Any], Optional[str]]:
     if docker_state != "active":
         result = absent_container()
         result["state"] = "unknown"
@@ -245,7 +249,7 @@ def main() -> int:
     document = {
         "schema_version": SCHEMA_VERSION,
         "probe_version": PROBE_VERSION,
-        "observed_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        "observed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "identity": {
             "instance_id": observed_instance_id,
             "runtime_id": RUNTIME_ID,

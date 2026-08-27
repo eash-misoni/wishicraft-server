@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import base64
 import inspect
 from pathlib import Path
@@ -157,3 +158,9 @@ def test_probe_artifact_contains_no_mutation_or_minecraft_file_access() -> None:
     )
 
     assert all(token not in source.lower() for token in forbidden)
+
+
+def test_probe_artifact_supports_target_python_3_9_syntax() -> None:
+    source = Path("src/wishicraft/artifacts/host_runtime_probe.py").read_text(encoding="utf-8")
+
+    ast.parse(source, feature_version=(3, 9))

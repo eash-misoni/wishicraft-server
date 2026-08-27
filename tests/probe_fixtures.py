@@ -11,7 +11,7 @@ EXPECTED_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"
 def runtime_stopped_document(**overrides: object) -> dict[str, object]:
     document: dict[str, object] = {
         "schema_version": 1,
-        "probe_version": "1.0.0",
+        "probe_version": "1.0.1",
         "observed_at": "2026-08-27T00:00:00Z",
         "identity": {
             "instance_id": TARGET_INSTANCE_ID,

@@ -106,7 +106,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     document = _mapping(raw, "document")
     if _integer(document, "schema_version") != 1:
         raise ProbeContractError("unsupported probe schema version")
-    if _string(document, "probe_version") != "1.0.0":
+    if _string(document, "probe_version") != "1.0.1":
         raise ProbeContractError("unsupported probe version")
     observed_at = _timestamp(document, "observed_at")
 

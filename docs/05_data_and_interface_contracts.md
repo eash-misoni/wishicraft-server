@@ -460,7 +460,7 @@ probeは引数を持たず、stdoutへ次のversioned JSON一件だけを出力�
 ```json
 {
   "schema_version": 1,
-  "probe_version": "1.0.0",
+  "probe_version": "1.0.1",
   "observed_at": "2026-08-27T00:00:00Z",
   "identity": {
     "instance_id": "i-...",
