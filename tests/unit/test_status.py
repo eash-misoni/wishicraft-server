@@ -6,9 +6,12 @@ from datetime import UTC, datetime
 
 import pytest
 
+from tests.probe_fixtures import runtime_stopped_json
+from wishicraft.probe import ContainerState, DockerState, MountState
 from wishicraft.status import (
     Ec2Api,
     Ec2State,
+    HostRuntimeProbeApi,
     HostRuntimeState,
     MinecraftState,
     SsmApi,
@@ -38,23 +41,54 @@ class FailingEc2:
 class FakeSsm:
     def __init__(self, response: object) -> None:
         self.response = response
-        self.calls: list[list[dict[str, object]]] = []
+        self.calls: list[dict[str, object]] = []
 
-    def describe_instance_information(self, *, Filters: list[dict[str, object]]) -> object:
-        self.calls.append(Filters)
+    def describe_instance_information(self, **kwargs: object) -> object:
+        self.calls.append(kwargs)
         return self.response
 
 
 class FailingSsm:
-    def describe_instance_information(self, *, Filters: list[dict[str, object]]) -> object:
+    def describe_instance_information(self, **kwargs: object) -> object:
         raise RuntimeError("SSM response detail must not escape the adapter")
 
 
-def observer(ec2: Ec2Api, ssm: SsmApi | None = None) -> TargetStatusObserver:
+class ProbeResult:
+    def __init__(self, stdout: str) -> None:
+        self.stdout = stdout
+
+
+class FakeProbe:
+    def __init__(self, stdout: str = "{}") -> None:
+        self.stdout = stdout
+        self.calls: list[str] = []
+
+    def run_probe(self, *, instance_id: str) -> ProbeResult:
+        self.calls.append(instance_id)
+        return ProbeResult(self.stdout)
+
+
+class PagedSsm:
+    def __init__(self, pages: dict[str | None, object]) -> None:
+        self.pages = pages
+        self.calls: list[dict[str, object]] = []
+
+    def describe_instance_information(self, **kwargs: object) -> object:
+        self.calls.append(kwargs)
+        token = kwargs.get("NextToken")
+        return self.pages[token if isinstance(token, str) else None]
+
+
+def observer(
+    ec2: Ec2Api,
+    ssm: SsmApi | None = None,
+    probe: HostRuntimeProbeApi | None = None,
+) -> TargetStatusObserver:
     return TargetStatusObserver(
         instance_id=TARGET_INSTANCE_ID,
         ec2=ec2,
         ssm=ssm if ssm is not None else FakeSsm({}),
+        host_runtime_probe=probe if probe is not None else FakeProbe(),
     )
 
 
@@ -83,7 +117,10 @@ def test_stopped_target_short_circuits_unreachable_runtime_layers() -> None:
         "instance_id": TARGET_INSTANCE_ID,
         "ec2_state": "stopped",
         "ssm_state": "not-applicable",
+        "mount_state": "unknown",
+        "docker_state": "unknown",
         "host_runtime_state": "not-running",
+        "container_state": "unknown",
         "minecraft_service_state": "not-applicable",
         "minecraft_protocol_state": "not-applicable",
         "ready": False,
@@ -134,7 +171,7 @@ def test_running_target_observes_ssm_managed_node(
 
     status = observer(ec2, ssm).observe(observed_at=OBSERVED_AT)
 
-    assert ssm.calls == [[{"Key": "InstanceIds", "Values": [TARGET_INSTANCE_ID]}]]
+    assert ssm.calls == [{"Filters": [{"Key": "InstanceIds", "Values": [TARGET_INSTANCE_ID]}]}]
     assert status.ec2_state is Ec2State.RUNNING
     assert status.ssm_state is expected_state
     assert status.host_runtime_state is HostRuntimeState.UNKNOWN
@@ -142,6 +179,120 @@ def test_running_target_observes_ssm_managed_node(
     assert status.minecraft_protocol_state is MinecraftState.UNKNOWN
     assert status.ready is False
     assert status.observed_at is OBSERVED_AT
+
+
+def test_ssm_pagination_finds_target_on_second_page_and_runs_probe() -> None:
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {"Instances": [{"InstanceId": TARGET_INSTANCE_ID, "State": {"Name": "running"}}]}
+            ]
+        }
+    )
+    ssm = PagedSsm(
+        {
+            None: {
+                "InstanceInformationList": [
+                    {"InstanceId": "i-00000000000000000", "PingStatus": "Online"}
+                ],
+                "NextToken": "page-2",
+            },
+            "page-2": {
+                "InstanceInformationList": [
+                    {"InstanceId": TARGET_INSTANCE_ID, "PingStatus": "Online"}
+                ]
+            },
+        }
+    )
+    probe = FakeProbe(runtime_stopped_json())
+
+    status = observer(ec2, ssm, probe).observe(observed_at=OBSERVED_AT)
+
+    assert len(ssm.calls) == 2
+    assert ssm.calls[1]["NextToken"] == "page-2"
+    assert probe.calls == [TARGET_INSTANCE_ID]
+    assert status.ssm_state is SsmState.ONLINE
+    assert status.mount_state is MountState.EXPECTED
+    assert status.docker_state is DockerState.ACTIVE
+    assert status.host_runtime_state is HostRuntimeState.NOT_RUNNING
+    assert status.container_state is ContainerState.NOT_FOUND
+    assert status.minecraft_service_state is MinecraftState.NOT_RUNNING
+    assert status.minecraft_protocol_state is MinecraftState.NOT_APPLICABLE
+    assert status.ready is False
+
+
+def test_duplicate_ssm_target_across_pages_is_unknown_and_skips_probe() -> None:
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {"Instances": [{"InstanceId": TARGET_INSTANCE_ID, "State": {"Name": "running"}}]}
+            ]
+        }
+    )
+    ssm = PagedSsm(
+        {
+            None: {
+                "InstanceInformationList": [
+                    {"InstanceId": TARGET_INSTANCE_ID, "PingStatus": "Online"}
+                ],
+                "NextToken": "page-2",
+            },
+            "page-2": {
+                "InstanceInformationList": [
+                    {"InstanceId": TARGET_INSTANCE_ID, "PingStatus": "Online"}
+                ]
+            },
+        }
+    )
+    probe = FakeProbe(runtime_stopped_json())
+
+    status = observer(ec2, ssm, probe).observe(observed_at=OBSERVED_AT)
+
+    assert status.ssm_state is SsmState.UNKNOWN
+    assert probe.calls == []
+
+
+@pytest.mark.parametrize("token", ["", 42, "loop"])
+def test_malformed_or_looping_ssm_pagination_is_unknown(token: object) -> None:
+    first_token = token if token != "loop" else "loop"
+    pages: dict[str | None, object] = {
+        None: {"InstanceInformationList": [], "NextToken": first_token}
+    }
+    if token == "loop":
+        pages["loop"] = {"InstanceInformationList": [], "NextToken": "loop"}
+    ssm = PagedSsm(pages)
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {"Instances": [{"InstanceId": TARGET_INSTANCE_ID, "State": {"Name": "running"}}]}
+            ]
+        }
+    )
+
+    status = observer(ec2, ssm).observe(observed_at=OBSERVED_AT)
+
+    assert status.ssm_state is SsmState.UNKNOWN
+
+
+@pytest.mark.parametrize("ping_status", ["Inactive", "ConnectionLost"])
+def test_non_online_ssm_state_skips_probe(ping_status: str) -> None:
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {"Instances": [{"InstanceId": TARGET_INSTANCE_ID, "State": {"Name": "running"}}]}
+            ]
+        }
+    )
+    ssm = FakeSsm(
+        {"InstanceInformationList": [{"InstanceId": TARGET_INSTANCE_ID, "PingStatus": ping_status}]}
+    )
+    probe = FakeProbe(runtime_stopped_json())
+
+    status = observer(ec2, ssm, probe).observe(observed_at=OBSERVED_AT)
+
+    assert status.ssm_state in {SsmState.OFFLINE, SsmState.CONNECTION_LOST}
+    assert probe.calls == []
+    assert status.host_runtime_state is HostRuntimeState.UNKNOWN
 
 
 @pytest.mark.parametrize(
@@ -244,7 +395,12 @@ def test_ec2_api_failure_is_unknown_not_stopped() -> None:
 
 def test_invalid_target_instance_id_is_rejected() -> None:
     with pytest.raises(ValueError, match="invalid target EC2 instance ID"):
-        TargetStatusObserver(instance_id="i-guessed", ec2=FakeEc2({}), ssm=FakeSsm({}))
+        TargetStatusObserver(
+            instance_id="i-guessed",
+            ec2=FakeEc2({}),
+            ssm=FakeSsm({}),
+            host_runtime_probe=FakeProbe(),
+        )
 
 
 def test_naive_observation_time_is_rejected() -> None:

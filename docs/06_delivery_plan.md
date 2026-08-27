@@ -355,7 +355,7 @@ public ingress、旧host退役は後続単位とする。
 
 ## 6. Phase 3 — 実測status
 
-- **状態:** In Progress（repository-only EC2 / SSM observation slices）
+- **状態:** In Progress（repository-only EC2 / SSM / Host Runtime observation slices）
 
 ### 目的
 
@@ -378,6 +378,8 @@ AWS側から実状態を取得し、DynamoDBへ安全に保存する。
 最初のvertical sliceはTarget instance IDを明示inputとするEC2 adapterである。EC2が`stopped`なら到達不能なSSM/Host Runtime/Minecraft probeを実行せず、canonical `not-applicable` / `not-running` stateとUTC `observed_at`を返す。AWS API/schema failureは`unknown`へfail-closedし、DynamoDB、Lambda、running host probe、AWS deployは後続sliceとする。
 
 次のvertical sliceはEC2が`running`の場合だけSSM managed-node状態を取得する。`Online` / `Inactive` / `ConnectionLost`をcanonical `online` / `offline` / `connection-lost`へ正規化し、API/schema failure、missing/duplicate、未知値は`unknown`へfail-closedする。SSMがonlineでない場合はHost Runtime probeへ進まない。Run Command、Host Runtime probe、DynamoDB、Lambda、AWS deployは後続sliceとする。
+
+Host Runtime observation sliceはSSM pagination、固定read-only probe、Run Command transport、strict JSON parser、status normalizationをrepositoryで実装する。probeはmount/systemd/Docker/対象containerだけを観測し、Minecraft内部fileやprotocolを観測しない。protocol-aware observation未実装中は`ready=false`を維持する。repository/CI成功後に限り、停止済みdev Targetを一時起動してruntime-stopped状態を実測し、Targetを通常停止して終端確認する。DynamoDB、Lambda、Route 53、Minecraft起動は対象外とする。
 
 ### 確認ケース
 

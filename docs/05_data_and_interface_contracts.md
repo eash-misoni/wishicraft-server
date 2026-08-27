@@ -434,7 +434,10 @@ Phase 3 first sliceのrepository-only outputはTarget EC2 identityを呼出元�
   "instance_id": "i-...",
   "ec2_state": "stopped",
   "ssm_state": "not-applicable",
+  "mount_state": "unknown",
+  "docker_state": "unknown",
   "host_runtime_state": "not-running",
+  "container_state": "unknown",
   "minecraft_service_state": "not-applicable",
   "minecraft_protocol_state": "not-applicable",
   "ready": false,
@@ -445,6 +448,64 @@ Phase 3 first sliceのrepository-only outputはTarget EC2 identityを呼出元�
 API failure、missing/duplicate instance、未知EC2 state、response schema不一致は`ec2_state=unknown`とし、下位stateも`unknown`、`ready=false`とする。Target instance IDをGitへ新しい物理ID正本として埋め込まず、将来のLambda environmentまたはCDK output wiringからadapterへ渡す。
 
 Phase 3 second sliceはEC2が`running`の場合だけSSM `DescribeInstanceInformation`をTarget instance IDでfilterする。単一の一致nodeについて`PingStatus=Online`を`online`、`Inactive`を`offline`、`ConnectionLost`を`connection-lost`へ正規化する。API failure、response schema不一致、missing/duplicate node、未知`PingStatus`、未処理paginationは`unknown`へfail-closedする。SSMがonlineでない場合はRun CommandまたはHost Runtime probeを実行せず、Host RuntimeとMinecraft stateを`unknown`のまま返す。
+
+Phase 3 third sliceでは`DescribeInstanceInformation`の全pageを追跡し、Target instance IDが全pageを通じてexactly one matchの場合だけstateを採用する。空・非string・循環token、100 page超過、malformed page、0件、2件以上、API failureは`unknown`へfail-closedする。
+
+SSM online時だけ、Control Planeがcommand文字列を受け取らない固定operation `run_probe(instance_id=...)`を呼ぶ。adapterはrepository-packaged probeをbase64で固定転送し、`AWS-RunShellScript`、単一Target、execution timeout 45秒、transport timeout 60秒、concurrency 1、errors 0でSendCommandする。Command IDを検証し、GetCommandInvocationをterminalまでpollする。timeout、API error、nonzero exit、command failure、transport schema failureではHost Runtime以下を`unknown`、`ready=false`とする。stdout JSONとstderr diagnosticを分離し、AWS detailをdomain errorへ露出しない。
+
+### Phase 3 Host Runtime read-only probe v1
+
+probeは引数を持たず、stdoutへ次のversioned JSON一件だけを出力する。診断はstderr、component failure codeは`errors`へsecret-freeな固定codeとして出す。
+
+```json
+{
+  "schema_version": 1,
+  "probe_version": "1.0.0",
+  "observed_at": "2026-08-27T00:00:00Z",
+  "identity": {
+    "instance_id": "i-...",
+    "runtime_id": "wishicraft-host-runtime",
+    "compose_project": "wishicraft-host-runtime",
+    "compose_service": "minecraft"
+  },
+  "mount": {
+    "state": "expected",
+    "mount_path": "/srv/minecraft",
+    "filesystem_type": "xfs",
+    "filesystem_uuid": "...",
+    "expected_filesystem_type": "xfs",
+    "expected_filesystem_uuid": "...",
+    "root_uid": 0,
+    "root_gid": 0,
+    "root_mode": "0755"
+  },
+  "docker": {"state": "active"},
+  "host_runtime": {
+    "unit": "wishicraft-host-runtime.service",
+    "state": "inactive"
+  },
+  "container": {
+    "state": "not-found",
+    "container_id": null,
+    "name": null,
+    "image_reference": null,
+    "image_digest": null,
+    "restart_policy": null,
+    "health": "not-applicable",
+    "oom_killed": null,
+    "restart_count": null,
+    "published_ports": {}
+  },
+  "minecraft": {
+    "runtime_state": "not-running",
+    "protocol_state": "not-applicable",
+    "ready": false
+  },
+  "errors": []
+}
+```
+
+probeはIMDSv2 instance ID、固定mount path/type/UUID、systemd unit state、Docker daemon、固定Compose project/service labelに一致するcontainerだけを観測する。`systemctl`/Docker/Composeのstart・stop・restart、mount変更、filesystem mutation、package/image操作、secret取得、environment/log出力、Minecraft内部file/world/RCONへのアクセスを禁止する。containerが正常に存在しない場合は`not-found`、停止済みなら`stopped`、観測不能なら`unknown`を区別する。container非running時はMinecraft runtimeを`not-running`、protocolを`not-applicable`、readyをfalseとする。schema version、required field、enum、type、UTC timestamp、instance/runtime identity、impossible combinationをstrict parserで検証し、未知schemaをbest-effort parseしない。
 
 
 ## 12. Operation Admission契約

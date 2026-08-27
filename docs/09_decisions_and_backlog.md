@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-23
+- **最終更新:** 2026-08-27
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -9,6 +9,15 @@
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-069 Phase 3 Host Runtime observationは固定read-only probeとstrict parserに分離する
+
+- **状態:** Accepted
+- **日付:** 2026-08-27
+- **Decision:** SSM online時だけ、引数なしのrepository-packaged probeを固定Run Command operationで実行する。probeはIMDSv2 identity、期待mount、systemd、Docker daemon、Compose labelで一意に識別したcontainerだけをhost-localに観測する。SSM transport、probe JSON schema v1 parser、status normalizationを分離する。
+- **Safety:** Control Planeが任意shellを渡すinterface、Minecraft内部file/world、environment/log、RCON、secretの観測、probeによるrepair/lifecycle/filesystem/Docker mutationを禁止する。transport/schema/identity/command failureはHost Runtime以下を`unknown`へfail-closedする。
+- **READY:** container runningやDocker healthだけではREADYにしない。Minecraft protocol-aware observationを後続sliceで実装するまでschema v1の`ready`は常にfalseとする。
+- **Timeout:** stage正本のstatus用`ssm_probe=60`秒を使い、script executionは45秒とする。start/stop用Host Runtime timeoutを流用しない。
 
 ### D-063 Phase 2 target hostを独立stackで作成する
 
