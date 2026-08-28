@@ -136,6 +136,7 @@ def test_stopped_target_short_circuits_unreachable_runtime_layers() -> None:
         "expected_game_id": EXPECTED_GAME_ID,
         "active_game_state": "not-applicable",
         "observed_active_game_id": None,
+        "player_count": None,
         "discrepancies": [],
         "ready": False,
         "observed_at": "2026-08-23T12:34:56Z",
@@ -283,7 +284,33 @@ def test_online_running_protocol_ready_normalizes_to_ready() -> None:
     assert status.active_game_state is ActiveGameState.OBSERVED
     assert status.observed_active_game_id == EXPECTED_GAME_ID
     assert status.discrepancies == ()
+    assert status.player_count == 0
     assert status.ready is True
+
+
+def test_player_count_is_independent_from_runtime_ready() -> None:
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {"Instances": [{"InstanceId": TARGET_INSTANCE_ID, "State": {"Name": "running"}}]}
+            ]
+        }
+    )
+    ssm = FakeSsm(
+        {"InstanceInformationList": [{"InstanceId": TARGET_INSTANCE_ID, "PingStatus": "Online"}]}
+    )
+
+    zero = observer(ec2, ssm, FakeProbe(runtime_running_json(player_count=0))).observe(
+        observed_at=OBSERVED_AT
+    )
+    positive = observer(ec2, ssm, FakeProbe(runtime_running_json(player_count=5))).observe(
+        observed_at=OBSERVED_AT
+    )
+
+    assert zero.player_count == 0
+    assert positive.player_count == 5
+    assert zero.ready is True
+    assert positive.ready is True
 
 
 def ready_status_with_active_game(active_game: dict[str, object]) -> TargetStatus:
@@ -379,6 +406,7 @@ def test_running_container_without_protocol_success_is_not_ready(protocol_result
     assert status.minecraft_service_state is MinecraftState.RUNNING
     assert status.minecraft_protocol_state in {MinecraftState.NOT_READY, MinecraftState.UNKNOWN}
     assert status.ready is False
+    assert status.player_count is None
 
 
 def test_duplicate_ssm_target_across_pages_is_unknown_and_skips_probe() -> None:

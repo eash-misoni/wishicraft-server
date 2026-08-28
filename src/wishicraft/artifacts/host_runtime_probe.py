@@ -20,7 +20,7 @@ from typing import Any, Optional
 # compatible with that interpreter even though the control-plane package targets 3.12.
 
 SCHEMA_VERSION = 1
-PROBE_VERSION = "1.2.0"
+PROBE_VERSION = "1.3.0"
 MOUNT_PATH = "/srv/minecraft"
 EXPECTED_FILESYSTEM_TYPE = "xfs"
 EXPECTED_FILESYSTEM_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"
@@ -308,6 +308,7 @@ def protocol_not_applicable() -> dict[str, Any]:
         "port": MINECRAFT_PORT,
         "reported_version": None,
         "protocol_version": None,
+        "player_count": None,
         "version_match": None,
         "observed_at": None,
     }
@@ -328,6 +329,7 @@ def observe_protocol(container_id: str) -> tuple[dict[str, Any], str, bool]:
         "port": MINECRAFT_PORT,
         "reported_version": None,
         "protocol_version": None,
+        "player_count": None,
         "version_match": None,
         "observed_at": observed_at,
     }
@@ -361,10 +363,19 @@ def observe_protocol(container_id: str) -> tuple[dict[str, Any], str, bool]:
         if not isinstance(server_info, dict):
             raise ValueError
         version = server_info.get("version")
+        players = server_info.get("players")
         if not isinstance(version, dict):
             raise ValueError
         reported_version = version.get("name")
         protocol_version = version.get("protocol")
+        raw_player_count = players.get("online") if isinstance(players, dict) else None
+        player_count = (
+            raw_player_count
+            if isinstance(raw_player_count, int)
+            and not isinstance(raw_player_count, bool)
+            and raw_player_count >= 0
+            else None
+        )
         if (
             not isinstance(reported_version, str)
             or not reported_version
@@ -383,6 +394,7 @@ def observe_protocol(container_id: str) -> tuple[dict[str, Any], str, bool]:
             "compatible_response": True,
             "reported_version": reported_version,
             "protocol_version": protocol_version,
+            "player_count": player_count,
             "version_match": version_match,
         }
     )

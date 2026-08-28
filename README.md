@@ -2,15 +2,29 @@
 
 Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジトリです。
 
-## Phase 0
+## 現在地点
 
-Phase 0で、Python、AWS CDK、設定検証、テスト、CIを整備しました。AWSリソース、Discord接続、Minecraftのインストールはまだ行いません。
+Phase 0〜3は完了しています。現在の次PhaseはPhase 4「Operationと排他制御」で、Games、Operations、Idempotency、Locksと条件付きadmissionを実装する段階です。Phase 4の実装前に、`docs/09_decisions_and_backlog.md`のDecision Neededを解消します。
+
+devは次の3層architectureです。
+
+```text
+Wishicraft Control Plane
+  -> AL2023 Host Runtime（systemd / Docker / Compose）
+  -> pinned itzg Minecraft Runtime
+```
+
+Frozen Phase 1 stack、独立Target stack、独立Control Plane stackを分離しています。dev Control PlaneのReconcile Lambdaとcurrent SystemState DynamoDBはdeploy・stopped Target integration済みです。Phase 1のhost Java、直接`minecraft.service`、Xmx 3G等はas-built履歴であり、現在のTarget runtime契約ではありません。
+
+設計・契約の正本は[Architecture](docs/03_architecture.md)、[Domain model](docs/04_domain_and_state_model.md)、[Data/interface contracts](docs/05_data_and_interface_contracts.md)、[Delivery plan](docs/06_delivery_plan.md)、[Decisions/backlog](docs/09_decisions_and_backlog.md)です。itzgとの責務境界は[itzg responsibility boundary](docs/architecture/itzg-responsibility-boundary.md)を参照してください。
+
+## 設定の正本
 
 `config/project.yaml`、`config/stages/<stage>.yaml`、`config/secrets.example.yaml`がGit管理された設定の正本です。秘密値は含めず、`secrets.example.yaml`にはParameter Store SecureStringのParameter名だけを置きます。
 
-`null`は未確定値であり、コードは補完しません。Phase 0のdev空CDK stackはenvironment-agnosticにsynthでき、AWS Account IDやAWS profileを必要としません。Phase 1以降の手動AWS操作は、runbookで定めたIAM Identity Center profileとSTS Account ID照合方針に従います。
+`null`は未確定値であり、コードは補完しません。手動AWS操作は、runbookで定めたIAM Identity Center profileとSTS Account ID照合方針に従います。
 
-prod設定はplaceholderとして読み込めますが、Phase 0でprod向けsynthを行うと、現在の`null`値をパス付きで列挙して失敗します。この一時的な安全ゲートは、すべての`null`を将来永続的に必須とするものではありません。Phase 1開始前にstage・処理・Phaseごとの必須値を定義します。
+prod設定はplaceholderとして読み込めますが、未確定の必須値がある間はprod向けsynth/deployをvalidationで停止します。
 
 ## 開発環境
 
@@ -29,7 +43,7 @@ npx --no-install cdk synth MinecraftTargetStack-dev --context stage=dev --contex
 npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=3 --context deployment=control-plane
 ```
 
-prod synthとdeployは初期リリース直前まで行いません。deploy、secret登録、AWS profileの指定はこのPhase 0の手順に含めません。
+prod synthとdeployは初期リリース直前まで行いません。通常のrepository validationはAWS credentialやsecretを使用しません。
 
 ## CI
 

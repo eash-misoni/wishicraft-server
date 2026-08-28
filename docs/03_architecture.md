@@ -11,7 +11,7 @@ Phase 1はhost上のJava、固定server.jar、`minecraft.service`、host firewal
 
 Phase 2以降は[itzg責務境界](architecture/itzg-responsibility-boundary.md)を正本とし、Control Plane（Wishicraft）、Host Runtime、Minecraft Runtime（itzg/docker-minecraft-server）の3層へ移行する。Wishicraftはdesired state、policy、認可、状態遷移、AWS resource、mapping/apply orchestrationを持つ。Host RuntimeはAL2023、EBS mount、Docker/Compose、systemd、secret injection、container lifecycleを持つ。Minecraft固有の取得・設定・互換性・起動停止は原則itzgへ委譲する。
 
-Phase 2aはAWS適用前のstatic Host Runtime契約である。D-062で固定したAL2023 release、kernel variant、region固有AMI identity、Compose checksum、itzg release tag/digest、initial tuning値からsecret-free artifactをrenderし、mount/identity/Phase 1 interlockを満たした場合だけ明示的なCompose操作を許す。Phase 1 `minecraft.service`はrollback先として残し、新unitはboot enableも自動restartも行わない。既存EBS UID/GIDはObservation Requiredであり、未観測のままhostへ適用しない。
+Phase 2aはAWS適用前のstatic Host Runtime契約として開始した。D-062で固定したAL2023 release、kernel variant、region固有AMI identity、Compose checksum、itzg release tag/digest、initial tuning値からsecret-free artifactをrenderし、mount/identity/Phase 1 interlockを満たした場合だけ明示的なCompose操作を許す。Phase 1 `minecraft.service`はrollback先として残し、新unitはboot enableも自動restartも行わない。当時Observation Requiredだった既存EBS UID/GIDはPhase 2で`993:993`と観測・固定済みである。
 
 Phase 2b-1では既存EBSのnumeric identity `993:993`を観測済みとし、`server.properties`だけに存在する`0:993` / `0640`を、Phase 1完全停止後の一回限りのHost Runtime migrationで`993:993` / `0640`へ変更する。Minecraft properties本文は編集せず、以後のrealizationはitzgへ委譲する。current dev memory targetはProvisionalなcontainer `2816 MiB`、Xms `1G`、Xmx `2G`である。
 
@@ -134,7 +134,7 @@ DynamoDBは実世界の状態そのものではなく、次を保存する。
 
 - EC2 APIでインスタンス状態を取得する。
 - running時だけSSM状態を確認する。
-- SSM online時だけ、repository固定のversioned read-only Host Runtime probeをRun Commandで実行する。probeはmount、systemd、Docker daemon、Compose labelで一意に識別したcontainerをhost-localに観測し、running container内では固定`mc-monitor status`によるJava Server List Pingだけをlocalhost:25565へ実行する。Minecraft内部file、environment、log、RCON、MOTD、player sampleをControl Planeへ取り込まない。transportとschemaを別々に検証してHost Runtime、container、Minecraft状態を正規化する。
+- SSM online時だけ、repository固定のversioned read-only Host Runtime probeをRun Commandで実行する。probeはmount、systemd、Docker daemon、Compose labelで一意に識別したcontainerをhost-localに観測し、running container内では固定`mc-monitor status`によるJava Server List Pingだけをlocalhost:25565へ実行する。online player count整数だけを正規化し、Minecraft内部file、environment、log、RCON、MOTD、player sample/name/UUID、raw responseをControl Planeへ取り込まない。transportとschemaを別々に検証してHost Runtime、container、Minecraft状態を正規化する。
 - 観測結果を正規化する。
 - 保存済みObserved Stateを条件付き更新する。
 - 不一致や異常をoperation/logへ記録する。

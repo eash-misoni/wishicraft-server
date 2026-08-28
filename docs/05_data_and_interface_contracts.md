@@ -102,6 +102,8 @@ observation_errors: list[string]
 observed_at: fixed-width UTC timestamp
 ```
 
+`observation.player_count`は正常に取得できた場合だけ0以上の整数、それ以外はnullである。将来flat属性へ展開する場合のcanonical名は`observed_player_count`とし、0人とunknown/not-applicableを区別する。player countだけの観測失敗はprotocol READYを書き換えない。
+
 Phase 4以降にoperationを導入するときは、次の属性群を同じitemへ追加できるが、Phase 3 Reconcileはこれらを先行作成・更新しない。
 
 ```yaml
@@ -166,10 +168,7 @@ package:
   package_version: initial-fixed-version
 
 runtime:
-  class: initial
-  java_runtime: corretto-25-headless
-  java_xms: 1G
-  java_xmx: 3G
+  class: default
   idle_shutdown_minutes: 30
 
 world:
@@ -205,9 +204,6 @@ package:
 
 runtime:
   class: string
-  java_runtime: string
-  java_xms: string
-  java_xmx: string
   idle_shutdown_minutes: integer
 
 world:
@@ -223,6 +219,17 @@ last_backup_at: timestamp | null
 ```
 
 DynamoDBではnested mapを使用できるが、頻繁に条件更新する属性はトップレベルへ出すことを許可する。実装前にrepository APIで隠蔽する。
+
+`runtime.class`は論理的なruntime capability/mapping selectorであり、image tag/digest、Java runtime、Docker/Compose/AL2023、container/JVM memoryをGame itemへ複製しない。初期`default` classのrealizationは`config/stages/dev.yaml.host_runtime`とD-060〜D-062のGit管理platform lockを唯一の正本とする。初期単一GameのMinecraft `VERSION=26.2` / `TYPE=VANILLA`も現時点では同じGit lockが正本で、Phase 9以降にPackageを導入した後は不変`package_id`/`package_version`参照が論理Game構成を所有する。Phase 1 `compute`、host Corretto、直接Java、Xms/Xmx 1G/3Gはas-built履歴であり、このGame desired-state schemaへ戻さない。
+
+| 値 | 現在の唯一の正本 | realization / observation |
+|---|---|---|
+| Minecraft VERSION / TYPE | dev `host_runtime.minecraft`（将来はimmutable Package参照） | itzg入力とprotocol観測 |
+| runtime class | Game `runtime.class` | Git管理mappingがHost Runtime artifactへ変換 |
+| Java runtime / itzg image | dev `host_runtime.image` | pinned container image |
+| container/JVM memory | dev `host_runtime.memory` | Compose/runtime observation |
+| Host platform / Docker / Compose | dev `host_runtime.platform` / `compose` | Target Host Runtime |
+| expected active Game ID | initial Git identity（Phase 4後はvalidated desired Game ID） | explicit container labelと`/data` bindで観測 |
 
 ## 5. DynamoDB: Operations
 
@@ -428,6 +435,7 @@ Phase 3ではdeployment configurationで許可済みの単一system/game/Target�
     "minecraft_service_state": "running",
     "minecraft_protocol_state": "ready",
     "observed_active_game_id": "game-vanilla-main",
+    "player_count": 0,
     "runtime_ready": true
   },
   "health": "HEALTHY",
@@ -451,6 +459,7 @@ Phase 3 first sliceのrepository-only outputはTarget EC2 identityを呼出元�
   "container_state": "unknown",
   "minecraft_service_state": "not-applicable",
   "minecraft_protocol_state": "not-applicable",
+  "player_count": null,
   "ready": false,
   "observed_at": "2026-08-23T00:00:00Z"
 }
@@ -471,7 +480,7 @@ probeは引数を持たず、stdoutへ次のversioned JSON一件だけを出力�
 ```json
 {
   "schema_version": 1,
-  "probe_version": "1.2.0",
+  "probe_version": "1.3.0",
   "observed_at": "2026-08-27T00:00:00Z",
   "identity": {
     "instance_id": "i-...",
@@ -523,6 +532,7 @@ probeは引数を持たず、stdoutへ次のversioned JSON一件だけを出力�
       "port": 25565,
       "reported_version": null,
       "protocol_version": null,
+      "player_count": null,
       "version_match": null,
       "observed_at": null
     },
@@ -534,9 +544,9 @@ probeは引数を持たず、stdoutへ次のversioned JSON一件だけを出力�
 
 probeはIMDSv2 instance ID、固定mount path/type/UUID、systemd unit state、Docker daemon、固定Compose project/service labelに一致するcontainerだけを観測する。`systemctl`/Docker/Composeのstart・stop・restart、mount変更、filesystem mutation、package/image操作、secret取得、environment/log出力、Minecraft内部file/world/RCONへのアクセスを禁止する。containerが正常に存在しない場合は`not-found`、停止済みなら`stopped`、観測不能なら`unknown`を区別する。container非running時はMinecraft runtimeを`not-running`、protocolを`not-applicable`、active gameを`not-applicable`、readyをfalseとする。
 
-probe v1.2.0はHost Runtime rendererがCompose serviceへ付与する`com.wishicraft.active-game-id`と`com.wishicraft.active-game-data-source`をrealized runtime metadataとして使用する。container running時だけvalidated `game-<slug>` IDを返し、宣言data sourceとDocker inspectで一意に観測したbind `/data` sourceを比較する。directory名からGame IDを逆算しない。metadata missing/malformed/ambiguousはactive game `unknown`、宣言とbindの不一致は`binding_consistency=mismatch`とし、Control Planeはそれぞれ`active-game-unknown` / `runtime-state-mismatch`へ導出する。期待IDとの差は`active-game-mismatch`とする。
+probe v1.2.0で追加したactive game contractは、Host Runtime rendererがCompose serviceへ付与する`com.wishicraft.active-game-id`と`com.wishicraft.active-game-data-source`をrealized runtime metadataとして使用する。container running時だけvalidated `game-<slug>` IDを返し、宣言data sourceとDocker inspectで一意に観測したbind `/data` sourceを比較する。directory名からGame IDを逆算しない。metadata missing/malformed/ambiguousはactive game `unknown`、宣言とbindの不一致は`binding_consistency=mismatch`とし、Control Planeはそれぞれ`active-game-unknown` / `runtime-state-mismatch`へ導出する。期待IDとの差は`active-game-mismatch`とする。
 
-container running時だけ、一意に解決したcontainer IDへ固定`docker exec <id> mc-monitor status --json --host localhost --port 25565 --timeout 3s`を実行する。外部command、host、port、timeoutをControl Plane inputにしない。probeはraw responseからhost/port、version name、protocol versionだけをstrictに抽出し、MOTD、favicon、player sample、raw JSONを出力しない。`result`は`success` / `failed` / `unavailable` / `unknown` / `not-applicable`を取り、試行時だけprotocol固有`observed_at`をUTCで持つ。nonzeroは`not-ready`、timeout/実行不能/schema異常は`unknown`、container非runningは`not-applicable`とする。
+container running時だけ、一意に解決したcontainer IDへ固定`docker exec <id> mc-monitor status --json --host localhost --port 25565 --timeout 3s`を実行する。外部command、host、port、timeoutをControl Plane inputにしない。probe v1.3.0はraw responseからhost/port、version name、protocol version、`players.online`の非負整数だけを抽出し、MOTD、favicon、player sample/name/UUID、raw JSONを出力しない。`player_count`は取得成功時の整数（0を含む）で、field欠損/不正、protocol failure/not-applicable時はnullとする。player count fieldだけの不正は有効なprotocol responseを失敗へ変えない。`result`は`success` / `failed` / `unavailable` / `unknown` / `not-applicable`を取り、試行時だけprotocol固有`observed_at`をUTCで持つ。nonzeroは`not-ready`、timeout/実行不能/protocol schema異常は`unknown`、container非runningは`not-applicable`とする。player countはREADY条件ではなく、0人でもREADYになり得る。
 
 期待version `26.2`との比較は、report nameが`26.2`または`Minecraft 26.2`等の独立したversion tokenを含む場合を一致とし、`1.26.2`や`26.20`は一致させない。protocol成功、version一致、mount expected、Docker active、Host Runtime active、container running、component errorなしをすべて満たす場合だけPhase 3 runtime `ready=true`とする。active game mismatchはこのruntime READYを書き換えず、別の`discrepancies`属性に保持する。START-005全体の完了にはruntime READY、active game一致、connection endpoint/DNS一致を上位Workflowで評価する。schema version、probe version、required field、enum、type、UTC timestamp、instance/runtime identity、impossible combinationをstrict parserで検証し、未知versionをbest-effort parseしない。
 
@@ -739,7 +749,7 @@ minecraft-heartbeat.service
 minecraft-heartbeat.timer
 ```
 
-`minecraft.service`はPhase 1 as-builtの契約である。Phase 2以降はsystemd、Docker/Compose、itzgが独立にrestartしないよう、Host Runtimeをcontainer lifecycle ownerとする。systemdはmount後の起動・停止順序を統括し、Composeのrestart policyはControl Planeの停止意図を打ち消さないものとする。具体的unit、restart値、stop timeoutはDecision Neededである。Discord入力やDynamoDB文字列を直接`ExecStart`やshellへ埋め込まない。
+`minecraft.service`はPhase 1 as-builtの契約である。Phase 2以降はsystemd、Docker/Compose、itzgが独立にrestartしないよう、`wishicraft-host-runtime.service`とHost Runtimeをcontainer lifecycle ownerとする。systemdはmount後の起動・停止順序を統括し、Compose restart policyは`no`、各stop timeoutは`config/stages/dev.yaml.host_runtime.timeouts`を正本とする。Discord入力やDynamoDB文字列を直接`ExecStart`やshellへ埋め込まない。
 
 ### Desired state mapping / apply（Phase 2で確定）
 
@@ -750,7 +760,7 @@ minecraft-heartbeat.timer
 - RCON等の管理portはhostへpublishせず、command pathはhost-local / container-localに閉じる。
 - command認可はControl Plane、secret injectionはHost Runtime、Minecraft固有command実行はitzg/runtimeが担当する。
 
-具体的なdesired/applied schema、idempotency、apply result、command adapter、secret受渡しはDecision Neededであり、本節から推測しない。
+desired/rendered/applied revisionの概念、active game observation、read-only command adapterは確定済みである。Phase 4のwrite-side CAS詳細、Phase 5/6のmutation command adapter、RCON/secret受渡しは未決定であり、本節から推測しない。
 
 ### Phase 2a canonical boot-time artifact
 

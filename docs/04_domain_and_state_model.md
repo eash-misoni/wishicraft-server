@@ -249,24 +249,24 @@ observed_player_count: integer | null
 
 判定不能時は0ではなくnullとする。
 
+固定Host Runtime probeは、Minecraft protocol status responseの`server_info.players.online`が非負整数の場合だけ`observed_player_count`へ正規化する。player sample、name、UUID、MOTD、raw responseは伝播・保存しない。player count fieldの欠損/不正、protocol failure、container停止、protocol not-applicableではnullとし、0人を観測した状態と区別する。player count fieldだけの観測失敗は有効なprotocol responseのREADYを変更しない。player countはREADY条件でもControl Plane convergence条件でもなく、0人でもprotocol READYは成立する。
+
 Phase 3の最初のvertical sliceではTarget EC2が`stopped`の場合だけ、SSMを`not-applicable`、Host Runtimeを`not-running`、Minecraft service/protocolを`not-applicable`へ段階的に短絡する。次のsliceではEC2が`running`の場合だけSSM managed-node状態を照会し、AWS `PingStatus`の`Online`を`online`、`Inactive`を`offline`、`ConnectionLost`を`connection-lost`へ正規化する。SSM APIまたはresponse解析に失敗した場合とmissing/duplicate nodeは`unknown`とする。SSMがonlineでない限りHost Runtime以下は`unknown`のままとし、停止・READYを推測しない。
 
-Phase 3 Host Runtime observation sliceではSSM online時だけ固定read-only probeを実行する。期待XFS mount、Docker daemon active、Host Runtime unit inactive、対象container stoppedまたはnot-foundを正常に観測できた場合は、Host RuntimeとMinecraft runtimeを`not-running`、protocolを`not-applicable`とする。mount不一致、Docker unavailable、unit/container矛盾は`degraded`、transport、schema、identity、個別観測失敗は該当軸とHost Runtimeを`unknown`へfail-closedする。container runningやDocker healthだけではREADYにせず、Minecraft protocol-aware observation未実装中は常に`ready=false`とする。
+Phase 3 Host Runtime observationではSSM online時だけ固定read-only probeを実行する。期待XFS mount、Docker daemon active、Host Runtime unit inactive、対象container stoppedまたはnot-foundを正常に観測できた場合は、Host RuntimeとMinecraft runtimeを`not-running`、protocolを`not-applicable`とする。mount不一致、Docker unavailable、unit/container矛盾は`degraded`、transport、schema、identity、個別観測失敗は該当軸とHost Runtimeを`unknown`へfail-closedする。container runningやDocker healthだけではREADYにせず、固定container-local protocol observationの成功を必須とする。
 
-### READY判定
+### Runtime READYとstart convergence
 
-以下をすべて満たす場合に、派生状態としてREADYと判断する。
+Phase 3のruntime READYは、Target statusがEC2/SSM/Host Runtime/containerの正常観測とMinecraft protocol READYを満たす場合に成立する。active game、public endpoint、DNS、player countはruntime READY自体を書き換えない。
 
 ```text
 observed_ec2_state == running
 observed_ssm_state == online
-observed_connection_endpoint_state == ready
 observed_minecraft_service_state == active
 observed_minecraft_protocol_state == ready
-observed_active_game_id == desired_game_id
 ```
 
-READYは保存してもよいが、上記観測値から再計算可能な派生値として扱う。
+START-005の上位start convergence/successは、runtime READYに加え、active game一致とconnection endpoint/DNS一致を評価する。runtime READYは保存してもよいが観測値から再計算可能な派生値であり、convergenceと同一視しない。
 
 ## 6. Operation State
 

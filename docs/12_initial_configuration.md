@@ -81,8 +81,8 @@ Phase 2以降は設定所有権をさらに分離する。
 
 | 種別 | 唯一の正本 |
 |---|---|
-| itzg image、Docker/Compose、基盤policy、immutable default | Git管理設定（具体的schemaはDecision Needed） |
-| Discord等から運用中に変更するdesired state | DynamoDB等のControl Plane store（具体的schemaはDecision Needed） |
+| itzg image、Docker/Compose、基盤policy、immutable default | Git管理の`host_runtime`設定 |
+| Discord等から運用中に変更するdesired state | DynamoDB等のControl Plane store。Phase 4でwrite-side CAS詳細を確定する |
 | RCON等のsecret | AWS secret store |
 | world、Minecraft実ファイル | data EBS上のruntime data。desired stateの正本ではなくrealization結果 |
 

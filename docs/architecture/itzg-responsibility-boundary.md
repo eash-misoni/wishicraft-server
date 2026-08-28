@@ -256,17 +256,9 @@ systemd、Docker/Compose、itzg、Minecraft の複数層が独立に restart を
 
 ## 16. 現時点の未確定事項
 
-AL2023 release/kernel/AMI、itzg image tag/digest、Docker Engine/Composeの導入・固定方法、synthetic fixtureで必要と確認したownership migration、および最小構成のinitial memoryはD-060〜D-062で確定またはProvisional化した。残る実機観測・設計事項は次のとおりである。
+AL2023 release/kernel/AMI、itzg image tag/digest、Docker/Compose、UID/GID 993、ownership migration、Host Runtime lifecycle owner/restart no、停止timeout、最小memory/OOM/graceful stopはD-060〜D-068で固定またはProvisional化し、dev実機で検証した。Phase 3ではread-only observation、active game、Reconcile、current SystemStateを完成した。残る設計事項は次のとおりである。
 
-- target host上のUID/GID 993 collisionとdata EBS identityの再確認。
-
-- t3a.medium上でのcontainer memory / JVM heap、Docker/itzg起動peak、OOM余裕の実測。
-
-- systemd と Compose の具体的な起動・停止・restart policy、および lifecycle owner の最終設定。
-
-- 各層の停止 timeout と graceful shutdown の検証条件。
-
-- 運用中に変更可能な desired state の具体的な保存先・schema、および desired / applied state の持ち方。
+- Phase 4で運用中desired stateのwrite-side CAS/versionとOperation/Lock ownershipを確定する。
 
 - Control Plane -> Host Runtime -> itzg への具体的 command path と secret injection 方法。
 

@@ -123,6 +123,7 @@ class TargetStatus:
     expected_game_id: str
     active_game_state: ActiveGameState
     observed_active_game_id: str | None
+    player_count: int | None
     discrepancies: tuple[Discrepancy, ...]
     ready: bool
     observed_at: datetime
@@ -152,6 +153,7 @@ class TargetStatus:
             "expected_game_id": self.expected_game_id,
             "active_game_state": self.active_game_state.value,
             "observed_active_game_id": self.observed_active_game_id,
+            "player_count": self.player_count,
             "discrepancies": [item.value for item in self.discrepancies],
             "ready": self.ready,
             "observed_at": observed_at,
@@ -209,6 +211,7 @@ class TargetStatusObserver:
                 expected_game_id=self._expected_game_id,
                 active_game_state=ActiveGameState.NOT_APPLICABLE,
                 observed_active_game_id=None,
+                player_count=None,
                 discrepancies=(),
                 ready=False,
                 observed_at=observed_at,
@@ -258,6 +261,7 @@ class TargetStatusObserver:
             expected_game_id=self._expected_game_id,
             active_game_state=ActiveGameState.UNKNOWN,
             observed_active_game_id=None,
+            player_count=None,
             discrepancies=(),
             ready=False,
             observed_at=observed_at,
@@ -415,6 +419,7 @@ def _status_from_probe(
         expected_game_id=expected_game_id,
         active_game_state=probe.active_game.state,
         observed_active_game_id=probe.active_game.game_id,
+        player_count=probe.protocol.player_count,
         discrepancies=discrepancies,
         ready=ready,
         observed_at=observed_at,

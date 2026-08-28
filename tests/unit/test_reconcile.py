@@ -55,6 +55,7 @@ def target_status(
         expected_game_id="game-vanilla-main",
         active_game_state=ActiveGameState.OBSERVED if running else ActiveGameState.NOT_APPLICABLE,
         observed_active_game_id=game_id,
+        player_count=0 if ready else None,
         discrepancies=discrepancies,
         ready=ready,
         observed_at=NOW,
@@ -126,6 +127,7 @@ def test_stopped_target_and_absent_dns_is_healthy() -> None:
     ).reconcile(observed_at=NOW)
     assert result.health is Health.HEALTHY
     assert result.discrepancies == ()
+    assert result.observation["player_count"] is None
     assert result.observation["runtime_ready"] is False
     assert repo.saved == [result]
 
@@ -156,6 +158,7 @@ def test_runtime_ready_game_match_and_endpoint_match_is_healthy() -> None:
     ).reconcile(observed_at=NOW)
     assert result.health is Health.HEALTHY
     assert result.discrepancies == ()
+    assert result.observation["player_count"] == 0
 
 
 def test_runtime_ready_game_mismatch_remains_ready_but_degraded() -> None:

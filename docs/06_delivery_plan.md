@@ -20,7 +20,7 @@
 | 1 | Minecraft EC2手動起動 | EC2、EBS、Route 53、SSM、systemd、バニラ1個 |
 | 2 | itzg Host Runtime境界 | migration contract、mapping/apply、probe/start/stop command path |
 | 3 | 実測status | Reconcile Lambda、SystemState |
-| 4 | Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
+| 4 | **Next / Not Started:** Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
 | 5 | 安全なstart | Start Step Functions |
 | 6 | 安全なstop | Stop Step Functions |
 | 7 | Discord MVP | `/mc status/start/stop` |
@@ -400,6 +400,8 @@ stopped Targetへcanonical Reconcile inputを2回実行した。両方でEC2 sto
 古いobserved_atの実AWS書込み試験は、production Lambdaがsynthetic state/timeを受け付けず、schema外AWS CLI writeも行わない境界を優先して実施しなかった。repository adapterのolder/equal conditional rejection testと、previous READYからfresh UNKNOWN/ready falseへ更新するtestをcloseout時に再実行して成功した。Lambda logはruntimeのINIT/START/END/REPORTだけで、credential、secret、environment dump、probe/raw Minecraft contentを含まなかった。
 
 終了時はPhase 1/Target EC2 stopped、data EBSはTargetへattachedかつDeleteOnTermination false、snapshot completed、Target ingress 0、DNS absent、Phase 1/Target stackの更新時刻不変である。STA-001〜006のPhase 3 status/reconcile成果物と実測条件を満たしたためPhase 3を完了とする。Operation/Lock、start/stop workflow、Discord、periodic/event-driven reconcileは後続Phaseの範囲である。
+
+Phase 3 closeout後のrepository-only consistency fixとして、probe v1.3.0で既存mc-monitor responseのonline player countだけを追加した。0とunknown/not-applicableを区別し、sample/name/UUID/MOTD/raw JSONを伝播せず、player countをruntime READY条件にしない。AWS/Target再実測を伴わないcontract/test補完であり、Phase 3はCompletedのままとする。
 
 ### 確認ケース
 

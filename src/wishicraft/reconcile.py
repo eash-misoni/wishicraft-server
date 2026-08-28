@@ -181,6 +181,7 @@ def _derive_state(
             "runtime_ready": False,
             "active_game_state": "unknown",
             "observed_active_game_id": None,
+            "player_count": None,
         }
         base_discrepancies: list[str] = []
     else:

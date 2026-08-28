@@ -10,6 +10,16 @@
 
 ## 2. 採用済み決定
 
+### D-073 Phase 4前はGame desired stateとGit管理runtime lockを分離する
+
+- **状態:** Accepted（既存D-059〜D-062の整合明文化）
+- **日付:** 2026-08-28
+- **Game schema:** Gameはidentity、lifecycle/materialization、Package参照、論理`runtime.class`、Game単位policyを持つ。host Java、itzg image、Docker/Compose/AL2023、container/JVM memory等のphysical runtime artifactをGame itemへ複製しない。
+- **Source of Truth:** Phase 4初期単一GameではMinecraft VERSION/TYPE、Java variant、itzg image、memory、platform lockを`config/stages/dev.yaml.host_runtime`のGit管理値が所有する。Phase 9以降にPackageを導入した後は、Gameの不変Package参照が論理Minecraft構成を所有し、runtime class mappingがGit lockへrealizeする。同じkeyをGameとGitへ二重に保存しない。
+- **Phase 1 history:** `compute`、Corretto 25、直接`minecraft.service`、Xms 1G/Xmx 3G、server.jar checksumはPhase 1 as-builtとして残すが、Target/Game current contractではない。
+- **Phase 3 completion fix:** probe v1.3.0は既存mc-monitor responseからonline player countの非負整数だけを追加で正規化する。0とunknown/not-applicableを区別し、sample/name/UUID/MOTD/raw responseを保存せず、READY条件へ加えない。
+- **Scope:** repository contract/docs/testsの整合だけを行い、Games table、Operation/Lock、AWS deployまたは実機validationを開始しない。
+
 ### D-072 Phase 3 Reconcileは独立Control Plane stackでcurrent SystemStateを単調更新する
 
 - **状態:** Accepted
@@ -39,7 +49,7 @@
 - **日付:** 2026-08-27
 - **Decision:** 一意に解決したrunning container内の固定`mc-monitor status --json --host localhost --port 25565 --timeout 3s`だけをHost Runtime read-only probeから実行する。host/port/timeout/commandをControl Plane inputにせず、Minecraft portのhost publish、SG ingress、DNS、RCONを必要としない。
 - **Normalization:** container非runningはprotocol not-applicable、nonzeroはnot-ready、timeout/実行不能/malformed responseはunknownとし、すべてready falseとする。protocol success時も期待version token `26.2`が一致しなければnot-readyとする。
-- **Data minimization:** raw JSON、MOTD、favicon、player sampleを伝播せず、attempt/result、互換応答有無、reported version、protocol version、version match、protocol observed_atだけをversioned probe JSONへ正規化する。
+- **Data minimization:** raw JSON、MOTD、favicon、player sample/name/UUIDを伝播せず、attempt/result、互換応答有無、reported version、protocol version、online player count整数、version match、protocol observed_atだけをversioned probe JSONへ正規化する。player countは0とunknown/not-applicableを区別し、READY条件にしない。
 - **READY boundary:** protocol success/version一致に加え、mount expected、Docker active、Host Runtime active、container running、component errorなしの場合だけPhase 3 runtime `TargetStatus.ready=true`とする。START-005のoperation成功には後続sliceのactive gameとconnection endpoint/DNS一致も必要であり、本sliceだけでstart workflow完成とはしない。
 - **Safety:** protocol status pingはread-onlyとし、RCON、Minecraft command、properties/world/log read、container/network mutationを禁止する。
 - **Fixed image validation:** 固定digest imageのmc-monitorは0.16.11で、`status`のjson/host/port/timeout flagsを確認した。Go flagのhelpはusageを出力してexit 2となるため、CIはhelp本文の必須flagとexit 0または2を組み合わせてcontractを検証する。
@@ -54,7 +64,7 @@
 - **Safety:** Control Planeが任意shellを渡すinterface、Minecraft内部file/world、environment/log、RCON、secretの観測、probeによるrepair/lifecycle/filesystem/Docker mutationを禁止する。transport/schema/identity/command failureはHost Runtime以下を`unknown`へfail-closedする。
 - **READY:** container runningやDocker healthだけではREADYにしない。v1.0.xで`ready=false`へ固定していた契約は、D-070のprotocol-aware probe v1.1.0で拡張する。
 - **Timeout:** stage正本のstatus用`ssm_probe=60`秒を使い、script executionは45秒とする。start/stop用Host Runtime timeoutを流用しない。
-- **Runtime compatibility:** SSMで転送するprobeはControl Plane packageのPython targetではなくTarget AMIの標準interpreterでも実行可能でなければならない。v1.0.0の初回実機試行はAL2023のPython 3.9に`datetime.UTC`がなくcommand failureとなったため成功扱いせず、Python 3.9 syntax/API compatibility testを追加したv1.0.1で修正した。protocol contractはD-070のv1.1.0、現行active game contractはD-071のv1.2.0である。
+- **Runtime compatibility:** SSMで転送するprobeはControl Plane packageのPython targetではなくTarget AMIの標準interpreterでも実行可能でなければならない。v1.0.0の初回実機試行はAL2023のPython 3.9に`datetime.UTC`がなくcommand failureとなったため成功扱いせず、Python 3.9 syntax/API compatibility testを追加したv1.0.1で修正した。protocol contractはD-070のv1.1.0、active game contractはD-071のv1.2.0、player count最小補完はD-073のv1.3.0である。
 - **Dev observation:** repository validationとCI成功後、Targetを一時起動してSSM Onlineを確認した。固定probe v1.0.1はexit 0、schema v1、stderr空で、expected XFS/UUID mount、Docker active、Host Runtime inactive、固定digestのcontainer stopped、restart policy no、OOMKilled false、RestartCount 0、Minecraft not-running、protocol not-applicable、ready falseを返した。status経路も同じcanonical stateへ正規化した。
 - **No mutation / closeout:** 直接probeとstatus経路の前後で、`observed_at`以外のprobe事実、mount root metadata、EBS attachment、Target SGに変化はなかった。container/Host Runtime停止を確認してTarget EC2を通常停止し、停止後status経路がRun Commandを送らずEC2 stopped / SSM not-applicable / Host Runtime not-running / ready falseを返すことを確認した。Phase 1/Target stacks、data EBS、snapshot、ingress、DNSは変更していない。
 
@@ -334,7 +344,7 @@
 
 ### D-033 初期は1 stack・dev deploy
 
-- **状態:** Accepted
+- **状態:** Superseded by D-063 and D-072（Phase 0/1 as-built）
 - stageごとに1つの`MinecraftStack`を使用し、constructで責務を分ける。
 - 初期からFoundation/ControlPlane/Monitoringを別stackへ固定しない。
 - Phase 0からdev/prodの設定schemaを扱い、`config/stages/prod.yaml`はplaceholderとしてGit管理する。
@@ -368,7 +378,7 @@
 
 ### D-038 初期runtimeとstorage class
 
-- **状態:** Accepted
+- **状態:** Phase 1 as-built。Target runtime部分はD-059〜D-062、D-068によりSuperseded
 - Regionは`ap-northeast-1`、CPU architectureは`x86_64`、初期instance typeは`t3a.medium`とする。
 - Amazon Linux 2023、Corretto 25 headless、Xms `1G`、Xmx `3G`を初期値とする。
 - root EBSはgp3 16 GiB、data EBSはgp3 30 GiB、暗号化・保持とする。
@@ -391,7 +401,7 @@
 
 ### D-054 Phase 1初期vanilla Gameの固定artifactと起動基盤
 
-- **状態:** Accepted
+- **状態:** Phase 1 as-built。Target runtime部分はD-059〜D-062、D-068によりSuperseded
 - 初期PackageはMinecraft Java Edition 26.2 vanilla、初期Gameは`game-vanilla-main`とする。Corretto 25 headlessで実行し、公式version metadataのURL・SHA-1・sizeとリポジトリ固定SHA-256をすべて検証する。runtimeで`latest`やmanifestを参照しない。
 - 初期Gameはdata EBS上へ配置し、`online-mode`、静的ホワイトリスト、EULA同意を必須にする。Minecraft Management Protocolは無効のままとする。RCONはSecureStringから設定し、Security Group ingressなしとhost firewallによる実効的localhost限定を必須にする。
 
@@ -693,32 +703,45 @@
 
 ## 5. Current blockers
 
-Phase 0とPhase 1は完了した。Phase 1の意図的SIGTERM終了契約はas-built課題として履歴を維持するが、直接Java process向け解決を先行しない。Phase 2ではitzg移行後のgraceful shutdown、container exit、Host Runtime service結果を一体で定義する。
+Phase 0〜3は完了した。UID/GIDとownership compatibility、AL2023/AMI、Docker/Compose/itzg pin、initial memory、SSM/Host Runtime/protocol/active game/endpoint observation、Reconcile、SystemState/DynamoDB/Lambda、stopped Target integrationは解消済みであり、current blockerへ残さない。
 
-Phase 2aでD-060へ確定した項目を除くDecision Needed:
+### Phase 4開始前の分類
 
-| 項目 | 決める内容 |
-|---|---|
-| identity observation | containerへ渡す既存data EBSのnumeric UID/GID、ACL/owner/file type |
-| platform observation | release-specific AMI ID、導入Docker NEVRA |
-| resource tuning | dev実測に基づくmemory/timeout/OOM初期値の確定 |
-| desired state | desired/rendered/applied revisionの永続schemaとControl Plane統合 |
-| apply | boot-time設定とruntime operationの分類、idempotency、反映確認 |
-| command path | SSM→host-local→container-localの具体方式、RCON client/library |
-| secret injection | SecureString取得後の最小露出方式、更新・破棄方法 |
-| whitelist | 起動時同期と稼働中即時反映の使い分け、実反映確認 |
-| backup | itzg/docker-mc-backup等のruntime mechanismとWishicraft policy、S3/EBS snapshotの分担 |
-| migration | Phase 1 world/configの互換性、同等性gate、rollback、独自runtime退役順序 |
+| 項目 | 状態 | 現在の契約 / 未決定点 |
+|---|---|---|
+| conditional admission transaction | Accepted | D-026。Idempotency、Operation、Lock、Current Operationを一transactionで受付し、失敗時はworkflowを開始しない。 |
+| concurrent conflict policy | Accepted | 有効Lockまたはnon-null Current Operationなら競合operationを新規作成せず拒否する。同一idempotency keyは既存Operationを返す。 |
+| lock renewal semantics | Accepted | operation ID・lease version・未期限切れを条件に延長し、失敗は`LOCK_LOST`。副作用直前に所有権を再確認する。 |
+| lock lease/renew values | Provisional | dev設定はlease 900秒、renew 120秒。workflow実装・timeout解析後に短縮/延長を再評価する。 |
+| Operation retention / TTL | Deferred | 初期Phase 4ではTTLを有効化せず履歴を保持する。監査期間と運用query確定後にretentionを決める。 |
+| Idempotency retention / TTL | Deferred | 初期Phase 4ではTTLを有効化しない。外部再送期間・Operation retentionより短くしない。 |
+| Lock owner identity | Decision Needed | `operation_id`だけをowner identityとするか、別のadmission owner tokenを持つかをLocks repository実装前に決める。 |
+| SystemState desired-state CAS/version | Decision Needed | integer `version`/`desired_revision`のどちらを条件式の正本にし、Current Operation更新とどう一体化するかをSystemState write-side実装前に決める。Observed `observed_at` monotonicityとは分離する。 |
+| operation timeout / stale operation | Decision Needed | `timeout_at`超過後に誰が`TIMED_OUT`へ遷移させ、期限切れLock/Current Operationをどの所有者条件で回収するかをOperations repository/admission実装前に決める。TTL削除を回復機構にはしない。 |
 
-dev用Discord Guild/channel/role/Application ID/Public Keyは`config/stages/dev.yaml`へ反映済みであり、blockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
+#### Phase 4 Decision Neededの選択肢
+
+1. **Lock owner identity（Locks repository実装前）**
+   - A: `operation_id`を唯一のowner/fencing identityにし、別`owner`属性を持たない。推奨。admission時点で確定し、LockとCurrent Operationの不変条件が単純になる。一方、同一Operation内のworkflow再実行単位は区別できない。
+   - B: admissionで別owner tokenを生成する。workflow attempt単位のfencingを強められるが、Idempotency/Operation/Lock/Step Functions間のtoken lifecycleと回復が複雑になる。
+2. **SystemState desired-state CAS（SystemState write-side実装前）**
+   - A: item全体の`version`を全更新で共有する。単純だが、ReconcileのObserved更新とDesired/Current Operation更新が不要に競合する。
+   - B: `desired_revision`をDesired更新のCASに使い、Current Operationはnull/owner条件、Observedは既存`observed_at`条件として属性群ごとに分離する。推奨。D-030の部分更新境界を維持できるが、repository methodごとに条件式が異なる。
+3. **stale Operation回復（Operations repository/admission実装前）**
+   - A: admissionまたは明示recoveryが`timeout_at`、Lock expiry、Current Operation ownershipをtransactionally確認し、`TIMED_OUT`化と所有者条件付きcleanupを行う。推奨。Phase 4で安全な回復契約を作れ、定期schedulerは後回しにできるが、受付pathが複雑になる。
+   - B: Step FunctionsのCatch/Timeoutだけでterminal化する。通常failureは単純だが、execution開始前失敗や外部停止でstale stateが残り得る。
+   - C: 定期sweeperを同時導入する。最終回復は早いが、Phase 4 scopeとAWS resourceを増やし、periodic reconcileの後続Phase境界を崩す。
+
+Phase 4以外に残る既知事項は、write-side Host Runtime command pathとRCON/secret injection（Phase 5/6まで）、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。これらをPhase 4のrepository domain model開始blockerとはしない。
+
+dev用Discord Guild/channel/role/Application ID/Public Keyは設定済みでありblockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
 
 Phase別に決める事項:
 
 | 項目 | 決定期限 |
 |---|---|
-| EULA同意、server.jar取得、checksum検証、初回起動の実行承認 | Phase 1 bootstrap検証前 |
-| RCON password安全配布方式のEC2実装 | Phase 1 EC2 bootstrap実装時 |
-| RCON client/library / container-local command path | Phase 2開始前 |
+| Lock owner identity、desired-state CAS、stale operation recovery | Phase 4 write-side repository実装前 |
+| RCON client/library / container-local command path | Phase 5 start workflow前 |
 | dev Discord Bot TokenのSecureString登録とApplication/command設定確認 | Phase 7開始前 |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |
 | backup整合方式 | Phase 8開始前 |

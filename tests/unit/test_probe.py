@@ -87,6 +87,7 @@ def test_running_protocol_success_establishes_ready() -> None:
     assert probe.protocol.result is ProtocolResult.SUCCESS
     assert probe.protocol.reported_version == "26.2"
     assert probe.protocol.protocol_version == 772
+    assert probe.protocol.player_count == 0
     assert probe.protocol.version_match is True
     assert probe.active_game.game_id == "game-vanilla-main"
     assert probe.active_game.binding_consistency is BindingConsistency.CONSISTENT
@@ -143,6 +144,8 @@ def test_version_comparison_accepts_expected_version_with_label() -> None:
         {"observed_at": None},
         {"protocol_version": "772"},
         {"reported_version": None},
+        {"player_count": -1},
+        {"player_count": "0"},
     ],
 )
 def test_malformed_protocol_contract_is_rejected(mutation: dict[str, object]) -> None:
@@ -198,6 +201,23 @@ def test_container_missing_is_a_known_not_running_state() -> None:
     assert probe.container.state is ContainerState.NOT_FOUND
     assert probe.minecraft_runtime_state == "not-running"
     assert probe.protocol_state == "not-applicable"
+    assert probe.protocol.player_count is None
+
+
+def test_protocol_success_preserves_positive_player_count_without_sample() -> None:
+    probe = parse(runtime_running_document(player_count=4))
+
+    assert probe.protocol.player_count == 4
+    assert not hasattr(probe.protocol, "players")
+    assert probe.ready is True
+
+
+def test_protocol_success_allows_unknown_player_count_without_changing_ready() -> None:
+    probe = parse(runtime_running_document(player_count=None))
+
+    assert probe.protocol.player_count is None
+    assert probe.protocol_state is ProtocolState.READY
+    assert probe.ready is True
 
 
 def test_observation_failure_remains_unknown() -> None:

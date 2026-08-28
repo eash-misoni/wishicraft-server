@@ -18,14 +18,18 @@ def result(returncode: int, stdout: str = "", stderr: str = "") -> subprocess.Co
     return subprocess.CompletedProcess(("docker",), returncode, stdout, stderr)
 
 
-def successful_mc_monitor_json(version: str = "26.2") -> str:
+def successful_mc_monitor_json(version: str = "26.2", player_count: object = 0) -> str:
     return json.dumps(
         {
             "host": "localhost",
             "port": 25565,
             "server_info": {
                 "version": {"name": version, "protocol": 772},
-                "players": {"max": 20, "online": 0},
+                "players": {
+                    "max": 20,
+                    "online": player_count,
+                    "sample": [{"name": "must-not-propagate", "id": "private-player-id"}],
+                },
                 "description": {"text": "must not be propagated"},
             },
         }
@@ -127,8 +131,47 @@ def test_protocol_success_uses_only_fixed_container_local_command(
     assert observation["result"] == "success"
     assert observation["reported_version"] == "26.2"
     assert observation["protocol_version"] == 772
+    assert observation["player_count"] == 0
     assert "description" not in observation
     assert "players" not in observation
+    assert state == "ready"
+    assert ready is True
+
+
+def test_protocol_success_normalizes_positive_player_count_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        host_runtime_probe,
+        "run",
+        lambda *command: result(0, successful_mc_monitor_json(player_count=3)),
+    )
+
+    observation, state, ready = host_runtime_probe.observe_protocol(CONTAINER_ID)
+
+    assert observation["player_count"] == 3
+    assert "players" not in observation
+    assert "sample" not in observation
+    assert "must-not-propagate" not in json.dumps(observation)
+    assert "private-player-id" not in json.dumps(observation)
+    assert state == "ready"
+    assert ready is True
+
+
+@pytest.mark.parametrize("player_count", [-1, True, "0", None])
+def test_malformed_player_count_is_null_without_changing_protocol_ready(
+    monkeypatch: pytest.MonkeyPatch, player_count: object
+) -> None:
+    monkeypatch.setattr(
+        host_runtime_probe,
+        "run",
+        lambda *command: result(0, successful_mc_monitor_json(player_count=player_count)),
+    )
+
+    observation, state, ready = host_runtime_probe.observe_protocol(CONTAINER_ID)
+
+    assert observation["result"] == "success"
+    assert observation["player_count"] is None
     assert state == "ready"
     assert ready is True
 

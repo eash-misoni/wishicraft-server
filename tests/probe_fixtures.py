@@ -11,7 +11,7 @@ EXPECTED_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"
 def runtime_stopped_document(**overrides: object) -> dict[str, object]:
     document: dict[str, object] = {
         "schema_version": 1,
-        "probe_version": "1.2.0",
+        "probe_version": "1.3.0",
         "observed_at": "2026-08-27T00:00:00Z",
         "identity": {
             "instance_id": TARGET_INSTANCE_ID,
@@ -63,6 +63,7 @@ def runtime_stopped_document(**overrides: object) -> dict[str, object]:
                 "port": 25565,
                 "reported_version": None,
                 "protocol_version": None,
+                "player_count": None,
                 "version_match": None,
                 "observed_at": None,
             },
@@ -83,6 +84,7 @@ def runtime_running_document(
     protocol_result: str = "success",
     reported_version: str | None = "26.2",
     protocol_version: int | None = 772,
+    player_count: int | None = 0,
     version_match: bool | None = True,
 ) -> dict[str, object]:
     document = runtime_stopped_document()
@@ -126,6 +128,7 @@ def runtime_running_document(
             "port": 25565,
             "reported_version": reported_version if successful else None,
             "protocol_version": protocol_version if successful else None,
+            "player_count": player_count if successful else None,
             "version_match": version_match if successful else None,
             "observed_at": "2026-08-27T00:00:01Z",
         },
@@ -139,6 +142,7 @@ def runtime_running_json(
     protocol_result: str = "success",
     reported_version: str | None = "26.2",
     protocol_version: int | None = 772,
+    player_count: int | None = 0,
     version_match: bool | None = True,
 ) -> str:
     return json.dumps(
@@ -146,6 +150,7 @@ def runtime_running_json(
             protocol_result=protocol_result,
             reported_version=reported_version,
             protocol_version=protocol_version,
+            player_count=player_count,
             version_match=version_match,
         ),
         separators=(",", ":"),

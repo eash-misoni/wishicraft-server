@@ -116,6 +116,7 @@ class ProtocolObservation:
     port: int
     reported_version: str | None
     protocol_version: int | None
+    player_count: int | None
     version_match: bool | None
     observed_at: datetime | None
 
@@ -158,7 +159,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     document = _mapping(raw, "document")
     if _integer(document, "schema_version") != 1:
         raise ProbeContractError("unsupported probe schema version")
-    if _string(document, "probe_version") != "1.2.0":
+    if _string(document, "probe_version") != "1.3.0":
         raise ProbeContractError("unsupported probe version")
     observed_at = _timestamp(document, "observed_at")
 
@@ -388,6 +389,7 @@ def _parse_protocol(value: dict[str, object]) -> ProtocolObservation:
     port = _integer(value, "port")
     reported_version = _optional_string(value, "reported_version")
     protocol_version = _optional_integer(value, "protocol_version")
+    player_count = _optional_integer(value, "player_count")
     version_match = _optional_boolean(value, "version_match")
     observed_at = _optional_timestamp(value, "observed_at")
     if host != "localhost" or port != 25565:
@@ -399,6 +401,8 @@ def _parse_protocol(value: dict[str, object]) -> ProtocolObservation:
         if not compatible_response or any(item is None for item in response_fields):
             raise ProbeContractError("protocol success lacks compatible response metadata")
         assert reported_version is not None
+        if player_count is not None and player_count < 0:
+            raise ProbeContractError("protocol player count must be non-negative")
         if version_match is not _version_matches_expected(reported_version):
             raise ProbeContractError("protocol version comparison is inconsistent")
     elif compatible_response or any(item is not None for item in response_fields):
@@ -418,6 +422,7 @@ def _parse_protocol(value: dict[str, object]) -> ProtocolObservation:
         port=port,
         reported_version=reported_version,
         protocol_version=protocol_version,
+        player_count=player_count,
         version_match=version_match,
         observed_at=observed_at,
     )
