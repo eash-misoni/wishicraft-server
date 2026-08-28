@@ -1,7 +1,7 @@
 # 05. Data and Interface Contracts
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-28
+- **最終更新:** 2026-08-29
 
 ## 1. 契約変更ルール
 
@@ -107,7 +107,7 @@ observed_at: fixed-width UTC timestamp
 Phase 4以降にoperationを導入するときは、次の属性群を同じitemへ追加できるが、Phase 3 Reconcileはこれらを先行作成・更新しない。
 
 ```yaml
-version: 42
+desired_revision: 42
 desired_game_id: string | null
 requested_operation_id: string | null
 desired_updated_at: timestamp | null
@@ -222,6 +222,8 @@ DynamoDBではnested mapを使用できるが、頻繁に条件更新する属�
 
 `runtime.class`は論理的なruntime capability/mapping selectorであり、image tag/digest、Java runtime、Docker/Compose/AL2023、container/JVM memoryをGame itemへ複製しない。初期`default` classのrealizationは`config/stages/dev.yaml.host_runtime`とD-060〜D-062のGit管理platform lockを唯一の正本とする。初期単一GameのMinecraft `VERSION=26.2` / `TYPE=VANILLA`も現時点では同じGit lockが正本で、Phase 9以降にPackageを導入した後は不変`package_id`/`package_version`参照が論理Game構成を所有する。Phase 1 `compute`、host Corretto、直接Java、Xms/Xmx 1G/3Gはas-built履歴であり、このGame desired-state schemaへ戻さない。
 
+初期Gameは固定admin path `python -m wishicraft.game_admin --stage dev`を明示実行し、`attribute_not_exists(game_id)`条件で一度だけ登録する。deployやLambda cold startが既存Gameを無条件上書きしない。実AWS実行はPhase 4 deploy/integrationの承認境界で行う。
+
 | 値 | 現在の唯一の正本 | realization / observation |
 |---|---|---|
 | Minecraft VERSION / TYPE | dev `host_runtime.minecraft`（将来はimmutable Package参照） | itzg入力とprotocol観測 |
@@ -299,16 +301,15 @@ PK: lock_name
 
 ```yaml
 lock_name: minecraft-control
-operation_id: string
-owner: string
+resource_id: wishicraft-main
+owner_operation_id: string
+lease_id: string
 acquired_at: timestamp
-expires_at: epoch_seconds
-lease_version: integer
+lease_expires_at: epoch_seconds
 updated_at: timestamp
-cleanup_ttl: epoch_seconds
 ```
 
-`cleanup_ttl`は物理削除用であり、有効性は`expires_at`で判断する。
+`owner_operation_id`はlogical ownership、acquisitionごとに一意な`lease_id`は現在leaseを保持するexecutorのproofである。renew、release、副作用直前の確認は両者の一致と`lease_expires_at >= now`を要求する。Phase 4 MVPではTTLを有効化せず、期限切れLockも通常admissionが自動takeoverしない。
 
 
 ## 7. DynamoDB: Idempotency
@@ -328,6 +329,7 @@ idempotency_key: string
 operation_id: string
 operation_type: string
 source: DISCORD | WEB | SCHEDULE | ADMIN | CLI
+target_game_id: string | null
 created_at: timestamp
 expires_at: epoch_seconds | null
 ```
@@ -576,16 +578,24 @@ container running時だけ、一意に解決したcontainer IDへ固定`docker e
 
 1. `Idempotency`へkeyを条件付きPut
 2. `Operations`へ条件付きPut
-3. `Locks`へ期限切れ判定付きPut/Update
-4. `SystemState.current_operation_id`をnull条件付きUpdate
+3. `Locks`へ不存在条件付きPut（期限切れitemも通常admissionではtakeoverしない）
+4. `SystemState.current_operation_id`をabsent / DynamoDB NULL条件付きUpdate
 
-同じidempotency keyが既に存在する場合は、保存済みoperation IDを返し、新しいOperationを作成しない。
+同じidempotency keyが既に存在し、operation type、source、target Gameも一致する場合は、保存済みoperation IDを返し、新しいOperation IDを生成しない。同じkeyを異なるpayloadへ再利用した場合はconflictとして拒否する。
 
 成功後、Step Functionsを`operation_id`と同じexecution nameで開始し、execution ARNをOperationへ保存する。開始失敗時はOperationをFAILEDへ更新し、所有者条件付きでLockとCurrent Operationを解除する。Idempotency itemは失敗履歴との対応を維持するため削除せず、同じ要求の再送には既存の失敗結果を返すか、利用者が新しいrequest IDで再実行する。
 
 ### STATUS admission
 
-STATUS Operationは`Idempotency`と`Operations`だけを条件付き作成し、`Locks`と`SystemState.current_operation_id`を変更しない。定期reconcileはOperation admissionを使用しない。
+STATUS Operationはactive GameのConditionCheckとともに`Idempotency`と`Operations`だけを条件付き作成し、`Locks`と`SystemState.current_operation_id`を変更しない。定期reconcileはOperation admissionを使用しない。
+
+### Desired State CAS
+
+Desired mutationはcallerが読んだ`desired_revision=N`を条件に、同一更新で`N+1`へ進める。必要なoperationでは`current_operation_id`一致もtransaction conditionへ含める。Observed freshnessは引き続き`observed_at`で保護し、ReconcileはDesired属性を更新しない。将来の`rendered_revision`、`applied_revision`とは別のrevisionとして接続する。
+
+### Stale Operation recovery
+
+deadline超過またはlease expiryはstale candidateであり、それだけでFAILEDを意味しない。通常admissionは競合をblockする。明示recoveryはfresh Reconcile evidenceを必須とし、旧Operationのterminal化、owned Lock削除、owned `current_operation_id`解除を一transactionで条件付き実行する。
 
 ### CLI/Admin admission
 

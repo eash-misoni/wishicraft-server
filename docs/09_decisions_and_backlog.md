@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-28
+- **最終更新:** 2026-08-29
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -9,6 +9,15 @@
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-074 Phase 4 Lock ownership、Desired CAS、stale recovery契約
+
+- **状態:** Accepted（human review）
+- **日付:** 2026-08-29
+- **Lock identity:** `operation_id`をlogical ownerとし、各acquisitionで一意な`lease_id`を発行する。Lockはresource/system identity、`owner_operation_id`、`lease_id`、`lease_expires_at`を保持し、renew、release、protected side effect直前の確認はoperation/lease一致と未期限切れを要求する。同一Operationの二重executorや期限切れ後の古いexecutorをcurrent ownerとみなさない。
+- **Desired CAS:** Desiredは`desired_revision`、Observedは`observed_at`、Operation ownershipは`current_operation_id`で独立して保護する。Desired mutationはexpected revision NのCASでN+1へ進め、必要なoperationではCurrent Operation条件もtransactionへ含める。ReconcileはDesiredを上書きしない。将来の`rendered_revision`、`applied_revision`との接続を維持する。
+- **Stale recovery:** Lock expiryはOperation failureではない。deadline/lease超過はstale candidateとして新しい競合admissionをblockし、fresh Reconcile後の明示recoveryが旧Operationのterminal化とowned Current Operation/Lock cleanupを一transactionで行う。実状態を観測せず単純FAILED化せず、Phase 4 MVPの通常admissionへauto-recoveryを入れない。副作用前と安全と証明できる限定caseの将来自動化は別Decisionとする。
+- **Values/retention:** lease 900秒・renew 120秒はPhase 5/6 workflow実測前のProvisional値。Operation/Idempotency TTLはDeferredのままとする。
 
 ### D-073 Phase 4前はGame desired stateとGit管理runtime lockを分離する
 
@@ -711,24 +720,23 @@ Phase 0〜3は完了した。UID/GIDとownership compatibility、AL2023/AMI、Do
 |---|---|---|
 | conditional admission transaction | Accepted | D-026。Idempotency、Operation、Lock、Current Operationを一transactionで受付し、失敗時はworkflowを開始しない。 |
 | concurrent conflict policy | Accepted | 有効Lockまたはnon-null Current Operationなら競合operationを新規作成せず拒否する。同一idempotency keyは既存Operationを返す。 |
-| lock renewal semantics | Accepted | operation ID・lease version・未期限切れを条件に延長し、失敗は`LOCK_LOST`。副作用直前に所有権を再確認する。 |
+| lock renewal semantics | Accepted | D-074。owner operation ID・lease ID・未期限切れを条件に延長し、失敗は`LOCK_LOST`。副作用直前に所有権を再確認する。 |
 | lock lease/renew values | Provisional | dev設定はlease 900秒、renew 120秒。workflow実装・timeout解析後に短縮/延長を再評価する。 |
 | Operation retention / TTL | Deferred | 初期Phase 4ではTTLを有効化せず履歴を保持する。監査期間と運用query確定後にretentionを決める。 |
 | Idempotency retention / TTL | Deferred | 初期Phase 4ではTTLを有効化しない。外部再送期間・Operation retentionより短くしない。 |
-| Lock owner identity | Decision Needed | `operation_id`だけをowner identityとするか、別のadmission owner tokenを持つかをLocks repository実装前に決める。 |
-| SystemState desired-state CAS/version | Decision Needed | integer `version`/`desired_revision`のどちらを条件式の正本にし、Current Operation更新とどう一体化するかをSystemState write-side実装前に決める。Observed `observed_at` monotonicityとは分離する。 |
-| operation timeout / stale operation | Decision Needed | `timeout_at`超過後に誰が`TIMED_OUT`へ遷移させ、期限切れLock/Current Operationをどの所有者条件で回収するかをOperations repository/admission実装前に決める。TTL削除を回復機構にはしない。 |
+| Lock owner identity | Accepted | D-074。`operation_id`はlogical owner、acquisitionごとの`lease_id`はcurrent possession proof。 |
+| SystemState desired-state CAS/version | Accepted | D-074。Desired=`desired_revision`、Observed=`observed_at`、Operation=`current_operation_id`へ分離する。 |
+| operation timeout / stale operation | Accepted | D-074。通常admissionはblockし、fresh Reconcile後の明示recoveryでだけterminal化とowned cleanupを行う。 |
 
-#### Phase 4 Decision Neededの選択肢
+#### Phase 4 human reviewで解決した選択肢（履歴）
 
 1. **Lock owner identity（Locks repository実装前）**
-   - A: `operation_id`を唯一のowner/fencing identityにし、別`owner`属性を持たない。推奨。admission時点で確定し、LockとCurrent Operationの不変条件が単純になる。一方、同一Operation内のworkflow再実行単位は区別できない。
-   - B: admissionで別owner tokenを生成する。workflow attempt単位のfencingを強められるが、Idempotency/Operation/Lock/Step Functions間のtoken lifecycleと回復が複雑になる。
+   - 単一`operation_id`案と別attempt token案を比較した。human reviewはlogical ownerを`operation_id`、current possession proofをacquisition固有`lease_id`とする組合せを採用した。
 2. **SystemState desired-state CAS（SystemState write-side実装前）**
    - A: item全体の`version`を全更新で共有する。単純だが、ReconcileのObserved更新とDesired/Current Operation更新が不要に競合する。
    - B: `desired_revision`をDesired更新のCASに使い、Current Operationはnull/owner条件、Observedは既存`observed_at`条件として属性群ごとに分離する。推奨。D-030の部分更新境界を維持できるが、repository methodごとに条件式が異なる。
 3. **stale Operation回復（Operations repository/admission実装前）**
-   - A: admissionまたは明示recoveryが`timeout_at`、Lock expiry、Current Operation ownershipをtransactionally確認し、`TIMED_OUT`化と所有者条件付きcleanupを行う。推奨。Phase 4で安全な回復契約を作れ、定期schedulerは後回しにできるが、受付pathが複雑になる。
+   - A: admissionまたは明示recoveryで自動/手動回収する案。human reviewは通常admissionの自動回収を退け、fresh Reconcile後の明示recoveryだけを採用した。
    - B: Step FunctionsのCatch/Timeoutだけでterminal化する。通常failureは単純だが、execution開始前失敗や外部停止でstale stateが残り得る。
    - C: 定期sweeperを同時導入する。最終回復は早いが、Phase 4 scopeとAWS resourceを増やし、periodic reconcileの後続Phase境界を崩す。
 
@@ -740,7 +748,7 @@ Phase別に決める事項:
 
 | 項目 | 決定期限 |
 |---|---|
-| Lock owner identity、desired-state CAS、stale operation recovery | Phase 4 write-side repository実装前 |
+| Lock owner identity、desired-state CAS、stale operation recovery | D-074でAccepted（2026-08-29） |
 | RCON client/library / container-local command path | Phase 5 start workflow前 |
 | dev Discord Bot TokenのSecureString登録とApplication/command設定確認 | Phase 7開始前 |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |

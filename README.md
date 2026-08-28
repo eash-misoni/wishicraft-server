@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜3は完了しています。現在の次PhaseはPhase 4「Operationと排他制御」で、Games、Operations、Idempotency、Locksと条件付きadmissionを実装する段階です。Phase 4の実装前に、`docs/09_decisions_and_backlog.md`のDecision Neededを解消します。
+Phase 0〜3は完了しています。現在はPhase 4「Operationと排他制御」を実装中で、Games、Operations、Idempotency、Locks、条件付きadmission、Desired CASのrepository契約を構築する段階です。Phase 4開始前のLock owner、Desired revision、stale recovery判断はD-074でAcceptedです。
 
 devは次の3層architectureです。
 
@@ -40,7 +40,7 @@ uv run ruff format --check .
 uv run mypy src infrastructure tests
 npx --no-install cdk synth MinecraftStack-dev --context stage=dev --context phase=1 --context deployment=phase1
 npx --no-install cdk synth MinecraftTargetStack-dev --context stage=dev --context deployment=target
-npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=3 --context deployment=control-plane
+npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=4 --context deployment=control-plane
 ```
 
 prod synthとdeployは初期リリース直前まで行いません。通常のrepository validationはAWS credentialやsecretを使用しません。

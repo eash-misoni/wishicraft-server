@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-28
+- **最終更新:** 2026-08-29
 
 ## 1. 開発原則
 
@@ -20,7 +20,7 @@
 | 1 | Minecraft EC2手動起動 | EC2、EBS、Route 53、SSM、systemd、バニラ1個 |
 | 2 | itzg Host Runtime境界 | migration contract、mapping/apply、probe/start/stop command path |
 | 3 | 実測status | Reconcile Lambda、SystemState |
-| 4 | **Next / Not Started:** Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
+| 4 | **In Progress:** Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
 | 5 | 安全なstart | Start Step Functions |
 | 6 | 安全なstop | Stop Step Functions |
 | 7 | Discord MVP | `/mc status/start/stop` |
@@ -428,6 +428,10 @@ Phase 3 closeout後のrepository-only consistency fixとして、probe v1.3.0で
 
 ## 7. Phase 4 — Operationと排他制御
 
+**状態:** In Progress（2026-08-29 repository implementation開始、AWS未deploy）
+
+D-074でLock logical owner / lease possession、Desired revision CAS、stale recoveryをAcceptedとした。repository実装はGame条件付き登録、4 table construct、versioned admission Lambda、idempotent admission transaction、STATUS short path、lease renew/release/ownership check、Operation step/terminal更新、fresh Reconcileを要求する明示stale recovery、Desired CASを含む。AWS deploy、初期Game実登録、実DynamoDB transaction integrationは未実施であり、repository validation/CI完了後も別の外部操作承認境界とする。
+
 ### 目的
 
 start/stopを安全に実行するための履歴とロックを作る。
@@ -458,8 +462,9 @@ start/stopを安全に実行するための履歴とロックを作る。
 - STATUS OperationはLockとCurrent Operationを使用しない。
 - Idempotency、Operation、Lock、Current OperationをTransactionで一体として受付できる。
 - 有効ロックがある場合にOperationやworkflowを新規作成せず競合を拒否する。
-- 期限切れロックを条件付きで引き継げる。
+- 期限切れロックを通常admissionが自動takeoverせず、fresh Reconcileを伴う明示recoveryまで競合をblockする。
 - 他operationのロックを解放できない。
+- 同一Operationの古いexecutorは異なる`lease_id`のleaseをrenew、release、または副作用用に使用できない。
 - TTL削除を待たずに正しく判断できる。
 - 初回GameがGames tableへ登録されている。
 

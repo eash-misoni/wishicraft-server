@@ -68,6 +68,19 @@ class SystemState:
         }
 
 
+@dataclass(frozen=True)
+class DesiredStateSnapshot:
+    desired_state: DesiredState
+    desired_game_id: str | None
+    desired_revision: int
+
+    def __post_init__(self) -> None:
+        if self.desired_revision < 0:
+            raise ValueError("desired revision must be non-negative")
+        if self.desired_state is DesiredState.RUNNING and self.desired_game_id is None:
+            raise ValueError("RUNNING desired state requires a game")
+
+
 class DynamoApi(Protocol):
     def get_item(self, **kwargs: object) -> object: ...
     def update_item(self, **kwargs: object) -> object: ...
@@ -93,6 +106,74 @@ class SystemStateRepository:
         if not isinstance(raw, dict) or not isinstance(raw.get("S"), str):
             raise ValueError("malformed desired state")
         return DesiredState(raw["S"])
+
+    def desired_snapshot(self) -> DesiredStateSnapshot:
+        response = self._api.get_item(
+            TableName=self._table,
+            Key={"system_id": {"S": self._system_id}},
+            ProjectionExpression="desired_state, desired_game_id, desired_revision",
+            ConsistentRead=True,
+        )
+        if not isinstance(response, dict) or response.get("Item") is None:
+            return DesiredStateSnapshot(DesiredState.STOPPED, None, 0)
+        item = response.get("Item")
+        if not isinstance(item, dict):
+            raise ValueError("malformed SystemState item")
+        desired_state = _read_string(item, "desired_state")
+        desired_game_id = _read_nullable_string(item, "desired_game_id")
+        desired_revision = _read_non_negative_integer(item, "desired_revision", default=0)
+        return DesiredStateSnapshot(DesiredState(desired_state), desired_game_id, desired_revision)
+
+    def update_desired(
+        self,
+        *,
+        desired_state: DesiredState,
+        desired_game_id: str | None,
+        expected_revision: int,
+        operation_id: str,
+        updated_at: datetime,
+        require_current_operation: bool = True,
+    ) -> int:
+        snapshot = DesiredStateSnapshot(desired_state, desired_game_id, expected_revision + 1)
+        if not operation_id:
+            raise ValueError("operation identity must be non-empty")
+        updated_at_value = utc_timestamp(updated_at)
+        names = {
+            "#desired_state": "desired_state",
+            "#desired_game_id": "desired_game_id",
+            "#desired_revision": "desired_revision",
+            "#requested_operation_id": "requested_operation_id",
+            "#desired_updated_at": "desired_updated_at",
+        }
+        values: dict[str, object] = {
+            ":desired_state": _to_attribute(snapshot.desired_state.value),
+            ":desired_game_id": _to_attribute(snapshot.desired_game_id),
+            ":expected_revision": _to_attribute(expected_revision),
+            ":initial_revision": _to_attribute(0),
+            ":next_revision": _to_attribute(snapshot.desired_revision),
+            ":operation_id": _to_attribute(operation_id),
+            ":updated_at": _to_attribute(updated_at_value),
+        }
+        revision_condition = (
+            "((attribute_not_exists(#desired_revision) AND :expected_revision = :initial_revision) "
+            "OR #desired_revision = :expected_revision)"
+        )
+        if require_current_operation:
+            names["#current_operation_id"] = "current_operation_id"
+            revision_condition += " AND #current_operation_id = :operation_id"
+        self._api.update_item(
+            TableName=self._table,
+            Key={"system_id": {"S": self._system_id}},
+            UpdateExpression=(
+                "SET #desired_state = :desired_state, #desired_game_id = :desired_game_id, "
+                "#desired_revision = :next_revision, "
+                "#requested_operation_id = :operation_id, #desired_updated_at = :updated_at"
+            ),
+            ConditionExpression=revision_condition,
+            ExpressionAttributeNames=names,
+            ExpressionAttributeValues=values,
+        )
+        return snapshot.desired_revision
 
     def save(self, state: SystemState) -> None:
         if state.system_id != self._system_id:
@@ -163,3 +244,40 @@ def _validate_safe_value(value: object) -> None:
             _validate_safe_value(item)
         return
     raise ValueError("unsupported SystemState observation value")
+
+
+def _read_string(item: dict[str, object], name: str) -> str:
+    raw = item.get(name)
+    if not isinstance(raw, dict):
+        raise ValueError(f"malformed {name}")
+    value = raw.get("S")
+    if not isinstance(value, str):
+        raise ValueError(f"malformed {name}")
+    return value
+
+
+def _read_nullable_string(item: dict[str, object], name: str) -> str | None:
+    raw = item.get(name)
+    if raw is None or raw == {"NULL": True}:
+        return None
+    if not isinstance(raw, dict):
+        raise ValueError(f"malformed {name}")
+    value = raw.get("S")
+    if not isinstance(value, str):
+        raise ValueError(f"malformed {name}")
+    return value
+
+
+def _read_non_negative_integer(item: dict[str, object], name: str, *, default: int) -> int:
+    raw = item.get(name)
+    if raw is None:
+        return default
+    if not isinstance(raw, dict) or not isinstance(raw.get("N"), str):
+        raise ValueError(f"malformed {name}")
+    try:
+        value = int(raw["N"])
+    except ValueError as error:
+        raise ValueError(f"malformed {name}") from error
+    if value < 0:
+        raise ValueError(f"malformed {name}")
+    return value

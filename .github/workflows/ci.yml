@@ -33,7 +33,7 @@ jobs:
           --context stage=dev --context deployment=target
       - run: >-
           npx --no-install cdk synth WishicraftControlPlaneStack-dev
-          --context stage=dev --context phase=3 --context deployment=control-plane
+          --context stage=dev --context phase=4 --context deployment=control-plane
       - run: >-
           shellcheck infrastructure/host_runtime/docker_compose_install.sh
           infrastructure/host_runtime/target_host_validation.sh

@@ -1,7 +1,7 @@
 # 03. Architecture
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-28
+- **最終更新:** 2026-08-29
 
 ## 1. アーキテクチャ方針
 
@@ -313,6 +313,10 @@ LambdaからEC2へ直接TCP接続せず、SSMを管理経路にすることでVP
 Discord Command Lambda、管理CLI、integration testは同じOperation admission serviceを使用する。
 
 競合operationでは、idempotency key予約、Operation作成、Lock取得、`current_operation_id`設定をDynamoDB Transactionで一体として行う。Phase 5、6のCLI確認でもState Machineを直接開始して受付処理を迂回しない。
+
+Lockのlogical ownerはOperation ID、現在のacquisition possession proofは一意なlease IDである。renew、release、protected side effect前の確認は両IDと未期限切れを要求する。期限切れLockはstale Operation candidateとして通常admissionをblockし、fresh Reconcile後の明示recovery以外ではtakeoverしない。
+
+Desired mutationは`desired_revision` CAS、Observed更新は`observed_at` freshness、Operation ownershipは`current_operation_id`条件で独立して保護する。
 
 同じidempotency keyが再送された場合は、既存operation IDを返し、新しいOperationやworkflowを作成しない。
 

@@ -54,16 +54,29 @@ def _action_list(value: object) -> list[str]:
 
 
 def test_control_plane_stack_is_independent_and_read_mostly() -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=3, deployment="control-plane")
+    app = build_app(REPOSITORY_ROOT, "dev", phase=4, deployment="control-plane")
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
 
-    template.resource_count_is("AWS::DynamoDB::Table", 1)
-    template.resource_count_is("AWS::Lambda::Function", 1)
-    template.resource_count_is("AWS::Logs::LogGroup", 1)
+    template.resource_count_is("AWS::DynamoDB::Table", 5)
+    template.resource_count_is("AWS::Lambda::Function", 2)
+    template.resource_count_is("AWS::Logs::LogGroup", 2)
     assert template.find_resources("AWS::EC2::Instance") == {}
     assert template.find_resources("AWS::EC2::VolumeAttachment") == {}
-    table = next(iter(template.find_resources("AWS::DynamoDB::Table").values()))["Properties"]
+    tables = template.find_resources("AWS::DynamoDB::Table")
+    table_names = {table["Properties"]["TableName"] for table in tables.values()}
+    assert table_names == {
+        "wc-dev-system-state",
+        "wc-dev-games",
+        "wc-dev-operations",
+        "wc-dev-idempotency",
+        "wc-dev-locks",
+    }
+    table = next(
+        value["Properties"]
+        for value in tables.values()
+        if value["Properties"]["TableName"] == "wc-dev-system-state"
+    )
     assert table["BillingMode"] == "PAY_PER_REQUEST"
     assert table["KeySchema"] == [{"AttributeName": "system_id", "KeyType": "HASH"}]
     assert "StreamSpecification" not in table
@@ -71,7 +84,11 @@ def test_control_plane_stack_is_independent_and_read_mostly() -> None:
     assert "GlobalSecondaryIndexes" not in table
 
     functions = template.find_resources("AWS::Lambda::Function")
-    function = next(iter(functions.values()))["Properties"]
+    function = next(
+        value["Properties"]
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-reconcile"
+    )
     environment = function["Environment"]["Variables"]
     assert "INSTANCE_ID" not in environment
     assert environment["GAME_ID"] == "game-vanilla-main"
@@ -91,6 +108,7 @@ def test_control_plane_stack_is_independent_and_read_mostly() -> None:
         "route53:ListResourceRecordSets",
         "dynamodb:GetItem",
         "dynamodb:UpdateItem",
+        "dynamodb:TransactWriteItems",
     } <= actions
     assert not actions & {
         "ec2:StartInstances",
@@ -98,6 +116,35 @@ def test_control_plane_stack_is_independent_and_read_mostly() -> None:
         "ec2:TerminateInstances",
         "route53:ChangeResourceRecordSets",
         "ssm:GetParameter",
+    }
+    assert template.find_resources("AWS::StepFunctions::StateMachine") == {}
+
+    admission = next(
+        value["Properties"]
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-admission"
+    )
+    admission_environment = admission["Environment"]["Variables"]
+    assert admission_environment["SYSTEM_ID"] == "wishicraft-main"
+    assert admission_environment["GAME_ID"] == "game-vanilla-main"
+    assert admission_environment["GLOBAL_LOCK_NAME"] == "minecraft-control"
+    assert admission_environment["LOCK_LEASE_SECONDS"] == "900"
+    assert "INSTANCE_ID" not in admission_environment
+    admission_role = admission["Role"]["Fn::GetAtt"][0]
+    admission_policies = [
+        policy["Properties"]["PolicyDocument"]
+        for policy in template.find_resources("AWS::IAM::Policy").values()
+        if {"Ref": admission_role} in policy["Properties"]["Roles"]
+    ]
+    admission_actions = {
+        action
+        for policy in admission_policies
+        for statement in policy["Statement"]
+        for action in _action_list(statement["Action"])
+    }
+    assert admission_actions == {
+        "dynamodb:GetItem",
+        "dynamodb:TransactWriteItems",
     }
     statements = [
         statement

@@ -74,6 +74,10 @@ class ProjectConfig:
         return _require_string(self.values, "initial_game.game_id")
 
     @property
+    def initial_game_display_name(self) -> str:
+        return _require_string(self.values, "initial_game.display_name")
+
+    @property
     def initial_minecraft_profile_name(self) -> str:
         profiles = _lookup_path(self.values, "initial_game.minecraft_profile_names")
         assert isinstance(profiles, list) and len(profiles) == 1 and isinstance(profiles[0], str)
@@ -154,6 +158,33 @@ class StageConfig:
     @property
     def ssm_probe_timeout_seconds(self) -> int:
         return _require_positive_int(self.values, "timeouts_seconds.ssm_probe")
+
+    @property
+    def global_lock_name(self) -> str:
+        return _require_string(self.values, "operation.global_lock_name")
+
+    @property
+    def lock_lease_seconds(self) -> int:
+        return _require_positive_int(self.values, "operation.lock_lease_seconds")
+
+    @property
+    def lock_renew_interval_seconds(self) -> int:
+        return _require_positive_int(self.values, "operation.lock_renew_interval_seconds")
+
+    def operation_timeout_seconds(self, operation_type: str) -> int:
+        key = {
+            "STATUS": "status",
+            "START": "start_workflow",
+            "STOP": "stop_workflow",
+            "BACKUP": "backup",
+        }.get(operation_type)
+        if key is None:
+            raise ConfigValidationError([f"unsupported Phase 4 operation type: {operation_type}"])
+        return _require_positive_int(self.values, f"timeouts_seconds.{key}")
+
+    @property
+    def idle_shutdown_minutes(self) -> int:
+        return _require_positive_int(self.values, "runtime.idle_shutdown_minutes")
 
     @property
     def instance_type(self) -> str:

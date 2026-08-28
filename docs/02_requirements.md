@@ -1,7 +1,7 @@
 # 02. Requirements
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-22
+- **最終更新:** 2026-08-29
 
 ## 1. 要件の読み方
 
@@ -256,17 +256,17 @@ start、stop、status、backup等はoperationとして記録する。ただし�
 
 ### OPR-003 ロックリース `MUST / MVP`
 
-ロックには`expires_at`を持たせる。長時間operationは待機ループ中に定期的にリースを延長する。
+ロックには`lease_expires_at`を持たせる。長時間operationは待機ループ中に定期的にリースを延長する。`operation_id`はlogical owner、acquisitionごとに一意な`lease_id`は現在のlease possession proofとする。
 
 EC2 start/stop、SSM command、Desired State更新等の副作用直前にロック所有権を確認し、所有権を失っている場合は`LOCK_LOST`として新しい副作用を実行しない。
 
 ### OPR-004 TTL非依存 `MUST / MVP`
 
-DynamoDB TTLによる物理削除をロック解放条件に使わない。取得時に`expires_at`を評価する。
+DynamoDB TTLによる物理削除をロック解放条件に使わない。所有権確認時に`lease_expires_at`を評価する。Phase 4 MVPの通常admissionは期限切れitemも自動takeoverせず、明示stale recoveryまで競合をblockする。
 
 ### OPR-005 所有者付き解放 `MUST / MVP`
 
-ロック解放は、保存された`operation_id`が解放者のoperationと一致する場合だけ行う。
+ロック解放は、保存された`owner_operation_id`と`lease_id`が解放者の値と一致し、leaseが未期限切れの場合だけ行う。
 
 
 ### OPR-006 Operation受付の原子性 `MUST / MVP`

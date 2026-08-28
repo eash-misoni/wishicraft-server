@@ -1,7 +1,7 @@
 # 04. Domain and State Model
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-28
+- **最終更新:** 2026-08-29
 
 ## 1. 設計原則
 
@@ -422,7 +422,7 @@ READYまたは起動途中として扱えるGameは同時に1つだけ。
 
 ### INV-002 Operation所有
 
-`SystemState.current_operation_id`とグローバルLockの`operation_id`は、競合operation中は一致する。
+`SystemState.current_operation_id`とグローバルLockの`owner_operation_id`は、競合operation中は一致する。実行者はさらにacquisition固有の`lease_id`を提示する。
 
 ### INV-003 Active Game一致
 
@@ -472,30 +472,30 @@ Desired State更新後にoperationが失敗しても、failure cleanupがDesired
 
 ```text
 lock_name = minecraft-control
-operation_id
-owner
+resource_id
+owner_operation_id
+lease_id
 acquired_at
-expires_at
-lease_version
+lease_expires_at
+updated_at
 ```
 
 ### 取得条件
 
-次のいずれかを満たす場合だけ取得できる。
+通常admissionではLock itemが存在しない場合だけ取得できる。
 
 ```text
 attribute_not_exists(lock_name)
-OR expires_at < now
 ```
 
-更新時に新しい`operation_id`と`lease_version`を保存する。
+acquisitionごとに新しい`lease_id`を発行する。期限切れitemの存在はstale Operation candidateを示し得るため、通常admissionは自動takeoverせず競合をblockする。
 
 ### 延長条件
 
 ```text
-operation_id == caller_operation_id
-AND lease_version == expected_version
-AND expires_at >= now
+owner_operation_id == caller_operation_id
+AND lease_id == caller_lease_id
+AND lease_expires_at >= now
 ```
 
 Wait/pollループ中は延長間隔がリース期限より十分短くなるようにする。副作用直前にも所有権を確認する。条件付き延長に失敗した場合は`LOCK_LOST`とする。
@@ -503,12 +503,18 @@ Wait/pollループ中は延長間隔がリース期限より十分短くなる�
 ### 解放条件
 
 ```text
-operation_id == caller_operation_id
+owner_operation_id == caller_operation_id
+AND lease_id == caller_lease_id
+AND lease_expires_at >= now
 ```
 
 ### TTL
 
-TTL属性は古いロック項目の後処理にだけ使用できる。ロックの有効性判定や解放完了判定には使用しない。
+Phase 4 MVPではLock TTLを有効化しない。将来追加するTTL属性は古いitemの物理削除用に限り、leaseの有効性や解放完了判定には使用しない。
+
+### Stale Operation recovery
+
+Lock expiryとOperation failureは同義ではない。deadline超過またはlease expiryを検出した通常admissionは新しい競合operationを拒否する。fresh Reconcile後の明示recoveryだけが、観測結果を根拠に旧Operationをterminalへ条件付き遷移し、`owner_operation_id`、`lease_id`、`current_operation_id`の一致を同一transactionで確認してownershipを整理できる。実状態を観測せず単純にFAILEDへ変えない。
 
 
 ### Operation Admission
@@ -518,8 +524,8 @@ TTL属性は古いロック項目の後処理にだけ使用できる。ロッ�
 ```text
 Put Idempotency if attribute_not_exists(idempotency_key)
 Put Operation if attribute_not_exists(operation_id)
-Put/Update Lock if attribute_not_exists(lock_name) OR expires_at < now
-Update SystemState if current_operation_id is null
+Put Lock if attribute_not_exists(lock_name)
+Update SystemState if current_operation_id is absent or DynamoDB NULL
 ```
 
 Transactionが失敗した場合、Operationを作成せず、workflowを開始しない。受付成功後にStep Functions開始が失敗した場合は、Operationを失敗へ更新し、所有者条件付きでLockとCurrent Operationを解除する。
