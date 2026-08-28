@@ -321,6 +321,9 @@ def test_docker_integration_contract_is_fixed_and_synthetic() -> None:
     assert "SKIP_CHOWN_DATA=true" in script
     assert "SETUP_ONLY=true" in script
     assert "ENABLE_RCON=false" in script
+    assert "--entrypoint mc-monitor" in script
+    assert 'mc_monitor_help_rc" == 0 || "$mc_monitor_help_rc" == 2' in script
+    assert "PASS:mc-monitor-fixed-status-contract" in script
     assert "/srv/minecraft" not in script
     assert "RCON_PASSWORD" not in script
     assert "chown -R" not in script

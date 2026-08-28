@@ -61,13 +61,21 @@ inspect_arch=$(docker image inspect --format '{{.Architecture}}' "$IMAGE")
 mc_monitor_version=$(docker run --rm --platform linux/amd64 --entrypoint mc-monitor "$IMAGE" version) || \
   fail 'fixed image does not provide mc-monitor'
 [[ -n "$mc_monitor_version" ]] || fail 'mc-monitor version output was empty'
-mc_monitor_help=$(docker run --rm --platform linux/amd64 --entrypoint mc-monitor "$IMAGE" status --help 2>&1) || \
-  fail 'mc-monitor status help failed'
+set +e
+trap - ERR
+mc_monitor_help=$(docker run --rm --platform linux/amd64 --entrypoint mc-monitor "$IMAGE" status --help 2>&1)
+mc_monitor_help_rc=$?
+set -e
+trap 'unexpected_error "$LINENO"' ERR
+[[ "$mc_monitor_help_rc" == 0 || "$mc_monitor_help_rc" == 2 ]] || {
+  printf '%s\n' "$mc_monitor_help" >&2
+  fail "mc-monitor status help returned unexpected status $mc_monitor_help_rc"
+}
 for expected_flag in -json -host -port -timeout; do
   grep -F -- "$expected_flag" <<<"$mc_monitor_help" >/dev/null || \
     fail "mc-monitor status does not provide $expected_flag"
 done
-printf 'OBS:McMonitorVersion=%s\n' "$mc_monitor_version"
+printf 'OBS:McMonitorVersion=%s HelpStatus=%s\n' "$mc_monitor_version" "$mc_monitor_help_rc"
 
 mkdir -p "$data_dir/preexisting/nested"
 printf '%s\n' 'difficulty=easy' 'enable-rcon=true' > "$data_dir/server.properties"
