@@ -355,7 +355,7 @@ public ingress、旧host退役は後続単位とする。
 
 ## 6. Phase 3 — 実測status
 
-- **状態:** In Progress（status observationはdev実測済み、Control Plane persistenceはrepository validated / AWS未deploy・未integration）
+- **状態:** Completed（2026-08-28）
 
 ### 目的
 
@@ -391,7 +391,15 @@ Host Runtime observation sliceはSSM pagination、固定read-only probe、Run Co
 
 2026-08-28にrepository-onlyのactive game observation sliceを完了した。`config/project.yaml`のinitial Game IDをControl Plane期待値とし、Host Runtime rendererがcontainerへ明示するGame ID/data source metadataと実`/data` bindをread-only probe v1.2.0で照合する。期待/観測一致、active game mismatch/unknown、runtime bind mismatchをstatusの独立discrepancyとして導出し、protocol runtime READYをgame mismatchでfalseへ書き換えない。
 
-今回までに、Minecraft running observation、protocol-aware status、runtime READY true、running→not-ready→ready→stopped遷移、protocol failureではREADYにしない契約、active game observation、active game discrepancyをdev実測まで完了した。加えてpublic/private IPv4、Route 53、endpoint discrepancy、Reconcile domain service、current SystemState repository、DynamoDB/Lambda/独立Control Plane stackをrepositoryで実装・検証した。Control Plane stackのcredential付きdiff/deploy、stopped Target Reconcile、実DynamoDB persistenceは未実施であり、Phase 3全体は未完了とする。
+Minecraft running observation、protocol-aware status、runtime READY true、running→not-ready→ready→stopped遷移、protocol failureではREADYにしない契約、active game observation、active game discrepancyをdev実測まで完了した。加えてpublic/private IPv4、Route 53、endpoint discrepancy、Reconcile domain service、current SystemState repository、DynamoDB/Lambda/独立Control Plane stackをrepositoryで実装・検証した。repository実装時点ではAWS deploy/integrationを未完了として分離し、次のcloseout実測後にだけPhase 3を完了とした。
+
+2026-08-28にcredential付きdiffを3 stack別々に実施した。Phase 1はAMI parameter再解決によるEC2 replacement、履歴上のUserData、移行済み旧VolumeAttachmentの既知Frozen差分があるためdeployせず、Targetは差分0だった。Control PlaneはDynamoDB、LogGroup、IAM Role/Policy、Lambdaの新規resourceだけで、read-mostly IAMと特定SystemState table writeに限定されていたため、`WishicraftControlPlaneStack-dev`だけをdeployして`CREATE_COMPLETE`を確認した。
+
+stopped Targetへcanonical Reconcile inputを2回実行した。両方でEC2 stopped、public IPv4 absent、DNS absent、SSM/protocol/active game not-applicable、Host Runtime not-running、runtime ready false、discrepancy/errorなし、health HEALTHYとなった。`observed_at`は`2026-08-28T10:17:07.423850Z`から`2026-08-28T10:17:51.361257Z`へ前進し、DynamoDBは`system_id=wishicraft-main`のcurrent item一件だけを更新した。前後のTarget向けSSM command countは43、latest metadataも同一で、このReconcileによるSendCommandは0件だった。
+
+古いobserved_atの実AWS書込み試験は、production Lambdaがsynthetic state/timeを受け付けず、schema外AWS CLI writeも行わない境界を優先して実施しなかった。repository adapterのolder/equal conditional rejection testと、previous READYからfresh UNKNOWN/ready falseへ更新するtestをcloseout時に再実行して成功した。Lambda logはruntimeのINIT/START/END/REPORTだけで、credential、secret、environment dump、probe/raw Minecraft contentを含まなかった。
+
+終了時はPhase 1/Target EC2 stopped、data EBSはTargetへattachedかつDeleteOnTermination false、snapshot completed、Target ingress 0、DNS absent、Phase 1/Target stackの更新時刻不変である。STA-001〜006のPhase 3 status/reconcile成果物と実測条件を満たしたためPhase 3を完了とする。Operation/Lock、start/stop workflow、Discord、periodic/event-driven reconcileは後続Phaseの範囲である。
 
 ### 確認ケース
 
@@ -831,4 +839,4 @@ AdmitOperation
 
 repository実装としてpublic/private IPv4、Route 53 A record、endpoint discrepancy、Reconcile domain service、current SystemState conditional repository、on-demand DynamoDB、薄いReconcile Lambda、独立Control Plane stackを追加した。stopped TargetではSSM/Run Command/Host Runtimeを短絡し、public IPv4 absent + DNS absentを正常化する。focused/full test、Ruff、mypy、shell syntaxとPhase 1/Target/Control Planeの個別synthでrepository validationを行う。
 
-repository validationだけではAWS完了としない。credential付きdiff、Control Plane stackだけのdeploy、stopped Target observationのcurrent SystemState保存は未実施として別作業で確認・記録する。periodic reconcile、start/stop workflow、Discord/API、operation admission/lock、backupは後続Phaseのままとする。
+repository validationだけではAWS完了としない。上記のcredential付きdiff、Control Plane-only deploy、stopped Target observationのcurrent SystemState保存を実測してPhase 3をcloseoutした。periodic reconcile、start/stop workflow、Discord/API、operation admission/lock、backupは後続Phaseのままとする。

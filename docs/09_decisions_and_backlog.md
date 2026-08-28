@@ -20,6 +20,8 @@
 - **Persistence:** `system_id`一件のcurrent SystemStateをUpdateItemし、fixed-width UTC `observed_at`のstrictly-newer conditional writeで古い結果と同一timestampを拒否する。観測failureもfresh UNKNOWN/ready false/error classificationとして保存し、過去READYを残さない。DynamoDB failureは成功へ変換しない。
 - **IAM:** EC2/SSM/Route 53 read、固定probe実行、特定table GetItem/UpdateItem、Lambda logだけを許可し、lifecycle/EBS/SG/DNS/secret/IAM mutationを禁止する。
 - **Scope:** periodic reconcile、start/stop workflow、DynamoDB history/Streams/TTL/GSI、Discord/API、DNS writeは含めない。
+- **Dev deployment:** 2026-08-28にTarget diff 0、Control Planeが新規DynamoDB/LogGroup/IAM/Lambdaだけであることを確認し、`WishicraftControlPlaneStack-dev`だけをdeployした。Phase 1のAMI/UserData/旧attachment既知Frozen差分はdeployしていない。
+- **Dev integration:** stopped Targetを2回Reconcileし、public IPv4/DNS absent、SSM/protocol/active game not-applicable、Host Runtime not-running、runtime ready false、discrepancy/errorなし、health HEALTHYをcurrent item一件へ保存した。2回目は新しい`observed_at`で同じitemを更新し、Target向けSSM command metadataは前後不変でSendCommand 0だった。strictly-newer条件はrepositoryのolder/equal rejection testで検証し、synthetic production observationやschema外AWS CLI writeは行っていない。
 
 ### D-071 Phase 3 active gameはHost Runtime明示metadataと実bindから観測する
 

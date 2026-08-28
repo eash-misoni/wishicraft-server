@@ -459,3 +459,5 @@ Phase 3ではPhase 1/Targetから独立した`WishicraftControlPlaneStack-<stage
 Reconcile domain serviceはdesired context取得、Target解決、EC2/SSM/固定Host Runtime probeの段階観測、public IPv4、Route 53 A record観測、discrepancy/health導出、条件付き永続化を統括する。Lambda handlerはversioned input検証とAWS adapter wiringだけを担当する。Phase 1/Target stack、EC2 lifecycle、EBS、SG、DNS writeはこのstackの責務に含めない。
 
 repositoryでのconstruct実装・test・synthとAWS上のdeploy/integrationは別のdelivery stateとして記録する。repository validatedだけでControl Plane stack、DynamoDB、LambdaがAWSへ作成済みとは扱わない。
+
+2026-08-28にdevのcredential付きdiffでTarget stack差分0、Control PlaneはDynamoDB、LogGroup、IAM Role/Policy、Lambdaの新規resourceだけであることを確認し、`WishicraftControlPlaneStack-dev`だけをdeployした。Phase 1にはAMI parameter再解決、履歴上のUserData、移行済み旧VolumeAttachmentの既知Frozen差分があるためdeployせず、Control Planeからの参照も追加していない。stopped TargetへのReconcileを2回実行し、段階観測のshort-circuit、current SystemStateの単調更新、既存stack/runtime/storage/network境界の不変を確認した。
