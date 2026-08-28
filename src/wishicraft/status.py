@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ipaddress
 import re
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -43,6 +44,12 @@ class SsmState(StrEnum):
     OFFLINE = "offline"
     CONNECTION_LOST = "connection-lost"
     NOT_APPLICABLE = "not-applicable"
+    UNKNOWN = "unknown"
+
+
+class PublicIpv4State(StrEnum):
+    ASSIGNED = "assigned"
+    ABSENT = "absent"
     UNKNOWN = "unknown"
 
 
@@ -102,6 +109,10 @@ class TargetStatus:
 
     instance_id: str
     ec2_state: Ec2State
+    public_ipv4_state: PublicIpv4State
+    public_ipv4: str | None
+    private_ipv4: str | None
+    network_observation_source: str
     ssm_state: SsmState
     mount_state: MountState
     docker_state: DockerState
@@ -127,6 +138,10 @@ class TargetStatus:
             "schema_version": 1,
             "instance_id": self.instance_id,
             "ec2_state": self.ec2_state.value,
+            "public_ipv4_state": self.public_ipv4_state.value,
+            "public_ipv4": self.public_ipv4,
+            "private_ipv4": self.private_ipv4,
+            "network_observation_source": self.network_observation_source,
             "ssm_state": self.ssm_state.value,
             "mount_state": self.mount_state.value,
             "docker_state": self.docker_state.value,
@@ -169,14 +184,21 @@ class TargetStatusObserver:
         """Return UNKNOWN on API/schema failure; never infer STOPPED."""
         try:
             response = self._ec2.describe_instances(InstanceIds=[self._instance_id])
-            ec2_state = _parse_ec2_state(response, self._instance_id)
+            ec2_state, public_state, public_ip, private_ip = _parse_ec2_observation(
+                response, self._instance_id
+            )
         except Exception:  # noqa: BLE001 - AWS boundary is normalized without exposing details.
             ec2_state = Ec2State.UNKNOWN
+            public_state, public_ip, private_ip = PublicIpv4State.UNKNOWN, None, None
 
         if ec2_state in {Ec2State.STOPPED, Ec2State.TERMINATED}:
             return TargetStatus(
                 instance_id=self._instance_id,
                 ec2_state=ec2_state,
+                public_ipv4_state=public_state,
+                public_ipv4=public_ip,
+                private_ipv4=private_ip,
+                network_observation_source="ec2-describe-instances",
                 ssm_state=SsmState.NOT_APPLICABLE,
                 mount_state=MountState.UNKNOWN,
                 docker_state=DockerState.UNKNOWN,
@@ -208,6 +230,9 @@ class TargetStatusObserver:
                 return _status_from_probe(
                     instance_id=self._instance_id,
                     ec2_state=ec2_state,
+                    public_ipv4_state=public_state,
+                    public_ipv4=public_ip,
+                    private_ipv4=private_ip,
                     ssm_state=ssm_state,
                     probe=probe,
                     expected_game_id=self._expected_game_id,
@@ -219,6 +244,10 @@ class TargetStatusObserver:
         return TargetStatus(
             instance_id=self._instance_id,
             ec2_state=ec2_state,
+            public_ipv4_state=public_state,
+            public_ipv4=public_ip,
+            private_ipv4=private_ip,
+            network_observation_source="ec2-describe-instances",
             ssm_state=ssm_state,
             mount_state=MountState.UNKNOWN,
             docker_state=DockerState.UNKNOWN,
@@ -235,14 +264,16 @@ class TargetStatusObserver:
         )
 
 
-def _parse_ec2_state(response: object, expected_instance_id: str) -> Ec2State:
+def _parse_ec2_observation(
+    response: object, expected_instance_id: str
+) -> tuple[Ec2State, PublicIpv4State, str | None, str | None]:
     if not isinstance(response, dict):
-        return Ec2State.UNKNOWN
+        return Ec2State.UNKNOWN, PublicIpv4State.UNKNOWN, None, None
     reservations = response.get("Reservations")
     if not isinstance(reservations, list):
-        return Ec2State.UNKNOWN
+        return Ec2State.UNKNOWN, PublicIpv4State.UNKNOWN, None, None
 
-    matched_states: list[str] = []
+    matched: list[tuple[str, object, object]] = []
     for raw_reservation in reservations:
         if not isinstance(raw_reservation, dict):
             continue
@@ -258,14 +289,40 @@ def _parse_ec2_state(response: object, expected_instance_id: str) -> Ec2State:
                 continue
             state = instance.get("State")
             if isinstance(state, dict) and isinstance(state.get("Name"), str):
-                matched_states.append(state["Name"])
+                matched.append(
+                    (
+                        state["Name"],
+                        instance.get("PublicIpAddress"),
+                        instance.get("PrivateIpAddress"),
+                    )
+                )
 
-    if len(matched_states) != 1:
-        return Ec2State.UNKNOWN
+    if len(matched) != 1:
+        return Ec2State.UNKNOWN, PublicIpv4State.UNKNOWN, None, None
+    state_name, raw_public, raw_private = matched[0]
     try:
-        return Ec2State(matched_states[0])
+        state = Ec2State(state_name)
     except ValueError:
-        return Ec2State.UNKNOWN
+        return Ec2State.UNKNOWN, PublicIpv4State.UNKNOWN, None, None
+    private_ip = _ipv4_or_none(raw_private)
+    if raw_private is not None and private_ip is None:
+        return state, PublicIpv4State.UNKNOWN, None, None
+    if raw_public is None:
+        return state, PublicIpv4State.ABSENT, None, private_ip
+    public_ip = _ipv4_or_none(raw_public)
+    if public_ip is not None:
+        return state, PublicIpv4State.ASSIGNED, public_ip, private_ip
+    return state, PublicIpv4State.UNKNOWN, None, private_ip
+
+
+def _ipv4_or_none(value: object) -> str | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = ipaddress.ip_address(value)
+    except ValueError:
+        return None
+    return value if parsed.version == 4 else None
 
 
 def _observe_ssm_state(ssm: SsmApi, expected_instance_id: str) -> SsmState:
@@ -317,6 +374,9 @@ def _status_from_probe(
     *,
     instance_id: str,
     ec2_state: Ec2State,
+    public_ipv4_state: PublicIpv4State,
+    public_ipv4: str | None,
+    private_ipv4: str | None,
     ssm_state: SsmState,
     probe: HostRuntimeProbe,
     expected_game_id: str,
@@ -341,6 +401,10 @@ def _status_from_probe(
     return TargetStatus(
         instance_id=instance_id,
         ec2_state=ec2_state,
+        public_ipv4_state=public_ipv4_state,
+        public_ipv4=public_ipv4,
+        private_ipv4=private_ipv4,
+        network_observation_source="ec2-describe-instances",
         ssm_state=ssm_state,
         mount_state=probe.mount.state,
         docker_state=probe.docker_state,

@@ -451,3 +451,11 @@ Webを追加するときに`LaterWebStack`を分離する。初期からFoundati
 コードと設定schemaはPhase 0からdev/prod両stageを扱えるようにする。`config/stages/prod.yaml`は未確定値を`null`としたplaceholderとしてGit管理してよいが、これはprod AWSリソースを作成済みという意味ではない。Phase 0〜7の実装・`cdk synth`・deployはdevを基本とし、prodの必須値が未確定の間はprod向け`cdk synth`またはdeployを明示的なvalidation errorで停止する。prodの具体値確定、`cdk synth`、`cdk diff`、deployは最初の実用リリース直前に行う。
 
 具体的なproject名、resource prefix、FQDN、runtime、容量、timeout等は`config/project.yaml`と`config/stages/<stage>.yaml`を正本とする。秘密値そのものは設定ファイルへ保存せず、`config/secrets.example.yaml`にはParameter名だけを記載する。CDKがParameter Store、Lambda environment、CloudFormation output等へ配布した値を、YAMLと独立した手動設定の正本にしない。
+
+### Phase 3 Control Plane status integration
+
+Phase 3ではPhase 1/Targetから独立した`WishicraftControlPlaneStack-<stage>`を追加する。このstackはcurrent SystemState用DynamoDB、薄いReconcile Lambda、専用IAM、LogGroupだけを所有する。TargetはProject/Stage/Purpose tagでexactly oneに解決し、物理instance IDをGitへ正本化しない。
+
+Reconcile domain serviceはdesired context取得、Target解決、EC2/SSM/固定Host Runtime probeの段階観測、public IPv4、Route 53 A record観測、discrepancy/health導出、条件付き永続化を統括する。Lambda handlerはversioned input検証とAWS adapter wiringだけを担当する。Phase 1/Target stack、EC2 lifecycle、EBS、SG、DNS writeはこのstackの責務に含めない。
+
+repositoryでのconstruct実装・test・synthとAWS上のdeploy/integrationは別のdelivery stateとして記録する。repository validatedだけでControl Plane stack、DynamoDB、LambdaがAWSへ作成済みとは扱わない。

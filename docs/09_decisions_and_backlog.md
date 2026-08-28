@@ -10,6 +10,17 @@
 
 ## 2. 採用済み決定
 
+### D-072 Phase 3 Reconcileは独立Control Plane stackでcurrent SystemStateを単調更新する
+
+- **状態:** Accepted
+- **日付:** 2026-08-28
+- **Architecture:** 独立`WishicraftControlPlaneStack-dev`にon-demand DynamoDB、薄いReconcile Lambda、read-mostly IAM、14日LogGroupだけを置く。Phase 1/Target stackへcross-stack exportや変更を追加しない。
+- **Target identity:** Project/Stage/Purpose tagでexactly oneのnon-terminated Targetを解決し、0/duplicate/schema/API failureはUNKNOWNとして保存する。physical instance IDをGitへ追加しない。
+- **Observation:** EC2/SSM/固定Host Runtime probeの既存short-circuitを維持し、public/private IPv4とcanonical Route 53 A recordをread-only観測する。stopped + public IPv4 absent + DNS absentは正常である。
+- **Persistence:** `system_id`一件のcurrent SystemStateをUpdateItemし、fixed-width UTC `observed_at`のstrictly-newer conditional writeで古い結果と同一timestampを拒否する。観測failureもfresh UNKNOWN/ready false/error classificationとして保存し、過去READYを残さない。DynamoDB failureは成功へ変換しない。
+- **IAM:** EC2/SSM/Route 53 read、固定probe実行、特定table GetItem/UpdateItem、Lambda logだけを許可し、lifecycle/EBS/SG/DNS/secret/IAM mutationを禁止する。
+- **Scope:** periodic reconcile、start/stop workflow、DynamoDB history/Streams/TTL/GSI、Discord/API、DNS writeは含めない。
+
 ### D-071 Phase 3 active gameはHost Runtime明示metadataと実bindから観測する
 
 - **状態:** Accepted

@@ -681,3 +681,11 @@ RESET_PRECONDITION_FAILED
 ```
 
 内部error detailと利用者向けmessageは分離する。
+
+## 14. Phase 3 Endpoint / Reconcile state
+
+public IPv4は`assigned | absent | unknown`、Route 53 A recordは`present | absent | unknown`としてraw factを分離する。EC2 stopped/terminatedでpublic IPv4 absentかつDNS absentは正常で、discrepancyを生成しない。
+
+Endpoint discrepancyは`dns-missing-when-required`、`dns-points-to-wrong-ipv4`、`dns-present-while-endpoint-should-be-absent`、`public-ipv4-unknown`、`dns-observation-unknown`を使用する。runtime READY、active game discrepancy、endpoint discrepancy、healthは別軸とする。
+
+desired STOPPEDでEC2 stoppedかつendpoint discrepancy/observation errorなしは`HEALTHY`。観測不能は`UNKNOWN`、desiredとの差分は`DEGRADED`とする。観測failure時はfresh `observed_at`、関連state unknown、runtime ready false、固定error classificationを持つ新しいSystemStateを保存し、過去のREADYを残さない。

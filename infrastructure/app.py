@@ -6,6 +6,7 @@ from pathlib import Path
 
 from aws_cdk import App
 
+from infrastructure.stacks.control_plane_stack import ControlPlaneStack
 from infrastructure.stacks.minecraft_stack import MinecraftStack
 from infrastructure.stacks.minecraft_target_stack import MinecraftTargetStack
 from wishicraft.config import load_configuration, validate_stage_for_action
@@ -26,6 +27,8 @@ def build_app(
     app = App()
     if deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
+    elif deployment == "control-plane":
+        ControlPlaneStack(app, stage=configuration.stage, project=configuration.project)
     elif deployment == "phase1":
         MinecraftStack(
             app,
@@ -36,7 +39,7 @@ def build_app(
             phase=phase,
         )
     else:
-        raise ValueError("deployment must be phase1 or target")
+        raise ValueError("deployment must be phase1, target, or control-plane")
     return app
 
 
@@ -57,6 +60,8 @@ def main() -> None:
     validate_stage_for_action(configuration.stage, phase=phase, action=validation_action)
     if deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
+    elif deployment == "control-plane":
+        ControlPlaneStack(app, stage=configuration.stage, project=configuration.project)
     elif deployment == "phase1":
         MinecraftStack(
             app,
@@ -67,7 +72,7 @@ def main() -> None:
             phase=phase,
         )
     else:
-        raise ValueError("CDK context deployment must be phase1 or target")
+        raise ValueError("CDK context deployment must be phase1, target, or control-plane")
     app.synth()
 
 

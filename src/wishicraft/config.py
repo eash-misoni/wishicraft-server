@@ -58,6 +58,14 @@ class ProjectConfig:
         return _require_string(self.values, "project.resource_prefix")
 
     @property
+    def system_id(self) -> str:
+        return _require_string(self.values, "project.system_id")
+
+    @property
+    def project_slug(self) -> str:
+        return _require_string(self.values, "project.slug")
+
+    @property
     def stack_name(self) -> str:
         return _require_string(self.values, "toolchain.initial_stack_name")
 
@@ -142,6 +150,10 @@ class StageConfig:
     @property
     def route53_insync_timeout_seconds(self) -> int:
         return _require_positive_int(self.values, "timeouts_seconds.route53_insync")
+
+    @property
+    def ssm_probe_timeout_seconds(self) -> int:
+        return _require_positive_int(self.values, "timeouts_seconds.ssm_probe")
 
     @property
     def instance_type(self) -> str:

@@ -25,10 +25,15 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy src infrastructure tests
-      - run: npx --no-install cdk synth --context stage=dev
+      - run: >-
+          npx --no-install cdk synth MinecraftStack-dev
+          --context stage=dev --context phase=1 --context deployment=phase1
       - run: >-
           npx --no-install cdk synth MinecraftTargetStack-dev
           --context stage=dev --context deployment=target
+      - run: >-
+          npx --no-install cdk synth WishicraftControlPlaneStack-dev
+          --context stage=dev --context phase=3 --context deployment=control-plane
       - run: >-
           shellcheck infrastructure/host_runtime/docker_compose_install.sh
           infrastructure/host_runtime/target_host_validation.sh

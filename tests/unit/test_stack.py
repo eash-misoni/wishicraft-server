@@ -53,6 +53,82 @@ def _action_list(value: object) -> list[str]:
     return cast(list[str], value)
 
 
+def test_control_plane_stack_is_independent_and_read_mostly() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=3, deployment="control-plane")
+    stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
+    template = Template.from_stack(stack)
+
+    template.resource_count_is("AWS::DynamoDB::Table", 1)
+    template.resource_count_is("AWS::Lambda::Function", 1)
+    template.resource_count_is("AWS::Logs::LogGroup", 1)
+    assert template.find_resources("AWS::EC2::Instance") == {}
+    assert template.find_resources("AWS::EC2::VolumeAttachment") == {}
+    table = next(iter(template.find_resources("AWS::DynamoDB::Table").values()))["Properties"]
+    assert table["BillingMode"] == "PAY_PER_REQUEST"
+    assert table["KeySchema"] == [{"AttributeName": "system_id", "KeyType": "HASH"}]
+    assert "StreamSpecification" not in table
+    assert "TimeToLiveSpecification" not in table
+    assert "GlobalSecondaryIndexes" not in table
+
+    functions = template.find_resources("AWS::Lambda::Function")
+    function = next(iter(functions.values()))["Properties"]
+    environment = function["Environment"]["Variables"]
+    assert "INSTANCE_ID" not in environment
+    assert environment["GAME_ID"] == "game-vanilla-main"
+    assert "i-04fc0629dc4ea466e" not in str(template.to_json())
+
+    actions = {
+        action
+        for policy in template.find_resources("AWS::IAM::Policy").values()
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+        for action in _action_list(statement["Action"])
+    }
+    assert {
+        "ec2:DescribeInstances",
+        "ssm:DescribeInstanceInformation",
+        "ssm:SendCommand",
+        "ssm:GetCommandInvocation",
+        "route53:ListResourceRecordSets",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+    } <= actions
+    assert not actions & {
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:TerminateInstances",
+        "route53:ChangeResourceRecordSets",
+        "ssm:GetParameter",
+    }
+    statements = [
+        statement
+        for policy in template.find_resources("AWS::IAM::Policy").values()
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+    ]
+    send_command = [
+        statement
+        for statement in statements
+        if "ssm:SendCommand" in _action_list(statement["Action"])
+    ]
+    assert len(send_command) == 2
+    assert any(
+        "document/AWS-RunShellScript" in str(statement["Resource"]) for statement in send_command
+    )
+    target_statement = next(
+        statement for statement in send_command if ":instance/*" in str(statement["Resource"])
+    )
+    assert target_statement["Condition"]["StringEquals"] == {
+        "ssm:resourceTag/Project": "wishicraft",
+        "ssm:resourceTag/Purpose": "phase2-target-validation",
+        "ssm:resourceTag/Stage": "dev",
+    }
+    route53_statement = next(
+        statement
+        for statement in statements
+        if "route53:ListResourceRecordSets" in _action_list(statement["Action"])
+    )
+    assert route53_statement["Resource"] == "arn:aws:route53:::hostedzone/Z077818024BJUAUBFMTKV"
+
+
 def test_dev_stack_is_empty_and_environment_agnostic() -> None:
     app = build_app(REPOSITORY_ROOT, "dev")
 

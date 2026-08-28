@@ -16,6 +16,7 @@ from wishicraft.status import (
     HostRuntimeProbeApi,
     HostRuntimeState,
     MinecraftState,
+    PublicIpv4State,
     SsmApi,
     SsmState,
     TargetStatus,
@@ -121,6 +122,10 @@ def test_stopped_target_short_circuits_unreachable_runtime_layers() -> None:
         "schema_version": 1,
         "instance_id": TARGET_INSTANCE_ID,
         "ec2_state": "stopped",
+        "public_ipv4_state": "absent",
+        "public_ipv4": None,
+        "private_ipv4": None,
+        "network_observation_source": "ec2-describe-instances",
         "ssm_state": "not-applicable",
         "mount_state": "unknown",
         "docker_state": "unknown",
@@ -154,6 +159,31 @@ def test_pending_target_does_not_query_ssm() -> None:
     assert status.ssm_state is SsmState.UNKNOWN
     assert status.host_runtime_state is HostRuntimeState.UNKNOWN
     assert status.ready is False
+
+
+def test_running_target_observes_public_and_private_ipv4() -> None:
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {
+                    "Instances": [
+                        {
+                            "InstanceId": TARGET_INSTANCE_ID,
+                            "State": {"Name": "running"},
+                            "PublicIpAddress": "203.0.113.8",
+                            "PrivateIpAddress": "10.0.0.8",
+                        }
+                    ]
+                }
+            ]
+        }
+    )
+    status = observer(ec2, FakeSsm({"InstanceInformationList": []})).observe(
+        observed_at=OBSERVED_AT
+    )
+    assert status.public_ipv4_state is PublicIpv4State.ASSIGNED
+    assert status.public_ipv4 == "203.0.113.8"
+    assert status.private_ipv4 == "10.0.0.8"
 
 
 @pytest.mark.parametrize(

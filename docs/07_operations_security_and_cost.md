@@ -57,6 +57,8 @@ EC2 start/stopやSSM実行権限を直接持たせず、workflow Task roleへ分
 
 Resource `*`を避ける。AWS APIの制約でResource制限できないActionはconditionと監査を追加する。
 
+Phase 3 Reconcile LambdaはEC2/SSM managed-node/Route 53 read、固定probe SendCommand/GetCommandInvocation、特定SystemState tableのGetItem/UpdateItemだけを持つ。Start/Stop/Terminate、EBS/SG/DNS mutation、secret read、IAM mutationを許可しない。Target SendCommandはTarget tag conditionと固定AWS-RunShellScript documentへ限定する。
+
 ### Minecraft EC2 role
 
 - SSM managed instance

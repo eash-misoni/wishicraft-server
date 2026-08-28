@@ -86,12 +86,26 @@ system_id = wishicraft-main
 
 ### Attributes
 
+Phase 3のcurrent status persistenceは、次の最小属性を使用する。`observation`はraw AWS responseではなく正規化済みの観測属性群である。
+
 ```yaml
 system_id: wishicraft-main
 schema_version: 1
-version: 42
-
+environment: dev
+game_id: game-vanilla-main
 desired_state: STOPPED | RUNNING
+target_instance_id: string | null
+observation: normalized map
+discrepancies: list[string]
+health: HEALTHY | DEGRADED | UNHEALTHY | UNKNOWN
+observation_errors: list[string]
+observed_at: fixed-width UTC timestamp
+```
+
+Phase 4以降にoperationを導入するときは、次の属性群を同じitemへ追加できるが、Phase 3 Reconcileはこれらを先行作成・更新しない。
+
+```yaml
+version: 42
 desired_game_id: string | null
 requested_operation_id: string | null
 desired_updated_at: timestamp | null
@@ -120,7 +134,7 @@ updated_at: timestamp
 
 - SystemState全体のPutItem置換を避け、属性群ごとのUpdateItemを使用する。
 - Desired State更新、Current Operation更新、Observed State更新、Last Error更新をrepository APIで分離する。
-- ReconcileはObserved State、Health、Discrepancies、observed_atだけを更新する。
+- ReconcileはTarget identityを含むObserved State、Health、Discrepancies、observation errors、observed_atだけを更新する。初回item作成時のidentityと既定`desired_state=STOPPED`は`if_not_exists`で設定し、既存Desired StateやCurrent Operationを上書きしない。
 - `observed_at`または観測versionで古い結果を拒否する。
 - `current_operation_id`の解除は保存値が呼出元operation IDと一致する場合だけ行う。
 
@@ -390,16 +404,10 @@ record_last_error(...)
 ### Input
 
 ```json
-{
-  "schema_version": 1,
-  "system_id": "wishicraft-main",
-  "operation_id": "op-...",
-  "reason": "STATUS_COMMAND",
-  "force_probe": true
-}
+{"schema_version":1,"operation":"reconcile"}
 ```
 
-`operation_id`は定期reconcileではnullを許可する。
+Phase 3ではdeployment configurationで許可済みの単一system/game/Targetだけを解決する。外部inputからsystem ID、instance ID、shell、Hosted Zone、record nameを上書きできない。operation metadataを伴う呼出しはOperation domain導入後にversioned contractとして追加する。
 
 ### Output
 
@@ -407,22 +415,25 @@ record_last_error(...)
 {
   "schema_version": 1,
   "system_id": "wishicraft-main",
-  "observed": {
+  "environment": "dev",
+  "game_id": "game-vanilla-main",
+  "desired_state": "RUNNING",
+  "target_instance_id": "i-...",
+  "observation": {
     "ec2_state": "running",
     "public_ipv4": "203.0.113.10",
-    "dns_target_ipv4": "203.0.113.10",
-    "connection_endpoint_state": "ready",
+    "dns_ipv4_values": ["203.0.113.10"],
     "ssm_state": "online",
     "host_runtime_state": "running",
-    "minecraft_service_state": "active",
+    "minecraft_service_state": "running",
     "minecraft_protocol_state": "ready",
-    "active_game_id": "game-vanilla-main",
-    "player_count": 2,
-    "observed_at": "2026-07-23T00:00:00Z"
+    "observed_active_game_id": "game-vanilla-main",
+    "runtime_ready": true
   },
-  "ready": true,
   "health": "HEALTHY",
-  "discrepancies": []
+  "discrepancies": [],
+  "observation_errors": [],
+  "observed_at": "2026-08-28T00:00:00.000000Z"
 }
 ```
 
@@ -969,3 +980,17 @@ Stage = dev | prod
 ManagedBy = cdk
 Owner = project-owner
 ```
+
+## 23. Phase 3 Control Plane Reconcile contract
+
+Lambda inputは次の固定versioned objectだけを受理する。instance ID、shell、Hosted Zone、record nameはinputで上書きできない。
+
+```json
+{"schema_version":1,"operation":"reconcile"}
+```
+
+SystemState tableは`PK=system_id`のcurrent item一件を保持する。itemは`schema_version`、`environment`、`game_id`、`desired_state`、`target_instance_id`、normalized `observation`、`discrepancies`、`health`、`observation_errors`、fixed-width UTC `observed_at`を持つ。raw AWS response、raw mc-monitor JSON、stderr、MOTD/player content、secret/credentialを保存しない。
+
+観測更新はUpdateItemを使い、`attribute_not_exists(observed_at) OR observed_at < :observed_at`を必須とする。timestampは`YYYY-MM-DDTHH:MM:SS.ffffffZ`へ正規化し、lexicographic orderとUTC chronological orderを一致させる。同一timestampも上書きせずConditionalCheckFailedで拒否し、異なる結果が同じ観測順序を共有する曖昧さを許さない。DynamoDB write failureは呼出元へ伝播する。
+
+Route 53 observerはcanonical Hosted Zone/FQDNに対するread-only ListResourceRecordSetsだけを使う。record absent、単一A record、unexpected valuesを分離し、duplicate、Alias/unsupported shape、malformed response、API failureはunknownへfail-closedする。

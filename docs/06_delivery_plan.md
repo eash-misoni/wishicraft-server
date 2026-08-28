@@ -355,7 +355,7 @@ public ingress、旧host退役は後続単位とする。
 
 ## 6. Phase 3 — 実測status
 
-- **状態:** In Progress（EC2 / SSM / Host Runtime / protocol READY observation slicesはdev実測まで完了）
+- **状態:** In Progress（status observationはdev実測済み、Control Plane persistenceはrepository validated / AWS未deploy・未integration）
 
 ### 目的
 
@@ -391,7 +391,7 @@ Host Runtime observation sliceはSSM pagination、固定read-only probe、Run Co
 
 2026-08-28にrepository-onlyのactive game observation sliceを完了した。`config/project.yaml`のinitial Game IDをControl Plane期待値とし、Host Runtime rendererがcontainerへ明示するGame ID/data source metadataと実`/data` bindをread-only probe v1.2.0で照合する。期待/観測一致、active game mismatch/unknown、runtime bind mismatchをstatusの独立discrepancyとして導出し、protocol runtime READYをgame mismatchでfalseへ書き換えない。
 
-今回までに完了したのはMinecraft running observation、protocol-aware status、runtime READY true、running→not-ready→ready→stopped遷移、protocol failureではREADYにしない契約、active game observation、active game discrepancyである。public IPv4 observation、Route 53 observation、endpoint discrepancy、Reconcile domain service、SystemState/DynamoDB、Lambda、Control Plane integrationは未完了とする。
+今回までに、Minecraft running observation、protocol-aware status、runtime READY true、running→not-ready→ready→stopped遷移、protocol failureではREADYにしない契約、active game observation、active game discrepancyをdev実測まで完了した。加えてpublic/private IPv4、Route 53、endpoint discrepancy、Reconcile domain service、current SystemState repository、DynamoDB/Lambda/独立Control Plane stackをrepositoryで実装・検証した。Control Plane stackのcredential付きdiff/deploy、stopped Target Reconcile、実DynamoDB persistenceは未実施であり、Phase 3全体は未完了とする。
 
 ### 確認ケース
 
@@ -826,3 +826,9 @@ AdmitOperation
 - CDK synthが成功する。
 - 変更した契約・決定・進捗を文書へ反映した。
 - 実行していない確認を「確認済み」と記載していない。
+
+### Phase 3 Control Plane status integration slice
+
+repository実装としてpublic/private IPv4、Route 53 A record、endpoint discrepancy、Reconcile domain service、current SystemState conditional repository、on-demand DynamoDB、薄いReconcile Lambda、独立Control Plane stackを追加した。stopped TargetではSSM/Run Command/Host Runtimeを短絡し、public IPv4 absent + DNS absentを正常化する。focused/full test、Ruff、mypy、shell syntaxとPhase 1/Target/Control Planeの個別synthでrepository validationを行う。
+
+repository validationだけではAWS完了としない。credential付きdiff、Control Plane stackだけのdeploy、stopped Target observationのcurrent SystemState保存は未実施として別作業で確認・記録する。periodic reconcile、start/stop workflow、Discord/API、operation admission/lock、backupは後続Phaseのままとする。

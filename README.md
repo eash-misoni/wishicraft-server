@@ -24,8 +24,9 @@ uv run pytest
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy src infrastructure tests
-npx --no-install cdk synth --context stage=dev
+npx --no-install cdk synth MinecraftStack-dev --context stage=dev --context phase=1 --context deployment=phase1
 npx --no-install cdk synth MinecraftTargetStack-dev --context stage=dev --context deployment=target
+npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=3 --context deployment=control-plane
 ```
 
 prod synthとdeployは初期リリース直前まで行いません。deploy、secret登録、AWS profileの指定はこのPhase 0の手順に含めません。
