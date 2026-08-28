@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-27
+- **最終更新:** 2026-08-28
 
 ## 1. 開発原則
 
@@ -355,7 +355,7 @@ public ingress、旧host退役は後続単位とする。
 
 ## 6. Phase 3 — 実測status
 
-- **状態:** In Progress（EC2 / SSM / Host Runtime observation slicesはdev実測まで完了）
+- **状態:** In Progress（EC2 / SSM / Host Runtime / protocol READY observation slicesはdev実測まで完了）
 
 ### 目的
 
@@ -385,7 +385,11 @@ Host Runtime observation sliceはSSM pagination、固定read-only probe、Run Co
 
 最初の実機試行でprobe v1.0.0はTarget標準Python 3.9に`datetime.UTC`がないためcommand failureとなった。Targetを停止してから、Python 3.9構文/API互換を回帰検査するv1.0.1へ更新し、repository validation/CI成功後に新しい実測として再実行した。v1.0.0の失敗結果は成功扱いしない。
 
-この時点で完了したのはEC2 stopped/running、SSM managed-node、Host Runtime read-only、Docker/container stopped、transport/parser fail-closedの観測である。次のprotocol-aware sliceは、fixed itzg container内の`mc-monitor`からlocalhost:25565へJava Server List Pingを送り、Minecraft running、protocol READY、runtime `ready=true`を観測する。外部port公開、RCON、Minecraft内部file、Reconcile/DynamoDB/Lambdaは含めない。discrepancy、Reconcile domain service、DynamoDB、Lambda、public IPv4/Route 53は引き続き未完了とする。
+2026-08-28にprotocol-aware READY sliceのdev実測を完了した。固定image integrationでmc-monitor command contractを検証後、Targetだけを起動し、Minecraft未起動時のruntime not-running / protocol not-applicable / ready falseを再確認した。Phase 2 canonical Host Runtime unitから既存Minecraft 26.2 worldを起動し、container runningだがprotocol not-ready / ready falseのstartup中間状態から、localhost:25565のJava Server List Ping成功、reported version 26.2 / protocol 776、runtime ready trueへの遷移をproduction status経路で確認した。
+
+直接観測した固定imageのmc-monitorは0.16.11で、probe v1.1.0はMOTD/player/raw responseを伝播せず必要fieldだけを正規化した。READY時はmount expected、Docker/Host Runtime/container running、health healthy、OOMKilled false、RestartCount 0、restart no、memory 2816 MiB、published portsなしだった。canonical Host Runtime stopはexit 0で、overworld/the_end/the_nether保存と`All dimensions are saved`、process/listener不在を確認した。EC2 running中のpost-stopはprotocol not-applicable / ready falseへ戻り、Target停止後statusはRun Commandを送らなかった。
+
+今回完了したのはMinecraft running observation、protocol-aware status、runtime READY true、running→not-ready→ready→stopped遷移、protocol failureではREADYにしない契約である。active game mismatch/discrepancy、public IPv4/Route 53、Reconcile domain service、SystemState/DynamoDB、Lambda、Control Plane integrationは未完了とする。
 
 ### 確認ケース
 

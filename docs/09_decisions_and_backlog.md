@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-27
+- **最終更新:** 2026-08-28
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -19,6 +19,9 @@
 - **Data minimization:** raw JSON、MOTD、favicon、player sampleを伝播せず、attempt/result、互換応答有無、reported version、protocol version、version match、protocol observed_atだけをversioned probe JSONへ正規化する。
 - **READY boundary:** protocol success/version一致に加え、mount expected、Docker active、Host Runtime active、container running、component errorなしの場合だけPhase 3 runtime `TargetStatus.ready=true`とする。START-005のoperation成功には後続sliceのactive gameとconnection endpoint/DNS一致も必要であり、本sliceだけでstart workflow完成とはしない。
 - **Safety:** protocol status pingはread-onlyとし、RCON、Minecraft command、properties/world/log read、container/network mutationを禁止する。
+- **Fixed image validation:** 固定digest imageのmc-monitorは0.16.11で、`status`のjson/host/port/timeout flagsを確認した。Go flagのhelpはusageを出力してexit 2となるため、CIはhelp本文の必須flagとexit 0または2を組み合わせてcontractを検証する。
+- **Dev observation:** Target/SSM起動後、Host Runtime停止中はprotocol not-applicable / ready falseだった。canonical unit起動直後にcontainer running / protocol not-ready / ready falseを実測し、その後reported version 26.2 / protocol 776のcontainer-local responseでready trueへ遷移した。Docker health healthyだけでREADYにならないnegative evidenceを実機でも確認した。
+- **Graceful closeout:** canonical unit停止でoverworld/the_end/the_netherのsaveと`All dimensions are saved`、container exit 0、OOMKilled false、RestartCount 0、listener/process不在を確認した。EC2 running中のpost-stopはprotocol not-applicable / ready falseへ戻り、Target停止後statusはRun Commandを送信しなかった。終了時は両EC2 stopped、data EBS attachment/snapshot/SG/DNS/stacks不変である。
 
 ### D-069 Phase 3 Host Runtime observationは固定read-only probeとstrict parserに分離する
 
@@ -28,7 +31,7 @@
 - **Safety:** Control Planeが任意shellを渡すinterface、Minecraft内部file/world、environment/log、RCON、secretの観測、probeによるrepair/lifecycle/filesystem/Docker mutationを禁止する。transport/schema/identity/command failureはHost Runtime以下を`unknown`へfail-closedする。
 - **READY:** container runningやDocker healthだけではREADYにしない。v1.0.xで`ready=false`へ固定していた契約は、D-070のprotocol-aware probe v1.1.0で拡張する。
 - **Timeout:** stage正本のstatus用`ssm_probe=60`秒を使い、script executionは45秒とする。start/stop用Host Runtime timeoutを流用しない。
-- **Runtime compatibility:** SSMで転送するprobeはControl Plane packageのPython targetではなくTarget AMIの標準interpreterでも実行可能でなければならない。v1.0.0の初回実機試行はAL2023のPython 3.9に`datetime.UTC`がなくcommand failureとなったため成功扱いせず、Python 3.9 syntax/API compatibility testを追加したv1.0.1を正本とする。
+- **Runtime compatibility:** SSMで転送するprobeはControl Plane packageのPython targetではなくTarget AMIの標準interpreterでも実行可能でなければならない。v1.0.0の初回実機試行はAL2023のPython 3.9に`datetime.UTC`がなくcommand failureとなったため成功扱いせず、Python 3.9 syntax/API compatibility testを追加したv1.0.1で修正した。現行正本はD-070でprotocol contractを追加したv1.1.0である。
 - **Dev observation:** repository validationとCI成功後、Targetを一時起動してSSM Onlineを確認した。固定probe v1.0.1はexit 0、schema v1、stderr空で、expected XFS/UUID mount、Docker active、Host Runtime inactive、固定digestのcontainer stopped、restart policy no、OOMKilled false、RestartCount 0、Minecraft not-running、protocol not-applicable、ready falseを返した。status経路も同じcanonical stateへ正規化した。
 - **No mutation / closeout:** 直接probeとstatus経路の前後で、`observed_at`以外のprobe事実、mount root metadata、EBS attachment、Target SGに変化はなかった。container/Host Runtime停止を確認してTarget EC2を通常停止し、停止後status経路がRun Commandを送らずEC2 stopped / SSM not-applicable / Host Runtime not-running / ready falseを返すことを確認した。Phase 1/Target stacks、data EBS、snapshot、ingress、DNSは変更していない。
 
