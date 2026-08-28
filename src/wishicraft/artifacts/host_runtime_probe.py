@@ -20,7 +20,7 @@ from typing import Any, Optional
 # compatible with that interpreter even though the control-plane package targets 3.12.
 
 SCHEMA_VERSION = 1
-PROBE_VERSION = "1.1.0"
+PROBE_VERSION = "1.2.0"
 MOUNT_PATH = "/srv/minecraft"
 EXPECTED_FILESYSTEM_TYPE = "xfs"
 EXPECTED_FILESYSTEM_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"
@@ -34,6 +34,9 @@ MINECRAFT_HOST = "localhost"
 MINECRAFT_PORT = 25565
 PROTOCOL_TIMEOUT = "3s"
 _DIGEST_PATTERN = re.compile(r"@(?P<digest>sha256:[0-9a-f]{64})$")
+_GAME_ID_PATTERN = re.compile(r"game-[a-z0-9]+(?:-[a-z0-9]+)*$")
+_GAME_ID_LABEL = "com.wishicraft.active-game-id"
+_GAME_DATA_SOURCE_LABEL = "com.wishicraft.active-game-data-source"
 
 
 def run(*command: str) -> subprocess.CompletedProcess[str]:
@@ -144,12 +147,59 @@ def absent_container() -> dict[str, Any]:
     }
 
 
-def observe_container(docker_state: str) -> tuple[dict[str, Any], Optional[str]]:
+def active_game_not_applicable() -> dict[str, Any]:
+    return {"state": "not-applicable", "game_id": None, "binding_consistency": "not-applicable"}
+
+
+def observe_active_game(document: dict[str, Any]) -> dict[str, Any]:
+    """Read Host Runtime labels and verify their declared /data bind without path inference."""
+    unknown = {"state": "unknown", "game_id": None, "binding_consistency": "unknown"}
+    try:
+        config = document["Config"]
+        labels = config["Labels"]
+        mounts = document["Mounts"]
+        if not isinstance(labels, dict) or not isinstance(mounts, list):
+            return unknown
+        game_id = labels.get(_GAME_ID_LABEL)
+        declared_source = labels.get(_GAME_DATA_SOURCE_LABEL)
+        if (
+            not isinstance(game_id, str)
+            or _GAME_ID_PATTERN.fullmatch(game_id) is None
+            or not isinstance(declared_source, str)
+            or not declared_source.startswith(f"{MOUNT_PATH}/games/")
+        ):
+            return unknown
+        data_mounts = [
+            item for item in mounts if isinstance(item, dict) and item.get("Destination") == "/data"
+        ]
+        if len(data_mounts) != 1:
+            return unknown
+        data_mount = data_mounts[0]
+        source = data_mount.get("Source")
+        if data_mount.get("Type") != "bind" or not isinstance(source, str):
+            return unknown
+        expected_source = f"{MOUNT_PATH}/games/{game_id}/server"
+        return {
+            "state": "observed",
+            "game_id": game_id,
+            "binding_consistency": (
+                "consistent"
+                if declared_source == expected_source and source == declared_source
+                else "mismatch"
+            ),
+        }
+    except (KeyError, TypeError):
+        return unknown
+
+
+def observe_container(
+    docker_state: str,
+) -> tuple[dict[str, Any], dict[str, Any], Optional[str]]:
     if docker_state != "active":
         result = absent_container()
         result["state"] = "unknown"
         result["health"] = "unknown"
-        return result, None
+        return result, {"state": "unknown", "game_id": None, "binding_consistency": "unknown"}, None
     listed = run(
         "docker",
         "ps",
@@ -165,21 +215,33 @@ def observe_container(docker_state: str) -> tuple[dict[str, Any], Optional[str]]
         result = absent_container()
         result["state"] = "unknown"
         result["health"] = "unknown"
-        return result, "CONTAINER_LIST_FAILED"
+        return (
+            result,
+            {"state": "unknown", "game_id": None, "binding_consistency": "unknown"},
+            "CONTAINER_LIST_FAILED",
+        )
     identifiers = [line for line in listed.stdout.splitlines() if line]
     if not identifiers:
-        return absent_container(), None
+        return absent_container(), active_game_not_applicable(), None
     if len(identifiers) != 1:
         result = absent_container()
         result["state"] = "unknown"
         result["health"] = "unknown"
-        return result, "CONTAINER_DUPLICATE"
+        return (
+            result,
+            {"state": "unknown", "game_id": None, "binding_consistency": "unknown"},
+            "CONTAINER_DUPLICATE",
+        )
     inspected = run("docker", "inspect", identifiers[0])
     if inspected.returncode != 0:
         result = absent_container()
         result["state"] = "unknown"
         result["health"] = "unknown"
-        return result, "CONTAINER_INSPECT_FAILED"
+        return (
+            result,
+            {"state": "unknown", "game_id": None, "binding_consistency": "unknown"},
+            "CONTAINER_INSPECT_FAILED",
+        )
     try:
         documents = json.loads(inspected.stdout)
         document = documents[0] if isinstance(documents, list) and len(documents) == 1 else None
@@ -208,7 +270,7 @@ def observe_container(docker_state: str) -> tuple[dict[str, Any], Optional[str]]
         digest_match = _DIGEST_PATTERN.search(image_reference)
         ports = host_config.get("PortBindings")
         published_ports = ports if isinstance(ports, dict) else {}
-        return {
+        container = {
             "state": status_value,
             "container_id": str(document["Id"]),
             "name": str(document["Name"]).removeprefix("/"),
@@ -219,12 +281,22 @@ def observe_container(docker_state: str) -> tuple[dict[str, Any], Optional[str]]
             "oom_killed": state["OOMKilled"],
             "restart_count": document["RestartCount"],
             "published_ports": published_ports,
-        }, None
+        }
+        active_game = (
+            observe_active_game(document)
+            if status_value == "running"
+            else active_game_not_applicable()
+        )
+        return container, active_game, None
     except (KeyError, TypeError, ValueError, json.JSONDecodeError):
         result = absent_container()
         result["state"] = "unknown"
         result["health"] = "unknown"
-        return result, "CONTAINER_SCHEMA_INVALID"
+        return (
+            result,
+            {"state": "unknown", "game_id": None, "binding_consistency": "unknown"},
+            "CONTAINER_SCHEMA_INVALID",
+        )
 
 
 def protocol_not_applicable() -> dict[str, Any]:
@@ -331,7 +403,7 @@ def main() -> int:
     runtime_state, runtime_error = observe_unit(HOST_RUNTIME_UNIT)
     if runtime_error:
         errors.append(runtime_error)
-    container, container_error = observe_container(docker_state)
+    container, active_game, container_error = observe_container(docker_state)
     if container_error:
         errors.append(container_error)
     if container["state"] in {"stopped", "not-found"}:
@@ -373,6 +445,7 @@ def main() -> int:
         "docker": {"state": docker_state},
         "host_runtime": {"unit": HOST_RUNTIME_UNIT, "state": runtime_state},
         "container": container,
+        "active_game": active_game,
         "minecraft": minecraft,
         "errors": sorted(errors),
     }

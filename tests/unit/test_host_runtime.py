@@ -84,6 +84,10 @@ def test_rendered_compose_has_only_the_minecraft_public_port_and_safe_lifecycle(
         }
     ]
     assert service["env_file"] == ["runtime.env"]
+    assert service["labels"] == {
+        "com.wishicraft.active-game-id": "game-vanilla-main",
+        "com.wishicraft.active-game-data-source": ("/srv/minecraft/games/game-vanilla-main/server"),
+    }
     assert {
         "VERSION=26.2",
         "TYPE=VANILLA",

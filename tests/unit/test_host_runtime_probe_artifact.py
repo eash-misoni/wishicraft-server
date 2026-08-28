@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 import subprocess
+from pathlib import Path
 
 import pytest
 
 from wishicraft.artifacts import host_runtime_probe
 
 CONTAINER_ID = "9a83cb71c92d225eb436448dbe94eefe4e7a207ec350c967ec05e72982b0dad6"
+GAME_SOURCE = "/srv/minecraft/games/game-vanilla-main/server"
 
 
 def result(returncode: int, stdout: str = "", stderr: str = "") -> subprocess.CompletedProcess[str]:
@@ -28,6 +30,69 @@ def successful_mc_monitor_json(version: str = "26.2") -> str:
             },
         }
     )
+
+
+def container_document(
+    *, game_id: object = "game-vanilla-main", source: str = GAME_SOURCE
+) -> dict[str, object]:
+    return {
+        "Config": {
+            "Labels": {
+                "com.wishicraft.active-game-id": game_id,
+                "com.wishicraft.active-game-data-source": GAME_SOURCE,
+            }
+        },
+        "Mounts": [{"Type": "bind", "Source": source, "Destination": "/data"}],
+    }
+
+
+def test_active_game_uses_explicit_runtime_labels_and_matching_bind() -> None:
+    observation = host_runtime_probe.observe_active_game(container_document())
+
+    assert observation == {
+        "state": "observed",
+        "game_id": "game-vanilla-main",
+        "binding_consistency": "consistent",
+    }
+
+
+def test_active_game_binding_mismatch_is_explicit() -> None:
+    observation = host_runtime_probe.observe_active_game(
+        container_document(source="/srv/minecraft/games/game-fabric-test/server")
+    )
+
+    assert observation["state"] == "observed"
+    assert observation["binding_consistency"] == "mismatch"
+
+
+def test_active_game_identity_must_match_declared_game_directory() -> None:
+    observation = host_runtime_probe.observe_active_game(
+        container_document(game_id="game-fabric-test")
+    )
+
+    assert observation["state"] == "observed"
+    assert observation["game_id"] == "game-fabric-test"
+    assert observation["binding_consistency"] == "mismatch"
+
+
+@pytest.mark.parametrize("game_id", [None, "", "../world", "game_Invalid"])
+def test_missing_or_malformed_active_game_is_unknown(game_id: object) -> None:
+    observation = host_runtime_probe.observe_active_game(container_document(game_id=game_id))
+
+    assert observation == {
+        "state": "unknown",
+        "game_id": None,
+        "binding_consistency": "unknown",
+    }
+
+
+def test_active_game_probe_does_not_read_minecraft_internal_files() -> None:
+    source = host_runtime_probe.__file__
+    assert source is not None
+    text = Path(source).read_text(encoding="utf-8")
+    assert "server.properties" not in text
+    assert "level.dat" not in text
+    assert "world/" not in text
 
 
 def test_protocol_success_uses_only_fixed_container_local_command(

@@ -229,6 +229,18 @@ EC2ローカルruntime情報と実際の起動設定から確認したGame ID。
 observed_active_game_id: string | null
 ```
 
+Phase 3のHost Runtime probeは、rendererがcontainerへ付与した明示的なGame IDとdata source metadataを観測し、実際の`/data` bind sourceとの整合を確認する。directory名、`server.properties`、world、`level.dat`からGame IDを逆算しない。container非running時はactive gameを`not-applicable`、running中にidentityを安全に取得できない場合は`unknown`とする。
+
+active game差分はruntime protocol READYと別軸である。protocol応答が正常なら`TargetStatus.ready=true`を維持したまま、次を`discrepancies`へ導出できる。
+
+```text
+active-game-mismatch
+active-game-unknown
+runtime-state-mismatch
+```
+
+`active-game-mismatch`は期待Game IDと観測IDの差、`active-game-unknown`はrunning中のidentity観測不能、`runtime-state-mismatch`は宣言data sourceと実bindの不一致を表す。EC2またはcontainer停止時はactive game差分を生成しない。
+
 ### Player Count
 
 ```text

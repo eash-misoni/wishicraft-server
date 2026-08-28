@@ -13,8 +13,11 @@ from tests.probe_fixtures import (
     runtime_stopped_document,
 )
 from wishicraft.probe import (
+    ActiveGameState,
+    BindingConsistency,
     ContainerState,
     DockerState,
+    HostRuntimeProbe,
     MountState,
     ProbeContractError,
     ProtocolResult,
@@ -24,7 +27,7 @@ from wishicraft.probe import (
 )
 
 
-def parse(document: dict[str, object]) -> object:
+def parse(document: dict[str, object]) -> HostRuntimeProbe:
     return parse_host_runtime_probe(json.dumps(document), expected_instance_id=TARGET_INSTANCE_ID)
 
 
@@ -39,6 +42,8 @@ def test_valid_runtime_stopped_probe() -> None:
     assert probe.container.state is ContainerState.NOT_FOUND
     assert probe.minecraft_runtime_state == "not-running"
     assert probe.protocol_state == "not-applicable"
+    assert probe.active_game.state is ActiveGameState.NOT_APPLICABLE
+    assert probe.active_game.game_id is None
     assert probe.ready is False
     assert probe.errors == ()
 
@@ -53,6 +58,13 @@ def test_unknown_schema_version_is_rejected() -> None:
     document = runtime_stopped_document(schema_version=2)
 
     with pytest.raises(ProbeContractError, match="unsupported probe schema"):
+        parse(document)
+
+
+def test_unknown_probe_version_is_rejected() -> None:
+    document = runtime_stopped_document(probe_version="1.1.0")
+
+    with pytest.raises(ProbeContractError, match="unsupported probe version"):
         parse(document)
 
 
@@ -76,6 +88,8 @@ def test_running_protocol_success_establishes_ready() -> None:
     assert probe.protocol.reported_version == "26.2"
     assert probe.protocol.protocol_version == 772
     assert probe.protocol.version_match is True
+    assert probe.active_game.game_id == "game-vanilla-main"
+    assert probe.active_game.binding_consistency is BindingConsistency.CONSISTENT
     assert probe.ready is True
 
 
@@ -160,6 +174,11 @@ def test_docker_unavailable_requires_unknown_container() -> None:
         }
     )
     minecraft.update({"runtime_state": "unknown", "protocol_state": "unknown", "ready": False})
+    document["active_game"] = {
+        "state": "unknown",
+        "game_id": None,
+        "binding_consistency": "unknown",
+    }
     protocol = minecraft["protocol"]
     assert isinstance(protocol, dict)
     protocol["result"] = "unknown"
@@ -210,3 +229,40 @@ def test_instance_identity_mismatch_is_rejected() -> None:
             json.dumps(runtime_stopped_document()),
             expected_instance_id="i-00000000000000000",
         )
+
+
+@pytest.mark.parametrize("game_id", [None, "", "../world", "game_Invalid"])
+def test_malformed_observed_active_game_is_rejected(game_id: object) -> None:
+    document = runtime_running_document()
+    active_game = document["active_game"]
+    assert isinstance(active_game, dict)
+    active_game["game_id"] = game_id
+
+    with pytest.raises(ProbeContractError, match="active game|game_id"):
+        parse(document)
+
+
+def test_running_container_accepts_unknown_active_game_fail_closed() -> None:
+    document = runtime_running_document()
+    document["active_game"] = {
+        "state": "unknown",
+        "game_id": None,
+        "binding_consistency": "unknown",
+    }
+
+    probe = parse(document)
+
+    assert probe.active_game.state is ActiveGameState.UNKNOWN
+    assert probe.ready is True
+
+
+def test_stopped_container_rejects_observed_active_game() -> None:
+    document = runtime_stopped_document()
+    document["active_game"] = {
+        "state": "observed",
+        "game_id": "game-vanilla-main",
+        "binding_consistency": "consistent",
+    }
+
+    with pytest.raises(ProbeContractError, match="stopped container"):
+        parse(document)

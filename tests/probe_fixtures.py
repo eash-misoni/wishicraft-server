@@ -11,7 +11,7 @@ EXPECTED_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"
 def runtime_stopped_document(**overrides: object) -> dict[str, object]:
     document: dict[str, object] = {
         "schema_version": 1,
-        "probe_version": "1.1.0",
+        "probe_version": "1.2.0",
         "observed_at": "2026-08-27T00:00:00Z",
         "identity": {
             "instance_id": TARGET_INSTANCE_ID,
@@ -46,6 +46,11 @@ def runtime_stopped_document(**overrides: object) -> dict[str, object]:
             "oom_killed": None,
             "restart_count": None,
             "published_ports": {},
+        },
+        "active_game": {
+            "state": "not-applicable",
+            "game_id": None,
+            "binding_consistency": "not-applicable",
         },
         "minecraft": {
             "runtime_state": "not-running",
@@ -97,6 +102,11 @@ def runtime_running_document(
         "oom_killed": False,
         "restart_count": 0,
         "published_ports": {},
+    }
+    document["active_game"] = {
+        "state": "observed",
+        "game_id": "game-vanilla-main",
+        "binding_consistency": "consistent",
     }
     successful = protocol_result == "success"
     document["minecraft"] = {

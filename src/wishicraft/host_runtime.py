@@ -86,6 +86,10 @@ def render_boot_time_artifacts(
         "mem_limit": container_memory,
         "stop_grace_period": f"{compose_stop}s",
         "env_file": ["runtime.env"],
+        "labels": {
+            "com.wishicraft.active-game-id": project.initial_game_id,
+            "com.wishicraft.active-game-data-source": game_directory,
+        },
         "volumes": [
             {
                 "type": "bind",

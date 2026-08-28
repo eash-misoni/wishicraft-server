@@ -9,6 +9,9 @@ from enum import StrEnum
 from typing import Protocol, cast
 
 from wishicraft.probe import (
+    GAME_ID_PATTERN,
+    ActiveGameState,
+    BindingConsistency,
     ContainerState,
     DockerState,
     HostRuntimeProbe,
@@ -63,6 +66,14 @@ class MinecraftState(StrEnum):
     UNKNOWN = "unknown"
 
 
+class Discrepancy(StrEnum):
+    """Observed divergence that does not rewrite runtime protocol readiness."""
+
+    ACTIVE_GAME_MISMATCH = "active-game-mismatch"
+    ACTIVE_GAME_UNKNOWN = "active-game-unknown"
+    RUNTIME_STATE_MISMATCH = "runtime-state-mismatch"
+
+
 class Ec2Api(Protocol):
     """Narrow EC2 API boundary used by the first status slice."""
 
@@ -98,6 +109,10 @@ class TargetStatus:
     container_state: ContainerState
     minecraft_service_state: MinecraftState
     minecraft_protocol_state: MinecraftState
+    expected_game_id: str
+    active_game_state: ActiveGameState
+    observed_active_game_id: str | None
+    discrepancies: tuple[Discrepancy, ...]
     ready: bool
     observed_at: datetime
 
@@ -119,6 +134,10 @@ class TargetStatus:
             "container_state": self.container_state.value,
             "minecraft_service_state": self.minecraft_service_state.value,
             "minecraft_protocol_state": self.minecraft_protocol_state.value,
+            "expected_game_id": self.expected_game_id,
+            "active_game_state": self.active_game_state.value,
+            "observed_active_game_id": self.observed_active_game_id,
+            "discrepancies": [item.value for item in self.discrepancies],
             "ready": self.ready,
             "observed_at": observed_at,
         }
@@ -131,13 +150,17 @@ class TargetStatusObserver:
         self,
         *,
         instance_id: str,
+        expected_game_id: str,
         ec2: Ec2Api,
         ssm: SsmApi,
         host_runtime_probe: HostRuntimeProbeApi,
     ) -> None:
         if INSTANCE_ID_PATTERN.fullmatch(instance_id) is None:
             raise ValueError("invalid target EC2 instance ID")
+        if GAME_ID_PATTERN.fullmatch(expected_game_id) is None:
+            raise ValueError("invalid expected game ID")
         self._instance_id = instance_id
+        self._expected_game_id = expected_game_id
         self._ec2 = ec2
         self._ssm = ssm
         self._host_runtime_probe = host_runtime_probe
@@ -161,6 +184,10 @@ class TargetStatusObserver:
                 container_state=ContainerState.UNKNOWN,
                 minecraft_service_state=MinecraftState.NOT_APPLICABLE,
                 minecraft_protocol_state=MinecraftState.NOT_APPLICABLE,
+                expected_game_id=self._expected_game_id,
+                active_game_state=ActiveGameState.NOT_APPLICABLE,
+                observed_active_game_id=None,
+                discrepancies=(),
                 ready=False,
                 observed_at=observed_at,
             )
@@ -183,6 +210,7 @@ class TargetStatusObserver:
                     ec2_state=ec2_state,
                     ssm_state=ssm_state,
                     probe=probe,
+                    expected_game_id=self._expected_game_id,
                     observed_at=observed_at,
                 )
             except Exception:  # noqa: BLE001 - transport/parser failures are fail-closed.
@@ -198,6 +226,10 @@ class TargetStatusObserver:
             container_state=ContainerState.UNKNOWN,
             minecraft_service_state=MinecraftState.UNKNOWN,
             minecraft_protocol_state=MinecraftState.UNKNOWN,
+            expected_game_id=self._expected_game_id,
+            active_game_state=ActiveGameState.UNKNOWN,
+            observed_active_game_id=None,
+            discrepancies=(),
             ready=False,
             observed_at=observed_at,
         )
@@ -287,6 +319,7 @@ def _status_from_probe(
     ec2_state: Ec2State,
     ssm_state: SsmState,
     probe: HostRuntimeProbe,
+    expected_game_id: str,
     observed_at: datetime,
 ) -> TargetStatus:
     host_runtime_state = _normalize_host_runtime(probe)
@@ -304,6 +337,7 @@ def _status_from_probe(
         ProtocolState.UNKNOWN: MinecraftState.UNKNOWN,
     }[probe.protocol_state]
     ready = probe.ready and host_runtime_state is HostRuntimeState.RUNNING
+    discrepancies = _active_game_discrepancies(probe, expected_game_id)
     return TargetStatus(
         instance_id=instance_id,
         ec2_state=ec2_state,
@@ -314,6 +348,10 @@ def _status_from_probe(
         container_state=probe.container.state,
         minecraft_service_state=minecraft_state,
         minecraft_protocol_state=protocol_state,
+        expected_game_id=expected_game_id,
+        active_game_state=probe.active_game.state,
+        observed_active_game_id=probe.active_game.game_id,
+        discrepancies=discrepancies,
         ready=ready,
         observed_at=observed_at,
     )
@@ -340,3 +378,19 @@ def _normalize_host_runtime(probe: HostRuntimeProbe) -> HostRuntimeState:
     ):
         return HostRuntimeState.UNKNOWN
     return HostRuntimeState.DEGRADED
+
+
+def _active_game_discrepancies(
+    probe: HostRuntimeProbe, expected_game_id: str
+) -> tuple[Discrepancy, ...]:
+    active_game = probe.active_game
+    if probe.container.state is not ContainerState.RUNNING:
+        return ()
+    if active_game.state is ActiveGameState.UNKNOWN:
+        return (Discrepancy.ACTIVE_GAME_UNKNOWN,)
+    discrepancies: list[Discrepancy] = []
+    if active_game.game_id != expected_game_id:
+        discrepancies.append(Discrepancy.ACTIVE_GAME_MISMATCH)
+    if active_game.binding_consistency is BindingConsistency.MISMATCH:
+        discrepancies.append(Discrepancy.RUNTIME_STATE_MISMATCH)
+    return tuple(discrepancies)

@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 
 import pytest
 
 from tests.probe_fixtures import runtime_running_json, runtime_stopped_json
-from wishicraft.probe import ContainerState, DockerState, MountState
+from wishicraft.probe import ActiveGameState, ContainerState, DockerState, MountState
 from wishicraft.status import (
+    Discrepancy,
     Ec2Api,
     Ec2State,
     HostRuntimeProbeApi,
@@ -16,10 +18,12 @@ from wishicraft.status import (
     MinecraftState,
     SsmApi,
     SsmState,
+    TargetStatus,
     TargetStatusObserver,
 )
 
 TARGET_INSTANCE_ID = "i-04fc0629dc4ea466e"
+EXPECTED_GAME_ID = "game-vanilla-main"
 OBSERVED_AT = datetime(2026, 8, 23, 12, 34, 56, tzinfo=UTC)
 
 
@@ -86,6 +90,7 @@ def observer(
 ) -> TargetStatusObserver:
     return TargetStatusObserver(
         instance_id=TARGET_INSTANCE_ID,
+        expected_game_id=EXPECTED_GAME_ID,
         ec2=ec2,
         ssm=ssm if ssm is not None else FakeSsm({}),
         host_runtime_probe=probe if probe is not None else FakeProbe(),
@@ -123,6 +128,10 @@ def test_stopped_target_short_circuits_unreachable_runtime_layers() -> None:
         "container_state": "unknown",
         "minecraft_service_state": "not-applicable",
         "minecraft_protocol_state": "not-applicable",
+        "expected_game_id": EXPECTED_GAME_ID,
+        "active_game_state": "not-applicable",
+        "observed_active_game_id": None,
+        "discrepancies": [],
         "ready": False,
         "observed_at": "2026-08-23T12:34:56Z",
     }
@@ -241,7 +250,75 @@ def test_online_running_protocol_ready_normalizes_to_ready() -> None:
     assert status.container_state is ContainerState.RUNNING
     assert status.minecraft_service_state is MinecraftState.RUNNING
     assert status.minecraft_protocol_state is MinecraftState.READY
+    assert status.active_game_state is ActiveGameState.OBSERVED
+    assert status.observed_active_game_id == EXPECTED_GAME_ID
+    assert status.discrepancies == ()
     assert status.ready is True
+
+
+def ready_status_with_active_game(active_game: dict[str, object]) -> TargetStatus:
+    document = json.loads(runtime_running_json())
+    document["active_game"] = active_game
+    ec2 = FakeEc2(
+        {
+            "Reservations": [
+                {"Instances": [{"InstanceId": TARGET_INSTANCE_ID, "State": {"Name": "running"}}]}
+            ]
+        }
+    )
+    ssm = FakeSsm(
+        {"InstanceInformationList": [{"InstanceId": TARGET_INSTANCE_ID, "PingStatus": "Online"}]}
+    )
+    return observer(ec2, ssm, FakeProbe(json.dumps(document))).observe(observed_at=OBSERVED_AT)
+
+
+def test_protocol_ready_with_matching_active_game_has_no_discrepancy() -> None:
+    status = ready_status_with_active_game(
+        {
+            "state": "observed",
+            "game_id": EXPECTED_GAME_ID,
+            "binding_consistency": "consistent",
+        }
+    )
+
+    assert status.ready is True
+    assert status.discrepancies == ()
+
+
+def test_protocol_ready_with_other_active_game_keeps_runtime_ready() -> None:
+    status = ready_status_with_active_game(
+        {
+            "state": "observed",
+            "game_id": "game-fabric-test",
+            "binding_consistency": "consistent",
+        }
+    )
+
+    assert status.ready is True
+    assert status.observed_active_game_id == "game-fabric-test"
+    assert status.discrepancies == (Discrepancy.ACTIVE_GAME_MISMATCH,)
+
+
+def test_running_with_unknown_active_game_derives_unknown_discrepancy() -> None:
+    status = ready_status_with_active_game(
+        {"state": "unknown", "game_id": None, "binding_consistency": "unknown"}
+    )
+
+    assert status.ready is True
+    assert status.discrepancies == (Discrepancy.ACTIVE_GAME_UNKNOWN,)
+
+
+def test_active_game_bind_mismatch_is_runtime_discrepancy() -> None:
+    status = ready_status_with_active_game(
+        {
+            "state": "observed",
+            "game_id": EXPECTED_GAME_ID,
+            "binding_consistency": "mismatch",
+        }
+    )
+
+    assert status.ready is True
+    assert status.discrepancies == (Discrepancy.RUNTIME_STATE_MISMATCH,)
 
 
 @pytest.mark.parametrize("protocol_result", ["failed", "unavailable", "unknown"])
@@ -450,6 +527,7 @@ def test_invalid_target_instance_id_is_rejected() -> None:
     with pytest.raises(ValueError, match="invalid target EC2 instance ID"):
         TargetStatusObserver(
             instance_id="i-guessed",
+            expected_game_id=EXPECTED_GAME_ID,
             ec2=FakeEc2({}),
             ssm=FakeSsm({}),
             host_runtime_probe=FakeProbe(),

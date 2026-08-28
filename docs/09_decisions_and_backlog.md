@@ -10,6 +10,16 @@
 
 ## 2. 採用済み決定
 
+### D-071 Phase 3 active gameはHost Runtime明示metadataと実bindから観測する
+
+- **状態:** Accepted
+- **日付:** 2026-08-28
+- **Source of Truth:** Control Plane期待値はGit管理の初期Game ID（将来はvalidated desired Game ID）とし、Host Runtimeがrealizeした現在値はrendererがCompose containerへ付与する明示Game ID/data source labelを正本とする。directory名、Compose project/container名、Minecraft内部fileからGame IDを逆算しない。
+- **Observation:** probe v1.2.0はrunning containerだけでlogical Game IDを返し、宣言data sourceとDocker inspectの一意なbind `/data` sourceを比較する。container非runningはnot-applicable、metadata missing/malformed/ambiguousはunknown、bind不一致はruntime-state-mismatchへfail-closedする。probeはread-onlyを維持する。
+- **Discrepancy:** expected/observed差は`active-game-mismatch`、running中の観測不能は`active-game-unknown`、metadata/bind矛盾は`runtime-state-mismatch`とする。EC2/container停止時はactive game discrepancyを生成しない。
+- **READY boundary:** `TargetStatus.ready`はMinecraft protocol runtime READYのままとし、active game mismatchでもtrueを保持できる。START-005のoperation成功は上位Workflowがruntime READY、active game一致、後続endpoint/DNS一致を合わせて判定する。
+- **Scope:** 本Decisionはrepository契約とtestだけを更新し、AWS、Host Runtime apply、Minecraft lifecycle、Reconcile、DynamoDB、Lambda、Route 53を実行・実装しない。
+
 ### D-070 Phase 3 runtime READYはcontainer-local Java protocol ping成功を必須とする
 
 - **状態:** Accepted
@@ -31,7 +41,7 @@
 - **Safety:** Control Planeが任意shellを渡すinterface、Minecraft内部file/world、environment/log、RCON、secretの観測、probeによるrepair/lifecycle/filesystem/Docker mutationを禁止する。transport/schema/identity/command failureはHost Runtime以下を`unknown`へfail-closedする。
 - **READY:** container runningやDocker healthだけではREADYにしない。v1.0.xで`ready=false`へ固定していた契約は、D-070のprotocol-aware probe v1.1.0で拡張する。
 - **Timeout:** stage正本のstatus用`ssm_probe=60`秒を使い、script executionは45秒とする。start/stop用Host Runtime timeoutを流用しない。
-- **Runtime compatibility:** SSMで転送するprobeはControl Plane packageのPython targetではなくTarget AMIの標準interpreterでも実行可能でなければならない。v1.0.0の初回実機試行はAL2023のPython 3.9に`datetime.UTC`がなくcommand failureとなったため成功扱いせず、Python 3.9 syntax/API compatibility testを追加したv1.0.1で修正した。現行正本はD-070でprotocol contractを追加したv1.1.0である。
+- **Runtime compatibility:** SSMで転送するprobeはControl Plane packageのPython targetではなくTarget AMIの標準interpreterでも実行可能でなければならない。v1.0.0の初回実機試行はAL2023のPython 3.9に`datetime.UTC`がなくcommand failureとなったため成功扱いせず、Python 3.9 syntax/API compatibility testを追加したv1.0.1で修正した。protocol contractはD-070のv1.1.0、現行active game contractはD-071のv1.2.0である。
 - **Dev observation:** repository validationとCI成功後、Targetを一時起動してSSM Onlineを確認した。固定probe v1.0.1はexit 0、schema v1、stderr空で、expected XFS/UUID mount、Docker active、Host Runtime inactive、固定digestのcontainer stopped、restart policy no、OOMKilled false、RestartCount 0、Minecraft not-running、protocol not-applicable、ready falseを返した。status経路も同じcanonical stateへ正規化した。
 - **No mutation / closeout:** 直接probeとstatus経路の前後で、`observed_at`以外のprobe事実、mount root metadata、EBS attachment、Target SGに変化はなかった。container/Host Runtime停止を確認してTarget EC2を通常停止し、停止後status経路がRun Commandを送らずEC2 stopped / SSM not-applicable / Host Runtime not-running / ready falseを返すことを確認した。Phase 1/Target stacks、data EBS、snapshot、ingress、DNSは変更していない。
 

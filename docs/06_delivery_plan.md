@@ -389,7 +389,9 @@ Host Runtime observation sliceはSSM pagination、固定read-only probe、Run Co
 
 直接観測した固定imageのmc-monitorは0.16.11で、probe v1.1.0はMOTD/player/raw responseを伝播せず必要fieldだけを正規化した。READY時はmount expected、Docker/Host Runtime/container running、health healthy、OOMKilled false、RestartCount 0、restart no、memory 2816 MiB、published portsなしだった。canonical Host Runtime stopはexit 0で、overworld/the_end/the_nether保存と`All dimensions are saved`、process/listener不在を確認した。EC2 running中のpost-stopはprotocol not-applicable / ready falseへ戻り、Target停止後statusはRun Commandを送らなかった。
 
-今回完了したのはMinecraft running observation、protocol-aware status、runtime READY true、running→not-ready→ready→stopped遷移、protocol failureではREADYにしない契約である。active game mismatch/discrepancy、public IPv4/Route 53、Reconcile domain service、SystemState/DynamoDB、Lambda、Control Plane integrationは未完了とする。
+2026-08-28にrepository-onlyのactive game observation sliceを完了した。`config/project.yaml`のinitial Game IDをControl Plane期待値とし、Host Runtime rendererがcontainerへ明示するGame ID/data source metadataと実`/data` bindをread-only probe v1.2.0で照合する。期待/観測一致、active game mismatch/unknown、runtime bind mismatchをstatusの独立discrepancyとして導出し、protocol runtime READYをgame mismatchでfalseへ書き換えない。
+
+今回までに完了したのはMinecraft running observation、protocol-aware status、runtime READY true、running→not-ready→ready→stopped遷移、protocol failureではREADYにしない契約、active game observation、active game discrepancyである。public IPv4 observation、Route 53 observation、endpoint discrepancy、Reconcile domain service、SystemState/DynamoDB、Lambda、Control Plane integrationは未完了とする。
 
 ### 確認ケース
 

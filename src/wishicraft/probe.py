@@ -13,6 +13,7 @@ INSTANCE_ID_PATTERN = re.compile(r"^i-[0-9a-f]{17}$")
 SHA256_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 ERROR_CODE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
 EXPECTED_MINECRAFT_VERSION = "26.2"
+GAME_ID_PATTERN = re.compile(r"^game-[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 class ProbeContractError(ValueError):
@@ -66,6 +67,19 @@ class ProtocolResult(StrEnum):
     UNKNOWN = "unknown"
 
 
+class ActiveGameState(StrEnum):
+    OBSERVED = "observed"
+    NOT_APPLICABLE = "not-applicable"
+    UNKNOWN = "unknown"
+
+
+class BindingConsistency(StrEnum):
+    CONSISTENT = "consistent"
+    MISMATCH = "mismatch"
+    NOT_APPLICABLE = "not-applicable"
+    UNKNOWN = "unknown"
+
+
 @dataclass(frozen=True)
 class MountObservation:
     state: MountState
@@ -107,6 +121,13 @@ class ProtocolObservation:
 
 
 @dataclass(frozen=True)
+class ActiveGameObservation:
+    state: ActiveGameState
+    game_id: str | None
+    binding_consistency: BindingConsistency
+
+
+@dataclass(frozen=True)
 class HostRuntimeProbe:
     observed_at: datetime
     instance_id: str
@@ -118,6 +139,7 @@ class HostRuntimeProbe:
     host_runtime_unit: str
     host_runtime_state: UnitState
     container: ContainerObservation
+    active_game: ActiveGameObservation
     minecraft_runtime_state: str
     protocol_state: ProtocolState
     protocol: ProtocolObservation
@@ -136,7 +158,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     document = _mapping(raw, "document")
     if _integer(document, "schema_version") != 1:
         raise ProbeContractError("unsupported probe schema version")
-    if _string(document, "probe_version") != "1.1.0":
+    if _string(document, "probe_version") != "1.2.0":
         raise ProbeContractError("unsupported probe version")
     observed_at = _timestamp(document, "observed_at")
 
@@ -163,6 +185,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
         raise ProbeContractError("unexpected Host Runtime unit")
     host_runtime_state = _enum(UnitState, host_runtime, "state")
     container = _parse_container(_mapping(document.get("container"), "container"))
+    active_game = _parse_active_game(_mapping(document.get("active_game"), "active_game"))
     minecraft = _mapping(document.get("minecraft"), "minecraft")
     minecraft_runtime_state = _string(minecraft, "runtime_state")
     protocol_state = _enum(ProtocolState, minecraft, "protocol_state")
@@ -179,10 +202,15 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
             or protocol.attempted
             or protocol.result is not ProtocolResult.NOT_APPLICABLE
             or ready
+            or active_game.state is not ActiveGameState.NOT_APPLICABLE
         ):
             raise ProbeContractError("stopped container has impossible Minecraft state")
     elif container.state is ContainerState.RUNNING:
-        if minecraft_runtime_state != "running" or not protocol.attempted:
+        if (
+            minecraft_runtime_state != "running"
+            or not protocol.attempted
+            or active_game.state is ActiveGameState.NOT_APPLICABLE
+        ):
             raise ProbeContractError("running container requires protocol observation")
         if protocol.result is ProtocolResult.SUCCESS:
             expected_state = (
@@ -200,6 +228,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
         or protocol_state is not ProtocolState.UNKNOWN
         or protocol.attempted
         or protocol.result is not ProtocolResult.UNKNOWN
+        or active_game.state is not ActiveGameState.UNKNOWN
         or ready
     ):
         raise ProbeContractError("unprobed Minecraft state must remain unknown")
@@ -228,6 +257,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
         host_runtime_unit=host_runtime_unit,
         host_runtime_state=host_runtime_state,
         container=container,
+        active_game=active_game,
         minecraft_runtime_state=minecraft_runtime_state,
         protocol_state=protocol_state,
         protocol=protocol,
@@ -326,6 +356,28 @@ def _parse_container(value: dict[str, object]) -> ContainerObservation:
         restart_count=restart_count,
         published_ports=published_ports,
     )
+
+
+def _parse_active_game(value: dict[str, object]) -> ActiveGameObservation:
+    state = _enum(ActiveGameState, value, "state")
+    game_id = _optional_string(value, "game_id")
+    consistency = _enum(BindingConsistency, value, "binding_consistency")
+    if state is ActiveGameState.OBSERVED:
+        if game_id is None or GAME_ID_PATTERN.fullmatch(game_id) is None:
+            raise ProbeContractError("observed active game has invalid identity")
+        if consistency not in {
+            BindingConsistency.CONSISTENT,
+            BindingConsistency.MISMATCH,
+        }:
+            raise ProbeContractError("observed active game lacks binding result")
+    elif game_id is not None:
+        raise ProbeContractError("unobserved active game contains identity")
+    elif state is ActiveGameState.NOT_APPLICABLE:
+        if consistency is not BindingConsistency.NOT_APPLICABLE:
+            raise ProbeContractError("inactive game has inconsistent binding state")
+    elif consistency is not BindingConsistency.UNKNOWN:
+        raise ProbeContractError("unknown active game has known binding state")
+    return ActiveGameObservation(state, game_id, consistency)
 
 
 def _parse_protocol(value: dict[str, object]) -> ProtocolObservation:
