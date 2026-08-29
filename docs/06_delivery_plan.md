@@ -590,13 +590,17 @@ VerifyAdmissionAndLock
 - stop成功後のDesired/Observedが一致する。
 - `SetDesiredStopped`後の失敗ではDesired `STOPPED`を維持し、残存実状態を記録する。
 
-### Repository implementation status（2026-08-29 interruption recovery）
+### Repository / integration status（2026-08-29）
 
 STOP専用Standard State Machine、Task Lambda、Admission接続、Desired STOPPED convergence、lease renew/side-effect前verify、fixed Host Runtime STOP、explicit RCON save、graceful stop確認、EC2 stop、DNS DELETE/INSYNC、fresh Reconcile、failure classificationをrepositoryへ実装した。Actual stopped + Desired RUNNING/STOPPED、stale DNSでもEC2を再起動せず収束する。
 
 RCON secretはstage固定Parameter Store SecureString名だけをGit管理し、Target Hostの`/run/wishicraft`へ取得する。password fileに加え、itzgが生成するrcon-cli configもephemeral bindとしてData EBSへのsecret永続化を防ぐ。Phase 5 predecessor checksumからの固定artifact atomic replacementを用意した。
 
-この記録時点でPhase 6 Control Plane deploy、Target IAM/artifact update、secret作成、RCON有効化、STOP admission、実RCON、実STOPは未実施である。TargetはoperatorがHost Runtime停止確認後にEC2停止したactual stopped状態だが、explicit save等の証跡がないためPhase 6 product STOP successには数えない。次のAWS writeは明示承認境界である。
+operator停止後の `Desired RUNNING` revision 2 / Actual EC2 stopped / stale DNSという不整合から、fresh ReconcileでStopped observationとDNS discrepancyを保存した後、Control Plane stackだけへPhase 6 STOP resourcesをdeployした。canonical AdmissionからSTOPを実行し、Operation `op-c944e14c-88ee-456f-a221-617d35aa4838`はActual stopped short-circuitを選択して、runtime、RCON、SSM、EC2 start/stopを呼ばず、DesiredをSTOPPED revision 3へCASした。lease ownershipをDNS side effect直前に更新・検証し、stale A recordをchange `/change/C08095151JYYWO3IEW862`でDELETE、Route 53 INSYNC後のfresh ReconcileでEC2 stopped、SSM/protocol not-applicable、Host Runtime not-running、public IPv4/DNS absent、discrepancyなし、HEALTHYを確認して42.316秒でSUCCEEDEDとなった。Lock/current operationはowned terminal transactionで解放された。
+
+同一idempotency key/payloadの再送は同じOperationを`created=false`で返し、STOP executionは1件のまま、Desired revision、DNS、Lock、EC2/SSM side effectを変更しなかった。実行前後のTarget向けSSM command countは71、最新command IDも同一で、CloudTrail上のTarget StartInstances/StopInstancesにもintegration時間帯の新規eventはない。これらはstopped-state convergenceの実AWS証跡であり、repository testsとは区別する。READYからのexplicit save / graceful runtime stop / EC2 stopを含む通常STOP pathは未実証である。
+
+Target secret-read IAM、Phase 6 Host Runtime artifact、RCON SecureString、secret injection、実RCON commandは未適用である。次のAWS writeはこれらの初production適用とSTART→STOP end-to-end検証に対する別の明示承認境界とする。
 
 ## 10. Phase 7 — Discord MVP
 

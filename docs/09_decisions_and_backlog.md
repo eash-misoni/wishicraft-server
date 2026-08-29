@@ -734,13 +734,14 @@
 
 ### D-077 Phase 6 STOP専用workflowとephemeral RCON client config
 
-- **状態:** Accepted（repository-only。初AWS適用は未承認）
+- **状態:** Accepted（Control Plane / stopped-state convergence適用済み。RCON/Target初適用は未承認）
 - **日付:** 2026-08-29
 - STARTとSTOPはfailure isolationとIAM最小化のため別Standard State Machine/Task Lambdaとする。Admission、Operation/Lock、Desired CAS、Reconcile contractは共有する。
 - STOPは固定Host Runtime operation内でcontainer-local `rcon-cli save-all flush`を実行し、成功後だけsystemd graceful stopへ進む。systemd/itzgだけの暗黙saveをSTOP-001のexplicit save証跡へ読み替えない。
 - `RCON_PASSWORD_FILE`のsourceはHost `/run/wishicraft/rcon-password`とする。itzgが`/data/.rcon-cli.env`と`.rcon-cli.yaml`へpasswordを派生保存するため、両pathもHost `/run/wishicraft`のephemeral filesでbindし、Data EBSにsecretを残さない。
 - Actual EC2 stoppedではruntimeを起動し直さず、Desired STOPPED、DNS absent、fresh Observedへ収束する。通常pathの順序はcanonical contractどおりruntime停止確認、EC2 stopped、DNS DELETE/INSYNCである。
 - Target secret read IAM、artifact、secret作成、injection、実RCON commandの最初のproduction適用は明示承認境界を維持する。
+- **Stopped-state dev evidence:** `Desired RUNNING` revision 2 / Actual stopped / stale DNSからcanonical STOP Admissionを実行し、Actual stopped short-circuitでDesired STOPPED revision 3、DNS DELETE/INSYNC、fresh stopped observation、HEALTHY、Operation SUCCEEDED、Lock/current operation解放へ収束した。実行時間は42.316秒で、Target向けSSM、EC2 Start/Stop、Host Runtime、RCON、secret readは0件だった。同一payload retryは同じOperationを`created=false`で返し、新規executionもside effectも作らなかった。これは通常running STOPのsave/graceful shutdownを実証するものではない。
 
 ## 5. Current blockers
 
