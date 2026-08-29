@@ -36,6 +36,8 @@ def test_secret_artifact_uses_ephemeral_file_and_fixed_parameter_allowlist() -> 
     assert "--with-decryption" in script
     assert "/wishicraft/(dev|prod)/secret/rcon-password" in script
     assert "chmod 0400" in script
+    assert "RUNTIME_ENV_PATH=/etc/wishicraft/host-runtime/runtime.env" in script
+    assert 'install -o "$runtime_uid" -g "$runtime_gid" -m 0600' in script
     assert "RCON_PASSWORD=" not in script
     assert 'rm -f -- "$SECRET_PATH" "$CLI_ENV_PATH" "$CLI_YAML_PATH"' in script
 
@@ -60,6 +62,7 @@ def test_upgrade_requires_approved_predecessors_and_installs_entrypoint_last() -
     assert "RUNTIME_ENV_PREDECESSOR=723b6e" in script
     assert "BROKEN_HOST_ENV_PREDECESSOR=62c9bd" in script
     assert "CONTAINER_ENV_PREDECESSOR=271ce8" in script
+    assert "SECRET_PREDECESSOR=9190a6" in script
     assert "RUNTIME_ENV_PATH=/etc/wishicraft/host-runtime/runtime.env" in script
     assert 'replace_existing "$SOURCE_ROOT/phase2-real-data.env" "$HOST_ENV_PATH"' in script
     assert 'replace_existing "$SOURCE_ROOT/phase6-runtime.env" "$RUNTIME_ENV_PATH"' in script
