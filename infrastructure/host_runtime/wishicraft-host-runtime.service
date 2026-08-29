@@ -2,6 +2,7 @@
 Description=Wishicraft itzg Host Runtime
 Requires=wishicraft-data-volume.service docker.service
 After=wishicraft-data-volume.service docker.service
+RequiresMountsFor=/srv/minecraft
 
 [Service]
 Type=oneshot

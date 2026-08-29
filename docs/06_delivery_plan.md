@@ -478,7 +478,7 @@ start/stopを安全に実行するための履歴とロックを作る。
 
 ## 8. Phase 5 — 安全なstart workflow
 
-- **状態:** Repository validated / AWS integration pending（2026-08-29）
+- **状態:** AWS integration recovery in progress（2026-08-29）
 
 ### 目的
 
@@ -542,7 +542,7 @@ Operation admissionが新規STARTを作成した場合だけ`operation_id`をSta
 
 Host Runtime commandは引数がexactly `START`のversioned wrapperだけを許可し、systemdの固定unitへ変換する。instance ID、shell、path、Minecraft commandをAPI inputにしない。STARTはRCONを必要とせず、RCON有効化、secret取得、管理port publishはこのsliceに含めない。
 
-repository validationとcredentialless synthは完了対象だが、Target SGへのMinecraft TCP 25565 ingressだけのupdate、Control Plane stack update、wrapperのTarget配置、実EC2 start、SSM Run Command、Route 53 writeは未実行であり、public exposure/AWS writeの明示承認後にintegrationで完了条件を実測する。SSH、RCON、管理port ingressは追加しない。
+初回AWS integrationではTarget SGのMinecraft TCP 25565 in-place update、Control Plane stack、固定`operation-v1`配置、AdmissionからのSTARTを適用した。EC2、SSM、Host Runtime、container、protocol READYまでは成功したが、installed Composeがactive Game labels導入前のapproved predecessorだったため`active-game-unknown`でDNS write前にFAILEDとなった。operator `StopInstances`時にはmount unmountがExecStopと競合してgraceful shutdownを証明できなかった。D-076の固定artifact upgradeとmount orderingをrepositoryで修正し、実機ordering/active Game検証後にDesired RUNNING revision 2からrevisionを増やさないconvergence STARTを再実行する。SSH、RCON、管理port ingressは追加しない。
 
 ## 9. Phase 6 — 安全なstop workflow
 

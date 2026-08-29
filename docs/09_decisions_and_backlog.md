@@ -10,6 +10,16 @@
 
 ## 2. 採用済み決定
 
+### D-076 Host Runtimeはdata mount unitへ直接依存しactive Game metadataを固定artifactでrealizeする
+
+- **状態:** Accepted（Phase 5 recovery）
+- **日付:** 2026-08-29
+- **Incident evidence:** 初回Phase 5 STARTはEC2、SSM、typed Host Runtime START、container、protocol READY、player count 0まで到達したが、Target上の旧Compose artifactにD-071のactive Game labelsがなく`active-game-unknown`でfail-closedした。DNS write前にterminal FAILEDとなり、Desired RUNNING revision 2を維持した。利用上限中のoperator `StopInstances`では`/srv/minecraft` unmountとHost Runtime ExecStopが並行し、mount guardが`FAIL:MOUNT_SOURCE`となったためgraceful shutdownは証明されていない。
+- **Active Game realization:** canonical rendererが`com.wishicraft.active-game-id=game-vanilla-main`と宣言data sourceをcontainerへ付与する。probeはD-071どおりexplicit labelsと一意な`/data` bindだけを比較し、directory名からGame identityを導出しない。
+- **Mount ordering:** Host Runtime unitは独自mount guard serviceへの`Requires`/`After`に加え`RequiresMountsFor=/srv/minecraft`を持つ。systemdが対応するmount unitへの`Requires`/`After`を生成し、startではmount後、stopでは逆順によりHost Runtime ExecStop完了後にunmountを開始させる。boot enableなし、`Restart=no`、Compose `restart: "no"`を維持する。
+- **Upgrade:** Target適用は引数なしの固定repository artifactだけを使用する。既知のpredecessor/target SHA-256、regular/non-symlink、root owner、modeを検証し、同一directoryのtemporary fileからatomic renameする。未知artifact、runtime active、container/listener存在時は変更前に停止する。secret、environment dump、任意path/payloadを受け付けない。
+- **Desired retry:** STARTはDesired RUNNINGへの収束operationである。同一GameのDesiredが既にRUNNINGならrevisionを増やさず、fresh actual observationからEC2/SSM/runtime/endpoint convergenceを再開する。以前のOperationがterminalでLock/Current Operationがなければ新しいAdmissionを許可し、raw state repairは行わない。
+
 ### D-074 Phase 4 Lock ownership、Desired CAS、stale recovery契約
 
 - **状態:** Accepted（human review）

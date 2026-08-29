@@ -176,7 +176,7 @@ Phase 2 target Host Runtimeのstage設定は、その後のtarget platform lock�
 
 D-062でPhase 2 target platform lockを最終確定した。targetはAL2023 `2023.12.20260803`、kernel 6.18、ap-northeast-1の公式x86_64 AMI `al2023-ami-2023.12.20260803.3-kernel-6.18-x86_64` / `ami-0b4d2909a55ed2c78`である。Phase 1 as-built `2023.12.20260803.3` / kernel 6.1は履歴として変更しない。固定releaseの標準repositoryで確認したDockerは`docker-25.0.16-1.amzn2023.0.3.x86_64`だが、RPM NEVRAは独立した設定正本にせず実機install時にも記録・照合する。
 
-D-063でdev target hostは`MinecraftTargetStack-dev`へ分離した。既存VPC `vpc-0c3cca1e65696ed8e` / ap-northeast-1a subnet `subnet-0a70e5682ea8d0bd3`を明示inputとし、target EC2は`t3a.medium`、暗号化gp3 16 GiB root、public IPv4、専用SSM role/profileを使用する。Phase 2 deploy時の専用SGはingress 0であり、Phase 5 repositoryではSTART-005のためMinecraft TCP 25565だけを追加するが、AWS update前の明示承認境界にある。SSH/RCON/管理portは公開しない。target stackはdata EBS、Phase 1 IAM/SG、secret、DNSを参照しない。Phase 2 identityは観測済み`993:993`を使用する。
+D-063でdev target hostは`MinecraftTargetStack-dev`へ分離した。既存VPC `vpc-0c3cca1e65696ed8e` / ap-northeast-1a subnet `subnet-0a70e5682ea8d0bd3`を明示inputとし、target EC2は`t3a.medium`、暗号化gp3 16 GiB root、public IPv4、専用SSM role/profileを使用する。Phase 2 deploy時の専用SG ingress 0はhistorical stateであり、Phase 5適用後のbaselineはMinecraft gameplay TCP 25565だけを許可する。SSH/RCON/管理portは公開しない。target stackはdata EBS、Phase 1 IAM/SG、secret、DNSを参照しない。Phase 2 identityは観測済み`993:993`を使用する。
 
 Phase 7前:
 

@@ -4,13 +4,16 @@ from datetime import UTC, datetime
 
 import pytest
 
+from wishicraft.operation import LeaseProof
 from wishicraft.start_workflow import (
     Ec2LifecycleAdapter,
     FixedHostStartAdapter,
+    StartCoordinator,
     StartErrorCode,
     StartObservation,
     StartWorkflowError,
 )
+from wishicraft.system_state import DesiredState, DesiredStateSnapshot
 
 
 class FakeEc2:
@@ -30,6 +33,28 @@ class FakeSsm:
     def send_command(self, **kwargs: object) -> object:
         self.calls.append(kwargs)
         return {"Command": {"CommandId": "command-1"}}
+
+
+class FakeLeases:
+    def __init__(self) -> None:
+        self.verified = 0
+
+    def verify_owned(self, proof: LeaseProof, *, now: datetime) -> None:
+        del proof, now
+        self.verified += 1
+
+
+class FakeStates:
+    def __init__(self, snapshot: DesiredStateSnapshot) -> None:
+        self.snapshot = snapshot
+        self.updates: list[dict[str, object]] = []
+
+    def desired_snapshot(self) -> DesiredStateSnapshot:
+        return self.snapshot
+
+    def update_desired(self, **kwargs: object) -> int:
+        self.updates.append(kwargs)
+        return self.snapshot.desired_revision + 1
 
 
 def _observation(**overrides: object) -> StartObservation:
@@ -99,3 +124,73 @@ def test_observation_parser_rejects_raw_or_malformed_state() -> None:
 
 def test_reference_timestamp_is_timezone_aware() -> None:
     assert datetime(2026, 8, 29, tzinfo=UTC).utcoffset() is not None
+
+
+@pytest.mark.parametrize(
+    "observation",
+    (
+        _observation(
+            ec2_state="stopped",
+            ssm_state="not-applicable",
+            runtime_ready=False,
+            observed_active_game_id=None,
+            public_ipv4=None,
+            dns_ipv4_values=(),
+        ),
+        _observation(runtime_ready=False, observed_active_game_id=None, dns_ipv4_values=()),
+    ),
+)
+def test_desired_running_can_resume_convergence_without_revision_increment(
+    observation: StartObservation,
+) -> None:
+    leases = FakeLeases()
+    states = FakeStates(DesiredStateSnapshot(DesiredState.RUNNING, "game-vanilla-main", 2))
+    coordinator = StartCoordinator(leases, states, lease_seconds=900)  # type: ignore[arg-type]
+
+    revision, already_ready = coordinator.verify_and_set_desired(
+        proof=LeaseProof("wishicraft-main", "op-new", "lease-new", 9999999999),
+        observation=observation,
+        game_id="game-vanilla-main",
+        now=datetime(2026, 8, 29, tzinfo=UTC),
+    )
+
+    assert (revision, already_ready) == (2, False)
+    assert leases.verified == 1
+    assert states.updates == []
+
+
+def test_fully_converged_desired_running_skips_desired_mutation() -> None:
+    states = FakeStates(DesiredStateSnapshot(DesiredState.RUNNING, "game-vanilla-main", 2))
+    coordinator = StartCoordinator(FakeLeases(), states, lease_seconds=900)  # type: ignore[arg-type]
+
+    revision, already_ready = coordinator.verify_and_set_desired(
+        proof=LeaseProof("wishicraft-main", "op-new", "lease-new", 9999999999),
+        observation=_observation(),
+        game_id="game-vanilla-main",
+        now=datetime(2026, 8, 29, tzinfo=UTC),
+    )
+
+    assert (revision, already_ready) == (2, True)
+    assert states.updates == []
+
+
+def test_desired_stopped_normal_start_advances_revision_once() -> None:
+    states = FakeStates(DesiredStateSnapshot(DesiredState.STOPPED, None, 2))
+    coordinator = StartCoordinator(FakeLeases(), states, lease_seconds=900)  # type: ignore[arg-type]
+
+    revision, already_ready = coordinator.verify_and_set_desired(
+        proof=LeaseProof("wishicraft-main", "op-new", "lease-new", 9999999999),
+        observation=_observation(
+            ec2_state="stopped",
+            ssm_state="not-applicable",
+            runtime_ready=False,
+            observed_active_game_id=None,
+            public_ipv4=None,
+            dns_ipv4_values=(),
+        ),
+        game_id="game-vanilla-main",
+        now=datetime(2026, 8, 29, tzinfo=UTC),
+    )
+
+    assert (revision, already_ready) == (3, False)
+    assert len(states.updates) == 1

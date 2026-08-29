@@ -192,6 +192,32 @@ def test_mount_guard_failure_prevents_compose_operation(tmp_path: Path) -> None:
     assert not marker.exists()
 
 
+def test_mount_guard_failure_prevents_compose_stop(tmp_path: Path) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    marker = tmp_path / "docker-called"
+    mount_guard = bin_dir / "mount-guard"
+    docker = bin_dir / "docker"
+    mount_guard.write_text("#!/bin/sh\nexit 23\n", encoding="utf-8")
+    docker.write_text(f"#!/bin/sh\ntouch '{marker}'\n", encoding="utf-8")
+    for path in (mount_guard, docker):
+        path.chmod(0o755)
+
+    result = subprocess.run(
+        [str(HOST_RUNTIME / "stop.sh")],
+        env={
+            **os.environ,
+            "PATH": f"{bin_dir}:{os.environ['PATH']}",
+            "MOUNT_GUARD": str(mount_guard),
+            "COMPOSE_FILE": str(tmp_path / "compose.yaml"),
+        },
+        check=False,
+    )
+
+    assert result.returncode == 23
+    assert not marker.exists()
+
+
 def test_filesystem_preflight_rejects_symlink_without_modifying_it(tmp_path: Path) -> None:
     mount_path = tmp_path / "mount"
     game_directory = mount_path / "games" / "game-test" / "server"
@@ -315,6 +341,21 @@ def test_static_shutdown_artifacts_match_provisional_timeout_contract() -> None:
     assert "TimeoutStopSec=180" in (HOST_RUNTIME / "wishicraft-host-runtime.service").read_text(
         encoding="utf-8"
     )
+
+
+def test_host_runtime_has_direct_mount_unit_start_and_shutdown_ordering() -> None:
+    unit = (HOST_RUNTIME / "wishicraft-host-runtime.service").read_text(encoding="utf-8")
+
+    # RequiresMountsFor adds Requires= and After= dependencies on srv-minecraft.mount.
+    # systemd reverses After= ordering at shutdown, so ExecStop completes before unmount.
+    assert "RequiresMountsFor=/srv/minecraft" in unit
+    assert "Requires=wishicraft-data-volume.service docker.service" in unit
+    assert "After=wishicraft-data-volume.service docker.service" in unit
+    assert unit.index("RequiresMountsFor=/srv/minecraft") < unit.index("[Service]")
+    assert "ExecStop=/usr/local/lib/wishicraft-host-runtime/stop.sh" in unit
+    assert "Restart=no" in unit
+    assert "\n[Install]\n" not in unit
+    assert "WantedBy=" not in unit
 
 
 def test_docker_integration_contract_is_fixed_and_synthetic() -> None:
