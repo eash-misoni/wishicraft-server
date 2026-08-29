@@ -22,6 +22,16 @@ source "$HOST_ENV_PATH"
 set +a
 [[ "$COMPOSE_FILE" == /etc/wishicraft/host-runtime/compose.yaml ]] || \
   fail MOUNT_GUARD_FAILED 65
+[[ "$GAME_DIRECTORY" =~ ^/srv/minecraft/games/[a-z0-9-]+/server$ ]] || \
+  fail MOUNT_GUARD_FAILED 65
+for name in .rcon-cli.env .rcon-cli.yaml; do
+  placeholder="$GAME_DIRECTORY/$name"
+  if [[ -e "$placeholder" || -L "$placeholder" ]]; then
+    [[ -f "$placeholder" && ! -L "$placeholder" && ! -s "$placeholder" ]] || \
+      fail MOUNT_GUARD_FAILED 65
+    rm -f -- "$placeholder"
+  fi
+done
 "$FILESYSTEM_PREFLIGHT" || fail MOUNT_GUARD_FAILED 65
 container_id="$(docker compose --file "$COMPOSE_FILE" ps --quiet minecraft)" || \
   fail GRACEFUL_RUNTIME_STOP_FAILED 72
