@@ -57,11 +57,11 @@ aws ssm get-parameter \
   --query Parameter.Value \
   --output text >"$temporary" || fail
 [[ -s "$temporary" && "$(wc -l <"$temporary")" -le 1 ]] || fail
-chown root:root "$temporary"
+chown "$runtime_uid:$runtime_gid" "$temporary"
 mv -f -- "$temporary" "$SECRET_PATH"
 trap - EXIT
 [[ -f "$SECRET_PATH" && ! -L "$SECRET_PATH" ]] || fail
-[[ "$(stat -c '%U:%G:%a' "$SECRET_PATH")" == "root:root:400" ]] || fail
+[[ "$(stat -c '%u:%g:%a' "$SECRET_PATH")" == "$runtime_uid:$runtime_gid:400" ]] || fail
 [[ "$(stat -c '%u:%g:%a' "$CLI_ENV_PATH")" == "$runtime_uid:$runtime_gid:600" ]] || fail
 [[ "$(stat -c '%u:%g:%a' "$CLI_YAML_PATH")" == "$runtime_uid:$runtime_gid:600" ]] || fail
 printf '%s\n' '{"schema_version":1,"operation":"RCON_SECRET_PREPARE","status":"succeeded"}'
