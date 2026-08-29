@@ -58,6 +58,10 @@ def test_upgrade_requires_approved_predecessors_and_installs_entrypoint_last() -
     script = (HOST / "phase6_runtime_contract_upgrade.sh").read_text(encoding="utf-8")
     assert "COMPOSE_PREDECESSOR=c92fbb" in script
     assert "RUNTIME_ENV_PREDECESSOR=723b6e" in script
+    assert "BROKEN_HOST_ENV_PREDECESSOR=62c9bd" in script
+    assert "RUNTIME_ENV_PATH=/etc/wishicraft/host-runtime/runtime.env" in script
+    assert 'replace_existing "$SOURCE_ROOT/phase2-real-data.env" "$HOST_ENV_PATH"' in script
+    assert 'install_new "$SOURCE_ROOT/phase6-runtime.env" "$RUNTIME_ENV_PATH"' in script
     assert "OPERATION_PREDECESSOR=eb8ce7" in script
     assert "UNAPPROVED_PREDECESSOR" in script
     operation_install = 'replace_existing "$SOURCE_ROOT/operation-v1.sh"'
@@ -70,6 +74,7 @@ def test_upgrade_requires_approved_predecessors_and_installs_entrypoint_last() -
         "phase6-rcon.env",
         "phase6-compose.yaml",
         "phase6-runtime.env",
+        "phase2-real-data.env",
         "operation-v1.sh",
     ):
         digest = hashlib.sha256((HOST / filename).read_bytes()).hexdigest()
