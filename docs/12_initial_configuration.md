@@ -160,7 +160,7 @@ Phase 1前:
 
 dev用RCON passwordはSecureStringへ登録済みである。実値は取得・表示・Gitへの保存を行わない。Minecraft 26.2の公式server.jar URL、SHA-1、SHA-256、sizeは`config/stages/dev.yaml`へ固定した。初期GameのEULA同意は明示済みであるが、server.jarのEC2取得、checksum検証、Minecraft初回起動はdeploy後の別途手動確認として扱う。
 
-`mc-dev.wishicraft.net`のAレコードはPhase 0で手動作成しない。Phase 1でEC2起動後に現在の動的パブリックIPv4へUPSERTし、EC2停止完了後に削除する。
+`mc-dev.wishicraft.net`のAレコードはPhase 0で手動作成しない。Phase 5 START workflowがruntime READY、active Game一致、current public IPv4を確認した後にUPSERTし、Route 53 `INSYNC`とendpoint一致を成功条件にする。Phase 5以降のSG baselineはgameplay TCP 25565だけであり、SSH/RCON/管理portは公開しない。停止後のDNS cleanupはcanonical workflow/operator procedureだけで行い、Desired/Observedとの不一致をraw Route 53/DynamoDB mutationで隠さない。
 
 itzg採用後もEULA同意はoperator policy/gateとして維持する。承認主体と事実はWishicraft/operator側で管理し、承認済みの場合だけitzgへ同意入力を渡す。itzgの`EULA`入力自体を人間の承認記録の代替にしない。
 

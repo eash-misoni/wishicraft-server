@@ -21,7 +21,7 @@
 | 2 | itzg Host Runtime境界 | migration contract、mapping/apply、probe/start/stop command path |
 | 3 | 実測status | Reconcile Lambda、SystemState |
 | 4 | **Completed:** Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
-| 5 | **Repository validated / AWS integration pending:** 安全なstart | Start Step Functions |
+| 5 | **Completed:** 安全なstart | Start Step Functions |
 | 6 | 安全なstop | Stop Step Functions |
 | 7 | Discord MVP | `/mc status/start/stop` |
 | 8 | 運用保護 | backup、自動停止、heartbeat、追加監視 |
@@ -478,7 +478,7 @@ start/stopを安全に実行するための履歴とロックを作る。
 
 ## 8. Phase 5 — 安全なstart workflow
 
-- **状態:** AWS integration recovery in progress（2026-08-29）
+- **状態:** Completed（2026-08-29 repository / dev AWS integration完了）
 
 ### 目的
 
@@ -542,7 +542,11 @@ Operation admissionが新規STARTを作成した場合だけ`operation_id`をSta
 
 Host Runtime commandは引数がexactly `START`のversioned wrapperだけを許可し、systemdの固定unitへ変換する。instance ID、shell、path、Minecraft commandをAPI inputにしない。STARTはRCONを必要とせず、RCON有効化、secret取得、管理port publishはこのsliceに含めない。
 
-初回AWS integrationではTarget SGのMinecraft TCP 25565 in-place update、Control Plane stack、固定`operation-v1`配置、AdmissionからのSTARTを適用した。EC2、SSM、Host Runtime、container、protocol READYまでは成功したが、installed Composeがactive Game labels導入前のapproved predecessorだったため`active-game-unknown`でDNS write前にFAILEDとなった。operator `StopInstances`時にはmount unmountがExecStopと競合してgraceful shutdownを証明できなかった。D-076の固定artifact upgradeとmount orderingをrepositoryで修正し、実機ordering/active Game検証後にDesired RUNNING revision 2からrevisionを増やさないconvergence STARTを再実行する。SSH、RCON、管理port ingressは追加しない。
+初回AWS integrationではTarget SGのMinecraft TCP 25565 in-place update、Control Plane stack、固定`operation-v1`配置、AdmissionからのSTARTを適用した。EC2、SSM、Host Runtime、container、protocol READYまでは成功したが、installed Composeがactive Game labels導入前のapproved predecessorだったため`active-game-unknown`でDNS write前にFAILEDとなった。利用上限中のoperator `StopInstances`ではmount unmountがExecStopと競合して`FAIL:MOUNT_SOURCE`となり、この停止のgraceful shutdownは証明できなかった。
+
+D-076 recoveryでは旧Compose/unitのSHA-256をapproved predecessorとして照合し、固定secret-free artifactへatomic upgradeした。適用後はCompose `c92fbbfb8c955e249b39edbd2b2063e0cfa05214d8242bdeb302dd1d996b0770`（root:root/0600）、unit `6de3ea3ecfa68537f804872b467400e1e0316ed6627d50e5ed96fa80af2c1608`（root:root/0644）で、systemdの実生成依存に`Requires/After=srv-minecraft.mount`、boot時Host Runtime/container非起動を確認した。検証bootではprotocol READY、expected/observed active Game `game-vanilla-main`を確認した。controlled systemd poweroffではHost Runtime stop完了 `10:41:51.680530Z`の後にmount unmount開始 `10:41:51.712191Z`となり、Minecraft stop、全dimension保存、runner `Done`、container exit 0、OOM false、restart 0を確認した。
+
+その後、Desired RUNNING revision 2 / actual stopped / DNS absentから新しいAdmissionでconvergence STARTを開始し、revisionを増やさずEC2、SSM、typed Host Runtime START、protocol READY、active Game一致、public IPv4 `52.68.217.91`、Route 53 UPSERT/INSYNC、endpoint一致、HEALTHY、Operation SUCCEEDED、Lock/Current Operation解放まで完了した。executionは`2026-08-29T10:45:05.131Z`から`10:49:08.190Z`まで243.059秒だった。renew taskを5回観測し、900秒leaseには十分なmarginがあったが、Phase 6 STOPの実測前なので900秒/120秒はProvisionalを維持する。同一idempotency key/payloadのretryは同じOperationを`created=false`で返し、新しいexecution、Lock、EC2 boot、Host Runtime START、DNS writeを作らなかった。closeout時はDesired/Actual/ObservedがRUNNING、runtime READY、active Game一致、DNSがcurrent public IPv4と一致しHEALTHYである。SSH、RCON、管理port ingress、secret、Phase 1、Data EBS lifecycleは変更していない。
 
 ## 9. Phase 6 — 安全なstop workflow
 

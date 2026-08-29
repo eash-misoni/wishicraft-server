@@ -19,6 +19,7 @@
 - **Mount ordering:** Host Runtime unitは独自mount guard serviceへの`Requires`/`After`に加え`RequiresMountsFor=/srv/minecraft`を持つ。systemdが対応するmount unitへの`Requires`/`After`を生成し、startではmount後、stopでは逆順によりHost Runtime ExecStop完了後にunmountを開始させる。boot enableなし、`Restart=no`、Compose `restart: "no"`を維持する。
 - **Upgrade:** Target適用は引数なしの固定repository artifactだけを使用する。既知のpredecessor/target SHA-256、regular/non-symlink、root owner、modeを検証し、同一directoryのtemporary fileからatomic renameする。未知artifact、runtime active、container/listener存在時は変更前に停止する。secret、environment dump、任意path/payloadを受け付けない。
 - **Desired retry:** STARTはDesired RUNNINGへの収束operationである。同一GameのDesiredが既にRUNNINGならrevisionを増やさず、fresh actual observationからEC2/SSM/runtime/endpoint convergenceを再開する。以前のOperationがterminalでLock/Current Operationがなければ新しいAdmissionを許可し、raw state repairは行わない。
+- **Dev validation:** approved predecessorからのatomic upgrade後、実生成dependencyに`Requires/After=srv-minecraft.mount`を確認した。controlled poweroffではHost Runtime stop完了後にmount unmountが始まり、Minecraft全dimension保存、container exit 0、OOM false、restart 0を確認した。Desired RUNNING revision 2からrevisionを増やさないSTART convergenceは243.059秒でSUCCEEDEDし、active Game、DNS/endpoint、idempotency retryも一致した。
 
 ### D-074 Phase 4 Lock ownership、Desired CAS、stale recovery契約
 
@@ -27,7 +28,7 @@
 - **Lock identity:** `operation_id`をlogical ownerとし、各acquisitionで一意な`lease_id`を発行する。Lockはresource/system identity、`owner_operation_id`、`lease_id`、`lease_expires_at`を保持し、renew、release、protected side effect直前の確認はoperation/lease一致と未期限切れを要求する。同一Operationの二重executorや期限切れ後の古いexecutorをcurrent ownerとみなさない。
 - **Desired CAS:** Desiredは`desired_revision`、Observedは`observed_at`、Operation ownershipは`current_operation_id`で独立して保護する。Desired mutationはexpected revision NのCASでN+1へ進め、必要なoperationではCurrent Operation条件もtransactionへ含める。ReconcileはDesiredを上書きしない。将来の`rendered_revision`、`applied_revision`との接続を維持する。
 - **Stale recovery:** Lock expiryはOperation failureではない。deadline/lease超過はstale candidateとして新しい競合admissionをblockし、fresh Reconcile後の明示recoveryが旧Operationのterminal化とowned Current Operation/Lock cleanupを一transactionで行う。実状態を観測せず単純FAILED化せず、Phase 4 MVPの通常admissionへauto-recoveryを入れない。副作用前と安全と証明できる限定caseの将来自動化は別Decisionとする。
-- **Values/retention:** lease 900秒・renew 120秒はPhase 5/6 workflow実測前のProvisional値。Operation/Idempotency TTLはDeferredのままとする。
+- **Values/retention:** lease 900秒・renew 120秒はPhase 5 STARTの243.059秒実測で5回のrenewと十分なmarginを確認した。Phase 6 STOPの実測前なので両値はProvisionalを維持する。Operation/Idempotency TTLはDeferredのままとする。
 - **Dev integration:** 2026-08-29にControl Plane stackだけへ4 tablesとAdmission Lambdaをdeployした。条件付きGame登録、atomic admission、idempotency、競合/STATUS、operation/lease一致、wrong lease拒否、renew/owned release、Desired revision CAS、fresh Reconcileを必須とするstale recoveryを実DynamoDBで確認した。integration後はLock 0件、Current Operationなし、識別可能なOperation/Idempotency履歴だけを保持する。Admission IAMは対象5 tableの`ConditionCheckItem`、`GetItem`、`PutItem`、`TransactWriteItems`、`UpdateItem`とLambda loggingに限定し、runtime/AWS lifecycle mutation権限を持たない。
 
 ### D-073 Phase 4前はGame desired stateとGit管理runtime lockを分離する

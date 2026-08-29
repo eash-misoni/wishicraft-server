@@ -131,6 +131,8 @@ Phase 2aではHost Runtime unitをboot enableせず、systemd `Restart=no`、Com
 
 Phase 5 recoveryでは、EC2 shutdown時に`/srv/minecraft` unmountがHost Runtime ExecStopより先に進みmount guardが失敗するraceを実測した。Host Runtime unitは`RequiresMountsFor=/srv/minecraft`で実mount unitへ直接依存し、start時はmount確立後、shutdown時はExecStop完了後にunmountするsystemd orderingを必須とする。独自mount serviceだけへの依存をこの保証の代替にしない。Target artifact upgradeはapproved predecessor SHA-256から固定secret-free bytesへのatomic replacementだけを許可する。
 
+修正後のdev実測ではsystemd生成依存に`Requires/After=srv-minecraft.mount`が存在し、Host Runtime stop完了後にmount unmountが開始した。Minecraftは停止要求を受けて全dimensionを保存し、containerはexit 0、OOMKilled=false、RestartCount 0だった。診断bootでもHost Runtime/containerは自動起動しなかった。Phase 5 closeout後のnetwork baselineはgameplay TCP 25565だけで、canonical A recordはrunning Targetのcurrent public IPv4だけを指す。Phase 6完成前のoperator停止はproduct STOP成功として扱わず、graceful runtime停止の証拠を先に取得し、停止後のDesired/Observed/DNS不一致をraw mutationで隠さない。
+
 Phase 2b-1の観測と固定image検証により、`server.properties`一件だけを`0:993` / `0640`から`993:993` / `0640`へ移すD-061を採用した。contentを変更せず、Phase 1完全停止、mount identity、regular/non-symlink、owner/mode、ACLをfail-closedで照合する。current memory targetはcontainer `2816 MiB`、Xms `1G`、Xmx `2G`へ安全側に下げるが、実負荷/OOM観測までProvisionalとする。
 
 Phase 2 validation時のTarget SG ingress 0はhistorical safe stateである。Phase 5以降のdev baselineはMinecraft gameplay TCP 25565だけを`0.0.0.0/0`から許可し、online-modeと既存whitelistを必須とする。SSH、RCON、管理portは公開しない。後続Phaseは25565 ruleを機械的に削除せず、egressはSSM、固定AL2023 repository、Compose公式artifact、GHCRおよびMinecraft distribution取得に必要なHTTPSだけを許可する。target IAMはSSM managed node権限だけとし、secret読取、backup、EBS操作権限を持たない。
