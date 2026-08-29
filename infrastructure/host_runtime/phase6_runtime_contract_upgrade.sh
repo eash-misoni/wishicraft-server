@@ -15,7 +15,7 @@ readonly RUNTIME_ENV_PREDECESSOR=723b6ebf352b7bd731eb9b69a3e318b398b9109f76be928
 readonly BROKEN_HOST_ENV_PREDECESSOR=62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce
 readonly CONTAINER_ENV_PREDECESSOR=271ce8bea4effa701c90c35c9ff3e93266437cfa76a84ed917d6381900d26837
 readonly SECRET_PREDECESSOR=6200012f402cd7927b1eb6c51c47f38dd11db3af09ea4557f1fdf54d88ceb930
-readonly STOP_PREDECESSOR=01a2aec545c177a5319d27fc4783c0d99c4d5c1194284983e59a8dd7e746ac2f
+readonly STOP_PREDECESSOR=eb960d9d9a187d095848bf8b373519bbb821ee7759396046e3632074ba8acaeb
 readonly OPERATION_PREDECESSOR=eb8ce78e784b9b0eb9d4b85ce26372b35441b8b43ff5ee2375344140b6a1bdf6
 
 sha256() { sha256sum "$1" | cut -d ' ' -f 1; }
@@ -74,7 +74,7 @@ main() {
   # New helpers first and the public operation entrypoint last. Every artifact is
   # fixed by repository SHA-256 and installed by same-directory atomic rename.
   replace_existing "$SOURCE_ROOT/stop-v1.sh" "$STOP_PATH" \
-    "$STOP_PREDECESSOR" eb960d9d9a187d095848bf8b373519bbb821ee7759396046e3632074ba8acaeb 755
+    "$STOP_PREDECESSOR" aa216797eab831c06c330c52cfe8c0ddb7bb65597b2273da3800693eb0102647 755
   replace_existing "$SOURCE_ROOT/rcon-secret-v1.sh" "$SECRET_PATH" \
     "$SECRET_PREDECESSOR" f9cdcf814fc6697ca60e079a4964b39956048049c7143d8ec7ffa84652af67c9 755
   install_new "$SOURCE_ROOT/phase6-rcon.env" "$RCON_ENV_PATH" a8fa649d7312f54502b4c04483ff9842c29024432a4f67c7eef120f494a5af53 600

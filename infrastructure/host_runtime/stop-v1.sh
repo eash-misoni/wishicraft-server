@@ -2,7 +2,6 @@
 set -euo pipefail
 
 readonly HOST_RUNTIME_UNIT=wishicraft-host-runtime.service
-readonly COMPOSE_FILE=/etc/wishicraft/host-runtime/compose.yaml
 readonly HOST_ENV_PATH=/etc/wishicraft/host-runtime.env
 readonly FILESYSTEM_PREFLIGHT=/usr/local/lib/wishicraft-host-runtime/filesystem_preflight.sh
 
@@ -21,6 +20,8 @@ set -a
 # shellcheck disable=SC1090 -- fixed root-owned configuration path
 source "$HOST_ENV_PATH"
 set +a
+[[ "$COMPOSE_FILE" == /etc/wishicraft/host-runtime/compose.yaml ]] || \
+  fail MOUNT_GUARD_FAILED 65
 "$FILESYSTEM_PREFLIGHT" || fail MOUNT_GUARD_FAILED 65
 container_id="$(docker compose --file "$COMPOSE_FILE" ps --quiet minecraft)" || \
   fail GRACEFUL_RUNTIME_STOP_FAILED 72
