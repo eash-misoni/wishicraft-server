@@ -20,8 +20,8 @@
 | 1 | Minecraft EC2手動起動 | EC2、EBS、Route 53、SSM、systemd、バニラ1個 |
 | 2 | itzg Host Runtime境界 | migration contract、mapping/apply、probe/start/stop command path |
 | 3 | 実測status | Reconcile Lambda、SystemState |
-| 4 | **In Progress:** Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
-| 5 | 安全なstart | Start Step Functions |
+| 4 | **Completed:** Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
+| 5 | **Next:** 安全なstart | Start Step Functions |
 | 6 | 安全なstop | Stop Step Functions |
 | 7 | Discord MVP | `/mc status/start/stop` |
 | 8 | 運用保護 | backup、自動停止、heartbeat、追加監視 |
@@ -428,9 +428,17 @@ Phase 3 closeout後のrepository-only consistency fixとして、probe v1.3.0で
 
 ## 7. Phase 4 — Operationと排他制御
 
-**状態:** In Progress（2026-08-29 repository implementation開始、AWS未deploy）
+**状態:** Completed（2026-08-29 repository / dev AWS integration完了）
 
-D-074でLock logical owner / lease possession、Desired revision CAS、stale recoveryをAcceptedとした。repository実装はGame条件付き登録、4 table construct、versioned admission Lambda、idempotent admission transaction、STATUS short path、lease renew/release/ownership check、Operation step/terminal更新、fresh Reconcileを要求する明示stale recovery、Desired CASを含む。AWS deploy、初期Game実登録、実DynamoDB transaction integrationは未実施であり、repository validation/CI完了後も別の外部操作承認境界とする。
+D-074でLock logical owner / lease possession、Desired revision CAS、stale recoveryをAcceptedとした。repository実装はGame条件付き登録、4 table construct、versioned admission Lambda、idempotent admission transaction、STATUS short pathと専用terminal更新、lease renew/release/ownership check、Operation step/terminal更新、fresh Reconcileを要求する明示stale recovery、Desired CASを含む。
+
+2026-08-29のdev integrationでは、Phase 1の既知historical diffだけを確認してdeployせず、Target diff 0を確認し、`WishicraftControlPlaneStack-dev`だけを更新した。Games/Operations/Idempotency/LocksはACTIVE、Admission LambdaはActive、既存Reconcile/SystemStateは保持された。初期`game-vanilla-main`を条件付き登録し、同一・異なるpayloadの再登録はいずれも既存itemを上書きせず拒否された。
+
+Admissionは同一idempotency key / 同一payloadで既存Operationを返し、異なるpayloadと競合Lockでは新規Operation/Idempotency/current ownerを残さず拒否した。Lock中のSTATUSはLock/Current Operationを変更せず受付・terminal化できた。owner operation IDとlease ID一致・未期限切れを実AWSで確認し、wrong leaseのverify/renew/release拒否、正しいrenewとowned release、OperationのPENDING→RUNNING→SUCCEEDEDおよびterminal後更新拒否を確認した。
+
+Desired CASはrevision 0→1だけ成功し、古いrevisionを拒否し、Observed `observed_at`を変更しなかった。synthetic stale Operationは通常admissionをblockし、fresh stopped Reconcile後だけTIMED_OUT化・owned Lock削除・`current_operation_id`解除を一transactionで完了し、その後のadmissionが成功した。integration終了時は4件の識別可能なOperation/Idempotency履歴を保持し、Lock 0件、Current Operationなし、SystemStateはSTOPPED / desired revision 1 / fresh stopped observationである。TTLはDeferredのためraw deleteやTTL追加を行っていない。
+
+初回AdmissionはIAMにtransaction内部の`PutItem`等が不足してAccessDeniedとなり、transaction itemは0件だった。Admission roleへ対象5 table限定の`ConditionCheckItem`、`GetItem`、`PutItem`、`TransactWriteItems`、`UpdateItem`だけを追加して再検証した。EC2/SSM/Route 53/EBS/secret権限は追加していない。integration期間のTarget向けSSM Commandは0件で、両EC2 stopped、data EBS attachment、snapshot、Target ingress 0、DNS absent、Phase 1/Target stackは不変だった。
 
 ### 目的
 

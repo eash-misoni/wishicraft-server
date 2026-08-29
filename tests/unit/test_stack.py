@@ -143,8 +143,11 @@ def test_control_plane_stack_is_independent_and_read_mostly() -> None:
         for action in _action_list(statement["Action"])
     }
     assert admission_actions == {
+        "dynamodb:ConditionCheckItem",
         "dynamodb:GetItem",
+        "dynamodb:PutItem",
         "dynamodb:TransactWriteItems",
+        "dynamodb:UpdateItem",
     }
     statements = [
         statement

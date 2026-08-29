@@ -175,7 +175,13 @@ class ControlPlaneStack(Stack):
         )
         admission.add_to_role_policy(
             iam.PolicyStatement(
-                actions=["dynamodb:GetItem", "dynamodb:TransactWriteItems"],
+                actions=[
+                    "dynamodb:ConditionCheckItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:TransactWriteItems",
+                    "dynamodb:UpdateItem",
+                ],
                 resources=[
                     table.table_arn,
                     games_table.table_arn,

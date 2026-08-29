@@ -91,6 +91,15 @@ def test_competing_operation_admission_is_one_atomic_transaction() -> None:
     assert result.lease_id == "lease-001"
     items = transaction_items(api)
     assert len(items) == 5
+    idempotency_item = cast(dict[str, dict[str, object]], items[0]["Put"])["Item"]
+    assert idempotency_item["expires_at"] == {"NULL": True}
+    operation_item = cast(dict[str, dict[str, object]], items[1]["Put"])["Item"]
+    assert operation_item["workflow_execution_name"] == {"NULL": True}
+    assert operation_item["started_at"] == {"NULL": True}
+    assert operation_item["completed_at"] == {"NULL": True}
+    assert operation_item["expires_at"] == {"NULL": True}
+    discord = cast(dict[str, dict[str, object]], operation_item["discord"])["M"]
+    assert discord["guild_id"] == {"NULL": True}
     game = cast(dict[str, object], items[2]["ConditionCheck"])
     assert game["ConditionExpression"] == (
         "attribute_exists(game_id) AND lifecycle_state = :active"
@@ -309,6 +318,27 @@ def test_normal_completion_releases_only_current_unexpired_lease_and_operation()
     assert "lease_expires_at >= :now" in cast(str, lock_delete["ConditionExpression"])
     current_update = cast(dict[str, object], items[2]["Update"])
     assert current_update["ConditionExpression"] == "current_operation_id = :operation_id"
+
+
+def test_status_completion_requires_an_unlocked_status_operation() -> None:
+    api = FakeDynamo()
+    operation_repository(api).complete_unlocked(
+        operation_id="op-status-001",
+        status=OperationStatus.SUCCEEDED,
+        completed_at=datetime(2026, 8, 29, tzinfo=UTC),
+    )
+    update = api.updates[0]
+    condition = cast(str, update["ConditionExpression"])
+    assert "operation_type = :status_operation" in condition
+    assert "attribute_type(lock_name, :null_type)" in condition
+    assert "#status IN (:pending, :running)" in condition
+    assert update["ExpressionAttributeNames"] == {"#status": "status", "#error": "error"}
+    with pytest.raises(ValueError, match="normal completion"):
+        operation_repository(FakeDynamo()).complete_unlocked(
+            operation_id="op-status-001",
+            status=OperationStatus.TIMED_OUT,
+            completed_at=datetime(2026, 8, 29, tzinfo=UTC),
+        )
 
 
 def test_stale_recovery_requires_fresh_observation_and_exact_lease_cleanup() -> None:

@@ -18,6 +18,7 @@
 - **Desired CAS:** Desiredは`desired_revision`、Observedは`observed_at`、Operation ownershipは`current_operation_id`で独立して保護する。Desired mutationはexpected revision NのCASでN+1へ進め、必要なoperationではCurrent Operation条件もtransactionへ含める。ReconcileはDesiredを上書きしない。将来の`rendered_revision`、`applied_revision`との接続を維持する。
 - **Stale recovery:** Lock expiryはOperation failureではない。deadline/lease超過はstale candidateとして新しい競合admissionをblockし、fresh Reconcile後の明示recoveryが旧Operationのterminal化とowned Current Operation/Lock cleanupを一transactionで行う。実状態を観測せず単純FAILED化せず、Phase 4 MVPの通常admissionへauto-recoveryを入れない。副作用前と安全と証明できる限定caseの将来自動化は別Decisionとする。
 - **Values/retention:** lease 900秒・renew 120秒はPhase 5/6 workflow実測前のProvisional値。Operation/Idempotency TTLはDeferredのままとする。
+- **Dev integration:** 2026-08-29にControl Plane stackだけへ4 tablesとAdmission Lambdaをdeployした。条件付きGame登録、atomic admission、idempotency、競合/STATUS、operation/lease一致、wrong lease拒否、renew/owned release、Desired revision CAS、fresh Reconcileを必須とするstale recoveryを実DynamoDBで確認した。integration後はLock 0件、Current Operationなし、識別可能なOperation/Idempotency履歴だけを保持する。Admission IAMは対象5 tableの`ConditionCheckItem`、`GetItem`、`PutItem`、`TransactWriteItems`、`UpdateItem`とLambda loggingに限定し、runtime/AWS lifecycle mutation権限を持たない。
 
 ### D-073 Phase 4前はGame desired stateとGit管理runtime lockを分離する
 
@@ -712,9 +713,9 @@
 
 ## 5. Current blockers
 
-Phase 0〜3は完了した。UID/GIDとownership compatibility、AL2023/AMI、Docker/Compose/itzg pin、initial memory、SSM/Host Runtime/protocol/active game/endpoint observation、Reconcile、SystemState/DynamoDB/Lambda、stopped Target integrationは解消済みであり、current blockerへ残さない。
+Phase 0〜4は完了した。UID/GIDとownership compatibility、AL2023/AMI、Docker/Compose/itzg pin、initial memory、status/Reconcile/SystemState、Game/Operation/Idempotency/Lock、atomic admission、lease lifecycle、Desired CAS、stale recoveryは解消済みであり、current blockerへ残さない。
 
-### Phase 4開始前の分類
+### Phase 4 closeout時の分類（履歴）
 
 | 項目 | 状態 | 現在の契約 / 未決定点 |
 |---|---|---|
@@ -740,7 +741,7 @@ Phase 0〜3は完了した。UID/GIDとownership compatibility、AL2023/AMI、Do
    - B: Step FunctionsのCatch/Timeoutだけでterminal化する。通常failureは単純だが、execution開始前失敗や外部停止でstale stateが残り得る。
    - C: 定期sweeperを同時導入する。最終回復は早いが、Phase 4 scopeとAWS resourceを増やし、periodic reconcileの後続Phase境界を崩す。
 
-Phase 4以外に残る既知事項は、write-side Host Runtime command pathとRCON/secret injection（Phase 5/6まで）、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。これらをPhase 4のrepository domain model開始blockerとはしない。
+Phase 5以降に残る既知事項は、write-side Host Runtime command pathとRCON/secret injection（Phase 5/6まで）、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。これらはPhase 4 closeoutを妨げない。
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは設定済みでありblockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
 

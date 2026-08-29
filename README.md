@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜3は完了しています。現在はPhase 4「Operationと排他制御」を実装中で、Games、Operations、Idempotency、Locks、条件付きadmission、Desired CASのrepository契約を構築する段階です。Phase 4開始前のLock owner、Desired revision、stale recovery判断はD-074でAcceptedです。
+Phase 0〜4は完了しています。devにはGames、Operations、Idempotency、Locks、条件付きAdmission Lambda、Desired CASがdeploy済みで、実DynamoDB transaction integrationまで完了しました。次はPhase 5「安全なstart workflow」です。Lock owner、Desired revision、stale recoveryの正本はD-074です。
 
 devは次の3層architectureです。
 
@@ -14,7 +14,7 @@ Wishicraft Control Plane
   -> pinned itzg Minecraft Runtime
 ```
 
-Frozen Phase 1 stack、独立Target stack、独立Control Plane stackを分離しています。dev Control PlaneのReconcile Lambdaとcurrent SystemState DynamoDBはdeploy・stopped Target integration済みです。Phase 1のhost Java、直接`minecraft.service`、Xmx 3G等はas-built履歴であり、現在のTarget runtime契約ではありません。
+Frozen Phase 1 stack、独立Target stack、独立Control Plane stackを分離しています。dev Control PlaneのReconcile/SystemStateに加え、Phase 4 tablesとAdmission Lambdaもdeploy・integration済みです。Phase 1のhost Java、直接`minecraft.service`、Xmx 3G等はas-built履歴であり、現在のTarget runtime契約ではありません。
 
 設計・契約の正本は[Architecture](docs/03_architecture.md)、[Domain model](docs/04_domain_and_state_model.md)、[Data/interface contracts](docs/05_data_and_interface_contracts.md)、[Delivery plan](docs/06_delivery_plan.md)、[Decisions/backlog](docs/09_decisions_and_backlog.md)です。itzgとの責務境界は[itzg responsibility boundary](docs/architecture/itzg-responsibility-boundary.md)を参照してください。
 

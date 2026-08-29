@@ -222,7 +222,7 @@ DynamoDBではnested mapを使用できるが、頻繁に条件更新する属�
 
 `runtime.class`は論理的なruntime capability/mapping selectorであり、image tag/digest、Java runtime、Docker/Compose/AL2023、container/JVM memoryをGame itemへ複製しない。初期`default` classのrealizationは`config/stages/dev.yaml.host_runtime`とD-060〜D-062のGit管理platform lockを唯一の正本とする。初期単一GameのMinecraft `VERSION=26.2` / `TYPE=VANILLA`も現時点では同じGit lockが正本で、Phase 9以降にPackageを導入した後は不変`package_id`/`package_version`参照が論理Game構成を所有する。Phase 1 `compute`、host Corretto、直接Java、Xms/Xmx 1G/3Gはas-built履歴であり、このGame desired-state schemaへ戻さない。
 
-初期Gameは固定admin path `python -m wishicraft.game_admin --stage dev`を明示実行し、`attribute_not_exists(game_id)`条件で一度だけ登録する。deployやLambda cold startが既存Gameを無条件上書きしない。実AWS実行はPhase 4 deploy/integrationの承認境界で行う。
+初期Gameは固定admin path `python -m wishicraft.game_admin --stage dev`を明示実行し、`attribute_not_exists(game_id)`条件で一度だけ登録する。deployやLambda cold startが既存Gameを無条件上書きしない。2026-08-29のdev integrationで初回登録成功、同一payload再登録と異なるpayload上書きのconditional rejectionを実測した。
 
 | 値 | 現在の唯一の正本 | realization / observation |
 |---|---|---|
@@ -262,6 +262,7 @@ status: PENDING | RUNNING | SUCCEEDED | FAILED | TIMED_OUT | CANCELLED
 current_step: string | null
 timeout_at: timestamp | null
 lock_name: string | null
+lease_id: string | null
 
 error:
   code: string | null
@@ -588,6 +589,7 @@ container running時だけ、一意に解決したcontainer IDへ固定`docker e
 ### STATUS admission
 
 STATUS Operationはactive GameのConditionCheckとともに`Idempotency`と`Operations`だけを条件付き作成し、`Locks`と`SystemState.current_operation_id`を変更しない。定期reconcileはOperation admissionを使用しない。
+STATUSのterminal更新は、Operation typeがSTATUS、`lock_name`がNULL、現在statusがPENDING/RUNNINGである条件をすべて満たす専用repository pathだけで行う。lockを持つOperationのowned completionと混用しない。
 
 ### Desired State CAS
 

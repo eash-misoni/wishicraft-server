@@ -242,6 +242,7 @@ class OperationAdmissionRepository:
                         "source": request.requested_by.value,
                         "target_game_id": request.target_game_id,
                         "created_at": utc_timestamp(request.requested_at),
+                        "expires_at": None,
                     }
                 ),
                 "ConditionExpression": "attribute_not_exists(idempotency_key)",
@@ -257,10 +258,18 @@ class OperationAdmissionRepository:
                         "operation_id": request.operation_id,
                         "schema_version": 1,
                         "idempotency_key": request.idempotency_key,
+                        "workflow_execution_name": None,
+                        "workflow_execution_arn": None,
                         "operation_type": request.operation_type.value,
                         "target_game_id": request.target_game_id,
-                        "requested_by": {"source": request.requested_by.value},
+                        "requested_by": {
+                            "source": request.requested_by.value,
+                            "discord_user_id": None,
+                            "display_name": None,
+                        },
                         "requested_at": utc_timestamp(request.requested_at),
+                        "started_at": None,
+                        "completed_at": None,
                         "status": OperationStatus.PENDING.value,
                         "current_step": "ADMITTED",
                         "timeout_at": (
@@ -270,7 +279,21 @@ class OperationAdmissionRepository:
                         ),
                         "lock_name": self._lock_name if lease_id is not None else None,
                         "lease_id": lease_id,
+                        "error": {
+                            "code": None,
+                            "message": None,
+                            "detail_ref": None,
+                            "retryable": None,
+                        },
+                        "discord": {
+                            "guild_id": None,
+                            "interaction_id": None,
+                            "channel_id": None,
+                            "message_id": None,
+                        },
+                        "result": None,
                         "updated_at": utc_timestamp(request.requested_at),
+                        "expires_at": None,
                     }
                 ),
                 "ConditionExpression": "attribute_not_exists(operation_id)",
@@ -524,6 +547,47 @@ class OperationRepository:
             ],
         )
 
+    def complete_unlocked(
+        self,
+        *,
+        operation_id: str,
+        status: OperationStatus,
+        completed_at: datetime,
+        error_code: str | None = None,
+    ) -> None:
+        if status not in {OperationStatus.SUCCEEDED, OperationStatus.FAILED}:
+            raise ValueError("normal completion must be SUCCEEDED or FAILED")
+        self._api.update_item(
+            TableName=self._operations,
+            Key={"operation_id": {"S": operation_id}},
+            UpdateExpression=(
+                "SET #status = :status, completed_at = :completed_at, "
+                "updated_at = :completed_at, #error = :error"
+            ),
+            ConditionExpression=(
+                "attribute_exists(operation_id) AND operation_type = :status_operation "
+                "AND attribute_type(lock_name, :null_type) "
+                "AND #status IN (:pending, :running)"
+            ),
+            ExpressionAttributeNames={"#status": "status", "#error": "error"},
+            ExpressionAttributeValues={
+                ":status": {"S": status.value},
+                ":completed_at": {"S": utc_timestamp(completed_at)},
+                ":error": _attribute(
+                    {
+                        "code": error_code,
+                        "message": None,
+                        "detail_ref": None,
+                        "retryable": None,
+                    }
+                ),
+                ":status_operation": {"S": OperationType.STATUS.value},
+                ":null_type": {"S": "NULL"},
+                ":pending": {"S": OperationStatus.PENDING.value},
+                ":running": {"S": OperationStatus.RUNNING.value},
+            },
+        )
+
     def recover_stale(
         self,
         *,
@@ -574,7 +638,14 @@ class OperationRepository:
         values = {
             ":status": {"S": status.value},
             ":completed_at": {"S": utc_timestamp(completed_at)},
-            ":error": _attribute({"code": error_code}),
+            ":error": _attribute(
+                {
+                    "code": error_code,
+                    "message": None,
+                    "detail_ref": None,
+                    "retryable": None,
+                }
+            ),
             ":pending": {"S": OperationStatus.PENDING.value},
             ":running": {"S": OperationStatus.RUNNING.value},
         }
@@ -589,10 +660,10 @@ class OperationRepository:
                 "Key": {"operation_id": {"S": operation_id}},
                 "UpdateExpression": (
                     "SET #status = :status, completed_at = :completed_at, "
-                    "updated_at = :completed_at, error = :error"
+                    "updated_at = :completed_at, #error = :error"
                 ),
                 "ConditionExpression": condition,
-                "ExpressionAttributeNames": {"#status": "status"},
+                "ExpressionAttributeNames": {"#status": "status", "#error": "error"},
                 "ExpressionAttributeValues": values,
             }
         }

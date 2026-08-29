@@ -15,6 +15,14 @@ def test_initial_game_is_derived_from_canonical_logical_configuration_only() -> 
     assert game.materialization_state is MaterializationState.MATERIALIZED
     assert game.runtime_class == "default"
     assert game.idle_shutdown_minutes == 30
-    serialized = str(game.to_item()).lower()
+    item = game.to_item()
+    assert item["created_from"] == {"template_id": None, "template_version": None}
+    assert item["world"] == {
+        "seed": None,
+        "difficulty": None,
+        "hardcore": None,
+        "generation": 1,
+    }
+    serialized = str(item).lower()
     for physical in ("itzg", "java25", "2816", "xmx", "docker", "compose", "ami-"):
         assert physical not in serialized
