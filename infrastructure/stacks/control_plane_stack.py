@@ -356,8 +356,8 @@ def _start_definition(
     def invoke(
         action: str,
         *,
+        failure_state: str,
         state_path: str | None = None,
-        failure_state: str = "SetTaskFailure",
     ) -> dict[str, object]:
         payload: dict[str, object] = {
             "schema_version": 1,
@@ -778,12 +778,6 @@ def _start_definition(
         "SetLockLostFailure": {
             "Type": "Pass",
             "Result": {"error_code": "LOCK_LOST"},
-            "ResultPath": "$.failure",
-            "Next": "ReconcileAfterFailure",
-        },
-        "SetTaskFailure": {
-            "Type": "Pass",
-            "Result": {"error_code": "INTERNAL_ERROR"},
             "ResultPath": "$.failure",
             "Next": "ReconcileAfterFailure",
         },

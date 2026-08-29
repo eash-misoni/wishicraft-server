@@ -132,6 +132,22 @@ def test_control_plane_stack_adds_phase_five_start_without_target_resources() ->
     assert states["AlreadyReady"]["Choices"][0]["Next"] == "UpdateDnsRecord"
     assert states["DnsChangeInSync"]["Choices"][0]["Next"] == "ReconcileDns"
 
+    reachable = {definition["StartAt"]}
+    pending = [definition["StartAt"]]
+    while pending:
+        state = states[pending.pop()]
+        targets = [
+            state.get("Next"),
+            state.get("Default"),
+            *(choice.get("Next") for choice in state.get("Choices", [])),
+            *(catch.get("Next") for catch in state.get("Catch", [])),
+        ]
+        for target in targets:
+            if target is not None and target not in reachable:
+                reachable.add(target)
+                pending.append(target)
+    assert reachable == set(states)
+
     admission = next(
         value["Properties"]
         for value in functions.values()
