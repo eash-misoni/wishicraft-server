@@ -52,6 +52,8 @@ def render_boot_time_artifacts(
     observed_uid: int,
     observed_gid: int,
     publish_minecraft_port: bool = True,
+    enable_rcon: bool = False,
+    rcon_parameter_name: str | None = None,
 ) -> RenderedHostRuntime:
     """Render one canonical boot-time configuration from validated sources of truth."""
     runtime = _runtime_mapping(stage.values)
@@ -67,8 +69,17 @@ def render_boot_time_artifacts(
     compose_stop = _positive_int(runtime, "timeouts.compose_stop_grace_period")
     game_directory = f"{stage.data_volume_mount_path}/games/{project.initial_game_id}/server"
 
+    if enable_rcon and not rcon_parameter_name:
+        raise ConfigValidationError(["RCON parameter name is required when RCON is enabled"])
+    if (
+        rcon_parameter_name is not None
+        and re.fullmatch(r"/wishicraft/(dev|prod)/secret/rcon-password", rcon_parameter_name)
+        is None
+    ):
+        raise ConfigValidationError(["RCON parameter name is outside the fixed allowlist"])
+
     environment = {
-        "ENABLE_RCON": "false",
+        "ENABLE_RCON": "true" if enable_rcon else "false",
         "EULA": "TRUE",
         "GID": str(observed_gid),
         "INIT_MEMORY": xms,
@@ -79,6 +90,15 @@ def render_boot_time_artifacts(
         "UID": str(observed_uid),
         "VERSION": version,
     }
+    if enable_rcon:
+        environment["RCON_PASSWORD_FILE"] = "/run/secrets/rcon-password"
+    volumes: list[dict[str, object]] = [
+        {
+            "type": "bind",
+            "source": game_directory,
+            "target": "/data",
+        }
+    ]
     service: dict[str, object] = {
         "image": image,
         "pull_policy": "never",
@@ -90,13 +110,7 @@ def render_boot_time_artifacts(
             "com.wishicraft.active-game-id": project.initial_game_id,
             "com.wishicraft.active-game-data-source": game_directory,
         },
-        "volumes": [
-            {
-                "type": "bind",
-                "source": game_directory,
-                "target": "/data",
-            }
-        ],
+        "volumes": volumes,
     }
     compose = {
         "name": "wishicraft-host-runtime",
@@ -104,6 +118,29 @@ def render_boot_time_artifacts(
     }
     if publish_minecraft_port:
         service["ports"] = [f"{stage.minecraft_port}:25565/tcp"]
+    if enable_rcon:
+        volumes.append(
+            {
+                "type": "bind",
+                "source": "/run/wishicraft/rcon-password",
+                "target": "/run/secrets/rcon-password",
+                "read_only": True,
+            }
+        )
+        volumes.extend(
+            [
+                {
+                    "type": "bind",
+                    "source": "/run/wishicraft/rcon-cli.env",
+                    "target": "/data/.rcon-cli.env",
+                },
+                {
+                    "type": "bind",
+                    "source": "/run/wishicraft/rcon-cli.yaml",
+                    "target": "/data/.rcon-cli.yaml",
+                },
+            ]
+        )
     compose_yaml = yaml.safe_dump(compose, sort_keys=True, default_flow_style=False)
     runtime_env = "".join(f"{key}={environment[key]}\n" for key in sorted(environment))
     manifest = {
@@ -116,6 +153,7 @@ def render_boot_time_artifacts(
         "compose_sha256": hashlib.sha256(compose_yaml.encode()).hexdigest(),
         "runtime_env_sha256": hashlib.sha256(runtime_env.encode()).hexdigest(),
         "secret_material_included": False,
+        "rcon_enabled": enable_rcon,
     }
     canonical_manifest = json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n"
     digest = hashlib.sha256(canonical_manifest.encode()).hexdigest()

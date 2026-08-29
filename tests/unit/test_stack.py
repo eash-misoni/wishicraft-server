@@ -53,14 +53,14 @@ def _action_list(value: object) -> list[str]:
     return cast(list[str], value)
 
 
-def test_control_plane_stack_adds_phase_five_start_without_target_resources() -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=5, deployment="control-plane")
+def test_control_plane_stack_adds_phase_six_stop_without_target_resources() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=6, deployment="control-plane")
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
 
     template.resource_count_is("AWS::DynamoDB::Table", 5)
-    template.resource_count_is("AWS::Lambda::Function", 3)
-    template.resource_count_is("AWS::Logs::LogGroup", 3)
+    template.resource_count_is("AWS::Lambda::Function", 4)
+    template.resource_count_is("AWS::Logs::LogGroup", 4)
     assert template.find_resources("AWS::EC2::Instance") == {}
     assert template.find_resources("AWS::EC2::VolumeAttachment") == {}
     tables = template.find_resources("AWS::DynamoDB::Table")
@@ -110,17 +110,18 @@ def test_control_plane_stack_adds_phase_five_start_without_target_resources() ->
         "dynamodb:UpdateItem",
         "dynamodb:TransactWriteItems",
     } <= actions
-    assert not actions & {
-        "ec2:StopInstances",
-        "ec2:TerminateInstances",
-        "ssm:GetParameter",
-    }
-    template.resource_count_is("AWS::StepFunctions::StateMachine", 1)
+    assert "ec2:TerminateInstances" not in actions
+    assert "ssm:GetParameter" not in actions
+    template.resource_count_is("AWS::StepFunctions::StateMachine", 2)
     assert "ec2:StartInstances" in actions
+    assert "ec2:StopInstances" in actions
     assert "route53:ChangeResourceRecordSets" in actions
+    state_machines = template.find_resources("AWS::StepFunctions::StateMachine")
     state_machine = next(
-        iter(template.find_resources("AWS::StepFunctions::StateMachine").values())
-    )["Properties"]
+        value["Properties"]
+        for value in state_machines.values()
+        if value["Properties"]["StateMachineName"] == "wc-dev-start"
+    )
     definition = state_machine["Definition"]
     states = definition["States"]
     assert definition["TimeoutSeconds"] == 1800
@@ -147,6 +148,38 @@ def test_control_plane_stack_adds_phase_five_start_without_target_resources() ->
                 reachable.add(target)
                 pending.append(target)
     assert reachable == set(states)
+
+    stop_definition = next(
+        value["Properties"]["Definition"]
+        for value in state_machines.values()
+        if value["Properties"]["StateMachineName"] == "wc-dev-stop"
+    )
+    stop_states = stop_definition["States"]
+    assert stop_definition["TimeoutSeconds"] == 1200
+    assert stop_states["RuntimeStopped"]["Choices"][0]["Next"] == "RenewBeforeEc2Stop"
+    assert stop_states["Ec2Stopped"]["Choices"][0]["Next"] == "RenewBeforeDnsDelete"
+    assert stop_states["SetDnsTimeout"]["Result"]["error_code"] == "DNS_INSYNC_TIMEOUT"
+    assert stop_states["SetLockLostFailure"]["Result"]["error_code"] == "LOCK_LOST"
+    assert stop_states["RenewBeforeHostStop"]["Next"] == "RunHostStop"
+    assert stop_states["RenewBeforeEc2Stop"]["Next"] == "StopEc2"
+    assert stop_states["RenewBeforeDnsDelete"]["Next"] == "DeleteDns"
+    assert stop_states["SetLockLostFailure"]["Next"] == "ReconcileAfterFailure"
+    assert stop_states["AlreadyEc2Stopped"]["Choices"][0]["Next"] == ("RenewBeforeDnsDelete")
+    stop_reachable = {stop_definition["StartAt"]}
+    stop_pending = [stop_definition["StartAt"]]
+    while stop_pending:
+        stop_state = stop_states[stop_pending.pop()]
+        stop_targets = [
+            stop_state.get("Next"),
+            stop_state.get("Default"),
+            *(choice.get("Next") for choice in stop_state.get("Choices", [])),
+            *(catch.get("Next") for catch in stop_state.get("Catch", [])),
+        ]
+        for target in stop_targets:
+            if target is not None and target not in stop_reachable:
+                stop_reachable.add(target)
+                stop_pending.append(target)
+    assert stop_reachable == set(stop_states)
 
     admission = next(
         value["Properties"]
@@ -190,7 +223,7 @@ def test_control_plane_stack_adds_phase_five_start_without_target_resources() ->
         for statement in statements
         if "ssm:SendCommand" in _action_list(statement["Action"])
     ]
-    assert len(send_command) == 4
+    assert len(send_command) == 6
     assert any(
         "document/AWS-RunShellScript" in str(statement["Resource"]) for statement in send_command
     )
@@ -677,10 +710,10 @@ def test_target_stack_owns_only_the_imported_existing_data_attachment() -> None:
     template_text = str(template.to_json())
     for forbidden in (
         "/srv/minecraft",
-        "rcon-password",
-        "ssm:GetParameter",
         "route53:",
         "ec2:AttachVolume",
     ):
         assert forbidden not in template_text
+    assert "ssm:GetParameter" in template_text
+    assert "/wishicraft/dev/secret/rcon-password" in template_text
     assert "i-021eaa7f33ddaf0a6" not in template_text

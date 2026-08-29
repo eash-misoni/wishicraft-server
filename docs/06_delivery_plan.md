@@ -590,6 +590,14 @@ VerifyAdmissionAndLock
 - stop成功後のDesired/Observedが一致する。
 - `SetDesiredStopped`後の失敗ではDesired `STOPPED`を維持し、残存実状態を記録する。
 
+### Repository implementation status（2026-08-29 interruption recovery）
+
+STOP専用Standard State Machine、Task Lambda、Admission接続、Desired STOPPED convergence、lease renew/side-effect前verify、fixed Host Runtime STOP、explicit RCON save、graceful stop確認、EC2 stop、DNS DELETE/INSYNC、fresh Reconcile、failure classificationをrepositoryへ実装した。Actual stopped + Desired RUNNING/STOPPED、stale DNSでもEC2を再起動せず収束する。
+
+RCON secretはstage固定Parameter Store SecureString名だけをGit管理し、Target Hostの`/run/wishicraft`へ取得する。password fileに加え、itzgが生成するrcon-cli configもephemeral bindとしてData EBSへのsecret永続化を防ぐ。Phase 5 predecessor checksumからの固定artifact atomic replacementを用意した。
+
+この記録時点でPhase 6 Control Plane deploy、Target IAM/artifact update、secret作成、RCON有効化、STOP admission、実RCON、実STOPは未実施である。TargetはoperatorがHost Runtime停止確認後にEC2停止したactual stopped状態だが、explicit save等の証跡がないためPhase 6 product STOP successには数えない。次のAWS writeは明示承認境界である。
+
 ## 10. Phase 7 — Discord MVP
 
 ### 目的

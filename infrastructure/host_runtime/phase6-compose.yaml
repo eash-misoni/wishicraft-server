@@ -1,0 +1,29 @@
+name: wishicraft-host-runtime
+services:
+  minecraft:
+    env_file:
+    - runtime.env
+    image: ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77
+    labels:
+      com.wishicraft.active-game-data-source: /srv/minecraft/games/game-vanilla-main/server
+      com.wishicraft.active-game-id: game-vanilla-main
+    mem_limit: 2816MiB
+    ports:
+    - 25565:25565/tcp
+    pull_policy: never
+    restart: 'no'
+    stop_grace_period: 150s
+    volumes:
+    - source: /srv/minecraft/games/game-vanilla-main/server
+      target: /data
+      type: bind
+    - read_only: true
+      source: /run/wishicraft/rcon-password
+      target: /run/secrets/rcon-password
+      type: bind
+    - source: /run/wishicraft/rcon-cli.env
+      target: /data/.rcon-cli.env
+      type: bind
+    - source: /run/wishicraft/rcon-cli.yaml
+      target: /data/.rcon-cli.yaml
+      type: bind

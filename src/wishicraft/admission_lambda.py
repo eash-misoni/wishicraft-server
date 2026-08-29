@@ -32,6 +32,7 @@ class StepFunctionsApi(Protocol):
 
 _service: OperationAdmissionService | None = None
 _launcher: WorkflowLauncher | None = None
+_stop_launcher: WorkflowLauncher | None = None
 
 
 def handler(event: object, context: object) -> dict[str, object]:
@@ -51,6 +52,14 @@ def handler(event: object, context: object) -> dict[str, object]:
             lease_id=result.lease_id,
             started_at=datetime.now(UTC),
         )
+    if result.created and operation_type is OperationType.STOP:
+        if result.lease_id is None:
+            raise RuntimeError("STOP admission did not create a lease")
+        _get_stop_launcher().start(
+            operation_id=result.operation_id,
+            lease_id=result.lease_id,
+            started_at=datetime.now(UTC),
+        )
     return {
         "schema_version": 1,
         "operation_id": result.operation_id,
@@ -60,10 +69,16 @@ def handler(event: object, context: object) -> dict[str, object]:
 
 
 class WorkflowLauncher:
-    def __init__(self, step_functions: StepFunctionsApi, dynamodb: DynamoApi) -> None:
+    def __init__(
+        self,
+        step_functions: StepFunctionsApi,
+        dynamodb: DynamoApi,
+        *,
+        state_machine_environment: str = "START_STATE_MACHINE_ARN",
+    ) -> None:
         self._step_functions = step_functions
         self._dynamodb = dynamodb
-        self._state_machine_arn = _required_environment("START_STATE_MACHINE_ARN")
+        self._state_machine_arn = _required_environment(state_machine_environment)
         self._operations_table = _required_environment("OPERATIONS_TABLE")
         self._operations = OperationRepository(
             dynamodb,
@@ -199,6 +214,20 @@ def _get_launcher() -> WorkflowLauncher:
             cast(DynamoApi, session.client("dynamodb", region_name=region)),
         )
     return _launcher
+
+
+def _get_stop_launcher() -> WorkflowLauncher:
+    global _stop_launcher
+    if _stop_launcher is None:
+        boto3 = importlib.import_module("boto3")
+        session = cast(AwsSession, boto3)
+        region = _required_environment("AWS_REGION")
+        _stop_launcher = WorkflowLauncher(
+            cast(StepFunctionsApi, session.client("stepfunctions", region_name=region)),
+            cast(DynamoApi, session.client("dynamodb", region_name=region)),
+            state_machine_environment="STOP_STATE_MACHINE_ARN",
+        )
+    return _stop_launcher
 
 
 def _required_environment(name: str) -> str:

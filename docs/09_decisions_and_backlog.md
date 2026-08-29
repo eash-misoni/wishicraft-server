@@ -732,6 +732,16 @@
 - **影響:** Phase 5 repositoryはSTARTだけをallowlistし、SAVE/STOP/whitelist/sayを先行実装しない。RCON/secretの初回AWS適用は別の明示承認境界とする。
 - **関連:** START-006、EC2-002、EC2-007、NFR-010、D-074、`docs/architecture/itzg-responsibility-boundary.md`。
 
+### D-077 Phase 6 STOP専用workflowとephemeral RCON client config
+
+- **状態:** Accepted（repository-only。初AWS適用は未承認）
+- **日付:** 2026-08-29
+- STARTとSTOPはfailure isolationとIAM最小化のため別Standard State Machine/Task Lambdaとする。Admission、Operation/Lock、Desired CAS、Reconcile contractは共有する。
+- STOPは固定Host Runtime operation内でcontainer-local `rcon-cli save-all flush`を実行し、成功後だけsystemd graceful stopへ進む。systemd/itzgだけの暗黙saveをSTOP-001のexplicit save証跡へ読み替えない。
+- `RCON_PASSWORD_FILE`のsourceはHost `/run/wishicraft/rcon-password`とする。itzgが`/data/.rcon-cli.env`と`.rcon-cli.yaml`へpasswordを派生保存するため、両pathもHost `/run/wishicraft`のephemeral filesでbindし、Data EBSにsecretを残さない。
+- Actual EC2 stoppedではruntimeを起動し直さず、Desired STOPPED、DNS absent、fresh Observedへ収束する。通常pathの順序はcanonical contractどおりruntime停止確認、EC2 stopped、DNS DELETE/INSYNCである。
+- Target secret read IAM、artifact、secret作成、injection、実RCON commandの最初のproduction適用は明示承認境界を維持する。
+
 ## 5. Current blockers
 
 Phase 0〜4は完了した。UID/GIDとownership compatibility、AL2023/AMI、Docker/Compose/itzg pin、initial memory、status/Reconcile/SystemState、Game/Operation/Idempotency/Lock、atomic admission、lease lifecycle、Desired CAS、stale recoveryは解消済みであり、current blockerへ残さない。

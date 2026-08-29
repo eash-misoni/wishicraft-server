@@ -224,6 +224,136 @@ class ControlPlaneStack(Stack):
                 lease_renew_seconds=stage.lock_renew_interval_seconds,
             ),
         )
+
+        stop_task_log_group = logs.LogGroup(
+            self,
+            "StopTaskLogGroup",
+            log_group_name=(
+                f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'stop-task')}"
+            ),
+            retention=logs.RetentionDays.TWO_WEEKS,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+        stop_task = lambda_.Function(
+            self,
+            "StopTaskFunction",
+            function_name=resource_name(project.resource_prefix, stage.stage, "stop-task"),
+            runtime=lambda_.Runtime.PYTHON_3_12,
+            architecture=lambda_.Architecture.X86_64,
+            code=lambda_.Code.from_asset(str(Path(__file__).resolve().parents[2] / "src")),
+            handler="wishicraft.stop_workflow_lambda.handler",
+            timeout=Duration.seconds(60),
+            memory_size=256,
+            log_group=stop_task_log_group,
+            environment={
+                "SYSTEM_STATE_TABLE": table.table_name,
+                "OPERATIONS_TABLE": operations_table.table_name,
+                "LOCKS_TABLE": locks_table.table_name,
+                "SYSTEM_ID": project.system_id,
+                "PROJECT": project.project_slug,
+                "STAGE": stage.stage,
+                "GLOBAL_LOCK_NAME": stage.global_lock_name,
+                "LOCK_LEASE_SECONDS": str(stage.lock_lease_seconds),
+                "HOST_STOP_TIMEOUT_SECONDS": str(stage.host_runtime_timeout_seconds("ssm")),
+                "HOSTED_ZONE_ID": stage.route53_hosted_zone_id,
+                "RECORD_NAME": stage.route53_record_name,
+            },
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(actions=["ec2:DescribeInstances"], resources=["*"])
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["ec2:StopInstances"],
+                resources=[f"arn:aws:ec2:{stage.aws_region}:{stage.aws_account_id}:instance/*"],
+                conditions={
+                    "StringEquals": {
+                        "ec2:ResourceTag/Project": project.project_slug,
+                        "ec2:ResourceTag/Stage": stage.stage,
+                        "ec2:ResourceTag/Purpose": "phase2-target-validation",
+                    }
+                },
+            )
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["ssm:SendCommand"],
+                resources=[f"arn:aws:ssm:{stage.aws_region}::document/AWS-RunShellScript"],
+            )
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["ssm:SendCommand"],
+                resources=[f"arn:aws:ec2:{stage.aws_region}:{stage.aws_account_id}:instance/*"],
+                conditions={
+                    "StringEquals": {
+                        "ssm:resourceTag/Project": project.project_slug,
+                        "ssm:resourceTag/Stage": stage.stage,
+                        "ssm:resourceTag/Purpose": "phase2-target-validation",
+                    }
+                },
+            )
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(actions=["ssm:GetCommandInvocation"], resources=["*"])
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["route53:ListResourceRecordSets"],
+                resources=[f"arn:aws:route53:::hostedzone/{stage.route53_hosted_zone_id}"],
+            )
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["route53:ChangeResourceRecordSets"],
+                resources=[f"arn:aws:route53:::hostedzone/{stage.route53_hosted_zone_id}"],
+                conditions={
+                    "ForAllValues:StringEquals": {
+                        "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+                            stage.route53_record_name
+                        ],
+                        "route53:ChangeResourceRecordSetsRecordTypes": ["A"],
+                        "route53:ChangeResourceRecordSetsActions": ["DELETE"],
+                    }
+                },
+            )
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["route53:GetChange"], resources=["arn:aws:route53:::change/*"]
+            )
+        )
+        stop_task.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "dynamodb:GetItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:TransactWriteItems",
+                ],
+                resources=[table.table_arn, operations_table.table_arn, locks_table.table_arn],
+            )
+        )
+        stop_workflow_role = iam.Role(
+            self,
+            "StopWorkflowRole",
+            assumed_by=iam.ServicePrincipal("states.amazonaws.com"),
+            description="Phase 6 STOP Standard workflow",
+        )
+        function.grant_invoke(stop_workflow_role)
+        stop_task.grant_invoke(stop_workflow_role)
+        stop_workflow = sfn.CfnStateMachine(
+            self,
+            "StopStateMachine",
+            state_machine_name=resource_name(project.resource_prefix, stage.stage, "stop"),
+            state_machine_type="STANDARD",
+            role_arn=stop_workflow_role.role_arn,
+            definition=_stop_definition(
+                reconcile_arn=function.function_arn,
+                stop_task_arn=stop_task.function_arn,
+                lease_renew_seconds=stage.lock_renew_interval_seconds,
+            ),
+        )
         function.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["ssm:SendCommand"],
@@ -294,6 +424,7 @@ class ControlPlaneStack(Stack):
                 "STOP_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("STOP")),
                 "BACKUP_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("BACKUP")),
                 "START_STATE_MACHINE_ARN": start_workflow.attr_arn,
+                "STOP_STATE_MACHINE_ARN": stop_workflow.attr_arn,
             },
         )
         admission.add_to_role_policy(
@@ -316,7 +447,8 @@ class ControlPlaneStack(Stack):
         )
         admission.add_to_role_policy(
             iam.PolicyStatement(
-                actions=["states:StartExecution"], resources=[start_workflow.attr_arn]
+                actions=["states:StartExecution"],
+                resources=[start_workflow.attr_arn, stop_workflow.attr_arn],
             )
         )
         admission.add_to_role_policy(
@@ -326,7 +458,11 @@ class ControlPlaneStack(Stack):
                     (
                         f"arn:aws:states:{stage.aws_region}:{stage.aws_account_id}:execution:"
                         f"{resource_name(project.resource_prefix, stage.stage, 'start')}:*"
-                    )
+                    ),
+                    (
+                        f"arn:aws:states:{stage.aws_region}:{stage.aws_account_id}:execution:"
+                        f"{resource_name(project.resource_prefix, stage.stage, 'stop')}:*"
+                    ),
                 ],
             )
         )
@@ -815,5 +951,367 @@ def _start_definition(
         "Comment": "Wishicraft Phase 5 START; Desired remains RUNNING after post-CAS failure",
         "StartAt": "InitializeWorkflow",
         "TimeoutSeconds": 1800,
+        "States": states,
+    }
+
+
+def _stop_definition(
+    *, reconcile_arn: str, stop_task_arn: str, lease_renew_seconds: int
+) -> dict[str, object]:
+    def invoke(action: str, failure: str, *, state: bool = False) -> dict[str, object]:
+        payload: dict[str, object] = {
+            "schema_version": 1,
+            "action": action,
+            "operation_id.$": "$.operation_id",
+            "lease_id.$": "$.lease_id",
+        }
+        if state:
+            payload["state.$"] = "$.reconcile.state"
+        return {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {"FunctionName": stop_task_arn, "Payload": payload},
+            "Retry": [
+                {
+                    "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"],
+                    "IntervalSeconds": 2,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 2,
+                }
+            ],
+            "Catch": [
+                {"ErrorEquals": ["States.ALL"], "ResultPath": "$.workflow_error", "Next": failure}
+            ],
+        }
+
+    def reconcile(next_state: str) -> dict[str, object]:
+        return {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+                "FunctionName": reconcile_arn,
+                "Payload": {"schema_version": 1, "operation": "reconcile"},
+            },
+            "ResultSelector": {"state.$": "$.Payload"},
+            "ResultPath": "$.reconcile",
+            "Next": next_state,
+            "Catch": [
+                {
+                    "ErrorEquals": ["States.ALL"],
+                    "ResultPath": "$.workflow_error",
+                    "Next": "SetObservationFailure",
+                }
+            ],
+        }
+
+    states: dict[str, object] = {
+        "InitializeWorkflow": {
+            "Type": "Pass",
+            "Result": {},
+            "ResultPath": "$.workflow_error",
+            "Next": "ReconcileBeforeStop",
+        },
+        "ReconcileBeforeStop": reconcile("SetDesiredStopped"),
+        "SetDesiredStopped": {
+            **invoke("set_desired", "SetPreconditionFailure", state=True),
+            "ResultPath": "$.desired",
+            "Next": "AlreadyEc2Stopped",
+        },
+        "AlreadyEc2Stopped": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.desired.Payload.already_stopped",
+                    "BooleanEquals": True,
+                    "Next": "RenewBeforeDnsDelete",
+                }
+            ],
+            "Default": "AlreadyRuntimeStopped",
+        },
+        "AlreadyRuntimeStopped": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.desired.Payload.runtime_stopped",
+                    "BooleanEquals": True,
+                    "Next": "RenewBeforeEc2Stop",
+                }
+            ],
+            "Default": "RenewBeforeHostStop",
+        },
+        "RenewBeforeHostStop": {
+            **invoke("renew", "SetLockLostFailure"),
+            "ResultPath": "$.lease",
+            "Next": "RunHostStop",
+        },
+        "RunHostStop": {
+            **invoke("run_host_stop", "SetHostFailure"),
+            "ResultPath": "$.host_stop",
+            "Next": "InitHostPoll",
+        },
+        "InitHostPoll": {
+            "Type": "Pass",
+            "Result": {"count": 0},
+            "ResultPath": "$.host_poll",
+            "Next": "WaitHostStop",
+        },
+        "WaitHostStop": {"Type": "Wait", "Seconds": 15, "Next": "IncrementHostPoll"},
+        "IncrementHostPoll": {
+            "Type": "Pass",
+            "Parameters": {"count.$": "States.MathAdd($.host_poll.count, 1)"},
+            "ResultPath": "$.host_poll",
+            "Next": "HostPollWithinDeadline",
+        },
+        "HostPollWithinDeadline": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.host_poll.count",
+                    "NumericGreaterThanEquals": 28,
+                    "Next": "SetRuntimeTimeout",
+                }
+            ],
+            "Default": "RenewBeforeHostCheck",
+        },
+        "RenewBeforeHostCheck": {
+            **invoke("renew", "SetLockLostFailure"),
+            "ResultPath": "$.lease",
+            "Next": "CheckHostStop",
+        },
+        "CheckHostStop": {
+            **invoke("check_host_stop", "SetHostFailure"),
+            "Parameters": {
+                "FunctionName": stop_task_arn,
+                "Payload": {
+                    "schema_version": 1,
+                    "action": "check_host_stop",
+                    "operation_id.$": "$.operation_id",
+                    "lease_id.$": "$.lease_id",
+                    "command_id.$": "$.host_stop.Payload.command_id",
+                },
+            },
+            "ResultPath": "$.host_check",
+            "Next": "HostStopComplete",
+        },
+        "HostStopComplete": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.host_check.Payload.complete",
+                    "BooleanEquals": True,
+                    "Next": "ReconcileRuntimeStopped",
+                }
+            ],
+            "Default": "WaitHostStop",
+        },
+        "ReconcileRuntimeStopped": reconcile("RuntimeStopped"),
+        "RuntimeStopped": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "And": [
+                        {
+                            "Variable": "$.reconcile.state.observation.host_runtime_state",
+                            "StringEquals": "not-running",
+                        },
+                        {
+                            "Variable": "$.reconcile.state.observation.minecraft_service_state",
+                            "StringEquals": "not-running",
+                        },
+                        {
+                            "Variable": "$.reconcile.state.observation.minecraft_protocol_state",
+                            "StringEquals": "not-applicable",
+                        },
+                    ],
+                    "Next": "RenewBeforeEc2Stop",
+                }
+            ],
+            "Default": "SetRuntimeTimeout",
+        },
+        "RenewBeforeEc2Stop": {
+            **invoke("renew", "SetLockLostFailure"),
+            "ResultPath": "$.lease",
+            "Next": "StopEc2",
+        },
+        "StopEc2": {
+            **invoke("stop_ec2", "SetEc2Failure", state=True),
+            "ResultPath": "$.ec2_stop",
+            "Next": "InitEc2Poll",
+        },
+        "InitEc2Poll": {
+            "Type": "Pass",
+            "Result": {"count": 0},
+            "ResultPath": "$.ec2_poll",
+            "Next": "WaitEc2Stopped",
+        },
+        "WaitEc2Stopped": {"Type": "Wait", "Seconds": 30, "Next": "IncrementEc2Poll"},
+        "IncrementEc2Poll": {
+            "Type": "Pass",
+            "Parameters": {"count.$": "States.MathAdd($.ec2_poll.count, 1)"},
+            "ResultPath": "$.ec2_poll",
+            "Next": "Ec2PollWithinDeadline",
+        },
+        "Ec2PollWithinDeadline": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.ec2_poll.count",
+                    "NumericGreaterThanEquals": 10,
+                    "Next": "SetEc2Timeout",
+                }
+            ],
+            "Default": "RenewBeforeEc2Probe",
+        },
+        "RenewBeforeEc2Probe": {
+            **invoke("renew", "SetLockLostFailure"),
+            "ResultPath": "$.lease",
+            "Next": "ReconcileEc2Stopped",
+        },
+        "ReconcileEc2Stopped": reconcile("Ec2Stopped"),
+        "Ec2Stopped": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.reconcile.state.observation.ec2_state",
+                    "StringEquals": "stopped",
+                    "Next": "RenewBeforeDnsDelete",
+                }
+            ],
+            "Default": "WaitEc2Stopped",
+        },
+        "RenewBeforeDnsDelete": {
+            **invoke("renew", "SetLockLostFailure"),
+            "ResultPath": "$.lease",
+            "Next": "DeleteDns",
+        },
+        "DeleteDns": {
+            **invoke("delete_dns", "SetDnsFailure"),
+            "ResultPath": "$.dns_delete",
+            "Next": "DnsAlreadyAbsent",
+        },
+        "DnsAlreadyAbsent": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.dns_delete.Payload.absent",
+                    "BooleanEquals": True,
+                    "Next": "ReconcileAfterStop",
+                }
+            ],
+            "Default": "InitDnsPoll",
+        },
+        "InitDnsPoll": {
+            "Type": "Pass",
+            "Result": {"count": 0},
+            "ResultPath": "$.dns_poll",
+            "Next": "WaitDnsInSync",
+        },
+        "WaitDnsInSync": {"Type": "Wait", "Seconds": 30, "Next": "IncrementDnsPoll"},
+        "IncrementDnsPoll": {
+            "Type": "Pass",
+            "Parameters": {"count.$": "States.MathAdd($.dns_poll.count, 1)"},
+            "ResultPath": "$.dns_poll",
+            "Next": "DnsPollWithinDeadline",
+        },
+        "DnsPollWithinDeadline": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.dns_poll.count",
+                    "NumericGreaterThanEquals": 4,
+                    "Next": "SetDnsTimeout",
+                }
+            ],
+            "Default": "RenewBeforeDnsCheck",
+        },
+        "RenewBeforeDnsCheck": {
+            **invoke("renew", "SetLockLostFailure"),
+            "ResultPath": "$.lease",
+            "Next": "CheckDnsChange",
+        },
+        "CheckDnsChange": {
+            **invoke("check_dns_change", "SetDnsFailure"),
+            "Parameters": {
+                "FunctionName": stop_task_arn,
+                "Payload": {
+                    "schema_version": 1,
+                    "action": "check_dns_change",
+                    "operation_id.$": "$.operation_id",
+                    "lease_id.$": "$.lease_id",
+                    "change_id.$": "$.dns_delete.Payload.change_id",
+                },
+            },
+            "ResultPath": "$.dns_check",
+            "Next": "DnsInSync",
+        },
+        "DnsInSync": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.dns_check.Payload.complete",
+                    "BooleanEquals": True,
+                    "Next": "ReconcileAfterStop",
+                }
+            ],
+            "Default": "WaitDnsInSync",
+        },
+        "ReconcileAfterStop": reconcile("MarkSucceeded"),
+        "MarkSucceeded": {**invoke("complete", "SetObservationFailure", state=True), "End": True},
+    }
+    failures = {
+        "SetPreconditionFailure": "STOP_PRECONDITION_FAILED",
+        "SetHostFailure": "GRACEFUL_RUNTIME_STOP_FAILED",
+        "SetRuntimeTimeout": "MINECRAFT_STOP_TIMEOUT",
+        "SetEc2Failure": "EC2_STOP_FAILED",
+        "SetEc2Timeout": "EC2_STOP_TIMEOUT",
+        "SetDnsFailure": "DNS_DELETE_FAILED",
+        "SetDnsTimeout": "DNS_INSYNC_TIMEOUT",
+        "SetObservationFailure": "OBSERVATION_FAILED",
+        "SetLockLostFailure": "LOCK_LOST",
+    }
+    for name, code in failures.items():
+        states[name] = {
+            "Type": "Pass",
+            "Result": {"error_code": code},
+            "ResultPath": "$.failure",
+            "Next": "ReconcileAfterFailure",
+        }
+    states.update(
+        {
+            "ReconcileAfterFailure": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "Parameters": {
+                    "FunctionName": reconcile_arn,
+                    "Payload": {"schema_version": 1, "operation": "reconcile"},
+                },
+                "ResultPath": "$.failure_reconcile",
+                "Next": "RecordFailure",
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "UnrecoverableFailure"}],
+            },
+            "RecordFailure": {
+                **invoke("fail", "UnrecoverableFailure"),
+                "Parameters": {
+                    "FunctionName": stop_task_arn,
+                    "Payload": {
+                        "schema_version": 1,
+                        "action": "fail",
+                        "operation_id.$": "$.operation_id",
+                        "lease_id.$": "$.lease_id",
+                        "error_code.$": "$.failure.error_code",
+                        "workflow_error.$": "$.workflow_error",
+                    },
+                },
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "UnrecoverableFailure"}],
+                "Next": "StopFailed",
+            },
+            "StopFailed": {"Type": "Fail", "Error": "STOP_WORKFLOW_FAILED"},
+            "UnrecoverableFailure": {"Type": "Fail", "Error": "STOP_CLEANUP_FAILED"},
+        }
+    )
+    return {
+        "Comment": "Wishicraft Phase 6 STOP; Desired remains STOPPED after post-CAS failure",
+        "StartAt": "InitializeWorkflow",
+        "TimeoutSeconds": 1200,
         "States": states,
     }

@@ -89,6 +89,17 @@ class MinecraftTargetStack(Stack):
                 iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore")
             ],
         )
+        role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["ssm:GetParameter"],
+                resources=[
+                    (
+                        f"arn:aws:ssm:{stage.aws_region}:{stage.aws_account_id}:parameter"
+                        f"/wishicraft/{stage.stage}/secret/rcon-password"
+                    )
+                ],
+            )
+        )
         profile = iam.CfnInstanceProfile(self, "TargetInstanceProfile", roles=[role.role_name])
         security_group = ec2.CfnSecurityGroup(
             self,

@@ -115,6 +115,57 @@ def test_real_data_validation_renderer_can_omit_all_published_ports() -> None:
     assert service["volumes"][0]["source"] == ("/srv/minecraft/games/game-vanilla-main/server")
 
 
+def test_phase6_renderer_uses_file_only_rcon_secret_without_publishing_port() -> None:
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+    rendered = render_boot_time_artifacts(
+        configuration.project,
+        configuration.stage,
+        observed_uid=993,
+        observed_gid=993,
+        enable_rcon=True,
+        rcon_parameter_name="/wishicraft/dev/secret/rcon-password",
+    )
+    service = yaml.safe_load(rendered.compose_yaml)["services"]["minecraft"]
+    assert service["ports"] == ["25565:25565/tcp"]
+    assert service["volumes"][1] == {
+        "type": "bind",
+        "source": "/run/wishicraft/rcon-password",
+        "target": "/run/secrets/rcon-password",
+        "read_only": True,
+    }
+    assert service["volumes"][2:] == [
+        {
+            "type": "bind",
+            "source": "/run/wishicraft/rcon-cli.env",
+            "target": "/data/.rcon-cli.env",
+        },
+        {
+            "type": "bind",
+            "source": "/run/wishicraft/rcon-cli.yaml",
+            "target": "/data/.rcon-cli.yaml",
+        },
+    ]
+    assert "ENABLE_RCON=true" in rendered.runtime_env
+    assert "RCON_PASSWORD_FILE=/run/secrets/rcon-password" in rendered.runtime_env
+    assert "/wishicraft/dev/secret/rcon-password" not in (
+        rendered.compose_yaml + rendered.runtime_env + rendered.manifest_json
+    )
+    assert "25575" not in rendered.compose_yaml
+
+
+def test_phase6_renderer_rejects_unapproved_secret_parameter_path() -> None:
+    configuration = load_configuration(REPOSITORY_ROOT, "dev")
+    with pytest.raises(ConfigValidationError, match="outside the fixed allowlist"):
+        render_boot_time_artifacts(
+            configuration.project,
+            configuration.stage,
+            observed_uid=993,
+            observed_gid=993,
+            enable_rcon=True,
+            rcon_parameter_name="/other/secret",
+        )
+
+
 @pytest.mark.parametrize("version", ("LATEST", "SNAPSHOT", "snapshot"))
 def test_renderer_rejects_floating_minecraft_versions(version: str) -> None:
     configuration = load_configuration(REPOSITORY_ROOT, "dev")

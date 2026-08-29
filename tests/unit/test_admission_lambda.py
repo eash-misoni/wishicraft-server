@@ -69,6 +69,30 @@ def test_valid_admission_invocation_uses_domain_service(monkeypatch: pytest.Monk
     assert launcher.calls[0]["operation_id"] == "op-001"
 
 
+def test_stop_admission_launches_stop_workflow_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    service = Service(AdmissionResult("op-stop", True, "lease-stop"))
+    launcher = Launcher()
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.setattr(admission_lambda, "_stop_launcher", launcher)
+    stop_event = {**event(), "operation_type": "STOP", "idempotency_key": "stop-001"}
+    result = admission_lambda.handler(stop_event, None)
+    assert result["operation_id"] == "op-stop"
+    assert service.calls[0]["operation_type"] is OperationType.STOP
+    assert launcher.calls[0]["lease_id"] == "lease-stop"
+
+
+def test_duplicate_stop_admission_does_not_launch_new_execution(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = Service(AdmissionResult("op-stop", False, None))
+    launcher = Launcher()
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.setattr(admission_lambda, "_stop_launcher", launcher)
+    stop_event = {**event(), "operation_type": "STOP", "idempotency_key": "stop-001"}
+    assert admission_lambda.handler(stop_event, None)["created"] is False
+    assert launcher.calls == []
+
+
 @pytest.mark.parametrize(
     "invalid",
     [

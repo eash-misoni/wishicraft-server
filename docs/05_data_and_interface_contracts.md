@@ -662,6 +662,14 @@ State Machineの初期inputはadmissionが生成した次の値だけとする�
 
 START terminal successはEC2 running、SSM online、Phase 3 runtime READY、active Game一致、public IPv4存在、Route 53 change `INSYNC`、A recordが現在IPv4と一致の全条件を要求する。runtime READY、desired convergence、Operation successは別概念として保持する。
 
+### Phase 6 STOP operation v1
+
+Control PlaneはSSMへrepository固定command `sudo /usr/local/libexec/wishicraft/operation-v1 STOP`だけを送る。wrapperはliteral `START`または`STOP`一個だけを許可する。STOPは固定mount guard、Compose serviceから解決したexactly-one container、container-local `rcon-cli save-all flush`、systemd stop、container/process/25565・25575 listener消滅確認へ変換する。save失敗またはRCON unavailableではfail closedし、EC2 stopを呼ばない。password、任意shell、任意Minecraft command、任意path、任意container IDをinputにしない。
+
+STOP workflow inputはPhase 5と同じ`schema_version`、`operation_id`、`lease_id`だけである。Desired STOPPEDは`desired_revision` CASし、既にDesired STOPPEDならrevisionを増やさずactual convergenceを継続する。Actual stoppedならruntimeを再起動せずDNS cleanupとfresh Reconcileへ進む。terminal successはDesired STOPPED、EC2 stopped、SSM not-applicable、Host Runtime not-running、Minecraft service/protocol not-applicable、public IPv4 absent、DNS absent、observation error/discrepancyなしを要求する。
+
+failure codeは少なくとも`STOP_PRECONDITION_FAILED`、`LOCK_LOST`、`MINECRAFT_SAVE_FAILED`、`RCON_UNAVAILABLE`、`GRACEFUL_RUNTIME_STOP_FAILED`、`MINECRAFT_STOP_TIMEOUT`、`EC2_STOP_FAILED`、`EC2_STOP_TIMEOUT`、`DNS_DELETE_FAILED`、`DNS_INSYNC_TIMEOUT`、`OBSERVATION_FAILED`を区別する。Desired更新後のfailureはDesired STOPPEDを戻さず、fresh Reconcile後にowned terminal cleanupを試みる。
+
 Phase 1の直接Java/systemd操作はas-builtとして維持する。Phase 2以降はSSMから許可済みHost Runtime interfaceを呼び、Host Runtimeがcontainer-localなitzg/runtime interfaceへ接続する。以下のCLI名とpayloadは旧案を含むため、Phase 3以降はPhase 2 Host Runtimeのsystemd unit、Docker/Compose、itzg containerを観測・操作するinterfaceへ読み替える。
 
 実装言語はPythonを基本とする。

@@ -384,6 +384,12 @@ Discord /mc stop
 
 保存失敗時は通常停止を続行せず、管理者確認が必要な失敗とする。
 
+Phase 6はSTART State Machineへbranchを混在させず、STOP専用Standard State MachineとTask Lambdaを使用する。Admission、Operation/Lock、Desired CAS、Reconcileは共有し、STOP固有のEC2 StopInstances、DNS DELETE、固定Host Runtime STOP権限だけを専用Taskへ与える。
+
+Host Runtime STOPは固定`operation-v1 STOP`だけを受け付け、container-local `rcon-cli save-all flush`成功後に既存systemd unitを停止する。container/process/listener停止を確認するまでEC2停止へ進まない。RCON passwordはTarget roleがstage固定SecureStringだけを取得して`/run/wishicraft`へ0400で置き、read-only bindと`RCON_PASSWORD_FILE`で渡す。itzgが生成する`.rcon-cli.env`/`.rcon-cli.yaml`もData EBSへ永続化させず、`/run/wishicraft`上の0600 filesを`/data`の該当pathへbindする。RCON portはpublishせず、SG ingressも追加しない。
+
+Actual EC2が既にstoppedなら、Desired RUNNING/STOPPEDのどちらからでもEC2やMinecraftを起動せず、Desired STOPPED CAS、stale DNS DELETE/INSYNC、fresh Reconcileへ収束する。canonical orderingは通常経路でsave、runtime stop、EC2 stop/stopped、DNS DELETE/INSYNC、final Reconcileである。
+
 ## 8. statusフロー
 
 ```text
