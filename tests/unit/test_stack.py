@@ -622,6 +622,9 @@ def test_target_stack_owns_only_the_imported_existing_data_attachment() -> None:
     security_group = next(iter(template.find_resources("AWS::EC2::SecurityGroup").values()))[
         "Properties"
     ]
+    # This imported value is replacement-only in CloudFormation. Its wording is
+    # historical; the ingress assertions below define the effective baseline.
+    assert security_group["GroupDescription"] == "Phase 2 target host with zero ingress"
     assert security_group["SecurityGroupIngress"] == [
         {
             "CidrIp": "0.0.0.0/0",

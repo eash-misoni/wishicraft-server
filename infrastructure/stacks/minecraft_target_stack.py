@@ -93,7 +93,9 @@ class MinecraftTargetStack(Stack):
         security_group = ec2.CfnSecurityGroup(
             self,
             "TargetSecurityGroup",
-            group_description="Target host with Minecraft client ingress only",
+            # CloudFormation treats GroupDescription as replacement-only. Keep the
+            # imported Phase 2 value so Phase 5 changes only the ingress rules.
+            group_description="Phase 2 target host with zero ingress",
             vpc_id=str(values["target_host.vpc_id"]),
             security_group_ingress=[
                 ec2.CfnSecurityGroup.IngressProperty(
