@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜4は完了しています。devにはGames、Operations、Idempotency、Locks、条件付きAdmission Lambda、Desired CASがdeploy済みで、実DynamoDB transaction integrationまで完了しました。次はPhase 5「安全なstart workflow」です。Lock owner、Desired revision、stale recoveryの正本はD-074です。
+Phase 0〜4は完了しています。devにはGames、Operations、Idempotency、Locks、条件付きAdmission Lambda、Desired CASがdeploy済みで、実DynamoDB transaction integrationまで完了しました。Phase 5「安全なstart workflow」はrepository-only implementationまで完了し、最初のcredential-backed diff/deploy/実機START前の承認境界にあります。Lock owner、Desired revision、stale recoveryの正本はD-074、write-side command pathはD-075です。
 
 devは次の3層architectureです。
 
@@ -40,7 +40,7 @@ uv run ruff format --check .
 uv run mypy src infrastructure tests
 npx --no-install cdk synth MinecraftStack-dev --context stage=dev --context phase=1 --context deployment=phase1
 npx --no-install cdk synth MinecraftTargetStack-dev --context stage=dev --context deployment=target
-npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=4 --context deployment=control-plane
+npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=5 --context deployment=control-plane
 ```
 
 prod synthとdeployは初期リリース直前まで行いません。通常のrepository validationはAWS credentialやsecretを使用しません。

@@ -53,14 +53,14 @@ def _action_list(value: object) -> list[str]:
     return cast(list[str], value)
 
 
-def test_control_plane_stack_is_independent_and_read_mostly() -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=4, deployment="control-plane")
+def test_control_plane_stack_adds_phase_five_start_without_target_resources() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=5, deployment="control-plane")
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
 
     template.resource_count_is("AWS::DynamoDB::Table", 5)
-    template.resource_count_is("AWS::Lambda::Function", 2)
-    template.resource_count_is("AWS::Logs::LogGroup", 2)
+    template.resource_count_is("AWS::Lambda::Function", 3)
+    template.resource_count_is("AWS::Logs::LogGroup", 3)
     assert template.find_resources("AWS::EC2::Instance") == {}
     assert template.find_resources("AWS::EC2::VolumeAttachment") == {}
     tables = template.find_resources("AWS::DynamoDB::Table")
@@ -111,13 +111,26 @@ def test_control_plane_stack_is_independent_and_read_mostly() -> None:
         "dynamodb:TransactWriteItems",
     } <= actions
     assert not actions & {
-        "ec2:StartInstances",
         "ec2:StopInstances",
         "ec2:TerminateInstances",
-        "route53:ChangeResourceRecordSets",
         "ssm:GetParameter",
     }
-    assert template.find_resources("AWS::StepFunctions::StateMachine") == {}
+    template.resource_count_is("AWS::StepFunctions::StateMachine", 1)
+    assert "ec2:StartInstances" in actions
+    assert "route53:ChangeResourceRecordSets" in actions
+    state_machine = next(
+        iter(template.find_resources("AWS::StepFunctions::StateMachine").values())
+    )["Properties"]
+    definition = state_machine["Definition"]
+    states = definition["States"]
+    assert definition["TimeoutSeconds"] == 1800
+    assert states["WaitReady"]["Seconds"] == 120
+    assert states["SetEc2Timeout"]["Result"]["error_code"] == "EC2_START_TIMEOUT"
+    assert states["SetSsmTimeout"]["Result"]["error_code"] == "SSM_ONLINE_TIMEOUT"
+    assert states["SetHostTimeout"]["Result"]["error_code"] == "SSM_COMMAND_TIMEOUT"
+    assert states["SetReadyTimeout"]["Result"]["error_code"] == "MINECRAFT_READY_TIMEOUT"
+    assert states["AlreadyReady"]["Choices"][0]["Next"] == "UpdateDnsRecord"
+    assert states["DnsChangeInSync"]["Choices"][0]["Next"] == "ReconcileDns"
 
     admission = next(
         value["Properties"]
@@ -148,6 +161,8 @@ def test_control_plane_stack_is_independent_and_read_mostly() -> None:
         "dynamodb:PutItem",
         "dynamodb:TransactWriteItems",
         "dynamodb:UpdateItem",
+        "states:DescribeExecution",
+        "states:StartExecution",
     }
     statements = [
         statement
@@ -159,7 +174,7 @@ def test_control_plane_stack_is_independent_and_read_mostly() -> None:
         for statement in statements
         if "ssm:SendCommand" in _action_list(statement["Action"])
     ]
-    assert len(send_command) == 2
+    assert len(send_command) == 4
     assert any(
         "document/AWS-RunShellScript" in str(statement["Resource"]) for statement in send_command
     )
@@ -607,7 +622,15 @@ def test_target_stack_owns_only_the_imported_existing_data_attachment() -> None:
     security_group = next(iter(template.find_resources("AWS::EC2::SecurityGroup").values()))[
         "Properties"
     ]
-    assert "SecurityGroupIngress" not in security_group
+    assert security_group["SecurityGroupIngress"] == [
+        {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Minecraft client connections",
+            "FromPort": 25565,
+            "IpProtocol": "tcp",
+            "ToPort": 25565,
+        }
+    ]
     assert security_group["VpcId"] == "vpc-0c3cca1e65696ed8e"
     assert security_group["SecurityGroupEgress"] == [
         {

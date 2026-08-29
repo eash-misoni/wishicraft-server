@@ -145,7 +145,7 @@ desired state は、変更内容によって反映方法が異なる。Wishicraf
 
 ## 9. Command Path / RCON の境界
 
-RCON 等の管理 port を host や Internet へ publish しないことを前提とし、Control Plane から Minecraft command を実行する経路は Host Runtime 内に閉じる。具体方式は Phase 2 で固定するが、責務境界は次の通りとする。
+RCON 等の管理 port を host や Internet へ publish しないことを前提とし、Control Plane から Minecraft command を実行する経路は Host Runtime 内に閉じる。具体方式はD-075で固定し、責務境界は次の通りとする。
 
 ```text
 Control Plane
@@ -159,6 +159,12 @@ Control Plane
 - RCON password を application log、shell history、Git、DynamoDB の平文値として残さない。
 
 - command path の認可は Control Plane、secret の安全な受け渡しは Host Runtime、Minecraft command の具体的実行は itzg/runtime の責務とする。
+
+- Control Plane/APIはtyped allowlist operationだけを受け付け、任意shellまたは任意Minecraft commandを受け付けない。Phase 5 STARTは固定Host Runtime systemd unitの起動だけでありRCONを使用しない。
+
+- Minecraft-aware commandが必要な後続operationは固定itzg image内のcontainer-local `rcon-cli`を使用する。Wishicraft独自のRCON protocol client/libraryは実装しない。
+
+- RCON secretはAWS managed sourceからHost Runtimeだけが取得し、`/run`等のephemeral file、最小permission、read-only bind、`RCON_PASSWORD_FILE`でitzgへ渡す。password本文をCompose environment、SSM argument、Git、logへ置かず、RCON portをhost publishまたはSG ingressへ追加しない。
 
 ## 10. Source of Truth と設定の所有権
 
@@ -258,9 +264,7 @@ systemd、Docker/Compose、itzg、Minecraft の複数層が独立に restart を
 
 AL2023 release/kernel/AMI、itzg image tag/digest、Docker/Compose、UID/GID 993、ownership migration、Host Runtime lifecycle owner/restart no、停止timeout、最小memory/OOM/graceful stopはD-060〜D-068で固定またはProvisional化し、dev実機で検証した。Phase 3ではread-only observation、active game、Reconcile、current SystemStateを完成した。残る設計事項は次のとおりである。
 
-- Phase 4で運用中desired stateのwrite-side CAS/versionとOperation/Lock ownershipを確定する。
-
-- Control Plane -> Host Runtime -> itzg への具体的 command path と secret injection 方法。
+- RCON secret injectionの初回実AWS適用と実測（方式はD-075で固定済み）。
 
 - whitelist 等について、起動時同期と稼働中即時反映をどう使い分けるか。
 

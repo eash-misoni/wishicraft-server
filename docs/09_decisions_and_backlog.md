@@ -711,6 +711,16 @@
 - current physical attachmentは`TargetDataVolumeAttachment`としてTarget StackへResource Import済みで`IN_SYNC`、post-import target `cdk diff`は0である。closeout時はPhase 1 EC2とtarget EC2がともにstopped、snapshot `snap-0b1d9536e9c476c0f`はcompleted/retained、Phase 1 stackはtermination protection有効のFrozen rollback environmentである。
 - Data EBS Volume本体のstack ownership移管、stale Phase 1 attachment logical resource、Phase 1 EC2/root退役、Phase 1 stack削除はDeferred retirement debtでありPhase 2 blockerではない。RCON、public 25565、DNS automation、Control Plane integrationも後続Phaseのscopeとする。
 
+### D-075 write-side Host Runtime command pathとRCON境界
+
+- **状態:** Accepted
+- **日付:** 2026-08-29
+- **背景:** Phase 5以降のControl PlaneはHost Runtimeへwrite-side operationを要求するが、任意shell/Minecraft command、独自RCON protocol実装、secret露出を導入してはならない。
+- **決定:** Control Planeからはversioned・typed・allowlist済みoperationだけをSSMで呼ぶ。Phase 5 STARTは引数がexactly `START`のhost-local wrapperを固定commandで呼び、wrapperが`wishicraft-host-runtime.service`のsystemd startへ変換する。外部requestはinstance ID、path、shell、Minecraft commandを指定できない。STARTはRCONを使用しない。
+- **RCON:** Minecraft管理commandが必要な後続Phaseでは、固定itzg image内のcontainer-local `rcon-cli`を利用し、Control Planeに独自RCON client/libraryを実装しない。secretはAWS managed sourceからHost Runtimeだけが取得し、`/run`等のephemeral fileへ最小permissionで置き、read-only bindと`RCON_PASSWORD_FILE`でitzgへ渡す。password本文をCompose environment、SSM argument、log、Gitへ置かず、RCON portをpublishせずSG ingressも追加しない。
+- **影響:** Phase 5 repositoryはSTARTだけをallowlistし、SAVE/STOP/whitelist/sayを先行実装しない。RCON/secretの初回AWS適用は別の明示承認境界とする。
+- **関連:** START-006、EC2-002、EC2-007、NFR-010、D-074、`docs/architecture/itzg-responsibility-boundary.md`。
+
 ## 5. Current blockers
 
 Phase 0〜4は完了した。UID/GIDとownership compatibility、AL2023/AMI、Docker/Compose/itzg pin、initial memory、status/Reconcile/SystemState、Game/Operation/Idempotency/Lock、atomic admission、lease lifecycle、Desired CAS、stale recoveryは解消済みであり、current blockerへ残さない。
@@ -741,7 +751,7 @@ Phase 0〜4は完了した。UID/GIDとownership compatibility、AL2023/AMI、Do
    - B: Step FunctionsのCatch/Timeoutだけでterminal化する。通常failureは単純だが、execution開始前失敗や外部停止でstale stateが残り得る。
    - C: 定期sweeperを同時導入する。最終回復は早いが、Phase 4 scopeとAWS resourceを増やし、periodic reconcileの後続Phase境界を崩す。
 
-Phase 5以降に残る既知事項は、write-side Host Runtime command pathとRCON/secret injection（Phase 5/6まで）、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。これらはPhase 4 closeoutを妨げない。
+Phase 5以降に残る既知事項は、RCON/secret injectionの初回実AWS適用（RCONを必要とする後続operationまで）、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。write-side Host Runtime command pathはD-075で確定した。
 
 dev用Discord Guild/channel/role/Application ID/Public Keyは設定済みでありblockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
 
@@ -750,7 +760,7 @@ Phase別に決める事項:
 | 項目 | 決定期限 |
 |---|---|
 | Lock owner identity、desired-state CAS、stale operation recovery | D-074でAccepted（2026-08-29） |
-| RCON client/library / container-local command path | Phase 5 start workflow前 |
+| RCON client/library / container-local command path | D-075でAccepted（2026-08-29） |
 | dev Discord Bot TokenのSecureString登録とApplication/command設定確認 | Phase 7開始前 |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |
 | backup整合方式 | Phase 8開始前 |

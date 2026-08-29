@@ -21,7 +21,7 @@
 | 2 | itzg Host Runtime境界 | migration contract、mapping/apply、probe/start/stop command path |
 | 3 | 実測status | Reconcile Lambda、SystemState |
 | 4 | **Completed:** Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
-| 5 | **Next:** 安全なstart | Start Step Functions |
+| 5 | **Repository validated / AWS integration pending:** 安全なstart | Start Step Functions |
 | 6 | 安全なstop | Stop Step Functions |
 | 7 | Discord MVP | `/mc status/start/stop` |
 | 8 | 運用保護 | backup、自動停止、heartbeat、追加監視 |
@@ -478,6 +478,8 @@ start/stopを安全に実行するための履歴とロックを作る。
 
 ## 8. Phase 5 — 安全なstart workflow
 
+- **状態:** Repository validated / AWS integration pending（2026-08-29）
+
 ### 目的
 
 AWS Console/CLIから固定バニラGameを安全に起動する。
@@ -531,6 +533,16 @@ RecordFailure
 - timeout時に実状態を再観測する。
 - operation履歴とcurrent stepを追える。
 - 失敗後にロックが永久残留しない。
+
+### Repository-only実装記録
+
+Operation admissionが新規STARTを作成した場合だけ`operation_id`をStandard execution nameとしてworkflowを開始し、duplicate idempotency retryでは新しいexecutionを作らない。workflowはfresh Reconcile、Desired RUNNING CAS、tagで一意解決したTargetのEC2 start、SSM online待機、固定Host Runtime `operation-v1 START`、protocol-aware READY、active Game一致、限定Route 53 UPSERT、Change ID `INSYNC`、fresh endpoint一致を順に確認する。
+
+待機loopは120秒以下で同一`operation_id` / `lease_id` / 未期限切れ条件によるrenewを行い、EC2 start、SSM command、DNS write、terminal completion直前にcurrent lease possessionを検証する。同一Gameが既にREADYならEC2/Host Runtime side effectをskipしてendpoint収束へ進む。`SetDesiredRunning`後のfailureはDesiredを戻さず、fresh Reconcile後にowned failure completionを試みる。lock lossまたはcleanup observation failureでは他owner stateを変更せずexecutionをfailさせ、通常admissionによるexpired takeoverは行わない。
+
+Host Runtime commandは引数がexactly `START`のversioned wrapperだけを許可し、systemdの固定unitへ変換する。instance ID、shell、path、Minecraft commandをAPI inputにしない。STARTはRCONを必要とせず、RCON有効化、secret取得、管理port publishはこのsliceに含めない。
+
+repository validationとcredentialless synthは完了対象だが、Target SGへのMinecraft TCP 25565 ingressだけのupdate、Control Plane stack update、wrapperのTarget配置、実EC2 start、SSM Run Command、Route 53 writeは未実行であり、public exposure/AWS writeの明示承認後にintegrationで完了条件を実測する。SSH、RCON、管理port ingressは追加しない。
 
 ## 9. Phase 6 — 安全なstop workflow
 

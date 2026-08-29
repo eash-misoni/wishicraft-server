@@ -34,6 +34,16 @@ class Service:
         return self.result
 
 
+class Launcher:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    def start(self, *, operation_id: str, lease_id: str, started_at: datetime) -> None:
+        self.calls.append(
+            {"operation_id": operation_id, "lease_id": lease_id, "started_at": started_at}
+        )
+
+
 def event() -> dict[str, object]:
     return {
         "schema_version": 1,
@@ -46,7 +56,9 @@ def event() -> dict[str, object]:
 
 def test_valid_admission_invocation_uses_domain_service(monkeypatch: pytest.MonkeyPatch) -> None:
     service = Service(AdmissionResult("op-001", True, "lease-001"))
+    launcher = Launcher()
     monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.setattr(admission_lambda, "_launcher", launcher)
     assert admission_lambda.handler(event(), None) == {
         "schema_version": 1,
         "operation_id": "op-001",
@@ -54,6 +66,7 @@ def test_valid_admission_invocation_uses_domain_service(monkeypatch: pytest.Monk
         "lease_id": "lease-001",
     }
     assert service.calls[0]["operation_type"] is OperationType.START
+    assert launcher.calls[0]["operation_id"] == "op-001"
 
 
 @pytest.mark.parametrize(

@@ -59,6 +59,8 @@ Resource `*`を避ける。AWS APIの制約でResource制限できないAction�
 
 Phase 3 Reconcile LambdaはEC2/SSM managed-node/Route 53 read、固定probe SendCommand/GetCommandInvocation、特定SystemState tableのGetItem/UpdateItemだけを持つ。Start/Stop/Terminate、EBS/SG/DNS mutation、secret read、IAM mutationを許可しない。Target SendCommandはTarget tag conditionと固定AWS-RunShellScript documentへ限定する。
 
+Phase 5 START Task LambdaはTarget tag条件付き`StartInstances`、固定document/tag条件付きSendCommand、GetCommandInvocation、対象Hosted ZoneのChangeResourceRecordSets、Route 53 change status確認、Phase 4 tableのowned conditional updateだけを持つ。Stop/Terminate、EBS、SG、IAM、secret readを許可しない。State Machine roleはReconcile/START Task Lambda invokeだけ、Admission Lambdaは新規STARTの対象State Machine `StartExecution`だけを追加する。
+
 ### Minecraft EC2 role
 
 - SSM managed instance
@@ -121,13 +123,15 @@ Phase 1では`minecraft.service`、固定server.jar、専用user/group、host fi
 
 Phase 2以降は、systemdがdata EBS mount完了後のHost Runtime起動順序を保証し、Docker/Composeがcontainer lifecycleを一元管理し、itzgがMinecraft processとgraceful shutdownを担当する。RCON等の管理portはhostへpublishせず、SSMからhost-local / container-localに閉じたcommand pathだけを使用する。Minecraft接続port以外を外部公開しない。
 
+Phase 5 STARTのSSM writeは固定`operation-v1 START`だけで、任意shell、path、Minecraft commandを受け取らない。STARTではRCONを有効化せずsecretを取得しない。Minecraft-aware commandが必要な後続Phaseでは固定itzg image内のcontainer-local `rcon-cli`を使用し、passwordはHost RuntimeだけがAWS managed sourceから取得して`/run`等のephemeral fileへ最小permissionで置き、read-only bindと`RCON_PASSWORD_FILE`で渡す。Compose environment、SSM argument、通常logへpassword本文を置かない。
+
 systemd、Docker/Compose、itzgのrestart policyを重ねず、Control Planeの停止要求を下位restartが打ち消さない構成にする。具体値はPhase 2 Decisionで確定する。
 
 Phase 2aではHost Runtime unitをboot enableせず、systemd `Restart=no`、Compose `restart: "no"`、`pull_policy: never`とする。start前にdata mount guard、filesystem preflight、Phase 1 `minecraft.service`非activeを確認する。既存worldへrecursive chownを行わず、観測済みnumeric UID/GIDと`SKIP_CHOWN_DATA=true`を使用する。memoryと停止timeoutはD-060のProvisional初期値であり、恒久的制約ではない。
 
 Phase 2b-1の観測と固定image検証により、`server.properties`一件だけを`0:993` / `0640`から`993:993` / `0640`へ移すD-061を採用した。contentを変更せず、Phase 1完全停止、mount identity、regular/non-symlink、owner/mode、ACLをfail-closedで照合する。current memory targetはcontainer `2816 MiB`、Xms `1G`、Xmx `2G`へ安全側に下げるが、実負荷/OOM観測までProvisionalとする。
 
-Target host validation用SGはingressを持たず、SSH、RCON、Minecraft 25565を公開しない。egressはSSM、固定AL2023 repository、Compose公式artifact、GHCRおよびMinecraft distribution取得に必要なHTTPSだけを許可する。target IAMはSSM managed node権限だけとし、secret読取、backup、EBS操作権限を持たない。
+Phase 2 validation時のTarget SGはingress 0であった。Phase 5 repository設計ではSTART-005の接続endpointを成立させるため、Minecraft TCP 25565だけを`0.0.0.0/0`から許可する。online-modeと既存whitelistを必須とし、SSH、RCON、管理portは公開しない。このSG updateはpublic exposure変更としてcredential-backed diff/update前に明示承認を要求する。egressはSSM、固定AL2023 repository、Compose公式artifact、GHCRおよびMinecraft distribution取得に必要なHTTPSだけを許可する。target IAMはSSM managed node権限だけとし、secret読取、backup、EBS操作権限を持たない。
 
 ## 5. Secret管理
 
@@ -157,7 +161,7 @@ Discord public key、Guild ID、Channel ID、Role IDは秘密ではないが、�
 - CDKとアプリケーションへ渡す値: 秘密値ではなくParameter名
 - Secrets Manager: 自動rotation等が必要になった場合に再評価
 
-Phase 1では、EC2 instance roleの`ssm:GetParameter`をdev用RCON SecureStringへ限定し、`server.properties`へ安全に反映した。target architectureでもParameter Store SecureStringと最小権限を維持するが、Host Runtimeからcontainerへの具体的なsecret injection方法はPhase 2 Decision Neededとする。secretをComposeのGit管理値、DynamoDB平文、log、shell history、environment dumpへ残さない。
+Phase 1では、EC2 instance roleの`ssm:GetParameter`をdev用RCON SecureStringへ限定し、`server.properties`へ安全に反映した。target architectureではD-075によりParameter Store SecureStringと最小権限、Host Runtime-only retrieval、ephemeral secret file、read-only bind、`RCON_PASSWORD_FILE`を基本契約とする。初回AWS適用はRCONを必要とするPhaseの明示承認境界で行う。secretをComposeのGit管理値、DynamoDB平文、log、shell history、environment dumpへ残さない。
 
 推奨Parameter名:
 

@@ -351,6 +351,12 @@ Discord /mc start
 
 失敗時はCatchでエラーを記録し、実状態を再観測してからロックを解放する。
 
+Phase 5 repository implementationでは、admission Lambdaだけが新規START executionを開始する。workflow inputはadmission生成のOperation/lease identityだけで、Target instanceはtagによるexactly-one resolverが内部解決する。EC2、SSM、DNSのprotected write前にcurrent lease possessionを検証し、poll loopでrenewする。
+
+Host Runtime write-side境界はD-075の固定`operation-v1 START`であり、systemdの固定Host Runtime unitだけを起動する。STARTにはMinecraft commandが不要なためRCONを有効化せず、secret injection、RCON publish、独自protocol clientを追加しない。既に同一Gameがprotocol-aware READYの場合はEC2/Host Runtime side effectをskipするが、Route 53 `INSYNC`とendpoint一致は改めて収束確認する。
+
+Target SGはPhase 5 public endpointのためMinecraft TCP 25565だけを`0.0.0.0/0`から許可するrepository設計へ進める。online-modeと既存whitelistを前提とし、SSH、RCON、管理portはingress 0を維持する。このSG updateはpublic exposure変更のためcredential-backed diff/update前に明示承認を要求する。
+
 ## 7. 初回stopフロー
 
 ```text

@@ -634,6 +634,34 @@ Task Lambdaは1責務に限定する。
 
 ## 14. Host Runtime操作契約
 
+### Phase 5 START operation v1
+
+Control PlaneはSSM `AWS-RunShellScript`へ次のrepository固定commandだけを送る。
+
+```text
+sudo /usr/local/libexec/wishicraft/operation-v1 START
+```
+
+wrapperの入力は引数1個のliteral `START`だけである。外部requestからinstance ID、shell、path、game ID、Minecraft commandを渡さず、TargetはProject/Stage/Purpose tagでexactly oneに解決する。wrapperは固定`wishicraft-host-runtime.service`へ`systemctl start`を行い、active確認後にsecret-free JSONをstdoutへ返す。READY待機はwrapperではなくReconcile/Step Functionsが行う。
+
+```json
+{"schema_version":1,"operation":"START","status":"accepted"}
+```
+
+不正operationはexit 64と`INVALID_OPERATION`でfail-closedする。Phase 5 STARTはRCONを使わない。将来のMinecraft-aware writeはD-075のcontainer-local `rcon-cli`境界を使用し、同じwrapperへ任意commandを追加しない。
+
+### Phase 5 START workflow task input
+
+State Machineの初期inputはadmissionが生成した次の値だけとする。
+
+```json
+{"schema_version":1,"operation_id":"op-...","lease_id":"lease-..."}
+```
+
+各protected taskは`owner_operation_id=operation_id`、`lease_id`、未期限切れを直前に確認する。poll loopはProvisionalな120秒間隔、renew後leaseは900秒である。Desired RUNNINGは`desired_revision` CAS、Observedはfresh Reconcileの`observed_at`で独立して更新する。
+
+START terminal successはEC2 running、SSM online、Phase 3 runtime READY、active Game一致、public IPv4存在、Route 53 change `INSYNC`、A recordが現在IPv4と一致の全条件を要求する。runtime READY、desired convergence、Operation successは別概念として保持する。
+
 Phase 1の直接Java/systemd操作はas-builtとして維持する。Phase 2以降はSSMから許可済みHost Runtime interfaceを呼び、Host Runtimeがcontainer-localなitzg/runtime interfaceへ接続する。以下のCLI名とpayloadは旧案を含むため、Phase 3以降はPhase 2 Host Runtimeのsystemd unit、Docker/Compose、itzg containerを観測・操作するinterfaceへ読み替える。
 
 実装言語はPythonを基本とする。

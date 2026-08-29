@@ -93,8 +93,17 @@ class MinecraftTargetStack(Stack):
         security_group = ec2.CfnSecurityGroup(
             self,
             "TargetSecurityGroup",
-            group_description="Phase 2 target host with zero ingress",
+            group_description="Target host with Minecraft client ingress only",
             vpc_id=str(values["target_host.vpc_id"]),
+            security_group_ingress=[
+                ec2.CfnSecurityGroup.IngressProperty(
+                    ip_protocol="tcp",
+                    from_port=stage.minecraft_port,
+                    to_port=stage.minecraft_port,
+                    cidr_ip="0.0.0.0/0",
+                    description="Minecraft client connections",
+                )
+            ],
             security_group_egress=[
                 ec2.CfnSecurityGroup.EgressProperty(
                     ip_protocol="tcp",

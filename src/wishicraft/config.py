@@ -171,6 +171,12 @@ class StageConfig:
     def lock_renew_interval_seconds(self) -> int:
         return _require_positive_int(self.values, "operation.lock_renew_interval_seconds")
 
+    def host_runtime_timeout_seconds(self, name: str) -> int:
+        if name not in {"wrapper", "ssm", "control_plane_wait"}:
+            raise ConfigValidationError([f"unsupported Host Runtime timeout: {name}"])
+        key = "host_runtime_wrapper" if name == "wrapper" else name
+        return _require_positive_int(self.values, f"host_runtime.timeouts.{key}")
+
     def operation_timeout_seconds(self, operation_type: str) -> int:
         key = {
             "STATUS": "status",
