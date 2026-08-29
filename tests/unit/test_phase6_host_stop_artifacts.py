@@ -59,9 +59,10 @@ def test_upgrade_requires_approved_predecessors_and_installs_entrypoint_last() -
     assert "COMPOSE_PREDECESSOR=c92fbb" in script
     assert "RUNTIME_ENV_PREDECESSOR=723b6e" in script
     assert "BROKEN_HOST_ENV_PREDECESSOR=62c9bd" in script
+    assert "CONTAINER_ENV_PREDECESSOR=271ce8" in script
     assert "RUNTIME_ENV_PATH=/etc/wishicraft/host-runtime/runtime.env" in script
     assert 'replace_existing "$SOURCE_ROOT/phase2-real-data.env" "$HOST_ENV_PATH"' in script
-    assert 'install_new "$SOURCE_ROOT/phase6-runtime.env" "$RUNTIME_ENV_PATH"' in script
+    assert 'replace_existing "$SOURCE_ROOT/phase6-runtime.env" "$RUNTIME_ENV_PATH"' in script
     assert "OPERATION_PREDECESSOR=eb8ce7" in script
     assert "UNAPPROVED_PREDECESSOR" in script
     operation_install = 'replace_existing "$SOURCE_ROOT/operation-v1.sh"'
