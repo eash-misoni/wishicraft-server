@@ -63,6 +63,18 @@ sources:
 
 判断時は「この用語を一文で説明できない読者が、周囲の段落を正しく理解できるか」を問う。説明なしでは曖昧になるなら、出現回数だけで除外しない。一方、文脈上の意味を持たない一般英単語や、解説してもWishicraft文書の理解に寄与しない語は候補にしない。
 
+各同期では全表示用sourceの文章部分をsource単位でcoverage auditする。code block、inline code、URL、既存linkを候補抽出から除外し、英語の略語、製品・service・resource名、infrastructure/network/storage/security、test/validation/CI、architecture・責務境界、状態・処理・failure handlingの語を棚卸しする。新規・更新sourceだけでなく、用語またはaliasを追加した場合は全既存sourceも再確認する。
+
+各候補は実行時の一時的なaudit記録で、次のいずれかへ分類する。
+
+1. 新規用語ページ
+2. 既存用語ページへのalias統合
+3. 既存用語ページで対応済み
+4. 横断guideで関係を補足
+5. 対象外。対象外はresource ID、version、一時値、path、code識別子、command option、普通の英文表現等の具体的理由を記録する
+
+一度しかないこと、広い概念であること、guideに説明があることだけを対象外理由にしない。ordinary Englishとtechnical Englishを文脈で分け、`Security Group`、`Instance Profile`、`SSM Run Command`、`CloudFormation Stack`、`Docker Image`、`bind mount`、`signature verification`、`graceful shutdown`のように一概念として使われるmultiword phraseを短い語より優先する。読者が本文中で未説明の英語技術語に遭遇しにくい状態を目標にする。
+
 commit hash、resource/instance/Command ID、IP、version番号だけの項目、一時値、一度限りの変数/test名、単なるfile名やcommand optionはページ化しない。
 
 既存ページのtitle、aliases、source表記を照合し、同じ概念なら更新する。英語・日本語、略称、大文字小文字、表記揺れだけで重複ページを作らない。曖昧な短縮表記をtitleにせず、repositoryの文脈に合う製品名・service名・技術概念を含む正規名称へ寄せる。
@@ -132,13 +144,14 @@ Wiki link追加後の「原文一致」はbyte一致ではなく、追加したW
 
 1. repository規約、状態、tracked source inventory、全対象文書、既存Wikiを読む。
 2. authority、完了地点、Accepted/Deferred/Superseded、Phase間の変更を整理する。
-3. 既存用語とaliasを照合し、新規・更新・統合を判断する。
+3. source別coverage auditを行い、各候補を新規、alias統合、既存対応、guide、理由付き対象外へ分類する。既存用語とaliasを照合し、新規・更新・統合を判断する。
 4. `.obsidian/**`と`personal/**`を生成・管理対象から除外してHome、用語、guide、表示用sourceを更新する。
 5. 次を検証する。失敗時は不完全な更新を成功扱いせず、`.local/learning-wiki/`内で安全に直せるものだけ直して再検証する。
 
 - tracked source inventoryと表示用sourceがpath単位で1対1に一致し、重複、欠落、削除済みsourceへの参照がない。
 - 全内部link先が存在し、Homeから全生成ページへ到達できる。
 - 正規名称とaliasが衝突せず、英語titleに自然な日本語aliasがある。
+- 全sourceのcoverage audit結果があり、multiword phraseを不自然に分割せず、全候補が5区分のいずれかへ分類されている。
 - 略語の展開があり、一言説明が別の未説明英語だけにならず、一般概念とWishicraft固有用途が分かれている。
 - authority区分が維持され、Superseded Decisionや途中Phaseを現行仕様にしていない。
 - 各derivedページにsource、authority、実行時HEADのas-of情報がある。
