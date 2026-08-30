@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜5は完了しています。Phase 6 Control Planeとstopped-state STOP convergenceはdev適用・実証済みですが、running STOPはRCON filesystem/nested-bind contractの回復中で未closeoutです。3回のrecoveryはすべてexplicit save前にfail closedし、Target/Minecraftはrunning、Desired STOPPEDの不一致をraw修復せず保持しています。D-078でpassword ROとitzg生成CLI config exact 2件RWを分離し、read-only filesystem preflight契約をrepositoryへ反映しました。次のproduction artifact適用とSTOP retryは明示承認境界です。
+Phase 0〜6は完了しています。Phase 6はdevでD-078のpassword RO / generated CLI config exact 2件RW、read-only filesystem preflight、container-local RCON authentication、fixed `save-all flush`、graceful Host Runtime stop、EC2 stopped、DNS DELETE/INSYNC、fresh Reconcile、duplicate idempotencyを実証しました。4件のrecovery failureはいずれもsaveまたはEC2/DNS side effect前にfail closedし、inactive-only canonical artifact適用後のSTART→STOPでcloseoutしました。終了時はDesired/Actual/Observed STOPPED、DNS absent、HEALTHY、Lock/current operationなしです。
 
 devは次の3層architectureです。
 

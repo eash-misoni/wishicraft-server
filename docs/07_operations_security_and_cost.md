@@ -169,6 +169,8 @@ Phase 1では、EC2 instance roleの`ssm:GetParameter`をdev用RCON SecureString
 
 Phase 6ではitzgがcontainer-local `rcon-cli`用に生成する`.rcon-cli.env`と`.rcon-cli.yaml`もsecret materialとして扱う。persistent `/data`へ直接作成させず、Host Runtimeがruntime UID/GID所有0600で`/run/wishicraft`へ事前作成したexact 2 filesをRW bindする。password fileは0400かつRO bindのままである。Data EBS側に許容する同名fileはroot:root 0644、size 0、nlink 1のbacking placeholderだけで、non-zeroはsecurity failureとする。preflight/STOPはrunning bind targetをmutationしない。Target roleの読取は`/wishicraft/<stage>/secret/rcon-password`一件へ限定する。
 
+2026-08-30のPhase 6 closeoutではproduction Docker inspect/preflightでpassword RO、CLI config exact 2件RW、host ephemeral metadata、zero-size backing placeholders、RCON authenticationを確認した。fixed saveとgraceful stop後だけEC2停止へ進み、DNS DELETE/INSYNCとfinal HEALTHY Reconcileを完了した。RCON/SSH/management ingressは追加せず、SGはgameplay TCP 25565だけである。
+
 推奨Parameter名:
 
 ```text

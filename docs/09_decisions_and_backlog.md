@@ -12,7 +12,7 @@
 
 ### D-078 itzg生成RCON CLI configは固定2件だけephemeral RW nested bindとする
 
-- **状態:** Accepted（human review、repository-only）
+- **状態:** Accepted（production validated）
 - **日付:** 2026-08-30
 - **Upstream rationale:** 固定itzg `2026.7.2`の`start`はruntime UID/GIDへ切り替えて`start-configuration`を実行し、同scriptは`HOME=/data`、`RCON_PASSWORD_FILE`を読み、`$HOME/.rcon-cli.env`と`$HOME/.rcon-cli.yaml`へcontainer-local `rcon-cli`設定を書き込む。このupstream write contractのため生成config destinationはwritableでなければならない。
 - **Decision:** password fileは固定`/run/wishicraft/rcon-password`から`/run/secrets/rcon-password`へのRO bindを維持する。生成configだけは`/run/wishicraft/rcon-cli.env`→`/data/.rcon-cli.env`と`/run/wishicraft/rcon-cli.yaml`→`/data/.rcon-cli.yaml`のexact 2 bindをRWで許可する。一般的なRCON/RW mount例外、wildcard、任意source/destinationへ拡張しない。
@@ -20,6 +20,7 @@
 - **Purity:** filesystem preflightはread-only validationであり、running中のnested bind destinationをrm/unlink/truncate/replaceしない。`stop-v1`はread-only guards、RCON availability、固定`save-all flush`、systemd graceful stop、stopped verificationだけを担う。prepare/cleanup責務をSTOP critical pathへ混在させない。
 - **Recovery evidence:** running STOP recoveryは、(1) systemd外typed STOPのpreflight env不足、(2) readonly `COMPOSE_FILE` collision、(3) live nested-bind backing placeholder削除によるRCON authentication loss、の3回をいずれもexplicit save前にfail closedした。共通原因はproduction runtime topology、とくにDocker nested bind lifecycleをrepository fixtureが十分モデル化していなかったことである。failed Operationsは履歴として保持し、第四hot-patchとSTOP retryは未承認である。
 - **First production validation:** inactive-only full artifact upgradeとcanonical STARTは成功したが、STOP admission前のlive preflightでDocker label用Go templateのquote escaping bugを検出した。raw device/mount guard後、RCON/save前にfail closedし、verified maintenance stopでcontainer exit 0へ戻した。running-state replacementは行わず、正しいtemplate literalとproduction regression testをrepositoryへ追加し、次のinactive-only適用を新しい承認境界とする。
+- **Final production validation:** 修正版をinactive-onlyで適用後、canonical STARTとlive preflightでraw device、mount guard、exact Docker nested binds、RCON authenticationを順にPASSした。canonical STOPはexplicit save、graceful runtime stop、EC2 stopped、DNS DELETE/INSYNC、fresh stopped Reconcile、terminal/owned cleanup、duplicate idempotencyまで成功した。password/CLI configをpublic port、SG、Git、SSM argumentへ露出せず、Data EBSにはstrict zero-size backing placeholder以外のpersistent configを許可しなかった。
 - **関係:** D-075のcontainer-local client、`RCON_PASSWORD_FILE`、非公開RCON境界を変更しない。D-077のephemeral generated config方式をRO一律解釈からpassword RO / exact generated config RWへ精密化する。独自RCON clientや`mc-send-to-console`へ切り替えない。
 
 ### D-076 Host Runtimeはdata mount unitへ直接依存しactive Game metadataを固定artifactでrealizeする
@@ -40,7 +41,7 @@
 - **Lock identity:** `operation_id`をlogical ownerとし、各acquisitionで一意な`lease_id`を発行する。Lockはresource/system identity、`owner_operation_id`、`lease_id`、`lease_expires_at`を保持し、renew、release、protected side effect直前の確認はoperation/lease一致と未期限切れを要求する。同一Operationの二重executorや期限切れ後の古いexecutorをcurrent ownerとみなさない。
 - **Desired CAS:** Desiredは`desired_revision`、Observedは`observed_at`、Operation ownershipは`current_operation_id`で独立して保護する。Desired mutationはexpected revision NのCASでN+1へ進め、必要なoperationではCurrent Operation条件もtransactionへ含める。ReconcileはDesiredを上書きしない。将来の`rendered_revision`、`applied_revision`との接続を維持する。
 - **Stale recovery:** Lock expiryはOperation failureではない。deadline/lease超過はstale candidateとして新しい競合admissionをblockし、fresh Reconcile後の明示recoveryが旧Operationのterminal化とowned Current Operation/Lock cleanupを一transactionで行う。実状態を観測せず単純FAILED化せず、Phase 4 MVPの通常admissionへauto-recoveryを入れない。副作用前と安全と証明できる限定caseの将来自動化は別Decisionとする。
-- **Values/retention:** lease 900秒・renew 120秒はPhase 5 STARTの243.059秒実測で5回のrenewと十分なmarginを確認した。Phase 6 STOPの実測前なので両値はProvisionalを維持する。Operation/Idempotency TTLはDeferredのままとする。
+- **Values/retention:** lease 900秒・renew 120秒はAcceptedとする。Phase 5 START 243.059秒/5回renew、Phase 6 closeout START 243.499秒、STOP 93.353秒/6回renewを実測し、STOPの最長poll gap約30秒に対してrenew後marginは少なくとも約870秒だった。Operation/Idempotency TTLはDeferredのままとする。
 - **Dev integration:** 2026-08-29にControl Plane stackだけへ4 tablesとAdmission Lambdaをdeployした。条件付きGame登録、atomic admission、idempotency、競合/STATUS、operation/lease一致、wrong lease拒否、renew/owned release、Desired revision CAS、fresh Reconcileを必須とするstale recoveryを実DynamoDBで確認した。integration後はLock 0件、Current Operationなし、識別可能なOperation/Idempotency履歴だけを保持する。Admission IAMは対象5 tableの`ConditionCheckItem`、`GetItem`、`PutItem`、`TransactWriteItems`、`UpdateItem`とLambda loggingに限定し、runtime/AWS lifecycle mutation権限を持たない。
 
 ### D-073 Phase 4前はGame desired stateとGit管理runtime lockを分離する
@@ -746,7 +747,7 @@
 
 ### D-077 Phase 6 STOP専用workflowとephemeral RCON client config
 
-- **状態:** Accepted（Control Plane / stopped-state convergence適用済み。RCON/Target初適用は未承認）
+- **状態:** Accepted（Phase 6 production validated）
 - **日付:** 2026-08-29
 - STARTとSTOPはfailure isolationとIAM最小化のため別Standard State Machine/Task Lambdaとする。Admission、Operation/Lock、Desired CAS、Reconcile contractは共有する。
 - STOPは固定Host Runtime operation内でcontainer-local `rcon-cli save-all flush`を実行し、成功後だけsystemd graceful stopへ進む。systemd/itzgだけの暗黙saveをSTOP-001のexplicit save証跡へ読み替えない。
@@ -754,6 +755,7 @@
 - Actual EC2 stoppedではruntimeを起動し直さず、Desired STOPPED、DNS absent、fresh Observedへ収束する。通常pathの順序はcanonical contractどおりruntime停止確認、EC2 stopped、DNS DELETE/INSYNCである。
 - Target secret read IAM、artifact、secret作成、injection、実RCON commandの最初のproduction適用は明示承認境界を維持する。
 - **Stopped-state dev evidence:** `Desired RUNNING` revision 2 / Actual stopped / stale DNSからcanonical STOP Admissionを実行し、Actual stopped short-circuitでDesired STOPPED revision 3、DNS DELETE/INSYNC、fresh stopped observation、HEALTHY、Operation SUCCEEDED、Lock/current operation解放へ収束した。実行時間は42.316秒で、Target向けSSM、EC2 Start/Stop、Host Runtime、RCON、secret readは0件だった。同一payload retryは同じOperationを`created=false`で返し、新規executionもside effectも作らなかった。これは通常running STOPのsave/graceful shutdownを実証するものではない。
+- **Running STOP dev evidence:** D-078修正版でcanonical START後、container-local RCON authenticationとfixed `save-all flush`、graceful systemd stop、runtime stopped確認、EC2 stopped、DNS DELETE/INSYNC、fresh Reconcile、terminal successを93.353秒で完了した。同一payload retryはsame Operation、`created=false`、新規execution/Lock/Desired/save/EC2/DNS side effectなしだった。
 
 ## 5. Current blockers
 

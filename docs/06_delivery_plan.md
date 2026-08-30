@@ -22,7 +22,7 @@
 | 3 | 実測status | Reconcile Lambda、SystemState |
 | 4 | **Completed:** Operationと排他制御 | Games/Operations/Idempotency/Locks、条件付き更新 |
 | 5 | **Completed:** 安全なstart | Start Step Functions |
-| 6 | 安全なstop | Stop Step Functions |
+| 6 | **Completed:** 安全なstop | Stop Step Functions |
 | 7 | Discord MVP | `/mc status/start/stop` |
 | 8 | 運用保護 | backup、自動停止、heartbeat、追加監視 |
 | 9 | 複数ゲーム抽象 | Package/Preset/Template/Game、runtime class |
@@ -550,6 +550,8 @@ D-076 recoveryでは旧Compose/unitのSHA-256をapproved predecessorとして照
 
 ## 9. Phase 6 — 安全なstop workflow
 
+- **状態:** Completed（2026-08-30）
+
 ### State Machine
 
 ```text
@@ -607,6 +609,12 @@ Target secret-read IAM、Phase 6 Host Runtime artifact、RCON SecureString、sec
 RCON/Target artifact初適用後のrunning STOPは3回ともexplicit save前にfail closedした。順にsystemd外STOPのpreflight env不足、readonly `COMPOSE_FILE` collision、live Docker nested-bind backing placeholder削除によるRCON authentication lossであり、EC2 stopとDNS deleteへは進んでいない。production topology fixture不足を共通原因としてD-078をAcceptedとし、password ROと生成config exact 2件RWを分離した。filesystem preflightをread-only化し、strict zero-size backing placeholderとDocker inspect identityをknown managed artifact contractへ追加した。repository修正・fixture・testsはproduction実測と区別し、Phase 6はrunning STOP成功まで未完了である。第四hot-patch、STOP retry、AWS writeは別の明示承認境界とする。
 
 D-078の最初のinactive-only full artifact適用とcanonical STARTは成功したが、STOP admission前のlive validationでDocker label用Go templateにshell single-quote内でも不要なbackslashが残り、template parse errorでpreflightがfail closedした。save/STOP/EC2/DNS side effectはなく、Targetはverified maintenance systemd stopで再びHost Runtime inactive、container exit 0、OOM false、restart 0へ戻した。production wrapper bugのためrepository修正・CI後の再適用を新しい承認境界とし、running-state replacementは行わない。
+
+修正版preflight `e2343290fc2aa9113de7630e656df607d59eae872e4fdb343fb660d1b2b5ca33`をapproved predecessorからinactive-only atomic upgradeした。Desired RUNNING revision 6 / Actual inactiveからcanonical START `op-691da46e-6b04-40d0-a635-a8c8335253cf`を実行し、revisionを増やさず243.499秒でREADY、active Game一致、player 0、DNS一致、HEALTHYへ収束した。production live gateは`PASS:RAW_DEVICE_PREFLIGHT`、`PASS:MOUNT_GUARD`、`PASS:D078_DOCKER_NESTED_BIND`、`PASS:RCON_AUTHENTICATION`を順に記録した。password bindはRO、生成config exact 2件はRW、Data EBS backing placeholderはroot:root 0644、size 0、nlink 1、Host sourceはruntime 993:993、0400/0600だった。
+
+canonical STOP `op-cbff4fbd-dbfe-4d32-a4f6-62ea2fa84d57`はDesired STOPPED revision 7へCASし、fixed SSM command `fdab7824-e5c3-4106-b4f5-15af84dc4375`が4.787秒、exit 0でexplicit `save-all flush`とgraceful systemd stopを完了した。Host stop command完了 `02:11:05.757Z`、runtime-stopped Reconcile後、EC2 Stop task開始 `02:11:18.797Z`の順で、running Minecraftへのdirect StopInstancesはない。同一Compose/systemd artifactの直前maintenance stopではcontainer exit 0、OOMKilled false、RestartCount 0を実測しており、product STOPでも同じgraceful path、process/listener消滅、HostStopCompleteを確認した。EC2 stopped後にDNS DELETE、Route 53 INSYNC、fresh Reconcileを行い、93.353秒でSUCCEEDEDした。最終状態はDesired STOPPED revision 7、EC2 stopped、SSM/protocol not-applicable、Host Runtime not-running、public IPv4/DNS absent、HEALTHY、discrepancyなし、Lock/current operationなしである。同一idempotency key retryはsame Operation、`created=false`、execution 1件、side effectなしだった。
+
+STOPは6回renewし、最長poll gapは約30秒、900秒leaseに少なくとも約870秒のrenew後marginがあった。Phase 5 START 243.059秒/5回renew、今回START 243.499秒、STOP 93.353秒/6回renewの実測から、lease 900秒・renew 120秒をAcceptedとする。Phase 1はstopped/Frozen、Data EBSはTarget attached・DeleteOnTermination false、migration snapshotはcompleted/retained、SGはpublic gameplay TCP 25565だけを維持した。
 
 ## 10. Phase 7 — Discord MVP
 
