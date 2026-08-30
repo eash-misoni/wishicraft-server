@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -127,6 +128,28 @@ class StageConfig:
     def aws_region(self) -> str:
         """Return the configured AWS Region after phase validation."""
         return _require_string(self.values, "aws.region")
+
+    def discord_public_id(self, name: str) -> str:
+        if name not in {
+            "application_id",
+            "guild_id",
+            "operation_channel_id",
+            "admin_channel_id",
+            "player_role_id",
+            "admin_role_id",
+        }:
+            raise ConfigValidationError([f"unsupported Discord public ID: {name}"])
+        value = _require_string(self.values, f"discord.{name}")
+        if re.fullmatch(r"[0-9]{1,20}", value) is None:
+            raise ConfigValidationError([f"discord.{name} must be a Discord snowflake"])
+        return value
+
+    @property
+    def discord_public_key(self) -> str:
+        value = _require_string(self.values, "discord.public_key")
+        if re.fullmatch(r"[0-9a-fA-F]{64}", value) is None:
+            raise ConfigValidationError(["discord.public_key must be a 32-byte hexadecimal key"])
+        return value
 
     @property
     def minecraft_port(self) -> int:
@@ -475,6 +498,28 @@ REQUIRED_PATHS: Final[dict[tuple[int, str, str], tuple[str, ...]]] = {
         "storage.data.mount_path",
         "route53.hosted_zone_id",
         "route53.record_name",
+    ),
+    (7, "dev", "synth"): (
+        "aws.account_id",
+        "aws.region",
+        "discord.application_id",
+        "discord.guild_id",
+        "discord.operation_channel_id",
+        "discord.admin_channel_id",
+        "discord.player_role_id",
+        "discord.admin_role_id",
+        "discord.public_key",
+    ),
+    (7, "dev", "deploy"): (
+        "aws.account_id",
+        "aws.region",
+        "discord.application_id",
+        "discord.guild_id",
+        "discord.operation_channel_id",
+        "discord.admin_channel_id",
+        "discord.player_role_id",
+        "discord.admin_role_id",
+        "discord.public_key",
     ),
 }
 

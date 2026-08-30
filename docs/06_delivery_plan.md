@@ -618,7 +618,7 @@ STOPは6回renewし、最長poll gapは約30秒、900秒leaseに少なくとも�
 
 ## 10. Phase 7 — Discord MVP
 
-- **状態:** In Progress（Phase 7A Contract / Decision freeze）
+- **状態:** In Progress（Phase 7A Contract / Decision freeze・Phase 7B repository implementation completed、Phase 7C next）
 
 ### 目的
 
@@ -636,11 +636,15 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 
 ### Phase 7B — Discord ingress / signature / authorization
 
+- **状態:** Completed（repository-only、AWS/Discord未適用）
 - API Gateway HTTP APIとCommand Lambdaを実装する。
 - raw request bodyに対するDiscord signature/timestamp verificationを最初に行う。
 - configured dev Guild、operation channel、player role OR admin roleをapplication側で検証する。
 - PINGとDeferred Responseを期限内に返し、internal detailを公開しない。
 - Bot TokenはCommand Lambdaへ付与しない。
+- `config/discord/commands.v1.json`をschema正本とし、PyNaClのhash-locked Lambda bundle、HTTP API v2 raw/base64 body復元、signature-first verification、strict PING/command parseを実装した。
+- valid commandを含む全経路でOperation Admission、Reconcile、State Machine、DynamoDB/AWS lifecycle mutationは0である。Phase 7B responseはOperationを受付けたと誤認させないephemeral messageであり、Phase 7CでSTATUS Admissionとdeferred responseへ接続する。
+- CDKはPhase 7 contextでHTTP API `POST /discord/interactions`と3秒Command Lambdaを生成する。Lambda roleはCloudWatch LogsとAPI Gateway invoke permission以外のapplication policyを持たず、Bot Token、DynamoDB、Step Functions、EC2、SSM、Route 53権限を持たない。
 
 ### Phase 7C — `/mc status`
 

@@ -300,6 +300,62 @@ def test_phase_one_network_allows_only_configured_minecraft_tcp_ingress() -> Non
     assert template.find_resources("AWS::EC2::EIP") == {}
 
 
+def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=7, deployment="control-plane")
+    stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
+    template = Template.from_stack(stack)
+
+    functions = template.find_resources("AWS::Lambda::Function")
+    command_logical_id, command = next(
+        (logical_id, value)
+        for logical_id, value in functions.items()
+        if value["Properties"]["FunctionName"] == "wc-dev-discord-command"
+    )
+    properties = command["Properties"]
+    assert properties["Handler"] == "wishicraft.discord_command_lambda.handler"
+    assert properties["Runtime"] == "python3.12"
+    assert properties["Timeout"] == 3
+    environment = properties["Environment"]["Variables"]
+    assert set(environment) == {
+        "DISCORD_APPLICATION_ID",
+        "DISCORD_GUILD_ID",
+        "DISCORD_OPERATION_CHANNEL_ID",
+        "DISCORD_PLAYER_ROLE_ID",
+        "DISCORD_ADMIN_ROLE_ID",
+        "DISCORD_PUBLIC_KEY",
+    }
+    assert "BOT_TOKEN" not in str(environment)
+    assert "discord-bot-token" not in str(template.to_json())
+
+    role_logical_id = properties["Role"]["Fn::GetAtt"][0]
+    command_actions: set[str] = set()
+    for policy in template.find_resources("AWS::IAM::Policy").values():
+        if {"Ref": role_logical_id} not in policy["Properties"]["Roles"]:
+            continue
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]:
+            command_actions.update(_action_list(statement["Action"]))
+    assert command_actions <= {"logs:CreateLogStream", "logs:PutLogEvents"}
+    assert not any(
+        action.startswith(prefix)
+        for action in command_actions
+        for prefix in ("ssm:", "states:", "dynamodb:", "ec2:", "route53:", "iam:")
+    )
+
+    routes = template.find_resources("AWS::ApiGatewayV2::Route")
+    assert len(routes) == 1
+    route = next(iter(routes.values()))["Properties"]
+    assert route["RouteKey"] == "POST /discord/interactions"
+    assert template.resource_count_is("AWS::ApiGatewayV2::Api", 1) is None
+    permissions = template.find_resources("AWS::Lambda::Permission")
+    command_permissions = [
+        item
+        for item in permissions.values()
+        if command_logical_id in str(item["Properties"].get("FunctionName"))
+    ]
+    assert len(command_permissions) == 1
+    assert command_permissions[0]["Properties"]["Principal"] == "apigateway.amazonaws.com"
+
+
 def test_phase_one_minecraft_instance_role_has_only_required_ssm_permissions() -> None:
     app = build_app(REPOSITORY_ROOT, "dev", phase=1)
     stack = cast(Stack, app.node.find_child("MinecraftStack-dev"))

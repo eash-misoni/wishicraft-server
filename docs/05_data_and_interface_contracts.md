@@ -975,7 +975,10 @@ Discord deliveryの成功・失敗はOperationのMinecraft/AWS terminal result�
 
 ## 19.1 Phase 7 MVP Interaction contract
 
-- command schemaのGit正本は`/mc status`、`/mc start`、`/mc stop`だけを定義する。
+- command schemaのGit正本`config/discord/commands.v1.json`は`/mc status`、`/mc start`、`/mc stop`だけを定義する。
+- HTTP API v2 eventの`body`は、`isBase64Encoded=true`ならstrict base64 decodeし、falseなら受信文字列のUTF-8 bytesとする。JSON objectへparseしてから署名用bodyを再構築しない。`X-Signature-Timestamp || raw body`をEd25519署名対象とし、署名検証をparse・authorization・side effectより先に行う。
+- PINGはPONGを返す。APPLICATION_COMMANDはinteraction/application/guild/channel/command/member rolesをstrictに検証し、unsupported interaction、unknown/duplicate option、欠落member/rolesを拒否する。error responseはinternal detailを含めない。
+- Phase 7Bの認証・認可済みcommand responseはephemeral type 4で、Control Plane Operationを受付けていない事実を明示する。このsliceはAdmission、Reconcile、State Machine、DynamoDB、EC2、SSM、Route 53を呼ばない。Phase 7C以降でAdmissionへ接続した時点からdeferred responseを使用する。
 - idempotency keyはDiscord Interaction identityから決定的に作り、同じInteraction payloadの再送を既存Operationへ対応付ける。異なるpayloadによるkey再利用は既存Admission contractどおりrejectする。
 - Command ingressはstage固定Guild、operation channel、member rolesを検証し、player roleまたはadmin roleを許可する。通常MVP commandでadmin channelを許可しない。
 - START/STOPは既存のlock付きAdmissionを呼び、STATUSはLock/Current Operationなしの既存STATUS admissionを呼ぶ。

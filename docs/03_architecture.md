@@ -100,6 +100,10 @@ CloudWatch / Budgets
 
 Command LambdaはControl Planeのexternal adapterであり、Desired State、Lock、`current_operation_id`、EC2、SSM、RCON、Minecraft、DNSを直接操作しない。START/STOP State MachineをAdmission抜きで開始せず、EC2起動完了、Minecraft READY、Reconcile完了をInteraction request中に待たない。Admission transactionとworkflow開始失敗時のowned cleanupは既存service contractを再利用する。
 
+Phase 7Bのtrust boundaryはHTTP API payload format 2.0を受け、`isBase64Encoded`に従ってraw body bytesを一度だけ復元する。JSON parseや再serializeより先に、`X-Signature-Timestamp`のASCII bytesとraw bodyを連結し、stage設定のDiscord Public KeyでEd25519 signatureを検証する。欠落・不正header、unsupported content encoding、base64不正、署名不一致、Public Key設定不正はfail closedし、下流へ進めない。暗号実装はPyNaClをhash固定してLambda assetへbundleし、独自Ed25519実装を持たない。
+
+署名後はApplication ID、Guild ID、operation channel IDをexact matchし、memberがplayer roleまたはadmin roleを持つことを検証する。Git正本の`/mc` commandとexact 1 subcommand（`status`、`start`、`stop`）以外を拒否する。Phase 7Bでは認証・認可済みcommandもAdmissionへ接続せず、「ingress検証済みだがOperation未受付」のephemeral responseを返す。PINGだけはPONGを返す。Phase 7C以降で同じ境界の後段へAdmissionとdeferred responseを接続する。
+
 通常の`/mc status`、`/mc start`、`/mc stop`はadmin roleでもoperation channelだけを使用する。admin channelはPhase 7 MVPでは使用せず、後続のrecovery/reset/maintenance用に予約する。Discord command permissionはUX補助であり、LambdaのGuild/channel/role認可を代替しない。
 
 ### Step Functions Standard

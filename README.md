@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜6は完了しています。Phase 6はdevでD-078のpassword RO / generated CLI config exact 2件RW、read-only filesystem preflight、container-local RCON authentication、fixed `save-all flush`、graceful Host Runtime stop、EC2 stopped、DNS DELETE/INSYNC、fresh Reconcile、duplicate idempotencyを実証しました。4件のrecovery failureはいずれもsaveまたはEC2/DNS side effect前にfail closedし、inactive-only canonical artifact適用後のSTART→STOPでcloseoutしました。終了時はDesired/Actual/Observed STOPPED、DNS absent、HEALTHY、Lock/current operationなしです。
+Phase 0〜6とPhase 7Aは完了しています。Phase 7BではGit正本の`/mc status/start/stop` schema、HTTP API ingress、raw body Ed25519 signature verification、stage固定Application/Guild/operation channel/player-or-admin role認可をrepositoryへ実装しました。このsliceのCommand LambdaはOperation Admission、Reconcile、AWS lifecycleを呼ばず、安全なPING/PONGと「Operation未受付」の本人限定responseだけを返します。AWS/Discord production適用とcommand registrationは未実施です。
 
 devは次の3層architectureです。
 
@@ -40,7 +40,7 @@ uv run ruff format --check .
 uv run mypy src infrastructure tests
 npx --no-install cdk synth MinecraftStack-dev --context stage=dev --context phase=1 --context deployment=phase1
 npx --no-install cdk synth MinecraftTargetStack-dev --context stage=dev --context deployment=target
-npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=6 --context deployment=control-plane
+npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=7 --context deployment=control-plane
 ```
 
 prod synthとdeployは初期リリース直前まで行いません。通常のrepository validationはAWS credentialやsecretを使用しません。

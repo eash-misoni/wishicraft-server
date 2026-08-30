@@ -17,6 +17,7 @@
 - `/mc status`、`/mc start`、`/mc stop`のcommand schemaはGit上のversioned artifactを正本とする。
 - Discord APIへのGuild command registration/updateはCDK deployの暗黙side effectにせず、明示的なoperator script/runbookとして実行する。AWS infrastructure mutationとDiscord external configuration mutationを別のreview・実行・証跡境界にする。
 - Phase 7Aではregistrationを実行しない。dev Application/Guildの公開ID一致とBot Token SecureStringの存在確認はPhase 7B/Gのpreflight blockerとして追跡する。
+- Phase 7Bで`config/discord/commands.v1.json`をversioned正本として追加した。repository/CDK実装はDiscord API registrationを行わず、external mutation境界を維持する。
 
 ### D-083 Discord Bot TokenのIAM境界
 
@@ -25,6 +26,7 @@
 - Interaction ingress/Command Lambdaはstage設定のDiscord Public Keyだけで署名を検証し、Bot Tokenを読まない。Bot Tokenを読むIAMはDiscord Message componentだけへ分離し、固定`/wishicraft/<stage>/secret/discord-bot-token`の`ssm:GetParameter`に限定する。
 - Command Lambda、START/STOP/STATUS executor、Reconcile、Minecraft TargetへBot Token readを付与しない。Message componentにはEC2、SSM、RCON、DNS、Desired/Lock mutation権限を付与しない。
 - secret実値はGit、Lambda environment、SSM/Discord command argument、Operation、Step Functions input、fixture、snapshot、logへ保存しない。既存D-040のSecureString方針を精密化する。
+- Phase 7B Command Lambdaは公開ID/Public Keyだけをenvironmentへ受け、application IAM policyを持たない。Bot Token parameter名もasset、template、environmentへ含めないことをinfrastructure testで固定する。
 
 ### D-082 Discord delivery failureをControl Plane resultから分離する
 
@@ -58,6 +60,7 @@
 - Discord command permissionはUX補助であり、Command Lambdaがsignature検証後にGuild、channel、roleをapplication側で必ず検証する。権限不足と入力errorは本人限定で返す。
 - Discordは既存Operation Admission、START/STOP workflow、STATUS/Reconcileへのexternal adapterである。Desired、Lock、lease、`current_operation_id`、EC2、SSM、RCON、Minecraft、DNSを直接操作せず、State MachineをAdmission抜きで起動しない。
 - D-074〜D-078のownership、CAS、freshness、typed Host Runtime、STOP/RCON安全契約をDiscord向けに複製・緩和しない。
+- Phase 7Bではsignature-first、Application/Guild/operation channel exact match、player OR admin roleを実装した。valid commandでもControl Plane mutationは未接続とし、Phase 7C以降のadapter接続前にtrust boundaryだけを独立検証する。
 
 ### D-078 itzg生成RCON CLI configは固定2件だけephemeral RW nested bindとする
 

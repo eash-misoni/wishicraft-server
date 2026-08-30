@@ -182,6 +182,7 @@ Phase 7B production適用前:
 
 - `config/stages/dev.yaml`のGuild/channel/role/Application ID/Public KeyがDiscord Developer Portalと実際のGuild設定に一致することを確認する
 - Discord Bot Tokenのdev用SecureStringが存在することを値を表示せず確認し、未登録なら別の明示承認付きoperator actionで登録する
+- `phase=7` Control Plane synthでGit正本command schemaとDiscord Command Lambda assetがhash-locked Linux wheelを含めて再現可能にbundleされることを確認する
 
 Phase 7G E2E前:
 

@@ -1,0 +1,26 @@
+[
+  {
+    "type": 1,
+    "name": "mc",
+    "description": "Wishicraft Minecraft controls",
+    "integration_types": [0],
+    "contexts": [0],
+    "options": [
+      {
+        "type": 1,
+        "name": "status",
+        "description": "Show fresh Wishicraft status"
+      },
+      {
+        "type": 1,
+        "name": "start",
+        "description": "Start the Wishicraft server"
+      },
+      {
+        "type": 1,
+        "name": "stop",
+        "description": "Save and stop the Wishicraft server"
+      }
+    ]
+  }
+]

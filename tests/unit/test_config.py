@@ -44,6 +44,29 @@ def test_dev_phase_one_validation_accepts_confirmed_settings(action: str) -> Non
     validate_stage_for_action(config.stage, phase=1, action=action)
 
 
+@pytest.mark.parametrize("action", ("synth", "deploy"))
+def test_dev_phase_seven_validation_accepts_public_discord_settings(action: str) -> None:
+    config = load_configuration(REPOSITORY_ROOT, "dev")
+
+    validate_stage_for_action(config.stage, phase=7, action=action)
+    assert config.stage.discord_public_id("application_id") == "1531887197433757768"
+    assert config.stage.discord_public_id("guild_id") == "1251169327554625757"
+    assert len(config.stage.discord_public_key) == 64
+
+
+def test_phase_seven_validation_rejects_missing_discord_public_setting() -> None:
+    config = load_configuration(REPOSITORY_ROOT, "dev")
+    values = {**config.stage.values}
+    raw_discord = values["discord"]
+    assert isinstance(raw_discord, dict)
+    discord = dict(raw_discord)
+    discord["operation_channel_id"] = None
+    values["discord"] = discord
+
+    with pytest.raises(ConfigValidationError, match="discord.operation_channel_id"):
+        validate_stage_for_action(StageConfig(stage="dev", values=values), phase=7, action="synth")
+
+
 def test_data_volume_filesystem_settings_are_loaded_from_stage_configuration() -> None:
     config = load_configuration(REPOSITORY_ROOT, "dev")
 

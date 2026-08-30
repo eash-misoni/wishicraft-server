@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from aws_cdk import Duration, Environment, RemovalPolicy, Stack, Tags
+from aws_cdk import AssetHashType, CfnOutput, Duration, Environment, RemovalPolicy, Stack, Tags
+from aws_cdk import aws_apigatewayv2 as apigwv2
+from aws_cdk import aws_apigatewayv2_integrations as apigwv2_integrations
 from aws_cdk import aws_dynamodb as dynamodb
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as lambda_
@@ -12,12 +14,15 @@ from aws_cdk import aws_logs as logs
 from aws_cdk import aws_stepfunctions as sfn
 from constructs import Construct
 
+from infrastructure.discord_command_bundle import discord_command_bundling
 from wishicraft.config import ProjectConfig, StageConfig
 from wishicraft.naming import resource_name, resource_tags
 
 
 class ControlPlaneStack(Stack):
-    def __init__(self, scope: Construct, *, project: ProjectConfig, stage: StageConfig) -> None:
+    def __init__(
+        self, scope: Construct, *, project: ProjectConfig, stage: StageConfig, phase: int = 0
+    ) -> None:
         super().__init__(
             scope,
             f"WishicraftControlPlaneStack-{stage.stage}",
@@ -466,6 +471,68 @@ class ControlPlaneStack(Stack):
                 ],
             )
         )
+        if phase >= 7:
+            _add_discord_ingress(self, project=project, stage=stage)
+
+
+def _add_discord_ingress(stack: Stack, *, project: ProjectConfig, stage: StageConfig) -> None:
+    repository_root = Path(__file__).resolve().parents[2]
+    log_group = logs.LogGroup(
+        stack,
+        "DiscordCommandLogGroup",
+        log_group_name=(
+            f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'discord-command')}"
+        ),
+        retention=logs.RetentionDays.TWO_WEEKS,
+        removal_policy=RemovalPolicy.DESTROY,
+    )
+    function = lambda_.Function(
+        stack,
+        "DiscordCommandFunction",
+        function_name=resource_name(project.resource_prefix, stage.stage, "discord-command"),
+        runtime=lambda_.Runtime.PYTHON_3_12,
+        architecture=lambda_.Architecture.X86_64,
+        code=lambda_.Code.from_asset(
+            str(repository_root),
+            bundling=discord_command_bundling(repository_root),
+            asset_hash_type=AssetHashType.OUTPUT,
+        ),
+        handler="wishicraft.discord_command_lambda.handler",
+        timeout=Duration.seconds(3),
+        memory_size=256,
+        log_group=log_group,
+        environment={
+            "DISCORD_APPLICATION_ID": stage.discord_public_id("application_id"),
+            "DISCORD_GUILD_ID": stage.discord_public_id("guild_id"),
+            "DISCORD_OPERATION_CHANNEL_ID": stage.discord_public_id("operation_channel_id"),
+            "DISCORD_PLAYER_ROLE_ID": stage.discord_public_id("player_role_id"),
+            "DISCORD_ADMIN_ROLE_ID": stage.discord_public_id("admin_role_id"),
+            "DISCORD_PUBLIC_KEY": stage.discord_public_key,
+        },
+        description="Phase 7B signature and authorization boundary; no Control Plane mutation",
+    )
+    api = apigwv2.HttpApi(
+        stack,
+        "DiscordInteractionsApi",
+        api_name=resource_name(project.resource_prefix, stage.stage, "discord-interactions"),
+        create_default_stage=True,
+        description="Discord Interaction ingress with application signature verification",
+    )
+    integration = apigwv2_integrations.HttpLambdaIntegration(
+        "DiscordCommandIntegration",
+        function,
+        payload_format_version=apigwv2.PayloadFormatVersion.VERSION_2_0,
+    )
+    api.add_routes(
+        path="/discord/interactions",
+        methods=[apigwv2.HttpMethod.POST],
+        integration=integration,
+    )
+    CfnOutput(
+        stack,
+        "DiscordInteractionsEndpoint",
+        value=f"{api.api_endpoint}/discord/interactions",
+    )
 
 
 def _table(
