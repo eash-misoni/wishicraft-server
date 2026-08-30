@@ -37,9 +37,9 @@ validate_mount_contract() {
   local container_id="$1" mounts line source destination rw type matched
   local password_count=0 env_count=0 yaml_count=0
 
-  [[ "$(docker inspect --format '{{index .Config.Labels \"com.docker.compose.project\"}}' "$container_id")" == \
+  [[ "$(docker inspect --format '{{index .Config.Labels "com.docker.compose.project"}}' "$container_id")" == \
     "$COMPOSE_PROJECT" ]] || fail "unexpected container project"
-  [[ "$(docker inspect --format '{{index .Config.Labels \"com.docker.compose.service\"}}' "$container_id")" == \
+  [[ "$(docker inspect --format '{{index .Config.Labels "com.docker.compose.service"}}' "$container_id")" == \
     "$COMPOSE_SERVICE" ]] || fail "unexpected container service"
   mounts="$(docker inspect --format \
     '{{range .Mounts}}{{printf "%s\t%s\t%t\t%s\n" .Source .Destination .RW .Type}}{{end}}' \

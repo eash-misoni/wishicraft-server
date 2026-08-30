@@ -606,6 +606,8 @@ Target secret-read IAM、Phase 6 Host Runtime artifact、RCON SecureString、sec
 
 RCON/Target artifact初適用後のrunning STOPは3回ともexplicit save前にfail closedした。順にsystemd外STOPのpreflight env不足、readonly `COMPOSE_FILE` collision、live Docker nested-bind backing placeholder削除によるRCON authentication lossであり、EC2 stopとDNS deleteへは進んでいない。production topology fixture不足を共通原因としてD-078をAcceptedとし、password ROと生成config exact 2件RWを分離した。filesystem preflightをread-only化し、strict zero-size backing placeholderとDocker inspect identityをknown managed artifact contractへ追加した。repository修正・fixture・testsはproduction実測と区別し、Phase 6はrunning STOP成功まで未完了である。第四hot-patch、STOP retry、AWS writeは別の明示承認境界とする。
 
+D-078の最初のinactive-only full artifact適用とcanonical STARTは成功したが、STOP admission前のlive validationでDocker label用Go templateにshell single-quote内でも不要なbackslashが残り、template parse errorでpreflightがfail closedした。save/STOP/EC2/DNS side effectはなく、Targetはverified maintenance systemd stopで再びHost Runtime inactive、container exit 0、OOM false、restart 0へ戻した。production wrapper bugのためrepository修正・CI後の再適用を新しい承認境界とし、running-state replacementは行わない。
+
 ## 10. Phase 7 — Discord MVP
 
 ### 目的

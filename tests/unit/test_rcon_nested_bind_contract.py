@@ -187,6 +187,13 @@ def test_preflight_requires_password_ro_and_cli_config_rw() -> None:
     assert "unexpected RCON mount" in source
 
 
+def test_docker_label_templates_use_valid_go_template_quotes() -> None:
+    source = PREFLIGHT.read_text(encoding="utf-8")
+    assert '{{index .Config.Labels "com.docker.compose.project"}}' in source
+    assert '{{index .Config.Labels "com.docker.compose.service"}}' in source
+    assert '{{index .Config.Labels \\"' not in source
+
+
 def test_running_preflight_preserves_cli_config_for_rcon_use() -> None:
     source = PREFLIGHT.read_text(encoding="utf-8")
     stop = STOP.read_text(encoding="utf-8")
