@@ -26,3 +26,9 @@ devを基本とし、prod deployや破壊的操作を勝手に行わない。
 - production wrapper、payload、oracle、selection logicを変える必要が生じたら、根拠と影響を示して停止する。
 - AWS、SSM、EC2、host、deploy、DNS、secret、破壊的操作、またはセキュリティ動作変更の直前では停止して明示承認を求める。
 - 詳細な自律実行・証跡・停止境界は`docs/10_codex_working_agreement.md`を正本とする。
+
+## 学習Wiki同期
+
+- 完了したPhaseまたは明確な実装sliceの予定tracked変更がすべてcommitされた後、finalized HEADを根拠として最終handoff前に`$wishicraft-learning-wiki`を実行する。Phase途中や未commitの仕様変更には実行しない。
+- 自動実行は`.local/learning-wiki/`が存在するprimary/local checkoutだけで行う。temporary worktree、Codex cloud、または出力先がない環境では別Wikiを作らず、skip理由を最終報告する。
+- 同期失敗で完了済みPhaseやcommitを巻き戻さない。同期ではAWS、Discord、production、GitHub設定、実機を操作せず、学習Wiki生成物をcommitしない。
