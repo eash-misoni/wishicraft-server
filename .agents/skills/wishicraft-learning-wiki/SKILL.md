@@ -108,11 +108,14 @@ aliases:
 関連する`docs/`と`local-notes/codex/`は、手間を理由に省略せず`.local/learning-wiki/sources/`へ表示用コピーを作る。
 
 - 冒頭にprovenance、authority、元source path、historical noteの注意を追加する。
-- 追加層以降の原文本文を元sourceと一致させる。原文に許す変更はWiki link追加だけとする。
-- code block、inline code、URL、heading、既存front matter、既存Markdown linkを壊さない。
-- 各用語は同じsource内の最初の重要な出現だけをリンクし、長いaliasを優先する。
+- 追加層以降の本文で既存用語ページに対応する語が現れた場合、その重要な出現箇所から用語ページへ直接移動できるObsidian Wiki linkを付ける。別の関連用語一覧だけで代替しない。
+- 同じsource内では各用語の最初の重要な出現だけを原則としてリンクする。単なる一覧、偶然の文字列一致、意味の異なる同名語は除外し、複数aliasが一致する場合は文脈に合う最長の表現を優先する。
+- 日本語などtitleと異なる表示語は、表示文を維持するpiped linkにする。対応する既存用語ページがなければリンクを作らず、用語ページ数やlink密度を目的に増やさない。
+- code block、inline code、URL、heading、既存front matter、既存Markdown linkを変更しない。resource ID、commit hash、IP、version番号、一時値もリンク対象にしない。
+- canonicalとhistorical-learningの表示用sourceへ同じ規則を適用し、authorityの区別を維持する。
 - sourceから用語へ、用語のSourcesからsourceへ戻れるようにする。
-- resource ID、hash、IP、version、一時値をリンク対象にしない。
+
+Wiki link追加後の「原文一致」はbyte一致ではなく、追加したWiki linkを正規化した本文で判定する。`[[Operation]]`は`Operation`へ、`[[Operation|操作]]`は`操作`へ戻し、その結果が元source本文と一致しなければならない。表示される文字、語順、heading、code、URL、既存Markdown linkは変えず、許可する本文差分は既存用語へのWiki link記法だけとする。provenanceなど表示用コピー固有の付加領域は従来どおり比較対象から分離する。
 
 汎用scannerを作らず、CodexがMarkdown構造と文脈を確認しながらリンクする。
 
@@ -128,7 +131,7 @@ aliases:
 - 正規名称とaliasが衝突せず、英語titleに自然な日本語aliasがある。
 - authority区分が維持され、Superseded Decisionや途中Phaseを現行仕様にしていない。
 - 各derivedページにsource、authority、実行時HEADのas-of情報がある。
-- 表示用コピーの原文部分が元sourceと一致し、許可箇所以外を壊していない。
+- 表示用コピーの追加Wiki linkを表示文字列へ正規化した原文部分が元sourceと一致し、許可されたWiki link記法以外を壊していない。全表示用sourceを確認し、重要な用語から既存用語ページへ移動でき、同一source内に過剰な重複linkがない。
 - Skillが`.obsidian/**`または`personal/**`へ書き込んだ証拠がない。実行中の外部並行変更はbyte差だけで失敗にせず、Skillの変更として報告・復元しない。
 - tracked fileが実行前より増えて変更されず、`.local/learning-wiki/`がignoreされている。
 - dependencyや外部環境を操作していない。
