@@ -90,7 +90,7 @@ aliases:
 
 個別用語だけでは理解しにくい独立した処理フロー、状態比較、責務境界がある場合だけ、再利用可能な日本語guideを作成・更新する。Phaseごとに機械的に増やさない。
 
-`Home.md`から全生成用語、guide、表示用sourceへ到達でき、関連用語とSourcesから相互にたどれるようにする。
+`Home.md`から全生成用語、guide、表示用sourceへ到達でき、関連用語とSourcesから相互にたどれるようにする。source数が多い場合はauthorityやPhaseなど意味のある単位で整理した索引を使い、無秩序な長い一覧や同一sourceの重複生成を避ける。
 
 ```text
 .local/learning-wiki/
@@ -105,9 +105,10 @@ aliases:
 
 ## 表示用source
 
-関連する`docs/`と`local-notes/codex/`は、手間を理由に省略せず`.local/learning-wiki/sources/`へ表示用コピーを作る。
+trackedな`docs/**/*.md`と`local-notes/codex/**/*.md`を実行ごとに列挙し、関連性や用語linkの有無で絞らず、全件を`.local/learning-wiki/sources/`へ表示用コピーとして収録する。source pathと表示用ページは1対1とし、元directory構造を保持して同名fileを衝突させない。追加、削除、renameを反映し、新規sourceだけでなく既存sourceも毎回確認する。READMEやconfigは現在地点とauthority判断には使ってよいが、この全件収録対象には含めない。
 
 - 冒頭にprovenance、authority、元source path、historical noteの注意を追加する。
+- 原文表示用コピー、authority、provenance、用語linkをsourceの現状に合わせ、sourceにない内容を推測で補わない。将来計画、Deferred、未実施事項を原文から削らず、付加領域で現行の完了状態と区別する。
 - 追加層以降の本文で既存用語ページに対応する語が現れた場合、その重要な出現箇所から用語ページへ直接移動できるObsidian Wiki linkを付ける。別の関連用語一覧だけで代替しない。
 - 同じsource内では各用語の最初の重要な出現だけを原則としてリンクする。単なる一覧、偶然の文字列一致、意味の異なる同名語は除外し、複数aliasが一致する場合は文脈に合う最長の表現を優先する。
 - 日本語などtitleと異なる表示語は、表示文を維持するpiped linkにする。対応する既存用語ページがなければリンクを作らず、用語ページ数やlink密度を目的に増やさない。
@@ -115,18 +116,21 @@ aliases:
 - canonicalとhistorical-learningの表示用sourceへ同じ規則を適用し、authorityの区別を維持する。
 - sourceから用語へ、用語のSourcesからsourceへ戻れるようにする。
 
+用語ページを新設・renameした場合、またはaliasを追加した場合は、その用語について新規分だけでなく全表示用sourceを再確認する。各sourceの最初の重要な意味一致箇所だけへlinkし、対応ページのない語や単なる文字列一致にはlinkしない。
+
 Wiki link追加後の「原文一致」はbyte一致ではなく、追加したWiki linkを正規化した本文で判定する。`[[Operation]]`は`Operation`へ、`[[Operation|操作]]`は`操作`へ戻し、その結果が元source本文と一致しなければならない。表示される文字、語順、heading、code、URL、既存Markdown linkは変えず、許可する本文差分は既存用語へのWiki link記法だけとする。provenanceなど表示用コピー固有の付加領域は従来どおり比較対象から分離する。
 
 汎用scannerを作らず、CodexがMarkdown構造と文脈を確認しながらリンクする。
 
 ## 更新と検証
 
-1. repository規約、状態、全対象文書、既存Wikiを読む。
+1. repository規約、状態、tracked source inventory、全対象文書、既存Wikiを読む。
 2. authority、完了地点、Accepted/Deferred/Superseded、Phase間の変更を整理する。
 3. 既存用語とaliasを照合し、新規・更新・統合を判断する。
 4. `.obsidian/**`と`personal/**`を生成・管理対象から除外してHome、用語、guide、表示用sourceを更新する。
 5. 次を検証する。失敗時は不完全な更新を成功扱いせず、`.local/learning-wiki/`内で安全に直せるものだけ直して再検証する。
 
+- tracked source inventoryと表示用sourceがpath単位で1対1に一致し、重複、欠落、削除済みsourceへの参照がない。
 - 全内部link先が存在し、Homeから全生成ページへ到達できる。
 - 正規名称とaliasが衝突せず、英語titleに自然な日本語aliasがある。
 - authority区分が維持され、Superseded Decisionや途中Phaseを現行仕様にしていない。
