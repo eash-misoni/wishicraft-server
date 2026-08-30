@@ -167,7 +167,7 @@ Discord public key、Guild ID、Channel ID、Role IDは秘密ではないが、�
 
 Phase 1では、EC2 instance roleの`ssm:GetParameter`をdev用RCON SecureStringへ限定し、`server.properties`へ安全に反映した。target architectureではD-075によりParameter Store SecureStringと最小権限、Host Runtime-only retrieval、ephemeral secret file、read-only bind、`RCON_PASSWORD_FILE`を基本契約とする。初回AWS適用はRCONを必要とするPhaseの明示承認境界で行う。secretをComposeのGit管理値、DynamoDB平文、log、shell history、environment dumpへ残さない。
 
-Phase 6ではitzgがcontainer-local `rcon-cli`用に生成する`.rcon-cli.env`と`.rcon-cli.yaml`もsecret materialとして扱う。persistent `/data`へ直接作成させず、Host Runtimeが`/run/wishicraft`へ事前作成した0600 filesをbindし、正常STOP後にpassword fileとともに削除する。Target roleの読取は`/wishicraft/<stage>/secret/rcon-password`一件へ限定する。
+Phase 6ではitzgがcontainer-local `rcon-cli`用に生成する`.rcon-cli.env`と`.rcon-cli.yaml`もsecret materialとして扱う。persistent `/data`へ直接作成させず、Host Runtimeがruntime UID/GID所有0600で`/run/wishicraft`へ事前作成したexact 2 filesをRW bindする。password fileは0400かつRO bindのままである。Data EBS側に許容する同名fileはroot:root 0644、size 0、nlink 1のbacking placeholderだけで、non-zeroはsecurity failureとする。preflight/STOPはrunning bind targetをmutationしない。Target roleの読取は`/wishicraft/<stage>/secret/rcon-password`一件へ限定する。
 
 推奨Parameter名:
 

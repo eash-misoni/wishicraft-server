@@ -164,7 +164,7 @@ Control Plane
 
 - Minecraft-aware commandが必要な後続operationは固定itzg image内のcontainer-local `rcon-cli`を使用する。Wishicraft独自のRCON protocol client/libraryは実装しない。
 
-- RCON secretはAWS managed sourceからHost Runtimeだけが取得し、`/run`等のephemeral file、最小permission、read-only bind、`RCON_PASSWORD_FILE`でitzgへ渡す。password本文をCompose environment、SSM argument、Git、logへ置かず、RCON portをhost publishまたはSG ingressへ追加しない。
+- RCON passwordはAWS managed sourceからHost Runtimeだけが取得し、`/run/wishicraft/rcon-password`、最小permission、RO bind、`RCON_PASSWORD_FILE`でitzgへ渡す。固定itzgの`start-configuration`はruntime UID/GID、`HOME=/data`で`.rcon-cli.env`と`.rcon-cli.yaml`を書き込むため、この2 destinationだけはexact `/run/wishicraft/rcon-cli.*` sourceへのRW bindをD-078で許可する。他のRCON関連mountをRWへ一般化しない。password本文をCompose environment、SSM argument、Git、logへ置かず、RCON portをhost publishまたはSG ingressへ追加しない。
 
 ## 10. Source of Truth と設定の所有権
 

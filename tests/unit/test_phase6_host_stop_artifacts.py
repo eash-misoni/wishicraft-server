@@ -23,8 +23,8 @@ def test_stop_artifact_saves_before_systemd_and_never_calls_ec2() -> None:
     assert "HOST_ENV_PATH=/etc/wishicraft/host-runtime.env" in script
     assert 'source "$HOST_ENV_PATH"' in script
     assert '[[ "$COMPOSE_FILE" == /etc/wishicraft/host-runtime/compose.yaml ]]' in script
-    assert ".rcon-cli.env .rcon-cli.yaml" in script
-    assert '[[ -f "$placeholder" && ! -L "$placeholder" && ! -s "$placeholder" ]]' in script
+    assert "placeholder" not in script
+    assert "rm -f" not in script
 
 
 def test_stop_artifact_does_not_accept_command_path_or_container_input() -> None:
@@ -67,12 +67,13 @@ def test_phase6_fixed_compose_and_runtime_env_match_canonical_renderer() -> None
 
 def test_upgrade_requires_approved_predecessors_and_installs_entrypoint_last() -> None:
     script = (HOST / "phase6_runtime_contract_upgrade.sh").read_text(encoding="utf-8")
-    assert "COMPOSE_PREDECESSOR=c92fbb" in script
+    assert "COMPOSE_PREDECESSOR=1e8368" in script
     assert "RUNTIME_ENV_PREDECESSOR=723b6e" in script
     assert "BROKEN_HOST_ENV_PREDECESSOR=62c9bd" in script
     assert "CONTAINER_ENV_PREDECESSOR=271ce8" in script
     assert "SECRET_PREDECESSOR=620001" in script
-    assert "STOP_PREDECESSOR=aa2167" in script
+    assert "STOP_PREDECESSOR=88e886" in script
+    assert "PREFLIGHT_PREDECESSOR=f24500" in script
     assert "RUNTIME_ENV_PATH=/etc/wishicraft/host-runtime/runtime.env" in script
     assert 'replace_existing "$SOURCE_ROOT/phase2-real-data.env" "$HOST_ENV_PATH"' in script
     assert 'replace_existing "$SOURCE_ROOT/phase6-runtime.env" "$RUNTIME_ENV_PATH"' in script
@@ -84,6 +85,7 @@ def test_upgrade_requires_approved_predecessors_and_installs_entrypoint_last() -
     assert "CONTAINER_RUNNING" in script
     for filename in (
         "stop-v1.sh",
+        "filesystem_preflight.sh",
         "rcon-secret-v1.sh",
         "phase6-rcon.env",
         "phase6-compose.yaml",

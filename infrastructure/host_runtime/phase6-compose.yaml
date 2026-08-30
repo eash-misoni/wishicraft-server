@@ -21,9 +21,11 @@ services:
       source: /run/wishicraft/rcon-password
       target: /run/secrets/rcon-password
       type: bind
-    - source: /run/wishicraft/rcon-cli.env
+    - read_only: false
+      source: /run/wishicraft/rcon-cli.env
       target: /data/.rcon-cli.env
       type: bind
-    - source: /run/wishicraft/rcon-cli.yaml
+    - read_only: false
+      source: /run/wishicraft/rcon-cli.yaml
       target: /data/.rcon-cli.yaml
       type: bind

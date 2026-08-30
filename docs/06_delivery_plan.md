@@ -602,6 +602,10 @@ operator停止後の `Desired RUNNING` revision 2 / Actual EC2 stopped / stale D
 
 Target secret-read IAM、Phase 6 Host Runtime artifact、RCON SecureString、secret injection、実RCON commandは未適用である。次のAWS writeはこれらの初production適用とSTART→STOP end-to-end検証に対する別の明示承認境界とする。
 
+### Running STOP recovery contract review（2026-08-30）
+
+RCON/Target artifact初適用後のrunning STOPは3回ともexplicit save前にfail closedした。順にsystemd外STOPのpreflight env不足、readonly `COMPOSE_FILE` collision、live Docker nested-bind backing placeholder削除によるRCON authentication lossであり、EC2 stopとDNS deleteへは進んでいない。production topology fixture不足を共通原因としてD-078をAcceptedとし、password ROと生成config exact 2件RWを分離した。filesystem preflightをread-only化し、strict zero-size backing placeholderとDocker inspect identityをknown managed artifact contractへ追加した。repository修正・fixture・testsはproduction実測と区別し、Phase 6はrunning STOP成功まで未完了である。第四hot-patch、STOP retry、AWS writeは別の明示承認境界とする。
+
 ## 10. Phase 7 — Discord MVP
 
 ### 目的

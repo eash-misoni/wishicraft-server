@@ -138,11 +138,13 @@ def test_phase6_renderer_uses_file_only_rcon_secret_without_publishing_port() ->
             "type": "bind",
             "source": "/run/wishicraft/rcon-cli.env",
             "target": "/data/.rcon-cli.env",
+            "read_only": False,
         },
         {
             "type": "bind",
             "source": "/run/wishicraft/rcon-cli.yaml",
             "target": "/data/.rcon-cli.yaml",
+            "read_only": False,
         },
     ]
     assert "ENABLE_RCON=true" in rendered.runtime_env

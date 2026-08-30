@@ -133,11 +133,13 @@ def render_boot_time_artifacts(
                     "type": "bind",
                     "source": "/run/wishicraft/rcon-cli.env",
                     "target": "/data/.rcon-cli.env",
+                    "read_only": False,
                 },
                 {
                     "type": "bind",
                     "source": "/run/wishicraft/rcon-cli.yaml",
                     "target": "/data/.rcon-cli.yaml",
+                    "read_only": False,
                 },
             ]
         )

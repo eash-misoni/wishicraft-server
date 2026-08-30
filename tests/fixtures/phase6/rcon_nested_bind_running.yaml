@@ -1,0 +1,58 @@
+schema_version: 1
+game_root: /srv/minecraft/games/game-vanilla-main/server
+runtime_identity:
+  uid: 993
+  gid: 993
+container:
+  running: true
+  project: wishicraft-host-runtime
+  service: minecraft
+placeholders:
+  - path: /srv/minecraft/games/game-vanilla-main/server/.rcon-cli.env
+    type: regular
+    symlink: false
+    uid: 0
+    gid: 0
+    mode: 420
+    size: 0
+    nlink: 1
+  - path: /srv/minecraft/games/game-vanilla-main/server/.rcon-cli.yaml
+    type: regular
+    symlink: false
+    uid: 0
+    gid: 0
+    mode: 420
+    size: 0
+    nlink: 1
+runtime_sources:
+  - path: /run/wishicraft/rcon-password
+    type: regular
+    symlink: false
+    uid: 993
+    gid: 993
+    mode: 256
+  - path: /run/wishicraft/rcon-cli.env
+    type: regular
+    symlink: false
+    uid: 993
+    gid: 993
+    mode: 384
+  - path: /run/wishicraft/rcon-cli.yaml
+    type: regular
+    symlink: false
+    uid: 993
+    gid: 993
+    mode: 384
+mounts:
+  - source: /run/wishicraft/rcon-password
+    destination: /run/secrets/rcon-password
+    rw: false
+    type: bind
+  - source: /run/wishicraft/rcon-cli.env
+    destination: /data/.rcon-cli.env
+    rw: true
+    type: bind
+  - source: /run/wishicraft/rcon-cli.yaml
+    destination: /data/.rcon-cli.yaml
+    rw: true
+    type: bind

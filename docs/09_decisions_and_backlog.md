@@ -10,6 +10,17 @@
 
 ## 2. 採用済み決定
 
+### D-078 itzg生成RCON CLI configは固定2件だけephemeral RW nested bindとする
+
+- **状態:** Accepted（human review、repository-only）
+- **日付:** 2026-08-30
+- **Upstream rationale:** 固定itzg `2026.7.2`の`start`はruntime UID/GIDへ切り替えて`start-configuration`を実行し、同scriptは`HOME=/data`、`RCON_PASSWORD_FILE`を読み、`$HOME/.rcon-cli.env`と`$HOME/.rcon-cli.yaml`へcontainer-local `rcon-cli`設定を書き込む。このupstream write contractのため生成config destinationはwritableでなければならない。
+- **Decision:** password fileは固定`/run/wishicraft/rcon-password`から`/run/secrets/rcon-password`へのRO bindを維持する。生成configだけは`/run/wishicraft/rcon-cli.env`→`/data/.rcon-cli.env`と`/run/wishicraft/rcon-cli.yaml`→`/data/.rcon-cli.yaml`のexact 2 bindをRWで許可する。一般的なRCON/RW mount例外、wildcard、任意source/destinationへ拡張しない。
+- **Filesystem contract:** Host sourceはruntime UID/GID所有、0600、regular/non-symlinkのephemeral `/run` fileとする。Data EBS側はexact Game rootの2 pathだけをroot:root、0644、regular/non-symlink、size 0、nlink 1のDocker backing placeholderとして認識する。running時はcanonical Compose project/serviceとexact source/destination/RO-RW/type/重複なしをDocker inspectで証明する。stopped時も同じzero-size placeholderはknown managed artifactとして許容し、non-zeroはsecurity/correctness failureへfail closedする。
+- **Purity:** filesystem preflightはread-only validationであり、running中のnested bind destinationをrm/unlink/truncate/replaceしない。`stop-v1`はread-only guards、RCON availability、固定`save-all flush`、systemd graceful stop、stopped verificationだけを担う。prepare/cleanup責務をSTOP critical pathへ混在させない。
+- **Recovery evidence:** running STOP recoveryは、(1) systemd外typed STOPのpreflight env不足、(2) readonly `COMPOSE_FILE` collision、(3) live nested-bind backing placeholder削除によるRCON authentication loss、の3回をいずれもexplicit save前にfail closedした。共通原因はproduction runtime topology、とくにDocker nested bind lifecycleをrepository fixtureが十分モデル化していなかったことである。failed Operationsは履歴として保持し、第四hot-patchとSTOP retryは未承認である。
+- **関係:** D-075のcontainer-local client、`RCON_PASSWORD_FILE`、非公開RCON境界を変更しない。D-077のephemeral generated config方式をRO一律解釈からpassword RO / exact generated config RWへ精密化する。独自RCON clientや`mc-send-to-console`へ切り替えない。
+
 ### D-076 Host Runtimeはdata mount unitへ直接依存しactive Game metadataを固定artifactでrealizeする
 
 - **状態:** Accepted（Phase 5 recovery）
@@ -738,7 +749,7 @@
 - **日付:** 2026-08-29
 - STARTとSTOPはfailure isolationとIAM最小化のため別Standard State Machine/Task Lambdaとする。Admission、Operation/Lock、Desired CAS、Reconcile contractは共有する。
 - STOPは固定Host Runtime operation内でcontainer-local `rcon-cli save-all flush`を実行し、成功後だけsystemd graceful stopへ進む。systemd/itzgだけの暗黙saveをSTOP-001のexplicit save証跡へ読み替えない。
-- `RCON_PASSWORD_FILE`のsourceはHost `/run/wishicraft/rcon-password`とする。itzgが`/data/.rcon-cli.env`と`.rcon-cli.yaml`へpasswordを派生保存するため、両pathもHost `/run/wishicraft`のephemeral filesでbindし、Data EBSにsecretを残さない。
+- `RCON_PASSWORD_FILE`のsourceはHost `/run/wishicraft/rcon-password`とする。itzgが`/data/.rcon-cli.env`と`.rcon-cli.yaml`へpasswordを派生保存するため、両pathもHost `/run/wishicraft`のephemeral filesでbindし、Data EBSにsecretを残さない。mount modeの精密契約はD-078を正本とし、passwordはRO、upstream生成configの固定2件だけをRWとする。
 - Actual EC2 stoppedではruntimeを起動し直さず、Desired STOPPED、DNS absent、fresh Observedへ収束する。通常pathの順序はcanonical contractどおりruntime停止確認、EC2 stopped、DNS DELETE/INSYNCである。
 - Target secret read IAM、artifact、secret作成、injection、実RCON commandの最初のproduction適用は明示承認境界を維持する。
 - **Stopped-state dev evidence:** `Desired RUNNING` revision 2 / Actual stopped / stale DNSからcanonical STOP Admissionを実行し、Actual stopped short-circuitでDesired STOPPED revision 3、DNS DELETE/INSYNC、fresh stopped observation、HEALTHY、Operation SUCCEEDED、Lock/current operation解放へ収束した。実行時間は42.316秒で、Target向けSSM、EC2 Start/Stop、Host Runtime、RCON、secret readは0件だった。同一payload retryは同じOperationを`created=false`で返し、新規executionもside effectも作らなかった。これは通常running STOPのsave/graceful shutdownを実証するものではない。

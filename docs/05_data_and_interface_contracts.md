@@ -670,6 +670,8 @@ STOP workflow inputはPhase 5と同じ`schema_version`、`operation_id`、`lease
 
 failure codeは少なくとも`STOP_PRECONDITION_FAILED`、`LOCK_LOST`、`MINECRAFT_SAVE_FAILED`、`RCON_UNAVAILABLE`、`GRACEFUL_RUNTIME_STOP_FAILED`、`MINECRAFT_STOP_TIMEOUT`、`EC2_STOP_FAILED`、`EC2_STOP_TIMEOUT`、`DNS_DELETE_FAILED`、`DNS_INSYNC_TIMEOUT`、`OBSERVATION_FAILED`を区別する。Desired更新後のfailureはDesired STOPPEDを戻さず、fresh Reconcile後にowned terminal cleanupを試みる。
 
+D-078によりfilesystem preflightはread-onlyである。Data EBS上のexact `.rcon-cli.env`と`.rcon-cli.yaml`はroot:root、0644、regular/non-symlink、size 0、nlink 1のときだけknown Docker backing placeholderとして許容する。running時はさらにcanonical `wishicraft-host-runtime` / `minecraft` containerのDocker inspectで、password bindがexact source/destinationかつRO、生成config 2件がexact source/destinationかつRWで各1件であることを要求する。対応する`/run/wishicraft/rcon-cli.*`はruntime UID/GID、0600、regular/non-symlinkでなければならない。STOPはplaceholderを削除・truncate・置換せず、unknown/missing/duplicate/non-zero/mode・owner不一致をfail closedする。container stopped時もstrict zero-size placeholderはknown managed artifactとして許容する。
+
 Phase 1の直接Java/systemd操作はas-builtとして維持する。Phase 2以降はSSMから許可済みHost Runtime interfaceを呼び、Host Runtimeがcontainer-localなitzg/runtime interfaceへ接続する。以下のCLI名とpayloadは旧案を含むため、Phase 3以降はPhase 2 Host Runtimeのsystemd unit、Docker/Compose、itzg containerを観測・操作するinterfaceへ読み替える。
 
 実装言語はPythonを基本とする。

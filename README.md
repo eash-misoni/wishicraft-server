@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜5は完了しています。devにはPhase 5 START workflowまでdeployされ、実AWS end-to-endを完了しました。Phase 6「安全なstop workflow」はrepository implementation中で、STOP State Machine、RCON/secret、Target artifact、実STOPは未deployです。2026-08-29のoperator停止後、Target EC2はstoppedですが、Desired RUNNING revision 2、古いObserved running、stale DNSをraw修復せず保持しています。Lock owner、Desired revision、stale recoveryの正本はD-074、write-side command pathはD-075です。
+Phase 0〜5は完了しています。Phase 6 Control Planeとstopped-state STOP convergenceはdev適用・実証済みですが、running STOPはRCON filesystem/nested-bind contractの回復中で未closeoutです。3回のrecoveryはすべてexplicit save前にfail closedし、Target/Minecraftはrunning、Desired STOPPEDの不一致をraw修復せず保持しています。D-078でpassword ROとitzg生成CLI config exact 2件RWを分離し、read-only filesystem preflight契約をrepositoryへ反映しました。次のproduction artifact適用とSTOP retryは明示承認境界です。
 
 devは次の3層architectureです。
 
