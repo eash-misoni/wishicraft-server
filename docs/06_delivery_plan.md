@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-29
+- **最終更新:** 2026-08-30
 
 ## 1. 開発原則
 
@@ -45,7 +45,7 @@
 | 4 | SYS-002、OPR-001〜010、NFR-002、NFR-003 |
 | 5 | START-001〜008、EC2-008 |
 | 6 | STOP-001〜005、STOP-007、EC2-008 |
-| 7 | DIS-001〜007、NFR-008、NFR-009 |
+| 7 | DIS-001〜010、NFR-008、NFR-009 |
 | 8 | BAK-001〜006、NFR-004、自動停止要件 |
 | 9以降 | GAME、PKG、CREATE、RESET、WEB、OP、CHATの各LATER要件 |
 
@@ -618,22 +618,62 @@ STOPは6回renewし、最長poll gapは約30秒、900秒leaseに少なくとも�
 
 ## 10. Phase 7 — Discord MVP
 
+- **状態:** In Progress（Phase 7A Contract / Decision freeze）
+
 ### 目的
 
 一般利用者がDiscordだけで固定バニラGameを利用できるようにする。
 
-### 実装順
+Discordは新しいMinecraft制御系ではなく、既存Operation Admission、START/STOP、STATUS/Reconcileへの認証・認可済みexternal adapterとuser-facing projectionである。Discord層からDesired、Lock、Current Operation、EC2、SSM、RCON、DNSを直接操作しない。
 
-1. Discord Application設定手順
-2. API Gateway
-3. Command Lambda署名検証
-4. Guild/channel/user/role認可
-5. `/mc status`
-6. `/mc start`
-7. `/mc stop`
-8. Deferred Response
-9. Bot Tokenによる公開進捗更新
-10. Discord API error handling
+### Phase 7A — Contract / Decision freeze
+
+- DIS-001〜010と既存Operation/Reconcile contractの接続を確定する。
+- Guild、operation channel、player/admin role認可を固定する。
+- STATUSの非Lock・非同期fresh Reconcile contractを固定する。
+- Operation単位message idempotency、delivery failure分離、Bot Token IAM、command registration ownershipをDecision化する。
+- source、infrastructure、AWS、Discord external configurationは変更しない。
+
+### Phase 7B — Discord ingress / signature / authorization
+
+- API Gateway HTTP APIとCommand Lambdaを実装する。
+- raw request bodyに対するDiscord signature/timestamp verificationを最初に行う。
+- configured dev Guild、operation channel、player role OR admin roleをapplication側で検証する。
+- PINGとDeferred Responseを期限内に返し、internal detailを公開しない。
+- Bot TokenはCommand Lambdaへ付与しない。
+
+### Phase 7C — `/mc status`
+
+- Discord Interaction identityを使ってSTATUSを既存Admissionへadmitする。
+- Lockと`current_operation_id`を使用せず、fresh Reconcileを非同期実行する。
+- 小さいStandard Step Functionsまたはasync Lambdaは、既存Reconcileのtimeout、retry、IAM、追跡性を比較してこのsliceで決定する。
+- fresh Observed/Healthの利用者向けprojectionを返す。
+
+### Phase 7D — Discord message transport
+
+- Bot Tokenを読む独立Message componentを実装する。
+- 1 Operationにつき原則1公開messageを条件付きで関連付け、retryでも増殖させず更新する。
+- Discord delivery failureをControl Plane Operation resultから分離して観測する。
+- Interaction Tokenを永続化せず、secretとinternal error detailをlog/messageへ出さない。
+
+### Phase 7E — `/mc start`
+
+- signature/authorization後、既存START AdmissionとState Machineを利用する。
+- Deferred Response後にOperation単位progress messageへ投影する。
+- duplicate Interactionで新しいOperation/execution/messageを作らない。
+
+### Phase 7F — `/mc stop`
+
+- signature/authorization後、実証済みSTOP AdmissionとState Machineを利用する。
+- explicit save、graceful stop、EC2/DNS/fresh Reconcileの判定をDiscord層へ複製しない。
+- duplicate Interactionでsave/stop/messageを再実行しない。
+
+### Phase 7G — real Discord + AWS E2E / release gate
+
+- Git正本の`/mc` schemaを明示operator actionでdev Guildへ登録する。CDK deployの暗黙side effectにしない。
+- real Discordからstatus、start、stop、authorization、duplicate、delivery failure分離を確認する。
+- AWS Budgets、log retention、workflow/EC2/divergence/Lock/Lambda alarmと手動snapshot runbookをrelease gateとして確認する。
+- Phase 8 backup完成までは試験運用とする。
 
 ### 完了条件
 
@@ -656,6 +696,9 @@ Discord start
 - コマンド連打でoperationを増殖させない。
 - 内部error detailを公開しない。
 - Discord更新失敗だけでMinecraft操作結果を偽装しない。
+- 同一Operationの公開messageがretryで増殖しない。
+- Command LambdaはBot Tokenを読まず、Message componentだけが固定SecureStringを読める。
+- command registrationがGit正本と明示operator actionに分離されている。
 
 このPhase完了を最初の実用リリースとする。ただし次の最低限監視も同時に有効でなければならない。
 

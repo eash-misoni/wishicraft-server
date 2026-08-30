@@ -1,7 +1,7 @@
 # 02. Requirements
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-29
+- **最終更新:** 2026-08-30
 
 ## 1. 要件の読み方
 
@@ -231,6 +231,20 @@ start、stopのInteraction初期応答は短時間でDeferred Responseを返す�
 | OP管理 | 不可 | 可 |
 | runtime class変更 | 不可 | 可 |
 | 強制停止 | 不可 | 可 |
+
+Phase 7 MVPの`status`、`start`、`stop`は、stage設定で固定したGuildとoperation channelからの要求だけを受け付け、player roleまたはadmin roleを持つmemberを許可する。Discord側command permissionはUX上の補助であり、application側でもGuild、channel、roleを必ず検証する。admin roleの通常操作もoperation channelを使用し、admin channelは後続のrecovery、reset、maintenance等の管理操作まで予約する。
+
+### DIS-008 Control Plane adapter境界 `MUST / MVP`
+
+Discord ingressは既存Operation Admissionへのexternal adapterとする。Desired State、Lock、`current_operation_id`、EC2、SSM、RCON、Minecraft、DNSを直接操作せず、START/STOP State MachineをAdmission抜きで起動しない。`status`はSTATUS Operationとしてadmitした後にfresh Reconcileを非同期実行し、Interaction handler内で完了を待たない。Discord表示はOperationとObserved Stateのprojectionであり、Control Plane stateの正本にしない。
+
+### DIS-009 Message冪等性とdelivery分離 `MUST / MVP`
+
+公開progress/resultは原則1 Operationにつき1つのBot channel messageを作成し、retry、Interaction再送、workflow retryで増殖させない。同一Operationのmessage identityを条件付きで関連付け、以後は同じmessageを更新する。Discord message create/update失敗はdelivery結果として別に観測し、Minecraft/AWS Operationの成功・失敗を変更しない。
+
+### DIS-010 Token権限とcommand登録 `MUST / MVP`
+
+Interaction署名検証を行うCommand Lambdaは公開設定のDiscord Public Keyを使用し、Bot Tokenを読まない。Bot Tokenのsecret readはDiscord message delivery componentだけに限定する。`/mc` command schemaはGitを正本とし、Discord APIへのregistrationはCDK deployの暗黙side effectではなく、明示operator actionとして行う。
 
 ## 7. Operation・ロック要件
 

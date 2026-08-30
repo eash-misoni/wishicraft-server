@@ -2,7 +2,7 @@
 
 - **文書状態:** Canonical
 - **対象:** Phase 0開始時点の初期設定
-- **最終更新:** 2026-08-29
+- **最終更新:** 2026-08-30
 
 ## 1. 目的
 
@@ -178,11 +178,15 @@ D-062でPhase 2 target platform lockを最終確定した。targetはAL2023 `202
 
 D-063でdev target hostは`MinecraftTargetStack-dev`へ分離した。既存VPC `vpc-0c3cca1e65696ed8e` / ap-northeast-1a subnet `subnet-0a70e5682ea8d0bd3`を明示inputとし、target EC2は`t3a.medium`、暗号化gp3 16 GiB root、public IPv4、専用SSM role/profileを使用する。Phase 2 deploy時の専用SG ingress 0はhistorical stateであり、Phase 5適用後のbaselineはMinecraft gameplay TCP 25565だけを許可する。SSH/RCON/管理portは公開しない。target stackはdata EBS、Phase 1 IAM/SG、secret、DNSを参照しない。Phase 2 identityは観測済み`993:993`を使用する。
 
-Phase 7前:
+Phase 7B production適用前:
 
 - `config/stages/dev.yaml`のGuild/channel/role/Application ID/Public KeyがDiscord Developer Portalと実際のGuild設定に一致することを確認する
-- dev ApplicationへGuild commandを登録する
-- Discord Bot Tokenをdev用SecureStringへ登録する
+- Discord Bot Tokenのdev用SecureStringが存在することを値を表示せず確認し、未登録なら別の明示承認付きoperator actionで登録する
+
+Phase 7G E2E前:
+
+- Git管理の`/mc status`、`/mc start`、`/mc stop` schemaを正本としてdev ApplicationへGuild commandを明示operator actionで登録する
+- command registrationをCDK deployの暗黙side effectにしない
 
 最初のprod deploy前:
 

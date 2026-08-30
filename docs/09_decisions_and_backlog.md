@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-29
+- **最終更新:** 2026-08-30
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -9,6 +9,55 @@
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-084 Discord command schemaとregistration mutationを分離する
+
+- **状態:** Accepted（Phase 7A）
+- **日付:** 2026-08-30
+- `/mc status`、`/mc start`、`/mc stop`のcommand schemaはGit上のversioned artifactを正本とする。
+- Discord APIへのGuild command registration/updateはCDK deployの暗黙side effectにせず、明示的なoperator script/runbookとして実行する。AWS infrastructure mutationとDiscord external configuration mutationを別のreview・実行・証跡境界にする。
+- Phase 7Aではregistrationを実行しない。dev Application/Guildの公開ID一致とBot Token SecureStringの存在確認はPhase 7B/Gのpreflight blockerとして追跡する。
+
+### D-083 Discord Bot TokenのIAM境界
+
+- **状態:** Accepted（Phase 7A）
+- **日付:** 2026-08-30
+- Interaction ingress/Command Lambdaはstage設定のDiscord Public Keyだけで署名を検証し、Bot Tokenを読まない。Bot Tokenを読むIAMはDiscord Message componentだけへ分離し、固定`/wishicraft/<stage>/secret/discord-bot-token`の`ssm:GetParameter`に限定する。
+- Command Lambda、START/STOP/STATUS executor、Reconcile、Minecraft TargetへBot Token readを付与しない。Message componentにはEC2、SSM、RCON、DNS、Desired/Lock mutation権限を付与しない。
+- secret実値はGit、Lambda environment、SSM/Discord command argument、Operation、Step Functions input、fixture、snapshot、logへ保存しない。既存D-040のSecureString方針を精密化する。
+
+### D-082 Discord delivery failureをControl Plane resultから分離する
+
+- **状態:** Accepted（Phase 7A）
+- **日付:** 2026-08-30
+- Discord message create/updateはOperation/Observed Stateのuser-facing projectionであり、Control Plane stateの正本ではない。delivery errorによって成功済みSTART/STOP/STATUSをFAILEDへ変更せず、Minecraft/AWS failureをDiscord successとして扱わない。
+- delivery failureはstructured log、metric/alarm、および必要なら後方互換なoptional delivery metadataで別に観測する。Operation schema変更の要否とmigrationはPhase 7Dで確定する。
+- D-045の「Discord進捗は任意adapter」をDiscord MVPのfailure semanticsとして具体化する。
+
+### D-081 公開progress messageはOperation単位で冪等にする
+
+- **状態:** Accepted（Phase 7A）
+- **日付:** 2026-08-30
+- START/STOP等の公開progress/resultは原則1 Operationにつき1 Bot channel messageとする。Interaction再送、Admission duplicate、workflow/Lambda retryで新規messageを増殖させない。
+- Operationの既存Discord metadataにある`message_id`をmessage identityとして条件付きで一度だけ関連付け、以後は同一messageを更新する。create成功とidentity保存の境界で必要なrecovery/idempotency方式はPhase 7DでAPI behaviorと既存schema migrationを確認して決める。
+- Interaction Tokenは長時間更新に使用・永続化せず、同一Interaction payloadは既存payload-aware idempotencyで同じOperationへ対応付ける。
+
+### D-080 STATUSは非Lock Operationとして非同期fresh Reconcileを実行する
+
+- **状態:** Accepted（Phase 7A）
+- **日付:** 2026-08-30
+- `/mc status`は明示STATUS Operationとして既存Admissionへadmitし、payload-aware idempotencyを持つ。D-046どおりLockを取得せず、`SystemState.current_operation_id`も設定しない。
+- 保存済みSystemStateをそのまま表示して完了せず、非同期executorがfresh Reconcileを行い、その結果をDiscordへprojectする。Interaction handlerはReconcile完了まで同期的に待たず、期限内にDeferred Responseを返す。
+- executorを小さいStandard Step Functionsとasync Lambdaのどちらにするかは、Phase 7Cで既存Reconcileのtimeout、retry、追跡性、IAM最小化を比較して確定する。方式未決定でも本Decisionのadmission/state contractは変更しない。
+
+### D-079 Discord MVP authorizationとControl Plane adapter境界
+
+- **状態:** Accepted（Phase 7A）
+- **日付:** 2026-08-30
+- `/mc status`、`/mc start`、`/mc stop`はstage設定のGuildかつoperation channelに限定し、memberがplayer roleまたはadmin roleを持つ場合だけ許可する。admin roleの通常操作もoperation channelを使用し、admin channelは後続recovery/reset/maintenance用に予約する。
+- Discord command permissionはUX補助であり、Command Lambdaがsignature検証後にGuild、channel、roleをapplication側で必ず検証する。権限不足と入力errorは本人限定で返す。
+- Discordは既存Operation Admission、START/STOP workflow、STATUS/Reconcileへのexternal adapterである。Desired、Lock、lease、`current_operation_id`、EC2、SSM、RCON、Minecraft、DNSを直接操作せず、State MachineをAdmission抜きで起動しない。
+- D-074〜D-078のownership、CAS、freshness、typed Host Runtime、STOP/RCON安全契約をDiscord向けに複製・緩和しない。
 
 ### D-078 itzg生成RCON CLI configは固定2件だけephemeral RW nested bindとする
 
@@ -759,7 +808,7 @@
 
 ## 5. Current blockers
 
-Phase 0〜4は完了した。UID/GIDとownership compatibility、AL2023/AMI、Docker/Compose/itzg pin、initial memory、status/Reconcile/SystemState、Game/Operation/Idempotency/Lock、atomic admission、lease lifecycle、Desired CAS、stale recoveryは解消済みであり、current blockerへ残さない。
+Phase 0〜6は完了した。UID/GIDとownership compatibility、AL2023/AMI、Docker/Compose/itzg pin、initial memory、status/Reconcile/SystemState、Game/Operation/Idempotency/Lock、atomic admission、lease lifecycle、Desired CAS、stale recovery、START/STOP、D-078 RCON contractは解消済みであり、current blockerへ残さない。
 
 ### Phase 4 closeout時の分類（履歴）
 
@@ -768,7 +817,7 @@ Phase 0〜4は完了した。UID/GIDとownership compatibility、AL2023/AMI、Do
 | conditional admission transaction | Accepted | D-026。Idempotency、Operation、Lock、Current Operationを一transactionで受付し、失敗時はworkflowを開始しない。 |
 | concurrent conflict policy | Accepted | 有効Lockまたはnon-null Current Operationなら競合operationを新規作成せず拒否する。同一idempotency keyは既存Operationを返す。 |
 | lock renewal semantics | Accepted | D-074。owner operation ID・lease ID・未期限切れを条件に延長し、失敗は`LOCK_LOST`。副作用直前に所有権を再確認する。 |
-| lock lease/renew values | Provisional | dev設定はlease 900秒、renew 120秒。workflow実装・timeout解析後に短縮/延長を再評価する。 |
+| lock lease/renew values | Accepted | D-074。dev設定はlease 900秒、renew 120秒。Phase 5/6 STARTとPhase 6 STOPの実測、renew後marginからAcceptedとした。 |
 | Operation retention / TTL | Deferred | 初期Phase 4ではTTLを有効化せず履歴を保持する。監査期間と運用query確定後にretentionを決める。 |
 | Idempotency retention / TTL | Deferred | 初期Phase 4ではTTLを有効化しない。外部再送期間・Operation retentionより短くしない。 |
 | Lock owner identity | Accepted | D-074。`operation_id`はlogical owner、acquisitionごとの`lease_id`はcurrent possession proof。 |
@@ -787,9 +836,9 @@ Phase 0〜4は完了した。UID/GIDとownership compatibility、AL2023/AMI、Do
    - B: Step FunctionsのCatch/Timeoutだけでterminal化する。通常failureは単純だが、execution開始前失敗や外部停止でstale stateが残り得る。
    - C: 定期sweeperを同時導入する。最終回復は早いが、Phase 4 scopeとAWS resourceを増やし、periodic reconcileの後続Phase境界を崩す。
 
-Phase 5以降に残る既知事項は、RCON/secret injectionの初回実AWS適用（RCONを必要とする後続operationまで）、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。write-side Host Runtime command pathはD-075で確定した。
+Phase 7以降に残る既知事項は、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。write-side Host RuntimeとRCON/secret production contractはD-075〜D-078で実証済みである。
 
-dev用Discord Guild/channel/role/Application ID/Public Keyは設定済みでありblockerではない。Discord Bot Tokenは秘密値としてGitへ保存せず、Phase 7開始前にdev用SecureStringへ登録する。
+dev用Discord Guild/channel/role/Application ID/Public Keyはrepository設定済みであり、Phase 7Aのblockerではない。実Discord設定とのread-only照合とdev用Discord Bot Token SecureStringの存在確認はPhase 7B/Gのproduction preflightで必要である。Tokenが不存在ならMessage transport/E2Eのblockerだが、Phase 7Aでは作成・取得・表示しない。
 
 Phase別に決める事項:
 
@@ -797,7 +846,8 @@ Phase別に決める事項:
 |---|---|
 | Lock owner identity、desired-state CAS、stale operation recovery | D-074でAccepted（2026-08-29） |
 | RCON client/library / container-local command path | D-075でAccepted（2026-08-29） |
-| dev Discord Bot TokenのSecureString登録とApplication/command設定確認 | Phase 7開始前 |
+| dev Discord公開IDの実環境照合とBot Token SecureString存在確認 | Phase 7B production適用前 |
+| Git正本`/mc` schemaのdev Guild registration | Phase 7G E2E前の明示operator action |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |
 | backup整合方式 | Phase 8開始前 |
 | Package manifest最終schema | Phase 9開始前 |

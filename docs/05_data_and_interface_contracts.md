@@ -1,7 +1,7 @@
 # 05. Data and Interface Contracts
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-29
+- **最終更新:** 2026-08-30
 
 ## 1. 契約変更ルール
 
@@ -968,6 +968,19 @@ discord:
 ```
 
 Bot Token、Interaction Tokenそのものは保存しない。
+
+`message_id`は公開progress/result messageのOperation単位identityである。message create前後のretryやDiscord Interaction再送で別messageを無制限に作らず、未設定から一意なIDへの条件付き確定を行い、確定後は同じmessageを更新する。既存Operation schemaへdelivery属性を追加する必要がある場合は、Phase 7Dで後方互換、既存item、conditional updateを確認してからschema versionまたはoptional属性として定義する。
+
+Discord deliveryの成功・失敗はOperationのMinecraft/AWS terminal resultと別のprojection状態である。message create/update errorによってOperationの`SUCCEEDED`/`FAILED`を変更しない。公開messageにはinternal error detail、role判定情報、Interaction Token、Bot Tokenを含めない。
+
+## 19.1 Phase 7 MVP Interaction contract
+
+- command schemaのGit正本は`/mc status`、`/mc start`、`/mc stop`だけを定義する。
+- idempotency keyはDiscord Interaction identityから決定的に作り、同じInteraction payloadの再送を既存Operationへ対応付ける。異なるpayloadによるkey再利用は既存Admission contractどおりrejectする。
+- Command ingressはstage固定Guild、operation channel、member rolesを検証し、player roleまたはadmin roleを許可する。通常MVP commandでadmin channelを許可しない。
+- START/STOPは既存のlock付きAdmissionを呼び、STATUSはLock/Current Operationなしの既存STATUS admissionを呼ぶ。
+- STATUSはfresh Reconcileを行う非同期executorへ渡し、Interaction handlerはReconcile完了まで待たない。
+- Deferred ResponseにInteraction Tokenを永続化せず、その後の公開progress/resultはBot channel messageへ投影する。
 
 ## 20. 設定と秘密情報の配置
 

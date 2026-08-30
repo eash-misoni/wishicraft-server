@@ -1,7 +1,7 @@
 # 03. Architecture
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-29
+- **最終更新:** 2026-08-30
 
 ## 1. アーキテクチャ方針
 
@@ -92,13 +92,15 @@ CloudWatch / Budgets
 
 1. Discord署名検証
 2. Interaction解析
-3. Guild、channel、user、role認可
+3. stage固定Guild、operation channel、player/admin roleの認可
 4. 入力検証
 5. DiscordへのDeferred Response
-6. idempotency key予約、Operation作成、Lock取得、`current_operation_id`設定をDynamoDB Transactionで受付
-7. Step Functionsを`operation_id`をexecution nameとして開始
+6. 既存Operation Admission serviceの呼出し
+7. Admission結果に従う非同期executor開始
 
-EC2起動完了やMinecraft READYを待たない。Transactionが失敗した場合は競合Operationを作らず、Step Functionsも開始しない。Workflow開始失敗時は所有者条件付きで受付状態を後始末する。
+Command LambdaはControl Planeのexternal adapterであり、Desired State、Lock、`current_operation_id`、EC2、SSM、RCON、Minecraft、DNSを直接操作しない。START/STOP State MachineをAdmission抜きで開始せず、EC2起動完了、Minecraft READY、Reconcile完了をInteraction request中に待たない。Admission transactionとworkflow開始失敗時のowned cleanupは既存service contractを再利用する。
+
+通常の`/mc status`、`/mc start`、`/mc stop`はadmin roleでもoperation channelだけを使用する。admin channelはPhase 7 MVPでは使用せず、後続のrecovery/reset/maintenance用に予約する。Discord command permissionはUX補助であり、LambdaのGuild/channel/role認可を代替しない。
 
 ### Step Functions Standard
 
@@ -394,7 +396,10 @@ Actual EC2が既にstoppedなら、Desired RUNNING/STOPPEDのどちらからで�
 
 ```text
 Discord /mc status
-→ Deferredまたは即時受付
+→ 署名・Guild/channel/role検証
+→ Deferred Response
+→ STATUS Operation admission（Idempotency + Operationのみ）
+→ 非同期STATUS executor
 → Reconcile Lambda
 → EC2 state取得
 → runningならSSM確認
@@ -404,7 +409,13 @@ Discord /mc status
 → 結果をDiscordへ公開
 ```
 
-利用者が明示的に実行したstatusはSTATUS Operationとして記録するが、operationロックと`current_operation_id`は使用しない。EventBridgeやworkflow内部のreconcileはOperationを作成しない。保存値更新は条件付き書き込みで競合を避ける。
+利用者が明示的に実行したstatusはSTATUS Operationとして記録するが、operationロックと`current_operation_id`は使用しない。Interaction handlerはfresh Reconcile完了まで同期的に待たない。STATUS executorを小さいStep Functionsにするかasync LambdaにするかはPhase 7Cで既存Reconcileのtimeout/retry/IAMを比較して決める。EventBridgeやworkflow内部のreconcileはOperationを作成しない。保存値更新は条件付き書き込みで競合を避ける。
+
+## 8.1 Discord message projection
+
+START/STOPの公開表示は原則1 Operationにつき1つのBot channel messageとし、Operationへ関連付けたmessage identityを条件付きで確定して更新する。Interaction Tokenは長時間更新へ使用・保存しない。Discord create/update failureはdelivery status/logとしてControl Plane operationと分離し、既に成功したMinecraft/AWS operationをFAILEDへ変えない。
+
+Bot Tokenを読むのはDiscord Message componentだけとし、Command LambdaはPublic Keyだけで署名検証する。`/mc` command schemaはGit管理し、Discord API registrationはCDK deployと分離した明示operator actionとする。
 
 ## 9. 後期アーキテクチャ
 
