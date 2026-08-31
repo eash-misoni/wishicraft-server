@@ -873,7 +873,9 @@ Phase 0〜6は完了した。UID/GIDとownership compatibility、AL2023/AMI、Do
 
 Phase 7F repository completion時点で、Discord `/mc status`、`/mc start`、`/mc stop`はすべて既存Control Plane Admissionへ接続済みである。STOPはD-087のprogress revisionとD-086のdelivery protocolをSTARTと共用し、Phase 6のsave/graceful stop/EC2/DNS/Reconcile契約をDiscord層へ複製しないため、新しいDecisionは追加しない。Phase 7以降に残る既知事項は、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。write-side Host RuntimeとRCON/secret production contractはD-075〜D-078で実証済みである。
 
-dev用Discord Guild/channel/role/Application ID/Public Keyはrepository設定済みである。2026-08-31のPhase 7D read-only preflightでは正本account/regionを照合後、値を取得しないParameter metadata queryで`/wishicraft/dev/secret/discord-bot-token`が不存在と確認した。repository implementationのblockerではないが、Message component deploy/E2E前に別の明示承認付きoperator actionでSecureStringを作成し、metadataを再確認する必要がある。実Discord設定とのread-only照合もPhase 7G production preflightに残る。
+dev用Discord Guild/channel/role/Application ID/Public Keyはrepository設定済みである。2026-08-31のPhase 7G-1で正本account/regionとPhase 6 safe stateを再確認し、operator非echo入力により固定Parameter `/wishicraft/dev/secret/discord-bot-token`をAWS managed keyの`SecureString` Version 1として新規作成した。値を取得しないmetadata queryでname/type/version/ARN/region/accountを確認し、値・fragmentをrepository、shell引数、environment、transcript、logへ保存していない。続くprocess-memory-onlyのDiscord read-only照合ではToken validity、Application ID/Public Key、Guild、operation/admin channel、player/admin roleのexact matchと、Botのoperation channelにおける`VIEW_CHANNEL`、`SEND_MESSAGES`、`EMBED_LINKS`を確認した。Gatewayとprivileged intentsはMVPのHTTP Interactions + REST message architectureでは不要である。
+
+Phase 7G-1のcredential-backed `cdk diff --change-set=false`ではTarget差分0、Control PlaneはPhase 7 repository実装どおりHTTP API、Command/STATUS/Message Lambda、Operations Stream、SQS/DLQ、最小IAMと既存Lambda code更新だけであり、DynamoDB replacement/data loss、Target/Phase 1/EBS/SG/DNS mutationはない。`dynamodb:ListStreams`のresource `*`はresource-level restrictionをサポートしないlist actionに限定され、lifecycle/secret wildcardではない。Phase 1 diffには既知のhistorical UserData差分とreplacement可能性が残るため、Frozen stackをPhase 7G deploy対象から除外し続ける。現在のControl PlaneにはPhase 7 HTTP endpointが未deployである。Phase 7G-2のblocker/境界は、Control Plane stackだけの明示deploy、deploy後endpoint/PING確認、Discord Interaction Endpoint URL設定、Git正本commandの明示Guild registration、最低限monitoring release gate確認である。
 
 Phase別に決める事項:
 
@@ -881,7 +883,7 @@ Phase別に決める事項:
 |---|---|
 | Lock owner identity、desired-state CAS、stale operation recovery | D-074でAccepted（2026-08-29） |
 | RCON client/library / container-local command path | D-075でAccepted（2026-08-29） |
-| dev Discord公開IDの実環境照合とBot Token SecureString存在確認 | Phase 7B production適用前 |
+| dev Discord公開IDの実環境照合とBot Token SecureString存在確認 | Phase 7G-1で完了（2026-08-31） |
 | Git正本`/mc` schemaのdev Guild registration | Phase 7G E2E前の明示operator action |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |
 | backup整合方式 | Phase 8開始前 |
