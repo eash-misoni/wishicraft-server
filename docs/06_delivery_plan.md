@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-30
+- **最終更新:** 2026-08-31
 
 ## 1. 開発原則
 
@@ -618,7 +618,7 @@ STOPは6回renewし、最長poll gapは約30秒、900秒leaseに少なくとも�
 
 ## 10. Phase 7 — Discord MVP
 
-- **状態:** In Progress（Phase 7A Contract / Decision freeze・Phase 7B repository implementation completed、Phase 7C next）
+- **状態:** In Progress（Phase 7A Contract / Decision freeze・Phase 7B/7C repository implementation completed、Phase 7D next）
 
 ### 目的
 
@@ -648,10 +648,15 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 
 ### Phase 7C — `/mc status`
 
+- **状態:** Completed（repository-only、AWS/Discord未適用）
 - Discord Interaction identityを使ってSTATUSを既存Admissionへadmitする。
 - Lockと`current_operation_id`を使用せず、fresh Reconcileを非同期実行する。
 - 小さいStandard Step Functionsまたはasync Lambdaは、既存Reconcileのtimeout、retry、IAM、追跡性を比較してこのsliceで決定する。
 - fresh Observed/Healthの利用者向けprojectionを返す。
+- 現行Reconcileがsingle Lambda invocationで完結しdurable waitを持たないため、D-085のOperations Stream駆動async Lambdaを採用した。Admission commitがdispatch sourceとなり、同一Interactionのduplicateは同じOperationを返して新規executor dispatchを作らない。
+- Command LambdaはSTATUSだけをAdmissionへ接続してephemeral deferred responseを返す。START/STOPは未受付のまま、executorは既存ReconcileとSTATUS専用unlocked terminalizationを再利用し、安全なprojectionをOperation resultへ保存する。
+- Streamはbatch size 1、STATUS INSERT filter、bounded retry、暗号化DLQを持つ。Command LambdaはAdmission Lambda invokeだけ、executorはOperations Get/UpdateとReconcile Lambda invokeだけを持ち、Bot Token、START/STOP State Machine、EC2/SSM/Route 53 direct権限を持たない。
+- Phase 7D前なのでprojectionをDiscord APIへ送信せず、実command registration/deploy/E2Eを行わない。
 
 ### Phase 7D — Discord message transport
 

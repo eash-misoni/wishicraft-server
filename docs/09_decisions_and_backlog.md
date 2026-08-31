@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-30
+- **最終更新:** 2026-08-31
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -9,6 +9,16 @@
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-085 STATUS executorはOperations Stream駆動async Lambdaとする
+
+- **状態:** Accepted（Phase 7C repository validated）
+- **日付:** 2026-08-31
+- 現行Reconcileは1回のLambda invocationでfresh observationとObserved保存まで完結し、durable waitやmulti-stage orchestrationを必要としない。このためSTATUS専用Standard State Machineは追加せず、small async Lambdaを採用する。
+- Command LambdaによるAdmission後の直接async invokeは、Operation commitとdispatchの間にfailure/unknown gapを作る。既存Admission transactionが作るOperations INSERTをDynamoDB `NEW_IMAGE` Streamのdispatch sourceとし、STATUS INSERTだけをfilterする。duplicate idempotencyは新規INSERTを作らないためexecutorも増殖しない。
+- Stream deliveryはat-least-onceであり、executorは同じoperation_idを使用する。既存STATUS専用`complete_unlocked`をresult対応へ拡張し、terminal retryをno-opとする。Reconcile failureはgeneric unknown projectionと分類済みerrorでterminal化し、executor/terminal write failureはbounded retry後に暗号化DLQへ送る。
+- Command LambdaはAdmission Lambda invokeだけ、executorはOperations Get/UpdateとReconcile Lambda invokeだけを持つ。Lock、lease、Current Operation、Desired、START/STOP State Machine、Bot Token、EC2/SSM/Route 53 direct権限を追加しない。
+- Phase 7CはprojectionをOperation resultへ保存するまでとし、Discord API delivery、`message_id` persistence/recoveryはD-081/D-082に従いPhase 7Dで実装する。
 
 ### D-084 Discord command schemaとregistration mutationを分離する
 

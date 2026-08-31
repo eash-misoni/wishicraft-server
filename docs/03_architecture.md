@@ -1,7 +1,7 @@
 # 03. Architecture
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-30
+- **最終更新:** 2026-08-31
 
 ## 1. アーキテクチャ方針
 
@@ -401,19 +401,23 @@ Actual EC2が既にstoppedなら、Desired RUNNING/STOPPEDのどちらからで�
 ```text
 Discord /mc status
 → 署名・Guild/channel/role検証
-→ Deferred Response
 → STATUS Operation admission（Idempotency + Operationのみ）
-→ 非同期STATUS executor
+→ Deferred Response
+→ Operations DynamoDB Stream INSERT filter
+→ 非同期STATUS executor Lambda
 → Reconcile Lambda
 → EC2 state取得
 → runningならSSM確認
 → onlineならprobe実行
 → runningならパブリックIPv4とRoute 53 targetを確認
 → SystemStateのObserved属性群だけを条件付き部分更新
-→ 結果をDiscordへ公開
+→ 既存unlocked STATUS terminalizationへ安全なresult projectionを保存
+→ Phase 7D Message componentへ引渡し（Phase 7Cでは未送信）
 ```
 
-利用者が明示的に実行したstatusはSTATUS Operationとして記録するが、operationロックと`current_operation_id`は使用しない。Interaction handlerはfresh Reconcile完了まで同期的に待たない。STATUS executorを小さいStep Functionsにするかasync LambdaにするかはPhase 7Cで既存Reconcileのtimeout/retry/IAMを比較して決める。EventBridgeやworkflow内部のreconcileはOperationを作成しない。保存値更新は条件付き書き込みで競合を避ける。
+利用者が明示的に実行したstatusはSTATUS Operationとして記録するが、operationロック、lease、`current_operation_id`、Desired updateは使用しない。Interaction handlerは既存Admission Lambdaの受付結果だけを待ってDeferred Responseを返し、fresh Reconcile完了まで待たない。現行Reconcileは1 Lambda invocationで完結しdurable waitを持たないため、D-085によりSTATUS executorはStandard State Machineではなくasync Lambdaとする。
+
+Admission transactionが作成したOperations INSERTをStream sourceとするため、Operation commitとdispatch sourceの間に別writeのgapを作らない。同一Interactionは`discord:<interaction_id>`のpayload-aware idempotencyで同じOperationへ戻り、新規INSERTとexecutor dispatchを増やさない。Stream retryは同じoperation_idを再処理し、terminal Operationはfresh Reconcileを再実行せず終了する。永続failureはbounded retry後に暗号化DLQへ送り、未観測のまま捨てない。EventBridgeやworkflow内部のreconcileはOperationを作成しない。
 
 ## 8.1 Discord message projection
 

@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜6とPhase 7Aは完了しています。Phase 7BではGit正本の`/mc status/start/stop` schema、HTTP API ingress、raw body Ed25519 signature verification、stage固定Application/Guild/operation channel/player-or-admin role認可をrepositoryへ実装しました。このsliceのCommand LambdaはOperation Admission、Reconcile、AWS lifecycleを呼ばず、安全なPING/PONGと「Operation未受付」の本人限定responseだけを返します。AWS/Discord production適用とcommand registrationは未実施です。
+Phase 0〜6とPhase 7A〜7Cは完了しています。Phase 7Cでは認証・認可済み`/mc status`だけを既存STATUS Admissionへ接続し、Operations Stream駆動のasync Lambdaがfresh Reconcile、既存unlocked STATUS terminalization、安全なprojection生成まで行います。START/STOP、Discord message delivery、AWS/Discord production適用、command registrationは未実施です。
 
 devは次の3層architectureです。
 

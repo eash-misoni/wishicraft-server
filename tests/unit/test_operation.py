@@ -126,6 +126,13 @@ def test_status_admission_does_not_take_lock_or_current_operation() -> None:
     for item in transaction_items(api):
         put = item.get("Put")
         assert not isinstance(put, dict) or put.get("TableName") != "locks"
+        assert "Update" not in item
+    operation_item = cast(
+        dict[str, dict[str, object]],
+        cast(dict[str, object], transaction_items(api)[1]["Put"])["Item"],
+    )
+    assert operation_item["lock_name"] == {"NULL": True}
+    assert operation_item["lease_id"] == {"NULL": True}
 
 
 def test_same_idempotency_key_returns_existing_operation_without_write() -> None:
@@ -181,6 +188,29 @@ def test_duplicate_service_request_does_not_generate_a_new_operation_id() -> Non
     )
     assert result.operation_id == "op-existing"
     assert generated == 0
+
+
+def test_duplicate_discord_status_returns_same_operation_without_new_dispatch_source() -> None:
+    api = FakeDynamo()
+    api.item = idempotency_item(
+        "op-status-existing",
+        operation_type=OperationType.STATUS,
+        source=RequestSource.DISCORD,
+    )
+    service = OperationAdmissionService(
+        repository(api),
+        game_id="game-vanilla-main",
+        timeout_seconds={OperationType.STATUS: 120},
+        operation_id_factory=lambda: "op-must-not-be-created",
+    )
+    result = service.admit(
+        operation_type=OperationType.STATUS,
+        idempotency_key="discord:1532000000000000001",
+        requested_by=RequestSource.DISCORD,
+        requested_at=datetime(2026, 8, 31, tzinfo=UTC),
+    )
+    assert result == type(result)("op-status-existing", False, None)
+    assert api.transactions == []
 
 
 def test_idempotency_key_reuse_with_different_payload_is_rejected() -> None:
@@ -326,19 +356,42 @@ def test_status_completion_requires_an_unlocked_status_operation() -> None:
         operation_id="op-status-001",
         status=OperationStatus.SUCCEEDED,
         completed_at=datetime(2026, 8, 29, tzinfo=UTC),
+        result={"status": "stopped", "ready": False},
     )
     update = api.updates[0]
     condition = cast(str, update["ConditionExpression"])
     assert "operation_type = :status_operation" in condition
     assert "attribute_type(lock_name, :null_type)" in condition
     assert "#status IN (:pending, :running)" in condition
-    assert update["ExpressionAttributeNames"] == {"#status": "status", "#error": "error"}
+    assert update["ExpressionAttributeNames"] == {
+        "#status": "status",
+        "#error": "error",
+        "#result": "result",
+    }
+    values = cast(dict[str, object], update["ExpressionAttributeValues"])
+    assert values[":result"] == {"M": {"status": {"S": "stopped"}, "ready": {"BOOL": False}}}
     with pytest.raises(ValueError, match="normal completion"):
         operation_repository(FakeDynamo()).complete_unlocked(
             operation_id="op-status-001",
             status=OperationStatus.TIMED_OUT,
             completed_at=datetime(2026, 8, 29, tzinfo=UTC),
         )
+
+
+def test_status_state_read_requires_status_without_lock() -> None:
+    api = FakeDynamo()
+    api.item = {
+        "operation_type": {"S": "STATUS"},
+        "status": {"S": "RUNNING"},
+        "lock_name": {"NULL": True},
+    }
+    assert (
+        operation_repository(api).unlocked_status_state("op-status-001") is OperationStatus.RUNNING
+    )
+    assert isinstance(api.item, dict)
+    api.item = {**api.item, "lock_name": {"S": "minecraft-control"}}
+    with pytest.raises(ValueError, match="must not have a lock"):
+        operation_repository(api).unlocked_status_state("op-status-001")
 
 
 def test_stale_recovery_requires_fresh_observation_and_exact_lease_cleanup() -> None:
@@ -372,10 +425,15 @@ def test_stale_recovery_requires_fresh_observation_and_exact_lease_cleanup() -> 
         )
 
 
-def idempotency_item(operation_id: str) -> dict[str, object]:
+def idempotency_item(
+    operation_id: str,
+    *,
+    operation_type: OperationType = OperationType.START,
+    source: RequestSource = RequestSource.CLI,
+) -> dict[str, object]:
     return {
         "operation_id": {"S": operation_id},
-        "operation_type": {"S": "START"},
-        "source": {"S": "CLI"},
+        "operation_type": {"S": operation_type.value},
+        "source": {"S": source.value},
         "target_game_id": {"S": "game-vanilla-main"},
     }

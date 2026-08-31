@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import io
 import json
 from pathlib import Path
 
@@ -17,6 +18,18 @@ ADMIN_ROLE_ID = "1531883595113697410"
 TIMESTAMP = "1788060000"
 
 
+class Admission:
+    def __init__(self, result: str | Exception = "op-status-001") -> None:
+        self.result = result
+        self.calls: list[str] = []
+
+    def admit(self, *, interaction_id: str) -> str:
+        self.calls.append(interaction_id)
+        if isinstance(self.result, Exception):
+            raise self.result
+        return self.result
+
+
 @pytest.fixture
 def signing_key(monkeypatch: pytest.MonkeyPatch) -> SigningKey:
     key = SigningKey.generate()
@@ -30,10 +43,11 @@ def signing_key(monkeypatch: pytest.MonkeyPatch) -> SigningKey:
     }
     for name, value in environment.items():
         monkeypatch.setenv(name, value)
+    monkeypatch.setattr(discord_command_lambda, "_status_admission", Admission())
     return key
 
 
-def payload(*, interaction_type: int = 2) -> dict[str, object]:
+def payload(*, interaction_type: int = 2, subcommand: str = "status") -> dict[str, object]:
     value: dict[str, object] = {
         "id": "1532000000000000001",
         "application_id": APPLICATION_ID,
@@ -51,7 +65,7 @@ def payload(*, interaction_type: int = 2) -> dict[str, object]:
                     "id": "1532000000000000002",
                     "name": "mc",
                     "type": 1,
-                    "options": [{"name": "status", "type": 1}],
+                    "options": [{"name": subcommand, "type": 1}],
                 },
             }
         )
@@ -91,17 +105,28 @@ def test_ping_returns_pong(signing_key: SigningKey) -> None:
     assert response_body(response) == {"type": 1}
 
 
-def test_valid_command_is_honest_phase7b_ephemeral_response(signing_key: SigningKey) -> None:
+def test_valid_status_is_admitted_once_then_deferred(signing_key: SigningKey) -> None:
     response = discord_command_lambda.handler(event(payload(), signing_key), None)
     assert response["statusCode"] == 200
     assert response_body(response) == {
-        "type": 4,
-        "data": {
-            "content": "Discord ingress verified; no Minecraft operation was submitted.",
-            "flags": 64,
-            "allowed_mentions": {"parse": []},
-        },
+        "type": 5,
+        "data": {"flags": 64},
     }
+    admission = discord_command_lambda._status_admission
+    assert isinstance(admission, Admission)
+    assert admission.calls == ["1532000000000000001"]
+
+
+@pytest.mark.parametrize("subcommand", ["start", "stop"])
+def test_start_and_stop_remain_unconnected(signing_key: SigningKey, subcommand: str) -> None:
+    response = discord_command_lambda.handler(
+        event(payload(subcommand=subcommand), signing_key), None
+    )
+    assert response["statusCode"] == 200
+    assert "no Minecraft operation was submitted" in json.dumps(response_body(response))
+    admission = discord_command_lambda._status_admission
+    assert isinstance(admission, Admission)
+    assert admission.calls == []
 
 
 def test_base64_command_uses_same_boundary(signing_key: SigningKey) -> None:
@@ -119,6 +144,9 @@ def test_invalid_signature_precedes_malformed_json(signing_key: SigningKey) -> N
 
     assert response["statusCode"] == 401
     assert response_body(response) == {"error": "invalid request"}
+    admission = discord_command_lambda._status_admission
+    assert isinstance(admission, Admission)
+    assert admission.calls == []
 
 
 def test_signed_malformed_json_is_safe_400(signing_key: SigningKey) -> None:
@@ -137,6 +165,9 @@ def test_unauthorized_request_has_no_role_or_internal_detail(signing_key: Signin
     assert PLAYER_ROLE_ID not in rendered
     assert ADMIN_ROLE_ID not in rendered
     assert "arn:" not in rendered
+    admission = discord_command_lambda._status_admission
+    assert isinstance(admission, Admission)
+    assert admission.calls == []
 
 
 def test_invalid_public_key_configuration_is_safe_500(
@@ -148,11 +179,48 @@ def test_invalid_public_key_configuration_is_safe_500(
     assert response_body(response) == {"error": "service unavailable"}
 
 
-def test_phase7b_handler_has_no_control_plane_clients() -> None:
+def test_status_admission_failure_is_safe_and_retryable(signing_key: SigningKey) -> None:
+    discord_command_lambda._status_admission = Admission(RuntimeError("internal detail"))
+    response = discord_command_lambda.handler(event(payload(), signing_key), None)
+    assert response["statusCode"] == 200
+    rendered = json.dumps(response_body(response))
+    assert "Please retry" in rendered
+    assert "internal detail" not in rendered
+
+
+def test_lambda_admission_uses_stable_discord_key_and_accepts_duplicate_result() -> None:
+    class Api:
+        calls: list[dict[str, object]] = []
+
+        def invoke(self, **kwargs: object) -> object:
+            self.calls.append(kwargs)
+            return {
+                "StatusCode": 200,
+                "Payload": io.BytesIO(
+                    b'{"schema_version":1,"operation_id":"op-existing",'
+                    b'"created":false,"lease_id":null}'
+                ),
+            }
+
+    api = Api()
+    admission = discord_command_lambda.LambdaStatusAdmission(api, function_name="admission")
+    assert admission.admit(interaction_id="1532000000000000001") == "op-existing"
+    raw_payload = api.calls[0]["Payload"]
+    assert isinstance(raw_payload, bytes)
+    request = json.loads(raw_payload)
+    assert request == {
+        "schema_version": 1,
+        "operation": "admit",
+        "operation_type": "STATUS",
+        "idempotency_key": "discord:1532000000000000001",
+        "requested_by": "DISCORD",
+    }
+
+
+def test_phase7c_handler_only_connects_status_to_admission_lambda() -> None:
     assert discord_command_lambda.__file__ is not None
     source = Path(discord_command_lambda.__file__).read_text(encoding="utf-8")
     for forbidden in (
-        "boto3",
         "OperationAdmission",
         "Reconcile",
         "StartExecution",
@@ -162,3 +230,6 @@ def test_phase7b_handler_has_no_control_plane_clients() -> None:
         "route53",
     ):
         assert forbidden not in source
+    assert '"operation_type": "STATUS"' in source
+    assert '"operation_type": "START"' not in source
+    assert '"operation_type": "STOP"' not in source

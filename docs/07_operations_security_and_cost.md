@@ -1,7 +1,7 @@
 # 07. Operations, Security, and Cost
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-30
+- **最終更新:** 2026-08-31
 
 ## 1. 運用原則
 
@@ -62,6 +62,8 @@ Phase 3 Reconcile LambdaはEC2/SSM managed-node/Route 53 read、固定probe Send
 Phase 5 START Task LambdaはTarget tag条件付き`StartInstances`、固定document/tag条件付きSendCommand、GetCommandInvocation、対象Hosted ZoneのChangeResourceRecordSets、Route 53 change status確認、Phase 4 tableのowned conditional updateだけを持つ。Stop/Terminate、EBS、SG、IAM、secret readを許可しない。State Machine roleはReconcile/START Task Lambda invokeだけ、Admission Lambdaは新規STARTの対象State Machine `StartExecution`だけを追加する。
 
 Phase 7 Command LambdaはDiscord Public Keyによる署名検証、stage固定Application/Guild/channel/role認可、既存Operation Admission呼出しに限定し、Bot Token、EC2/SSM/RCON/DNS write権限を持たない。Phase 7BではAdmissionも未接続であり、Lambda roleへapplication IAM policyを付与せずCloudWatch Logsだけを許可する。Discord Bot Tokenの`ssm:GetParameter`はMessage componentだけへ、`/wishicraft/<stage>/secret/discord-bot-token`一件に限定する。Message componentはMinecraft/AWS lifecycle権限を持たず、delivery failureをControl Plane Operation resultへ変換しない。
+
+Phase 7CでCommand Lambdaへ追加するapplication権限は既存Admission Lambda一件の`lambda:InvokeFunction`だけである。STATUS executorはOperations table一件の`GetItem`/`UpdateItem`、既存Reconcile Lambda一件のinvoke、Operations Stream read、暗号化DLQ送信、loggingだけを持つ。ReconcileのEC2/SSM/Route 53 readと固定probe権限をexecutorへ複製せず、Bot Token、Parameter Store、START/STOP State Machine、Desired/Lock/SystemState mutation権限を付与しない。
 
 ### Minecraft EC2 role
 

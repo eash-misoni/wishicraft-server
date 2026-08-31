@@ -19,6 +19,7 @@ CHAT_INPUT = 1
 SUB_COMMAND = 1
 PONG = 1
 CHANNEL_MESSAGE_WITH_SOURCE = 4
+DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5
 EPHEMERAL = 1 << 6
 MAX_BODY_BYTES = 64 * 1024
 SNOWFLAKE = re.compile(r"^[0-9]{1,20}$")
@@ -183,6 +184,17 @@ def pong_response() -> dict[str, object]:
 
 def phase7b_response() -> dict[str, object]:
     return _ephemeral("Discord ingress verified; no Minecraft operation was submitted.")
+
+
+def deferred_ephemeral_response() -> dict[str, object]:
+    return {
+        "type": DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+        "data": {"flags": EPHEMERAL},
+    }
+
+
+def status_admission_failure_response() -> dict[str, object]:
+    return _ephemeral("Status could not be submitted. Please retry this command.")
 
 
 def unauthorized_response() -> dict[str, object]:

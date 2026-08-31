@@ -554,6 +554,7 @@ class OperationRepository:
         status: OperationStatus,
         completed_at: datetime,
         error_code: str | None = None,
+        result: dict[str, object] | None = None,
     ) -> None:
         if status not in {OperationStatus.SUCCEEDED, OperationStatus.FAILED}:
             raise ValueError("normal completion must be SUCCEEDED or FAILED")
@@ -562,14 +563,18 @@ class OperationRepository:
             Key={"operation_id": {"S": operation_id}},
             UpdateExpression=(
                 "SET #status = :status, completed_at = :completed_at, "
-                "updated_at = :completed_at, #error = :error"
+                "updated_at = :completed_at, #error = :error, #result = :result"
             ),
             ConditionExpression=(
                 "attribute_exists(operation_id) AND operation_type = :status_operation "
                 "AND attribute_type(lock_name, :null_type) "
                 "AND #status IN (:pending, :running)"
             ),
-            ExpressionAttributeNames={"#status": "status", "#error": "error"},
+            ExpressionAttributeNames={
+                "#status": "status",
+                "#error": "error",
+                "#result": "result",
+            },
             ExpressionAttributeValues={
                 ":status": {"S": status.value},
                 ":completed_at": {"S": utc_timestamp(completed_at)},
@@ -581,12 +586,32 @@ class OperationRepository:
                         "retryable": None,
                     }
                 ),
+                ":result": _attribute(result),
                 ":status_operation": {"S": OperationType.STATUS.value},
                 ":null_type": {"S": "NULL"},
                 ":pending": {"S": OperationStatus.PENDING.value},
                 ":running": {"S": OperationStatus.RUNNING.value},
             },
         )
+
+    def unlocked_status_state(self, operation_id: str) -> OperationStatus:
+        _validate_identifier(operation_id, "operation")
+        response = self._api.get_item(
+            TableName=self._operations,
+            Key={"operation_id": {"S": operation_id}},
+            ProjectionExpression="operation_type, #status, lock_name",
+            ExpressionAttributeNames={"#status": "status"},
+            ConsistentRead=True,
+        )
+        if not isinstance(response, dict) or not isinstance(response.get("Item"), dict):
+            raise ValueError("STATUS operation does not exist")
+        item = response["Item"]
+        assert isinstance(item, dict)
+        if _string_attribute(item, "operation_type") != OperationType.STATUS.value:
+            raise ValueError("operation is not STATUS")
+        if item.get("lock_name") != {"NULL": True}:
+            raise ValueError("STATUS operation must not have a lock")
+        return OperationStatus(_string_attribute(item, "status"))
 
     def recover_stale(
         self,
@@ -721,6 +746,8 @@ def _attribute(value: object) -> dict[str, object]:
         return {"NULL": True}
     if isinstance(value, str):
         return {"S": value}
+    if isinstance(value, bool):
+        return {"BOOL": value}
     if isinstance(value, int):
         return {"N": str(value)}
     if isinstance(value, dict):

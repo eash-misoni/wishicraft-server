@@ -323,6 +323,7 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
         "DISCORD_PLAYER_ROLE_ID",
         "DISCORD_ADMIN_ROLE_ID",
         "DISCORD_PUBLIC_KEY",
+        "ADMISSION_FUNCTION_NAME",
     }
     assert "BOT_TOKEN" not in str(environment)
     assert "discord-bot-token" not in str(template.to_json())
@@ -334,7 +335,12 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
             continue
         for statement in policy["Properties"]["PolicyDocument"]["Statement"]:
             command_actions.update(_action_list(statement["Action"]))
-    assert command_actions <= {"logs:CreateLogStream", "logs:PutLogEvents"}
+    assert command_actions <= {
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "lambda:InvokeFunction",
+    }
+    assert "lambda:InvokeFunction" in command_actions
     assert not any(
         action.startswith(prefix)
         for action in command_actions
@@ -354,6 +360,70 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
     ]
     assert len(command_permissions) == 1
     assert command_permissions[0]["Properties"]["Principal"] == "apigateway.amazonaws.com"
+
+    status_logical_id, status_executor = next(
+        (logical_id, value)
+        for logical_id, value in functions.items()
+        if value["Properties"]["FunctionName"] == "wc-dev-status-executor"
+    )
+    assert status_executor["Properties"]["Handler"] == "wishicraft.status_executor_lambda.handler"
+    status_environment = status_executor["Properties"]["Environment"]["Variables"]
+    assert set(status_environment) == {
+        "OPERATIONS_TABLE",
+        "LOCKS_TABLE",
+        "SYSTEM_STATE_TABLE",
+        "SYSTEM_ID",
+        "GLOBAL_LOCK_NAME",
+        "RECONCILE_FUNCTION_NAME",
+    }
+    status_role = status_executor["Properties"]["Role"]["Fn::GetAtt"][0]
+    status_actions: set[str] = set()
+    for policy in template.find_resources("AWS::IAM::Policy").values():
+        if {"Ref": status_role} not in policy["Properties"]["Roles"]:
+            continue
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]:
+            status_actions.update(_action_list(statement["Action"]))
+    assert {"dynamodb:GetItem", "dynamodb:UpdateItem", "lambda:InvokeFunction"} <= status_actions
+    assert (
+        not {
+            "dynamodb:PutItem",
+            "dynamodb:DeleteItem",
+            "dynamodb:TransactWriteItems",
+            "dynamodb:Scan",
+            "dynamodb:Query",
+        }
+        & status_actions
+    )
+    assert not any(
+        action.startswith(prefix)
+        for action in status_actions
+        for prefix in (
+            "ec2:",
+            "ssm:SendCommand",
+            "route53:",
+            "states:",
+            "iam:",
+            "ssm:GetParameter",
+        )
+    )
+    mappings = template.find_resources("AWS::Lambda::EventSourceMapping")
+    status_mapping = next(
+        value
+        for value in mappings.values()
+        if status_logical_id in str(value["Properties"].get("FunctionName"))
+    )
+    assert status_mapping["Properties"]["BatchSize"] == 1
+    assert status_mapping["Properties"]["StartingPosition"] == "LATEST"
+    assert status_mapping["Properties"]["MaximumRetryAttempts"] == 2
+    assert "STATUS" in str(status_mapping["Properties"]["FilterCriteria"])
+    assert "OnFailure" in status_mapping["Properties"]["DestinationConfig"]
+    operations_table = next(
+        value["Properties"]
+        for value in template.find_resources("AWS::DynamoDB::Table").values()
+        if value["Properties"]["TableName"] == "wc-dev-operations"
+    )
+    assert operations_table["StreamSpecification"] == {"StreamViewType": "NEW_IMAGE"}
+    template.resource_count_is("AWS::SQS::Queue", 1)
 
 
 def test_phase_one_minecraft_instance_role_has_only_required_ssm_permissions() -> None:

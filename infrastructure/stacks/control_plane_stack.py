@@ -10,7 +10,9 @@ from aws_cdk import aws_apigatewayv2_integrations as apigwv2_integrations
 from aws_cdk import aws_dynamodb as dynamodb
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as lambda_
+from aws_cdk import aws_lambda_event_sources as lambda_event_sources
 from aws_cdk import aws_logs as logs
+from aws_cdk import aws_sqs as sqs
 from aws_cdk import aws_stepfunctions as sfn
 from constructs import Construct
 
@@ -58,6 +60,7 @@ class ControlPlaneStack(Stack):
             "OperationsTable",
             name=resource_name(project.resource_prefix, stage.stage, "operations"),
             key="operation_id",
+            stream=dynamodb.StreamViewType.NEW_IMAGE if phase >= 7 else None,
         )
         idempotency_table = _table(
             self,
@@ -472,10 +475,29 @@ class ControlPlaneStack(Stack):
             )
         )
         if phase >= 7:
-            _add_discord_ingress(self, project=project, stage=stage)
+            _add_discord_ingress(
+                self,
+                project=project,
+                stage=stage,
+                admission=admission,
+                reconcile=function,
+                operations_table=operations_table,
+                locks_table=locks_table,
+                system_state_table=table,
+            )
 
 
-def _add_discord_ingress(stack: Stack, *, project: ProjectConfig, stage: StageConfig) -> None:
+def _add_discord_ingress(
+    stack: Stack,
+    *,
+    project: ProjectConfig,
+    stage: StageConfig,
+    admission: lambda_.Function,
+    reconcile: lambda_.Function,
+    operations_table: dynamodb.Table,
+    locks_table: dynamodb.Table,
+    system_state_table: dynamodb.Table,
+) -> None:
     repository_root = Path(__file__).resolve().parents[2]
     log_group = logs.LogGroup(
         stack,
@@ -508,8 +530,73 @@ def _add_discord_ingress(stack: Stack, *, project: ProjectConfig, stage: StageCo
             "DISCORD_PLAYER_ROLE_ID": stage.discord_public_id("player_role_id"),
             "DISCORD_ADMIN_ROLE_ID": stage.discord_public_id("admin_role_id"),
             "DISCORD_PUBLIC_KEY": stage.discord_public_key,
+            "ADMISSION_FUNCTION_NAME": admission.function_name,
         },
-        description="Phase 7B signature and authorization boundary; no Control Plane mutation",
+        description="Phase 7C Discord ingress; STATUS admission only",
+    )
+    admission.grant_invoke(function)
+
+    status_log_group = logs.LogGroup(
+        stack,
+        "StatusExecutorLogGroup",
+        log_group_name=(
+            f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'status-executor')}"
+        ),
+        retention=logs.RetentionDays.TWO_WEEKS,
+        removal_policy=RemovalPolicy.DESTROY,
+    )
+    status_executor = lambda_.Function(
+        stack,
+        "StatusExecutorFunction",
+        function_name=resource_name(project.resource_prefix, stage.stage, "status-executor"),
+        runtime=lambda_.Runtime.PYTHON_3_12,
+        architecture=lambda_.Architecture.X86_64,
+        code=lambda_.Code.from_asset(str(repository_root / "src")),
+        handler="wishicraft.status_executor_lambda.handler",
+        timeout=Duration.seconds(stage.operation_timeout_seconds("STATUS") + 30),
+        memory_size=256,
+        log_group=status_log_group,
+        environment={
+            "OPERATIONS_TABLE": operations_table.table_name,
+            "LOCKS_TABLE": locks_table.table_name,
+            "SYSTEM_STATE_TABLE": system_state_table.table_name,
+            "SYSTEM_ID": project.system_id,
+            "GLOBAL_LOCK_NAME": stage.global_lock_name,
+            "RECONCILE_FUNCTION_NAME": reconcile.function_name,
+        },
+        description="Phase 7C asynchronous non-locking STATUS executor",
+    )
+    status_executor.add_to_role_policy(
+        iam.PolicyStatement(
+            actions=["dynamodb:GetItem", "dynamodb:UpdateItem"],
+            resources=[operations_table.table_arn],
+        )
+    )
+    reconcile.grant_invoke(status_executor)
+    status_dlq = sqs.Queue(
+        stack,
+        "StatusExecutorDlq",
+        queue_name=resource_name(project.resource_prefix, stage.stage, "status-executor-dlq"),
+        encryption=sqs.QueueEncryption.SQS_MANAGED,
+        retention_period=Duration.days(14),
+    )
+    status_executor.add_event_source(
+        lambda_event_sources.DynamoEventSource(
+            operations_table,
+            starting_position=lambda_.StartingPosition.LATEST,
+            batch_size=1,
+            bisect_batch_on_error=True,
+            retry_attempts=2,
+            on_failure=lambda_event_sources.SqsDlq(status_dlq),
+            filters=[
+                lambda_.FilterCriteria.filter(
+                    {
+                        "eventName": ["INSERT"],
+                        "dynamodb": {"NewImage": {"operation_type": {"S": ["STATUS"]}}},
+                    }
+                )
+            ],
+        )
     )
     api = apigwv2.HttpApi(
         stack,
@@ -541,6 +628,7 @@ def _table(
     *,
     name: str,
     key: str,
+    stream: dynamodb.StreamViewType | None = None,
 ) -> dynamodb.Table:
     return dynamodb.Table(
         scope,
@@ -549,6 +637,7 @@ def _table(
         partition_key=dynamodb.Attribute(name=key, type=dynamodb.AttributeType.STRING),
         billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
         encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        stream=stream,
         removal_policy=RemovalPolicy.RETAIN,
     )
 
