@@ -261,6 +261,8 @@ Phase 7 release gateのprimary pathは`CloudWatch Alarm / AWS Budgets -> encrypt
 
 monitoring observerは5分ごとにSystemState、global Lock、Target EC2をread-only観測しcustom metricsを発行するだけで、Reconcile、state repair、自動STOP、Discord notificationを実行しない。alarm notification smokeはsecretを含まない明示test本文のSNS publishで行い、実Control Plane failureを注入しない。
 
+2026-09-01のPhase 7G-M dev実測では、Email実値を非表示operator入力だけでSNS subscriptionへ渡し、confirmed 1 / pending 0をmetadata read-backした。`TEST ONLY`通知のoperator受信、24 alarmsすべて`OK`、observer schedule Enabled、Budget 4通知のSNS subscriber、retry/DLQ深度0を確認した。個人Email address、token、secret fragmentは正本・Git・transcriptへ記録しない。
+
 ## 8. コスト保護
 
 ### 初期閾値
@@ -270,6 +272,8 @@ monitoring observerは5分ごとにSystemState、global Lock、Target EC2をread
 - EC2長時間running警告: 8時間
 - Desired STOPPEDかつEC2 running警告: 15分
 - dev log retention: 14日
+
+Phase 7G-M dev read-backでは月額15 USD BudgetがHEALTHYで、actual 50/80/100%とforecasted 100%の各通知にSNS subscriberが一件ずつ存在した。Budgetは通知だけを行いControl Plane stateを変更しない。
 
 具体値の正本は`config/stages/<stage>.yaml`とする。Parameter StoreやLambda environmentへ配布された公開値を人間が独立して変更しない。
 
