@@ -10,6 +10,16 @@
 
 ## 2. 採用済み決定
 
+### D-087 START progressはOperation progress revisionで単調配信する
+
+- **状態:** Accepted（Phase 7E repository validated）
+- **日付:** 2026-08-31
+- Discord `/mc start`は署名・認可後に既存Admission Lambdaを同期invokeし、shared START AdmissionだけがOperation、Lock、lease、Current Operationと既存START State Machine executionを作る。Command LambdaはAdmission成功後に即時ephemeral ACKを返し、Interaction tokenを長時間progress identityへ使用しない。3秒境界の実測はPhase 7G release gateとする。
+- Operation itemに単調増加する`progress_revision`を追加する。Admissionは0、公開対象となる`current_step`/terminal status transitionは同じconditional update/transactionでrevisionを1増やす。Operations Stream eventはこのrevisionをdelivery source identityとし、Message componentのconsistent readがevent revisionより新しければstale eventをno-opにする。
+- 初回revisionはD-086 nonceで通常messageを一件作り、以後は保存済み`message_id`をeditする。delivery metadataはsource/delivered revisionをCAS管理する。metadata-only MODIFYはprogress revisionが変わらないためdeliveryしない。古いrevisionのFAILEDは新しいrevisionをblockせず、新revisionごとにbounded attemptを開始できる。
+- progress delivery failureはD-082どおりSTART Operation、Lock、Desired、State Machineを変更しない。terminal success/failureは既存START Operation status/errorだけからsafe projectionし、DiscordがEC2/DNS/READYを独自判定しない。
+- **関連:** D-079、D-081〜D-086、D-045、D-074。
+
 ### D-086 Discord通常messageはOperation nonceとdelivery CASで冪等化する
 
 - **状態:** Accepted（Phase 7D repository validated）

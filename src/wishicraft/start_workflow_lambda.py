@@ -110,6 +110,12 @@ def handler(event: object, context: object) -> dict[str, object]:
         return {"desired_revision": revision, "already_ready": already_ready}
     if action == "start_ec2":
         runtime.coordinator.leases.verify_owned(proof, now=now)
+        runtime.operations.update_step(
+            operation_id=proof.owner_operation_id,
+            current_step="EC2_STARTING",
+            status=OperationStatus.RUNNING,
+            updated_at=now,
+        )
         observation = StartObservation.from_item(_mapping(payload, "state"))
         started = runtime.ec2_lifecycle.start_if_needed(
             instance_id=runtime.resolver.resolve(), current_state=observation.ec2_state
@@ -120,6 +126,12 @@ def handler(event: object, context: object) -> dict[str, object]:
         return {"lease_expires_at": renewed.lease_expires_at}
     if action == "run_host_start":
         runtime.coordinator.leases.verify_owned(proof, now=now)
+        runtime.operations.update_step(
+            operation_id=proof.owner_operation_id,
+            current_step="HOST_RUNTIME_STARTING",
+            status=OperationStatus.RUNNING,
+            updated_at=now,
+        )
         command_id = runtime.host_start.start(instance_id=runtime.resolver.resolve())
         return {"command_id": command_id}
     if action == "check_host_start":
@@ -131,6 +143,12 @@ def handler(event: object, context: object) -> dict[str, object]:
         return {"status": status, "complete": status == "Success"}
     if action == "upsert_dns":
         runtime.coordinator.leases.verify_owned(proof, now=now)
+        runtime.operations.update_step(
+            operation_id=proof.owner_operation_id,
+            current_step="ENDPOINT_CONVERGING",
+            status=OperationStatus.RUNNING,
+            updated_at=now,
+        )
         observation = StartObservation.from_item(_mapping(payload, "state"))
         if not observation.runtime_ready or observation.observed_active_game_id != runtime.game_id:
             raise StartWorkflowError(StartErrorCode.READY_TIMEOUT)

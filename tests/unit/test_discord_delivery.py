@@ -52,15 +52,20 @@ class Store:
     def claim(
         self, record: DeliveryRecord, *, attempt_id: str, now_epoch: int
     ) -> DeliveryRecord | None:
-        if record.delivery_status is DeliveryStatus.PENDING:
+        same_source = record.delivery_source_revision == record.source_revision
+        if same_source and record.delivery_status is DeliveryStatus.PENDING:
             return (
                 replace(record, resumed_pending=True) if record.attempt_id == attempt_id else None
             )
-        if record.delivery_status in {DeliveryStatus.DELIVERED, DeliveryStatus.FAILED}:
+        if same_source and record.delivery_status in {
+            DeliveryStatus.DELIVERED,
+            DeliveryStatus.FAILED,
+        }:
             return None
         self.record = replace(
             record,
             delivery_status=DeliveryStatus.PENDING,
+            delivery_source_revision=record.source_revision,
             attempt_id=attempt_id,
             attempt_count=record.attempt_count + 1,
             first_attempt_epoch=record.first_attempt_epoch or now_epoch,
@@ -76,6 +81,7 @@ class Store:
             self.record,
             delivery_status=DeliveryStatus.DELIVERED,
             message_id=message_id,
+            delivered_revision=record.source_revision,
         )
 
     def mark_failed(
@@ -112,12 +118,19 @@ class Messages:
             raise self.failures.pop(0)
         return self.by_nonce[nonce]
 
+    def edit(self, *, channel_id: str, message_id: str, content: str) -> str:
+        self.calls.append({"channel_id": channel_id, "message_id": message_id, "content": content})
+        if self.failures:
+            raise self.failures.pop(0)
+        return message_id
+
 
 class Queue:
     def __init__(self) -> None:
         self.calls: list[tuple[str, int]] = []
 
-    def schedule(self, *, operation_id: str, delay_seconds: int) -> None:
+    def schedule(self, *, operation_id: str, source_revision: int, delay_seconds: int) -> None:
+        assert source_revision == 0
         self.calls.append((operation_id, delay_seconds))
 
 
@@ -182,6 +195,7 @@ def test_ambiguous_create_is_not_retried_after_nonce_recovery_window() -> None:
     store.record = replace(
         store.record,
         delivery_status=DeliveryStatus.PENDING,
+        delivery_source_revision=0,
         attempt_id="ddb:event-1",
         attempt_count=1,
         first_attempt_epoch=100,
@@ -200,6 +214,7 @@ def test_competing_worker_and_stale_retry_do_not_create() -> None:
     store.record = replace(
         store.record,
         delivery_status=DeliveryStatus.PENDING,
+        delivery_source_revision=0,
         attempt_id="ddb:winner",
         attempt_count=1,
         first_attempt_epoch=1788134400,
@@ -300,6 +315,66 @@ def test_nonce_is_stable_unique_width_and_projection_is_safe() -> None:
     with pytest.raises(DiscordFailure) as error:
         render_status_projection(unsafe)
     assert "token-like" not in str(error.value)
+
+
+def test_start_progress_updates_one_message_monotonically() -> None:
+    store, messages, queue = Store(), Messages(), Queue()
+    store.record = replace(
+        store.record,
+        operation_id="op-start-001",
+        operation_type="START",
+        operation_status="PENDING",
+        current_step="ADMITTED",
+        source_revision=0,
+        projection={},
+    )
+    delivery = service(store, messages, queue)
+    delivery.deliver(operation_id="op-start-001", source_revision=0, attempt_id="ddb:insert")
+    message_id = store.record.message_id
+    assert message_id is not None
+
+    store.record = replace(
+        store.record,
+        operation_status="RUNNING",
+        current_step="EC2_STARTING",
+        source_revision=1,
+    )
+    delivery.deliver(operation_id="op-start-001", source_revision=1, attempt_id="ddb:step-1")
+    store.record = replace(
+        store.record,
+        operation_status="SUCCEEDED",
+        source_revision=2,
+    )
+    delivery.deliver(operation_id="op-start-001", source_revision=2, attempt_id="ddb:terminal")
+
+    assert len(messages.by_nonce) == 1
+    assert len(messages.calls) == 3
+    assert messages.calls[1]["message_id"] == message_id
+    assert messages.calls[2]["message_id"] == message_id
+    assert "online" in messages.calls[2]["content"]
+    delivery.deliver(operation_id="op-start-001", source_revision=1, attempt_id="ddb:stale")
+    assert len(messages.calls) == 3
+
+
+def test_newer_revision_can_recover_after_older_delivery_failed() -> None:
+    store, messages, queue = Store(), Messages(), Queue()
+    store.record = replace(
+        store.record,
+        operation_id="op-start-002",
+        operation_type="START",
+        operation_status="RUNNING",
+        current_step="EC2_STARTING",
+        source_revision=1,
+        projection={},
+        delivery_source_revision=1,
+        delivery_status=DeliveryStatus.FAILED,
+    )
+    store.record = replace(store.record, source_revision=2, current_step="HOST_RUNTIME_STARTING")
+    service(store, messages, queue).deliver(
+        operation_id="op-start-002", source_revision=2, attempt_id="ddb:newer"
+    )
+    assert store.record.delivery_status is DeliveryStatus.DELIVERED
+    assert store.record.delivered_revision == 2
 
 
 class Response:

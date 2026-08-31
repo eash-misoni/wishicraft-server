@@ -18,6 +18,8 @@ from wishicraft.discord_interactions import (
     phase7b_response,
     pong_response,
     raw_body_from_event,
+    start_admission_failure_response,
+    start_admitted_response,
     status_admission_failure_response,
     unauthorized_response,
     verify_signature,
@@ -32,16 +34,22 @@ class PayloadStream(Protocol):
     def read(self) -> bytes: ...
 
 
-class StatusAdmission(Protocol):
-    def admit(self, *, interaction_id: str, guild_id: str, channel_id: str) -> str: ...
+class OperationAdmission(Protocol):
+    def admit(
+        self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
+    ) -> str: ...
 
 
-class LambdaStatusAdmission:
+class LambdaOperationAdmission:
     def __init__(self, api: LambdaApi, *, function_name: str) -> None:
         self._api = api
         self._function_name = function_name
 
-    def admit(self, *, interaction_id: str, guild_id: str, channel_id: str) -> str:
+    def admit(
+        self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
+    ) -> str:
+        if operation_type not in {"STATUS", "START"}:
+            raise ValueError("unsupported Discord admission type")
         response = self._api.invoke(
             FunctionName=self._function_name,
             InvocationType="RequestResponse",
@@ -49,7 +57,7 @@ class LambdaStatusAdmission:
                 {
                     "schema_version": 1,
                     "operation": "admit",
-                    "operation_type": "STATUS",
+                    "operation_type": operation_type,
                     "idempotency_key": f"discord:{interaction_id}",
                     "requested_by": "DISCORD",
                     "discord": {
@@ -61,10 +69,10 @@ class LambdaStatusAdmission:
                 separators=(",", ":"),
             ).encode(),
         )
-        return _parse_admission_response(response)
+        return _parse_admission_response(response, operation_type=operation_type)
 
 
-_status_admission: StatusAdmission | None = None
+_operation_admission: OperationAdmission | None = None
 
 
 def handler(event: object, context: object) -> dict[str, object]:
@@ -86,7 +94,8 @@ def handler(event: object, context: object) -> dict[str, object]:
         return _http_response(200, pong_response())
     if interaction.kind is InteractionKind.STATUS:
         try:
-            _get_status_admission().admit(
+            _get_operation_admission().admit(
+                operation_type="STATUS",
                 interaction_id=interaction.interaction_id,
                 guild_id=config.guild_id,
                 channel_id=config.operation_channel_id,
@@ -94,21 +103,32 @@ def handler(event: object, context: object) -> dict[str, object]:
         except Exception:  # noqa: BLE001 - AWS boundary returns only a fixed safe response.
             return _http_response(200, status_admission_failure_response())
         return _http_response(200, deferred_ephemeral_response())
+    if interaction.kind is InteractionKind.START:
+        try:
+            _get_operation_admission().admit(
+                operation_type="START",
+                interaction_id=interaction.interaction_id,
+                guild_id=config.guild_id,
+                channel_id=config.operation_channel_id,
+            )
+        except Exception:  # noqa: BLE001 - AWS boundary returns only a fixed safe response.
+            return _http_response(200, start_admission_failure_response())
+        return _http_response(200, start_admitted_response())
     return _http_response(200, phase7b_response())
 
 
-def _get_status_admission() -> StatusAdmission:
-    global _status_admission
-    if _status_admission is None:
+def _get_operation_admission() -> OperationAdmission:
+    global _operation_admission
+    if _operation_admission is None:
         boto3 = importlib.import_module("boto3")
-        _status_admission = LambdaStatusAdmission(
+        _operation_admission = LambdaOperationAdmission(
             cast(LambdaApi, boto3.client("lambda")),
             function_name=_required_environment("ADMISSION_FUNCTION_NAME"),
         )
-    return _status_admission
+    return _operation_admission
 
 
-def _parse_admission_response(response: object) -> str:
+def _parse_admission_response(response: object, *, operation_type: str) -> str:
     if not isinstance(response, dict) or response.get("StatusCode") != 200:
         raise RuntimeError("STATUS admission failed")
     if response.get("FunctionError") is not None:
@@ -129,8 +149,11 @@ def _parse_admission_response(response: object) -> str:
     created = value.get("created")
     if not isinstance(operation_id, str) or not operation_id or not isinstance(created, bool):
         raise RuntimeError("STATUS admission failed")
-    if value.get("lease_id") is not None:
+    lease_id = value.get("lease_id")
+    if operation_type == "STATUS" and lease_id is not None:
         raise RuntimeError("STATUS admission created a lease")
+    if operation_type == "START" and (not isinstance(lease_id, str) or not lease_id):
+        raise RuntimeError("START admission did not return a lease")
     return operation_id
 
 

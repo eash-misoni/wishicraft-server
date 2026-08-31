@@ -28,6 +28,8 @@ def operation_item() -> dict[str, object]:
         "operation_id": {"S": "op-status-001"},
         "operation_type": {"S": "STATUS"},
         "status": {"S": "SUCCEEDED"},
+        "current_step": {"S": "ADMITTED"},
+        "progress_revision": {"N": "1"},
         "discord": attribute(
             {
                 "guild_id": "1251169327554625757",
@@ -79,7 +81,7 @@ def test_store_claim_and_delivery_metadata_are_conditional_and_separate() -> Non
         claimed, attempt_id="ddb:event-1", message_id="1532999999999999999", now_epoch=101
     )
     assert len(api.updates) == 2
-    assert "#status IN (:succeeded, :failed)" in str(api.updates[0]["ConditionExpression"])
+    assert "progress_revision = :source_revision" in str(api.updates[0]["ConditionExpression"])
     assert "delivery_attempt_id = :attempt" in str(api.updates[1]["ConditionExpression"])
     values = cast(dict[str, object], api.updates[1]["ExpressionAttributeValues"])
     assert values[":status"] == {"S": DeliveryStatus.DELIVERED.value}
@@ -110,24 +112,26 @@ def test_stream_and_sqs_event_preserve_operation_identity() -> None:
                         "operation_id": {"S": "op-status-001"},
                         "operation_type": {"S": "STATUS"},
                         "status": {"S": "SUCCEEDED"},
+                        "progress_revision": {"N": "1"},
                         "requested_by": {"M": {"source": {"S": "DISCORD"}}},
                         "discord": {"M": {"channel_id": {"S": "1531883129525244015"}}},
-                    }
+                    },
+                    "OldImage": {"progress_revision": {"N": "0"}},
                 },
             }
         ]
     }
-    assert discord_message_lambda._delivery_events(stream) == (("op-status-001", "ddb:event-1"),)
+    assert discord_message_lambda._delivery_events(stream) == (("op-status-001", 1, "ddb:event-1"),)
     sqs = {
         "Records": [
             {
                 "eventSource": "aws:sqs",
                 "eventID": "message-1",
-                "body": '{"schema_version":1,"operation_id":"op-status-001"}',
+                "body": ('{"schema_version":1,"operation_id":"op-status-001","source_revision":1}'),
             }
         ]
     }
-    assert discord_message_lambda._delivery_events(sqs) == (("op-status-001", "sqs:message-1"),)
+    assert discord_message_lambda._delivery_events(sqs) == (("op-status-001", 1, "sqs:message-1"),)
 
 
 def test_non_discord_terminal_status_is_not_delivered() -> None:
@@ -142,14 +146,88 @@ def test_non_discord_terminal_status_is_not_delivered() -> None:
                         "operation_id": {"S": "op-cli-status"},
                         "operation_type": {"S": "STATUS"},
                         "status": {"S": "SUCCEEDED"},
+                        "progress_revision": {"N": "1"},
                         "requested_by": {"M": {"source": {"S": "CLI"}}},
                         "discord": {"M": {"channel_id": {"NULL": True}}},
-                    }
+                    },
+                    "OldImage": {"progress_revision": {"N": "0"}},
                 },
             }
         ]
     }
     assert discord_message_lambda._delivery_events(stream) == ()
+
+
+def test_start_insert_and_progress_are_delivered_but_metadata_only_modify_is_noop() -> None:
+    base = {
+        "operation_id": {"S": "op-start-001"},
+        "operation_type": {"S": "START"},
+        "status": {"S": "PENDING"},
+        "current_step": {"S": "ADMITTED"},
+        "progress_revision": {"N": "0"},
+        "requested_by": {"M": {"source": {"S": "DISCORD"}}},
+        "discord": {"M": {"channel_id": {"S": "1531883129525244015"}}},
+    }
+    insert = {
+        "Records": [
+            {
+                "eventSource": "aws:dynamodb",
+                "eventName": "INSERT",
+                "eventID": "insert-1",
+                "dynamodb": {"NewImage": base},
+            }
+        ]
+    }
+    assert discord_message_lambda._delivery_events(insert) == (("op-start-001", 0, "ddb:insert-1"),)
+    metadata = {
+        "Records": [
+            {
+                "eventSource": "aws:dynamodb",
+                "eventName": "MODIFY",
+                "eventID": "metadata-1",
+                "dynamodb": {
+                    "OldImage": base,
+                    "NewImage": {
+                        **base,
+                        "discord": {
+                            "M": {
+                                "channel_id": {"S": "1531883129525244015"},
+                                "delivery_status": {"S": "PENDING"},
+                            }
+                        },
+                    },
+                },
+            }
+        ]
+    }
+    assert discord_message_lambda._delivery_events(metadata) == ()
+
+
+def test_old_start_progress_event_carries_its_revision_for_stale_rejection() -> None:
+    event = {
+        "Records": [
+            {
+                "eventSource": "aws:dynamodb",
+                "eventName": "MODIFY",
+                "eventID": "progress-1",
+                "dynamodb": {
+                    "OldImage": {"progress_revision": {"N": "0"}},
+                    "NewImage": {
+                        "operation_id": {"S": "op-start-001"},
+                        "operation_type": {"S": "START"},
+                        "status": {"S": "RUNNING"},
+                        "current_step": {"S": "EC2_STARTING"},
+                        "progress_revision": {"N": "1"},
+                        "requested_by": {"M": {"source": {"S": "DISCORD"}}},
+                        "discord": {"M": {"channel_id": {"S": "1531883129525244015"}}},
+                    },
+                },
+            }
+        ]
+    }
+    assert discord_message_lambda._delivery_events(event) == (
+        ("op-start-001", 1, "ddb:progress-1"),
+    )
 
 
 @pytest.mark.parametrize(

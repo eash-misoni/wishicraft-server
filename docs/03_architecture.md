@@ -438,6 +438,20 @@ STATUS terminal Operation + safe projection
 
 Interaction original responseはtoken有効期間15分と長時間STARTの不一致、およびtoken非永続化契約のため公開message identityに使わない。create成否不明retryは同じnonceで短い回復窓だけ再試行し、窓を越えればduplicateを作らずdelivery failureへ隔離する。retryable failureはdelivery metadataのdurable transitionからSQS delayへ接続し、Command/STATUS executorからMessage Lambdaをfire-and-forgetしない。
 
+Phase 7EのSTART adapter/deliveryは次の境界とする。
+
+```text
+Discord /mc start
+→ signature / Guild / channel / role authorization
+→ shared START Admission（Operation / Lock / lease / Current Operation）
+→ existing START Standard State Machine
+→ Operation progress_revision付きstep/status transition
+→ Operations Stream
+→ initial normal message create、以後同一message edit
+```
+
+Command LambdaはAdmission Lambda invoke以外のControl Plane権限を持たない。`progress_revision`はControl Plane transitionと同じwriteで単調増加し、Message componentはevent revisionとconsistent current revisionを照合する。delivery metadataだけの更新ではrevisionが変わらず、古いeventは新しい表示を巻き戻さない。Discord delivery failureはSTART workflowやLock/Desiredへ逆流しない。
+
 ## 9. 後期アーキテクチャ
 
 ### 複数ゲーム

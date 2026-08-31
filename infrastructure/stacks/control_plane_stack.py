@@ -540,7 +540,7 @@ def _add_discord_ingress(
             "DISCORD_PUBLIC_KEY": stage.discord_public_key,
             "ADMISSION_FUNCTION_NAME": admission.function_name,
         },
-        description="Phase 7C Discord ingress; STATUS admission only",
+        description="Phase 7E Discord ingress; STATUS and shared START admission",
     )
     admission.grant_invoke(function)
 
@@ -677,11 +677,10 @@ def _add_discord_ingress(
             filters=[
                 lambda_.FilterCriteria.filter(
                     {
-                        "eventName": ["MODIFY"],
+                        "eventName": ["INSERT", "MODIFY"],
                         "dynamodb": {
                             "NewImage": {
-                                "operation_type": {"S": ["STATUS"]},
-                                "status": {"S": ["SUCCEEDED", "FAILED"]},
+                                "operation_type": {"S": ["STATUS", "START"]},
                                 "requested_by": {"M": {"source": {"S": ["DISCORD"]}}},
                             }
                         },

@@ -285,6 +285,7 @@ class OperationAdmissionRepository:
                         "completed_at": None,
                         "status": OperationStatus.PENDING.value,
                         "current_step": "ADMITTED",
+                        "progress_revision": 0,
                         "timeout_at": (
                             utc_timestamp(request.timeout_at)
                             if request.timeout_at is not None
@@ -524,7 +525,8 @@ class OperationRepository:
             TableName=self._operations,
             Key={"operation_id": {"S": operation_id}},
             UpdateExpression=(
-                "SET #status = :status, current_step = :step, updated_at = :updated_at"
+                "SET #status = :status, current_step = :step, updated_at = :updated_at, "
+                "progress_revision = if_not_exists(progress_revision, :zero) + :one"
             ),
             ConditionExpression=(
                 "attribute_exists(operation_id) AND #status IN (:pending, :running)"
@@ -536,6 +538,8 @@ class OperationRepository:
                 ":updated_at": {"S": utc_timestamp(updated_at)},
                 ":pending": {"S": OperationStatus.PENDING.value},
                 ":running": {"S": OperationStatus.RUNNING.value},
+                ":one": {"N": "1"},
+                ":zero": {"N": "0"},
             },
         )
 
@@ -580,7 +584,8 @@ class OperationRepository:
             Key={"operation_id": {"S": operation_id}},
             UpdateExpression=(
                 "SET #status = :status, completed_at = :completed_at, "
-                "updated_at = :completed_at, #error = :error, #result = :result"
+                "updated_at = :completed_at, #error = :error, #result = :result, "
+                "progress_revision = if_not_exists(progress_revision, :zero) + :one"
             ),
             ConditionExpression=(
                 "attribute_exists(operation_id) AND operation_type = :status_operation "
@@ -605,6 +610,8 @@ class OperationRepository:
                 ),
                 ":result": _attribute(result),
                 ":status_operation": {"S": OperationType.STATUS.value},
+                ":one": {"N": "1"},
+                ":zero": {"N": "0"},
                 ":null_type": {"S": "NULL"},
                 ":pending": {"S": OperationStatus.PENDING.value},
                 ":running": {"S": OperationStatus.RUNNING.value},
@@ -690,6 +697,8 @@ class OperationRepository:
             ),
             ":pending": {"S": OperationStatus.PENDING.value},
             ":running": {"S": OperationStatus.RUNNING.value},
+            ":one": {"N": "1"},
+            ":zero": {"N": "0"},
         }
         condition = "#status IN (:pending, :running)"
         if extra_condition is not None:
@@ -702,7 +711,8 @@ class OperationRepository:
                 "Key": {"operation_id": {"S": operation_id}},
                 "UpdateExpression": (
                     "SET #status = :status, completed_at = :completed_at, "
-                    "updated_at = :completed_at, #error = :error"
+                    "updated_at = :completed_at, #error = :error, "
+                    "progress_revision = if_not_exists(progress_revision, :zero) + :one"
                 ),
                 "ConditionExpression": condition,
                 "ExpressionAttributeNames": {"#status": "status", "#error": "error"},

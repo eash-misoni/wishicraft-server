@@ -99,6 +99,7 @@ def test_competing_operation_admission_is_one_atomic_transaction() -> None:
     assert operation_item["started_at"] == {"NULL": True}
     assert operation_item["completed_at"] == {"NULL": True}
     assert operation_item["expires_at"] == {"NULL": True}
+    assert operation_item["progress_revision"] == {"N": "0"}
     discord = cast(dict[str, dict[str, object]], operation_item["discord"])["M"]
     assert discord["guild_id"] == {"NULL": True}
     game = cast(dict[str, object], items[2]["ConditionCheck"])

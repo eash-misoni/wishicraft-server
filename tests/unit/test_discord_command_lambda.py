@@ -4,6 +4,7 @@ import base64
 import io
 import json
 from pathlib import Path
+from typing import cast
 
 import pytest
 from nacl.signing import SigningKey
@@ -21,10 +22,12 @@ TIMESTAMP = "1788060000"
 class Admission:
     def __init__(self, result: str | Exception = "op-status-001") -> None:
         self.result = result
-        self.calls: list[str] = []
+        self.calls: list[tuple[str, str]] = []
 
-    def admit(self, *, interaction_id: str, guild_id: str, channel_id: str) -> str:
-        self.calls.append(interaction_id)
+    def admit(
+        self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
+    ) -> str:
+        self.calls.append((operation_type, interaction_id))
         assert guild_id == GUILD_ID
         assert channel_id == OPERATION_CHANNEL_ID
         if isinstance(self.result, Exception):
@@ -45,7 +48,7 @@ def signing_key(monkeypatch: pytest.MonkeyPatch) -> SigningKey:
     }
     for name, value in environment.items():
         monkeypatch.setenv(name, value)
-    monkeypatch.setattr(discord_command_lambda, "_status_admission", Admission())
+    monkeypatch.setattr(discord_command_lambda, "_operation_admission", Admission())
     return key
 
 
@@ -114,19 +117,25 @@ def test_valid_status_is_admitted_once_then_deferred(signing_key: SigningKey) ->
         "type": 5,
         "data": {"flags": 64},
     }
-    admission = discord_command_lambda._status_admission
+    admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
-    assert admission.calls == ["1532000000000000001"]
+    assert admission.calls == [("STATUS", "1532000000000000001")]
 
 
-@pytest.mark.parametrize("subcommand", ["start", "stop"])
-def test_start_and_stop_remain_unconnected(signing_key: SigningKey, subcommand: str) -> None:
-    response = discord_command_lambda.handler(
-        event(payload(subcommand=subcommand), signing_key), None
-    )
+def test_start_uses_shared_admission_and_immediate_ephemeral_ack(signing_key: SigningKey) -> None:
+    response = discord_command_lambda.handler(event(payload(subcommand="start"), signing_key), None)
+    assert response["statusCode"] == 200
+    assert response_body(response)["type"] == 4
+    admission = discord_command_lambda._operation_admission
+    assert isinstance(admission, Admission)
+    assert admission.calls == [("START", "1532000000000000001")]
+
+
+def test_stop_remains_unconnected(signing_key: SigningKey) -> None:
+    response = discord_command_lambda.handler(event(payload(subcommand="stop"), signing_key), None)
     assert response["statusCode"] == 200
     assert "no Minecraft operation was submitted" in json.dumps(response_body(response))
-    admission = discord_command_lambda._status_admission
+    admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
     assert admission.calls == []
 
@@ -146,7 +155,7 @@ def test_invalid_signature_precedes_malformed_json(signing_key: SigningKey) -> N
 
     assert response["statusCode"] == 401
     assert response_body(response) == {"error": "invalid request"}
-    admission = discord_command_lambda._status_admission
+    admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
     assert admission.calls == []
 
@@ -167,7 +176,7 @@ def test_unauthorized_request_has_no_role_or_internal_detail(signing_key: Signin
     assert PLAYER_ROLE_ID not in rendered
     assert ADMIN_ROLE_ID not in rendered
     assert "arn:" not in rendered
-    admission = discord_command_lambda._status_admission
+    admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
     assert admission.calls == []
 
@@ -182,7 +191,7 @@ def test_invalid_public_key_configuration_is_safe_500(
 
 
 def test_status_admission_failure_is_safe_and_retryable(signing_key: SigningKey) -> None:
-    discord_command_lambda._status_admission = Admission(RuntimeError("internal detail"))
+    discord_command_lambda._operation_admission = Admission(RuntimeError("internal detail"))
     response = discord_command_lambda.handler(event(payload(), signing_key), None)
     assert response["statusCode"] == 200
     rendered = json.dumps(response_body(response))
@@ -205,9 +214,10 @@ def test_lambda_admission_uses_stable_discord_key_and_accepts_duplicate_result()
             }
 
     api = Api()
-    admission = discord_command_lambda.LambdaStatusAdmission(api, function_name="admission")
+    admission = discord_command_lambda.LambdaOperationAdmission(api, function_name="admission")
     assert (
         admission.admit(
+            operation_type="STATUS",
             interaction_id="1532000000000000001",
             guild_id=GUILD_ID,
             channel_id=OPERATION_CHANNEL_ID,
@@ -231,11 +241,40 @@ def test_lambda_admission_uses_stable_discord_key_and_accepts_duplicate_result()
     }
 
 
-def test_phase7c_handler_only_connects_status_to_admission_lambda() -> None:
+def test_start_duplicate_uses_same_shared_admission_identity() -> None:
+    class Api:
+        calls: list[dict[str, object]] = []
+
+        def invoke(self, **kwargs: object) -> object:
+            self.calls.append(kwargs)
+            return {
+                "StatusCode": 200,
+                "Payload": io.BytesIO(
+                    b'{"schema_version":1,"operation_id":"op-start-existing",'
+                    b'"created":false,"lease_id":"lease-existing"}'
+                ),
+            }
+
+    api = Api()
+    admission = discord_command_lambda.LambdaOperationAdmission(api, function_name="admission")
+    assert (
+        admission.admit(
+            operation_type="START",
+            interaction_id="1532000000000000001",
+            guild_id=GUILD_ID,
+            channel_id=OPERATION_CHANNEL_ID,
+        )
+        == "op-start-existing"
+    )
+    request = json.loads(cast(bytes, api.calls[0]["Payload"]))
+    assert request["operation_type"] == "START"
+    assert request["idempotency_key"] == "discord:1532000000000000001"
+
+
+def test_phase7e_handler_only_connects_status_and_start_to_shared_admission_lambda() -> None:
     assert discord_command_lambda.__file__ is not None
     source = Path(discord_command_lambda.__file__).read_text(encoding="utf-8")
     for forbidden in (
-        "OperationAdmission",
         "Reconcile",
         "StartExecution",
         "dynamodb",
@@ -244,6 +283,6 @@ def test_phase7c_handler_only_connects_status_to_admission_lambda() -> None:
         "route53",
     ):
         assert forbidden not in source
-    assert '"operation_type": "STATUS"' in source
-    assert '"operation_type": "START"' not in source
+    assert 'operation_type="STATUS"' in source
+    assert 'operation_type="START"' in source
     assert '"operation_type": "STOP"' not in source

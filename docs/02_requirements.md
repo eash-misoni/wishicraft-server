@@ -184,11 +184,11 @@ Discord Interactionの署名を検証し、不正なリクエストを拒否す�
 
 ### DIS-003 初期応答 `MUST / MVP`
 
-長時間処理はDiscordの期限内にDeferred Responseを返し、受付後に非同期ワークフローを開始する。
+長時間処理はDiscordの期限内に初期応答を返す。Admissionを期限内に完了できるcommandは受付結果を即時ephemeral responseで確定し、fresh Reconcile等を待つcommandはDeferred Responseを返す。いずれも長時間workflow完了をInteraction handler内で待たない。
 
 ### DIS-004 進捗メッセージ `MUST / MVP`
 
-start、stopのInteraction初期応答は短時間でDeferred Responseを返す。受付後、Bot Tokenで操作チャンネルへ通常の公開メッセージを作成し、その`message_id`をOperationへ保存する。主要進捗、完了、利用者向け失敗はこの通常メッセージを更新して表示する。
+start、stopのInteraction初期応答は期限内に受付結果をephemeralで確定する。受付後、Bot Tokenで操作チャンネルへ通常の公開メッセージを作成し、その`message_id`をOperationへ保存する。主要進捗、完了、利用者向け失敗はこの通常メッセージを更新して表示する。
 
 ### DIS-005 長時間更新 `MUST / MVP`
 
@@ -243,6 +243,8 @@ Discord ingressは既存Operation Admissionへのexternal adapterとする。Des
 公開progress/resultは原則1 Operationにつき1つのBot channel messageを作成し、retry、Interaction再送、workflow retryで増殖させない。同一Operationのmessage identityを条件付きで関連付け、以後は同じmessageを更新する。Discord message create/update失敗はdelivery結果として別に観測し、Minecraft/AWS Operationの成功・失敗を変更しない。
 
 通常message createはOperation単位の決定的nonceとDiscordのnonce重複排除を使用し、create成功・message identity保存前failureを同じlogical messageへ回復できなければならない。create成否不明の安全な回復期間を越えた場合、duplicateの可能性がある新規messageを作らずdeliveryだけをfail closedする。retryはboundedとし、429の`retry_after`を尊重し、permanent認証・認可・not-found failureを無限retryしない。
+
+START progressにはControl Plane Operationと同じwriteで単調増加するrevisionを用い、古いStream eventが新しい公開状態を上書きしてはならない。delivery metadataだけの更新は新しい公開deliveryをtriggerせず、古いrevisionのdelivery failureはより新しいprogress/terminal revisionを妨げてはならない。
 
 ### DIS-010 Token権限とcommand登録 `MUST / MVP`
 

@@ -618,7 +618,7 @@ STOPは6回renewし、最長poll gapは約30秒、900秒leaseに少なくとも�
 
 ## 10. Phase 7 — Discord MVP
 
-- **状態:** In Progress（Phase 7A〜7D repository implementation completed、Phase 7E next）
+- **状態:** In Progress（Phase 7A〜7E repository implementation completed、Phase 7F next）
 
 ### 目的
 
@@ -673,9 +673,12 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 
 ### Phase 7E — `/mc start`
 
-- signature/authorization後、既存START AdmissionとState Machineを利用する。
-- Deferred Response後にOperation単位progress messageへ投影する。
-- duplicate Interactionで新しいOperation/execution/messageを作らない。
+- **状態:** Completed（repository-only、AWS/Discord未適用）
+- signature/authorization後、既存Admission Lambdaへ`discord:<interaction_id>`でSTARTをadmitし、既存START State Machineだけを利用する。Command LambdaはDesired/Lock/EC2/SSM/DNS/State Machineを直接操作しない。
+- D-087の`progress_revision`をAdmission 0から公開step/terminal transitionごとに単調増加させ、Operations Stream INSERT/MODIFYをdurable triggerとする。初回はD-086 nonceで一messageを作り、後続は同じ`message_id`をeditする。
+- Stream event revisionとconsistent current Operation revisionを比較してstale eventをno-opにする。delivery metadataだけのMODIFYはrevision不変なので自己再triggerしない。古いrevisionのdelivery FAILED後も新しいrevisionはbounded deliveryを開始できる。
+- START Admission成功後は即時ephemeral ACKを返し、長時間progress/finalは通常Bot messageへ分離する。3秒initial response latency、Bot Token作成、deploy、real Discord E2EはPhase 7G release gateで実測する。
+- duplicate Interactionは既存payload-aware Admissionから同じOperation/executionへ戻り、新規Operation/Lock/messageを作らない。STOPは未接続のままである。
 
 ### Phase 7F — `/mc stop`
 

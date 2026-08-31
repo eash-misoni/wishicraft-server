@@ -33,6 +33,10 @@ class DeliveryRecord:
     operation_status: str
     channel_id: str
     projection: dict[str, object]
+    operation_type: str = "STATUS"
+    current_step: str = "ADMITTED"
+    source_revision: int = 0
+    error_code: str | None = None
     delivery_status: DeliveryStatus | None = None
     attempt_id: str | None = None
     attempt_count: int = 0
@@ -40,6 +44,8 @@ class DeliveryRecord:
     next_attempt_epoch: int | None = None
     outcome_unknown: bool = False
     message_id: str | None = None
+    delivery_source_revision: int | None = None
+    delivered_revision: int | None = None
     resumed_pending: bool = False
 
 
@@ -78,10 +84,11 @@ class DeliveryStore(Protocol):
 
 class DiscordMessages(Protocol):
     def create(self, *, channel_id: str, nonce: str, content: str) -> str: ...
+    def edit(self, *, channel_id: str, message_id: str, content: str) -> str: ...
 
 
 class RetryQueue(Protocol):
-    def schedule(self, *, operation_id: str, delay_seconds: int) -> None: ...
+    def schedule(self, *, operation_id: str, source_revision: int, delay_seconds: int) -> None: ...
 
 
 class DiscordDeliveryService:
@@ -98,12 +105,25 @@ class DiscordDeliveryService:
         self._retry_queue = retry_queue
         self._clock = clock
 
-    def deliver(self, *, operation_id: str, attempt_id: str) -> None:
+    def deliver(self, *, operation_id: str, attempt_id: str, source_revision: int = 0) -> None:
         now_epoch = int(self._clock().timestamp())
         record = self._store.load(operation_id)
-        if record.delivery_status in {DeliveryStatus.DELIVERED, DeliveryStatus.FAILED}:
+        if record.source_revision != source_revision:
             return
-        if record.message_id is not None:
+        if (
+            record.message_id is None
+            and record.delivery_status is DeliveryStatus.FAILED
+            and record.outcome_unknown
+        ):
+            # A prior create may exist without a persisted identity. A newer
+            # projection cannot safely create another message after recovery expiry.
+            return
+        if record.delivery_source_revision in {
+            None,
+            source_revision,
+        } and record.delivery_status in {DeliveryStatus.DELIVERED, DeliveryStatus.FAILED}:
+            return
+        if record.delivered_revision is not None and record.delivered_revision >= source_revision:
             return
         if (
             record.delivery_status is DeliveryStatus.RETRYABLE_FAILED
@@ -112,6 +132,7 @@ class DiscordDeliveryService:
         ):
             self._retry_queue.schedule(
                 operation_id=operation_id,
+                source_revision=source_revision,
                 delay_seconds=min(MAX_RETRY_SECONDS, max(1, record.next_attempt_epoch - now_epoch)),
             )
             return
@@ -130,11 +151,19 @@ class DiscordDeliveryService:
             )
             return
         try:
-            message_id = self._messages.create(
-                channel_id=claimed.channel_id,
-                nonce=operation_nonce(claimed.operation_id),
-                content=render_status_projection(claimed.projection),
-            )
+            content = render_operation_projection(claimed)
+            if claimed.message_id is None:
+                message_id = self._messages.create(
+                    channel_id=claimed.channel_id,
+                    nonce=operation_nonce(claimed.operation_id),
+                    content=content,
+                )
+            else:
+                message_id = self._messages.edit(
+                    channel_id=claimed.channel_id,
+                    message_id=claimed.message_id,
+                    content=content,
+                )
         except DiscordFailure as failure:
             delay_supported = failure.retry_after_seconds <= MAX_RETRY_SECONDS
             retryable = (
@@ -215,6 +244,25 @@ def render_status_projection(projection: object) -> str:
         lines.append(f"Endpoint: {endpoint}")
     lines.append(f"Health: {health}")
     return "\n".join(lines)
+
+
+def render_operation_projection(record: DeliveryRecord) -> str:
+    if record.operation_type == "STATUS":
+        return render_status_projection(record.projection)
+    if record.operation_type != "START":
+        raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
+    if record.operation_status == "SUCCEEDED":
+        return "Minecraft START: online and ready."
+    if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
+        return "Minecraft START: failed safely. Check the operation log with an administrator."
+    steps = {
+        "ADMITTED": "Minecraft START: accepted.",
+        "DESIRED_RUNNING": "Minecraft START: preparing the requested running state.",
+        "EC2_STARTING": "Minecraft START: starting the server host.",
+        "HOST_RUNTIME_STARTING": "Minecraft START: starting Minecraft.",
+        "ENDPOINT_CONVERGING": "Minecraft START: checking readiness and connection endpoint.",
+    }
+    return steps.get(record.current_step, "Minecraft START: in progress.")
 
 
 class DiscordHttpClient:

@@ -67,6 +67,8 @@ Phase 7CでCommand Lambdaへ追加するapplication権限は既存Admission Lamb
 
 Phase 7D Message Lambdaだけが`/wishicraft/<stage>/secret/discord-bot-token`一件の`ssm:GetParameter`を持つ。加えてOperations table一件のGet/Update、暗号化retry queueのsend/consume、Operations Stream read、loggingだけを許可する。EC2、SSM Run Command、Route 53、Step Functions、SystemState/Lock/Desired mutationを許可しない。Command LambdaとSTATUS executorのroleにはBot Token parameter名もsecret readも追加しない。
 
+Phase 7EでもCommand Lambdaの追加権限は既存Admission Lambda一件のinvokeだけであり、START State Machine、EC2、SSM、Route 53、Desired/Lock tableを直接操作しない。既存Admission Lambda/START workflow roleの権限境界は変更しない。START progress deliveryはOperations Streamだけをtriggerとし、Message LambdaのBot Token/IAM境界はD-083/D-086を維持する。
+
 Discord APIの429は応答の`retry_after`をSQS delayへ反映し、900秒のper-message delay上限を越える値では早期retryせずdelivery failureへfail closedする。5xx/network/timeoutはbounded retry、401/403/404はpermanent delivery failureとする。raw response body、Authorization header、tokenをlog/Operationへ保存しない。delivery alarm/DLQはMinecraft healthと別に扱い、Control Plane terminal resultを変更しない。
 
 ### Minecraft EC2 role

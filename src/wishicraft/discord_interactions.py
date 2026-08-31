@@ -193,8 +193,16 @@ def deferred_ephemeral_response() -> dict[str, object]:
     }
 
 
+def start_admitted_response() -> dict[str, object]:
+    return _ephemeral("START accepted. Progress will be posted in this channel.")
+
+
 def status_admission_failure_response() -> dict[str, object]:
     return _ephemeral("Status could not be submitted. Please retry this command.")
+
+
+def start_admission_failure_response() -> dict[str, object]:
+    return _ephemeral("START could not be submitted. Please retry this command.")
 
 
 def unauthorized_response() -> dict[str, object]:

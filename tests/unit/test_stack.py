@@ -479,6 +479,14 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
     assert any(
         "MODIFY" in str(mapping["Properties"].get("FilterCriteria")) for mapping in message_mappings
     )
+    stream_filter = next(
+        str(mapping["Properties"]["FilterCriteria"])
+        for mapping in message_mappings
+        if "FilterCriteria" in mapping["Properties"]
+    )
+    assert "INSERT" in stream_filter
+    assert "START" in stream_filter
+    assert "STATUS" in stream_filter
     assert any(
         "EventSourceArn" in mapping["Properties"]
         and "SQS" not in str(mapping["Properties"].get("FilterCriteria", ""))
