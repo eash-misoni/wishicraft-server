@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜6とPhase 7A〜7Fは完了しています。Phase 7FではDiscord `/mc stop`をshared STOP Admissionへ接続し、Phase 6のsave/graceful stop/EC2/DNS/Reconcile契約を変更せず、Operationの単調なprogress revisionから同一Discord messageを安全に更新する経路をrepository-onlyで実装しました。AWS/Discord production適用とcommand registrationは未実施です。
+Phase 0〜6とPhase 7A〜7F、Phase 7G-1〜7G-2は完了しています。Phase 7G-2ではControl Planeだけをdevへdeployし、Discord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`をGit正本から登録しました。既存Operation replayやMinecraft state mutationはありません。real Discord status/start/stop E2Eとrelease gateはPhase 7G-3で実施します。
 
 devは次の3層architectureです。
 

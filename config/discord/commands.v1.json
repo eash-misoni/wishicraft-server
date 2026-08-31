@@ -3,8 +3,6 @@
     "type": 1,
     "name": "mc",
     "description": "Wishicraft Minecraft controls",
-    "integration_types": [0],
-    "contexts": [0],
     "options": [
       {
         "type": 1,

@@ -12,10 +12,9 @@ def test_phase7_mvp_command_schema_is_exact_and_guild_only() -> None:
     assert isinstance(schema, list)
     assert len(schema) == 1
     command = schema[0]
+    assert set(command) == {"type", "name", "description", "options"}
     assert command["type"] == 1
     assert command["name"] == "mc"
-    assert command["integration_types"] == [0]
-    assert command["contexts"] == [0]
     assert [(option["name"], option["type"]) for option in command["options"]] == [
         ("status", 1),
         ("start", 1),

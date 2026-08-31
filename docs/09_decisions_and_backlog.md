@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-31
+- **最終更新:** 2026-09-01
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -44,12 +44,13 @@
 
 ### D-084 Discord command schemaとregistration mutationを分離する
 
-- **状態:** Accepted（Phase 7A）
+- **状態:** Accepted（Phase 7G-2 production validated）
 - **日付:** 2026-08-30
 - `/mc status`、`/mc start`、`/mc stop`のcommand schemaはGit上のversioned artifactを正本とする。
 - Discord APIへのGuild command registration/updateはCDK deployの暗黙side effectにせず、明示的なoperator script/runbookとして実行する。AWS infrastructure mutationとDiscord external configuration mutationを別のreview・実行・証跡境界にする。
 - Phase 7Aではregistrationを実行しない。dev Application/Guildの公開ID一致とBot Token SecureStringの存在確認はPhase 7B/Gのpreflight blockerとして追跡する。
 - Phase 7Bで`config/discord/commands.v1.json`をversioned正本として追加した。repository/CDK実装はDiscord API registrationを行わず、external mutation境界を維持する。
+- Phase 7G-2でdev Guildへ明示POST upsertし、登録前0件、登録後`mc`一件、global 0件をread-backした。Discord APIでは`integration_types`と`contexts`はglobal command専用でGuild read-backに存在しないため、Guild registration正本から両fieldを除外した。Guild限定性はendpoint scopeとD-079のapplication-side認可で維持し、unrelated commandを削除するbulk overwriteは使用しない。
 
 ### D-083 Discord Bot TokenのIAM境界
 
