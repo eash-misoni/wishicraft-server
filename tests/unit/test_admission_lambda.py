@@ -5,7 +5,12 @@ from datetime import datetime
 import pytest
 
 from wishicraft import admission_lambda
-from wishicraft.operation import AdmissionResult, OperationType, RequestSource
+from wishicraft.operation import (
+    AdmissionResult,
+    DiscordOperationContext,
+    OperationType,
+    RequestSource,
+)
 
 
 class Service:
@@ -20,6 +25,7 @@ class Service:
         idempotency_key: str,
         requested_by: RequestSource,
         requested_at: datetime,
+        discord: DiscordOperationContext | None = None,
     ) -> AdmissionResult:
         self.calls.append(
             {
@@ -27,6 +33,7 @@ class Service:
                 "idempotency_key": idempotency_key,
                 "requested_by": requested_by,
                 "requested_at": requested_at,
+                "discord": discord,
             }
         )
         if isinstance(self.result, Exception):

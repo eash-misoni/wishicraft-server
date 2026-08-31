@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from typing import Protocol, cast
 
 from wishicraft.operation import (
+    DiscordOperationContext,
     DynamoApi,
     LeaseProof,
     OperationAdmissionRepository,
@@ -37,12 +38,13 @@ _stop_launcher: WorkflowLauncher | None = None
 
 def handler(event: object, context: object) -> dict[str, object]:
     del context
-    operation_type, idempotency_key, requested_by = _parse_event(event)
+    operation_type, idempotency_key, requested_by, discord = _parse_event(event)
     result = _get_service().admit(
         operation_type=operation_type,
         idempotency_key=idempotency_key,
         requested_by=requested_by,
         requested_at=datetime.now(UTC),
+        discord=discord,
     )
     if result.created and operation_type is OperationType.START:
         if result.lease_id is None:
@@ -172,14 +174,26 @@ class WorkflowLauncher:
         }
 
 
-def _parse_event(event: object) -> tuple[OperationType, str, RequestSource]:
-    if not isinstance(event, dict) or set(event) != {
-        "schema_version",
-        "operation",
-        "operation_type",
-        "idempotency_key",
-        "requested_by",
-    }:
+def _parse_event(
+    event: object,
+) -> tuple[OperationType, str, RequestSource, DiscordOperationContext | None]:
+    if not isinstance(event, dict) or set(event) not in (
+        {
+            "schema_version",
+            "operation",
+            "operation_type",
+            "idempotency_key",
+            "requested_by",
+        },
+        {
+            "schema_version",
+            "operation",
+            "operation_type",
+            "idempotency_key",
+            "requested_by",
+            "discord",
+        },
+    ):
         raise ValueError("invalid Operation admission invocation")
     if event.get("schema_version") != 1 or event.get("operation") != "admit":
         raise ValueError("invalid Operation admission invocation")
@@ -191,7 +205,24 @@ def _parse_event(event: object) -> tuple[OperationType, str, RequestSource]:
     if not isinstance(requested_by, str):
         raise ValueError("invalid Operation admission invocation")
     try:
-        return OperationType(operation_type), idempotency_key, RequestSource(requested_by)
+        source = RequestSource(requested_by)
+        raw_discord = event.get("discord")
+        if raw_discord is None:
+            discord = None
+        elif (
+            source is RequestSource.DISCORD
+            and isinstance(raw_discord, dict)
+            and set(raw_discord) == {"guild_id", "channel_id", "interaction_id"}
+            and all(isinstance(value, str) for value in raw_discord.values())
+        ):
+            discord = DiscordOperationContext(
+                guild_id=raw_discord["guild_id"],
+                channel_id=raw_discord["channel_id"],
+                interaction_id=raw_discord["interaction_id"],
+            )
+        else:
+            raise ValueError("invalid Discord admission metadata")
+        return OperationType(operation_type), idempotency_key, source, discord
     except ValueError as error:
         raise ValueError("invalid Operation admission invocation") from error
 

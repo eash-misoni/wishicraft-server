@@ -618,7 +618,7 @@ STOPは6回renewし、最長poll gapは約30秒、900秒leaseに少なくとも�
 
 ## 10. Phase 7 — Discord MVP
 
-- **状態:** In Progress（Phase 7A Contract / Decision freeze・Phase 7B/7C repository implementation completed、Phase 7D next）
+- **状態:** In Progress（Phase 7A〜7D repository implementation completed、Phase 7E next）
 
 ### 目的
 
@@ -660,10 +660,16 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 
 ### Phase 7D — Discord message transport
 
+- **状態:** Completed（repository-only、AWS/Discord未適用）
 - Bot Tokenを読む独立Message componentを実装する。
 - 1 Operationにつき原則1公開messageを条件付きで関連付け、retryでも増殖させず更新する。
 - Discord delivery failureをControl Plane Operation resultから分離して観測する。
 - Interaction Tokenを永続化せず、secretとinternal error detailをlog/messageへ出さない。
+- D-086によりInteraction original response方式は採用せず、通常Bot messageへOperation由来25文字nonceと`enforce_nonce=true`を付ける。create成功・message ID保存前failureは同じStream event/nonceで既存message IDを回収し、30秒の曖昧結果回復窓を越えた場合はduplicate createせずdeliveryだけをfail closedする。
+- STATUS terminal MODIFYをOperations Streamのdurable triggerとし、Message Lambdaがoptional delivery metadataを条件付き更新する。retryable metadata transitionをSQS delayへ接続し、429の`retry_after`を尊重する。attemptは最大3回で暗号化DLQへ隔離し、401/403/404と不正responseを分類する。
+- Message Lambdaだけがdev Bot Token SecureString一件を`ssm:GetParameter`できる。Command Lambda/STATUS executorはBot Tokenなしを維持し、Message LambdaはEC2、SSM Run Command、Route 53、Step Functions、Desired/Lock mutation権限を持たない。
+- Phase 7C safe projectionだけをrenderし、delivery failureはOperation terminal resultへ逆流させない。START/STOPは引き続きAdmission 0であり、AWS deploy、Discord registration/message送信は実施しない。
+- dev Bot Token SecureStringはmetadata-only確認で不存在だった。repository completionとは分離し、Phase 7D infrastructure deployまたはPhase 7G E2E前の明示operator secret作成をblockerとする。
 
 ### Phase 7E — `/mc start`
 

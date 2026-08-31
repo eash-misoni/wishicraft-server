@@ -23,8 +23,10 @@ class Admission:
         self.result = result
         self.calls: list[str] = []
 
-    def admit(self, *, interaction_id: str) -> str:
+    def admit(self, *, interaction_id: str, guild_id: str, channel_id: str) -> str:
         self.calls.append(interaction_id)
+        assert guild_id == GUILD_ID
+        assert channel_id == OPERATION_CHANNEL_ID
         if isinstance(self.result, Exception):
             raise self.result
         return self.result
@@ -204,7 +206,14 @@ def test_lambda_admission_uses_stable_discord_key_and_accepts_duplicate_result()
 
     api = Api()
     admission = discord_command_lambda.LambdaStatusAdmission(api, function_name="admission")
-    assert admission.admit(interaction_id="1532000000000000001") == "op-existing"
+    assert (
+        admission.admit(
+            interaction_id="1532000000000000001",
+            guild_id=GUILD_ID,
+            channel_id=OPERATION_CHANNEL_ID,
+        )
+        == "op-existing"
+    )
     raw_payload = api.calls[0]["Payload"]
     assert isinstance(raw_payload, bytes)
     request = json.loads(raw_payload)
@@ -214,6 +223,11 @@ def test_lambda_admission_uses_stable_discord_key_and_accepts_duplicate_result()
         "operation_type": "STATUS",
         "idempotency_key": "discord:1532000000000000001",
         "requested_by": "DISCORD",
+        "discord": {
+            "guild_id": GUILD_ID,
+            "channel_id": OPERATION_CHANNEL_ID,
+            "interaction_id": "1532000000000000001",
+        },
     }
 
 

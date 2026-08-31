@@ -17,13 +17,19 @@ from aws_cdk import aws_stepfunctions as sfn
 from constructs import Construct
 
 from infrastructure.discord_command_bundle import discord_command_bundling
-from wishicraft.config import ProjectConfig, StageConfig
+from wishicraft.config import ProjectConfig, SecretsExampleConfig, StageConfig
 from wishicraft.naming import resource_name, resource_tags
 
 
 class ControlPlaneStack(Stack):
     def __init__(
-        self, scope: Construct, *, project: ProjectConfig, stage: StageConfig, phase: int = 0
+        self,
+        scope: Construct,
+        *,
+        project: ProjectConfig,
+        stage: StageConfig,
+        secrets: SecretsExampleConfig,
+        phase: int = 0,
     ) -> None:
         super().__init__(
             scope,
@@ -60,7 +66,7 @@ class ControlPlaneStack(Stack):
             "OperationsTable",
             name=resource_name(project.resource_prefix, stage.stage, "operations"),
             key="operation_id",
-            stream=dynamodb.StreamViewType.NEW_IMAGE if phase >= 7 else None,
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES if phase >= 7 else None,
         )
         idempotency_table = _table(
             self,
@@ -484,6 +490,7 @@ class ControlPlaneStack(Stack):
                 operations_table=operations_table,
                 locks_table=locks_table,
                 system_state_table=table,
+                bot_token_parameter_name=secrets.discord_bot_token_parameter_name(stage.stage),
             )
 
 
@@ -497,6 +504,7 @@ def _add_discord_ingress(
     operations_table: dynamodb.Table,
     locks_table: dynamodb.Table,
     system_state_table: dynamodb.Table,
+    bot_token_parameter_name: str,
 ) -> None:
     repository_root = Path(__file__).resolve().parents[2]
     log_group = logs.LogGroup(
@@ -596,6 +604,97 @@ def _add_discord_ingress(
                     }
                 )
             ],
+        )
+    )
+
+    delivery_dlq = sqs.Queue(
+        stack,
+        "DiscordMessageDlq",
+        queue_name=resource_name(project.resource_prefix, stage.stage, "discord-message-dlq"),
+        encryption=sqs.QueueEncryption.SQS_MANAGED,
+        retention_period=Duration.days(14),
+    )
+    delivery_queue = sqs.Queue(
+        stack,
+        "DiscordMessageRetryQueue",
+        queue_name=resource_name(project.resource_prefix, stage.stage, "discord-message-retry"),
+        encryption=sqs.QueueEncryption.SQS_MANAGED,
+        visibility_timeout=Duration.seconds(60),
+        retention_period=Duration.days(1),
+        dead_letter_queue=sqs.DeadLetterQueue(queue=delivery_dlq, max_receive_count=3),
+    )
+    message_log_group = logs.LogGroup(
+        stack,
+        "DiscordMessageLogGroup",
+        log_group_name=(
+            f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'discord-message')}"
+        ),
+        retention=logs.RetentionDays.TWO_WEEKS,
+        removal_policy=RemovalPolicy.DESTROY,
+    )
+    message = lambda_.Function(
+        stack,
+        "DiscordMessageFunction",
+        function_name=resource_name(project.resource_prefix, stage.stage, "discord-message"),
+        runtime=lambda_.Runtime.PYTHON_3_12,
+        architecture=lambda_.Architecture.X86_64,
+        code=lambda_.Code.from_asset(str(repository_root / "src")),
+        handler="wishicraft.discord_message_lambda.handler",
+        timeout=Duration.seconds(30),
+        memory_size=256,
+        log_group=message_log_group,
+        environment={
+            "OPERATIONS_TABLE": operations_table.table_name,
+            "BOT_TOKEN_PARAMETER_NAME": bot_token_parameter_name,
+            "DELIVERY_RETRY_QUEUE_URL": delivery_queue.queue_url,
+        },
+        description="Phase 7D idempotent Discord message delivery",
+    )
+    message.add_to_role_policy(
+        iam.PolicyStatement(
+            actions=["dynamodb:GetItem", "dynamodb:UpdateItem"],
+            resources=[operations_table.table_arn],
+        )
+    )
+    message.add_to_role_policy(
+        iam.PolicyStatement(
+            actions=["ssm:GetParameter"],
+            resources=[
+                f"arn:aws:ssm:{stage.aws_region}:{stage.aws_account_id}:parameter"
+                f"{bot_token_parameter_name}"
+            ],
+        )
+    )
+    delivery_queue.grant_send_messages(message)
+    message.add_event_source(
+        lambda_event_sources.DynamoEventSource(
+            operations_table,
+            starting_position=lambda_.StartingPosition.LATEST,
+            batch_size=1,
+            bisect_batch_on_error=True,
+            retry_attempts=2,
+            on_failure=lambda_event_sources.SqsDlq(delivery_dlq),
+            filters=[
+                lambda_.FilterCriteria.filter(
+                    {
+                        "eventName": ["MODIFY"],
+                        "dynamodb": {
+                            "NewImage": {
+                                "operation_type": {"S": ["STATUS"]},
+                                "status": {"S": ["SUCCEEDED", "FAILED"]},
+                                "requested_by": {"M": {"source": {"S": ["DISCORD"]}}},
+                            }
+                        },
+                    }
+                )
+            ],
+        )
+    )
+    message.add_event_source(
+        lambda_event_sources.SqsEventSource(
+            delivery_queue,
+            batch_size=1,
+            report_batch_item_failures=True,
         )
     )
     api = apigwv2.HttpApi(

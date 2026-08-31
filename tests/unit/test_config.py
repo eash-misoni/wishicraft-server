@@ -25,6 +25,9 @@ def test_project_dev_prod_and_secrets_load() -> None:
     assert dev.stage.stage == "dev"
     assert prod.stage.stage == "prod"
     assert "secure_parameters" in dev.secrets.values
+    assert dev.secrets.discord_bot_token_parameter_name("dev") == (
+        "/wishicraft/dev/secret/discord-bot-token"
+    )
     assert dev.secrets.rcon_password_parameter_name("dev") == "/wishicraft/dev/secret/rcon-password"
     assert (
         prod.secrets.rcon_password_parameter_name("prod") == "/wishicraft/prod/secret/rcon-password"

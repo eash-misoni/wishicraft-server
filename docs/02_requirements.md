@@ -242,6 +242,8 @@ Discord ingressは既存Operation Admissionへのexternal adapterとする。Des
 
 公開progress/resultは原則1 Operationにつき1つのBot channel messageを作成し、retry、Interaction再送、workflow retryで増殖させない。同一Operationのmessage identityを条件付きで関連付け、以後は同じmessageを更新する。Discord message create/update失敗はdelivery結果として別に観測し、Minecraft/AWS Operationの成功・失敗を変更しない。
 
+通常message createはOperation単位の決定的nonceとDiscordのnonce重複排除を使用し、create成功・message identity保存前failureを同じlogical messageへ回復できなければならない。create成否不明の安全な回復期間を越えた場合、duplicateの可能性がある新規messageを作らずdeliveryだけをfail closedする。retryはboundedとし、429の`retry_after`を尊重し、permanent認証・認可・not-found failureを無限retryしない。
+
 ### DIS-010 Token権限とcommand登録 `MUST / MVP`
 
 Interaction署名検証を行うCommand Lambdaは公開設定のDiscord Public Keyを使用し、Bot Tokenを読まない。Bot Tokenのsecret readはDiscord message delivery componentだけに限定する。`/mc` command schemaはGitを正本とし、Discord APIへのregistrationはCDK deployの暗黙side effectではなく、明示operator actionとして行う。

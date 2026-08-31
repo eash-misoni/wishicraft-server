@@ -967,6 +967,15 @@ discord:
   interaction_id: string
   requester_user_id: string
   progress_message_kind: BOT_CHANNEL_MESSAGE
+  delivery_id: string | null
+  delivery_status: PENDING | DELIVERED | RETRYABLE_FAILED | FAILED | null
+  delivery_attempt_id: string | null
+  delivery_attempt_count: integer | null
+  delivery_first_attempt_epoch: integer | null
+  delivery_next_attempt_epoch: integer | null
+  delivery_outcome_unknown: boolean | null
+  delivery_error_code: string | null
+  delivery_updated_epoch: integer | null
 ```
 
 Bot Token、Interaction Tokenそのものは保存しない。
@@ -974,6 +983,10 @@ Bot Token、Interaction Tokenそのものは保存しない。
 `message_id`は公開progress/result messageのOperation単位identityである。message create前後のretryやDiscord Interaction再送で別messageを無制限に作らず、未設定から一意なIDへの条件付き確定を行い、確定後は同じmessageを更新する。既存Operation schemaへdelivery属性を追加する必要がある場合は、Phase 7Dで後方互換、既存item、conditional updateを確認してからschema versionまたはoptional属性として定義する。
 
 Discord deliveryの成功・失敗はOperationのMinecraft/AWS terminal resultと別のprojection状態である。message create/update errorによってOperationの`SUCCEEDED`/`FAILED`を変更しない。公開messageにはinternal error detail、role判定情報、Interaction Token、Bot Tokenを含めない。
+
+Phase 7Dでは既存`discord` mapへ上記optional属性を後方互換に追加する。old Operationに属性がないことは未配送として扱うが、Discord由来OperationはAdmission transaction内でGuild/channel/Interaction identityをOperationと同時に保存する。`delivery_status`、`delivery_attempt_id`、attempt countを条件付き更新し、別workerのclaim、terminal delivery、他Operationのmessage IDを上書きしない。これらはdelivery projection metadataであり、Operation `status/result/error`の正本ではない。
+
+通常message createはOperation IDから導出した固定25文字`nonce`と`enforce_nonce=true`を必須とする。create成功後・`message_id`保存前failureは同じevent/nonceで回収する。Discordが保証する直近数分の重複排除を無期限保証と解釈せず、成否不明の回復は30秒以内だけ許可する。期限後、保存済みmessageの404、認証/認可失敗では自動的に別messageを作らない。
 
 ## 19.1 Phase 7 MVP Interaction contract
 

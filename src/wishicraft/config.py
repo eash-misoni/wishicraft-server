@@ -336,6 +336,12 @@ class SecretsExampleConfig:
             self.values, f"secure_parameters.rcon_password.{stage}_parameter_name"
         )
 
+    def discord_bot_token_parameter_name(self, stage: str) -> str:
+        """Return the configured Discord Bot Token SecureString name."""
+        return _require_string(
+            self.values, f"secure_parameters.discord_bot_token.{stage}_parameter_name"
+        )
+
 
 @dataclass(frozen=True)
 class Configuration:

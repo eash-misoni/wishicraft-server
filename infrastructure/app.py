@@ -29,7 +29,11 @@ def build_app(
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
     elif deployment == "control-plane":
         ControlPlaneStack(
-            app, stage=configuration.stage, project=configuration.project, phase=phase
+            app,
+            stage=configuration.stage,
+            project=configuration.project,
+            secrets=configuration.secrets,
+            phase=phase,
         )
     elif deployment == "phase1":
         MinecraftStack(
@@ -64,7 +68,11 @@ def main() -> None:
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
     elif deployment == "control-plane":
         ControlPlaneStack(
-            app, stage=configuration.stage, project=configuration.project, phase=phase
+            app,
+            stage=configuration.stage,
+            project=configuration.project,
+            secrets=configuration.secrets,
+            phase=phase,
         )
     elif deployment == "phase1":
         MinecraftStack(

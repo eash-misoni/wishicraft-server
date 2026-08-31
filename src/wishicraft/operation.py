@@ -45,6 +45,18 @@ class RequestSource(StrEnum):
 
 
 @dataclass(frozen=True)
+class DiscordOperationContext:
+    guild_id: str
+    channel_id: str
+    interaction_id: str
+
+    def __post_init__(self) -> None:
+        for value in (self.guild_id, self.channel_id, self.interaction_id):
+            if re.fullmatch(r"[0-9]{1,20}", value) is None:
+                raise ValueError("invalid Discord operation identity")
+
+
+@dataclass(frozen=True)
 class OperationRequest:
     operation_id: str
     idempotency_key: str
@@ -53,6 +65,7 @@ class OperationRequest:
     requested_by: RequestSource
     requested_at: datetime
     timeout_at: datetime | None
+    discord: DiscordOperationContext | None = None
 
     def __post_init__(self) -> None:
         _validate_identifier(self.operation_id, "operation")
@@ -286,9 +299,11 @@ class OperationAdmissionRepository:
                             "retryable": None,
                         },
                         "discord": {
-                            "guild_id": None,
-                            "interaction_id": None,
-                            "channel_id": None,
+                            "guild_id": request.discord.guild_id if request.discord else None,
+                            "interaction_id": (
+                                request.discord.interaction_id if request.discord else None
+                            ),
+                            "channel_id": request.discord.channel_id if request.discord else None,
                             "message_id": None,
                         },
                         "result": None,
@@ -372,6 +387,7 @@ class OperationAdmissionService:
         idempotency_key: str,
         requested_by: RequestSource,
         requested_at: datetime,
+        discord: DiscordOperationContext | None = None,
     ) -> AdmissionResult:
         timeout_seconds = self._timeouts.get(operation_type)
         if timeout_seconds is None or timeout_seconds <= 0:
@@ -393,6 +409,7 @@ class OperationAdmissionService:
             requested_by=requested_by,
             requested_at=requested_at,
             timeout_at=requested_at + timedelta(seconds=timeout_seconds),
+            discord=discord,
         )
         return self._repository.admit(request)
 

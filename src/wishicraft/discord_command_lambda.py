@@ -33,7 +33,7 @@ class PayloadStream(Protocol):
 
 
 class StatusAdmission(Protocol):
-    def admit(self, *, interaction_id: str) -> str: ...
+    def admit(self, *, interaction_id: str, guild_id: str, channel_id: str) -> str: ...
 
 
 class LambdaStatusAdmission:
@@ -41,7 +41,7 @@ class LambdaStatusAdmission:
         self._api = api
         self._function_name = function_name
 
-    def admit(self, *, interaction_id: str) -> str:
+    def admit(self, *, interaction_id: str, guild_id: str, channel_id: str) -> str:
         response = self._api.invoke(
             FunctionName=self._function_name,
             InvocationType="RequestResponse",
@@ -52,6 +52,11 @@ class LambdaStatusAdmission:
                     "operation_type": "STATUS",
                     "idempotency_key": f"discord:{interaction_id}",
                     "requested_by": "DISCORD",
+                    "discord": {
+                        "guild_id": guild_id,
+                        "channel_id": channel_id,
+                        "interaction_id": interaction_id,
+                    },
                 },
                 separators=(",", ":"),
             ).encode(),
@@ -81,7 +86,11 @@ def handler(event: object, context: object) -> dict[str, object]:
         return _http_response(200, pong_response())
     if interaction.kind is InteractionKind.STATUS:
         try:
-            _get_status_admission().admit(interaction_id=interaction.interaction_id)
+            _get_status_admission().admit(
+                interaction_id=interaction.interaction_id,
+                guild_id=config.guild_id,
+                channel_id=config.operation_channel_id,
+            )
         except Exception:  # noqa: BLE001 - AWS boundary returns only a fixed safe response.
             return _http_response(200, status_admission_failure_response())
         return _http_response(200, deferred_ephemeral_response())

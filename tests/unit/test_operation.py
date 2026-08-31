@@ -7,6 +7,7 @@ import pytest
 
 from wishicraft.operation import (
     AdmissionConflict,
+    DiscordOperationContext,
     LeaseLost,
     LeaseProof,
     LeaseRepository,
@@ -132,6 +133,31 @@ def test_status_admission_does_not_take_lock_or_current_operation() -> None:
         cast(dict[str, object], transaction_items(api)[1]["Put"])["Item"],
     )
     assert operation_item["lock_name"] == {"NULL": True}
+
+
+def test_discord_metadata_is_written_atomically_with_status_operation() -> None:
+    api = FakeDynamo()
+    base = request(OperationType.STATUS)
+    discord_request = OperationRequest(
+        **{
+            **base.__dict__,
+            "requested_by": RequestSource.DISCORD,
+            "discord": DiscordOperationContext(
+                guild_id="1251169327554625757",
+                channel_id="1531883129525244015",
+                interaction_id="1532000000000000001",
+            ),
+        }
+    )
+    repository(api).admit(discord_request)
+    operation_item = cast(dict[str, dict[str, object]], transaction_items(api)[1]["Put"])["Item"]
+    discord = cast(dict[str, dict[str, object]], operation_item["discord"])["M"]
+    assert discord == {
+        "guild_id": {"S": "1251169327554625757"},
+        "interaction_id": {"S": "1532000000000000001"},
+        "channel_id": {"S": "1531883129525244015"},
+        "message_id": {"NULL": True},
+    }
     assert operation_item["lease_id"] == {"NULL": True}
 
 

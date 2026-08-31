@@ -10,6 +10,18 @@
 
 ## 2. 採用済み決定
 
+### D-086 Discord通常messageはOperation nonceとdelivery CASで冪等化する
+
+- **状態:** Accepted（Phase 7D repository validated）
+- **日付:** 2026-08-31
+- Discord Interaction tokenは15分だけ有効で、最大30分のSTARTと整合せず、既存契約もtoken永続化を禁じる。このためdeferred original responseを長時間Operationの公開message identityにはせず、D-027どおりMessage componentがBot Tokenでoperation channelへ通常messageを作る。
+- Discord Create Messageの`nonce`（最大25文字）と`enforce_nonce=true`を使用する。Operation IDのSHA-256先頭128 bitをbase36固定25文字へ写像し、同一Operationのcreate retryでは同じnonceを使う。128 bit identityによりOperation間衝突を実用上無視できる水準へ抑える。create成功後・`message_id`条件付き保存前にLambdaが停止しても、同じStream event identityの再実行がDiscordの直近数分のnonce重複排除により既存message IDを回収する。
+- nonce重複排除は無期限ではないため、create成否不明の自動回復窓を30秒に限定する。PENDINGのまま、またはtimeout/network/5xx/malformed successで成否不明の状態が窓を越えた場合、新しいmessageを作らずdeliveryだけを`FAILED / DISCORD_CREATE_OUTCOME_AMBIGUOUS`へfail closedする。429はcreateされていない応答として`retry_after`を尊重する。
+- STATUS terminal transitionをOperations StreamからMessage componentへ渡す。retryable delivery metadataのconditional updateが次のStream eventとなり、SQS delay queueへenqueueするため、executorからのfire-and-forget gapを作らない。delivery attemptは最大3回、SQSとStreamはbatch size 1、暗号化DLQを持つ。429の`retry_after`がSQS per-message delay上限900秒を越える場合は早すぎるretryをせずdelivery failureへfail closedする。duplicate event、queue message、worker raceはdelivery status/attempt IDのCASで一つのlogical messageへ収束する。
+- optional `discord.delivery_*` metadataと`message_id`だけを更新し、Operation `status/result/error`、SystemState、Desired、Lock、Current Operationを変更しない。Discord上でmessageが削除された、または保存済みmessage IDへのupdateが404となった場合も、自動re-createせずdelivery failureとして隔離する。
+- Bot TokenはMessage Lambdaだけが固定SecureString一件をruntime取得する。Command LambdaとSTATUS executorへsecret readを付与しない。Message LambdaはOperations Get/Update、retry queue、logging以外のControl Plane/AWS lifecycle権限を持たない。
+- **関連:** D-027、D-045、D-081〜D-083、D-085。
+
 ### D-085 STATUS executorはOperations Stream駆動async Lambdaとする
 
 - **状態:** Accepted（Phase 7C repository validated）
@@ -851,7 +863,7 @@ Phase 0〜6は完了した。UID/GIDとownership compatibility、AL2023/AMI、Do
 
 Phase 7以降に残る既知事項は、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。write-side Host RuntimeとRCON/secret production contractはD-075〜D-078で実証済みである。
 
-dev用Discord Guild/channel/role/Application ID/Public Keyはrepository設定済みであり、Phase 7Aのblockerではない。実Discord設定とのread-only照合とdev用Discord Bot Token SecureStringの存在確認はPhase 7B/Gのproduction preflightで必要である。Tokenが不存在ならMessage transport/E2Eのblockerだが、Phase 7Aでは作成・取得・表示しない。
+dev用Discord Guild/channel/role/Application ID/Public Keyはrepository設定済みである。2026-08-31のPhase 7D read-only preflightでは正本account/regionを照合後、値を取得しないParameter metadata queryで`/wishicraft/dev/secret/discord-bot-token`が不存在と確認した。repository implementationのblockerではないが、Message component deploy/E2E前に別の明示承認付きoperator actionでSecureStringを作成し、metadataを再確認する必要がある。実Discord設定とのread-only照合もPhase 7G production preflightに残る。
 
 Phase別に決める事項:
 

@@ -425,6 +425,19 @@ START/STOPの公開表示は原則1 Operationにつき1つのBot channel message
 
 Bot Tokenを読むのはDiscord Message componentだけとし、Command LambdaはPublic Keyだけで署名検証する。`/mc` command schemaはGit管理し、Discord API registrationはCDK deployと分離した明示operator actionとする。
 
+Phase 7DのSTATUS deliveryは次の境界とする。
+
+```text
+STATUS terminal Operation + safe projection
+→ Operations Stream MODIFY
+→ Discord Message Lambda
+→ delivery metadata CAS / Operation由来nonce
+→ Discord channel Create Message (enforce_nonce=true)
+→ message_id CAS
+```
+
+Interaction original responseはtoken有効期間15分と長時間STARTの不一致、およびtoken非永続化契約のため公開message identityに使わない。create成否不明retryは同じnonceで短い回復窓だけ再試行し、窓を越えればduplicateを作らずdelivery failureへ隔離する。retryable failureはdelivery metadataのdurable transitionからSQS delayへ接続し、Command/STATUS executorからMessage Lambdaをfire-and-forgetしない。
+
 ## 9. 後期アーキテクチャ
 
 ### 複数ゲーム

@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜6とPhase 7A〜7Cは完了しています。Phase 7Cでは認証・認可済み`/mc status`だけを既存STATUS Admissionへ接続し、Operations Stream駆動のasync Lambdaがfresh Reconcile、既存unlocked STATUS terminalization、安全なprojection生成まで行います。START/STOP、Discord message delivery、AWS/Discord production適用、command registrationは未実施です。
+Phase 0〜6とPhase 7A〜7Dは完了しています。Phase 7CのSTATUS Admission、async fresh Reconcile、安全なprojectionに続き、Phase 7DではOperations Stream駆動のDiscord Message component、Operation nonce/message identity、bounded retry/DLQ、delivery failure分離をrepository-onlyで実装しました。START/STOPのDiscord接続、AWS/Discord production適用、command registrationは未実施です。
 
 devは次の3層architectureです。
 

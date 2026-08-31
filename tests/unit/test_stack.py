@@ -326,7 +326,6 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
         "ADMISSION_FUNCTION_NAME",
     }
     assert "BOT_TOKEN" not in str(environment)
-    assert "discord-bot-token" not in str(template.to_json())
 
     role_logical_id = properties["Role"]["Fn::GetAtt"][0]
     command_actions: set[str] = set()
@@ -422,8 +421,70 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
         for value in template.find_resources("AWS::DynamoDB::Table").values()
         if value["Properties"]["TableName"] == "wc-dev-operations"
     )
-    assert operations_table["StreamSpecification"] == {"StreamViewType": "NEW_IMAGE"}
-    template.resource_count_is("AWS::SQS::Queue", 1)
+    assert operations_table["StreamSpecification"] == {"StreamViewType": "NEW_AND_OLD_IMAGES"}
+
+    message_logical_id, message = next(
+        (logical_id, value)
+        for logical_id, value in functions.items()
+        if value["Properties"]["FunctionName"] == "wc-dev-discord-message"
+    )
+    assert message["Properties"]["Handler"] == "wishicraft.discord_message_lambda.handler"
+    message_environment = message["Properties"]["Environment"]["Variables"]
+    assert set(message_environment) == {
+        "OPERATIONS_TABLE",
+        "BOT_TOKEN_PARAMETER_NAME",
+        "DELIVERY_RETRY_QUEUE_URL",
+    }
+    assert message_environment["BOT_TOKEN_PARAMETER_NAME"] == (
+        "/wishicraft/dev/secret/discord-bot-token"
+    )
+    message_role = message["Properties"]["Role"]["Fn::GetAtt"][0]
+    message_statements = [
+        statement
+        for policy in template.find_resources("AWS::IAM::Policy").values()
+        if {"Ref": message_role} in policy["Properties"]["Roles"]
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+    ]
+    message_actions = {
+        action for statement in message_statements for action in _action_list(statement["Action"])
+    }
+    assert {"dynamodb:GetItem", "dynamodb:UpdateItem", "ssm:GetParameter"} <= message_actions
+    assert not any(
+        action.startswith(prefix)
+        for action in message_actions
+        for prefix in ("ec2:", "ssm:SendCommand", "route53:", "states:", "iam:")
+    )
+    token_statement = next(
+        statement
+        for statement in message_statements
+        if "ssm:GetParameter" in _action_list(statement["Action"])
+    )
+    assert token_statement["Resource"] == (
+        "arn:aws:ssm:ap-northeast-1:385526546525:parameter/wishicraft/dev/secret/discord-bot-token"
+    )
+    for role_id in (role_logical_id, status_role):
+        role_text = "".join(
+            str(policy)
+            for policy in template.find_resources("AWS::IAM::Policy").values()
+            if {"Ref": role_id} in policy["Properties"]["Roles"]
+        )
+        assert "ssm:GetParameter" not in role_text
+        assert "discord-bot-token" not in role_text
+    message_mappings = [
+        value
+        for value in mappings.values()
+        if message_logical_id in str(value["Properties"].get("FunctionName"))
+    ]
+    assert len(message_mappings) == 2
+    assert any(
+        "MODIFY" in str(mapping["Properties"].get("FilterCriteria")) for mapping in message_mappings
+    )
+    assert any(
+        "EventSourceArn" in mapping["Properties"]
+        and "SQS" not in str(mapping["Properties"].get("FilterCriteria", ""))
+        for mapping in message_mappings
+    )
+    template.resource_count_is("AWS::SQS::Queue", 3)
 
 
 def test_phase_one_minecraft_instance_role_has_only_required_ssm_permissions() -> None:

@@ -65,6 +65,10 @@ Phase 7 Command LambdaはDiscord Public Keyによる署名検証、stage固定Ap
 
 Phase 7CでCommand Lambdaへ追加するapplication権限は既存Admission Lambda一件の`lambda:InvokeFunction`だけである。STATUS executorはOperations table一件の`GetItem`/`UpdateItem`、既存Reconcile Lambda一件のinvoke、Operations Stream read、暗号化DLQ送信、loggingだけを持つ。ReconcileのEC2/SSM/Route 53 readと固定probe権限をexecutorへ複製せず、Bot Token、Parameter Store、START/STOP State Machine、Desired/Lock/SystemState mutation権限を付与しない。
 
+Phase 7D Message Lambdaだけが`/wishicraft/<stage>/secret/discord-bot-token`一件の`ssm:GetParameter`を持つ。加えてOperations table一件のGet/Update、暗号化retry queueのsend/consume、Operations Stream read、loggingだけを許可する。EC2、SSM Run Command、Route 53、Step Functions、SystemState/Lock/Desired mutationを許可しない。Command LambdaとSTATUS executorのroleにはBot Token parameter名もsecret readも追加しない。
+
+Discord APIの429は応答の`retry_after`をSQS delayへ反映し、900秒のper-message delay上限を越える値では早期retryせずdelivery failureへfail closedする。5xx/network/timeoutはbounded retry、401/403/404はpermanent delivery failureとする。raw response body、Authorization header、tokenをlog/Operationへ保存しない。delivery alarm/DLQはMinecraft healthと別に扱い、Control Plane terminal resultを変更しない。
+
 ### Minecraft EC2 role
 
 - SSM managed instance
