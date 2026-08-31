@@ -693,7 +693,7 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 
 ### Phase 7G — real Discord + AWS E2E / release gate
 
-- **状態:** In Progress（Phase 7G-1〜7G-2 completed、Phase 7G-3 real E2E前）
+- **状態:** In Progress（Phase 7G-1〜7G-2 completed、Phase 7G-M monitoring gate implementation中、Phase 7G-3 real E2E前）
 - Phase 7G-1では正本dev account/regionとPhase 6 safe stateをread-onlyで再確認し、固定Parameter `/wishicraft/dev/secret/discord-bot-token`をoperator非echo入力からAWS managed keyの`SecureString` Version 1として新規作成した。値・fragmentはrepository、shell引数、environment、transcript、logへ出さず、作成後はmetadataだけを確認した。
 - Bot Tokenをprocess memory内だけで使用したDiscord read-only照合ではApplication ID/Public Key、Guild、operation/admin channel、player/admin roleがdev設定と一致し、Botはoperation channelで`VIEW_CHANNEL`、`SEND_MESSAGES`、`EMBED_LINKS`を持つ。HTTP InteractionsとREST messageだけを使うためGateway接続・privileged intentsは不要である。
 - credential-backed template diffはTarget差分0、Control PlaneはPhase 7のHTTP API/Lambda/Operations Stream/SQS/DLQ/IAM追加と既存Lambda code更新で、DynamoDB/EC2/EBS/SG/DNS replacementまたは拡張を含まない。Phase 1には既知のhistorical UserData差分とreplacement可能性があるためFrozen/deploy禁止を維持する。Phase 7G-2ではControl Plane stackだけを明示deployし、Discord endpoint設定とcommand registrationはさらに別の明示operator mutationとして扱う。
@@ -702,6 +702,7 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 - Git正本の`/mc` schemaをbulk overwriteでなくGuild POST upsertによりdev Guildだけへ登録した。登録前Guild/global commandは0件、登録後は`mc`一件と`status/start/stop`だけで、global commandは0件だった。Discord仕様で`integration_types`/`contexts`はglobal scope専用のためGuild正本から除き、read-back exact matchを固定する。CDK deployの暗黙side effectにしない。
 - real Discordからstatus、start、stop、authorization、duplicate、delivery failure分離を確認する。
 - AWS Budgets、log retention、workflow/EC2/divergence/Lock/Lambda alarmと手動snapshot runbookをrelease gateとして確認する。
+- Phase 7G-3 Gate 0でBudgets/SNS/alarmsが0件と判明したためreal command前にfail closedした。D-088の5分read-only observer、native Step Functions/Lambda metrics、暗号化SNS Email primary path、monthly 15 USD BudgetをPhase 7G-Mで実装・deploy・通知smokeし、その完了後だけGate 0を再開する。
 - Phase 8 backup完成までは試験運用とする。
 
 ### 完了条件

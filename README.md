@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜6とPhase 7A〜7F、Phase 7G-1〜7G-2は完了しています。Phase 7G-2ではControl Planeだけをdevへdeployし、Discord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`をGit正本から登録しました。既存Operation replayやMinecraft state mutationはありません。real Discord status/start/stop E2Eとrelease gateはPhase 7G-3で実施します。
+Phase 0〜6とPhase 7A〜7F、Phase 7G-1〜7G-2は完了しています。Phase 7G-2ではControl Planeだけをdevへdeployし、Discord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`をGit正本から登録しました。Phase 7G-3 Gate 0でD-032 monitoring不足を検出したため、real command前にPhase 7G-Mのread-only observer、alarms、SNS Email、Budget gateを実施しています。
 
 devは次の3層architectureです。
 

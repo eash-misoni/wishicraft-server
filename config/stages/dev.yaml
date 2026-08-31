@@ -130,6 +130,8 @@ billing:
   dynamodb_mode: on_demand
 
 monitoring:
+  observer_schedule_minutes: 5
+  observation_freshness_warning_minutes: 10
   monthly_budget_usd: 15
   budget_threshold_percentages:
     - 50

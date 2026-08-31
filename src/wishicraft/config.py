@@ -215,6 +215,44 @@ class StageConfig:
     def idle_shutdown_minutes(self) -> int:
         return _require_positive_int(self.values, "runtime.idle_shutdown_minutes")
 
+    def monitoring_int(self, name: str) -> int:
+        if name not in {
+            "observer_schedule_minutes",
+            "observation_freshness_warning_minutes",
+            "monthly_budget_usd",
+            "ec2_running_warning_hours",
+            "desired_stopped_ec2_running_warning_minutes",
+            "desired_running_not_ready_warning_minutes",
+            "log_retention_days",
+        }:
+            raise ConfigValidationError([f"unsupported monitoring integer: {name}"])
+        return _require_positive_int(self.values, f"monitoring.{name}")
+
+    @property
+    def budget_threshold_percentages(self) -> tuple[int, ...]:
+        values = _lookup_path(self.values, "monitoring.budget_threshold_percentages")
+        if (
+            not isinstance(values, list)
+            or not values
+            or any(
+                not isinstance(value, int) or isinstance(value, bool) or value <= 0
+                for value in values
+            )
+        ):
+            raise ConfigValidationError(
+                ["monitoring.budget_threshold_percentages must be positive integers"]
+            )
+        return tuple(cast(int, value) for value in values)
+
+    @property
+    def notify_forecasted_budget(self) -> bool:
+        value = _lookup_path(self.values, "monitoring.notify_forecasted_100_percent")
+        if not isinstance(value, bool):
+            raise ConfigValidationError(
+                ["monitoring.notify_forecasted_100_percent must be boolean"]
+            )
+        return value
+
     @property
     def instance_type(self) -> str:
         """Return the configured EC2 instance type after phase validation."""
@@ -618,6 +656,13 @@ _POSITIVE_STAGE_INTS: Final = (
     "network.rcon_port",
     "storage.root.size_gib",
     "storage.data.size_gib",
+    "monitoring.observer_schedule_minutes",
+    "monitoring.observation_freshness_warning_minutes",
+    "monitoring.monthly_budget_usd",
+    "monitoring.ec2_running_warning_hours",
+    "monitoring.desired_stopped_ec2_running_warning_minutes",
+    "monitoring.desired_running_not_ready_warning_minutes",
+    "monitoring.log_retention_days",
     "minecraft_distribution.server_jar_size",
     "timeouts_seconds.ec2_running",
     "timeouts_seconds.ssm_online",
@@ -625,7 +670,6 @@ _POSITIVE_STAGE_INTS: Final = (
     "operation.lock_lease_seconds",
     "operation.lock_renew_interval_seconds",
     "runtime.idle_shutdown_minutes",
-    "monitoring.log_retention_days",
     "host_runtime.identity.uid",
     "host_runtime.identity.gid",
     "host_runtime.target_host.root_volume_size_gib",

@@ -496,6 +496,101 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
     template.resource_count_is("AWS::SQS::Queue", 3)
 
 
+def test_phase_seven_release_monitoring_is_complete_and_read_only() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=7, deployment="control-plane")
+    stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
+    template = Template.from_stack(stack)
+
+    functions = template.find_resources("AWS::Lambda::Function")
+    observer = next(
+        value
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-monitoring-observer"
+    )
+    assert observer["Properties"]["Handler"] == "wishicraft.monitoring_lambda.handler"
+    assert observer["Properties"]["Timeout"] == 30
+    assert "BOT_TOKEN" not in str(observer)
+    observer_role = observer["Properties"]["Role"]["Fn::GetAtt"][0]
+    observer_actions = {
+        action
+        for policy in template.find_resources("AWS::IAM::Policy").values()
+        if {"Ref": observer_role} in policy["Properties"]["Roles"]
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+        for action in _action_list(statement["Action"])
+    }
+    assert {
+        "dynamodb:GetItem",
+        "ec2:DescribeInstances",
+        "cloudwatch:PutMetricData",
+    } <= observer_actions
+    assert not any(
+        action.startswith(prefix)
+        for action in observer_actions
+        for prefix in (
+            "ec2:Start",
+            "ec2:Stop",
+            "ssm:",
+            "route53:",
+            "states:",
+            "sns:",
+            "dynamodb:Put",
+            "dynamodb:Update",
+            "dynamodb:Delete",
+            "ssm:GetParameter",
+        )
+    )
+
+    rules = template.find_resources("AWS::Events::Rule")
+    schedule = next(iter(rules.values()))["Properties"]
+    assert schedule["ScheduleExpression"] == "rate(5 minutes)"
+    assert schedule["State"] == "ENABLED"
+
+    alarms = template.find_resources("AWS::CloudWatch::Alarm")
+    names = {alarm["Properties"]["AlarmName"] for alarm in alarms.values()}
+    for fragment in (
+        "startworkflowfailurealarm",
+        "stopworkflowfailurealarm",
+        "targetrunningtoolongalarm",
+        "desiredstoppedec2runningalarm",
+        "desiredactualdivergencealarm",
+        "expiredoperationlockalarm",
+        "desiredrunningnotreadyalarm",
+        "monitoringobservationunknownalarm",
+        "errorsalarm",
+        "throttlesalarm",
+    ):
+        assert any(fragment in name for name in names)
+    assert len(alarms) == 24
+    assert all(alarm["Properties"]["AlarmActions"] for alarm in alarms.values())
+    custom = [
+        alarm["Properties"]
+        for alarm in alarms.values()
+        if alarm["Properties"].get("Namespace") == "Wishicraft/ControlPlane"
+    ]
+    assert len(custom) == 6
+    assert all(alarm["TreatMissingData"] == "breaching" for alarm in custom)
+
+    topics = template.find_resources("AWS::SNS::Topic")
+    assert len(topics) == 1
+    topic = next(iter(topics.values()))["Properties"]
+    assert topic["TopicName"] == "wc-dev-monitoring"
+    assert "KmsMasterKeyId" in topic
+    policies = template.find_resources("AWS::SNS::TopicPolicy")
+    policy_text = str(policies)
+    assert "cloudwatch.amazonaws.com" in policy_text
+    assert "budgets.amazonaws.com" in policy_text
+
+    budgets = template.find_resources("AWS::Budgets::Budget")
+    assert len(budgets) == 1
+    budget = next(iter(budgets.values()))["Properties"]
+    assert budget["Budget"]["BudgetLimit"] == {"Amount": 15, "Unit": "USD"}
+    assert len(budget["NotificationsWithSubscribers"]) == 4
+    assert all(
+        item["Subscribers"][0]["SubscriptionType"] == "SNS"
+        for item in budget["NotificationsWithSubscribers"]
+    )
+
+
 def test_phase_one_minecraft_instance_role_has_only_required_ssm_permissions() -> None:
     app = build_app(REPOSITORY_ROOT, "dev", phase=1)
     stack = cast(Stack, app.node.find_child("MinecraftStack-dev"))

@@ -257,6 +257,10 @@ Phase 7B ingressはfull Interaction payloadやmember role一覧をlogへ出さ�
 
 初期は管理者向けDiscord channelまたはSNS emailを使用する。通知経路自体の失敗を考慮し、CloudWatch/Step Functions consoleでも追跡できるようにする。
 
+Phase 7 release gateのprimary pathは`CloudWatch Alarm / AWS Budgets -> encrypted SNS Topic -> confirmed Email subscription`とする。Discord/Message Lambda障害を同じDiscord経路で通知する循環依存を避ける。Email addressはGit/CDK contextへ保存せず、Topic deploy後にoperatorがlocal terminalで非echo入力し、`sns subscribe --protocol email`を明示実行する。confirmation mail承認後、`list-subscriptions-by-topic`で`PendingConfirmation`でないことを確認する。
+
+monitoring observerは5分ごとにSystemState、global Lock、Target EC2をread-only観測しcustom metricsを発行するだけで、Reconcile、state repair、自動STOP、Discord notificationを実行しない。alarm notification smokeはsecretを含まない明示test本文のSNS publishで行い、実Control Plane failureを注入しない。
+
 ## 8. コスト保護
 
 ### 初期閾値

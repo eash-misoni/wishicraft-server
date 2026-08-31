@@ -73,7 +73,8 @@ Later: Secrets Manager
 CloudWatch / Budgets
   ├─ logs
   ├─ alarms
-  └─ cost alerts
+  ├─ scheduled read-only state observer
+  └─ encrypted SNS Email / cost alerts
 ```
 
 ## 3. AWSサービスの責務

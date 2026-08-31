@@ -10,6 +10,17 @@
 
 ## 2. 採用済み決定
 
+### D-088 Phase 7 release monitoringはread-only observerと独立SNS通知で構成する
+
+- **状態:** Accepted（Phase 7G-M repository validated）
+- **日付:** 2026-09-01
+- D-032のstate-based監視は5分周期のsmall LambdaがSystemState、global Lock、Target EC2をread-only取得し、`Wishicraft/ControlPlane` custom metricだけを発行する。Reconcile、Desired/Lock/Operation write、START/STOP、EC2 mutation、Discord、secret access、自動remediationを行わない。
+- Target running 8時間、Desired STOPPEDかつrunning 15分、Desired RUNNING未READY 20分をstage設定の正本とする。Desired/Actual divergenceは3連続period、RUNNING時のObserved freshness/UNKNOWNは10分を独立監視する。stable STOPPEDはdirect EC2 observationで評価できるため、不要なReconcile writeを監視pathへ導入しない。expired Lockは900秒leaseの`lease_expires_at`を現在UTC epochと比較し、存在だけではalarmにしない。
+- START/STOP failure/timeout/abortはAWS Step Functions native metrics、重要LambdaはErrors/Throttles native metricsを使用する。custom state metricsはobserver silenceをproblemとしてmissing=breaching、native event metricsはeventなしをnormalとしてmissing=notBreachingとする。
+- primary notificationはcustomer-managed KMS keyで暗号化したstage SNS TopicとEmail subscriptionとする。Email実値・subscriptionはCDK外の明示operator actionに分離する。AWS Budgetはdev account monthly 15 USD、actual 50/80/100%、forecasted 100%を同Topicへ通知する。Discord admin channelは循環依存を避けprimary通知にしない。
+- monitoringはobserverでありControl Plane truthを変更しない。alarm/SNS/Budget failureはMinecraft Operation resultへ逆流せず、Phase 8のauto-remediationとは別Decision境界を維持する。
+- **関連:** D-032、D-048、D-074、D-082。
+
 ### D-087 START progressはOperation progress revisionで単調配信する
 
 - **状態:** Accepted（Phase 7E repository validated）

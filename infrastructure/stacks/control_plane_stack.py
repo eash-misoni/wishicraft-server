@@ -7,11 +7,18 @@ from pathlib import Path
 from aws_cdk import AssetHashType, CfnOutput, Duration, Environment, RemovalPolicy, Stack, Tags
 from aws_cdk import aws_apigatewayv2 as apigwv2
 from aws_cdk import aws_apigatewayv2_integrations as apigwv2_integrations
+from aws_cdk import aws_budgets as budgets
+from aws_cdk import aws_cloudwatch as cloudwatch
+from aws_cdk import aws_cloudwatch_actions as cloudwatch_actions
 from aws_cdk import aws_dynamodb as dynamodb
+from aws_cdk import aws_events as events
+from aws_cdk import aws_events_targets as events_targets
 from aws_cdk import aws_iam as iam
+from aws_cdk import aws_kms as kms
 from aws_cdk import aws_lambda as lambda_
 from aws_cdk import aws_lambda_event_sources as lambda_event_sources
 from aws_cdk import aws_logs as logs
+from aws_cdk import aws_sns as sns
 from aws_cdk import aws_sqs as sqs
 from aws_cdk import aws_stepfunctions as sfn
 from constructs import Construct
@@ -481,7 +488,7 @@ class ControlPlaneStack(Stack):
             )
         )
         if phase >= 7:
-            _add_discord_ingress(
+            discord_functions = _add_discord_ingress(
                 self,
                 project=project,
                 stage=stage,
@@ -491,6 +498,22 @@ class ControlPlaneStack(Stack):
                 locks_table=locks_table,
                 system_state_table=table,
                 bot_token_parameter_name=secrets.discord_bot_token_parameter_name(stage.stage),
+            )
+            _add_release_monitoring(
+                self,
+                project=project,
+                stage=stage,
+                system_state_table=table,
+                locks_table=locks_table,
+                start_workflow=start_workflow,
+                stop_workflow=stop_workflow,
+                monitored_functions=(
+                    function,
+                    start_task,
+                    stop_task,
+                    admission,
+                    *discord_functions,
+                ),
             )
 
 
@@ -505,7 +528,7 @@ def _add_discord_ingress(
     locks_table: dynamodb.Table,
     system_state_table: dynamodb.Table,
     bot_token_parameter_name: str,
-) -> None:
+) -> tuple[lambda_.Function, lambda_.Function, lambda_.Function]:
     repository_root = Path(__file__).resolve().parents[2]
     log_group = logs.LogGroup(
         stack,
@@ -718,6 +741,229 @@ def _add_discord_ingress(
         "DiscordInteractionsEndpoint",
         value=f"{api.api_endpoint}/discord/interactions",
     )
+    return function, status_executor, message
+
+
+def _add_release_monitoring(
+    stack: Stack,
+    *,
+    project: ProjectConfig,
+    stage: StageConfig,
+    system_state_table: dynamodb.Table,
+    locks_table: dynamodb.Table,
+    start_workflow: sfn.CfnStateMachine,
+    stop_workflow: sfn.CfnStateMachine,
+    monitored_functions: tuple[lambda_.Function, ...],
+) -> None:
+    namespace = "Wishicraft/ControlPlane"
+    dimensions = {"Stage": stage.stage, "SystemId": project.system_id}
+    key = kms.Key(
+        stack,
+        "MonitoringNotificationKey",
+        alias=f"alias/{resource_name(project.resource_prefix, stage.stage, 'monitoring')}",
+        enable_key_rotation=True,
+        removal_policy=RemovalPolicy.RETAIN,
+        description="Encrypt Wishicraft monitoring notifications",
+    )
+    topic = sns.Topic(
+        stack,
+        "MonitoringTopic",
+        topic_name=resource_name(project.resource_prefix, stage.stage, "monitoring"),
+        master_key=key,
+    )
+    for service in ("cloudwatch.amazonaws.com", "budgets.amazonaws.com"):
+        principal = iam.ServicePrincipal(service)
+        topic.add_to_resource_policy(
+            iam.PolicyStatement(
+                principals=[principal], actions=["sns:Publish"], resources=[topic.topic_arn]
+            )
+        )
+        key.grant_encrypt_decrypt(principal)
+
+    observer_log = logs.LogGroup(
+        stack,
+        "MonitoringObserverLogGroup",
+        log_group_name=(
+            f"/aws/lambda/"
+            f"{resource_name(project.resource_prefix, stage.stage, 'monitoring-observer')}"
+        ),
+        retention=logs.RetentionDays.TWO_WEEKS,
+        removal_policy=RemovalPolicy.DESTROY,
+    )
+    observer = lambda_.Function(
+        stack,
+        "MonitoringObserverFunction",
+        function_name=resource_name(project.resource_prefix, stage.stage, "monitoring-observer"),
+        runtime=lambda_.Runtime.PYTHON_3_12,
+        architecture=lambda_.Architecture.X86_64,
+        code=lambda_.Code.from_asset(str(Path(__file__).resolve().parents[2] / "src")),
+        handler="wishicraft.monitoring_lambda.handler",
+        timeout=Duration.seconds(30),
+        memory_size=256,
+        log_group=observer_log,
+        environment={
+            "SYSTEM_STATE_TABLE": system_state_table.table_name,
+            "LOCKS_TABLE": locks_table.table_name,
+            "SYSTEM_ID": project.system_id,
+            "GLOBAL_LOCK_NAME": stage.global_lock_name,
+            "STAGE": stage.stage,
+            "METRIC_NAMESPACE": namespace,
+            "EC2_RUNNING_WARNING_SECONDS": str(
+                stage.monitoring_int("ec2_running_warning_hours") * 3600
+            ),
+            "DESIRED_STOPPED_RUNNING_WARNING_SECONDS": str(
+                stage.monitoring_int("desired_stopped_ec2_running_warning_minutes") * 60
+            ),
+            "DESIRED_RUNNING_NOT_READY_WARNING_SECONDS": str(
+                stage.monitoring_int("desired_running_not_ready_warning_minutes") * 60
+            ),
+            "OBSERVATION_FRESHNESS_SECONDS": str(
+                stage.monitoring_int("observation_freshness_warning_minutes") * 60
+            ),
+        },
+        description="Phase 7 read-only monitoring observer",
+    )
+    observer.add_to_role_policy(
+        iam.PolicyStatement(
+            actions=["dynamodb:GetItem"],
+            resources=[system_state_table.table_arn, locks_table.table_arn],
+        )
+    )
+    observer.add_to_role_policy(
+        iam.PolicyStatement(
+            actions=["ec2:DescribeInstances", "cloudwatch:PutMetricData"], resources=["*"]
+        )
+    )
+    events.Rule(
+        stack,
+        "MonitoringObserverSchedule",
+        rule_name=resource_name(project.resource_prefix, stage.stage, "monitoring-observer"),
+        schedule=events.Schedule.rate(
+            Duration.minutes(stage.monitoring_int("observer_schedule_minutes"))
+        ),
+        targets=[events_targets.LambdaFunction(observer)],
+    )
+
+    alarm_action = cloudwatch_actions.SnsAction(topic)
+
+    def add_alarm(
+        construct_id: str,
+        metric: cloudwatch.IMetric,
+        *,
+        evaluation_periods: int = 1,
+        datapoints_to_alarm: int | None = None,
+        missing: cloudwatch.TreatMissingData = cloudwatch.TreatMissingData.NOT_BREACHING,
+    ) -> None:
+        alarm = cloudwatch.Alarm(
+            stack,
+            construct_id,
+            alarm_name=resource_name(project.resource_prefix, stage.stage, construct_id.lower()),
+            metric=metric,
+            threshold=1,
+            evaluation_periods=evaluation_periods,
+            datapoints_to_alarm=datapoints_to_alarm,
+            comparison_operator=cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+            treat_missing_data=missing,
+        )
+        alarm.add_alarm_action(alarm_action)
+
+    for logical, machine in (("Start", start_workflow), ("Stop", stop_workflow)):
+        machine_name = resource_name(project.resource_prefix, stage.stage, logical.lower())
+        metrics = {
+            name: cloudwatch.Metric(
+                namespace="AWS/States",
+                metric_name=name,
+                dimensions_map={"StateMachineArn": machine.attr_arn},
+                statistic="Sum",
+                period=Duration.minutes(5),
+            )
+            for name in ("ExecutionsFailed", "ExecutionsTimedOut", "ExecutionsAborted")
+        }
+        add_alarm(
+            f"{logical}WorkflowFailureAlarm",
+            cloudwatch.MathExpression(
+                expression="failed + timedout + aborted",
+                using_metrics={
+                    "failed": metrics["ExecutionsFailed"],
+                    "timedout": metrics["ExecutionsTimedOut"],
+                    "aborted": metrics["ExecutionsAborted"],
+                },
+                period=Duration.minutes(5),
+                label=f"{machine_name} terminal failures",
+            ),
+        )
+
+    for metric_name, alarm_id, evaluations in (
+        ("TargetRunningTooLong", "TargetRunningTooLongAlarm", 1),
+        ("DesiredStoppedEc2Running", "DesiredStoppedEc2RunningAlarm", 1),
+        ("DesiredActualDivergence", "DesiredActualDivergenceAlarm", 3),
+        ("ExpiredOperationLock", "ExpiredOperationLockAlarm", 1),
+        ("DesiredRunningNotReady", "DesiredRunningNotReadyAlarm", 1),
+        ("MonitoringObservationUnknown", "MonitoringObservationUnknownAlarm", 2),
+    ):
+        add_alarm(
+            alarm_id,
+            cloudwatch.Metric(
+                namespace=namespace,
+                metric_name=metric_name,
+                dimensions_map=dimensions,
+                statistic="Maximum",
+                period=Duration.minutes(stage.monitoring_int("observer_schedule_minutes")),
+            ),
+            evaluation_periods=evaluations,
+            datapoints_to_alarm=evaluations,
+            missing=cloudwatch.TreatMissingData.BREACHING,
+        )
+
+    for function in (*monitored_functions, observer):
+        for metric_name, metric in (
+            ("Errors", function.metric_errors(period=Duration.minutes(5), statistic="Sum")),
+            ("Throttles", function.metric_throttles(period=Duration.minutes(5), statistic="Sum")),
+        ):
+            add_alarm(f"{function.node.id}{metric_name}Alarm", metric)
+
+    subscribers = [
+        budgets.CfnBudget.SubscriberProperty(address=topic.topic_arn, subscription_type="SNS")
+    ]
+    notifications = [
+        budgets.CfnBudget.NotificationWithSubscribersProperty(
+            notification=budgets.CfnBudget.NotificationProperty(
+                comparison_operator="GREATER_THAN",
+                notification_type="ACTUAL",
+                threshold=threshold,
+                threshold_type="PERCENTAGE",
+            ),
+            subscribers=subscribers,
+        )
+        for threshold in stage.budget_threshold_percentages
+    ]
+    if stage.notify_forecasted_budget:
+        notifications.append(
+            budgets.CfnBudget.NotificationWithSubscribersProperty(
+                notification=budgets.CfnBudget.NotificationProperty(
+                    comparison_operator="GREATER_THAN",
+                    notification_type="FORECASTED",
+                    threshold=100,
+                    threshold_type="PERCENTAGE",
+                ),
+                subscribers=subscribers,
+            )
+        )
+    budget = budgets.CfnBudget(
+        stack,
+        "MonthlyCostBudget",
+        budget=budgets.CfnBudget.BudgetDataProperty(
+            budget_name=resource_name(project.resource_prefix, stage.stage, "monthly-cost"),
+            budget_type="COST",
+            time_unit="MONTHLY",
+            budget_limit=budgets.CfnBudget.SpendProperty(
+                amount=stage.monitoring_int("monthly_budget_usd"), unit="USD"
+            ),
+        ),
+        notifications_with_subscribers=notifications,
+    )
+    budget.node.add_dependency(topic)
+    CfnOutput(stack, "MonitoringTopicArn", value=topic.topic_arn)
 
 
 def _table(

@@ -1092,6 +1092,8 @@ Lambda inputは次の固定versioned objectだけを受理する。instance ID�
 
 SystemState tableは`PK=system_id`のcurrent item一件を保持する。itemは`schema_version`、`environment`、`game_id`、`desired_state`、`target_instance_id`、normalized `observation`、`discrepancies`、`health`、`observation_errors`、fixed-width UTC `observed_at`を持つ。raw AWS response、raw mc-monitor JSON、stderr、MOTD/player content、secret/credentialを保存しない。
 
+Phase 7 release monitoring observerはSystemStateとfixed global Lockをconsistent readし、Target EC2を`DescribeInstances`で直接観測する。observerはstate itemを更新せず、`TargetRunningTooLong`、`DesiredStoppedEc2Running`、`DesiredActualDivergence`、`ExpiredOperationLock`、`DesiredRunningNotReady`、`MonitoringObservationUnknown`を0/1で毎period発行する。STOPPEDではdirect EC2 stoppedをcurrent actual evidenceとして古いObservedだけをdivergenceにせず、RUNNINGではfresh READY observationを要求し、stale/UNKNOWNを正常へ丸めない。
+
 観測更新はUpdateItemを使い、`attribute_not_exists(observed_at) OR observed_at < :observed_at`を必須とする。timestampは`YYYY-MM-DDTHH:MM:SS.ffffffZ`へ正規化し、lexicographic orderとUTC chronological orderを一致させる。同一timestampも上書きせずConditionalCheckFailedで拒否し、異なる結果が同じ観測順序を共有する曖昧さを許さない。DynamoDB write failureは呼出元へ伝播する。
 
 Route 53 observerはcanonical Hosted Zone/FQDNに対するread-only ListResourceRecordSetsだけを使う。record absent、単一A record、unexpected valuesを分離し、duplicate、Alias/unsupported shape、malformed response、API failureはunknownへfail-closedする。
