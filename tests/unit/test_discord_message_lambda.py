@@ -230,6 +230,57 @@ def test_old_start_progress_event_carries_its_revision_for_stale_rejection() -> 
     )
 
 
+def test_stop_progress_is_delivered_but_metadata_only_modify_is_noop() -> None:
+    base = {
+        "operation_id": {"S": "op-stop-001"},
+        "operation_type": {"S": "STOP"},
+        "status": {"S": "RUNNING"},
+        "current_step": {"S": "HOST_RUNTIME_STOPPING"},
+        "progress_revision": {"N": "2"},
+        "requested_by": {"M": {"source": {"S": "DISCORD"}}},
+        "discord": {"M": {"channel_id": {"S": "1531883129525244015"}}},
+    }
+    progress = {
+        "Records": [
+            {
+                "eventSource": "aws:dynamodb",
+                "eventName": "MODIFY",
+                "eventID": "stop-progress-2",
+                "dynamodb": {
+                    "OldImage": {**base, "progress_revision": {"N": "1"}},
+                    "NewImage": base,
+                },
+            }
+        ]
+    }
+    assert discord_message_lambda._delivery_events(progress) == (
+        ("op-stop-001", 2, "ddb:stop-progress-2"),
+    )
+
+    metadata = {
+        "Records": [
+            {
+                "eventSource": "aws:dynamodb",
+                "eventName": "MODIFY",
+                "eventID": "stop-metadata",
+                "dynamodb": {
+                    "OldImage": base,
+                    "NewImage": {
+                        **base,
+                        "discord": {
+                            "M": {
+                                "channel_id": {"S": "1531883129525244015"},
+                                "delivery_status": {"S": "PENDING"},
+                            }
+                        },
+                    },
+                },
+            }
+        ]
+    }
+    assert discord_message_lambda._delivery_events(metadata) == ()
+
+
 @pytest.mark.parametrize(
     "event",
     [

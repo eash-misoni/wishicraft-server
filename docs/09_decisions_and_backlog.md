@@ -871,7 +871,7 @@ Phase 0〜6は完了した。UID/GIDとownership compatibility、AL2023/AMI、Do
    - B: Step FunctionsのCatch/Timeoutだけでterminal化する。通常failureは単純だが、execution開始前失敗や外部停止でstale stateが残り得る。
    - C: 定期sweeperを同時導入する。最終回復は早いが、Phase 4 scopeとAWS resourceを増やし、periodic reconcileの後続Phase境界を崩す。
 
-Phase 7以降に残る既知事項は、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。write-side Host RuntimeとRCON/secret production contractはD-075〜D-078で実証済みである。
+Phase 7F repository completion時点で、Discord `/mc status`、`/mc start`、`/mc stop`はすべて既存Control Plane Admissionへ接続済みである。STOPはD-087のprogress revisionとD-086のdelivery protocolをSTARTと共用し、Phase 6のsave/graceful stop/EC2/DNS/Reconcile契約をDiscord層へ複製しないため、新しいDecisionは追加しない。Phase 7以降に残る既知事項は、Phase 1/Data EBS ownership retirement debt（別途承認後）、backup（Phase 8）、Package/Mod/Plugin（Phase 9/12）、chat integration（Phase 15）である。write-side Host RuntimeとRCON/secret production contractはD-075〜D-078で実証済みである。
 
 dev用Discord Guild/channel/role/Application ID/Public Keyはrepository設定済みである。2026-08-31のPhase 7D read-only preflightでは正本account/regionを照合後、値を取得しないParameter metadata queryで`/wishicraft/dev/secret/discord-bot-token`が不存在と確認した。repository implementationのblockerではないが、Message component deploy/E2E前に別の明示承認付きoperator actionでSecureStringを作成し、metadataを再確認する必要がある。実Discord設定とのread-only照合もPhase 7G production preflightに残る。
 

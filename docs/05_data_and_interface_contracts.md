@@ -990,7 +990,7 @@ Phase 7Dでは既存`discord` mapへ上記optional属性を後方互換に追加
 
 通常message createはOperation IDから導出した固定25文字`nonce`と`enforce_nonce=true`を必須とする。create成功後・`message_id`保存前failureは同じevent/nonceで回収する。Discordが保証する直近数分の重複排除を無期限保証と解釈せず、成否不明の回復は30秒以内だけ許可する。期限後、保存済みmessageの404、認証/認可失敗では自動的に別messageを作らない。
 
-Phase 7E以降のOperationは`progress_revision: integer`を持つ。Admission時は0で、公開対象の`current_step`またはterminal statusを更新する同一conditional write/transactionで1増やす。Stream deliveryはeventのrevisionをsource identityとし、current Operationが異なるrevisionならstale eventをno-opにする。Discord metadata CASは`delivery_source_revision`をclaimし、成功時だけ`delivery_delivered_revision`を進める。metadata-only updateは`progress_revision`を変更しないため公開deliveryを再起動しない。既存属性のないold itemは更新時に0から開始できる後方互換な`if_not_exists`を使用する。
+Phase 7E以降のSTART/STOP Operationは`progress_revision: integer`を持つ。Admission時は0で、公開対象の`current_step`またはterminal statusを更新する同一conditional write/transactionで1増やす。Stream deliveryはeventのrevisionをsource identityとし、current Operationが異なるrevisionならstale eventをno-opにする。Discord metadata CASは`delivery_source_revision`をclaimし、成功時だけ`delivery_delivered_revision`を進める。metadata-only updateは`progress_revision`を変更しないため公開deliveryを再起動しない。既存属性のないold itemは更新時に0から開始できる後方互換な`if_not_exists`を使用する。
 
 ## 19.1 Phase 7 MVP Interaction contract
 
@@ -999,7 +999,8 @@ Phase 7E以降のOperationは`progress_revision: integer`を持つ。Admission�
 - PINGはPONGを返す。APPLICATION_COMMANDはinteraction/application/guild/channel/command/member rolesをstrictに検証し、unsupported interaction、unknown/duplicate option、欠落member/rolesを拒否する。error responseはinternal detailを含めない。
 - Phase 7Bの認証・認可済みcommand responseはephemeral type 4で、Control Plane Operationを受付けていない事実を明示する。このsliceはAdmission、Reconcile、State Machine、DynamoDB、EC2、SSM、Route 53を呼ばない。Phase 7C以降でAdmissionへ接続した時点からdeferred responseを使用する。
 - Phase 7CではSTATUSだけを既存Admission Lambdaへ`RequestResponse`で渡し、idempotency keyを`discord:<interaction_id>`とする。受付成功後はephemeral Deferred Channel Message responseを返す。START/STOPはPhase 7Bの未受付responseを維持する。
-- Phase 7EではSTARTも同じAdmission Lambdaへ同じkey contractで渡す。START Admission成功後はtype 4 ephemeral ACKを返し、progress/finalはInteraction tokenではなくOperation単位の通常Bot messageへ投影する。STOPはPhase 7Fまで未接続とする。
+- Phase 7E/7FではSTART/STOPも同じAdmission Lambdaへ同じkey contractで渡す。Admission成功後はtype 4 ephemeral ACKを返し、progress/finalはInteraction tokenではなくOperation単位の通常Bot messageへ投影する。
+- STOPの公開stepは`ADMITTED`、`DESIRED_STOPPED`、`HOST_RUNTIME_STOPPING`、`EC2_STOPPING`、`ENDPOINT_CLEANUP`とterminal statusから安全にrenderする。これは表示projectionであり、save、runtime stop、EC2 stop、DNS、final Reconcileのsuccess判定をDiscordへ移さない。
 - STATUS admission transactionのOperations INSERTを`NEW_IMAGE` Streamでasync executorへ渡す。filterはINSERTかつ`operation_type=STATUS`、batch size 1とし、executor input identityは保存済み`operation_id`だけとする。同じInteraction retryは既存Operationを返すため新規stream recordを作らない。
 - executorはOperationがSTATUS、lock NULL、PENDING/RUNNINGであることをconsistent readし、既存Reconcile Lambdaを呼ぶ。fresh SystemStateからprojectionを生成し、既存`complete_unlocked`のSTATUS/lock NULL/non-terminal条件で`result`とterminal statusを同時更新する。terminal retryはno-opとする。
 - Reconcile invocation/schema failureはSTATUSを`FAILED / STATUS_RECONCILE_FAILED`へterminalizeし、resultはgeneric unknown projectionとする。raw detailを保存しない。executor自身またはterminal write failureはStream retry対象とし、bounded retry後はDLQへ送る。

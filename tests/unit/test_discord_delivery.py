@@ -18,6 +18,7 @@ from wishicraft.discord_delivery import (
     DiscordFailure,
     DiscordHttpClient,
     operation_nonce,
+    render_operation_projection,
     render_status_projection,
 )
 
@@ -375,6 +376,90 @@ def test_newer_revision_can_recover_after_older_delivery_failed() -> None:
     )
     assert store.record.delivery_status is DeliveryStatus.DELIVERED
     assert store.record.delivered_revision == 2
+
+
+def test_stop_progress_updates_one_message_monotonically() -> None:
+    store, messages, queue = Store(), Messages(), Queue()
+    store.record = replace(
+        store.record,
+        operation_id="op-stop-001",
+        operation_type="STOP",
+        operation_status="PENDING",
+        current_step="ADMITTED",
+        source_revision=0,
+        projection={},
+    )
+    delivery = service(store, messages, queue)
+    delivery.deliver(operation_id="op-stop-001", source_revision=0, attempt_id="ddb:insert")
+    message_id = store.record.message_id
+    assert message_id is not None
+
+    for revision, step in enumerate(
+        ("DESIRED_STOPPED", "HOST_RUNTIME_STOPPING", "EC2_STOPPING", "ENDPOINT_CLEANUP"),
+        start=1,
+    ):
+        store.record = replace(
+            store.record,
+            operation_status="RUNNING",
+            current_step=step,
+            source_revision=revision,
+        )
+        delivery.deliver(
+            operation_id="op-stop-001",
+            source_revision=revision,
+            attempt_id=f"ddb:step-{revision}",
+        )
+    store.record = replace(store.record, operation_status="SUCCEEDED", source_revision=5)
+    delivery.deliver(operation_id="op-stop-001", source_revision=5, attempt_id="ddb:terminal")
+
+    assert len(messages.by_nonce) == 1
+    assert len(messages.calls) == 6
+    assert all(call.get("message_id") == message_id for call in messages.calls[1:])
+    assert "server stopped" in messages.calls[-1]["content"]
+    delivery.deliver(operation_id="op-stop-001", source_revision=3, attempt_id="ddb:stale")
+    assert len(messages.calls) == 6
+
+
+def test_newer_stop_revision_can_recover_after_older_delivery_failed() -> None:
+    store, messages, queue = Store(), Messages(), Queue()
+    store.record = replace(
+        store.record,
+        operation_id="op-stop-002",
+        operation_type="STOP",
+        operation_status="RUNNING",
+        current_step="HOST_RUNTIME_STOPPING",
+        source_revision=2,
+        projection={},
+        delivery_source_revision=2,
+        delivery_status=DeliveryStatus.FAILED,
+    )
+    store.record = replace(store.record, source_revision=3, current_step="EC2_STOPPING")
+    service(store, messages, queue).deliver(
+        operation_id="op-stop-002", source_revision=3, attempt_id="ddb:newer"
+    )
+    assert store.record.delivery_status is DeliveryStatus.DELIVERED
+    assert store.record.delivered_revision == 3
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [
+        ("SUCCEEDED", "server stopped"),
+        ("FAILED", "failed safely"),
+    ],
+)
+def test_stop_terminal_projection_uses_operation_result_only(status: str, expected: str) -> None:
+    record = replace(
+        Store().record,
+        operation_type="STOP",
+        operation_status=status,
+        current_step="ENDPOINT_CLEANUP",
+        projection={"raw_ec2_state": "running", "raw_dns": "internal"},
+    )
+    rendered = render_operation_projection(record)
+    assert expected in rendered
+    assert "raw_ec2_state" not in rendered
+    assert "raw_dns" not in rendered
 
 
 class Response:

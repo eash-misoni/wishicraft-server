@@ -45,7 +45,7 @@ class DynamoDeliveryStore:
         if not isinstance(item, dict):
             raise ValueError("Discord delivery Operation does not exist")
         if _string(item, "operation_type") != "STATUS":
-            if _string(item, "operation_type") != "START":
+            if _string(item, "operation_type") not in {"START", "STOP"}:
                 raise ValueError("unsupported Discord delivery Operation")
         operation_status = _string(item, "status")
         operation_type = _string(item, "operation_type")
@@ -356,11 +356,11 @@ def _delivery_events(event: object) -> tuple[tuple[str, int, str], ...]:
             operation_id = _string(image, "operation_id")
             operation_type = _string(image, "operation_type")
             operation_status = _string(image, "status")
-            if operation_type not in {"STATUS", "START"}:
+            if operation_type not in {"STATUS", "START", "STOP"}:
                 continue
             if operation_type == "STATUS" and operation_status not in {"SUCCEEDED", "FAILED"}:
                 continue
-            if operation_type == "START" and operation_status not in {
+            if operation_type in {"START", "STOP"} and operation_status not in {
                 "PENDING",
                 "RUNNING",
                 "SUCCEEDED",

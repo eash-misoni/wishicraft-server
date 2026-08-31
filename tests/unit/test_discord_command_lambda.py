@@ -131,13 +131,13 @@ def test_start_uses_shared_admission_and_immediate_ephemeral_ack(signing_key: Si
     assert admission.calls == [("START", "1532000000000000001")]
 
 
-def test_stop_remains_unconnected(signing_key: SigningKey) -> None:
+def test_stop_uses_shared_admission_and_immediate_ephemeral_ack(signing_key: SigningKey) -> None:
     response = discord_command_lambda.handler(event(payload(subcommand="stop"), signing_key), None)
     assert response["statusCode"] == 200
-    assert "no Minecraft operation was submitted" in json.dumps(response_body(response))
+    assert response_body(response)["type"] == 4
     admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
-    assert admission.calls == []
+    assert admission.calls == [("STOP", "1532000000000000001")]
 
 
 def test_base64_command_uses_same_boundary(signing_key: SigningKey) -> None:
@@ -271,7 +271,46 @@ def test_start_duplicate_uses_same_shared_admission_identity() -> None:
     assert request["idempotency_key"] == "discord:1532000000000000001"
 
 
-def test_phase7e_handler_only_connects_status_and_start_to_shared_admission_lambda() -> None:
+def test_stop_duplicate_uses_same_shared_admission_identity() -> None:
+    class Api:
+        calls: list[dict[str, object]] = []
+
+        def invoke(self, **kwargs: object) -> object:
+            self.calls.append(kwargs)
+            return {
+                "StatusCode": 200,
+                "Payload": io.BytesIO(
+                    b'{"schema_version":1,"operation_id":"op-stop-existing",'
+                    b'"created":false,"lease_id":"lease-existing"}'
+                ),
+            }
+
+    api = Api()
+    admission = discord_command_lambda.LambdaOperationAdmission(api, function_name="admission")
+    assert (
+        admission.admit(
+            operation_type="STOP",
+            interaction_id="1532000000000000001",
+            guild_id=GUILD_ID,
+            channel_id=OPERATION_CHANNEL_ID,
+        )
+        == "op-stop-existing"
+    )
+    request = json.loads(cast(bytes, api.calls[0]["Payload"]))
+    assert request["operation_type"] == "STOP"
+    assert request["idempotency_key"] == "discord:1532000000000000001"
+
+
+def test_stop_admission_failure_is_safe_and_retryable(signing_key: SigningKey) -> None:
+    discord_command_lambda._operation_admission = Admission(RuntimeError("internal detail"))
+    response = discord_command_lambda.handler(event(payload(subcommand="stop"), signing_key), None)
+    assert response["statusCode"] == 200
+    rendered = json.dumps(response_body(response))
+    assert "Please retry" in rendered
+    assert "internal detail" not in rendered
+
+
+def test_phase7f_handler_only_connects_commands_to_shared_admission_lambda() -> None:
     assert discord_command_lambda.__file__ is not None
     source = Path(discord_command_lambda.__file__).read_text(encoding="utf-8")
     for forbidden in (
@@ -285,4 +324,5 @@ def test_phase7e_handler_only_connects_status_and_start_to_shared_admission_lamb
         assert forbidden not in source
     assert 'operation_type="STATUS"' in source
     assert 'operation_type="START"' in source
-    assert '"operation_type": "STOP"' not in source
+    assert 'operation_type="STOP"' in source
+    assert "StartExecution" not in source

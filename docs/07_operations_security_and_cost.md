@@ -69,6 +69,8 @@ Phase 7D Message Lambdaだけが`/wishicraft/<stage>/secret/discord-bot-token`�
 
 Phase 7EでもCommand Lambdaの追加権限は既存Admission Lambda一件のinvokeだけであり、START State Machine、EC2、SSM、Route 53、Desired/Lock tableを直接操作しない。既存Admission Lambda/START workflow roleの権限境界は変更しない。START progress deliveryはOperations Streamだけをtriggerとし、Message LambdaのBot Token/IAM境界はD-083/D-086を維持する。
 
+Phase 7FのSTOPも同じCommand LambdaとAdmission invoke権限だけを使用する。Command LambdaへSTOP State Machine、EC2 StopInstances、SSM、RCON、Route 53、Desired/Lock writeを追加せず、既存Admission Lambda/STOP workflow roleの権限境界を変更しない。STOP progress delivery failureはMessage subsystem内に隔離し、explicit save、graceful stop、EC2/DNS/final Reconcile、Lock cleanupを変更しない。
+
 Discord APIの429は応答の`retry_after`をSQS delayへ反映し、900秒のper-message delay上限を越える値では早期retryせずdelivery failureへfail closedする。5xx/network/timeoutはbounded retry、401/403/404はpermanent delivery failureとする。raw response body、Authorization header、tokenをlog/Operationへ保存しない。delivery alarm/DLQはMinecraft healthと別に扱い、Control Plane terminal resultを変更しない。
 
 ### Minecraft EC2 role

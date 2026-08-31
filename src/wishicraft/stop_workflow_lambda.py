@@ -114,6 +114,12 @@ def handler(event: object, context: object) -> dict[str, object]:
         return {"lease_expires_at": renewed.lease_expires_at}
     if action == "run_host_stop":
         runtime.coordinator.leases.verify_owned(proof, now=now)
+        runtime.operations.update_step(
+            operation_id=proof.owner_operation_id,
+            current_step="HOST_RUNTIME_STOPPING",
+            status=OperationStatus.RUNNING,
+            updated_at=now,
+        )
         command_id = runtime.host_stop.stop(instance_id=runtime.resolver.resolve())
         return {"command_id": command_id}
     if action == "check_host_stop":
@@ -125,6 +131,12 @@ def handler(event: object, context: object) -> dict[str, object]:
         return result
     if action == "stop_ec2":
         runtime.coordinator.leases.verify_owned(proof, now=now)
+        runtime.operations.update_step(
+            operation_id=proof.owner_operation_id,
+            current_step="EC2_STOPPING",
+            status=OperationStatus.RUNNING,
+            updated_at=now,
+        )
         stopped = runtime.ec2_stop.stop_if_needed(
             instance_id=runtime.resolver.resolve(),
             observation=StopObservation.from_item(_mapping(payload, "state")),
@@ -132,6 +144,12 @@ def handler(event: object, context: object) -> dict[str, object]:
         return {"stopped": stopped}
     if action == "delete_dns":
         runtime.coordinator.leases.verify_owned(proof, now=now)
+        runtime.operations.update_step(
+            operation_id=proof.owner_operation_id,
+            current_step="ENDPOINT_CLEANUP",
+            status=OperationStatus.RUNNING,
+            updated_at=now,
+        )
         return _delete_dns(cast(Route53WriteApi, runtime.route53), runtime)
     if action == "check_dns_change":
         complete = _dns_change_complete(

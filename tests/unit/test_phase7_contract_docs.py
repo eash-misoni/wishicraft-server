@@ -37,6 +37,22 @@ def test_phase7_delivery_plan_is_sliced_before_implementation() -> None:
     assert "source、infrastructure、AWS、Discord external configurationは変更しない" in plan
     assert "Phase 7B — Discord ingress / signature / authorization" in plan
     assert "Phase 7G — real Discord + AWS E2E / release gate" in plan
+    assert "Phase 7F — `/mc stop`" in plan
+    assert "Phase 7A〜7F repository implementation completed" in plan
+
+
+def test_phase7f_reuses_stop_control_plane_and_delivery_contracts() -> None:
+    architecture = read_doc("03_architecture.md")
+    interfaces = read_doc("05_data_and_interface_contracts.md")
+    security = read_doc("07_operations_security_and_cost.md")
+
+    assert "shared STOP Admission" in architecture
+    assert "explicit `save-all flush`" in architecture
+    assert "STOP workflow、Desired、Lock" in architecture
+    assert "`HOST_RUNTIME_STOPPING`" in interfaces
+    assert "success判定をDiscordへ移さない" in interfaces
+    assert "STOP State Machine" in security
+    assert "RCON" in security
 
 
 def test_phase7_secret_and_registration_ownership_are_consistent() -> None:

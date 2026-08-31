@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
+from wishicraft import stop_workflow_lambda
 from wishicraft.stop_workflow import StopErrorCode, StopWorkflowError
 from wishicraft.stop_workflow_lambda import (
     _command_result,
@@ -106,3 +109,91 @@ def test_dns_pending_is_not_success() -> None:
     api = Route53([])
     api.change_status = "PENDING"
     assert not _dns_change_complete(api, "/change/change-1")
+
+
+def test_stop_side_effects_publish_progress_only_after_lease_verification(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, str | None]] = []
+
+    class Leases:
+        def verify_owned(self, proof: object, *, now: object) -> None:
+            del proof, now
+            calls.append(("verify", None))
+
+    class Operations:
+        def update_step(self, **kwargs: object) -> None:
+            calls.append(("progress", str(kwargs["current_step"])))
+
+    class HostStop:
+        def stop(self, *, instance_id: str) -> str:
+            assert instance_id == "i-target"
+            calls.append(("host_stop", None))
+            return "command-1"
+
+    class Ec2Stop:
+        def stop_if_needed(self, *, instance_id: str, observation: object) -> bool:
+            assert instance_id == "i-target"
+            del observation
+            calls.append(("ec2_stop", None))
+            return True
+
+    class Resolver:
+        def resolve(self) -> str:
+            return "i-target"
+
+    route53 = Route53([])
+    runtime = SimpleNamespace(
+        system_id="wishicraft-main",
+        coordinator=SimpleNamespace(leases=Leases()),
+        operations=Operations(),
+        host_stop=HostStop(),
+        ec2_stop=Ec2Stop(),
+        resolver=Resolver(),
+        route53=route53,
+        hosted_zone_id="ZONE",
+        record_name="mc-dev.wishicraft.net",
+    )
+    monkeypatch.setattr(stop_workflow_lambda, "_runtime", runtime)
+    base = {
+        "schema_version": 1,
+        "operation_id": "op-stop-001",
+        "lease_id": "lease-stop-001",
+    }
+
+    assert stop_workflow_lambda.handler({**base, "action": "run_host_stop"}, None) == {
+        "command_id": "command-1"
+    }
+    assert stop_workflow_lambda.handler(
+        {
+            **base,
+            "action": "stop_ec2",
+            "state": {
+                "observation": {
+                    "ec2_state": "running",
+                    "ssm_state": "online",
+                    "host_runtime_state": "not-running",
+                    "minecraft_service_state": "not-running",
+                    "minecraft_protocol_state": "not-applicable",
+                    "public_ipv4": "203.0.113.10",
+                    "dns_ipv4_values": ["203.0.113.10"],
+                },
+                "health": "DEGRADED",
+                "observation_errors": [],
+                "discrepancies": [],
+            },
+        },
+        None,
+    ) == {"stopped": True}
+    assert stop_workflow_lambda.handler({**base, "action": "delete_dns"}, None) == {"absent": True}
+
+    assert calls == [
+        ("verify", None),
+        ("progress", "HOST_RUNTIME_STOPPING"),
+        ("host_stop", None),
+        ("verify", None),
+        ("progress", "EC2_STOPPING"),
+        ("ec2_stop", None),
+        ("verify", None),
+        ("progress", "ENDPOINT_CLEANUP"),
+    ]

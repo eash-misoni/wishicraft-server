@@ -249,20 +249,33 @@ def render_status_projection(projection: object) -> str:
 def render_operation_projection(record: DeliveryRecord) -> str:
     if record.operation_type == "STATUS":
         return render_status_projection(record.projection)
-    if record.operation_type != "START":
+    if record.operation_type not in {"START", "STOP"}:
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
+    if record.operation_type == "START":
+        if record.operation_status == "SUCCEEDED":
+            return "Minecraft START: online and ready."
+        if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
+            return "Minecraft START: failed safely. Check the operation log with an administrator."
+        steps = {
+            "ADMITTED": "Minecraft START: accepted.",
+            "DESIRED_RUNNING": "Minecraft START: preparing the requested running state.",
+            "EC2_STARTING": "Minecraft START: starting the server host.",
+            "HOST_RUNTIME_STARTING": "Minecraft START: starting Minecraft.",
+            "ENDPOINT_CONVERGING": "Minecraft START: checking readiness and connection endpoint.",
+        }
+        return steps.get(record.current_step, "Minecraft START: in progress.")
     if record.operation_status == "SUCCEEDED":
-        return "Minecraft START: online and ready."
+        return "Minecraft STOP: server stopped; the connection endpoint is unavailable."
     if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
-        return "Minecraft START: failed safely. Check the operation log with an administrator."
-    steps = {
-        "ADMITTED": "Minecraft START: accepted.",
-        "DESIRED_RUNNING": "Minecraft START: preparing the requested running state.",
-        "EC2_STARTING": "Minecraft START: starting the server host.",
-        "HOST_RUNTIME_STARTING": "Minecraft START: starting Minecraft.",
-        "ENDPOINT_CONVERGING": "Minecraft START: checking readiness and connection endpoint.",
+        return "Minecraft STOP: failed safely. Check the operation log with an administrator."
+    stop_steps = {
+        "ADMITTED": "Minecraft STOP: accepted.",
+        "DESIRED_STOPPED": "Minecraft STOP: preparing the requested stopped state.",
+        "HOST_RUNTIME_STOPPING": "Minecraft STOP: saving and stopping Minecraft.",
+        "EC2_STOPPING": "Minecraft STOP: stopping the server host.",
+        "ENDPOINT_CLEANUP": "Minecraft STOP: removing the connection endpoint and checking state.",
     }
-    return steps.get(record.current_step, "Minecraft START: in progress.")
+    return stop_steps.get(record.current_step, "Minecraft STOP: in progress.")
 
 
 class DiscordHttpClient:

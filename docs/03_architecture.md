@@ -452,6 +452,20 @@ Discord /mc start
 
 Command LambdaはAdmission Lambda invoke以外のControl Plane権限を持たない。`progress_revision`はControl Plane transitionと同じwriteで単調増加し、Message componentはevent revisionとconsistent current revisionを照合する。delivery metadataだけの更新ではrevisionが変わらず、古いeventは新しい表示を巻き戻さない。Discord delivery failureはSTART workflowやLock/Desiredへ逆流しない。
 
+Phase 7FのSTOP adapter/deliveryも同じ境界を共有する。
+
+```text
+Discord /mc stop
+→ signature / Guild / channel / role authorization
+→ shared STOP Admission（Operation / Lock / lease / Current Operation）
+→ existing STOP Standard State Machine
+→ Operation progress_revision付きstep/status transition
+→ Operations Stream
+→ initial normal message create、以後同一message edit
+```
+
+Discord層はPhase 6のexplicit `save-all flush`、graceful Host Runtime stop、EC2 stopped wait、DNS DELETE/`INSYNC`、fresh Reconcile、terminal cleanupを実行・判定しない。STOP Taskが既存lease ownershipを検証した後、Host Runtime停止、EC2停止、endpoint cleanupという公開価値のある境界だけをOperation stepとして更新する。delivery metadataだけのStream MODIFYと古いrevisionはSTARTと同じ規則でno-opとなり、Discord delivery failureはSTOP workflow、Desired、Lock、save/stop orderingへ逆流しない。
+
 ## 9. 後期アーキテクチャ
 
 ### 複数ゲーム

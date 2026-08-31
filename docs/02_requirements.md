@@ -1,7 +1,7 @@
 # 02. Requirements
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-30
+- **最終更新:** 2026-08-31
 
 ## 1. 要件の読み方
 
@@ -244,7 +244,7 @@ Discord ingressは既存Operation Admissionへのexternal adapterとする。Des
 
 通常message createはOperation単位の決定的nonceとDiscordのnonce重複排除を使用し、create成功・message identity保存前failureを同じlogical messageへ回復できなければならない。create成否不明の安全な回復期間を越えた場合、duplicateの可能性がある新規messageを作らずdeliveryだけをfail closedする。retryはboundedとし、429の`retry_after`を尊重し、permanent認証・認可・not-found failureを無限retryしない。
 
-START progressにはControl Plane Operationと同じwriteで単調増加するrevisionを用い、古いStream eventが新しい公開状態を上書きしてはならない。delivery metadataだけの更新は新しい公開deliveryをtriggerせず、古いrevisionのdelivery failureはより新しいprogress/terminal revisionを妨げてはならない。
+START/STOP progressにはControl Plane Operationと同じwriteで単調増加するrevisionを用い、古いStream eventが新しい公開状態を上書きしてはならない。delivery metadataだけの更新は新しい公開deliveryをtriggerせず、古いrevisionのdelivery failureはより新しいprogress/terminal revisionを妨げてはならない。
 
 ### DIS-010 Token権限とcommand登録 `MUST / MVP`
 

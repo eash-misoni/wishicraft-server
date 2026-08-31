@@ -486,6 +486,7 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
     )
     assert "INSERT" in stream_filter
     assert "START" in stream_filter
+    assert "STOP" in stream_filter
     assert "STATUS" in stream_filter
     assert any(
         "EventSourceArn" in mapping["Properties"]

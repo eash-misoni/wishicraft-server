@@ -618,7 +618,7 @@ STOPは6回renewし、最長poll gapは約30秒、900秒leaseに少なくとも�
 
 ## 10. Phase 7 — Discord MVP
 
-- **状態:** In Progress（Phase 7A〜7E repository implementation completed、Phase 7F next）
+- **状態:** In Progress（Phase 7A〜7F repository implementation completed、Phase 7G next）
 
 ### 目的
 
@@ -682,9 +682,14 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 
 ### Phase 7F — `/mc stop`
 
+- **状態:** Completed（repository-only、AWS/Discord未適用）
 - signature/authorization後、実証済みSTOP AdmissionとState Machineを利用する。
 - explicit save、graceful stop、EC2/DNS/fresh Reconcileの判定をDiscord層へ複製しない。
 - duplicate Interactionでsave/stop/messageを再実行しない。
+- `discord:<interaction_id>`をshared Admissionへ渡し、duplicateは同じOperation/lease/executionへ収束する。Command LambdaはAdmission Lambda invoke以外のControl Plane権限を持たず、STOP State Machineを直接起動しない。
+- D-087の単調な`progress_revision`とD-086の通常Bot message identityをSTOPにも再利用する。`DESIRED_STOPPED`、Host Runtime停止、EC2停止、endpoint cleanup、terminal transitionを同一messageへ投影し、古いeventとdelivery metadata-only eventをno-opにする。
+- Discord delivery failureはD-082どおりSTOP Operation、Desired、Lock、save/graceful stop、EC2/DNS/Reconcileへ逆流しない。既存Phase 6 STOP sourceの安全順序・fail-closed error classification・lease/cleanup contractは変更しない。
+- Bot Token作成、AWS deploy、Discord command registration、real status/start/stop E2EはPhase 7G release gateに残す。
 
 ### Phase 7G — real Discord + AWS E2E / release gate
 

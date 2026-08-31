@@ -21,6 +21,8 @@ from wishicraft.discord_interactions import (
     start_admission_failure_response,
     start_admitted_response,
     status_admission_failure_response,
+    stop_admission_failure_response,
+    stop_admitted_response,
     unauthorized_response,
     verify_signature,
 )
@@ -48,7 +50,7 @@ class LambdaOperationAdmission:
     def admit(
         self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
     ) -> str:
-        if operation_type not in {"STATUS", "START"}:
+        if operation_type not in {"STATUS", "START", "STOP"}:
             raise ValueError("unsupported Discord admission type")
         response = self._api.invoke(
             FunctionName=self._function_name,
@@ -114,6 +116,17 @@ def handler(event: object, context: object) -> dict[str, object]:
         except Exception:  # noqa: BLE001 - AWS boundary returns only a fixed safe response.
             return _http_response(200, start_admission_failure_response())
         return _http_response(200, start_admitted_response())
+    if interaction.kind is InteractionKind.STOP:
+        try:
+            _get_operation_admission().admit(
+                operation_type="STOP",
+                interaction_id=interaction.interaction_id,
+                guild_id=config.guild_id,
+                channel_id=config.operation_channel_id,
+            )
+        except Exception:  # noqa: BLE001 - AWS boundary returns only a fixed safe response.
+            return _http_response(200, stop_admission_failure_response())
+        return _http_response(200, stop_admitted_response())
     return _http_response(200, phase7b_response())
 
 
@@ -152,8 +165,8 @@ def _parse_admission_response(response: object, *, operation_type: str) -> str:
     lease_id = value.get("lease_id")
     if operation_type == "STATUS" and lease_id is not None:
         raise RuntimeError("STATUS admission created a lease")
-    if operation_type == "START" and (not isinstance(lease_id, str) or not lease_id):
-        raise RuntimeError("START admission did not return a lease")
+    if operation_type in {"START", "STOP"} and (not isinstance(lease_id, str) or not lease_id):
+        raise RuntimeError(f"{operation_type} admission did not return a lease")
     return operation_id
 
 
