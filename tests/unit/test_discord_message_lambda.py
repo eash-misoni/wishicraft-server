@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from typing import cast
 
 import pytest
 
 from wishicraft import discord_message_lambda
-from wishicraft.discord_delivery import DeliveryStatus
+from wishicraft.discord_delivery import (
+    DeliveryRecord,
+    DeliveryStatus,
+    DiscordDeliveryService,
+    operation_nonce,
+)
 
 
 def attribute(value: object) -> dict[str, object]:
@@ -71,6 +77,50 @@ class ConditionalFailure(Exception):
         self.response = {"Error": {"Code": "ConditionalCheckFailedException"}}
 
 
+class CompletionRacingDynamo(Dynamo):
+    def __init__(self, current_item: dict[str, object]) -> None:
+        super().__init__()
+        self.item = current_item
+        self.completion_calls = 0
+
+    def update_item(self, **kwargs: object) -> object:
+        self.updates.append(kwargs)
+        self.completion_calls += 1
+        raise ConditionalFailure
+
+
+def delivery_item(
+    *,
+    progress_revision: int,
+    delivery_source_revision: int,
+    delivery_status: str,
+    delivered_revision: int | None,
+    message_id: str = "1532999999999999999",
+    delivery_id: str | None = None,
+    attempt_id: str = "ddb:newer",
+) -> dict[str, object]:
+    item = operation_item()
+    item["operation_type"] = {"S": "STOP"}
+    item["status"] = {"S": "RUNNING"}
+    item["progress_revision"] = {"N": str(progress_revision)}
+    item["discord"] = attribute(
+        {
+            "guild_id": "1251169327554625757",
+            "channel_id": "1531883129525244015",
+            "interaction_id": "1532000000000000001",
+            "message_id": message_id,
+            "delivery_id": delivery_id or operation_nonce("op-status-001"),
+            "delivery_source_revision": delivery_source_revision,
+            "delivery_status": delivery_status,
+            "delivery_attempt_id": attempt_id,
+            "delivery_attempt_count": 1,
+            "delivery_delivered_revision": delivered_revision,
+            "delivery_outcome_unknown": False,
+        }
+    )
+    return item
+
+
 def test_store_claim_and_delivery_metadata_are_conditional_and_separate() -> None:
     api = Dynamo()
     store = discord_message_lambda.DynamoDeliveryStore(api, table_name="operations")
@@ -98,6 +148,197 @@ def test_conditional_claim_race_loses_without_delivery_side_effect() -> None:
 
     store = discord_message_lambda.DynamoDeliveryStore(RacingDynamo(), table_name="operations")
     assert store.claim(store.load("op-status-001"), attempt_id="worker-2", now_epoch=100) is None
+
+
+def test_production_stale_completion_race_is_noop_after_newer_revision_delivered(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    message_id = "1532999999999999999"
+    old = delivery_item(
+        progress_revision=4,
+        delivery_source_revision=3,
+        delivery_status="DELIVERED",
+        delivered_revision=3,
+    )
+    newer = delivery_item(
+        progress_revision=5,
+        delivery_source_revision=5,
+        delivery_status="DELIVERED",
+        delivered_revision=5,
+    )
+    discord_edits = [
+        {"revision": 5, "message_id": message_id},
+    ]
+
+    class InterleavingDynamo(Dynamo):
+        def __init__(self) -> None:
+            super().__init__()
+            self.item = old
+            self.completion_calls = 0
+
+        def update_item(self, **kwargs: object) -> object:
+            self.updates.append(kwargs)
+            if len(self.updates) == 1:
+                return {}
+            self.completion_calls += 1
+            self.item = newer
+            raise ConditionalFailure
+
+    class Messages:
+        def create(self, **kwargs: object) -> str:
+            raise AssertionError(f"unexpected create: {kwargs}")
+
+        def edit(self, **kwargs: object) -> str:
+            assert kwargs["message_id"] == message_id
+            discord_edits.insert(
+                0,
+                {"revision": 4, "message_id": message_id},
+            )
+            return message_id
+
+    class Queue:
+        def schedule(self, **kwargs: object) -> None:
+            raise AssertionError(f"unexpected retry: {kwargs}")
+
+    api = InterleavingDynamo()
+    store = discord_message_lambda.DynamoDeliveryStore(api, table_name="operations")
+    service = DiscordDeliveryService(store, Messages(), Queue())
+
+    monkeypatch.setattr(discord_message_lambda, "_get_service", lambda: service)
+    event = {
+        "Records": [
+            {
+                "eventSource": "aws:sqs",
+                "eventID": "old-completion",
+                "body": ('{"schema_version":1,"operation_id":"op-status-001","source_revision":4}'),
+            }
+        ]
+    }
+
+    assert discord_message_lambda.handler(event, object()) == {"batchItemFailures": []}
+
+    assert api.completion_calls == 1
+    assert discord_edits == [
+        {"revision": 4, "message_id": message_id},
+        {"revision": 5, "message_id": message_id},
+    ]
+    final = store.load("op-status-001")
+    assert final.delivery_status is DeliveryStatus.DELIVERED
+    assert final.delivered_revision == 5
+    assert final.delivery_source_revision == 5
+
+
+def test_same_revision_already_delivered_completion_is_noop() -> None:
+    current = delivery_item(
+        progress_revision=4,
+        delivery_source_revision=4,
+        delivery_status="DELIVERED",
+        delivered_revision=4,
+        attempt_id="ddb:winner",
+    )
+    store = discord_message_lambda.DynamoDeliveryStore(
+        CompletionRacingDynamo(current), table_name="operations"
+    )
+    claimed = replace(
+        store.load("op-status-001"),
+        delivery_status=DeliveryStatus.PENDING,
+        attempt_id="ddb:duplicate",
+    )
+
+    store.mark_delivered(
+        claimed,
+        attempt_id="ddb:duplicate",
+        message_id="1532999999999999999",
+        now_epoch=1788270466,
+    )
+
+
+def test_newer_pending_revision_supersedes_old_completion() -> None:
+    current = delivery_item(
+        progress_revision=5,
+        delivery_source_revision=5,
+        delivery_status="PENDING",
+        delivered_revision=3,
+    )
+    store = discord_message_lambda.DynamoDeliveryStore(
+        CompletionRacingDynamo(current), table_name="operations"
+    )
+    old_claim = replace(
+        store.load("op-status-001"),
+        source_revision=4,
+        delivery_source_revision=4,
+        attempt_id="ddb:older",
+    )
+
+    store.mark_failed(
+        old_claim,
+        attempt_id="ddb:older",
+        status=DeliveryStatus.RETRYABLE_FAILED,
+        code="DISCORD_NETWORK_FAILURE",
+        next_attempt_epoch=1788270471,
+        outcome_unknown=False,
+        now_epoch=1788270466,
+    )
+
+
+@pytest.mark.parametrize(
+    "current",
+    [
+        delivery_item(
+            progress_revision=3,
+            delivery_source_revision=3,
+            delivery_status="DELIVERED",
+            delivered_revision=3,
+        ),
+        delivery_item(
+            progress_revision=5,
+            delivery_source_revision=5,
+            delivery_status="DELIVERED",
+            delivered_revision=5,
+            message_id="1532888888888888888",
+        ),
+        delivery_item(
+            progress_revision=4,
+            delivery_source_revision=4,
+            delivery_status="PENDING",
+            delivered_revision=3,
+            attempt_id="ddb:unrelated",
+        ),
+        delivery_item(
+            progress_revision=5,
+            delivery_source_revision=5,
+            delivery_status="DELIVERED",
+            delivered_revision=5,
+            delivery_id="corrupt-delivery-identity",
+        ),
+    ],
+)
+def test_unexpected_completion_conflict_still_raises(current: dict[str, object]) -> None:
+    store = discord_message_lambda.DynamoDeliveryStore(
+        CompletionRacingDynamo(current), table_name="operations"
+    )
+    claimed = DeliveryRecord(
+        operation_id="op-status-001",
+        operation_status="RUNNING",
+        channel_id="1531883129525244015",
+        projection={},
+        operation_type="STOP",
+        current_step="HOST_RUNTIME_STOPPING",
+        source_revision=4,
+        delivery_status=DeliveryStatus.PENDING,
+        attempt_id="ddb:older",
+        message_id="1532999999999999999",
+        delivery_id=operation_nonce("op-status-001"),
+        delivery_source_revision=4,
+    )
+
+    with pytest.raises(ConditionalFailure):
+        store.mark_delivered(
+            claimed,
+            attempt_id="ddb:older",
+            message_id="1532999999999999999",
+            now_epoch=1788270466,
+        )
 
 
 def test_stream_and_sqs_event_preserve_operation_identity() -> None:

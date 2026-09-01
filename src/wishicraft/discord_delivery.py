@@ -44,6 +44,7 @@ class DeliveryRecord:
     next_attempt_epoch: int | None = None
     outcome_unknown: bool = False
     message_id: str | None = None
+    delivery_id: str | None = None
     delivery_source_revision: int | None = None
     delivered_revision: int | None = None
     resumed_pending: bool = False

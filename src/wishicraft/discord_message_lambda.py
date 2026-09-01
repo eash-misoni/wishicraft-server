@@ -72,6 +72,7 @@ class DynamoDeliveryStore:
             next_attempt_epoch=_optional_int(discord, "delivery_next_attempt_epoch"),
             outcome_unknown=_optional_bool(discord, "delivery_outcome_unknown") or False,
             message_id=_optional_string(discord, "message_id"),
+            delivery_id=_optional_string(discord, "delivery_id"),
             delivery_source_revision=_optional_int(discord, "delivery_source_revision"),
             delivered_revision=_optional_int(discord, "delivery_delivered_revision"),
         )
@@ -156,6 +157,7 @@ class DynamoDeliveryStore:
             **{
                 **record.__dict__,
                 "delivery_status": DeliveryStatus.PENDING,
+                "delivery_id": operation_nonce(record.operation_id),
                 "delivery_source_revision": record.source_revision,
                 "attempt_id": attempt_id,
                 "attempt_count": next_count,
@@ -242,26 +244,77 @@ class DynamoDeliveryStore:
             ),
             ":now": {"N": str(now_epoch)},
         }
-        self._api.update_item(
-            TableName=self._table,
-            Key={"operation_id": {"S": record.operation_id}},
-            UpdateExpression=(
-                "SET #discord.delivery_status = :status, "
-                "#discord.delivery_error_code = :code, "
-                "#discord.delivery_next_attempt_epoch = :next, "
-                "#discord.delivery_outcome_unknown = :unknown, "
-                "#discord.message_id = :message, "
-                "#discord.delivery_delivered_revision = :delivered_revision, "
-                "#discord.delivery_updated_epoch = :now"
-            ),
-            ConditionExpression=(
-                "progress_revision = :source_revision AND "
-                "#discord.delivery_source_revision = :source_revision AND "
-                "#discord.delivery_status = :pending AND #discord.delivery_attempt_id = :attempt"
-            ),
-            ExpressionAttributeNames={"#discord": "discord"},
-            ExpressionAttributeValues=values,
+        try:
+            self._api.update_item(
+                TableName=self._table,
+                Key={"operation_id": {"S": record.operation_id}},
+                UpdateExpression=(
+                    "SET #discord.delivery_status = :status, "
+                    "#discord.delivery_error_code = :code, "
+                    "#discord.delivery_next_attempt_epoch = :next, "
+                    "#discord.delivery_outcome_unknown = :unknown, "
+                    "#discord.message_id = :message, "
+                    "#discord.delivery_delivered_revision = :delivered_revision, "
+                    "#discord.delivery_updated_epoch = :now"
+                ),
+                ConditionExpression=(
+                    "progress_revision = :source_revision AND "
+                    "#discord.delivery_source_revision = :source_revision AND "
+                    "#discord.delivery_status = :pending AND "
+                    "#discord.delivery_attempt_id = :attempt"
+                ),
+                ExpressionAttributeNames={"#discord": "discord"},
+                ExpressionAttributeValues=values,
+            )
+        except Exception as error:
+            if not _conditional_failure(error):
+                raise
+            current = self.load(record.operation_id)
+            if self._completion_conflict_is_noop(
+                record,
+                current=current,
+                completed_status=status,
+                message_id=message_id or record.message_id,
+            ):
+                return
+            raise
+
+    @staticmethod
+    def _completion_conflict_is_noop(
+        record: DeliveryRecord,
+        *,
+        current: DeliveryRecord,
+        completed_status: DeliveryStatus,
+        message_id: str | None,
+    ) -> bool:
+        expected_delivery_id = operation_nonce(record.operation_id)
+        identity_matches = (
+            record.operation_id == current.operation_id
+            and record.operation_type == current.operation_type
+            and record.channel_id == current.channel_id
+            and record.delivery_id == expected_delivery_id
+            and current.delivery_id == expected_delivery_id
+            and message_id is not None
+            and current.message_id == message_id
         )
+        if not identity_matches:
+            return False
+        if current.source_revision > record.source_revision:
+            return (
+                current.delivery_source_revision == current.source_revision
+                and current.delivery_status is not None
+            )
+        if current.source_revision != record.source_revision:
+            return False
+        if current.delivery_source_revision != record.source_revision:
+            return False
+        if completed_status is DeliveryStatus.DELIVERED:
+            return (
+                current.delivery_status is DeliveryStatus.DELIVERED
+                and current.delivered_revision is not None
+                and current.delivered_revision >= record.source_revision
+            )
+        return current.delivery_status is completed_status
 
 
 class ParameterToken:

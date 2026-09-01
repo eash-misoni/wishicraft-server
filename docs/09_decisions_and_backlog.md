@@ -903,6 +903,8 @@ Phase 7G-1のcredential-backed `cdk diff --change-set=false`ではTarget差分0�
 
 Phase 7G-3 Gate 1では、role不足のrequestと、Discordが引数なしsubcommandへempty `options`を含めたproduction requestの双方がControl Plane Admission前にfail closedした。後者はDiscord protocolの正規shapeに対するparser compatibility bugであり、新Decisionではなく、`options`省略またはexact empty arrayだけを受理するstrict contractへ修正する。non-empty/non-array/unknown/nested shapeは拒否を維持し、deployとreal retryはrepository fixとは別の承認境界とする。
 
+Phase 7G-3 STOPはOperation `op-6949d819-27be-4eec-85e9-8f04c735ed9c`としてsave/graceful stop/EC2 stop/DNS DELETE/INSYNC/final Reconcile/owned cleanupを完了し、Control Plane `SUCCEEDED`、Discord progress revision 5 `DELIVERED`へ収束した。一方、古いprogress workerのDiscord edit後にnewer revisionがdelivery metadataを先に完了したため、古いworkerのcompletion CASが失敗してMessage Lambda Errors alarmが発報した。D-086/D-087から直接導かれる実装修正として、completion CAS failure後のconsistent read-backが同一Operation type/channel、deterministic delivery ID、message IDを確認し、newer revision ownershipまたは同一revision terminal completionだけをstale no-opとする。revision regression、identity mismatch、same-revision unrelated ownershipは引き続きerrorとし、Alarm契約を緩和しない。Control Plane safety stateはDesired revision 9 STOPPED、fresh stopped/HEALTHY、Lock/Current Operationなし、queue/DLQ 0で不変であり、deploy/final STATUSは別承認境界とする。
+
 Phase別に決める事項:
 
 | 項目 | 決定期限 |
