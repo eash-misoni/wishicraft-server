@@ -314,7 +314,7 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
     properties = command["Properties"]
     assert properties["Handler"] == "wishicraft.discord_command_lambda.handler"
     assert properties["Runtime"] == "python3.12"
-    assert properties["Timeout"] == 3
+    assert properties["Timeout"] == 10
     environment = properties["Environment"]["Variables"]
     assert set(environment) == {
         "DISCORD_APPLICATION_ID",

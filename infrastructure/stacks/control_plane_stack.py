@@ -551,7 +551,7 @@ def _add_discord_ingress(
             asset_hash_type=AssetHashType.OUTPUT,
         ),
         handler="wishicraft.discord_command_lambda.handler",
-        timeout=Duration.seconds(3),
+        timeout=Duration.seconds(10),
         memory_size=256,
         log_group=log_group,
         environment={
@@ -563,7 +563,7 @@ def _add_discord_ingress(
             "DISCORD_PUBLIC_KEY": stage.discord_public_key,
             "ADMISSION_FUNCTION_NAME": admission.function_name,
         },
-        description="Phase 7F Discord ingress; shared STATUS, START, and STOP admission",
+        description="Phase 7G Discord callback ACK before shared STATUS, START, and STOP admission",
     )
     admission.grant_invoke(function)
 

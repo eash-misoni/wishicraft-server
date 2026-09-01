@@ -186,6 +186,7 @@ def test_mvp_commands_are_strictly_parsed(subcommand: str, expected: Interaction
     interaction = parse_and_authorize(body, config=configuration(key))
 
     assert interaction.kind is expected
+    assert "non-production-test-token" not in repr(interaction)
 
 
 @pytest.mark.parametrize(

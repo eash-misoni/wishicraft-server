@@ -7,22 +7,17 @@ import json
 import os
 from typing import Protocol, cast
 
+from wishicraft.discord_interaction_callback import DiscordInteractionCallbackClient
 from wishicraft.discord_interactions import (
     DiscordIngressConfig,
     InteractionKind,
     MalformedInteraction,
     SignatureRejected,
     UnauthorizedInteraction,
-    deferred_ephemeral_response,
+    admission_result_content,
     parse_and_authorize,
-    phase7b_response,
     pong_response,
     raw_body_from_event,
-    start_admission_failure_response,
-    start_admitted_response,
-    status_admission_failure_response,
-    stop_admission_failure_response,
-    stop_admitted_response,
     unauthorized_response,
     verify_signature,
 )
@@ -40,6 +35,13 @@ class OperationAdmission(Protocol):
     def admit(
         self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
     ) -> str: ...
+
+
+class InteractionCallback(Protocol):
+    def defer(self, *, interaction_id: str, interaction_token: str) -> None: ...
+    def edit_original(
+        self, *, application_id: str, interaction_token: str, content: str
+    ) -> None: ...
 
 
 class LambdaOperationAdmission:
@@ -75,6 +77,7 @@ class LambdaOperationAdmission:
 
 
 _operation_admission: OperationAdmission | None = None
+_interaction_callback: InteractionCallback | None = None
 
 
 def handler(event: object, context: object) -> dict[str, object]:
@@ -94,40 +97,33 @@ def handler(event: object, context: object) -> dict[str, object]:
         return _http_response(500, {"error": "service unavailable"})
     if interaction.kind is InteractionKind.PING:
         return _http_response(200, pong_response())
-    if interaction.kind is InteractionKind.STATUS:
-        try:
-            _get_operation_admission().admit(
-                operation_type="STATUS",
-                interaction_id=interaction.interaction_id,
-                guild_id=config.guild_id,
-                channel_id=config.operation_channel_id,
-            )
-        except Exception:  # noqa: BLE001 - AWS boundary returns only a fixed safe response.
-            return _http_response(200, status_admission_failure_response())
-        return _http_response(200, deferred_ephemeral_response())
-    if interaction.kind is InteractionKind.START:
-        try:
-            _get_operation_admission().admit(
-                operation_type="START",
-                interaction_id=interaction.interaction_id,
-                guild_id=config.guild_id,
-                channel_id=config.operation_channel_id,
-            )
-        except Exception:  # noqa: BLE001 - AWS boundary returns only a fixed safe response.
-            return _http_response(200, start_admission_failure_response())
-        return _http_response(200, start_admitted_response())
-    if interaction.kind is InteractionKind.STOP:
-        try:
-            _get_operation_admission().admit(
-                operation_type="STOP",
-                interaction_id=interaction.interaction_id,
-                guild_id=config.guild_id,
-                channel_id=config.operation_channel_id,
-            )
-        except Exception:  # noqa: BLE001 - AWS boundary returns only a fixed safe response.
-            return _http_response(200, stop_admission_failure_response())
-        return _http_response(200, stop_admitted_response())
-    return _http_response(200, phase7b_response())
+    callback = _get_interaction_callback()
+    try:
+        callback.defer(
+            interaction_id=interaction.interaction_id,
+            interaction_token=interaction.interaction_token,
+        )
+    except Exception:  # noqa: BLE001 - fail closed before Admission, with no credential detail.
+        return _http_response(502, {"error": "interaction acknowledgement failed"})
+    try:
+        _get_operation_admission().admit(
+            operation_type=interaction.kind.value,
+            interaction_id=interaction.interaction_id,
+            guild_id=config.guild_id,
+            channel_id=config.operation_channel_id,
+        )
+        accepted = True
+    except Exception:  # noqa: BLE001 - AWS boundary is projected without internal detail.
+        accepted = False
+    try:
+        callback.edit_original(
+            application_id=config.application_id,
+            interaction_token=interaction.interaction_token,
+            content=admission_result_content(interaction.kind, accepted=accepted),
+        )
+    except Exception:  # noqa: BLE001 - acknowledgement delivery does not rewrite Control Plane truth.
+        pass
+    return _empty_http_response(202)
 
 
 def _get_operation_admission() -> OperationAdmission:
@@ -139,6 +135,13 @@ def _get_operation_admission() -> OperationAdmission:
             function_name=_required_environment("ADMISSION_FUNCTION_NAME"),
         )
     return _operation_admission
+
+
+def _get_interaction_callback() -> InteractionCallback:
+    global _interaction_callback
+    if _interaction_callback is None:
+        _interaction_callback = DiscordInteractionCallbackClient()
+    return _interaction_callback
 
 
 def _parse_admission_response(response: object, *, operation_type: str) -> str:
@@ -196,5 +199,14 @@ def _http_response(status_code: int, body: dict[str, object]) -> dict[str, objec
             "cache-control": "no-store",
         },
         "body": json.dumps(body, separators=(",", ":")),
+        "isBase64Encoded": False,
+    }
+
+
+def _empty_http_response(status_code: int) -> dict[str, object]:
+    return {
+        "statusCode": status_code,
+        "headers": {"cache-control": "no-store"},
+        "body": "",
         "isBase64Encoded": False,
     }

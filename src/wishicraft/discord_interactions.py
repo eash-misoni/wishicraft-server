@@ -6,7 +6,7 @@ import base64
 import binascii
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Protocol
 
@@ -82,6 +82,7 @@ class DiscordIngressConfig:
 @dataclass(frozen=True)
 class AuthorizedInteraction:
     interaction_id: str
+    interaction_token: str = field(repr=False)
     kind: InteractionKind
 
 
@@ -146,7 +147,8 @@ def verify_signature(
 
 def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> AuthorizedInteraction:
     payload = _load_unique_json(raw_body)
-    if not isinstance(payload.get("token"), str) or not payload["token"]:
+    interaction_token = payload.get("token")
+    if not isinstance(interaction_token, str) or not interaction_token:
         raise MalformedInteraction("invalid interaction")
     interaction_type = payload.get("type")
     interaction_id = _snowflake(payload.get("id"))
@@ -157,7 +159,7 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
     if interaction_type == PING:
         if "data" in payload:
             raise MalformedInteraction("invalid interaction")
-        return AuthorizedInteraction(interaction_id, InteractionKind.PING)
+        return AuthorizedInteraction(interaction_id, interaction_token, InteractionKind.PING)
     if interaction_type != APPLICATION_COMMAND:
         raise MalformedInteraction("unsupported interaction")
     if _snowflake(payload.get("guild_id")) != config.guild_id:
@@ -174,6 +176,7 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
         raise UnauthorizedInteraction("request is not authorized")
     return AuthorizedInteraction(
         interaction_id,
+        interaction_token,
         _parse_command(payload.get("data"), expected_guild_id=config.guild_id),
     )
 
@@ -194,23 +197,30 @@ def deferred_ephemeral_response() -> dict[str, object]:
 
 
 def start_admitted_response() -> dict[str, object]:
-    return _ephemeral("START accepted. Progress will be posted in this channel.")
+    return _ephemeral(admission_result_content(InteractionKind.START, accepted=True))
 
 
 def stop_admitted_response() -> dict[str, object]:
-    return _ephemeral("STOP accepted. Progress will be posted in this channel.")
+    return _ephemeral(admission_result_content(InteractionKind.STOP, accepted=True))
 
 
 def status_admission_failure_response() -> dict[str, object]:
-    return _ephemeral("Status could not be submitted. Please retry this command.")
+    return _ephemeral(admission_result_content(InteractionKind.STATUS, accepted=False))
 
 
 def start_admission_failure_response() -> dict[str, object]:
-    return _ephemeral("START could not be submitted. Please retry this command.")
+    return _ephemeral(admission_result_content(InteractionKind.START, accepted=False))
 
 
 def stop_admission_failure_response() -> dict[str, object]:
-    return _ephemeral("STOP could not be submitted. Please retry this command.")
+    return _ephemeral(admission_result_content(InteractionKind.STOP, accepted=False))
+
+
+def admission_result_content(kind: InteractionKind, *, accepted: bool) -> str:
+    label = "Status" if kind is InteractionKind.STATUS else kind.value
+    if accepted:
+        return f"{label} accepted. Progress will be posted in this channel."
+    return f"{label} could not be submitted. Please retry this command."
 
 
 def unauthorized_response() -> dict[str, object]:

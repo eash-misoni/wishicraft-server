@@ -12,7 +12,7 @@ def read_doc(name: str) -> str:
 def test_phase7_decisions_preserve_control_plane_boundaries() -> None:
     decisions = read_doc("09_decisions_and_backlog.md")
 
-    for decision_id in range(79, 88):
+    for decision_id in range(79, 90):
         assert f"### D-{decision_id:03d}" in decisions
 
     assert "player roleまたはadmin role" in decisions
@@ -25,6 +25,9 @@ def test_phase7_decisions_preserve_control_plane_boundaries() -> None:
     assert "enforce_nonce=true" in decisions
     assert "DISCORD_CREATE_OUTCOME_AMBIGUOUS" in decisions
     assert "progress_revision" in decisions
+    assert "ACK-before-Admission" in decisions
+    assert "202/empty body" in decisions
+    assert "15分だけ有効なInteraction tokenをprocess memory内" in decisions
 
 
 def test_phase7_delivery_plan_is_sliced_before_implementation() -> None:

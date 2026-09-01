@@ -10,6 +10,17 @@
 
 ## 2. 採用済み決定
 
+### D-089 Discord initial ACKはshared Admissionより先に外部callbackで確定する
+
+- **状態:** Accepted（Phase 7G-3 production failure recovery）
+- **日付:** 2026-09-01
+- HTTP Interactionの署名検証、strict parse、Application/Guild/channel/role認可が成功した後、DiscordのInteraction callback endpointへtype 5 ephemeral deferred ACKを送る。ACKはOperation acceptanceを意味せず、成功した場合だけ既存shared Admissionを同期invokeする。ACK失敗時はAdmission前にfail closedし、inline responseとの二重ACKを行わない。
+- ACK後のAdmission success/failureは、15分だけ有効なInteraction tokenをprocess memory内で使ってoriginal ephemeral responseへsafe acknowledgementとして反映する。この短期edit失敗はOperation resultを変更しない。tokenはOperation/DynamoDB/log/metric/exceptionへ保存せず、Command LambdaはBot Tokenを読まない。
+- 元のHTTP requestは外部callback成功後にDiscord公式contractどおり202/empty bodyとする。PINGは従来どおりinline PONG、authorization rejectionは本人限定inline responseを維持する。Command Lambda timeoutは3秒からbounded 10秒へ変更するが、3秒deadlineの解決根拠はtimeout延長ではなくACK-before-Admission orderingである。
+- START/STOP/STATUSのAdmission、idempotency、Lock/Desired/workflow contractは変更しない。長時間progress/final identityはInteraction tokenへ戻さず、D-086の通常Bot message、nonce、CAS deliveryを維持する。
+- **Production evidence:** Gate 1 parser fix後のreal STATUSはOperation `SUCCEEDED`、fresh stopped/HEALTHY projection、public message一件、delivery `DELIVERED`まで成功した。一方Command Lambdaは同期Admission待機中に3000ms timeoutし、API Gateway integration latency 3015ms / 5xx 1となった。Admission cold start込み2921.89msはcaller timeout後に完了したため、Control Plane safety stateはSTOPPEDのままOperationだけが正規に一件増えた。timeout alarmは既知incidentとして自然evaluationまで手動変更しない。
+- **関連:** D-079〜D-087、D-045、D-074。
+
 ### D-088 Phase 7 release monitoringはread-only observerと独立SNS通知で構成する
 
 - **状態:** Accepted（Phase 7G-M dev deployed / notification validated）
@@ -26,7 +37,7 @@
 
 - **状態:** Accepted（Phase 7E repository validated）
 - **日付:** 2026-08-31
-- Discord `/mc start`は署名・認可後に既存Admission Lambdaを同期invokeし、shared START AdmissionだけがOperation、Lock、lease、Current Operationと既存START State Machine executionを作る。Command LambdaはAdmission成功後に即時ephemeral ACKを返し、Interaction tokenを長時間progress identityへ使用しない。3秒境界の実測はPhase 7G release gateとする。
+- Discord `/mc start`は既存Admission Lambdaを同期invokeし、shared START AdmissionだけがOperation、Lock、lease、Current Operationと既存START State Machine executionを作る。initial response orderingはD-089でACK-before-Admissionへ更新するが、Interaction tokenを長時間progress identityへ使用しない本Decisionのdelivery contractは維持する。
 - Operation itemに単調増加する`progress_revision`を追加する。Admissionは0、公開対象となる`current_step`/terminal status transitionは同じconditional update/transactionでrevisionを1増やす。Operations Stream eventはこのrevisionをdelivery source identityとし、Message componentのconsistent readがevent revisionより新しければstale eventをno-opにする。
 - 初回revisionはD-086 nonceで通常messageを一件作り、以後は保存済み`message_id`をeditする。delivery metadataはsource/delivered revisionをCAS管理する。metadata-only MODIFYはprogress revisionが変わらないためdeliveryしない。古いrevisionのFAILEDは新しいrevisionをblockせず、新revisionごとにbounded attemptを開始できる。
 - progress delivery failureはD-082どおりSTART Operation、Lock、Desired、State Machineを変更しない。terminal success/failureは既存START Operation status/errorだけからsafe projectionし、DiscordがEC2/DNS/READYを独自判定しない。

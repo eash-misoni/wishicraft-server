@@ -35,6 +35,31 @@ class Admission:
         return self.result
 
 
+class Callback:
+    def __init__(
+        self,
+        *,
+        defer_failure: Exception | None = None,
+        edit_failure: Exception | None = None,
+    ) -> None:
+        self.defer_failure = defer_failure
+        self.edit_failure = edit_failure
+        self.calls: list[tuple[str, str]] = []
+
+    def defer(self, *, interaction_id: str, interaction_token: str) -> None:
+        assert interaction_token == "non-production-test-token"
+        self.calls.append(("defer", interaction_id))
+        if self.defer_failure is not None:
+            raise self.defer_failure
+
+    def edit_original(self, *, application_id: str, interaction_token: str, content: str) -> None:
+        assert application_id == APPLICATION_ID
+        assert interaction_token == "non-production-test-token"
+        self.calls.append(("edit", content))
+        if self.edit_failure is not None:
+            raise self.edit_failure
+
+
 @pytest.fixture
 def signing_key(monkeypatch: pytest.MonkeyPatch) -> SigningKey:
     key = SigningKey.generate()
@@ -49,6 +74,7 @@ def signing_key(monkeypatch: pytest.MonkeyPatch) -> SigningKey:
     for name, value in environment.items():
         monkeypatch.setenv(name, value)
     monkeypatch.setattr(discord_command_lambda, "_operation_admission", Admission())
+    monkeypatch.setattr(discord_command_lambda, "_interaction_callback", Callback())
     return key
 
 
@@ -116,24 +142,30 @@ def test_ping_returns_pong(signing_key: SigningKey) -> None:
     response = discord_command_lambda.handler(event(payload(interaction_type=1), signing_key), None)
     assert response["statusCode"] == 200
     assert response_body(response) == {"type": 1}
+    callback = discord_command_lambda._interaction_callback
+    assert isinstance(callback, Callback)
+    assert callback.calls == []
 
 
-def test_valid_status_is_admitted_once_then_deferred(signing_key: SigningKey) -> None:
+def test_valid_status_is_deferred_then_admitted_once(signing_key: SigningKey) -> None:
     response = discord_command_lambda.handler(event(payload(), signing_key), None)
-    assert response["statusCode"] == 200
-    assert response_body(response) == {
-        "type": 5,
-        "data": {"flags": 64},
-    }
+    assert response["statusCode"] == 202
+    assert response["body"] == ""
     admission = discord_command_lambda._operation_admission
+    callback = discord_command_lambda._interaction_callback
     assert isinstance(admission, Admission)
+    assert isinstance(callback, Callback)
     assert admission.calls == [("STATUS", "1532000000000000001")]
+    assert callback.calls == [
+        ("defer", "1532000000000000001"),
+        ("edit", "Status accepted. Progress will be posted in this channel."),
+    ]
 
 
 def test_start_uses_shared_admission_and_immediate_ephemeral_ack(signing_key: SigningKey) -> None:
     response = discord_command_lambda.handler(event(payload(subcommand="start"), signing_key), None)
-    assert response["statusCode"] == 200
-    assert response_body(response)["type"] == 4
+    assert response["statusCode"] == 202
+    assert response["body"] == ""
     admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
     assert admission.calls == [("START", "1532000000000000001")]
@@ -141,8 +173,8 @@ def test_start_uses_shared_admission_and_immediate_ephemeral_ack(signing_key: Si
 
 def test_stop_uses_shared_admission_and_immediate_ephemeral_ack(signing_key: SigningKey) -> None:
     response = discord_command_lambda.handler(event(payload(subcommand="stop"), signing_key), None)
-    assert response["statusCode"] == 200
-    assert response_body(response)["type"] == 4
+    assert response["statusCode"] == 202
+    assert response["body"] == ""
     admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
     assert admission.calls == [("STOP", "1532000000000000001")]
@@ -160,7 +192,7 @@ def test_production_empty_subcommand_options_reach_shared_admission_once(
         None,
     )
 
-    assert response["statusCode"] == 200
+    assert response["statusCode"] == 202
     admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
     assert admission.calls == [(subcommand.upper(), "1532000000000000001")]
@@ -183,7 +215,7 @@ def test_malformed_subcommand_options_do_not_reach_admission(
 
 def test_base64_command_uses_same_boundary(signing_key: SigningKey) -> None:
     response = discord_command_lambda.handler(event(payload(), signing_key, encoded=True), None)
-    assert response["statusCode"] == 200
+    assert response["statusCode"] == 202
 
 
 def test_invalid_signature_precedes_malformed_json(signing_key: SigningKey) -> None:
@@ -197,8 +229,11 @@ def test_invalid_signature_precedes_malformed_json(signing_key: SigningKey) -> N
     assert response["statusCode"] == 401
     assert response_body(response) == {"error": "invalid request"}
     admission = discord_command_lambda._operation_admission
+    callback = discord_command_lambda._interaction_callback
     assert isinstance(admission, Admission)
+    assert isinstance(callback, Callback)
     assert admission.calls == []
+    assert callback.calls == []
 
 
 def test_signed_malformed_json_is_safe_400(signing_key: SigningKey) -> None:
@@ -218,8 +253,82 @@ def test_unauthorized_request_has_no_role_or_internal_detail(signing_key: Signin
     assert ADMIN_ROLE_ID not in rendered
     assert "arn:" not in rendered
     admission = discord_command_lambda._operation_admission
+    callback = discord_command_lambda._interaction_callback
+    assert isinstance(admission, Admission)
+    assert isinstance(callback, Callback)
+    assert admission.calls == []
+    assert callback.calls == []
+
+
+def test_signature_parse_authorization_ack_admission_order(signing_key: SigningKey) -> None:
+    trace: list[str] = []
+
+    class OrderedCallback(Callback):
+        def defer(self, *, interaction_id: str, interaction_token: str) -> None:
+            trace.append("ack")
+            super().defer(interaction_id=interaction_id, interaction_token=interaction_token)
+
+        def edit_original(
+            self, *, application_id: str, interaction_token: str, content: str
+        ) -> None:
+            trace.append("edit")
+            super().edit_original(
+                application_id=application_id,
+                interaction_token=interaction_token,
+                content=content,
+            )
+
+    class OrderedAdmission(Admission):
+        def admit(
+            self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
+        ) -> str:
+            assert trace == ["ack"]
+            trace.append("admission")
+            return super().admit(
+                operation_type=operation_type,
+                interaction_id=interaction_id,
+                guild_id=guild_id,
+                channel_id=channel_id,
+            )
+
+    discord_command_lambda._interaction_callback = OrderedCallback()
+    discord_command_lambda._operation_admission = OrderedAdmission()
+
+    response = discord_command_lambda.handler(event(payload(), signing_key), None)
+
+    assert response["statusCode"] == 202
+    assert trace == ["ack", "admission", "edit"]
+
+
+def test_initial_ack_failure_is_fail_closed_before_admission(signing_key: SigningKey) -> None:
+    discord_command_lambda._interaction_callback = Callback(
+        defer_failure=RuntimeError("credential-bearing internal detail")
+    )
+
+    response = discord_command_lambda.handler(event(payload(), signing_key), None)
+
+    assert response["statusCode"] == 502
+    assert response_body(response) == {"error": "interaction acknowledgement failed"}
+    admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
     assert admission.calls == []
+    assert "internal detail" not in json.dumps(response)
+
+
+def test_ack_edit_failure_does_not_rewrite_successful_admission(signing_key: SigningKey) -> None:
+    discord_command_lambda._interaction_callback = Callback(
+        edit_failure=RuntimeError("credential-bearing internal detail")
+    )
+
+    response = discord_command_lambda.handler(event(payload(), signing_key), None)
+
+    assert response["statusCode"] == 202
+    admission = discord_command_lambda._operation_admission
+    callback = discord_command_lambda._interaction_callback
+    assert isinstance(admission, Admission)
+    assert isinstance(callback, Callback)
+    assert admission.calls == [("STATUS", "1532000000000000001")]
+    assert [name for name, _ in callback.calls] == ["defer", "edit"]
 
 
 def test_invalid_public_key_configuration_is_safe_500(
@@ -234,10 +343,14 @@ def test_invalid_public_key_configuration_is_safe_500(
 def test_status_admission_failure_is_safe_and_retryable(signing_key: SigningKey) -> None:
     discord_command_lambda._operation_admission = Admission(RuntimeError("internal detail"))
     response = discord_command_lambda.handler(event(payload(), signing_key), None)
-    assert response["statusCode"] == 200
-    rendered = json.dumps(response_body(response))
-    assert "Please retry" in rendered
-    assert "internal detail" not in rendered
+    assert response["statusCode"] == 202
+    callback = discord_command_lambda._interaction_callback
+    assert isinstance(callback, Callback)
+    assert callback.calls[-1] == (
+        "edit",
+        "Status could not be submitted. Please retry this command.",
+    )
+    assert "internal detail" not in json.dumps(callback.calls)
 
 
 def test_lambda_admission_uses_stable_discord_key_and_accepts_duplicate_result() -> None:
@@ -345,10 +458,14 @@ def test_stop_duplicate_uses_same_shared_admission_identity() -> None:
 def test_stop_admission_failure_is_safe_and_retryable(signing_key: SigningKey) -> None:
     discord_command_lambda._operation_admission = Admission(RuntimeError("internal detail"))
     response = discord_command_lambda.handler(event(payload(subcommand="stop"), signing_key), None)
-    assert response["statusCode"] == 200
-    rendered = json.dumps(response_body(response))
-    assert "Please retry" in rendered
-    assert "internal detail" not in rendered
+    assert response["statusCode"] == 202
+    callback = discord_command_lambda._interaction_callback
+    assert isinstance(callback, Callback)
+    assert callback.calls[-1] == (
+        "edit",
+        "STOP could not be submitted. Please retry this command.",
+    )
+    assert "internal detail" not in json.dumps(callback.calls)
 
 
 def test_phase7f_handler_only_connects_commands_to_shared_admission_lambda() -> None:
@@ -363,7 +480,7 @@ def test_phase7f_handler_only_connects_commands_to_shared_admission_lambda() -> 
         "route53",
     ):
         assert forbidden not in source
-    assert 'operation_type="STATUS"' in source
-    assert 'operation_type="START"' in source
-    assert 'operation_type="STOP"' in source
+    assert "operation_type=interaction.kind.value" in source
+    assert "callback.defer" in source
+    assert source.index("callback.defer") < source.index("_get_operation_admission().admit")
     assert "StartExecution" not in source
