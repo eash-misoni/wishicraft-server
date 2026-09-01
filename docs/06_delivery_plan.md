@@ -706,6 +706,7 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 - Email addressをrepository、argument、environment、transcriptへ出さないoperator非表示入力でSNS subscriptionを作成し、confirmation後はconfirmed 1 / pending 0をmetadataだけで確認した。secretなしの`TEST ONLY`通知を一件publishし、operator受信を確認した。Budgetはactual 50/80/100%とforecasted 100%の4通知すべてが同SNS Topicを参照する。
 - observer初回read-only invocationは6 metricsを発行し、その後scheduleを含め24 alarmsすべて`OK`、observer Active、EventBridge `rate(5 minutes)` Enabled、observer log retention 14日、STATUS/Message retry/DLQ深度0を確認した。observer IAMはSystemState/Locksの`GetItem`、`DescribeInstances`、`PutMetricData`、loggingだけで、Control Plane mutation、Bot Token、Discord、SSM、Route 53、Step Functions権限を持たない。
 - Phase 7G-M終了時もTarget/Phase 1はstopped、Phase 1 stack termination protection有効、Data EBSはTarget attached / DeleteOnTermination false、migration snapshot retained、SGはpublic TCP 25565だけ、DNS absent、Desired revision 7 STOPPED、Actual/Observed stopped / HEALTHY、Lock/Current Operation/running START・STOP executionなしを維持した。real Discord commandは引き続き0件であり、Phase 7G-3はこのsafe stateからGate 0を再評価する。
+- Phase 7G-3 Gate 1の最初の`/mc status`はrole不足をapplication authorizationが拒否し、role付与後の再試行ではDiscord production payloadがsubcommandに正規のempty `options`を含むことを確認した。旧strict parserは`name`/`type`以外のkeyを一律拒否したためHTTP 400となったが、いずれもAdmission/Operation/Lock/Desired/START・STOP side effect前にfail closedし、19件のOperation baselineとSTOPPED safety stateを維持した。compatibility fixは`options`省略またはexact empty arrayだけを許可し、non-empty/non-array/unknown/nested shapeを引き続き拒否する。deployとreal command再試行は別の明示承認境界とする。
 - Phase 8 backup完成までは試験運用とする。
 
 ### 完了条件

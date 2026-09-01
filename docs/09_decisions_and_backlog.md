@@ -890,6 +890,8 @@ dev用Discord Guild/channel/role/Application ID/Public Keyはrepository設定済
 
 Phase 7G-1のcredential-backed `cdk diff --change-set=false`ではTarget差分0、Control PlaneはPhase 7 repository実装どおりHTTP API、Command/STATUS/Message Lambda、Operations Stream、SQS/DLQ、最小IAMと既存Lambda code更新だけであり、DynamoDB replacement/data loss、Target/Phase 1/EBS/SG/DNS mutationはない。`dynamodb:ListStreams`のresource `*`はresource-level restrictionをサポートしないlist actionに限定され、lifecycle/secret wildcardではない。Phase 1 diffには既知のhistorical UserData差分とreplacement可能性が残るため、Frozen stackをPhase 7G deploy対象から除外し続ける。現在のControl PlaneにはPhase 7 HTTP endpointが未deployである。Phase 7G-2のblocker/境界は、Control Plane stackだけの明示deploy、deploy後endpoint/PING確認、Discord Interaction Endpoint URL設定、Git正本commandの明示Guild registration、最低限monitoring release gate確認である。
 
+Phase 7G-3 Gate 1では、role不足のrequestと、Discordが引数なしsubcommandへempty `options`を含めたproduction requestの双方がControl Plane Admission前にfail closedした。後者はDiscord protocolの正規shapeに対するparser compatibility bugであり、新Decisionではなく、`options`省略またはexact empty arrayだけを受理するstrict contractへ修正する。non-empty/non-array/unknown/nested shapeは拒否を維持し、deployとreal retryはrepository fixとは別の承認境界とする。
+
 Phase別に決める事項:
 
 | 項目 | 決定期限 |

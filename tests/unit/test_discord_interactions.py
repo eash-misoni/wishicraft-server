@@ -189,6 +189,26 @@ def test_mvp_commands_are_strictly_parsed(subcommand: str, expected: Interaction
 
 
 @pytest.mark.parametrize(
+    ("subcommand", "expected"),
+    [
+        ("status", InteractionKind.STATUS),
+        ("start", InteractionKind.START),
+        ("stop", InteractionKind.STOP),
+    ],
+)
+def test_mvp_commands_accept_discord_production_empty_subcommand_options(
+    subcommand: str, expected: InteractionKind
+) -> None:
+    key = SigningKey.generate()
+    payload = command_payload(subcommand)
+    payload["data"]["options"][0]["options"] = []  # type: ignore[index]
+
+    interaction = parse_and_authorize(json.dumps(payload).encode(), config=configuration(key))
+
+    assert interaction.kind is expected
+
+
+@pytest.mark.parametrize(
     "payload",
     [
         command_payload("restart"),
@@ -206,19 +226,44 @@ def test_mvp_commands_are_strictly_parsed(subcommand: str, expected: Interaction
                 ],
             },
         },
-        {
-            **command_payload(),
-            "data": {
-                "id": COMMAND_ID,
-                "name": "mc",
-                "type": 1,
-                "options": [{"name": "status", "type": 1, "options": []}],
-            },
-        },
     ],
 )
 def test_unknown_or_malformed_commands_are_rejected(payload: object) -> None:
     key = SigningKey.generate()
+    with pytest.raises(MalformedInteraction):
+        parse_and_authorize(json.dumps(payload).encode(), config=configuration(key))
+
+
+@pytest.mark.parametrize(
+    "nested_options",
+    [
+        [{}],
+        [{"name": "argument", "type": 3, "value": "unexpected"}],
+        [{"name": "argument", "type": 4, "value": 1}],
+        [{"name": "argument", "type": 6, "value": "1532000000000000999"}],
+        [{"name": "nested", "type": 1}],
+        [{"name": "group", "type": 2}],
+        None,
+        {},
+        "unexpected",
+    ],
+)
+def test_mvp_commands_reject_nonempty_or_nonarray_subcommand_options(
+    nested_options: object,
+) -> None:
+    key = SigningKey.generate()
+    payload = command_payload()
+    payload["data"]["options"][0]["options"] = nested_options  # type: ignore[index]
+
+    with pytest.raises(MalformedInteraction):
+        parse_and_authorize(json.dumps(payload).encode(), config=configuration(key))
+
+
+def test_mvp_commands_reject_unknown_subcommand_key() -> None:
+    key = SigningKey.generate()
+    payload = command_payload()
+    payload["data"]["options"][0]["unexpected"] = True  # type: ignore[index]
+
     with pytest.raises(MalformedInteraction):
         parse_and_authorize(json.dumps(payload).encode(), config=configuration(key))
 

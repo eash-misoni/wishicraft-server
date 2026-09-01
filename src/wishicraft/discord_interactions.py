@@ -261,7 +261,11 @@ def _parse_command(raw_data: object, *, expected_guild_id: str) -> InteractionKi
     if not isinstance(options, list) or len(options) != 1:
         raise MalformedInteraction("invalid command")
     option = options[0]
-    if not isinstance(option, dict) or set(option) != {"name", "type"}:
+    if not isinstance(option, dict) or not {"name", "type"} <= set(option):
+        raise MalformedInteraction("invalid command")
+    if set(option) - {"name", "type", "options"}:
+        raise MalformedInteraction("invalid command")
+    if "options" in option and option["options"] != []:
         raise MalformedInteraction("invalid command")
     name = option.get("name")
     if option.get("type") != SUB_COMMAND or not isinstance(name, str):

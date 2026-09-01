@@ -52,7 +52,12 @@ def signing_key(monkeypatch: pytest.MonkeyPatch) -> SigningKey:
     return key
 
 
-def payload(*, interaction_type: int = 2, subcommand: str = "status") -> dict[str, object]:
+def payload(
+    *,
+    interaction_type: int = 2,
+    subcommand: str = "status",
+    include_empty_subcommand_options: bool = False,
+) -> dict[str, object]:
     value: dict[str, object] = {
         "id": "1532000000000000001",
         "application_id": APPLICATION_ID,
@@ -61,6 +66,9 @@ def payload(*, interaction_type: int = 2, subcommand: str = "status") -> dict[st
         "version": 1,
     }
     if interaction_type == 2:
+        option: dict[str, object] = {"name": subcommand, "type": 1}
+        if include_empty_subcommand_options:
+            option["options"] = []
         value.update(
             {
                 "guild_id": GUILD_ID,
@@ -70,7 +78,7 @@ def payload(*, interaction_type: int = 2, subcommand: str = "status") -> dict[st
                     "id": "1532000000000000002",
                     "name": "mc",
                     "type": 1,
-                    "options": [{"name": subcommand, "type": 1}],
+                    "options": [option],
                 },
             }
         )
@@ -138,6 +146,39 @@ def test_stop_uses_shared_admission_and_immediate_ephemeral_ack(signing_key: Sig
     admission = discord_command_lambda._operation_admission
     assert isinstance(admission, Admission)
     assert admission.calls == [("STOP", "1532000000000000001")]
+
+
+@pytest.mark.parametrize("subcommand", ["status", "start", "stop"])
+def test_production_empty_subcommand_options_reach_shared_admission_once(
+    signing_key: SigningKey, subcommand: str
+) -> None:
+    response = discord_command_lambda.handler(
+        event(
+            payload(subcommand=subcommand, include_empty_subcommand_options=True),
+            signing_key,
+        ),
+        None,
+    )
+
+    assert response["statusCode"] == 200
+    admission = discord_command_lambda._operation_admission
+    assert isinstance(admission, Admission)
+    assert admission.calls == [(subcommand.upper(), "1532000000000000001")]
+
+
+@pytest.mark.parametrize("nested_options", [[{}], None, {}, "unexpected"])
+def test_malformed_subcommand_options_do_not_reach_admission(
+    signing_key: SigningKey, nested_options: object
+) -> None:
+    value = payload(include_empty_subcommand_options=True)
+    value["data"]["options"][0]["options"] = nested_options  # type: ignore[index]
+
+    response = discord_command_lambda.handler(event(value, signing_key), None)
+
+    assert response["statusCode"] == 400
+    admission = discord_command_lambda._operation_admission
+    assert isinstance(admission, Admission)
+    assert admission.calls == []
 
 
 def test_base64_command_uses_same_boundary(signing_key: SigningKey) -> None:
