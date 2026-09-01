@@ -905,6 +905,10 @@ Phase 7G-3 Gate 1では、role不足のrequestと、Discordが引数なしsubcom
 
 Phase 7G-3 STOPはOperation `op-6949d819-27be-4eec-85e9-8f04c735ed9c`としてsave/graceful stop/EC2 stop/DNS DELETE/INSYNC/final Reconcile/owned cleanupを完了し、Control Plane `SUCCEEDED`、Discord progress revision 5 `DELIVERED`へ収束した。一方、古いprogress workerのDiscord edit後にnewer revisionがdelivery metadataを先に完了したため、古いworkerのcompletion CASが失敗してMessage Lambda Errors alarmが発報した。D-086/D-087から直接導かれる実装修正として、completion CAS failure後のconsistent read-backが同一Operation type/channel、deterministic delivery ID、message IDを確認し、newer revision ownershipまたは同一revision terminal completionだけをstale no-opとする。revision regression、identity mismatch、same-revision unrelated ownershipは引き続きerrorとし、Alarm契約を緩和しない。Control Plane safety stateはDesired revision 9 STOPPED、fresh stopped/HEALTHY、Lock/Current Operationなし、queue/DLQ 0で不変であり、deploy/final STATUSは別承認境界とする。
 
+Phase 7は2026-09-01にCompletedとなった。completion CAS fixをCI成功済みcommit `c88788742d08d9766c3be80f75d62c653151520d`からControl Planeだけへdeployし、final STATUS `op-0f415db5-d0a3-439a-b387-064db10d2329`でOperation 24→25、fresh stopped/HEALTHY、通常message一件、delivery revision 2 / attempt 1 / `DELIVERED`を確認した。deploy後のMessage Lambdaを含む主要Lambda Errors/Throttlesは0、24 alarmsは全件`OK`、retry/DLQは0である。production accountingはbaseline 19から、role/parser rejectionはOperation 0、initial-response timeoutを伴ったsuccessful STATUS 1、D-089後のSTOPPED STATUS、START、RUNNING STATUS、STOP、final STOPPED STATUSの計6 Operation増加で25となった。
+
+real STARTは一Operation/一State MachineでREADY、DNS UPSERT/INSYNC、public TCP 25565とMinecraft 26.2 protocol 776へ到達し、real STOPはexplicit save、RCON fail-closed、graceful runtime stop、EC2 stop、DNS DELETE/INSYNC、fresh stopped/HEALTHY Reconcileを完了した。START/STOPはいずれも一公開messageをrevision 5まで単調更新し、duplicate/rollbackはなかった。STOP completion raceはControl Planeとfinal displayを変更せず、monitoring alarm emailが通知pathを実証した。final AWS stateはTarget stopped/public IPv4・DNSなし、Desired revision 9 STOPPED、Observed stopped/HEALTHY、Lock/Current Operation/running executionなし、Phase 1 Frozen、Data EBS/snapshot/SG safety不変である。Budgetは15 USD通知がactiveでactual 22.273 USD / forecast 23.005 USDとguardrail超過中であり、Phase 8 backup完成までは試験運用を維持する。新しいDecision Neededはない。
+
 Phase別に決める事項:
 
 | 項目 | 決定期限 |
@@ -912,7 +916,7 @@ Phase別に決める事項:
 | Lock owner identity、desired-state CAS、stale operation recovery | D-074でAccepted（2026-08-29） |
 | RCON client/library / container-local command path | D-075でAccepted（2026-08-29） |
 | dev Discord公開IDの実環境照合とBot Token SecureString存在確認 | Phase 7G-1で完了（2026-08-31） |
-| Git正本`/mc` schemaのdev Guild registration | Phase 7G E2E前の明示operator action |
+| Git正本`/mc` schemaのdev Guild registration | Phase 7G-2で完了（2026-08-31） |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |
 | backup整合方式 | Phase 8開始前 |
 | Package manifest最終schema | Phase 9開始前 |

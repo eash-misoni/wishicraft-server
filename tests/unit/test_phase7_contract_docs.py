@@ -30,7 +30,7 @@ def test_phase7_decisions_preserve_control_plane_boundaries() -> None:
     assert "15分だけ有効なInteraction tokenをprocess memory内" in decisions
 
 
-def test_phase7_delivery_plan_is_sliced_before_implementation() -> None:
+def test_phase7_delivery_plan_preserves_slices_and_records_completion() -> None:
     plan = read_doc("06_delivery_plan.md")
 
     for phase in "ABCDEFG":
@@ -41,7 +41,9 @@ def test_phase7_delivery_plan_is_sliced_before_implementation() -> None:
     assert "Phase 7B — Discord ingress / signature / authorization" in plan
     assert "Phase 7G — real Discord + AWS E2E / release gate" in plan
     assert "Phase 7F — `/mc stop`" in plan
-    assert "Phase 7A〜7F repository implementation completed" in plan
+    assert "Completed（2026-09-01、repository / dev AWS / real Discord E2E完了）" in plan
+    assert "final STOPPED STATUS" in plan
+    assert "Operationは24→25" in plan
 
 
 def test_phase7f_reuses_stop_control_plane_and_delivery_contracts() -> None:

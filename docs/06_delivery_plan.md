@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-31
+- **最終更新:** 2026-09-01
 
 ## 1. 開発原則
 
@@ -618,7 +618,7 @@ STOPは6回renewし、最長poll gapは約30秒、900秒leaseに少なくとも�
 
 ## 10. Phase 7 — Discord MVP
 
-- **状態:** In Progress（Phase 7A〜7F repository implementation completed、Phase 7G next）
+- **状態:** Completed（2026-09-01、repository / dev AWS / real Discord E2E完了）
 
 ### 目的
 
@@ -693,7 +693,7 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 
 ### Phase 7G — real Discord + AWS E2E / release gate
 
-- **状態:** In Progress（Phase 7G-1〜7G-2 / Phase 7G-M completed、Phase 7G-3 real E2E前）
+- **状態:** Completed（2026-09-01、Phase 7G-1〜7G-3 / Phase 7G-M完了）
 - Phase 7G-1では正本dev account/regionとPhase 6 safe stateをread-onlyで再確認し、固定Parameter `/wishicraft/dev/secret/discord-bot-token`をoperator非echo入力からAWS managed keyの`SecureString` Version 1として新規作成した。値・fragmentはrepository、shell引数、environment、transcript、logへ出さず、作成後はmetadataだけを確認した。
 - Bot Tokenをprocess memory内だけで使用したDiscord read-only照合ではApplication ID/Public Key、Guild、operation/admin channel、player/admin roleがdev設定と一致し、Botはoperation channelで`VIEW_CHANNEL`、`SEND_MESSAGES`、`EMBED_LINKS`を持つ。HTTP InteractionsとREST messageだけを使うためGateway接続・privileged intentsは不要である。
 - credential-backed template diffはTarget差分0、Control PlaneはPhase 7のHTTP API/Lambda/Operations Stream/SQS/DLQ/IAM追加と既存Lambda code更新で、DynamoDB/EC2/EBS/SG/DNS replacementまたは拡張を含まない。Phase 1には既知のhistorical UserData差分とreplacement可能性があるためFrozen/deploy禁止を維持する。Phase 7G-2ではControl Plane stackだけを明示deployし、Discord endpoint設定とcommand registrationはさらに別の明示operator mutationとして扱う。
@@ -710,6 +710,13 @@ Discordは新しいMinecraft制御系ではなく、既存Operation Admission、
 - parser fix deploy後のreal STATUSはOperation `op-35823bf7-b74b-4bf6-a21a-b941d69e40fd`、fresh stopped/HEALTHY projection、通常message一件、delivery `DELIVERED`まで成功したが、Command Lambdaが同期Admissionを待って3000ms timeoutし、Discord initial responseだけが失敗した。Admissionはcold start込み2921.89msでcaller timeout後に完了したため、Operationsは19→20、Lock/Desired/current operation/Targetは安全状態を維持した。D-089は認証・認可後のtype 5 callback ACKをAdmission前に確定し、ACK成功後だけshared Admissionを同期実行、original ephemeral responseを短期edit、元HTTP requestを202/empty bodyとする。timeout延長だけを解決策にせず、deploy/real retryを別承認境界に残す。
 - D-089 deploy後のSTOPPED STATUS、START、RUNNING STATUS、public Minecraft protocol probe、STOPは既存Control Plane経路で成功した。STOP Operation `op-6949d819-27be-4eec-85e9-8f04c735ed9c`はexplicit save、graceful Host Runtime stop、EC2 stop、DNS DELETE/INSYNC、fresh stopped/HEALTHY Reconcile、owned cleanupまで89.010秒で`SUCCEEDED`となり、Desired revision 9 STOPPED、Lock/Current Operationなしへ収束した。Discordも同一messageをprogress revision 5まで更新してfinal `DELIVERED`となった。
 - STOP progress中、古いrevision workerのDiscord edit成功後に新しいrevisionがdelivery metadataを先に完了し、古いworkerのcompletion CASが`ConditionalCheckFailedException`となった。Control Plane result、表示、message identity、retry/DLQへ影響せず、Message Lambda Errors alarmが正常に検出したが、completion側がD-087のsuperseded raceをexpected no-opへ分類していなかった。修正はCAS失敗後にOperationをconsistent readし、同一message/deterministic delivery identityでnewer revisionがownershipを取得済み、または同一revisionが期待terminal delivery状態ならno-opとする。revision後退、identity不一致、同一revisionの別owner等はerrorを維持する。Alarm thresholdは変更せず、deployとfinal STOPPED STATUSは別の明示承認境界に残す。
+- completion CAS fixはCI成功済みcommit `c88788742d08d9766c3be80f75d62c653151520d`からControl Plane stackだけへdeployした。credential-backed diffはshared Lambda code assetsだけで、IAM、alarm、Stream/SQS/DLQ、State Machine、DynamoDB、EC2/EBS/SG/DNSを変更しなかった。production bundle内のconsistent read-back分類を確認し、unsigned requestはsignature boundaryでfail closed、Operation 24件、Desired revision 9、Lock 0を維持した。
+- final STOPPED STATUS `op-0f415db5-d0a3-439a-b387-064db10d2329`はD-089のephemeral ACKによりDiscord timeoutなしで受付され、fresh Reconcileのstopped/HEALTHY/DNS absentを通常Bot message一件へdelivery revision 2、attempt 1、`DELIVERED`として公開した。Operationは24→25で、Desired revision 9、Lock/lease/Current Operationは不変だった。deployからfinal deliveryまでCommand/Admission/STATUS/Reconcile/Message LambdaのErrors/Throttlesは0、24 alarmsは全件`OK`、retry queueと2 DLQは0である。
+- production command accountingはPhase 7G-3開始時19件をbaselineとする。role不足requestとempty-options parser rejectionはOperation 0、parser修正後でinitial response timeoutしたSTATUSが19→20、D-089修正後STOPPED STATUSが20→21、STARTが21→22、RUNNING STATUSが22→23、STOPが23→24、final STOPPED STATUSが24→25である。失敗したGate 1 requestを成功sequenceの5 Operationsと混同しない。
+- START `op-8bb95273-c338-47a1-9253-24149e64721d`はshared Admission/State Machine一実行でEC2、SSM、Host Runtime、Minecraft 26.2 protocol 776、DNS UPSERT/INSYNC、fresh READYへ進み、Desired revision 8 RUNNING、HEALTHYへ収束した。Discord public progressは一messageをrevision 5まで単調editし、external DNS/TCP 25565/Minecraft server-list protocolでpublic readinessを確認した。RUNNING STATUS `op-e911303f-ac08-46c1-896b-c05d5740a609`はLock/Desiredを変更せずonline/HEALTHYを一messageで公開した。
+- STOP `op-6949d819-27be-4eec-85e9-8f04c735ed9c`はshared Admission/State Machine一実行でexplicit `save-all flush`、RCON fail-closed classification、graceful Minecraft/Host Runtime stop、EC2 stop、DNS DELETE/INSYNC、fresh Reconcile、owned cleanupを89.010秒で完了した。final stateはTarget stopped/public IPv4なし、Desired revision 9 STOPPED、Observed stopped/HEALTHY、discrepancy/Lock/Current Operation/running executionなしである。
+- release monitoringは24 alarms全件`OK`、5分observer Enabled、SNS Email subscription Confirmed、retry/DLQ 0、log retention 14日で完了した。STOP時のreal Message Lambda alarm emailによりprimary notification pathも実incidentで機能した。monthly Budget `wc-dev-monthly-cost`は15 USD、通知はactiveで、closeout時actual 22.273 USD / forecast 23.005 USDとguardrail超過中である。これは通知系が健全である既知cost状態としてPhase 7 E2E failureとは分離する。
+- final safety gateはPhase 1 stopped/Frozenかつstack termination protection有効、Data EBSはTarget attached / DeleteOnTermination false、migration snapshot completed/retained、SGはpublic TCP 25565だけ、SSH/RCON/management ingressなしを確認した。Bot Token/Interaction token/RCON secretのlog・repository露出はなく、Command/STATUS executorはBot Token権限なし、Message Lambdaだけがexact SecureStringをreadできる。新しいDecisionはなく、D-082/D-086/D-087/D-089を維持する。
 - Phase 8 backup完成までは試験運用とする。
 
 ### 完了条件
