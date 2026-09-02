@@ -283,6 +283,10 @@ expires_at: epoch_seconds | null
 
 STATUSの`result`はfresh Reconcile後に生成したuser-facing projectionであり、SystemStateの正本ではない。Phase 7C schema version 1は`kind=STATUS`、`status=stopped|starting|online|stopping|degraded|unknown`、`ready`、lowercase `health`、利用可能時だけのcanonical `endpoint`、`observed_at`、固定safe summaryだけを保存する。raw exception、AWS/SSM detail、instance identity、secret、role判定情報を含めない。
 
+BACKUP成功時の`result`は`kind=BACKUP`、logical `backup_id`、AWS `snapshot_id`、`source_volume_id`、`game_id`、`category=backup`を保持する。logical identityはOperation IDから一意に導出し、AWS Snapshot IDだけをWishicraft identityにしない。
+
+Phase 8A snapshot tag schema version 1は`Project`、`Stage`、`WishicraftCategory`、`WishicraftGameId`、`WishicraftOperationId`、`WishicraftSourceVolumeId`、`WishicraftSchemaVersion`、`WishicraftProtected`、`WishicraftCreatedAt`のexact setとする。通常値はcategory `backup`、protected `false`。migration snapshotはcategory `migration`として論理的に分離し、既存migration snapshotを通常retentionへ含めない。
+
 ### Index候補
 
 - GSI: `status` + `requested_at`

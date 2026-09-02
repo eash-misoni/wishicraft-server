@@ -34,11 +34,14 @@ class StepFunctionsApi(Protocol):
 _service: OperationAdmissionService | None = None
 _launcher: WorkflowLauncher | None = None
 _stop_launcher: WorkflowLauncher | None = None
+_backup_launcher: WorkflowLauncher | None = None
 
 
 def handler(event: object, context: object) -> dict[str, object]:
     del context
     operation_type, idempotency_key, requested_by, discord = _parse_event(event)
+    if operation_type is OperationType.BACKUP and not os.environ.get("BACKUP_STATE_MACHINE_ARN"):
+        raise ValueError("BACKUP workflow is not configured")
     result = _get_service().admit(
         operation_type=operation_type,
         idempotency_key=idempotency_key,
@@ -58,6 +61,14 @@ def handler(event: object, context: object) -> dict[str, object]:
         if result.lease_id is None:
             raise RuntimeError("STOP admission did not create a lease")
         _get_stop_launcher().start(
+            operation_id=result.operation_id,
+            lease_id=result.lease_id,
+            started_at=datetime.now(UTC),
+        )
+    if result.created and operation_type is OperationType.BACKUP:
+        if result.lease_id is None:
+            raise RuntimeError("BACKUP admission did not create a lease")
+        _get_backup_launcher().start(
             operation_id=result.operation_id,
             lease_id=result.lease_id,
             started_at=datetime.now(UTC),
@@ -259,6 +270,20 @@ def _get_stop_launcher() -> WorkflowLauncher:
             state_machine_environment="STOP_STATE_MACHINE_ARN",
         )
     return _stop_launcher
+
+
+def _get_backup_launcher() -> WorkflowLauncher:
+    global _backup_launcher
+    if _backup_launcher is None:
+        boto3 = importlib.import_module("boto3")
+        session = cast(AwsSession, boto3)
+        region = _required_environment("AWS_REGION")
+        _backup_launcher = WorkflowLauncher(
+            cast(StepFunctionsApi, session.client("stepfunctions", region_name=region)),
+            cast(DynamoApi, session.client("dynamodb", region_name=region)),
+            state_machine_environment="BACKUP_STATE_MACHINE_ARN",
+        )
+    return _backup_launcher
 
 
 def _required_environment(name: str) -> str:

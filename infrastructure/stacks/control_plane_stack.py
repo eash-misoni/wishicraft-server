@@ -375,6 +375,121 @@ class ControlPlaneStack(Stack):
                 lease_renew_seconds=stage.lock_renew_interval_seconds,
             ),
         )
+
+        backup_task: lambda_.Function | None = None
+        backup_workflow: sfn.CfnStateMachine | None = None
+        if phase >= 8:
+            backup_task_log_group = logs.LogGroup(
+                self,
+                "BackupTaskLogGroup",
+                log_group_name=(
+                    "/aws/lambda/"
+                    f"{resource_name(project.resource_prefix, stage.stage, 'backup-task')}"
+                ),
+                retention=logs.RetentionDays.TWO_WEEKS,
+                removal_policy=RemovalPolicy.DESTROY,
+            )
+            backup_task = lambda_.Function(
+                self,
+                "BackupTaskFunction",
+                function_name=resource_name(project.resource_prefix, stage.stage, "backup-task"),
+                runtime=lambda_.Runtime.PYTHON_3_12,
+                architecture=lambda_.Architecture.X86_64,
+                code=lambda_.Code.from_asset(str(Path(__file__).resolve().parents[2] / "src")),
+                handler="wishicraft.backup_workflow_lambda.handler",
+                timeout=Duration.seconds(60),
+                memory_size=256,
+                log_group=backup_task_log_group,
+                environment={
+                    "SYSTEM_STATE_TABLE": table.table_name,
+                    "OPERATIONS_TABLE": operations_table.table_name,
+                    "LOCKS_TABLE": locks_table.table_name,
+                    "SYSTEM_ID": project.system_id,
+                    "GAME_ID": project.initial_game_id,
+                    "PROJECT": project.project_slug,
+                    "STAGE": stage.stage,
+                    "AWS_ACCOUNT_ID": stage.aws_account_id,
+                    "AVAILABILITY_ZONE": stage.availability_zone,
+                    "DATA_VOLUME_ID": str(
+                        stage.host_runtime_value("target_host.existing_data_volume_id")
+                    ),
+                    "GLOBAL_LOCK_NAME": stage.global_lock_name,
+                    "LOCK_LEASE_SECONDS": str(stage.lock_lease_seconds),
+                },
+                description="Phase 8A stopped-only persistent Data EBS backup task",
+            )
+            backup_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["ec2:DescribeVolumes", "ec2:DescribeSnapshots"], resources=["*"]
+                )
+            )
+            backup_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["ec2:CreateSnapshot"],
+                    resources=[
+                        f"arn:aws:ec2:{stage.aws_region}:{stage.aws_account_id}:snapshot/*",
+                    ],
+                    conditions={
+                        "StringEquals": {
+                            "aws:RequestTag/Project": project.project_slug,
+                            "aws:RequestTag/Stage": stage.stage,
+                            "aws:RequestTag/WishicraftCategory": "backup",
+                            "aws:RequestTag/WishicraftGameId": project.initial_game_id,
+                            "aws:RequestTag/WishicraftProtected": "false",
+                        }
+                    },
+                )
+            )
+            backup_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["ec2:CreateSnapshot"],
+                    resources=[
+                        (
+                            f"arn:aws:ec2:{stage.aws_region}:{stage.aws_account_id}:volume/"
+                            f"{stage.host_runtime_value('target_host.existing_data_volume_id')}"
+                        )
+                    ],
+                )
+            )
+            backup_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["ec2:CreateTags"],
+                    resources=[f"arn:aws:ec2:{stage.aws_region}:{stage.aws_account_id}:snapshot/*"],
+                    conditions={"StringEquals": {"ec2:CreateAction": "CreateSnapshot"}},
+                )
+            )
+            backup_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=[
+                        "dynamodb:GetItem",
+                        "dynamodb:UpdateItem",
+                        "dynamodb:DeleteItem",
+                        "dynamodb:TransactWriteItems",
+                    ],
+                    resources=[table.table_arn, operations_table.table_arn, locks_table.table_arn],
+                )
+            )
+            backup_workflow_role = iam.Role(
+                self,
+                "BackupWorkflowRole",
+                assumed_by=iam.ServicePrincipal("states.amazonaws.com"),
+                description="Phase 8A BACKUP Standard workflow",
+            )
+            function.grant_invoke(backup_workflow_role)
+            backup_task.grant_invoke(backup_workflow_role)
+            backup_workflow = sfn.CfnStateMachine(
+                self,
+                "BackupStateMachine",
+                state_machine_name=resource_name(project.resource_prefix, stage.stage, "backup"),
+                state_machine_type="STANDARD",
+                role_arn=backup_workflow_role.role_arn,
+                definition=_backup_definition(
+                    reconcile_arn=function.function_arn,
+                    backup_task_arn=backup_task.function_arn,
+                    poll_seconds=stage.lock_renew_interval_seconds,
+                    timeout_seconds=stage.operation_timeout_seconds("BACKUP"),
+                ),
+            )
         function.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["ssm:SendCommand"],
@@ -446,6 +561,11 @@ class ControlPlaneStack(Stack):
                 "BACKUP_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("BACKUP")),
                 "START_STATE_MACHINE_ARN": start_workflow.attr_arn,
                 "STOP_STATE_MACHINE_ARN": stop_workflow.attr_arn,
+                **(
+                    {"BACKUP_STATE_MACHINE_ARN": backup_workflow.attr_arn}
+                    if backup_workflow is not None
+                    else {}
+                ),
             },
         )
         admission.add_to_role_policy(
@@ -469,7 +589,11 @@ class ControlPlaneStack(Stack):
         admission.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["states:StartExecution"],
-                resources=[start_workflow.attr_arn, stop_workflow.attr_arn],
+                resources=[
+                    start_workflow.attr_arn,
+                    stop_workflow.attr_arn,
+                    *([backup_workflow.attr_arn] if backup_workflow is not None else []),
+                ],
             )
         )
         admission.add_to_role_policy(
@@ -483,6 +607,17 @@ class ControlPlaneStack(Stack):
                     (
                         f"arn:aws:states:{stage.aws_region}:{stage.aws_account_id}:execution:"
                         f"{resource_name(project.resource_prefix, stage.stage, 'stop')}:*"
+                    ),
+                    *(
+                        [
+                            (
+                                f"arn:aws:states:{stage.aws_region}:"
+                                f"{stage.aws_account_id}:execution:"
+                                f"{resource_name(project.resource_prefix, stage.stage, 'backup')}:*"
+                            )
+                        ]
+                        if backup_workflow is not None
+                        else []
                     ),
                 ],
             )
@@ -507,10 +642,12 @@ class ControlPlaneStack(Stack):
                 locks_table=locks_table,
                 start_workflow=start_workflow,
                 stop_workflow=stop_workflow,
+                backup_workflow=backup_workflow,
                 monitored_functions=(
                     function,
                     start_task,
                     stop_task,
+                    *([backup_task] if backup_task is not None else []),
                     admission,
                     *discord_functions,
                 ),
@@ -753,6 +890,7 @@ def _add_release_monitoring(
     locks_table: dynamodb.Table,
     start_workflow: sfn.CfnStateMachine,
     stop_workflow: sfn.CfnStateMachine,
+    backup_workflow: sfn.CfnStateMachine | None,
     monitored_functions: tuple[lambda_.Function, ...],
 ) -> None:
     namespace = "Wishicraft/ControlPlane"
@@ -867,7 +1005,10 @@ def _add_release_monitoring(
         )
         alarm.add_alarm_action(alarm_action)
 
-    for logical, machine in (("Start", start_workflow), ("Stop", stop_workflow)):
+    monitored_workflows = [("Start", start_workflow), ("Stop", stop_workflow)]
+    if backup_workflow is not None:
+        monitored_workflows.append(("Backup", backup_workflow))
+    for logical, machine in monitored_workflows:
         machine_name = resource_name(project.resource_prefix, stage.stage, logical.lower())
         metrics = {
             name: cloudwatch.Metric(
@@ -1813,5 +1954,173 @@ def _stop_definition(
         "Comment": "Wishicraft Phase 6 STOP; Desired remains STOPPED after post-CAS failure",
         "StartAt": "InitializeWorkflow",
         "TimeoutSeconds": 1200,
+        "States": states,
+    }
+
+
+def _backup_definition(
+    *, reconcile_arn: str, backup_task_arn: str, poll_seconds: int, timeout_seconds: int
+) -> dict[str, object]:
+    """Build a one-create-attempt workflow; polling may retry but snapshot creation may not."""
+    max_polls = max(1, (timeout_seconds // poll_seconds) - 1)
+
+    def invoke(action: str, failure: str) -> dict[str, object]:
+        return {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+                "FunctionName": backup_task_arn,
+                "Payload": {
+                    "schema_version": 1,
+                    "action": action,
+                    "operation_id.$": "$.operation_id",
+                    "lease_id.$": "$.lease_id",
+                },
+            },
+            "Catch": [
+                {"ErrorEquals": ["States.ALL"], "ResultPath": "$.workflow_error", "Next": failure}
+            ],
+        }
+
+    states: dict[str, object] = {
+        "ReconcileBeforeBackup": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+                "FunctionName": reconcile_arn,
+                "Payload": {"schema_version": 1, "operation": "reconcile"},
+            },
+            "ResultSelector": {"state.$": "$.Payload"},
+            "ResultPath": "$.reconcile",
+            "Next": "ValidateStoppedHealthy",
+            "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "SetObservationFailure"}],
+        },
+        "ValidateStoppedHealthy": {
+            **invoke("preflight", "SetPreconditionFailure"),
+            "Parameters": {
+                "FunctionName": backup_task_arn,
+                "Payload": {
+                    "schema_version": 1,
+                    "action": "preflight",
+                    "operation_id.$": "$.operation_id",
+                    "lease_id.$": "$.lease_id",
+                    "state.$": "$.reconcile.state",
+                },
+            },
+            "ResultPath": "$.preflight",
+            "Next": "CreateSnapshotOnce",
+        },
+        "CreateSnapshotOnce": {
+            **invoke("create", "SetCreateFailure"),
+            "ResultPath": "$.snapshot",
+            "Next": "InitializeSnapshotPoll",
+        },
+        "InitializeSnapshotPoll": {
+            "Type": "Pass",
+            "Result": {"count": 0},
+            "ResultPath": "$.snapshot_poll",
+            "Next": "WaitSnapshot",
+        },
+        "WaitSnapshot": {"Type": "Wait", "Seconds": poll_seconds, "Next": "RenewLease"},
+        "RenewLease": {
+            **invoke("renew", "SetLockLostFailure"),
+            "ResultPath": "$.renewal",
+            "Next": "PollSnapshot",
+        },
+        "PollSnapshot": {
+            **invoke("poll", "SetSnapshotFailure"),
+            "Parameters": {
+                "FunctionName": backup_task_arn,
+                "Payload": {
+                    "schema_version": 1,
+                    "action": "poll",
+                    "operation_id.$": "$.operation_id",
+                    "lease_id.$": "$.lease_id",
+                    "snapshot_id.$": "$.snapshot.Payload.snapshot_id",
+                },
+            },
+            "ResultPath": "$.snapshot_status",
+            "Next": "SnapshotCompleted",
+        },
+        "SnapshotCompleted": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.snapshot_status.Payload.complete",
+                    "BooleanEquals": True,
+                    "Next": "VerifyAndComplete",
+                }
+            ],
+            "Default": "IncrementSnapshotPoll",
+        },
+        "IncrementSnapshotPoll": {
+            "Type": "Pass",
+            "Parameters": {"count.$": "States.MathAdd($.snapshot_poll.count, 1)"},
+            "ResultPath": "$.snapshot_poll",
+            "Next": "SnapshotPollWithinDeadline",
+        },
+        "SnapshotPollWithinDeadline": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.snapshot_poll.count",
+                    "NumericGreaterThanEquals": max_polls,
+                    "Next": "SetSnapshotTimeout",
+                }
+            ],
+            "Default": "WaitSnapshot",
+        },
+        "VerifyAndComplete": {
+            **invoke("complete", "SetVerificationFailure"),
+            "Parameters": {
+                "FunctionName": backup_task_arn,
+                "Payload": {
+                    "schema_version": 1,
+                    "action": "complete",
+                    "operation_id.$": "$.operation_id",
+                    "lease_id.$": "$.lease_id",
+                    "snapshot_id.$": "$.snapshot.Payload.snapshot_id",
+                    "tags.$": "$.snapshot.Payload.tags",
+                },
+            },
+            "End": True,
+        },
+    }
+    failures = {
+        "SetObservationFailure": "OBSERVATION_FAILED",
+        "SetPreconditionFailure": "BACKUP_PRECONDITION_FAILED",
+        "SetCreateFailure": "BACKUP_SNAPSHOT_CREATE_FAILED",
+        "SetSnapshotFailure": "BACKUP_SNAPSHOT_FAILED",
+        "SetSnapshotTimeout": "BACKUP_SNAPSHOT_TIMEOUT",
+        "SetVerificationFailure": "BACKUP_SNAPSHOT_VERIFICATION_FAILED",
+        "SetLockLostFailure": "LOCK_LOST",
+    }
+    for name, code in failures.items():
+        states[name] = {
+            "Type": "Pass",
+            "Result": {"error_code": code},
+            "ResultPath": "$.failure",
+            "Next": "RecordFailure",
+        }
+    states["RecordFailure"] = {
+        **invoke("fail", "UnrecoverableFailure"),
+        "Parameters": {
+            "FunctionName": backup_task_arn,
+            "Payload": {
+                "schema_version": 1,
+                "action": "fail",
+                "operation_id.$": "$.operation_id",
+                "lease_id.$": "$.lease_id",
+                "error_code.$": "$.failure.error_code",
+            },
+        },
+        "Next": "BackupFailed",
+    }
+    states["BackupFailed"] = {"Type": "Fail", "Error": "BACKUP_WORKFLOW_FAILED"}
+    states["UnrecoverableFailure"] = {"Type": "Fail", "Error": "BACKUP_CLEANUP_FAILED"}
+    return {
+        "Comment": "Wishicraft Phase 8A stopped-only Data EBS snapshot backup",
+        "StartAt": "ReconcileBeforeBackup",
+        "TimeoutSeconds": timeout_seconds,
         "States": states,
     }

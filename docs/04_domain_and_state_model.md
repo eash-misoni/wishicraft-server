@@ -337,6 +337,23 @@ RELEASE_LOCK_AFTER_FAILURE
 
 Operation statusとcurrent stepは別属性とする。
 
+backup例:
+
+```text
+ADMIT_OPERATION
+RECONCILE_BEFORE_BACKUP
+VALIDATE_STOPPED_HEALTHY
+VALIDATE_SOURCE_VOLUME
+CREATE_SNAPSHOT_ONCE
+WAIT_SNAPSHOT_COMPLETED
+RENEW_LOCK
+VERIFY_SNAPSHOT
+MARK_SUCCEEDED
+RELEASE_LOCK
+```
+
+BACKUPはDesired Stateを変更しない。timeoutはOperation FAILED/TIMED_OUTであり、作成済みsnapshotが後からcompletedになり得る。これを自動削除せず、同じidempotency requestで新しいsnapshotも作らない。
+
 ## 7. Health
 
 ```text

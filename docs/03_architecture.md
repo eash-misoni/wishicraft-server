@@ -288,6 +288,12 @@ LambdaからEC2へ直接TCP接続せず、SSMを管理経路にすることでVP
 - ローカル一時backup
 - Package cache
 
+Phase 8AのBACKUPはこのData EBS全体を一つのEBS Snapshotとして取得し、root EBSを除外する。current devはGame 1件だけなので`game-vanilla-main`とVolume 1本を明示的に一意bindingできる。`games/` layoutは将来複数Gameを同じfilesystemへ置けるため、Phase 9で2件目を追加する前にdedicated/shared Volume modelを再Decisionする。
+
+BACKUPはshared Admission/global Lockを使用するStandard workflowである。fresh Reconcile、STOPPED/HEALTHY validation、expected encrypted Volume validation、inline metadata付きCreateSnapshot一回、poll、completed/source/tag verification、terminal owned cleanupの順とする。CreateSnapshot stepにRetryを設定せず、同一idempotency replayも新しいexecution/snapshotを作らない。
+
+既存migration snapshotはD-065のretained rollback anchorで、Phase 8A tag schema導入前の歴史的resourceである。通常retentionはcategory `backup`のexact matchを必須とするため、untaggedまたはcategory `migration`のsnapshotを候補にしない。
+
 例:
 
 ```text

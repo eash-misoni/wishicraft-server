@@ -279,6 +279,10 @@ Phase 7G-M dev read-backでは月額15 USD BudgetがHEALTHYで、actual 50/80/10
 
 ### 必須対策
 
+Phase 8AのEBS Snapshotはincremental storageに課金され、保持数とchanged blocksに応じて増加する。通常backup newest 7 per Gameはcost上限のためにも必要だが、Phase 8Aは削除を実装しない。既存月額15 USD Budgetを継続し、backup専用Budgetを追加しない。
+
+Backup taskは`DescribeVolumes`、`CreateSnapshot`、`DescribeSnapshots`、CreateSnapshot時のinline `CreateTags`と、自身のOperation/Lock terminal処理だけを許可する。Start/Stop/Attach/Detach/DeleteVolume/DeleteSnapshot、SSM、Route 53、Discord token accessは許可しない。
+
 - AWS Budgets月額通知
 - 予測コスト通知
 - Minecraft EC2長時間running alarm

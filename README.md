@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜7は完了しています。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。D-032のread-only observer、24 alarms、confirmed SNS Email通知、月額Budgetも実deploy・検証済みです。次はPhase 8 backupです。
+Phase 0〜7は完了しています。Phase 8Aでは停止中のpersistent Data EBSだけを対象とするBACKUP Operationをrepository-onlyで実装・検証済みです。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。D-032のread-only observer、24 alarms、confirmed SNS Email通知、月額Budgetも実deploy・検証済みです。
 
 devは次の3層architectureです。
 

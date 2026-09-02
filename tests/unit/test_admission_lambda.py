@@ -100,6 +100,44 @@ def test_duplicate_stop_admission_does_not_launch_new_execution(
     assert launcher.calls == []
 
 
+def test_backup_admission_launches_backup_workflow_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    service = Service(AdmissionResult("op-backup", True, "lease-backup"))
+    launcher = Launcher()
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.setattr(admission_lambda, "_backup_launcher", launcher)
+    monkeypatch.setenv("BACKUP_STATE_MACHINE_ARN", "arn:backup")
+    backup_event = {**event(), "operation_type": "BACKUP", "idempotency_key": "backup-001"}
+    result = admission_lambda.handler(backup_event, None)
+    assert result["operation_id"] == "op-backup"
+    assert service.calls[0]["operation_type"] is OperationType.BACKUP
+    assert launcher.calls[0]["lease_id"] == "lease-backup"
+
+
+def test_duplicate_backup_admission_does_not_launch_or_create_snapshot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = Service(AdmissionResult("op-backup", False, None))
+    launcher = Launcher()
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.setattr(admission_lambda, "_backup_launcher", launcher)
+    monkeypatch.setenv("BACKUP_STATE_MACHINE_ARN", "arn:backup")
+    backup_event = {**event(), "operation_type": "BACKUP", "idempotency_key": "backup-001"}
+    assert admission_lambda.handler(backup_event, None)["created"] is False
+    assert launcher.calls == []
+
+
+def test_backup_is_rejected_before_admission_when_phase_eight_is_not_configured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = Service(AdmissionResult("op-backup", True, "lease-backup"))
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.delenv("BACKUP_STATE_MACHINE_ARN", raising=False)
+    backup_event = {**event(), "operation_type": "BACKUP", "idempotency_key": "backup-001"}
+    with pytest.raises(ValueError, match="not configured"):
+        admission_lambda.handler(backup_event, None)
+    assert service.calls == []
+
+
 @pytest.mark.parametrize(
     "invalid",
     [

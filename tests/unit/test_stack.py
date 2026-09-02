@@ -252,6 +252,52 @@ def test_dev_stack_is_empty_and_environment_agnostic() -> None:
     assert stack.environment == "aws://unknown-account/unknown-region"
 
 
+def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=8, deployment="control-plane")
+    stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
+    template = Template.from_stack(stack)
+    functions = template.find_resources("AWS::Lambda::Function")
+    backup = next(
+        value["Properties"]
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-backup-task"
+    )
+    assert backup["Environment"]["Variables"]["DATA_VOLUME_ID"] == "vol-03ac9f534326c345c"
+    policies = template.find_resources("AWS::IAM::Policy")
+    backup_role = backup["Role"]["Fn::GetAtt"][0]
+    actions = {
+        action
+        for policy in policies.values()
+        if {"Ref": backup_role} in policy["Properties"]["Roles"]
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+        for action in _action_list(statement["Action"])
+    }
+    assert {"ec2:CreateSnapshot", "ec2:DescribeSnapshots", "ec2:DescribeVolumes"} <= actions
+    assert not actions & {
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:AttachVolume",
+        "ec2:DetachVolume",
+        "ec2:DeleteVolume",
+        "ec2:DeleteSnapshot",
+        "ssm:SendCommand",
+        "route53:ChangeResourceRecordSets",
+        "ssm:GetParameter",
+    }
+    machines = template.find_resources("AWS::StepFunctions::StateMachine")
+    definition = next(
+        value["Properties"]["Definition"]
+        for value in machines.values()
+        if value["Properties"]["StateMachineName"] == "wc-dev-backup"
+    )
+    assert definition["TimeoutSeconds"] == 900
+    assert definition["States"]["CreateSnapshotOnce"].get("Retry") is None
+    assert definition["States"]["WaitSnapshot"]["Seconds"] == 120
+    assert definition["States"]["SetSnapshotTimeout"]["Result"]["error_code"] == (
+        "BACKUP_SNAPSHOT_TIMEOUT"
+    )
+
+
 def test_phase_one_network_uses_configured_public_subnet_and_internet_gateway() -> None:
     app = build_app(REPOSITORY_ROOT, "dev", phase=1)
 

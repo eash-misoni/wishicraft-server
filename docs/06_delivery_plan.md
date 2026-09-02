@@ -762,15 +762,24 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 
 ### 8.1 Backup
 
-1. `backup_game.py`
-2. 停止中Gameをbackupだけのために起動しないscheduled policy
-3. dev/prod分離したS3 bucket
-4. Block Public Access、暗号化、最小権限IAM、removal policy
-5. archive/checksum/manifest
-6. backup workflow
-7. `/mc backup`管理者コマンド
-8. 手動復元runbook
-9. 復元テスト
+#### Phase 8A — Backup contract / storage model freeze
+
+- **状態:** Completed（repository-only、AWS/Discord未適用）
+- initial `game-vanilla-main`とcurrent encrypted Data EBS 1本を一意にbindingする。Volume内には現在Game 1件だけが存在するが、`games/` layoutは将来共有可能であるため、2件目のGame導入前にstorage/retention modelを再Decisionする。
+- BACKUPを既存shared Admission、global Lock、Current Operation、idempotencyへ統合する。
+- fresh STOPPED/HEALTHY/no-discrepancy preflight後、expected Data EBSだけをinline metadata付きでsnapshot化し、Standard workflowで`completed`までpoll、source/tagを再検証してterminal化する。
+- 同一requestは同じOperation/executionへ戻す。CreateSnapshotにnative client tokenがないためcreate Taskを再試行せず、一Operationにつき一回のcreate intentだけを許可する。結果不明・timeout後の同一requestは新規snapshotを作らない。
+- normal backup newest 7 per Gameをcontract化し、migration/protectedを除外する。Phase 8Aでは削除しない。
+- backup workflow failure/timeoutとtask Lambda error/throttleを既存SNS monitoringへ追加する。
+- Restore、schedule、RUNNING backup、自動STOP、Discord command registration、AWS deployは対象外。
+- 将来のinterface候補は`/mc backup`とし、START/STOPと同じplayerまたはadmin role、operation channel exact match、safe public summaryを使用する。Phase 8Aではschema/adapter/registrationを追加しない。
+
+#### 後続slice
+
+1. `/mc backup` repository adapterと明示registration/deploy
+2. production preflight、deploy、実Snapshot lifecycle検証
+3. retention削除は別のdestructive-operation review後に実装
+4. Restore runbook/UIと復元テストはPhase 16
 
 ### 8.2 無人自動停止
 

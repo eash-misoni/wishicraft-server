@@ -379,41 +379,24 @@ systemd、Docker/Compose、itzgが独立にrestartを判断してControl Plane�
 
 ### BAK-002 対象 `MUST`
 
-最低限次を保存する。
-
-- ワールドとdimensionデータ
-- Game定義スナップショット
-- server.properties
-- config、defaultconfigs
-- package ID/version
-- Minecraft/Java要件
-- generation
-- 作成日時とchecksum
+Phase 8 MVPはpersistent Data EBS全体のEBS Snapshotを対象とする。root EBSはIaCとrepositoryから再構築可能なため対象外とする。初期単一GameではData EBSと`game-vanilla-main`を一意に対応させる。複数Gameを同一Volumeへ置く場合は、Game単位retentionを有効化する前にstorage modelを再Decisionする。
 
 ### BAK-003 成功判定 `MUST`
 
-次を確認してバックアップ成功とする。
-
-- Minecraft保存処理成功、または停止中の整合したデータ
-- アーカイブ生成成功
-- 非ゼロサイズ
-- checksum生成
-- S3アップロード成功
-- S3上のオブジェクト情報確認
-- backup manifest保存
+fresh stateがDesired/Actual/ObservedすべてSTOPPED、HEALTHY、discrepancy/active operationなしであること、expected Data EBS identity、Snapshot `completed`、source volume、owner、必須metadata/tagをすべて確認して成功とする。CreateSnapshot acceptedまたは`pending`だけでは成功にしない。
 
 ### BAK-004 復元可能性 `MUST`
 
-利用者向けrestore UIが未実装でも、管理者が手順に従って手動復元でき、定期的に復元テストできなければならない。
+SnapshotにはGame ID、source volume ID、category、Operation ID、作成日時、stage、schema version、protected flagを保持する。Restore操作と復元試験はPhase 8 MVPの対象外とし、Phase 16までsnapshotを自動置換・削除しない。
 
 
 ### BAK-005 停止中の不要起動禁止 `SHOULD`
 
-定期backupだけを目的として停止中のMinecraft EC2を毎日起動しない。停止処理中または稼働中に整合したbackupを作成し、前回backup以降に変更がない停止中Gameはscheduled backupをskipできる。Pre-reset、Pre-upgrade、Pre-deleteは別途必須とする。
+BACKUPは停止中だけ許可し、RUNNING/STARTING/STOPPING/unknown/degradedをfail closedで拒否する。BACKUP自身はEC2やMinecraftを停止・起動しない。scheduled backup、STOP連動backup、RUNNING backupはMVP対象外とする。
 
-### BAK-006 S3保護 `MUST`
+### BAK-006 Retentionと分類 `MUST`
 
-backup bucketはdev/prodで分離し、Block Public Access、server-side encryption、最小権限IAM、明示的removal policy、lifecycleを設定する。versioningやObject Lockは復旧要件と費用を評価してDecisionへ記録する。
+通常backupはGameごとにnewest 7を保持する。`backup`、`migration`、将来のcategoryをmetadataで区別し、migrationとprotected backupは通常retentionから除外する。Phase 8Aはpure selection contractまでとし、自動削除と`DeleteSnapshot`権限を追加しない。
 
 ## 10. 複数ゲーム・Package要件
 

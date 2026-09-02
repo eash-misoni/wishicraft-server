@@ -550,6 +550,7 @@ class OperationRepository:
         status: OperationStatus,
         completed_at: datetime,
         error_code: str | None = None,
+        result: dict[str, object] | None = None,
     ) -> None:
         if status not in {OperationStatus.SUCCEEDED, OperationStatus.FAILED}:
             raise ValueError("normal completion must be SUCCEEDED or FAILED")
@@ -562,6 +563,7 @@ class OperationRepository:
                     completed_at,
                     error_code,
                     extra_condition=None,
+                    result=result,
                 ),
                 self._lock_delete(proof, require_unexpired_at=now_epoch),
                 self._current_operation_remove(proof.owner_operation_id),
@@ -683,6 +685,7 @@ class OperationRepository:
         *,
         extra_condition: str | None,
         timeout_at: datetime | None = None,
+        result: dict[str, object] | None = None,
     ) -> dict[str, object]:
         values = {
             ":status": {"S": status.value},
@@ -699,6 +702,7 @@ class OperationRepository:
             ":running": {"S": OperationStatus.RUNNING.value},
             ":one": {"N": "1"},
             ":zero": {"N": "0"},
+            ":result": _attribute(result),
         }
         condition = "#status IN (:pending, :running)"
         if extra_condition is not None:
@@ -711,11 +715,15 @@ class OperationRepository:
                 "Key": {"operation_id": {"S": operation_id}},
                 "UpdateExpression": (
                     "SET #status = :status, completed_at = :completed_at, "
-                    "updated_at = :completed_at, #error = :error, "
+                    "updated_at = :completed_at, #error = :error, #result = :result, "
                     "progress_revision = if_not_exists(progress_revision, :zero) + :one"
                 ),
                 "ConditionExpression": condition,
-                "ExpressionAttributeNames": {"#status": "status", "#error": "error"},
+                "ExpressionAttributeNames": {
+                    "#status": "status",
+                    "#error": "error",
+                    "#result": "result",
+                },
                 "ExpressionAttributeValues": values,
             }
         }
