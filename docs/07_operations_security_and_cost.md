@@ -283,6 +283,8 @@ Phase 8AのEBS Snapshotはincremental storageに課金され、保持数とchang
 
 Backup taskは`DescribeVolumes`、`CreateSnapshot`、`DescribeSnapshots`、CreateSnapshot時のinline `CreateTags`と、自身のOperation/Lock terminal処理だけを許可する。Start/Stop/Attach/Detach/DeleteVolume/DeleteSnapshot、SSM、Route 53、Discord token accessは許可しない。
 
+2026-09-07のdev deployでは、Snapshot resourceをAWSが評価するaccountless ARN、source volumeをaccount-qualifiedのcurrent Data EBS ARNへ限定したIAMをread-backした。最初の誤ったaccount-qualified Snapshot ARNは明示的UnauthorizedとなりSnapshotを作らずsafe convergenceし、修正後の一回限りのcreate intentでnormal backup 1件を完成・再検証した。DeleteSnapshot、restore、volume lifecycle、EC2 START/STOP権限や操作は追加・実行していない。migration rollback anchorも変更していない。
+
 - AWS Budgets月額通知
 - 予測コスト通知
 - Minecraft EC2長時間running alarm

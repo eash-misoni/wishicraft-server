@@ -774,12 +774,20 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 - Restore、schedule、RUNNING backup、自動STOP、Discord command registration、AWS deployは対象外。
 - 将来のinterface候補は`/mc backup`とし、START/STOPと同じplayerまたはadmin role、operation channel exact match、safe public summaryを使用する。Phase 8Aではschema/adapter/registrationを追加しない。
 
+#### Phase 8B — dev deployment / first real backup
+
+- **状態:** Completed（2026-09-07、dev production evidence）
+- `WishicraftControlPlaneStack-dev`だけをdeployし、CloudFormation `UPDATE_COMPLETE`、replacement/deletion 0を確認した。Data EBS、EC2、Route 53、Security Group、DynamoDBの変更はなく、Backup task/workflowと関連alarm、AdmissionのBACKUP routeだけを既存Control Planeへ追加した。
+- first attempt `op-433438bf-d775-4799-8016-ff0bdcb361a7`は、Snapshot resource ARNをaccount-qualifiedとしていたIAM bugにより`CreateSnapshotOnce`で明示的`UnauthorizedOperation`となりsafe failureした。Snapshotは0件、duplicate possibilityなし、OperationはFAILEDのまま保持し、LockとCurrent Operationは正常に解放された。
+- EBS Snapshot ARNをAWSのaccountless form `arn:${Partition}:ec2:${Region}::snapshot/*`へ修正し、source Data EBS volume ARNはaccount-qualifiedの一意resourceに維持した。修正deployはBackup task IAM policyだけで、禁止されたDeleteSnapshot、restore、volume lifecycle、EC2 START/STOP権限を追加していない。
+- second Operation `op-ff3a9c8e-32be-4640-b782-ae9e60686d94`は一回のAdmissionと一回のcreate intentで`SUCCEEDED`となった。Snapshot `snap-079c0aa0c06935d8f`は`completed`、source `vol-03ac9f534326c345c`、expected account owner、D-090のexact 9 tagsとdescriptionをread-back検証した。
+- final stateはDesired/Observed/Actual STOPPED、HEALTHY、discrepancy/observation errorなし、DNS absent、Lock 0、Current Operationなし、unfinished Operation 0である。normal backupは今回の1件、migration rollback anchor `snap-0b1d9536e9c476c0f`はcompletedのまま不変で、retention削除は行っていない。
+
 #### 後続slice
 
 1. `/mc backup` repository adapterと明示registration/deploy
-2. production preflight、deploy、実Snapshot lifecycle検証
-3. retention削除は別のdestructive-operation review後に実装
-4. Restore runbook/UIと復元テストはPhase 16
+2. retention削除は別のdestructive-operation review後に実装
+3. Restore runbook/UIと復元テストはPhase 16
 
 ### 8.2 無人自動停止
 

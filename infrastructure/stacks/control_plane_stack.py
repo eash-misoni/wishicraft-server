@@ -427,7 +427,7 @@ class ControlPlaneStack(Stack):
                 iam.PolicyStatement(
                     actions=["ec2:CreateSnapshot"],
                     resources=[
-                        f"arn:aws:ec2:{stage.aws_region}:{stage.aws_account_id}:snapshot/*",
+                        f"arn:aws:ec2:{stage.aws_region}::snapshot/*",
                     ],
                     conditions={
                         "StringEquals": {
@@ -454,7 +454,7 @@ class ControlPlaneStack(Stack):
             backup_task.add_to_role_policy(
                 iam.PolicyStatement(
                     actions=["ec2:CreateTags"],
-                    resources=[f"arn:aws:ec2:{stage.aws_region}:{stage.aws_account_id}:snapshot/*"],
+                    resources=[f"arn:aws:ec2:{stage.aws_region}::snapshot/*"],
                     conditions={"StringEquals": {"ec2:CreateAction": "CreateSnapshot"}},
                 )
             )

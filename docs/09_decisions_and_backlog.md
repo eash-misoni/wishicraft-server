@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-09-01
+- **最終更新:** 2026-09-07
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -12,13 +12,14 @@
 
 ### D-090 Phase 8 MVPは停止中Data EBSのOperation-scoped Snapshotとする
 
-- **状態:** Accepted（Phase 8A repository contract）
+- **状態:** Accepted（Phase 8B dev deployed / first real backup validated）
 - **日付:** 2026-09-02
 - Phase 8 MVPはroot EBSを除外し、current persistent encrypted Data EBSだけをbackupする。BACKUPはD-026/D-074のshared Admissionとglobal Lockを使用し、START/STOP/BACKUP同士を排他する。fresh Desired STOPPED、Actual/Observed stopped、HEALTHY、discrepancyなし、Lock/current operationが当該BACKUP所有である場合だけ進め、BACKUP自身はSTOP/STARTしない。
 - current storageはData EBS 1本、active Game 1件であり、`game-vanilla-main`をVolumeへ明示bindingする。`/srv/minecraft/games/`は将来複数Gameを保持可能なので、Phase 9で2件目を有効化する前にdedicated/shared Volumeとretention ownershipを再Decisionする。
 - AWS `CreateSnapshot`はclient tokenを持たない。Operation IDをlogical backup identityの根にし、同名Standard execution、一回限りでRetryなしのcreate intent、inline Operation/category/source tags、同一idempotency replayで新規executionなし、というat-most-one contractを採用する。create outcome不明、poll timeout、verification mismatchでは新しいsnapshotを作らずOperationをFAILEDとし、既存snapshotを自動削除しない。
 - 成功は`completed`、expected source volume、account ownership、全metadata一致後だけとする。通常backupはGame単位newest 7、migration/protectedは除外するが、Phase 8Aはpure selectionだけで`DeleteSnapshot`を実装・許可しない。
 - Restore、schedule、RUNNING/application-consistent backup、Discord production commandは後続sliceとする。EBS incremental snapshot storageは課金対象であり、既存15 USD Budgetとは別Budgetを追加せず、将来retention automationが必要である。
+- **Dev validation:** 2026-09-07のfirst attemptはSnapshot ARNのaccount componentを誤って含めたIAM policyによりCreateSnapshotで明示的に拒否され、Snapshot 0件のままOperation FAILED、Lock/Current Operation解放へsafe convergenceした。Snapshot ARNをAWSのaccountless formへ修正し、volume ARNはaccount-qualifiedのまま限定したsecond attemptでは、Operation `op-ff3a9c8e-32be-4640-b782-ae9e60686d94`とSnapshot `snap-079c0aa0c06935d8f`が一対一で成功した。completed、current Data EBS source、account owner、description、exact metadataを再検証し、final STOPPED/HEALTHY、DNS absent、Lock/current operationなしを確認した。DeleteSnapshot、restore、retag、EC2 START/STOP、migration/protected snapshot変更は行っていない。
 - **関連:** D-017、D-026、D-029、D-032、D-036、D-043、D-045、D-053、D-074。
 
 ### D-089 Discord initial ACKはshared Admissionより先に外部callbackで確定する

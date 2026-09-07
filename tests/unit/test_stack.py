@@ -273,6 +273,42 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam() -> 
         for action in _action_list(statement["Action"])
     }
     assert {"ec2:CreateSnapshot", "ec2:DescribeSnapshots", "ec2:DescribeVolumes"} <= actions
+    statements = [
+        statement
+        for policy in policies.values()
+        if {"Ref": backup_role} in policy["Properties"]["Roles"]
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+    ]
+    snapshot_arn = "arn:aws:ec2:ap-northeast-1::snapshot/*"
+    account_qualified_snapshot_arn = "arn:aws:ec2:ap-northeast-1:385526546525:snapshot/*"
+    create_snapshot_resources = {
+        resource
+        for statement in statements
+        if "ec2:CreateSnapshot" in _action_list(statement["Action"])
+        for resource in (
+            statement["Resource"]
+            if isinstance(statement["Resource"], list)
+            else [statement["Resource"]]
+        )
+    }
+    create_tags_resources = {
+        resource
+        for statement in statements
+        if "ec2:CreateTags" in _action_list(statement["Action"])
+        for resource in (
+            statement["Resource"]
+            if isinstance(statement["Resource"], list)
+            else [statement["Resource"]]
+        )
+    }
+    assert snapshot_arn in create_snapshot_resources
+    assert snapshot_arn in create_tags_resources
+    assert account_qualified_snapshot_arn not in create_snapshot_resources
+    assert account_qualified_snapshot_arn not in create_tags_resources
+    assert (
+        "arn:aws:ec2:ap-northeast-1:385526546525:volume/vol-03ac9f534326c345c"
+        in create_snapshot_resources
+    )
     assert not actions & {
         "ec2:StartInstances",
         "ec2:StopInstances",
