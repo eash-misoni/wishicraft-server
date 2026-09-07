@@ -311,10 +311,8 @@ BACKUPはshared Admission/global Lockを使用するStandard workflowである�
     probe_game.py
     start_game.py
     stop_game.py
-    backup_game.py
   cache/
   staging/
-  archives/
 ```
 
 ゲームデータをroot volumeだけに置かない。

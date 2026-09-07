@@ -76,7 +76,7 @@ Discord APIの429は応答の`retry_after`をSQS delayへ反映し、900秒のpe
 ### Minecraft EC2 role
 
 - SSM managed instance
-- 必要なS3 backup/package path
+- 必要なS3 package artifact path（現行D-090 backupはEBS Snapshot）
 - heartbeat用DynamoDBの特定item/table
 - CloudWatch logs/metricsの必要範囲
 
@@ -299,7 +299,7 @@ Backup taskは`DescribeVolumes`、`CreateSnapshot`、`DescribeSnapshots`、Creat
 
 - EC2 stop failure
 - 高スペックruntime classの停止漏れ
-- backup archive急増
+- EBS Snapshot / Recycle Bin保持量の急増
 - CloudWatch logs急増
 - WebSocketまたはGateway Bot導入後の常駐費
 
@@ -307,74 +307,31 @@ Backup taskは`DescribeVolumes`、`CreateSnapshot`、`DescribeSnapshots`、Creat
 
 Cost allocationのため全リソースへProject/Stage/Owner/ManagedByを付ける。
 
-### Backup完成前の試験運用
+### Backupの運用状態
 
-Phase 7完了からPhase 8の検証済みS3 backup完成までは試験運用とする。
+Phase 8B/8Cで停止中Data EBSの検証済みEBS Snapshot backupとDiscord経路は完成した。
 
 - 初回利用前にdata EBS snapshotを取得するrunbookを用意する。
 - 重要なCDK変更、Minecraft version変更、systemd変更前にもsnapshotを確認する。
 - snapshot取得を通常stopやbackup workflowの代替として恒久運用しない。
 
 
-## 9. Backup方針
+## 9. Backup / retention方針
 
-### 種別
+### 現行種別と保持
 
-- `MANUAL`
-- `SCHEDULED`
-- `PRE_RESET`
-- `PRE_UPGRADE`
-- `PRE_DELETE`
+D-090 v1のnormal EBS Snapshot backupをGameごとnewest 7保持する。migration rollback anchor、protected、manual/operator-created、別stage/Game/source、normal retention ownershipをpositive proofできないSnapshotは削除対象外である。旧S3 archive案は現行backup contractではなく、archive機能としてDeferredである。package artifact/CDK assetのS3利用は別契約である。
 
-### 初期保持案
-
-Provisionalとして次を採用する。
-
-- Scheduled daily: 14日
-- Manual: 90日
-- Pre-reset: 90日
-- Pre-upgrade/delete: 180日
-
-利用量とS3費用を確認して調整する。重要Gameのbackupを自動で即時削除しない。
-
-### S3 bucket保護
-
-- dev/prodでbucketを分離する。
-- Block Public Accessを全面有効化する。
-- server-side encryptionを有効化する。
-- bucket、prefix、operationへ必要な最小権限だけをIAMへ付与する。
-- CDK removal policyを明示し、prod backupをstack削除で自動削除しない。
-- lifecycleはbackup typeと保持期間に従う。
-- versioningやObject Lockは復旧要件と費用を評価してDecisionへ記録する。
+D-091のRETENTIONはBACKUPと分離したOperationでglobal Lockを取り、完全inventory、durable provenance、StartTime ordering、Recycle Bin preflightとdelete直前再検証を要求する。初版は1 Operation最大1件で、relevant anomalyがあればrun全体no-deleteとする。実Delete releaseはnaturalにnormal backupが8件以上となった後の別gateで行う。
 
 
-### 実行タイミング
+### 対象外の将来案
 
-- 停止中Gameをscheduled backupだけのために毎日起動しない。
-- 通常stop中、稼働中の整合save後、または明示的manual backupで作成する。
-- 前回backup以降に変更がない停止中Gameはscheduled backupをskipできる。
-- Pre-reset、Pre-upgrade、Pre-deleteは必ず検証済みbackupを作る。
-
-### 整合性
-
-起動中backup:
-
-1. RCON保存要求
-2. 必要に応じてsave-off等の整合方式をPackageごとに定義
-3. archive
-4. checksum
-5. S3 upload
-6. verify
-7. 通常保存状態へ復帰
-
-実装が安全にできるまでは、停止中backupまたは短時間停止backupを優先してよい。
+scheduled/RUNNING backup、自動STOP、archive、pre-reset/pre-upgrade/pre-delete、migration cleanupは現行retention sliceの対象外である。
 
 ### 復元テスト
 
-- 利用者向けrestore UIより先に管理者runbookを作る。
-- 本番Gameへ直接上書きせずstagingへ復元する。
-- checksum、server start、world loadを確認する。
-- 少なくとも大きな仕様変更前に復元テストする。
+Restore runbook/UIとstaging復元試験はPhase 16で扱う。RETENTION releaseの成立条件とは混同しない。
 
 ## 10. 自動停止
 

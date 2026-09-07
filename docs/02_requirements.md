@@ -389,7 +389,7 @@ fresh stateがDesired/Actual/ObservedすべてSTOPPED、HEALTHY、discrepancy/ac
 
 ### BAK-004 復元可能性 `MUST`
 
-SnapshotにはGame ID、source volume ID、category、Operation ID、作成日時、stage、schema version、protected flagを保持する。Restore操作と復元試験はPhase 8 MVPの対象外とし、Phase 16までsnapshotを自動置換・削除しない。
+SnapshotにはGame ID、source volume ID、category、Operation ID、作成日時、stage、schema version、protected flagを保持する。Restore操作と復元試験はPhase 8 MVPの対象外としPhase 16で扱う。Phase 16前の削除は、D-091の明示的に承認されたRETENTION destructive-operation contractとrelease gateを満たし、durable provenanceで所有を証明できるD-090 v1 normal backupだけに許可する。それ以外のsnapshotは自動置換・削除しない。
 
 
 ### BAK-005 停止中の不要起動禁止 `SHOULD`
@@ -398,7 +398,7 @@ BACKUPは停止中だけ許可し、RUNNING/STARTING/STOPPING/unknown/degraded�
 
 ### BAK-006 Retentionと分類 `MUST`
 
-通常backupはGameごとにnewest 7を保持する。`backup`、`migration`、将来のcategoryをmetadataで区別し、migrationとprotected backupは通常retentionから除外する。Phase 8Aはpure selection contractまでとし、自動削除と`DeleteSnapshot`権限を追加しない。
+通常backupはGameごとにnewest 7を保持する。`backup`、`migration`、将来のcategoryをmetadataで区別し、migration、protected、既知のmanual/operator snapshotは通常retentionから除外する。削除は独立RETENTION Operation、global Lock、positive proof、delete直前再検証、1 Operation最大1件、明示的outcome reconciliationを必要とする。実DeleteSnapshotと権限のreleaseはD-091の別gateとする。
 
 ## 10. 複数ゲーム・Package要件
 
@@ -542,7 +542,7 @@ backup失敗、heartbeat stale、data volume使用率はPhase 8の機能導入�
 
 ### NFR-009 Backup導入前の試験運用保護 `MUST / MVP`
 
-Phase 8の検証済みS3 backupが完成するまでは、Phase 7を試験運用として扱い、初回利用前および重要変更前に管理者用EBS snapshot runbookを実行できる状態にする。
+Phase 8B/8Cで停止中Data EBSの検証済みEBS Snapshot backupとDiscord adapterは完成した。Restoreと復元試験はPhase 16で扱う。
 
 ### NFR-010 設定の単一正本 `MUST`
 

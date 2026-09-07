@@ -11,7 +11,9 @@ def test_phase_eight_backup_decision_and_scope_are_canonical() -> None:
     assert "root EBSを除外" in decisions
     assert "CreateSnapshot`はclient tokenを持たない" in decisions
     assert "migration/protected" in delivery
-    assert "自動削除と`DeleteSnapshot`権限を追加しない" in requirements
+    assert "D-091" in decisions
+    assert "1 RETENTION Operation最大1 Snapshot" in decisions
+    assert "実DeleteSnapshotと権限のreleaseはD-091の別gate" in requirements
 
 
 def test_restore_schedule_running_and_discord_are_out_of_phase_eight_a() -> None:

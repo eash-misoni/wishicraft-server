@@ -177,7 +177,7 @@ world:
   difficulty: null
   hardcore: null
 
-created_at: timestamp
+requested_at: timestamp
 updated_at: timestamp
 last_started_at: null
 last_backup_at: null
@@ -294,7 +294,7 @@ Phase 8A snapshot tag schema version 1は`Project`、`Stage`、`WishicraftCatego
 
 初期トラフィックではGSIなしで開始し、必要な管理画面クエリが確定してから追加してよい。
 
-古いoperationはTTLで削除可能だが、監査期間を決めてから有効化する。
+現在Operations tableにTTLは設定せず、recordの`expires_at`もnullである。将来、監査期間を決めた後は古いoperationをTTLで削除できるため、有限TTLとなり得るOperationをretention ownershipの永続証跡にしてはならない。
 
 ## 6. DynamoDB: Locks
 
@@ -400,7 +400,20 @@ SK: template_version
 
 ### Backups
 
-バックアップ一覧をDynamoDBで検索する必要が生じた時点で追加する。初期はS3 manifestとGame.last_backup_atで開始してよい。
+D-091のretention ownershipを証明する非TTLのdurable provenance/indexとして、実Delete release前に追加する。Operationsの監査TTLとは独立し、少なくとも次を保持する。
+
+```yaml
+snapshot_id: string
+operation_id: string
+game_id: string
+stage: string
+source_volume_id: string
+created_at: timestamp
+verified_at: timestamp
+schema_version: 1
+```
+
+BACKUP成功時にverified Snapshotとの一対一対応を永続化する。retentionはSnapshotのD-090 metadata/AWS attributesとこのrecordを相互照合し、Operation recordの存続には依存しない。既存Snapshotを登録する場合は、別release gateで元の成功Operation、source、owner、exact metadataをpositive proofして行い、証明できないnormal-backup claimはANOMALYとして削除しない。
 
 
 ## 10. SystemState Repository契約
@@ -759,22 +772,9 @@ READY待機はStep Functions/reconcile側が行う。
 
 通常モードで保存失敗した場合、強制停止しない。
 
-### `backup_game.py`
+### Backup runtime
 
-Input追加:
-
-```text
---backup-id
---destination-s3-uri
-```
-
-責務:
-
-- 保存済みデータ確認
-- staging archive作成
-- checksum
-- S3 upload
-- manifest出力
+現行Phase 8のbackupはD-090の停止中Data EBS Snapshotであり、host-side `backup_game.py`やS3 archiveを使用しない。S3 archiveはPhase 16のarchive/restore検討までDeferredとする。
 
 ## 15. Runtime State File
 

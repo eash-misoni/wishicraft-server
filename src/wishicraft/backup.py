@@ -226,23 +226,6 @@ class BackupCoordinator:
         return self.leases.renew(proof, now=now, lease_seconds=self.lease_seconds)
 
 
-def select_retention_candidates(
-    records: list[SnapshotRecord], *, game_id: str, source_volume_id: str
-) -> list[str]:
-    """Pure Phase 8A policy selector; no deletion side effect is implemented."""
-    eligible = [
-        record
-        for record in records
-        if record.tags.get("WishicraftCategory") == "backup"
-        and record.tags.get("WishicraftGameId") == game_id
-        and record.tags.get("WishicraftProtected") == "false"
-        and record.source_volume_id == source_volume_id
-        and record.tags.get("WishicraftSourceVolumeId") == source_volume_id
-    ]
-    eligible.sort(key=lambda item: item.tags.get("WishicraftCreatedAt", ""), reverse=True)
-    return [record.snapshot_id for record in eligible[7:]]
-
-
 def _validate_snapshot_id(value: str) -> None:
     if re.fullmatch(r"snap-[0-9a-f]{8,17}", value) is None:
         raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)

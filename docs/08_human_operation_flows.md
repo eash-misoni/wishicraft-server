@@ -133,7 +133,7 @@ Discordからの追加・削除、OP、候補表示は後期のプレイヤー�
 
 ## 6.1 Backup完成前にsnapshotを取る
 
-Phase 8の検証済みS3 backupが完成するまで、初回利用前または重要変更前にシステム管理者がdata EBS snapshot runbookを実行する。
+Phase 8B/8Cで停止中Data EBSのEBS Snapshot backupは検証済みである。重要変更前の追加snapshot要否はD-090のBACKUP contractと管理者runbookに従う。
 
 1. 通常stopでMinecraftとEC2を停止する。
 2. data EBSの対象volumeを確認する。

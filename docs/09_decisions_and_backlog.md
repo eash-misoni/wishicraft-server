@@ -10,6 +10,23 @@
 
 ## 2. 採用済み決定
 
+### D-091 RETENTIONはdurable provenanceを持つ独立した破壊的Operationとする
+
+- **状態:** Accepted（repository-only contract/model validated）
+- **日付:** 2026-09-07
+- **背景:** BAK-004の旧文言はPhase 16まで一律削除禁止としていた一方、D-090はnormal backup newest 7を定義していた。Operationsは現在TTLなし・`expires_at=null`だが、将来の監査TTLを許し、手動BACKUPが8件に達する期限も保証しないため、Operation存続をretention ownershipの永続根拠にはできない。
+- **決定:** RETENTIONはBACKUP成功結果と分離した独立Operation/workflowとし、START/STOP/BACKUPと同じglobal Lockを取得する。対象はcurrent bindingについてexact D-090 v1 metadata、expected owner/source、completed、成功時に記録した非TTL durable Backup provenanceをすべて相互検証できるnormal backupだけとする。Operationは補助監査証跡であり永続provenanceではない。Phase 9で2件目Gameを導入する前にstorage/retention ownershipを再Decisionする。
+- normal backupはGameごとactive inventoryのnewest 7を保持し、AWS Snapshot StartTimeをprimary orderingとする。WishicraftCreatedAtとBACKUP Operation由来のdurable provenance requested_atはstrict RFC 3339 parse、timezone-aware UTC instant equalityでcross-checkする。producerのcanonical表現が同一でもraw byte equalityには依存しない。Snapshot IDをtie breakerにせず、keep/delete境界が同一instantならcandidate 0とする。
+- 分類はKEEP/CANDIDATE/EXCLUDED/ANOMALYとする。known migration/protected/manual、normal ownershipをclaimしないSnapshot、正当に別stage/Game/categoryのSnapshotはEXCLUDEDである。normal retention-ownedとclaimするかその可能性が高いのにpositive proofできないものはANOMALYであり、初版はrelevant anomalyが一つでもあればrun全体no-deleteとする。完全paginationを証明できない場合もno-deleteとする。
+- inventory後かつdelete直前にowner/source/state/exact tags/protected/provenance/newest-7 membershipとLock ownershipを再検証する。初版は1 RETENTION Operation最大1 Snapshotとし、複数candidateでも安全に一意な最古1件だけを選び、次Operationで再inventoryする。
+- DeleteSnapshotは独立RETENTION task roleだけにaccountless Snapshot ARNと検証済みconditionを与える。application positive allowlistをprimary、IAM conditionをsecond boundaryとし、BACKUP task roleには追加しない。公式condition keyの存在だけで値形式を推測せず、release前にsynth、公式仕様、DryRun、必要ならpolicy simulationで実証する。本repository-only sliceではDeleteSnapshot実装/IAMを追加しない。
+- SDKの暗黙retryを抑制し、explicit success後もactive inventoryからのabsence convergenceを確認する。timeout/transport/response lossはOUTCOME_UNKNOWNとして新candidateへ進まず、同一SnapshotをDescribeする。不在ならactive deletionへ収束でき、存在する場合だけLock/predicate/membership再検証後に同一Operation・同一Snapshot IDのbounded retryを一度許容する。pre-delete NotFoundはfailure、delete後verificationのNotFoundはabsence evidenceとして区別する。
+- Recycle Bin ruleの存在・適用可能性を必須preflightとする。active inventoryからの削除、Recycle Bin retained、fully purged/not retained、unknownを区別し、復元可能期間や課金が残る状態を完全削除と表示しない。観測不能なら初回releaseはfail closedする。
+- 実production Delete E2Eはnormal backupが自然に8件以上になった後の別release gateで行う。検証目的でretention countを下げず、不要Snapshotを量産せず、migration/protectedを候補にしない。Restore/schedule/RUNNING backup/auto-STOP/migration cleanupは対象外で、Restoreと復元試験はPhase 16とする。
+- **影響:** 明示的release gateを満たすD-090 v1 normal backupに限りPhase 16前のretention deletionを許可し、BAK-004を精密化する。既存Phase 8B/8C Snapshotはdurable provenanceの安全な登録が別gateで完了するまでANOMALYとなり削除されない。
+- **代替案:** Operationを無期限化する案は監査lifecycleとretentionを結合するため不採用。Snapshot metadataだけを正本にする案は改変・欠損への独立証拠が弱い。Operation不存在を永久保持する案は安全だが手動backup間隔次第でretentionが恒久停止するため不採用。
+- **関連:** BAK-004、BAK-006、D-026、D-074、D-090、Phase 16。
+
 ### D-090 Phase 8 MVPは停止中Data EBSのOperation-scoped Snapshotとする
 
 - **状態:** Accepted（Phase 8B dev deployed / first real backup validated）
@@ -619,7 +636,7 @@
 ### D-048 Backup完成前は試験運用
 
 - **状態:** Accepted
-- Phase 8の検証済みS3 backup完成まではPhase 7環境を試験運用とする。
+- Phase 8B/8Cで検証済みEBS Snapshot backupとDiscord adapterは完成した。Restore検証はPhase 16で扱う。
 - 初回利用前と重要変更前にdata EBS snapshot runbookを実行可能にする。
 
 ### D-049 Phase 0設定validation gate

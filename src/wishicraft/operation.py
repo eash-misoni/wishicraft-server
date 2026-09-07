@@ -17,6 +17,7 @@ class OperationType(StrEnum):
     START = "START"
     STOP = "STOP"
     BACKUP = "BACKUP"
+    RETENTION = "RETENTION"
     CREATE = "CREATE"
     RESET = "RESET"
     OP_ADD = "OP_ADD"

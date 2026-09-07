@@ -793,7 +793,7 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 
 #### 後続slice
 
-1. retention削除は別のdestructive-operation review後に実装
+1. retention destructive-operation contractはD-091でfreeze済み。repository-only selector/modelは完成し、次はdurable provenance persistence、production dry-run、Recycle Bin/IAM実証、実Delete releaseを別gateで進める
 2. Restore runbook/UIと復元テストはPhase 16
 
 ### 8.2 無人自動停止
@@ -817,8 +817,9 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 
 ### 完了条件
 
-- 検証済みbackupをS3へ作れる。
-- runbookで別stagingディレクトリへ復元確認できる。
+- 停止中Data EBSの検証済みEBS Snapshot backupを作成しDiscordから安全に実行できる（Phase 8B/8Cで完了）。
+- retentionはD-091のdestructive release gateを満たしたnormal backupだけを扱う。
+- Restoreとstaging復元検証はPhase 16で扱う。
 - 無人時間経過で通常stopを開始できる。
 - player再接続で停止条件を解除できる。
 - 停止漏れを通知できる。

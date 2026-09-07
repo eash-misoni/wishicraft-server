@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import cast
 
 import pytest
@@ -12,7 +11,6 @@ from wishicraft.backup import (
     BackupWorkflowError,
     SnapshotAdapter,
     SnapshotRecord,
-    select_retention_candidates,
 )
 from wishicraft.operation import LeaseRepository
 
@@ -197,42 +195,3 @@ def test_snapshot_must_be_completed(state: str) -> None:
         _coordinator(SnapshotAdapter(Ec2(), account_id="123456789012")).verify_completed(
             record, expected_tags=backup_tags()
         )
-
-
-def test_retention_selects_only_unprotected_normal_backup_after_newest_seven() -> None:
-    records = [
-        SnapshotRecord(
-            f"snap-{index:017x}",
-            "vol-03ac9f534326c345c",
-            "completed",
-            backup_tags(datetime(2026, 9, index + 1, tzinfo=UTC).isoformat()),
-            "123456789012",
-        )
-        for index in range(9)
-    ]
-    migration = SnapshotRecord(
-        "snap-aaaaaaaaaaaaaaaaa",
-        "vol-03ac9f534326c345c",
-        "completed",
-        {**backup_tags(), "WishicraftCategory": "migration"},
-        "123456789012",
-    )
-    protected = SnapshotRecord(
-        "snap-bbbbbbbbbbbbbbbbb",
-        "vol-03ac9f534326c345c",
-        "completed",
-        {**backup_tags(), "WishicraftProtected": "true"},
-        "123456789012",
-    )
-    other_game = SnapshotRecord(
-        "snap-ccccccccccccccccc",
-        "vol-03ac9f534326c345c",
-        "completed",
-        {**backup_tags(), "WishicraftGameId": "game-other"},
-        "123456789012",
-    )
-    assert select_retention_candidates(
-        [*records, migration, protected, other_game],
-        game_id="game-vanilla-main",
-        source_volume_id="vol-03ac9f534326c345c",
-    ) == ["snap-00000000000000001", "snap-00000000000000000"]

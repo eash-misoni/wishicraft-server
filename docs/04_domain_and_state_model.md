@@ -565,7 +565,8 @@ Transactionが失敗した場合、Operationを作成せず、workflowを開始�
 - EC2が既にrunningならStartInstancesを再実行せず次へ進める。
 - 同じGameがREADYならstart成功相当へ進める。
 - EC2が既にstoppedならstop成功相当へ進める。
-- backup manifestが同一operation IDで既に検証済みなら重複archiveを作らない。
+- BACKUPは同一operation IDでcreate intentを再送せず、検証済みSnapshotへ一対一で収束する。
+- RETENTIONは同一Operation・同一Snapshot IDだけを扱い、結果不明時も別candidateへ進まない。
 
 ### EC2スクリプト
 
