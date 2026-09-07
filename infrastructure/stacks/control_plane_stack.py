@@ -700,7 +700,9 @@ def _add_discord_ingress(
             "DISCORD_PUBLIC_KEY": stage.discord_public_key,
             "ADMISSION_FUNCTION_NAME": admission.function_name,
         },
-        description="Phase 7G Discord callback ACK before shared STATUS, START, and STOP admission",
+        description=(
+            "Discord callback ACK before shared STATUS, START, STOP, and BACKUP admission"
+        ),
     )
     admission.grant_invoke(function)
 
@@ -840,7 +842,7 @@ def _add_discord_ingress(
                         "eventName": ["INSERT", "MODIFY"],
                         "dynamodb": {
                             "NewImage": {
-                                "operation_type": {"S": ["STATUS", "START", "STOP"]},
+                                "operation_type": {"S": ["STATUS", "START", "STOP", "BACKUP"]},
                                 "requested_by": {"M": {"source": {"S": ["DISCORD"]}}},
                             }
                         },

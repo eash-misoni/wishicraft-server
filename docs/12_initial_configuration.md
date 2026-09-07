@@ -186,7 +186,7 @@ Phase 7B production適用前:
 
 Phase 7G E2E前:
 
-- Git管理の`/mc status`、`/mc start`、`/mc stop` schemaを正本としてdev ApplicationへGuild commandを明示operator actionで登録する
+- Git管理の`/mc status`、`/mc start`、`/mc stop`、admin-only `/mc backup` schemaを正本としてdev ApplicationへGuild commandを明示operator actionで登録する
 - command registrationをCDK deployの暗黙side effectにしない
 
 最初のprod deploy前:

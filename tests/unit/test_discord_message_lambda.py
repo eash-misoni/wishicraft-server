@@ -72,6 +72,31 @@ class Dynamo:
         return {}
 
 
+@pytest.mark.parametrize("operation_type", ["START", "STOP", "BACKUP"])
+def test_store_load_accepts_long_running_operations(operation_type: str) -> None:
+    api = Dynamo()
+    api.item["operation_type"] = {"S": operation_type}
+    api.item["status"] = {"S": "RUNNING"}
+    api.item["current_step"] = {"S": "SNAPSHOT_CREATING"}
+
+    record = discord_message_lambda.DynamoDeliveryStore(api, table_name="wc-dev-operations").load(
+        "op-backup-001"
+    )
+
+    assert record.operation_type == operation_type
+    assert record.operation_status == "RUNNING"
+
+
+def test_store_load_rejects_unsupported_operation() -> None:
+    api = Dynamo()
+    api.item["operation_type"] = {"S": "RESTORE"}
+
+    with pytest.raises(ValueError, match="unsupported Discord delivery Operation"):
+        discord_message_lambda.DynamoDeliveryStore(api, table_name="wc-dev-operations").load(
+            "op-restore-001"
+        )
+
+
 class ConditionalFailure(Exception):
     def __init__(self) -> None:
         self.response = {"Error": {"Code": "ConditionalCheckFailedException"}}
@@ -520,6 +545,51 @@ def test_stop_progress_is_delivered_but_metadata_only_modify_is_noop() -> None:
         ]
     }
     assert discord_message_lambda._delivery_events(metadata) == ()
+
+
+def test_backup_insert_and_progress_are_delivered() -> None:
+    base = {
+        "operation_id": {"S": "op-backup-001"},
+        "operation_type": {"S": "BACKUP"},
+        "status": {"S": "PENDING"},
+        "current_step": {"S": "ADMITTED"},
+        "progress_revision": {"N": "0"},
+        "requested_by": {"M": {"source": {"S": "DISCORD"}}},
+        "discord": {"M": {"channel_id": {"S": "1531883129525244015"}}},
+    }
+    insert = {
+        "Records": [
+            {
+                "eventSource": "aws:dynamodb",
+                "eventName": "INSERT",
+                "eventID": "backup-insert",
+                "dynamodb": {"NewImage": base},
+            }
+        ]
+    }
+    assert discord_message_lambda._delivery_events(insert) == (
+        ("op-backup-001", 0, "ddb:backup-insert"),
+    )
+
+    running = {
+        **base,
+        "status": {"S": "RUNNING"},
+        "current_step": {"S": "SNAPSHOT_CREATING"},
+        "progress_revision": {"N": "1"},
+    }
+    progress = {
+        "Records": [
+            {
+                "eventSource": "aws:dynamodb",
+                "eventName": "MODIFY",
+                "eventID": "backup-progress",
+                "dynamodb": {"OldImage": base, "NewImage": running},
+            }
+        ]
+    }
+    assert discord_message_lambda._delivery_events(progress) == (
+        ("op-backup-001", 1, "ddb:backup-progress"),
+    )
 
 
 @pytest.mark.parametrize(

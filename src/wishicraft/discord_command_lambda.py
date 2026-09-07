@@ -52,7 +52,7 @@ class LambdaOperationAdmission:
     def admit(
         self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
     ) -> str:
-        if operation_type not in {"STATUS", "START", "STOP"}:
+        if operation_type not in {"STATUS", "START", "STOP", "BACKUP"}:
             raise ValueError("unsupported Discord admission type")
         response = self._api.invoke(
             FunctionName=self._function_name,
@@ -168,7 +168,9 @@ def _parse_admission_response(response: object, *, operation_type: str) -> str:
     lease_id = value.get("lease_id")
     if operation_type == "STATUS" and lease_id is not None:
         raise RuntimeError("STATUS admission created a lease")
-    if operation_type in {"START", "STOP"} and (not isinstance(lease_id, str) or not lease_id):
+    if operation_type in {"START", "STOP", "BACKUP"} and (
+        not isinstance(lease_id, str) or not lease_id
+    ):
         raise RuntimeError(f"{operation_type} admission did not return a lease")
     return operation_id
 

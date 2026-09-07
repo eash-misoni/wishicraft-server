@@ -250,8 +250,18 @@ def render_status_projection(projection: object) -> str:
 def render_operation_projection(record: DeliveryRecord) -> str:
     if record.operation_type == "STATUS":
         return render_status_projection(record.projection)
-    if record.operation_type not in {"START", "STOP"}:
+    if record.operation_type not in {"START", "STOP", "BACKUP"}:
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
+    if record.operation_type == "BACKUP":
+        if record.operation_status == "SUCCEEDED":
+            return "Minecraft BACKUP: completed."
+        if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
+            return "Minecraft BACKUP: did not complete. Check with an administrator."
+        backup_steps = {
+            "ADMITTED": "Minecraft BACKUP: accepted.",
+            "SNAPSHOT_CREATING": "Minecraft BACKUP: creating and verifying the backup.",
+        }
+        return backup_steps.get(record.current_step, "Minecraft BACKUP: in progress.")
     if record.operation_type == "START":
         if record.operation_status == "SUCCEEDED":
             return "Minecraft START: online and ready."

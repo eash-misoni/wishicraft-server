@@ -20,6 +20,7 @@
 - 成功は`completed`、expected source volume、account ownership、全metadata一致後だけとする。通常backupはGame単位newest 7、migration/protectedは除外するが、Phase 8Aはpure selectionだけで`DeleteSnapshot`を実装・許可しない。
 - Restore、schedule、RUNNING/application-consistent backup、Discord production commandは後続sliceとする。EBS incremental snapshot storageは課金対象であり、既存15 USD Budgetとは別Budgetを追加せず、将来retention automationが必要である。
 - **Dev validation:** 2026-09-07のfirst attemptはSnapshot ARNのaccount componentを誤って含めたIAM policyによりCreateSnapshotで明示的に拒否され、Snapshot 0件のままOperation FAILED、Lock/Current Operation解放へsafe convergenceした。Snapshot ARNをAWSのaccountless formへ修正し、volume ARNはaccount-qualifiedのまま限定したsecond attemptでは、Operation `op-ff3a9c8e-32be-4640-b782-ae9e60686d94`とSnapshot `snap-079c0aa0c06935d8f`が一対一で成功した。completed、current Data EBS source、account owner、description、exact metadataを再検証し、final STOPPED/HEALTHY、DNS absent、Lock/current operationなしを確認した。DeleteSnapshot、restore、retag、EC2 START/STOP、migration/protected snapshot変更は行っていない。
+- **Discord validation:** 2026-09-07のPhase 8Cではadmin roleなしのreal `/mc backup`をAdmission前に拒否し、role付与後のInteractionからOperation `op-eb1bd6d6-93cd-4832-9536-8282530eb6be`とSnapshot `snap-0762ec7637f489d5b`が一対一で成功した。初回public deliveryはloaderのBACKUP許可漏れでDLQへ安全隔離されたがbackend結果を変更せず、loader修正後に同Operationの元stream eventsだけをcontrolled replayして単一safe success message、delivery `DELIVERED`、DLQ 0へ収束した。新規BACKUP/Snapshotやraw state repairは行っていない。
 - **関連:** D-017、D-026、D-029、D-032、D-036、D-043、D-045、D-053、D-074。
 
 ### D-089 Discord initial ACKはshared Admissionより先に外部callbackで確定する
@@ -81,7 +82,7 @@
 
 - **状態:** Accepted（Phase 7G-2 production validated）
 - **日付:** 2026-08-30
-- `/mc status`、`/mc start`、`/mc stop`のcommand schemaはGit上のversioned artifactを正本とする。
+- `/mc status`、`/mc start`、`/mc stop`とPhase 8Cのadmin-only `/mc backup`のcommand schemaはGit上のversioned artifactを正本とする。BACKUP認可は既存DIS-007を維持する。
 - Discord APIへのGuild command registration/updateはCDK deployの暗黙side effectにせず、明示的なoperator script/runbookとして実行する。AWS infrastructure mutationとDiscord external configuration mutationを別のreview・実行・証跡境界にする。
 - Phase 7Aではregistrationを実行しない。dev Application/Guildの公開ID一致とBot Token SecureStringの存在確認はPhase 7B/Gのpreflight blockerとして追跡する。
 - Phase 7Bで`config/discord/commands.v1.json`をversioned正本として追加した。repository/CDK実装はDiscord API registrationを行わず、external mutation境界を維持する。

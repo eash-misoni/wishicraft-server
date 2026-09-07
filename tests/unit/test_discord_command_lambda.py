@@ -180,15 +180,44 @@ def test_stop_uses_shared_admission_and_immediate_ephemeral_ack(signing_key: Sig
     assert admission.calls == [("STOP", "1532000000000000001")]
 
 
-@pytest.mark.parametrize("subcommand", ["status", "start", "stop"])
+def test_admin_backup_uses_shared_admission_after_ack(signing_key: SigningKey) -> None:
+    value = payload(subcommand="backup")
+    value["member"] = {"roles": [ADMIN_ROLE_ID]}
+    response = discord_command_lambda.handler(event(value, signing_key), None)
+    assert response["statusCode"] == 202
+    admission = discord_command_lambda._operation_admission
+    callback = discord_command_lambda._interaction_callback
+    assert isinstance(admission, Admission)
+    assert isinstance(callback, Callback)
+    assert admission.calls == [("BACKUP", "1532000000000000001")]
+    assert callback.calls == [
+        ("defer", "1532000000000000001"),
+        ("edit", "BACKUP accepted. Progress will be posted in this channel."),
+    ]
+
+
+def test_player_only_backup_is_rejected_before_ack_or_admission(signing_key: SigningKey) -> None:
+    response = discord_command_lambda.handler(
+        event(payload(subcommand="backup"), signing_key), None
+    )
+    assert response["statusCode"] == 200
+    admission = discord_command_lambda._operation_admission
+    callback = discord_command_lambda._interaction_callback
+    assert isinstance(admission, Admission)
+    assert isinstance(callback, Callback)
+    assert admission.calls == []
+    assert callback.calls == []
+
+
+@pytest.mark.parametrize("subcommand", ["status", "start", "stop", "backup"])
 def test_production_empty_subcommand_options_reach_shared_admission_once(
     signing_key: SigningKey, subcommand: str
 ) -> None:
+    value = payload(subcommand=subcommand, include_empty_subcommand_options=True)
+    if subcommand == "backup":
+        value["member"] = {"roles": [ADMIN_ROLE_ID]}
     response = discord_command_lambda.handler(
-        event(
-            payload(subcommand=subcommand, include_empty_subcommand_options=True),
-            signing_key,
-        ),
+        event(value, signing_key),
         None,
     )
 
@@ -313,6 +342,20 @@ def test_initial_ack_failure_is_fail_closed_before_admission(signing_key: Signin
     assert isinstance(admission, Admission)
     assert admission.calls == []
     assert "internal detail" not in json.dumps(response)
+
+
+def test_backup_ack_failure_is_fail_closed_before_admission(signing_key: SigningKey) -> None:
+    value = payload(subcommand="backup")
+    value["member"] = {"roles": [ADMIN_ROLE_ID]}
+    discord_command_lambda._interaction_callback = Callback(
+        defer_failure=RuntimeError("raw AWS error")
+    )
+    response = discord_command_lambda.handler(event(value, signing_key), None)
+    assert response["statusCode"] == 502
+    admission = discord_command_lambda._operation_admission
+    assert isinstance(admission, Admission)
+    assert admission.calls == []
+    assert "AWS" not in json.dumps(response)
 
 
 def test_ack_edit_failure_does_not_rewrite_successful_admission(signing_key: SigningKey) -> None:
@@ -453,6 +496,40 @@ def test_stop_duplicate_uses_same_shared_admission_identity() -> None:
     request = json.loads(cast(bytes, api.calls[0]["Payload"]))
     assert request["operation_type"] == "STOP"
     assert request["idempotency_key"] == "discord:1532000000000000001"
+
+
+def test_backup_duplicate_uses_same_shared_admission_identity() -> None:
+    class Api:
+        calls: list[dict[str, object]] = []
+
+        def invoke(self, **kwargs: object) -> object:
+            self.calls.append(kwargs)
+            return {
+                "StatusCode": 200,
+                "Payload": io.BytesIO(
+                    b'{"schema_version":1,"operation_id":"op-backup-existing",'
+                    b'"created":false,"lease_id":"lease-existing"}'
+                ),
+            }
+
+    api = Api()
+    admission = discord_command_lambda.LambdaOperationAdmission(api, function_name="admission")
+    first = admission.admit(
+        operation_type="BACKUP",
+        interaction_id="1532000000000000001",
+        guild_id=GUILD_ID,
+        channel_id=OPERATION_CHANNEL_ID,
+    )
+    second = admission.admit(
+        operation_type="BACKUP",
+        interaction_id="1532000000000000001",
+        guild_id=GUILD_ID,
+        channel_id=OPERATION_CHANNEL_ID,
+    )
+    assert first == second == "op-backup-existing"
+    requests = [json.loads(cast(bytes, call["Payload"])) for call in api.calls]
+    assert {request["operation_type"] for request in requests} == {"BACKUP"}
+    assert {request["idempotency_key"] for request in requests} == {"discord:1532000000000000001"}
 
 
 def test_stop_admission_failure_is_safe_and_retryable(signing_key: SigningKey) -> None:

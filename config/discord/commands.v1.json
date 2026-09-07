@@ -18,6 +18,11 @@
         "type": 1,
         "name": "stop",
         "description": "Save and stop the Wishicraft server"
+      },
+      {
+        "type": 1,
+        "name": "backup",
+        "description": "Back up the stopped Wishicraft server"
       }
     ]
   }

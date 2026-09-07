@@ -149,12 +149,13 @@ Phase 8の検証済みS3 backupが完成するまで、初回利用前または�
 Phase 8以降。
 
 1. Discord管理者が`/mc backup`を実行する。
-2. 対象Gameを確認する。
-3. 起動中の場合は整合した保存状態を作る。
-4. バックアップ開始を公開する。
-5. archive、checksum、S3 upload、manifest検証を行う。
-6. backup ID、generation、作成時刻を公開する。
-7. 内部S3 URIや詳細は管理者向け表示に限定してよい。
+2. Command ingressが署名、Application/Guild、operation channel、admin roleを検証し、ACK成功後だけshared AdmissionへBACKUPを渡す。
+3. 公開messageは受付、backup作成・検証中、完了またはsafe failureだけを同一messageで表示し、Snapshot ID、Volume ID、AWS errorを表示しない。
+4. BACKUP workflowがfresh STOPPED/HEALTHY/no-discrepancyとcurrent Data EBSを検証する。起動中はfail closedとし、BACKUP自身はSTOP/STARTしない。
+5. 一回限りのcreate intentでData EBS Snapshotを作成し、`completed`、source、owner、exact metadataを検証する。
+6. Operationをterminal化し、LockとCurrent Operationを所有者条件付きで解放する。Discord delivery失敗はOperation結果を変更しない。
+
+dev Phase 8C E2Eではadmin roleなしrequestがAdmission前に拒否され、role付与後のreal requestはbackend Snapshotまで成功した。初回public deliveryだけがloaderのBACKUP許可漏れでDLQへ隔離されたため、修正deploy後に同Operationの元stream eventsをcontrolled replayした。stale revisionはno-op、terminal revisionだけが固定nonceの単一safe success messageへ収束し、新しいBACKUP/SnapshotやOperation status repairは行っていない。
 
 ## 8. 無人自動停止
 

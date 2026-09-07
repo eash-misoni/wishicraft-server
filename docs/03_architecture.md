@@ -103,7 +103,7 @@ Command LambdaはControl Planeのexternal adapterであり、Desired State、Loc
 
 Phase 7Bのtrust boundaryはHTTP API payload format 2.0を受け、`isBase64Encoded`に従ってraw body bytesを一度だけ復元する。JSON parseや再serializeより先に、`X-Signature-Timestamp`のASCII bytesとraw bodyを連結し、stage設定のDiscord Public KeyでEd25519 signatureを検証する。欠落・不正header、unsupported content encoding、base64不正、署名不一致、Public Key設定不正はfail closedし、下流へ進めない。暗号実装はPyNaClをhash固定してLambda assetへbundleし、独自Ed25519実装を持たない。
 
-署名後はApplication ID、Guild ID、operation channel IDをexact matchし、memberがplayer roleまたはadmin roleを持つことを検証する。Git正本の`/mc` commandとexact 1 subcommand（`status`、`start`、`stop`）以外を拒否する。Phase 7Bでは認証・認可済みcommandもAdmissionへ接続せず、「ingress検証済みだがOperation未受付」のephemeral responseを返す。PINGだけはPONGを返す。Phase 7C以降で同じ境界の後段へAdmissionとdeferred responseを接続する。
+署名後はApplication ID、Guild ID、operation channel IDをexact matchする。Git正本の`/mc` commandとexact 1 subcommand（`status`、`start`、`stop`、Phase 8C以降の`backup`）以外を拒否する。status/start/stopはplayerまたはadmin role、backupはDIS-007どおりadmin roleだけを許可する。Phase 7Bでは認証・認可済みcommandもAdmissionへ接続せず、「ingress検証済みだがOperation未受付」のephemeral responseを返す。PINGだけはPONGを返す。Phase 7C以降で同じ境界の後段へAdmissionとdeferred responseを接続する。
 
 通常の`/mc status`、`/mc start`、`/mc stop`はadmin roleでもoperation channelだけを使用する。admin channelはPhase 7 MVPでは使用せず、後続のrecovery/reset/maintenance用に予約する。Discord command permissionはUX補助であり、LambdaのGuild/channel/role認可を代替しない。
 
@@ -430,7 +430,7 @@ Admission transactionが作成したOperations INSERTをStream sourceとする�
 
 START/STOPの公開表示は原則1 Operationにつき1つのBot channel messageとし、Operationへ関連付けたmessage identityを条件付きで確定して更新する。Interaction Tokenは長時間更新へ使用・保存しない。Discord create/update failureはdelivery status/logとしてControl Plane operationと分離し、既に成功したMinecraft/AWS operationをFAILEDへ変えない。
 
-Bot Tokenを読むのはDiscord Message componentだけとし、Command LambdaはPublic Keyだけで署名検証する。`/mc` command schemaはGit管理し、Discord API registrationはCDK deployと分離した明示operator actionとする。
+Bot Tokenを読むのはDiscord Message componentだけとし、Command LambdaはPublic Keyだけで署名検証する。`/mc` command schemaはGit管理し、Discord API registrationはCDK deployと分離した明示operator actionとする。Phase 8CのBACKUPもCommand Lambdaからshared Admissionだけを呼び、Snapshot APIやBACKUP State Machineを直接呼ばない。
 
 Phase 7DのSTATUS deliveryは次の境界とする。
 

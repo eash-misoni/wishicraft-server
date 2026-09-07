@@ -26,7 +26,7 @@ SNOWFLAKE = re.compile(r"^[0-9]{1,20}$")
 HEX_PUBLIC_KEY = re.compile(r"^[0-9a-fA-F]{64}$")
 HEX_SIGNATURE = re.compile(r"^[0-9a-fA-F]{128}$")
 TIMESTAMP = re.compile(r"^[0-9]{1,20}$")
-MVP_SUBCOMMANDS = frozenset({"status", "start", "stop"})
+MVP_SUBCOMMANDS = frozenset({"status", "start", "stop", "backup"})
 
 
 class SignatureVerifier(Protocol):
@@ -54,6 +54,7 @@ class InteractionKind(StrEnum):
     STATUS = "STATUS"
     START = "START"
     STOP = "STOP"
+    BACKUP = "BACKUP"
 
 
 @dataclass(frozen=True)
@@ -172,12 +173,18 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
     roles = member.get("roles")
     if not isinstance(roles, list) or not all(isinstance(role, str) for role in roles):
         raise UnauthorizedInteraction("request is not authorized")
-    if not ({config.player_role_id, config.admin_role_id} & set(roles)):
+    kind = _parse_command(payload.get("data"), expected_guild_id=config.guild_id)
+    allowed_roles = (
+        {config.admin_role_id}
+        if kind is InteractionKind.BACKUP
+        else {config.player_role_id, config.admin_role_id}
+    )
+    if not (allowed_roles & set(roles)):
         raise UnauthorizedInteraction("request is not authorized")
     return AuthorizedInteraction(
         interaction_id,
         interaction_token,
-        _parse_command(payload.get("data"), expected_guild_id=config.guild_id),
+        kind,
     )
 
 

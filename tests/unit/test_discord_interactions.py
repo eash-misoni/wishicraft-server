@@ -295,6 +295,32 @@ def test_player_or_admin_role_is_authorized(roles: tuple[str, ...]) -> None:
     assert interaction.kind is InteractionKind.STATUS
 
 
+def test_backup_is_admin_only() -> None:
+    key = SigningKey.generate()
+    interaction = parse_and_authorize(
+        json.dumps(command_payload("backup", roles=(ADMIN_ROLE_ID,))).encode(),
+        config=configuration(key),
+    )
+    assert interaction.kind is InteractionKind.BACKUP
+
+    for roles in ((PLAYER_ROLE_ID,), (), ("1532000000000000999",)):
+        with pytest.raises(UnauthorizedInteraction):
+            parse_and_authorize(
+                json.dumps(command_payload("backup", roles=roles)).encode(),
+                config=configuration(key),
+            )
+
+
+@pytest.mark.parametrize("subcommand", ["status", "start", "stop"])
+def test_existing_commands_still_allow_player_role(subcommand: str) -> None:
+    key = SigningKey.generate()
+    interaction = parse_and_authorize(
+        json.dumps(command_payload(subcommand, roles=(PLAYER_ROLE_ID,))).encode(),
+        config=configuration(key),
+    )
+    assert interaction.kind is InteractionKind(subcommand.upper())
+
+
 @pytest.mark.parametrize(
     "payload",
     [

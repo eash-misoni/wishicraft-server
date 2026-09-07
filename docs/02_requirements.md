@@ -178,6 +178,8 @@ EC2が既にstoppedで、実行中operationや不整合がない場合、stopは
 - `/mc start`
 - `/mc stop`
 
+Phase 8Cでは運用保護commandとして`/mc backup`を追加する。引数は持たず、DIS-007どおりadmin roleだけを許可する。
+
 ### DIS-002 署名検証 `MUST / MVP`
 
 Discord Interactionの署名を検証し、不正なリクエストを拒否する。
@@ -244,7 +246,7 @@ Discord ingressは既存Operation Admissionへのexternal adapterとする。Des
 
 通常message createはOperation単位の決定的nonceとDiscordのnonce重複排除を使用し、create成功・message identity保存前failureを同じlogical messageへ回復できなければならない。create成否不明の安全な回復期間を越えた場合、duplicateの可能性がある新規messageを作らずdeliveryだけをfail closedする。retryはboundedとし、429の`retry_after`を尊重し、permanent認証・認可・not-found failureを無限retryしない。
 
-START/STOP progressにはControl Plane Operationと同じwriteで単調増加するrevisionを用い、古いStream eventが新しい公開状態を上書きしてはならない。delivery metadataだけの更新は新しい公開deliveryをtriggerせず、古いrevisionのdelivery failureはより新しいprogress/terminal revisionを妨げてはならない。
+START/STOP/BACKUP progressにはControl Plane Operationと同じwriteで単調増加するrevisionを用い、古いStream eventが新しい公開状態を上書きしてはならない。delivery metadataだけの更新は新しい公開deliveryをtriggerせず、古いrevisionのdelivery failureはより新しいprogress/terminal revisionを妨げてはならない。
 
 ### DIS-010 Token権限とcommand登録 `MUST / MVP`
 

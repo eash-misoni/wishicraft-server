@@ -772,7 +772,7 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 - normal backup newest 7 per Gameをcontract化し、migration/protectedを除外する。Phase 8Aでは削除しない。
 - backup workflow failure/timeoutとtask Lambda error/throttleを既存SNS monitoringへ追加する。
 - Restore、schedule、RUNNING backup、自動STOP、Discord command registration、AWS deployは対象外。
-- 将来のinterface候補は`/mc backup`とし、START/STOPと同じplayerまたはadmin role、operation channel exact match、safe public summaryを使用する。Phase 8Aではschema/adapter/registrationを追加しない。
+- 将来のinterface候補は`/mc backup`とし、DIS-007どおりadmin roleだけ、operation channel exact match、safe public summaryを使用する。Phase 8Aではschema/adapter/registrationを追加しない。
 
 #### Phase 8B — dev deployment / first real backup
 
@@ -783,11 +783,18 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 - second Operation `op-ff3a9c8e-32be-4640-b782-ae9e60686d94`は一回のAdmissionと一回のcreate intentで`SUCCEEDED`となった。Snapshot `snap-079c0aa0c06935d8f`は`completed`、source `vol-03ac9f534326c345c`、expected account owner、D-090のexact 9 tagsとdescriptionをread-back検証した。
 - final stateはDesired/Observed/Actual STOPPED、HEALTHY、discrepancy/observation errorなし、DNS absent、Lock 0、Current Operationなし、unfinished Operation 0である。normal backupは今回の1件、migration rollback anchor `snap-0b1d9536e9c476c0f`はcompletedのまま不変で、retention削除は行っていない。
 
+#### Phase 8C — Discord BACKUP adapter / command registration
+
+- **状態:** Completed（2026-09-07、dev production E2E）
+- Git正本の引数なしadmin-only `/mc backup`を既存署名検証、Application/Guild/channel認可、ACK-before-Admission、shared Admission、Operation単位Discord deliveryへ統合し、dev Guildへ既存status/start/stopを保持したまま明示登録した。Command LambdaへSnapshot、State Machine、EC2/EBS、secret read権限は追加していない。
+- admin roleなしのreal requestはAdmission前に安全拒否され、Operation/Snapshotは増えなかった。admin role付与後の同commandはephemeral ACK、Admission、BACKUP Standard workflowへ進み、Operation `op-eb1bd6d6-93cd-4832-9536-8282530eb6be`とSnapshot `snap-0762ec7637f489d5b`が一対一で成功した。Snapshotはcompleted、expected Data EBS source/account owner、D-090 exact metadataを満たした。
+- 初回Discord deliveryは`DynamoDeliveryStore.load()`のBACKUP許可漏れで失敗したが、backend結果には影響せず、revision 0/1/2のstream failureはDLQへ隔離された。loader境界のSTART/STOP/BACKUP受理とunsupported拒否を回帰test化して修正deployし、元stream eventをrevision順にcontrolled replayした。stale revision 0/1はCASでno-op、terminal revision 2だけが固定nonceでsafe success message一件を作成し、delivery `DELIVERED`、DLQ 0、関連alarm OKへ収束した。新しいBACKUP、Snapshot、Operation status rewrite、raw DynamoDB repairは行っていない。
+- final stateはDesired/Observed/Actual STOPPED、HEALTHY、discrepancy/observation errorなし、DNS absent、Lock 0、Current Operationなし、unfinished Operation 0である。normal backupはPhase 8B/8Cの2件、migration rollback anchorはcompletedのまま不変である。
+
 #### 後続slice
 
-1. `/mc backup` repository adapterと明示registration/deploy
-2. retention削除は別のdestructive-operation review後に実装
-3. Restore runbook/UIと復元テストはPhase 16
+1. retention削除は別のdestructive-operation review後に実装
+2. Restore runbook/UIと復元テストはPhase 16
 
 ### 8.2 無人自動停止
 

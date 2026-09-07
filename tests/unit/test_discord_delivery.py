@@ -442,6 +442,60 @@ def test_newer_stop_revision_can_recover_after_older_delivery_failed() -> None:
 
 
 @pytest.mark.parametrize(
+    ("status", "step", "expected"),
+    [
+        ("PENDING", "ADMITTED", "accepted"),
+        ("RUNNING", "SNAPSHOT_CREATING", "creating and verifying"),
+        ("SUCCEEDED", "SNAPSHOT_CREATING", "completed"),
+        ("FAILED", "SNAPSHOT_CREATING", "did not complete"),
+    ],
+)
+def test_backup_projection_is_safe(status: str, step: str, expected: str) -> None:
+    record = replace(
+        Store().record,
+        operation_type="BACKUP",
+        operation_status=status,
+        current_step=step,
+        projection={
+            "snapshot_id": "snap-sensitive",
+            "volume_id": "vol-sensitive",
+            "raw_error": "UnauthorizedOperation",
+            "account_id": "123456789012",
+        },
+    )
+    rendered = render_operation_projection(record)
+    assert expected in rendered
+    assert all(
+        forbidden not in rendered
+        for forbidden in (
+            "snap-sensitive",
+            "vol-sensitive",
+            "UnauthorizedOperation",
+            "123456789012",
+        )
+    )
+
+
+def test_backup_delivery_failure_does_not_change_operation_result() -> None:
+    store = Store()
+    store.record = replace(
+        store.record,
+        operation_id="op-backup-001",
+        operation_type="BACKUP",
+        operation_status="SUCCEEDED",
+        current_step="SNAPSHOT_CREATING",
+        source_revision=2,
+        projection={},
+    )
+    messages = Messages([DiscordFailure("DISCORD_AUTHORIZATION_FAILED", False)])
+    service(store, messages, Queue()).deliver(
+        operation_id="op-backup-001", source_revision=2, attempt_id="ddb:terminal"
+    )
+    assert store.record.delivery_status is DeliveryStatus.FAILED
+    assert store.operation_result == "SUCCEEDED"
+
+
+@pytest.mark.parametrize(
     ("status", "expected"),
     [
         ("SUCCEEDED", "server stopped"),

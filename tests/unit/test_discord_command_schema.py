@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_phase7_mvp_command_schema_is_exact_and_guild_only() -> None:
+def test_phase8c_command_schema_is_exact_and_guild_only() -> None:
     schema = json.loads((ROOT / "config/discord/commands.v1.json").read_text(encoding="utf-8"))
 
     assert isinstance(schema, list)
@@ -19,5 +19,6 @@ def test_phase7_mvp_command_schema_is_exact_and_guild_only() -> None:
         ("status", 1),
         ("start", 1),
         ("stop", 1),
+        ("backup", 1),
     ]
     assert all(set(option) == {"type", "name", "description"} for option in command["options"])
