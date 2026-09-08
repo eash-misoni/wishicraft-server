@@ -139,11 +139,6 @@ def handler(event: object, context: object) -> dict[str, object]:
             "anomaly_count": len(plan.anomaly_ids),
             "deletion_plan_count": len(plan.planned_delete_ids),
             "delete_action_count": 0,
-            "keep_snapshot_ids": list(plan.keep_ids),
-            "candidate_snapshot_ids": list(plan.candidate_ids),
-            "excluded_snapshot_ids": list(plan.excluded_ids),
-            "anomaly_snapshot_ids": list(plan.anomaly_ids),
-            "would_delete_snapshot_ids": list(plan.planned_delete_ids),
             "recycle_bin_rule_count": len(rules),
             "matching_recycle_bin_rule_count": matching_rules,
         }

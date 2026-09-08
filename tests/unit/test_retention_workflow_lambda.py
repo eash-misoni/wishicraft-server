@@ -224,6 +224,7 @@ def test_dry_run_succeeds_for_fresh_healthy_state_without_delete(
     assert evidence["excluded_count"] == 1
     assert evidence["candidate_count"] == evidence["anomaly_count"] == 0
     assert evidence["deletion_plan_count"] == evidence["delete_action_count"] == 0
+    assert all(not isinstance(value, list) for value in evidence.values())
     assert not hasattr(runtime.ec2, "delete_snapshot")
 
 
