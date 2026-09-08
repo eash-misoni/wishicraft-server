@@ -12,7 +12,7 @@
 
 ### D-091 RETENTIONはdurable provenanceを持つ独立した破壊的Operationとする
 
-- **状態:** Accepted（repository-only contract/model validated）
+- **状態:** Accepted（repository model validated、dev provenance persistence/backfill/dry-run completed）
 - **日付:** 2026-09-07
 - **背景:** BAK-004の旧文言はPhase 16まで一律削除禁止としていた一方、D-090はnormal backup newest 7を定義していた。Operationsは現在TTLなし・`expires_at=null`だが、将来の監査TTLを許し、手動BACKUPが8件に達する期限も保証しないため、Operation存続をretention ownershipの永続根拠にはできない。
 - **決定:** RETENTIONはBACKUP成功結果と分離した独立Operation/workflowとし、START/STOP/BACKUPと同じglobal Lockを取得する。対象はcurrent bindingについてexact D-090 v1 metadata、expected owner/source、completed、成功時に記録した非TTL durable Backup provenanceをすべて相互検証できるnormal backupだけとする。Operationは補助監査証跡であり永続provenanceではない。Phase 9で2件目Gameを導入する前にstorage/retention ownershipを再Decisionする。
@@ -27,6 +27,7 @@
 - 実production Delete E2Eはnormal backupが自然に8件以上になった後の別release gateで行う。検証目的でretention countを下げず、不要Snapshotを量産せず、migration/protectedを候補にしない。Restore/schedule/RUNNING backup/auto-STOP/migration cleanupは対象外で、Restoreと復元試験はPhase 16とする。
 - **影響:** 明示的release gateを満たすD-090 v1 normal backupに限りPhase 16前のretention deletionを許可し、BAK-004を精密化する。既存Phase 8B/8C Snapshotはdurable provenanceの安全な登録が別gateで完了するまでANOMALYとなり削除されない。
 - **代替案:** Operationを無期限化する案は監査lifecycleとretentionを結合するため不採用。Snapshot metadataだけを正本にする案は改変・欠損への独立証拠が弱い。Operation不存在を永久保持する案は安全だが手動backup間隔次第でretentionが恒久停止するため不採用。
+- **Dev evidence:** 2026-09-08にCI success済み実装から`WishicraftControlPlaneStack-dev`だけを更新し、Retainされた非TTL/on-demand/SSEの`wc-dev-backups`とBackup taskのtable限定GetItem/PutItemを確認した。Phase 8B/8C Snapshotをowner/source/state/standard tier/no-lock/exact D-090 metadata/成功Operationと照合し、2組4 recordをconditional transactionで登録した。consistent readと完全inventoryによるdry-runはKEEP 2、migration EXCLUDED 1、ANOMALY/CANDIDATE/delete 0、Recycle Bin rule 0、active Snapshot Lock 0へ収束した。Snapshot/tag/Operation変更、DeleteSnapshot permission、RETENTION workflow、DeleteSnapshot DryRun/実削除は行っていない。
 - **関連:** BAK-004、BAK-006、D-026、D-074、D-090、Phase 16。
 
 ### D-090 Phase 8 MVPは停止中Data EBSのOperation-scoped Snapshotとする

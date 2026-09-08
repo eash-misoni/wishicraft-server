@@ -237,6 +237,26 @@ class BackupProvenanceRepository:
             and self._load(f"OPERATION#{record.operation_id}") == record.operation_item()
         )
 
+    def existing_recorded_at(self, snapshot_id: str, operation_id: str) -> datetime | None:
+        """Recover a fixed audit timestamp only from a complete matching pair."""
+        snapshot = self._load(f"SNAPSHOT#{snapshot_id}")
+        operation = self._load(f"OPERATION#{operation_id}")
+        if snapshot is None and operation is None:
+            return None
+        if snapshot is None or operation is None:
+            raise ValueError("conflicting or partial Backup provenance")
+        if (
+            snapshot.get("snapshot_id") != snapshot_id
+            or snapshot.get("operation_id") != operation_id
+            or operation.get("snapshot_id") != snapshot_id
+            or operation.get("operation_id") != operation_id
+        ):
+            raise ValueError("conflicting or partial Backup provenance")
+        value = snapshot.get("provenance_recorded_at")
+        if not isinstance(value, str):
+            raise ValueError("malformed Backup provenance timestamp")
+        return _parse_rfc3339(value)
+
     def assert_createable_or_exact(self, record: BackupProvenanceRecord) -> bool:
         snapshot = self._load(f"SNAPSHOT#{record.snapshot_id}")
         operation = self._load(f"OPERATION#{record.operation_id}")

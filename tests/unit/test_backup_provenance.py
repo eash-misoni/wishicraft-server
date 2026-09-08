@@ -116,6 +116,33 @@ def test_exact_rerun_is_idempotent_even_if_attempt_time_changes() -> None:
     assert repository.assert_createable_or_exact(retry) is False
 
 
+def test_existing_pair_recovers_fixed_recorded_at_for_batch_replay() -> None:
+    api = Dynamo()
+    repository = BackupProvenanceRepository(api, table_name="backups")
+    original = record()
+    for write in repository.transactional_puts(original):
+        put = cast(dict[str, object], write["Put"])
+        item = cast(dict[str, object], put["Item"])
+        key = cast(dict[str, object], item["provenance_key"])
+        api.items[str(key["S"])] = item
+
+    assert (
+        repository.existing_recorded_at(original.snapshot_id, original.operation_id)
+        == original.provenance_recorded_at
+    )
+
+
+def test_existing_recorded_at_rejects_partial_pair() -> None:
+    api = Dynamo()
+    repository = BackupProvenanceRepository(api, table_name="backups")
+    original = record()
+    put = cast(dict[str, object], repository.transactional_puts(original)[0]["Put"])
+    api.items[f"SNAPSHOT#{original.snapshot_id}"] = cast(dict[str, object], put["Item"])
+
+    with pytest.raises(ValueError, match="conflicting or partial"):
+        repository.existing_recorded_at(original.snapshot_id, original.operation_id)
+
+
 def test_business_evidence_conflict_is_never_merged() -> None:
     api = Dynamo()
     repository = BackupProvenanceRepository(api, table_name="backups")

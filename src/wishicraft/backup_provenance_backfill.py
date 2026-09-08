@@ -66,6 +66,9 @@ def execute_backfill(
         lock_name=stage.global_lock_name,
     )
     snapshots = SnapshotAdapter(ec2, account_id=stage.aws_account_id)
+    repository = BackupProvenanceRepository(
+        cast(DynamoProvenanceApi, dynamodb), table_name=backups_table
+    )
     lock_states = load_complete_snapshot_locks(cast(SnapshotLockApi, ec2))
     mapping = _load_complete_operation_snapshot_mapping(dynamodb, operations_table)
     records: list[BackupProvenanceRecord] = []
@@ -81,7 +84,9 @@ def execute_backfill(
         if not isinstance(result, dict):
             raise ValueError("BACKUP Operation result is unavailable")
         requested_at = _strict_timestamp(str(raw["requested_at"]))
-        recorded_at = datetime.now(UTC)
+        recorded_at = repository.existing_recorded_at(snapshot_id, operation_id) or datetime.now(
+            UTC
+        )
         records.append(
             build_verified_provenance(
                 snapshot=snapshot,
@@ -108,9 +113,6 @@ def execute_backfill(
     existing_keys = _load_complete_provenance_keys(dynamodb, backups_table)
     if existing_keys - allowed_keys:
         raise ValueError("Backups table contains an unrelated record")
-    repository = BackupProvenanceRepository(
-        cast(DynamoProvenanceApi, dynamodb), table_name=backups_table
-    )
     for record in records:
         repository.register(record)
         if not repository.exact_match(record):
