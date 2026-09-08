@@ -388,6 +388,8 @@ class ControlPlaneStack(Stack):
 
         backup_task: lambda_.Function | None = None
         backup_workflow: sfn.CfnStateMachine | None = None
+        retention_task: lambda_.Function | None = None
+        retention_workflow: sfn.CfnStateMachine | None = None
         if phase >= 8:
             assert backups_table is not None
             backup_task_log_group = logs.LogGroup(
@@ -512,6 +514,107 @@ class ControlPlaneStack(Stack):
                     timeout_seconds=stage.operation_timeout_seconds("BACKUP"),
                 ),
             )
+            retention_task_log_group = logs.LogGroup(
+                self,
+                "RetentionTaskLogGroup",
+                log_group_name=(
+                    "/aws/lambda/"
+                    f"{resource_name(project.resource_prefix, stage.stage, 'retention-task')}"
+                ),
+                retention=logs.RetentionDays.TWO_WEEKS,
+                removal_policy=RemovalPolicy.DESTROY,
+            )
+            retention_task = lambda_.Function(
+                self,
+                "RetentionTaskFunction",
+                function_name=resource_name(project.resource_prefix, stage.stage, "retention-task"),
+                runtime=lambda_.Runtime.PYTHON_3_12,
+                architecture=lambda_.Architecture.X86_64,
+                code=lambda_.Code.from_asset(str(Path(__file__).resolve().parents[2] / "src")),
+                handler="wishicraft.retention_workflow_lambda.handler",
+                timeout=Duration.seconds(120),
+                memory_size=256,
+                log_group=retention_task_log_group,
+                environment={
+                    "SYSTEM_STATE_TABLE": table.table_name,
+                    "OPERATIONS_TABLE": operations_table.table_name,
+                    "BACKUPS_TABLE": backups_table.table_name,
+                    "LOCKS_TABLE": locks_table.table_name,
+                    "SYSTEM_ID": project.system_id,
+                    "GAME_ID": project.initial_game_id,
+                    "PROJECT": project.project_slug,
+                    "STAGE": stage.stage,
+                    "AWS_ACCOUNT_ID": stage.aws_account_id,
+                    "AVAILABILITY_ZONE": stage.availability_zone,
+                    "DATA_VOLUME_ID": str(
+                        stage.host_runtime_value("target_host.existing_data_volume_id")
+                    ),
+                    "DATA_VOLUME_DEVICE": str(
+                        stage.host_runtime_value("target_host.existing_data_volume_device")
+                    ),
+                    "GLOBAL_LOCK_NAME": stage.global_lock_name,
+                    "LOCK_LEASE_SECONDS": str(stage.lock_lease_seconds),
+                },
+                description="D-091 dry-run-only snapshot retention inventory task",
+            )
+            retention_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=[
+                        "ec2:DescribeLockedSnapshots",
+                        "ec2:DescribeSnapshots",
+                        "ec2:DescribeVolumes",
+                    ],
+                    resources=["*"],
+                )
+            )
+            retention_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["rbin:ListRules"],
+                    resources=["*"],
+                    conditions={"StringEquals": {"rbin:Request/ResourceType": "EBS_SNAPSHOT"}},
+                )
+            )
+            retention_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["rbin:GetRule"],
+                    resources=[f"arn:aws:rbin:{stage.aws_region}:{stage.aws_account_id}:rule/*"],
+                    conditions={"StringEquals": {"rbin:Attribute/ResourceType": "EBS_SNAPSHOT"}},
+                )
+            )
+            retention_task.add_to_role_policy(
+                iam.PolicyStatement(actions=["dynamodb:Scan"], resources=[backups_table.table_arn])
+            )
+            retention_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=[
+                        "dynamodb:GetItem",
+                        "dynamodb:UpdateItem",
+                        "dynamodb:DeleteItem",
+                        "dynamodb:TransactWriteItems",
+                    ],
+                    resources=[table.table_arn, operations_table.table_arn, locks_table.table_arn],
+                )
+            )
+            retention_workflow_role = iam.Role(
+                self,
+                "RetentionWorkflowRole",
+                assumed_by=iam.ServicePrincipal("states.amazonaws.com"),
+                description="D-091 dry-run-only RETENTION Standard workflow",
+            )
+            function.grant_invoke(retention_workflow_role)
+            retention_task.grant_invoke(retention_workflow_role)
+            retention_workflow = sfn.CfnStateMachine(
+                self,
+                "RetentionStateMachine",
+                state_machine_name=resource_name(project.resource_prefix, stage.stage, "retention"),
+                state_machine_type="STANDARD",
+                role_arn=retention_workflow_role.role_arn,
+                definition=_retention_definition(
+                    reconcile_arn=function.function_arn,
+                    retention_task_arn=retention_task.function_arn,
+                    timeout_seconds=stage.operation_timeout_seconds("RETENTION"),
+                ),
+            )
         function.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["ssm:SendCommand"],
@@ -581,11 +684,17 @@ class ControlPlaneStack(Stack):
                 "START_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("START")),
                 "STOP_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("STOP")),
                 "BACKUP_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("BACKUP")),
+                "RETENTION_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("RETENTION")),
                 "START_STATE_MACHINE_ARN": start_workflow.attr_arn,
                 "STOP_STATE_MACHINE_ARN": stop_workflow.attr_arn,
                 **(
                     {"BACKUP_STATE_MACHINE_ARN": backup_workflow.attr_arn}
                     if backup_workflow is not None
+                    else {}
+                ),
+                **(
+                    {"RETENTION_STATE_MACHINE_ARN": retention_workflow.attr_arn}
+                    if retention_workflow is not None
                     else {}
                 ),
             },
@@ -615,6 +724,7 @@ class ControlPlaneStack(Stack):
                     start_workflow.attr_arn,
                     stop_workflow.attr_arn,
                     *([backup_workflow.attr_arn] if backup_workflow is not None else []),
+                    *([retention_workflow.attr_arn] if retention_workflow is not None else []),
                 ],
             )
         )
@@ -641,6 +751,18 @@ class ControlPlaneStack(Stack):
                         if backup_workflow is not None
                         else []
                     ),
+                    *(
+                        [
+                            (
+                                f"arn:aws:states:{stage.aws_region}:"
+                                f"{stage.aws_account_id}:execution:"
+                                + resource_name(project.resource_prefix, stage.stage, "retention")
+                                + ":*"
+                            )
+                        ]
+                        if retention_workflow is not None
+                        else []
+                    ),
                 ],
             )
         )
@@ -665,11 +787,13 @@ class ControlPlaneStack(Stack):
                 start_workflow=start_workflow,
                 stop_workflow=stop_workflow,
                 backup_workflow=backup_workflow,
+                retention_workflow=retention_workflow,
                 monitored_functions=(
                     function,
                     start_task,
                     stop_task,
                     *([backup_task] if backup_task is not None else []),
+                    *([retention_task] if retention_task is not None else []),
                     admission,
                     *discord_functions,
                 ),
@@ -915,6 +1039,7 @@ def _add_release_monitoring(
     start_workflow: sfn.CfnStateMachine,
     stop_workflow: sfn.CfnStateMachine,
     backup_workflow: sfn.CfnStateMachine | None,
+    retention_workflow: sfn.CfnStateMachine | None,
     monitored_functions: tuple[lambda_.Function, ...],
 ) -> None:
     namespace = "Wishicraft/ControlPlane"
@@ -1032,6 +1157,8 @@ def _add_release_monitoring(
     monitored_workflows = [("Start", start_workflow), ("Stop", stop_workflow)]
     if backup_workflow is not None:
         monitored_workflows.append(("Backup", backup_workflow))
+    if retention_workflow is not None:
+        monitored_workflows.append(("Retention", retention_workflow))
     for logical, machine in monitored_workflows:
         machine_name = resource_name(project.resource_prefix, stage.stage, logical.lower())
         metrics = {
@@ -2147,4 +2274,95 @@ def _backup_definition(
         "StartAt": "ReconcileBeforeBackup",
         "TimeoutSeconds": timeout_seconds,
         "States": states,
+    }
+
+
+def _retention_definition(
+    *, reconcile_arn: str, retention_task_arn: str, timeout_seconds: int
+) -> dict[str, object]:
+    """Build the D-091 Standard workflow with no delete state or retry."""
+    invoke = {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "Parameters": {
+            "FunctionName": retention_task_arn,
+            "Payload": {
+                "schema_version": 1,
+                "action": "run",
+                "operation_id.$": "$.operation_id",
+                "lease_id.$": "$.lease_id",
+                "state.$": "$.reconcile.state",
+            },
+        },
+        "ResultPath": "$.retention",
+        "Next": "RetentionSafe",
+        "Catch": [
+            {
+                "ErrorEquals": ["States.ALL"],
+                "ResultPath": "$.workflow_error",
+                "Next": "SetTaskFailure",
+            }
+        ],
+    }
+    return {
+        "Comment": "D-091 dry-run-only snapshot retention",
+        "StartAt": "ReconcileBeforeRetention",
+        "TimeoutSeconds": timeout_seconds,
+        "States": {
+            "ReconcileBeforeRetention": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "Parameters": {
+                    "FunctionName": reconcile_arn,
+                    "Payload": {"schema_version": 1, "operation": "reconcile"},
+                },
+                "ResultSelector": {"state.$": "$.Payload"},
+                "ResultPath": "$.reconcile",
+                "Next": "RunRetentionDryRun",
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "SetObservationFailure"}],
+            },
+            "RunRetentionDryRun": invoke,
+            "RetentionSafe": {
+                "Type": "Choice",
+                "Choices": [
+                    {
+                        "Variable": "$.retention.Payload.status",
+                        "StringEquals": "SUCCEEDED",
+                        "Next": "RetentionSucceeded",
+                    }
+                ],
+                "Default": "RetentionFailed",
+            },
+            "RetentionSucceeded": {"Type": "Succeed"},
+            "SetObservationFailure": {
+                "Type": "Pass",
+                "Result": {"error_code": "OBSERVATION_FAILED"},
+                "ResultPath": "$.failure",
+                "Next": "RecordFailure",
+            },
+            "SetTaskFailure": {
+                "Type": "Pass",
+                "Result": {"error_code": "RETENTION_DRY_RUN_FAILED"},
+                "ResultPath": "$.failure",
+                "Next": "RecordFailure",
+            },
+            "RecordFailure": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "Parameters": {
+                    "FunctionName": retention_task_arn,
+                    "Payload": {
+                        "schema_version": 1,
+                        "action": "fail",
+                        "operation_id.$": "$.operation_id",
+                        "lease_id.$": "$.lease_id",
+                        "error_code.$": "$.failure.error_code",
+                    },
+                },
+                "Next": "RetentionFailed",
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "UnrecoverableFailure"}],
+            },
+            "RetentionFailed": {"Type": "Fail", "Error": "RETENTION_WORKFLOW_FAILED"},
+            "UnrecoverableFailure": {"Type": "Fail", "Error": "RETENTION_CLEANUP_FAILED"},
+        },
     }

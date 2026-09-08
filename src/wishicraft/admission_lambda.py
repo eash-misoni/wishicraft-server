@@ -35,6 +35,7 @@ _service: OperationAdmissionService | None = None
 _launcher: WorkflowLauncher | None = None
 _stop_launcher: WorkflowLauncher | None = None
 _backup_launcher: WorkflowLauncher | None = None
+_retention_launcher: WorkflowLauncher | None = None
 
 
 def handler(event: object, context: object) -> dict[str, object]:
@@ -42,6 +43,10 @@ def handler(event: object, context: object) -> dict[str, object]:
     operation_type, idempotency_key, requested_by, discord = _parse_event(event)
     if operation_type is OperationType.BACKUP and not os.environ.get("BACKUP_STATE_MACHINE_ARN"):
         raise ValueError("BACKUP workflow is not configured")
+    if operation_type is OperationType.RETENTION and not os.environ.get(
+        "RETENTION_STATE_MACHINE_ARN"
+    ):
+        raise ValueError("RETENTION workflow is not configured")
     result = _get_service().admit(
         operation_type=operation_type,
         idempotency_key=idempotency_key,
@@ -69,6 +74,14 @@ def handler(event: object, context: object) -> dict[str, object]:
         if result.lease_id is None:
             raise RuntimeError("BACKUP admission did not create a lease")
         _get_backup_launcher().start(
+            operation_id=result.operation_id,
+            lease_id=result.lease_id,
+            started_at=datetime.now(UTC),
+        )
+    if result.created and operation_type is OperationType.RETENTION:
+        if result.lease_id is None:
+            raise RuntimeError("RETENTION admission did not create a lease")
+        _get_retention_launcher().start(
             operation_id=result.operation_id,
             lease_id=result.lease_id,
             started_at=datetime.now(UTC),
@@ -286,6 +299,20 @@ def _get_backup_launcher() -> WorkflowLauncher:
     return _backup_launcher
 
 
+def _get_retention_launcher() -> WorkflowLauncher:
+    global _retention_launcher
+    if _retention_launcher is None:
+        boto3 = importlib.import_module("boto3")
+        session = cast(AwsSession, boto3)
+        region = _required_environment("AWS_REGION")
+        _retention_launcher = WorkflowLauncher(
+            cast(StepFunctionsApi, session.client("stepfunctions", region_name=region)),
+            cast(DynamoApi, session.client("dynamodb", region_name=region)),
+            state_machine_environment="RETENTION_STATE_MACHINE_ARN",
+        )
+    return _retention_launcher
+
+
 def _required_environment(name: str) -> str:
     value = os.environ.get(name)
     if not value:
@@ -319,6 +346,7 @@ def _build_service() -> OperationAdmissionService:
             OperationType.START,
             OperationType.STOP,
             OperationType.BACKUP,
+            OperationType.RETENTION,
         )
     }
     return OperationAdmissionService(

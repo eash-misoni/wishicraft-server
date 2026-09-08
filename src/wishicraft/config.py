@@ -206,6 +206,7 @@ class StageConfig:
             "START": "start_workflow",
             "STOP": "stop_workflow",
             "BACKUP": "backup",
+            "RETENTION": "retention",
         }.get(operation_type)
         if key is None:
             raise ConfigValidationError([f"unsupported Phase 4 operation type: {operation_type}"])

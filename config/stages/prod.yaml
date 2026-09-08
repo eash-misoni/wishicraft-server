@@ -61,6 +61,7 @@ timeouts_seconds:
   stop_workflow: 1200
   status: 120
   backup: 900
+  retention: 300
 
 operation:
   global_lock_name: minecraft-control

@@ -28,6 +28,7 @@
 - **影響:** 明示的release gateを満たすD-090 v1 normal backupに限りPhase 16前のretention deletionを許可し、BAK-004を精密化する。既存Phase 8B/8C Snapshotはdurable provenanceの安全な登録が別gateで完了するまでANOMALYとなり削除されない。
 - **代替案:** Operationを無期限化する案は監査lifecycleとretentionを結合するため不採用。Snapshot metadataだけを正本にする案は改変・欠損への独立証拠が弱い。Operation不存在を永久保持する案は安全だが手動backup間隔次第でretentionが恒久停止するため不採用。
 - **Dev evidence:** 2026-09-08にCI success済み実装から`WishicraftControlPlaneStack-dev`だけを更新し、Retainされた非TTL/on-demand/SSEの`wc-dev-backups`とBackup taskのtable限定GetItem/PutItemを確認した。Phase 8B/8C Snapshotをowner/source/state/standard tier/no-lock/exact D-090 metadata/成功Operationと照合し、2組4 recordをconditional transactionで登録した。consistent readと完全inventoryによるdry-runはKEEP 2、migration EXCLUDED 1、ANOMALY/CANDIDATE/delete 0、Recycle Bin rule 0、active Snapshot Lock 0へ収束した。Snapshot/tag/Operation変更、DeleteSnapshot permission、RETENTION workflow、DeleteSnapshot DryRun/実削除は行っていない。
+- **初回workflow具体化:** RETENTIONはshared Admissionからのみ起動し、global Lock/Current Operationを所有するStandard workflowとする。fresh ReconcileによるHEALTHY、discrepancy/observation errorなし、canonical Game/Data EBS bindingを必須にするが、filesystem snapshot作成ではないためSTOPPEDは必須にせずhealthyなRUNNING/STOPPEDを許容する。初回releaseはcomplete read-only inventoryとwould-delete planだけを記録し、ANOMALY等は可視なFAILED/no-deleteへ収束する。DeleteSnapshot task/state/permissionは後続release gateまで到達不能・未接続とする。
 - **関連:** BAK-004、BAK-006、D-026、D-074、D-090、Phase 16。
 
 ### D-090 Phase 8 MVPは停止中Data EBSのOperation-scoped Snapshotとする

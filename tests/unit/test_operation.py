@@ -120,6 +120,28 @@ def test_competing_operation_admission_is_one_atomic_transaction() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "conflicting_type", [OperationType.START, OperationType.STOP, OperationType.BACKUP]
+)
+def test_retention_shares_the_same_global_lock_conflict_boundary(
+    conflicting_type: OperationType,
+) -> None:
+    retention_api = FakeDynamo()
+    conflicting_api = FakeDynamo()
+    repository(retention_api).admit(request(OperationType.RETENTION))
+    repository(conflicting_api).admit(request(conflicting_type))
+
+    retention_lock = cast(dict[str, object], transaction_items(retention_api)[3]["Put"])
+    conflicting_lock = cast(dict[str, object], transaction_items(conflicting_api)[3]["Put"])
+    assert retention_lock["TableName"] == conflicting_lock["TableName"] == "locks"
+    assert retention_lock["Item"] == conflicting_lock["Item"]
+    assert (
+        retention_lock["ConditionExpression"]
+        == conflicting_lock["ConditionExpression"]
+        == ("attribute_not_exists(lock_name)")
+    )
+
+
 def test_backup_evidence_loads_authoritative_requested_at_consistently() -> None:
     api = FakeDynamo()
     api.item = {

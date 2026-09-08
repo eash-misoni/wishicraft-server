@@ -796,7 +796,8 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 1. **Completed（2026-09-08）:** D-091の非TTL durable provenance、safe backfill、Snapshot Lock/storage tierを含むread-only dry-run、未接続IAM policyをrepository実装した。`wc-dev-backups`はon-demand、SSE、TTL/stream/indexなし、CloudFormation Retainでdeployし、Backup taskにはtable限定GetItem/PutItemだけを追加した。
 2. Phase 8B/8Cの2 SnapshotをAWS/Operation evidenceから直前再検証し、それぞれSnapshot/Operation uniqueness pairをcreate-only conditional transactionで登録した。backfill前はnormal 2件がprovenance不足ANOMALY、登録後の実inventory dry-runはKEEP 2、EXCLUDED migration anchor 1、ANOMALY/CANDIDATE/planned delete 0だった。Recycle Bin ruleとactive Snapshot Lockは0、3 Snapshotはいずれもstandard tierである。
 3. `ec2:DeleteSnapshot` permission、RETENTION production workflow、DeleteSnapshot DryRun/実削除は未deploy・未実施である。IAM/RETENTION releaseは別gateとし、実Deleteはnatural 8件到達まで行わない。
-4. Restore runbook/UIと復元テストはPhase 16
+4. **準備中（repository-only）:** shared Admission/global Lock/Current Operationへ統合したRETENTION Standard workflow、read-only inventory task、operator entrypoint、failure/throttle/workflow alarmを実装する。初回production definitionはdry-run-onlyで、DeleteSnapshot task/state/permission、Discord command、EventBridge scheduleを含めない。deploy前に新BACKUP producer pathをreal `/mc backup` 1回で検証し、自動provenance作成とnormal/provenance 3件への収束をrelease gateとする。
+5. Restore runbook/UIと復元テストはPhase 16
 
 ### 8.2 無人自動停止
 

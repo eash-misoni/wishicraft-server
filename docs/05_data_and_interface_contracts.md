@@ -428,6 +428,8 @@ partition keyは`provenance_key`とし、`SNAPSHOT#<snapshot-id>`のimmutable ev
 
 新規BACKUPはcompleted/source/owner/exact metadata/standard storage tierを検証後、Operation SUCCEEDED、2 provenance record、Lock解放、Current Operation clearを同じDynamoDB transactionで確定する。transaction結果不明後は両provenanceとterminal Operation resultの完全一致だけを成功扱いする。既存Snapshotを登録する場合は、別release gateで元の成功Operation、source、owner、exact metadataをpositive proofして行い、証明できないnormal-backup claimはANOMALYとして削除しない。
 
+RETENTION operator entrypointはshared Admission Lambdaへ`operation_type=RETENTION`、`requested_by=ADMIN`、canonical Gameとcallerが一度固定した`retention:` namespaceのidempotency keyを送る。State Machineを直接開始しない。dry-run resultはinventory/KEEP/CANDIDATE/EXCLUDED/ANOMALY/deletion-plan/delete-actionの各countと内部Snapshot evidence、Recycle Bin rule countを保持し、production dry-run-only releaseの`delete_action_count`は必ず0とする。
+
 
 ## 10. SystemState Repository契約
 

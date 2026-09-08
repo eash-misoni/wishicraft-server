@@ -567,6 +567,8 @@ Transactionが失敗した場合、Operationを作成せず、workflowを開始�
 - EC2が既にstoppedならstop成功相当へ進める。
 - BACKUPは同一operation IDでcreate intentを再送せず、検証済みSnapshotへ一対一で収束する。
 - RETENTIONは同一Operation・同一Snapshot IDだけを扱い、結果不明時も別candidateへ進まない。
+- RETENTIONはBACKUPとは独立してshared Admissionから生成し、global LockとCurrent Operationを所有する。workflow内のfresh ReconcileがHEALTHY、discrepancy/observation errorなし、canonical Game/Data EBS bindingを証明することを必須とするが、過去Snapshotのinventory operationなのでSTOPPEDは必須にせず、healthyなRUNNING/STOPPEDを許容する。
+- dry-run-only releaseでは正常inventoryを`SUCCEEDED`とし、7件以内は`within-retention-limit`、candidateありはwould-delete evidenceを結果へ保持するがdelete actionは常に0とする。ANOMALY、partial inventory、unsafe classificationは`RETENTION_UNSAFE_INVENTORY`で`FAILED`へ収束させ、正常完了として隠さない。
 
 ### EC2スクリプト
 

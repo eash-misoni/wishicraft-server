@@ -357,6 +357,100 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam() -> 
     )
 
 
+def test_phase_eight_retention_is_standard_dry_run_only_with_read_only_aws_iam() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=8, deployment="control-plane")
+    stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
+    template = Template.from_stack(stack)
+    functions = template.find_resources("AWS::Lambda::Function")
+    retention = next(
+        value["Properties"]
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-retention-task"
+    )
+    assert retention["Handler"] == "wishicraft.retention_workflow_lambda.handler"
+    assert retention["Timeout"] == 120
+    assert retention["Environment"]["Variables"]["DATA_VOLUME_ID"] == ("vol-03ac9f534326c345c")
+    policies = template.find_resources("AWS::IAM::Policy")
+    role = retention["Role"]["Fn::GetAtt"][0]
+    statements = [
+        statement
+        for policy in policies.values()
+        if {"Ref": role} in policy["Properties"]["Roles"]
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+    ]
+    actions = {action for statement in statements for action in _action_list(statement["Action"])}
+    assert actions == {
+        "ec2:DescribeLockedSnapshots",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeVolumes",
+        "rbin:ListRules",
+        "rbin:GetRule",
+        "dynamodb:Scan",
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:TransactWriteItems",
+    }
+    forbidden = {
+        "ec2:DeleteSnapshot",
+        "ec2:CreateSnapshot",
+        "ec2:CreateTags",
+        "ec2:DeleteTags",
+        "ec2:LockSnapshot",
+        "ec2:UnlockSnapshot",
+        "rbin:CreateRule",
+        "rbin:UpdateRule",
+        "rbin:DeleteRule",
+        "rbin:LockRule",
+        "rbin:UnlockRule",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ssm:SendCommand",
+        "route53:ChangeResourceRecordSets",
+    }
+    assert not actions & forbidden
+    list_rules = next(
+        statement for statement in statements if statement["Action"] == "rbin:ListRules"
+    )
+    assert list_rules["Condition"] == {
+        "StringEquals": {"rbin:Request/ResourceType": "EBS_SNAPSHOT"}
+    }
+    get_rule = next(statement for statement in statements if statement["Action"] == "rbin:GetRule")
+    assert get_rule["Condition"] == {
+        "StringEquals": {"rbin:Attribute/ResourceType": "EBS_SNAPSHOT"}
+    }
+    machines = template.find_resources("AWS::StepFunctions::StateMachine")
+    retention_machine = next(
+        value["Properties"]
+        for value in machines.values()
+        if value["Properties"]["StateMachineName"] == "wc-dev-retention"
+    )
+    assert retention_machine["StateMachineType"] == "STANDARD"
+    definition = retention_machine["Definition"]
+    assert definition["TimeoutSeconds"] == 300
+    encoded = str(definition)
+    assert "DeleteSnapshot" not in encoded
+    assert "Retry" not in encoded
+    assert set(definition["States"]) == {
+        "ReconcileBeforeRetention",
+        "RunRetentionDryRun",
+        "RetentionSafe",
+        "RetentionSucceeded",
+        "SetObservationFailure",
+        "SetTaskFailure",
+        "RecordFailure",
+        "RetentionFailed",
+        "UnrecoverableFailure",
+    }
+    admission = next(
+        value["Properties"]
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-admission"
+    )
+    assert "RETENTION_STATE_MACHINE_ARN" in admission["Environment"]["Variables"]
+    assert admission["Environment"]["Variables"]["RETENTION_TIMEOUT_SECONDS"] == "300"
+
+
 def test_phase_one_network_uses_configured_public_subnet_and_internet_gateway() -> None:
     app = build_app(REPOSITORY_ROOT, "dev", phase=1)
 

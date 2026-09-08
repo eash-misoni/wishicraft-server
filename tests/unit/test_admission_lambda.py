@@ -138,6 +138,67 @@ def test_backup_is_rejected_before_admission_when_phase_eight_is_not_configured(
     assert service.calls == []
 
 
+def test_retention_admission_launches_dry_run_workflow_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = Service(AdmissionResult("op-retention", True, "lease-retention"))
+    launcher = Launcher()
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.setattr(admission_lambda, "_retention_launcher", launcher)
+    monkeypatch.setenv("RETENTION_STATE_MACHINE_ARN", "arn:retention")
+    retention_event = {
+        **event(),
+        "operation_type": "RETENTION",
+        "idempotency_key": "retention:request-001",
+        "requested_by": "ADMIN",
+    }
+    result = admission_lambda.handler(retention_event, None)
+    assert result["operation_id"] == "op-retention"
+    assert service.calls[0]["operation_type"] is OperationType.RETENTION
+    assert launcher.calls == [
+        {
+            "operation_id": "op-retention",
+            "lease_id": "lease-retention",
+            "started_at": launcher.calls[0]["started_at"],
+        }
+    ]
+
+
+def test_duplicate_retention_admission_does_not_launch_new_execution(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = Service(AdmissionResult("op-retention", False, None))
+    launcher = Launcher()
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.setattr(admission_lambda, "_retention_launcher", launcher)
+    monkeypatch.setenv("RETENTION_STATE_MACHINE_ARN", "arn:retention")
+    retention_event = {
+        **event(),
+        "operation_type": "RETENTION",
+        "idempotency_key": "retention:request-001",
+        "requested_by": "ADMIN",
+    }
+    assert admission_lambda.handler(retention_event, None)["created"] is False
+    assert launcher.calls == []
+
+
+def test_retention_is_rejected_before_admission_when_not_configured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = Service(AdmissionResult("op-retention", True, "lease-retention"))
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.delenv("RETENTION_STATE_MACHINE_ARN", raising=False)
+    retention_event = {
+        **event(),
+        "operation_type": "RETENTION",
+        "idempotency_key": "retention:request-001",
+        "requested_by": "ADMIN",
+    }
+    with pytest.raises(ValueError, match="not configured"):
+        admission_lambda.handler(retention_event, None)
+    assert service.calls == []
+
+
 @pytest.mark.parametrize(
     "invalid",
     [

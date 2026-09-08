@@ -292,6 +292,8 @@ Phase 8AのBACKUPはこのData EBS全体を一つのEBS Snapshotとして取得�
 
 BACKUPはshared Admission/global Lockを使用するStandard workflowである。fresh Reconcile、STOPPED/HEALTHY validation、expected encrypted Volume validation、inline metadata付きCreateSnapshot一回、poll、completed/source/tag verification、terminal owned cleanupの順とする。CreateSnapshot stepにRetryを設定せず、同一idempotency replayも新しいexecution/snapshotを作らない。
 
+RETENTIONもshared Admission/global Lock/Current Operationを使用する独立Standard workflowとする。初回releaseはfresh ReconcileによるHEALTHY/no-discrepancyとcanonical Game/Data EBS bindingを確認し、Snapshot、Snapshot Lock、Recycle Bin rule、durable provenanceを完全paginationでreadしてD-091分類と最大1件のwould-delete planだけを内部結果へ残すdry-run-only構成である。RUNNING/STOPPEDはいずれも許容し、DeleteSnapshot task/stateとDelete権限は接続しない。
+
 既存migration snapshotはD-065のretained rollback anchorで、Phase 8A tag schema導入前の歴史的resourceである。通常retentionはcategory `backup`のexact matchを必須とするため、untaggedまたはcategory `migration`のsnapshotを候補にしない。
 
 例:

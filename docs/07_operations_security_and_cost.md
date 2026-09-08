@@ -328,6 +328,8 @@ D-091のRETENTIONはBACKUPと分離したOperationでglobal Lockを取り、完�
 
 Snapshot Lock inventoryも完全取得し、active governance/compliance lockを持つnormal backupを削除候補にしない。初版はstandard tierだけを対象としarchive tierをANOMALYとする。Recycle Bin ruleとSnapshot Lockを変更・解除する権限はRETENTION roleへ与えない。
 
+RETENTIONの最初のproduction releaseはdry-run-only Standard workflowとする。operatorはdirect StartExecutionではなくshared Admissionを使用し、workflowはglobal Lock所有下でfresh Reconcileを行う。healthyなRUNNING/STOPPEDはいずれも許容する。task roleはEC2 Snapshot/Volume、Snapshot Lock、Recycle Bin、durable provenanceのreadと既存Operation/lease terminalizationに必要なtable操作だけを持ち、Snapshot/Recycle Bin/EC2/EBS/DNS mutationを持たない。
+
 
 ### 対象外の将来案
 
