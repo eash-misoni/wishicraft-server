@@ -17,9 +17,11 @@ from wishicraft.retention import (
     SnapshotDisposition,
     classify_inventory,
     load_complete_inventory,
+    load_complete_snapshot_locks,
     parse_rfc3339,
     plan_retention,
     reconcile_delete_outcome,
+    with_lock_states,
 )
 
 NOW = datetime(2026, 9, 7, 12, 0, tzinfo=UTC)
@@ -59,8 +61,11 @@ def provenance(item: InventorySnapshot, **changes: object) -> BackupProvenance:
         "game_id": "game-vanilla-main",
         "stage": "dev",
         "source_volume_id": "vol-data",
-        "requested_at": parse_rfc3339(item.tags["WishicraftCreatedAt"]),
-        "verified_at": NOW,
+        "operation_requested_at": parse_rfc3339(item.tags["WishicraftCreatedAt"])
+        - timedelta(seconds=6),
+        "wishicraft_created_at": parse_rfc3339(item.tags["WishicraftCreatedAt"]),
+        "snapshot_start_time": item.start_time,
+        "provenance_recorded_at": item.start_time + timedelta(seconds=3),
     }
     values.update(changes)
     return BackupProvenance(**values)  # type: ignore[arg-type]
@@ -153,9 +158,76 @@ def test_rfc3339_equivalent_instants_are_accepted() -> None:
         1,
         tags={**snapshot(1).tags, "WishicraftCreatedAt": "2026-09-07T13:00:00+01:00"},
     )
-    proof = provenance(item, requested_at=datetime(2026, 9, 7, 12, 0, tzinfo=UTC))
+    proof = provenance(
+        item,
+        wishicraft_created_at=datetime(2026, 9, 7, 12, 0, tzinfo=UTC),
+    )
     result = classify_inventory([item], {item.snapshot_id: proof}, context=CONTEXT)
     assert result[0].disposition is SnapshotDisposition.KEEP
+
+
+def test_distinct_operation_create_and_start_times_are_valid_and_start_time_orders() -> None:
+    items = [snapshot(i) for i in range(8)]
+    original_oldest = items[0]
+    shifted_created_at = NOW + timedelta(days=20)
+    oldest = snapshot(
+        0,
+        tags={
+            **original_oldest.tags,
+            "WishicraftCreatedAt": shifted_created_at.isoformat(),
+        },
+    )
+    items[0] = oldest
+    proof_map = proofs(items)
+    proof_map[oldest.snapshot_id] = provenance(
+        oldest,
+        operation_requested_at=NOW + timedelta(days=30),
+        wishicraft_created_at=shifted_created_at,
+    )
+    plan = plan_retention(items, proof_map, context=CONTEXT, recycle_bin_preflight_complete=True)
+    assert plan.candidate_ids == (oldest.snapshot_id,)
+
+
+@pytest.mark.parametrize(
+    ("created_at", "start_time", "requested_at"),
+    [
+        (
+            "2026-09-07T08:49:24.228723Z",
+            datetime(2026, 9, 7, 8, 49, 24, 460000, tzinfo=UTC),
+            datetime(2026, 9, 7, 8, 49, 18, 531862, tzinfo=UTC),
+        ),
+        (
+            "2026-09-07T13:50:38.685823Z",
+            datetime(2026, 9, 7, 13, 50, 38, 944000, tzinfo=UTC),
+            datetime(2026, 9, 7, 13, 50, 28, 486577, tzinfo=UTC),
+        ),
+    ],
+)
+def test_production_timestamp_shapes_are_backfill_eligible(
+    created_at: str, start_time: datetime, requested_at: datetime
+) -> None:
+    base = snapshot(1)
+    item = snapshot(
+        1,
+        start_time=start_time,
+        tags={**base.tags, "WishicraftCreatedAt": created_at},
+    )
+    proof = provenance(
+        item,
+        operation_requested_at=requested_at,
+        wishicraft_created_at=parse_rfc3339(created_at),
+        snapshot_start_time=start_time,
+    )
+    classified = classify_inventory([item], {item.snapshot_id: proof}, context=CONTEXT)
+    assert classified[0].disposition is SnapshotDisposition.KEEP
+
+
+@pytest.mark.parametrize("value", ["not-a-time", "2026-09-07T12:00:00"])
+def test_malformed_or_timezone_naive_created_at_is_anomaly(value: str) -> None:
+    base = snapshot(1)
+    item = snapshot(1, tags={**base.tags, "WishicraftCreatedAt": value})
+    classified = classify_inventory([item], {item.snapshot_id: provenance(base)}, context=CONTEXT)
+    assert classified[0].disposition is SnapshotDisposition.ANOMALY
 
 
 def test_recycle_bin_unknown_blocks_planning_and_states_are_explicit() -> None:
@@ -278,3 +350,38 @@ def test_relevant_inventory_attribute_anomalies_block(
     result = classify_inventory([item], {item.snapshot_id: provenance(item)}, context=CONTEXT)
     assert result[0].disposition is SnapshotDisposition.ANOMALY
     assert result[0].reason == reason
+
+
+@pytest.mark.parametrize("lock_state", ["governance", "compliance-cooloff", "compliance"])
+def test_active_snapshot_lock_is_anomaly(lock_state: str) -> None:
+    item = snapshot(1, lock_state=lock_state)
+    result = classify_inventory([item], {item.snapshot_id: provenance(item)}, context=CONTEXT)
+    assert result[0].disposition is SnapshotDisposition.ANOMALY
+
+
+def test_archive_storage_tier_is_anomaly() -> None:
+    item = snapshot(1, storage_tier="archive")
+    result = classify_inventory([item], {item.snapshot_id: provenance(item)}, context=CONTEXT)
+    assert result[0].disposition is SnapshotDisposition.ANOMALY
+
+
+class Locks:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def describe_locked_snapshots(self, **kwargs: object) -> object:
+        self.calls += 1
+        if self.calls == 1:
+            return {
+                "Snapshots": [{"SnapshotId": snapshot(1).snapshot_id, "LockState": "governance"}],
+                "NextToken": "next",
+            }
+        assert kwargs["NextToken"] == "next"
+        return {"Snapshots": []}
+
+
+def test_snapshot_lock_inventory_is_complete_and_enriches_snapshots() -> None:
+    states = load_complete_snapshot_locks(Locks())
+    item = snapshot(1)
+    enriched = with_lock_states([item], states)
+    assert enriched[0].lock_state == "governance"

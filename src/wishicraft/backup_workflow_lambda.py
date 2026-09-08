@@ -14,12 +14,18 @@ from wishicraft.backup import (
     Ec2SnapshotApi,
     SnapshotAdapter,
 )
+from wishicraft.backup_provenance import (
+    BackupOperationEvidence,
+    BackupProvenanceRepository,
+    build_verified_provenance,
+)
 from wishicraft.operation import (
     DynamoApi,
     LeaseProof,
     LeaseRepository,
     OperationRepository,
     OperationStatus,
+    OperationType,
 )
 
 
@@ -42,6 +48,7 @@ class Runtime:
             system_id=self.system_id,
             lock_name=_env("GLOBAL_LOCK_NAME"),
         )
+        self.provenance = BackupProvenanceRepository(dynamodb, table_name=_env("BACKUPS_TABLE"))
         leases = LeaseRepository(
             dynamodb, table_name=_env("LOCKS_TABLE"), lock_name=_env("GLOBAL_LOCK_NAME")
         )
@@ -109,18 +116,55 @@ def handler(event: object, context: object) -> dict[str, object]:
         tags = _string_mapping(payload, "tags")
         record = runtime.coordinator.snapshots.describe(snapshot_id)
         runtime.coordinator.verify_completed(record, expected_tags=tags)
+        if record.start_time is None or record.storage_tier != "standard":
+            raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
+        raw_operation = runtime.operations.load_backup_evidence(proof.owner_operation_id)
+        operation_result = raw_operation["result"]
+        if operation_result is not None and not isinstance(operation_result, dict):
+            raise ValueError("malformed BACKUP Operation result")
+        requested_at = datetime.fromisoformat(
+            str(raw_operation["requested_at"]).replace("Z", "+00:00")
+        )
+        provenance = build_verified_provenance(
+            snapshot=record,
+            operation=BackupOperationEvidence(
+                operation_id=proof.owner_operation_id,
+                operation_type=str(raw_operation["operation_type"]),
+                status=str(raw_operation["status"]),
+                requested_at=requested_at,
+                result=operation_result or {},
+            ),
+            project=runtime.coordinator.project,
+            stage=runtime.coordinator.stage,
+            game_id=runtime.coordinator.game_id,
+            source_volume_id=runtime.coordinator.expected_volume_id,
+            owner_id=record.owner_id,
+            provenance_recorded_at=now,
+            require_succeeded_operation=False,
+        )
+        should_create = runtime.provenance.assert_createable_or_exact(provenance)
+        result: dict[str, object] = {
+            "kind": "BACKUP",
+            "backup_id": proof.owner_operation_id.replace("op-", "backup-", 1),
+            "snapshot_id": snapshot_id,
+            "source_volume_id": runtime.coordinator.expected_volume_id,
+            "game_id": runtime.coordinator.game_id,
+            "category": "backup",
+        }
+        if not should_create:
+            if not runtime.operations.terminal_result_matches(
+                operation_id=proof.owner_operation_id,
+                operation_type=OperationType.BACKUP,
+                result=result,
+            ):
+                raise ValueError("Backup provenance exists without matching terminal Operation")
+            return {"status": "SUCCEEDED"}
         runtime.operations.complete_owned(
             proof=proof,
             status=OperationStatus.SUCCEEDED,
             completed_at=now,
-            result={
-                "kind": "BACKUP",
-                "backup_id": proof.owner_operation_id.replace("op-", "backup-", 1),
-                "snapshot_id": snapshot_id,
-                "source_volume_id": runtime.coordinator.expected_volume_id,
-                "game_id": runtime.coordinator.game_id,
-                "category": "backup",
-            },
+            result=result,
+            additional_writes=runtime.provenance.transactional_puts(provenance),
         )
         return {"status": "SUCCEEDED"}
     if action == "fail":

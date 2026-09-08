@@ -262,6 +262,16 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam() -> 
         for value in functions.values()
         if value["Properties"]["FunctionName"] == "wc-dev-backup-task"
     )
+    backup_table_resources = {
+        logical_id: value["Properties"]
+        for logical_id, value in template.find_resources("AWS::DynamoDB::Table").items()
+        if value["Properties"]["TableName"] == "wc-dev-backups"
+    }
+    backup_tables = list(backup_table_resources.values())
+    assert len(backup_tables) == 1
+    assert backup_tables[0]["KeySchema"] == [{"AttributeName": "provenance_key", "KeyType": "HASH"}]
+    assert "TimeToLiveSpecification" not in backup_tables[0]
+    assert backup["Environment"]["Variables"]["BACKUPS_TABLE"]["Ref"].startswith("BackupsTable")
     assert backup["Environment"]["Variables"]["DATA_VOLUME_ID"] == "vol-03ac9f534326c345c"
     policies = template.find_resources("AWS::IAM::Policy")
     backup_role = backup["Role"]["Fn::GetAtt"][0]
@@ -279,6 +289,19 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam() -> 
         if {"Ref": backup_role} in policy["Properties"]["Roles"]
         for statement in policy["Properties"]["PolicyDocument"]["Statement"]
     ]
+    backups_arn = {"Fn::GetAtt": [next(iter(backup_table_resources)), "Arn"]}
+    provenance_actions = {
+        action
+        for statement in statements
+        for resource in (
+            statement["Resource"]
+            if isinstance(statement["Resource"], list)
+            else [statement["Resource"]]
+        )
+        if resource == backups_arn
+        for action in _action_list(statement["Action"])
+    }
+    assert provenance_actions == {"dynamodb:GetItem", "dynamodb:PutItem"}
     snapshot_arn = "arn:aws:ec2:ap-northeast-1::snapshot/*"
     account_qualified_snapshot_arn = "arn:aws:ec2:ap-northeast-1:385526546525:snapshot/*"
     create_snapshot_resources = {

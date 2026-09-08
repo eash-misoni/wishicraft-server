@@ -544,6 +544,52 @@ class OperationRepository:
             },
         )
 
+    def terminal_result_matches(
+        self,
+        *,
+        operation_id: str,
+        operation_type: OperationType,
+        result: dict[str, object],
+    ) -> bool:
+        response = self._api.get_item(
+            TableName=self._operations,
+            Key={"operation_id": {"S": operation_id}},
+            ConsistentRead=True,
+        )
+        if not isinstance(response, dict) or not isinstance(response.get("Item"), dict):
+            return False
+        item = response["Item"]
+        assert isinstance(item, dict)
+        try:
+            return (
+                _string_attribute(item, "operation_type") == operation_type.value
+                and _string_attribute(item, "status") == OperationStatus.SUCCEEDED.value
+                and _decode_attribute(item.get("result")) == result
+            )
+        except ValueError:
+            return False
+
+    def load_backup_evidence(self, operation_id: str) -> dict[str, object]:
+        """Load the authoritative BACKUP fields needed for durable provenance."""
+        response = self._api.get_item(
+            TableName=self._operations,
+            Key={"operation_id": {"S": operation_id}},
+            ConsistentRead=True,
+        )
+        if not isinstance(response, dict) or not isinstance(response.get("Item"), dict):
+            raise ValueError("BACKUP operation does not exist")
+        item = response["Item"]
+        assert isinstance(item, dict)
+        if _string_attribute(item, "operation_type") != OperationType.BACKUP.value:
+            raise ValueError("operation is not BACKUP")
+        return {
+            "operation_id": operation_id,
+            "operation_type": OperationType.BACKUP.value,
+            "status": _string_attribute(item, "status"),
+            "requested_at": _string_attribute(item, "requested_at"),
+            "result": _decode_attribute(item.get("result")),
+        }
+
     def complete_owned(
         self,
         *,
@@ -552,6 +598,7 @@ class OperationRepository:
         completed_at: datetime,
         error_code: str | None = None,
         result: dict[str, object] | None = None,
+        additional_writes: tuple[dict[str, object], ...] = (),
     ) -> None:
         if status not in {OperationStatus.SUCCEEDED, OperationStatus.FAILED}:
             raise ValueError("normal completion must be SUCCEEDED or FAILED")
@@ -566,6 +613,7 @@ class OperationRepository:
                     extra_condition=None,
                     result=result,
                 ),
+                *additional_writes,
                 self._lock_delete(proof, require_unexpired_at=now_epoch),
                 self._current_operation_remove(proof.owner_operation_id),
             ],
@@ -793,6 +841,23 @@ def _attribute(value: object) -> dict[str, object]:
 
 def _attribute_map(value: dict[str, object]) -> dict[str, object]:
     return {key: _attribute(item) for key, item in value.items()}
+
+
+def _decode_attribute(value: object) -> object:
+    if not isinstance(value, dict):
+        raise ValueError("malformed attribute")
+    if isinstance(value.get("S"), str):
+        return value["S"]
+    if isinstance(value.get("BOOL"), bool):
+        return value["BOOL"]
+    if isinstance(value.get("N"), str):
+        return int(value["N"])
+    if value.get("NULL") is True:
+        return None
+    raw_map = value.get("M")
+    if isinstance(raw_map, dict):
+        return {key: _decode_attribute(item) for key, item in raw_map.items()}
+    raise ValueError("malformed attribute")
 
 
 def _is_transaction_cancelled(error: Exception) -> bool:

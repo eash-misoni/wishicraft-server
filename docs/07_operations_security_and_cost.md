@@ -324,6 +324,8 @@ D-090 v1のnormal EBS Snapshot backupをGameごとnewest 7保持する。migrati
 
 D-091のRETENTIONはBACKUPと分離したOperationでglobal Lockを取り、完全inventory、durable provenance、StartTime ordering、Recycle Bin preflightとdelete直前再検証を要求する。初版は1 Operation最大1件で、relevant anomalyがあればrun全体no-deleteとする。実Delete releaseはnaturalにnormal backupが8件以上となった後の別gateで行う。
 
+Snapshot Lock inventoryも完全取得し、active governance/compliance lockを持つnormal backupを削除候補にしない。初版はstandard tierだけを対象としarchive tierをANOMALYとする。Recycle Bin ruleとSnapshot Lockを変更・解除する権限はRETENTION roleへ与えない。
+
 
 ### 対象外の将来案
 

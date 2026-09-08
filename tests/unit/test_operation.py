@@ -120,6 +120,32 @@ def test_competing_operation_admission_is_one_atomic_transaction() -> None:
     )
 
 
+def test_backup_evidence_loads_authoritative_requested_at_consistently() -> None:
+    api = FakeDynamo()
+    api.item = {
+        "operation_id": {"S": "op-001"},
+        "operation_type": {"S": "BACKUP"},
+        "status": {"S": "RUNNING"},
+        "requested_at": {"S": "2026-09-07T13:50:28.486577Z"},
+        "result": {"NULL": True},
+    }
+    repo = OperationRepository(
+        api,
+        operations_table="operations",
+        locks_table="locks",
+        system_state_table="states",
+        system_id="wishicraft-main",
+        lock_name="minecraft-control",
+    )
+    assert repo.load_backup_evidence("op-001") == {
+        "operation_id": "op-001",
+        "operation_type": "BACKUP",
+        "status": "RUNNING",
+        "requested_at": "2026-09-07T13:50:28.486577Z",
+        "result": None,
+    }
+
+
 def test_status_admission_does_not_take_lock_or_current_operation() -> None:
     api = FakeDynamo()
     result = repository(api).admit(request(OperationType.STATUS))
@@ -375,6 +401,26 @@ def test_normal_completion_releases_only_current_unexpired_lease_and_operation()
     assert "lease_expires_at >= :now" in cast(str, lock_delete["ConditionExpression"])
     current_update = cast(dict[str, object], items[2]["Update"])
     assert current_update["ConditionExpression"] == "current_operation_id = :operation_id"
+
+
+def test_backup_provenance_writes_are_atomic_with_terminalization_and_cleanup() -> None:
+    api = FakeDynamo()
+    now = datetime(2026, 8, 29, tzinfo=UTC)
+    proof = LeaseProof("wishicraft-main", "op-001", "lease-001", int(now.timestamp()) + 10)
+    provenance: tuple[dict[str, object], ...] = (
+        {"Put": {"TableName": "backups", "Item": {"proof": {"S": "x"}}}},
+    )
+    operation_repository(api).complete_owned(
+        proof=proof,
+        status=OperationStatus.SUCCEEDED,
+        completed_at=now,
+        additional_writes=provenance,
+    )
+    items = transaction_items(api)
+    assert len(items) == 4
+    assert items[1] == provenance[0]
+    assert "Delete" in items[2]
+    assert "Update" in items[3]
 
 
 def test_status_completion_requires_an_unlocked_status_operation() -> None:

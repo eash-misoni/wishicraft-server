@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import cast
 
 import pytest
@@ -34,6 +35,7 @@ class Ec2:
                     "VolumeId": "vol-03ac9f534326c345c",
                     "State": "completed",
                     "OwnerId": "123456789012",
+                    "StartTime": datetime(2026, 9, 2, tzinfo=UTC),
                     "Tags": [],
                 }
             ]
@@ -51,6 +53,7 @@ class Ec2:
             "VolumeId": kwargs["VolumeId"],
             "State": "pending",
             "OwnerId": "123456789012",
+            "StartTime": datetime(2026, 9, 2, tzinfo=UTC),
             "Tags": tags[0]["Tags"],
         }
 
@@ -154,6 +157,7 @@ def test_snapshot_poll_and_verification_reject_wrong_source_or_tags() -> None:
                 "VolumeId": "vol-wrong0000000000",
                 "State": "completed",
                 "OwnerId": "123456789012",
+                "StartTime": datetime(2026, 9, 2, tzinfo=UTC),
                 "Tags": [{"Key": key, "Value": value} for key, value in backup_tags().items()],
             }
         ]

@@ -101,6 +101,8 @@ class SnapshotRecord:
     state: str
     tags: dict[str, str]
     owner_id: str
+    start_time: datetime | None = None
+    storage_tier: str | None = None
 
 
 class SnapshotAdapter:
@@ -162,6 +164,8 @@ class SnapshotAdapter:
         state = value.get("State")
         owner_id = value.get("OwnerId")
         raw_tags = value.get("Tags", [])
+        start_time = value.get("StartTime")
+        storage_tier = value.get("StorageTier", "standard")
         if not isinstance(snapshot_id, str) or not isinstance(volume_id, str):
             raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_CREATE_FAILED)
         _validate_snapshot_id(snapshot_id)
@@ -169,6 +173,8 @@ class SnapshotAdapter:
             not isinstance(state, str)
             or not isinstance(owner_id, str)
             or not isinstance(raw_tags, list)
+            or not isinstance(start_time, datetime)
+            or not isinstance(storage_tier, str)
         ):
             raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
         tags: dict[str, str] = {}
@@ -180,7 +186,9 @@ class SnapshotAdapter:
             ):
                 raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
             tags[cast(str, tag["Key"])] = cast(str, tag["Value"])
-        return SnapshotRecord(snapshot_id, volume_id, state, tags, owner_id)
+        return SnapshotRecord(
+            snapshot_id, volume_id, state, tags, owner_id, start_time, storage_tier
+        )
 
 
 @dataclass

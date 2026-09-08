@@ -71,6 +71,8 @@ class InventorySnapshot:
     start_time: datetime
     description: str
     tags: dict[str, str]
+    storage_tier: str = "standard"
+    lock_state: str | None = None
 
 
 @dataclass(frozen=True)
@@ -82,15 +84,19 @@ class BackupProvenance:
     game_id: str
     stage: str
     source_volume_id: str
-    requested_at: datetime
-    verified_at: datetime
+    operation_requested_at: datetime
+    wishicraft_created_at: datetime
+    snapshot_start_time: datetime
+    provenance_recorded_at: datetime
     schema_version: int = 1
 
     def __post_init__(self) -> None:
         if self.schema_version != 1:
             raise ValueError("unsupported backup provenance schema")
-        _aware_utc(self.requested_at)
-        _aware_utc(self.verified_at)
+        _aware_utc(self.operation_requested_at)
+        _aware_utc(self.wishicraft_created_at)
+        _aware_utc(self.snapshot_start_time)
+        _aware_utc(self.provenance_recorded_at)
 
 
 @dataclass(frozen=True)
@@ -114,6 +120,24 @@ class RetentionPlan:
 
 class SnapshotInventoryApi(Protocol):
     def describe_snapshots(self, **kwargs: object) -> object: ...
+
+
+class SnapshotLockApi(Protocol):
+    def describe_locked_snapshots(self, **kwargs: object) -> object: ...
+
+
+@dataclass(frozen=True)
+class RecycleBinRule:
+    identifier: str
+    retention_days: int
+    lock_state: str
+    resource_tags: dict[str, str]
+    exclusion_tags: dict[str, str]
+
+    def matches(self, tags: dict[str, str]) -> bool:
+        if self.resource_tags and not all(tags.get(k) == v for k, v in self.resource_tags.items()):
+            return False
+        return not any(tags.get(k) == v for k, v in self.exclusion_tags.items())
 
 
 class SnapshotDeleteAdapter(Protocol):
@@ -152,6 +176,52 @@ def load_complete_inventory(api: SnapshotInventoryApi, *, owner_id: str) -> list
             raise ValueError("invalid snapshot pagination")
         seen_tokens.add(raw_token)
         token = raw_token
+
+
+def load_complete_snapshot_locks(api: SnapshotLockApi) -> dict[str, str]:
+    token: str | None = None
+    seen: set[str] = set()
+    result: dict[str, str] = {}
+    while True:
+        request: dict[str, object] = {"MaxResults": 1000}
+        if token is not None:
+            request["NextToken"] = token
+        raw_response = api.describe_locked_snapshots(**request)
+        response = raw_response if isinstance(raw_response, dict) else {}
+        entries = response.get("Snapshots")
+        if not isinstance(entries, list):
+            raise ValueError("incomplete snapshot lock inventory")
+        for entry in entries:
+            if not isinstance(entry, dict):
+                raise ValueError("malformed snapshot lock")
+            snapshot_id = entry.get("SnapshotId")
+            lock_state = entry.get("LockState")
+            if not isinstance(snapshot_id, str) or not isinstance(lock_state, str):
+                raise ValueError("malformed snapshot lock")
+            if snapshot_id in result:
+                raise ValueError("duplicate snapshot lock")
+            result[snapshot_id] = lock_state
+        raw_token = response.get("NextToken")
+        if raw_token is None:
+            return result
+        if not isinstance(raw_token, str) or not raw_token or raw_token in seen:
+            raise ValueError("invalid snapshot lock pagination")
+        seen.add(raw_token)
+        token = raw_token
+
+
+def with_lock_states(
+    snapshots: list[InventorySnapshot], lock_states: dict[str, str]
+) -> list[InventorySnapshot]:
+    return [
+        InventorySnapshot(
+            **{
+                **item.__dict__,
+                "lock_state": lock_states.get(item.snapshot_id),
+            }
+        )
+        for item in snapshots
+    ]
 
 
 def classify_inventory(
@@ -300,6 +370,8 @@ def _classify(
         or item.source_volume_id != context.source_volume_id
         or item.state != "completed"
         or item.description != f"Wishicraft backup {operation_id}"
+        or item.storage_tier != "standard"
+        or item.lock_state in {"governance", "compliance-cooloff", "compliance"}
     ):
         return ClassifiedSnapshot(item, SnapshotDisposition.ANOMALY, "aws-attribute-mismatch")
     if provenance is None:
@@ -311,7 +383,8 @@ def _classify(
         or provenance.stage != context.stage
         or provenance.source_volume_id != context.source_volume_id
         or provenance.schema_version != 1
-        or _aware_utc(provenance.requested_at) != created_at
+        or _aware_utc(provenance.wishicraft_created_at) != created_at
+        or _aware_utc(provenance.snapshot_start_time) != _aware_utc(item.start_time)
     ):
         return ClassifiedSnapshot(item, SnapshotDisposition.ANOMALY, "provenance-mismatch")
     return ClassifiedSnapshot(item, SnapshotDisposition.KEEP, "retention-owned")
@@ -361,8 +434,10 @@ def _parse_inventory_snapshot(value: object) -> InventorySnapshot:
         value.get("OwnerId"),
         value.get("Description"),
     )
-    if not all(isinstance(field, str) for field in fields) or not isinstance(
-        value.get("StartTime"), datetime
+    if (
+        not all(isinstance(field, str) for field in fields)
+        or not isinstance(value.get("StartTime"), datetime)
+        or not isinstance(value.get("StorageTier", "standard"), str)
     ):
         raise ValueError("incomplete snapshot inventory record")
     return InventorySnapshot(
@@ -373,4 +448,5 @@ def _parse_inventory_snapshot(value: object) -> InventorySnapshot:
         _aware_utc(cast(datetime, value["StartTime"])),
         cast(str, fields[4]),
         tags,
+        cast(str, value.get("StorageTier", "standard")),
     )

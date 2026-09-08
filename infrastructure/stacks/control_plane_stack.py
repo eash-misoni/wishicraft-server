@@ -75,6 +75,16 @@ class ControlPlaneStack(Stack):
             key="operation_id",
             stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES if phase >= 7 else None,
         )
+        backups_table = (
+            _table(
+                self,
+                "BackupsTable",
+                name=resource_name(project.resource_prefix, stage.stage, "backups"),
+                key="provenance_key",
+            )
+            if phase >= 8
+            else None
+        )
         idempotency_table = _table(
             self,
             "IdempotencyTable",
@@ -379,6 +389,7 @@ class ControlPlaneStack(Stack):
         backup_task: lambda_.Function | None = None
         backup_workflow: sfn.CfnStateMachine | None = None
         if phase >= 8:
+            assert backups_table is not None
             backup_task_log_group = logs.LogGroup(
                 self,
                 "BackupTaskLogGroup",
@@ -403,6 +414,7 @@ class ControlPlaneStack(Stack):
                 environment={
                     "SYSTEM_STATE_TABLE": table.table_name,
                     "OPERATIONS_TABLE": operations_table.table_name,
+                    "BACKUPS_TABLE": backups_table.table_name,
                     "LOCKS_TABLE": locks_table.table_name,
                     "SYSTEM_ID": project.system_id,
                     "GAME_ID": project.initial_game_id,
@@ -466,7 +478,17 @@ class ControlPlaneStack(Stack):
                         "dynamodb:DeleteItem",
                         "dynamodb:TransactWriteItems",
                     ],
-                    resources=[table.table_arn, operations_table.table_arn, locks_table.table_arn],
+                    resources=[
+                        table.table_arn,
+                        operations_table.table_arn,
+                        locks_table.table_arn,
+                    ],
+                )
+            )
+            backup_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["dynamodb:GetItem", "dynamodb:PutItem"],
+                    resources=[backups_table.table_arn],
                 )
             )
             backup_workflow_role = iam.Role(

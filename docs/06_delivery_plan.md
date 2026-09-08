@@ -793,8 +793,9 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 
 #### 後続slice
 
-1. retention destructive-operation contractはD-091でfreeze済み。repository-only selector/modelは完成し、次はdurable provenance persistence、production dry-run、Recycle Bin/IAM実証、実Delete releaseを別gateで進める
-2. Restore runbook/UIと復元テストはPhase 16
+1. D-091のdurable provenance persistence、safe backfill、Snapshot Lock/storage tierを含むread-only dry-runと未接続IAM policyをrepository実装し、production preflight後のwrite gateで停止する
+2. provenance table deploy/backfill、production zero-candidate dry-run、IAM/RETENTION releaseは承認後の別段階とする。実Deleteはnatural 8件到達まで行わない
+3. Restore runbook/UIと復元テストはPhase 16
 
 ### 8.2 無人自動停止
 

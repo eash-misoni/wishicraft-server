@@ -285,7 +285,7 @@ STATUSの`result`はfresh Reconcile後に生成したuser-facing projectionで�
 
 BACKUP成功時の`result`は`kind=BACKUP`、logical `backup_id`、AWS `snapshot_id`、`source_volume_id`、`game_id`、`category=backup`を保持する。logical identityはOperation IDから一意に導出し、AWS Snapshot IDだけをWishicraft identityにしない。
 
-Phase 8A snapshot tag schema version 1は`Project`、`Stage`、`WishicraftCategory`、`WishicraftGameId`、`WishicraftOperationId`、`WishicraftSourceVolumeId`、`WishicraftSchemaVersion`、`WishicraftProtected`、`WishicraftCreatedAt`のexact setとする。通常値はcategory `backup`、protected `false`。migration snapshotはcategory `migration`として論理的に分離し、既存migration snapshotを通常retentionへ含めない。
+Phase 8A snapshot tag schema version 1は`Project`、`Stage`、`WishicraftCategory`、`WishicraftGameId`、`WishicraftOperationId`、`WishicraftSourceVolumeId`、`WishicraftSchemaVersion`、`WishicraftProtected`、`WishicraftCreatedAt`のexact setとする。`WishicraftCreatedAt`はBACKUP Operation受付時刻ではなく、WishicraftがCreateSnapshot intent/request直前に生成するapplication timestampである。通常値はcategory `backup`、protected `false`。migration snapshotはcategory `migration`として論理的に分離し、既存migration snapshotを通常retentionへ含めない。
 
 ### Index候補
 
@@ -408,12 +408,25 @@ operation_id: string
 game_id: string
 stage: string
 source_volume_id: string
-created_at: timestamp
-verified_at: timestamp
+project: string
+category: backup
+protected: false
+snapshot_start_time: timestamp
+operation_requested_at: timestamp
+wishicraft_created_at: timestamp
+provenance_recorded_at: timestamp
+verified_owner_id: string
+metadata: exact D-090 v1 map
+metadata_fingerprint: sha256
+verification_status: VERIFIED_BACKUP_SUCCEEDED
 schema_version: 1
 ```
 
-BACKUP成功時にverified Snapshotとの一対一対応を永続化する。retentionはSnapshotのD-090 metadata/AWS attributesとこのrecordを相互照合し、Operation recordの存続には依存しない。既存Snapshotを登録する場合は、別release gateで元の成功Operation、source、owner、exact metadataをpositive proofして行い、証明できないnormal-backup claimはANOMALYとして削除しない。
+partition keyは`provenance_key`とし、`SNAPSHOT#<snapshot-id>`のimmutable evidence recordと`OPERATION#<operation-id>`のuniqueness recordを同一transactionでcreate-only保存する。TTLは設定しない。同内容の再登録だけno-op、partial/conflictは上書き・mergeせずfail closedとする。
+
+4時刻は独立した意味を持つ。`operation_requested_at`はOperation record、`wishicraft_created_at`はexact D-090 tag、`snapshot_start_time`はAWS Snapshot attribute、`provenance_recorded_at`は検証完了後の永続化時刻から取得する。すべてstrict RFC 3339/timezone-awareとしてUTC instantへ正規化し、provenanceと観測sourceの一致を検証するが、cross-clock exact equalityや任意の許容幅はhard predicateにしない。retention orderingには`snapshot_start_time`だけを使用する。
+
+新規BACKUPはcompleted/source/owner/exact metadata/standard storage tierを検証後、Operation SUCCEEDED、2 provenance record、Lock解放、Current Operation clearを同じDynamoDB transactionで確定する。transaction結果不明後は両provenanceとterminal Operation resultの完全一致だけを成功扱いする。既存Snapshotを登録する場合は、別release gateで元の成功Operation、source、owner、exact metadataをpositive proofして行い、証明できないnormal-backup claimはANOMALYとして削除しない。
 
 
 ## 10. SystemState Repository契約
