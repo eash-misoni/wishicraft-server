@@ -159,6 +159,7 @@ def test_backfill_requires_exact_snapshot_and_succeeded_operation_evidence() -> 
         "123456789012",
         NOW,
         "standard",
+        f"Wishicraft backup {operation_id}",
     )
     result: dict[str, object] = {
         "kind": "BACKUP",
@@ -218,6 +219,7 @@ def test_terminalization_builder_accepts_distinct_operation_and_create_intent_ti
         "123456789012",
         NOW,
         "standard",
+        f"Wishicraft backup {operation_id}",
     )
     built = build_verified_provenance(
         snapshot=snapshot,

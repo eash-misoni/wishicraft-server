@@ -36,6 +36,7 @@ class Ec2:
                     "State": "completed",
                     "OwnerId": "123456789012",
                     "StartTime": datetime(2026, 9, 2, tzinfo=UTC),
+                    "Description": "Wishicraft backup op-01234567-89ab-cdef-0123-456789abcdef",
                     "Tags": [],
                 }
             ]
@@ -54,6 +55,7 @@ class Ec2:
             "State": "pending",
             "OwnerId": "123456789012",
             "StartTime": datetime(2026, 9, 2, tzinfo=UTC),
+            "Description": kwargs["Description"],
             "Tags": tags[0]["Tags"],
         }
 
@@ -158,6 +160,7 @@ def test_snapshot_poll_and_verification_reject_wrong_source_or_tags() -> None:
                 "State": "completed",
                 "OwnerId": "123456789012",
                 "StartTime": datetime(2026, 9, 2, tzinfo=UTC),
+                "Description": "Wishicraft backup op-01234567-89ab-cdef-0123-456789abcdef",
                 "Tags": [{"Key": key, "Value": value} for key, value in backup_tags().items()],
             }
         ]

@@ -103,6 +103,7 @@ class SnapshotRecord:
     owner_id: str
     start_time: datetime | None = None
     storage_tier: str | None = None
+    description: str | None = None
 
 
 class SnapshotAdapter:
@@ -166,6 +167,7 @@ class SnapshotAdapter:
         raw_tags = value.get("Tags", [])
         start_time = value.get("StartTime")
         storage_tier = value.get("StorageTier", "standard")
+        description = value.get("Description")
         if not isinstance(snapshot_id, str) or not isinstance(volume_id, str):
             raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_CREATE_FAILED)
         _validate_snapshot_id(snapshot_id)
@@ -175,6 +177,7 @@ class SnapshotAdapter:
             or not isinstance(raw_tags, list)
             or not isinstance(start_time, datetime)
             or not isinstance(storage_tier, str)
+            or not isinstance(description, str)
         ):
             raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
         tags: dict[str, str] = {}
@@ -187,7 +190,14 @@ class SnapshotAdapter:
                 raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
             tags[cast(str, tag["Key"])] = cast(str, tag["Value"])
         return SnapshotRecord(
-            snapshot_id, volume_id, state, tags, owner_id, start_time, storage_tier
+            snapshot_id,
+            volume_id,
+            state,
+            tags,
+            owner_id,
+            start_time,
+            storage_tier,
+            description,
         )
 
 
@@ -228,6 +238,8 @@ class BackupCoordinator:
         if record.state != "completed":
             raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
         if record.source_volume_id != self.expected_volume_id or record.tags != expected_tags:
+            raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
+        if record.description != f"Wishicraft backup {expected_tags['WishicraftOperationId']}":
             raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
 
     def renew(self, proof: LeaseProof, *, now: datetime) -> LeaseProof:

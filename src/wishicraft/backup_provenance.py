@@ -183,6 +183,7 @@ def build_verified_provenance(
         or snapshot.source_volume_id != source_volume_id
         or snapshot.start_time is None
         or snapshot.storage_tier != "standard"
+        or snapshot.description != f"Wishicraft backup {operation_id}"
         or set(tags) != REQUIRED_TAG_KEYS
         or any(tags.get(key) != value for key, value in expected_tags.items())
         or result_snapshot_mismatch
