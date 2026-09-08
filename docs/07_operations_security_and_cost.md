@@ -324,11 +324,13 @@ D-090 v1のnormal EBS Snapshot backupをGameごとnewest 7保持する。migrati
 
 D-091のRETENTIONはBACKUPと分離したOperationでglobal Lockを取り、完全inventory、durable provenance、StartTime ordering、Recycle Bin preflightとdelete直前再検証を要求する。初版は1 Operation最大1件で、relevant anomalyがあればrun全体no-deleteとする。実Delete releaseはnaturalにnormal backupが8件以上となった後の別gateで行う。
 
-2026-09-08にdevへ非TTL `wc-dev-backups`をdeployし、Phase 8B/8Cの成功済みnormal backup 2件をproduction evidence再検証後のcreate-only transactionで登録した。登録後dry-runはKEEP 2、migration EXCLUDED 1、ANOMALY/CANDIDATE/delete 0で、Recycle Bin rule/active Snapshot Lockは0、全Snapshotはstandard tierだった。DeleteSnapshot permission、RETENTION workflow、DeleteSnapshot DryRun/実削除はまだproductionへ接続していない。
+2026-09-08にdevへ非TTL `wc-dev-backups`をdeployし、Phase 8B/8Cの成功済みnormal backup 2件をproduction evidence再検証後のcreate-only transactionで登録した。さらにreal `/mc backup`で3件目のnormal backupとdurable provenance pairが通常terminalizationから自動作成されることを検証した。3件はいずれもstandard tierで、Recycle Bin matching ruleとactive Snapshot Lockは0である。
 
 Snapshot Lock inventoryも完全取得し、active governance/compliance lockを持つnormal backupを削除候補にしない。初版はstandard tierだけを対象としarchive tierをANOMALYとする。Recycle Bin ruleとSnapshot Lockを変更・解除する権限はRETENTION roleへ与えない。
 
 RETENTIONの最初のproduction releaseはdry-run-only Standard workflowとする。operatorはdirect StartExecutionではなくshared Admissionを使用し、workflowはglobal Lock所有下でfresh Reconcileを行う。healthyなRUNNING/STOPPEDはいずれも許容する。task roleはEC2 Snapshot/Volume、Snapshot Lock、Recycle Bin、durable provenanceのreadと既存Operation/lease terminalizationに必要なtable操作だけを持ち、Snapshot/Recycle Bin/EC2/EBS/DNS mutationを持たない。
+
+同日にdry-run-only workflowをdevへdeployした。初回実行はresultのlist値が既存DynamoDB serializer非対応で明示FAILEDとなったが、Snapshotを変更せずLock/Current Operationを安全に解放した。scalar evidenceだけを永続化する回帰修正後はKEEP 3、CANDIDATE 0、EXCLUDED 1、ANOMALY 0、planned/delete action 0でSUCCEEDEDした。State Machineにdelete pathはなく、task roleに`ec2:DeleteSnapshot`はなく、CloudTrailでも対象時間帯のDeleteSnapshot/tag/lock mutationは0だった。failure/task error alarmは修正後のエラーdatapoint 0でOKへ回復した。
 
 
 ### 対象外の将来案
