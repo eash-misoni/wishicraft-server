@@ -10,6 +10,17 @@
 
 ## 2. 採用済み決定
 
+### D-092 Runtime heartbeatはTargetから専用tableへfail-closedで送る
+
+- **状態:** Accepted（repository implementation / production release preparation）
+- **日付:** 2026-09-09
+- Target heartbeat producerは起動後速やかに最初の観測を送り、catch-up/backlog replayなしで60秒周期に一logical heartbeatを送る。bounded SDK retryは許容するがproducer failureだけでMinecraft/EC2を停止・再起動しない。
+- Target EC2 roleから専用RuntimeHeartbeats tableのcanonical `system_id` itemへ、consistent GetItemとconditional whole-record PutItemだけを行う。SystemState、Games、Operations、Locks、Backups、DNS、EC2、Snapshotを変更しない。古い`observed_at`とCAS競合はoverwriteせず次周期へ委ねる。
+- freshnessは`observed_at`から5分以内とし、`expires_at=observed_at+24h`は古いtelemetry cleanup専用である。TTL物理削除をfreshness/停止判断へ使わず、missing/staleをplayer zeroと推論しない。
+- player countはpositive、known zero、unknownを分ける。protocol非READY、観測error、Game binding不一致はunknownとして`empty_since=null`にする。同一Game・instance/runtime・Linux boot、前回READY/zero/valid empty_since、正順かつgap 5分以内の場合だけempty_sinceを維持し、それ以外のknown zeroは現在時刻から新しいempty periodを始める。positive/unknown、boot変更、stale gapはcontinuityをclearする。
+- heartbeatはauto-stop candidate signalにすぎない。STOP直前はfresh heartbeat、idle threshold、fresh ReconcileのHEALTHY/no discrepancy/no observation error、Game/boot一致、fresh direct player re-observation zero、競合なし、global Lock所有を再検証する。stale単独では停止せずmonitoring signalとする。
+- **関連:** D-031、D-032、NFR-004、NFR-007、Phase 8.2。
+
 ### D-091 RETENTIONはdurable provenanceを持つ独立した破壊的Operationとする
 
 - **状態:** Accepted（repository model validated、dev provenance persistence/backfill/dry-run completed）

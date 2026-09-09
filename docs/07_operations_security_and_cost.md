@@ -343,6 +343,8 @@ Restore runbook/UIとstaging復元試験はPhase 16で扱う。RETENTION release
 
 ## 10. 自動停止
 
+D-092のheartbeat producerはTargetから専用RuntimeHeartbeats tableへ60秒周期で直接送る。Target roleはcanonical keyに対するGetItem/PutItemだけを持ち、Control Plane authoritative tablesやEC2/DNS/Snapshotを変更しない。5分staleは通知用signalであり停止triggerではなく、24時間TTLはcleanup専用である。
+
 ### 観測
 
 Minecraft EC2上のheartbeat agent/timerが専用`RuntimeHeartbeats` itemへ次を送る。EC2 roleからSystemState、Operations、Locksを直接更新させない。

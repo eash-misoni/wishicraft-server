@@ -62,6 +62,21 @@ class ControlPlaneStack(Stack):
             encryption=dynamodb.TableEncryption.AWS_MANAGED,
             removal_policy=RemovalPolicy.RETAIN,
         )
+        if phase >= 8:
+            dynamodb.Table(
+                self,
+                "RuntimeHeartbeatsTable",
+                table_name=resource_name(
+                    project.resource_prefix, stage.stage, "runtime-heartbeats"
+                ),
+                partition_key=dynamodb.Attribute(
+                    name="system_id", type=dynamodb.AttributeType.STRING
+                ),
+                billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+                encryption=dynamodb.TableEncryption.AWS_MANAGED,
+                time_to_live_attribute="expires_at",
+                removal_policy=RemovalPolicy.RETAIN,
+            )
         games_table = _table(
             self,
             "GamesTable",

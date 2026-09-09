@@ -216,6 +216,11 @@ class StageConfig:
     def idle_shutdown_minutes(self) -> int:
         return _require_positive_int(self.values, "runtime.idle_shutdown_minutes")
 
+    def heartbeat_seconds(self, name: str) -> int:
+        if name not in {"interval", "stale", "ttl"}:
+            raise ConfigValidationError([f"unsupported heartbeat value: {name}"])
+        return _require_positive_int(self.values, f"runtime.heartbeat_{name}_seconds")
+
     def monitoring_int(self, name: str) -> int:
         if name not in {
             "observer_schedule_minutes",
@@ -671,6 +676,9 @@ _POSITIVE_STAGE_INTS: Final = (
     "operation.lock_lease_seconds",
     "operation.lock_renew_interval_seconds",
     "runtime.idle_shutdown_minutes",
+    "runtime.heartbeat_interval_seconds",
+    "runtime.heartbeat_stale_seconds",
+    "runtime.heartbeat_ttl_seconds",
     "host_runtime.identity.uid",
     "host_runtime.identity.gid",
     "host_runtime.target_host.root_volume_size_gib",

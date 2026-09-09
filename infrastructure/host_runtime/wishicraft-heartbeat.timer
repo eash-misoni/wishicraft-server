@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Wishicraft Runtime heartbeat every 60 seconds
+
+[Timer]
+OnBootSec=15s
+OnUnitActiveSec=60s
+AccuracySec=1s
+Persistent=false
+Unit=wishicraft-heartbeat.service
+
+[Install]
+WantedBy=timers.target

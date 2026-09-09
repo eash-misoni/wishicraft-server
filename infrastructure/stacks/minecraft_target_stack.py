@@ -8,7 +8,7 @@ from aws_cdk import aws_iam as iam
 from constructs import Construct
 
 from wishicraft.config import ConfigValidationError, ProjectConfig, StageConfig
-from wishicraft.naming import resource_tags
+from wishicraft.naming import resource_name, resource_tags
 
 
 class MinecraftTargetStack(Stack):
@@ -98,6 +98,21 @@ class MinecraftTargetStack(Stack):
                         f"/wishicraft/{stage.stage}/secret/rcon-password"
                     )
                 ],
+            )
+        )
+        heartbeat_table_name = resource_name(
+            project.resource_prefix, stage.stage, "runtime-heartbeats"
+        )
+        role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["dynamodb:GetItem", "dynamodb:PutItem"],
+                resources=[
+                    f"arn:aws:dynamodb:{stage.aws_region}:{stage.aws_account_id}:table/"
+                    f"{heartbeat_table_name}"
+                ],
+                conditions={
+                    "ForAllValues:StringEquals": {"dynamodb:LeadingKeys": [project.system_id]}
+                },
             )
         )
         profile = iam.CfnInstanceProfile(self, "TargetInstanceProfile", roles=[role.role_name])

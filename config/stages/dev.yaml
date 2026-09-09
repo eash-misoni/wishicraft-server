@@ -76,6 +76,9 @@ operation:
 
 runtime:
   idle_shutdown_minutes: 30
+  heartbeat_interval_seconds: 60
+  heartbeat_stale_seconds: 300
+  heartbeat_ttl_seconds: 86400
 
 # Phase 2 target Host Runtime lock. Phase 1 compute/java/artifact values above remain as-built.
 host_runtime:

@@ -368,6 +368,8 @@ PK: system_id
 system_id: wishicraft-main
 schema_version: 1
 boot_id: string
+instance_id: string
+runtime_id: wishicraft-host-runtime
 active_game_id: string | null
 protocol_state: ready | not-ready | unknown
 player_count: integer | null
@@ -377,6 +379,10 @@ expires_at: epoch_seconds
 ```
 
 Minecraft EC2 roleはこのitemの更新だけを許可する。自動停止開始前にはheartbeatだけで判断せず、Reconcileを実行する。
+
+D-092ではnominal intervalを60秒、stale thresholdを5分、TTLを`observed_at + 24h`とする。TTLはcleanup専用でfreshness判定に使わない。producerはconsistent read後、前record identityと`observed_at`を条件にwhole-record Putし、out-of-order/CAS conflictを上書きしない。
+
+`empty_since`は同一Game・instance/runtime・bootでREADYかつknown zeroが5分以内の正順heartbeatとして連続した場合だけ維持する。positive、unknown、protocol非READY、観測error、Game mismatch、boot変更、5分超gapではnullへclearし、次のtrusted zeroから新しいempty periodを始める。
 
 ## 9. 後期テーブル
 

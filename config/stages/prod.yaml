@@ -70,6 +70,9 @@ operation:
 
 runtime:
   idle_shutdown_minutes: 30
+  heartbeat_interval_seconds: 60
+  heartbeat_stale_seconds: 300
+  heartbeat_ttl_seconds: 86400
 
 host_runtime:
   platform:

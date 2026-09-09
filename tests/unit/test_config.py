@@ -32,6 +32,9 @@ def test_project_dev_prod_and_secrets_load() -> None:
     assert (
         prod.secrets.rcon_password_parameter_name("prod") == "/wishicraft/prod/secret/rcon-password"
     )
+    assert dev.stage.heartbeat_seconds("interval") == 60
+    assert dev.stage.heartbeat_seconds("stale") == 300
+    assert dev.stage.heartbeat_seconds("ttl") == 86_400
 
 
 def test_dev_phase_zero_synth_allows_known_nulls() -> None:

@@ -1,0 +1,11 @@
+[Unit]
+Description=Wishicraft Runtime heartbeat producer
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/wishicraft/heartbeat.env
+Environment=PYTHONPATH=/usr/local/libexec
+ExecStart=/usr/bin/python3 -m wishicraft.runtime_heartbeat_producer
+TimeoutStartSec=45
