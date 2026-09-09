@@ -40,7 +40,7 @@ main() {
     d92dd704ccc56f821ba5116298a8861bab70ad26d29101cbc23ef423ffd1b0d9 644
   install_fixed "$SOURCE_ROOT/runtime_heartbeat_producer.py" \
     "$PACKAGE_ROOT/runtime_heartbeat_producer.py" \
-    850687134ea09f0a4d5a020851f5a55f5e909498a013a9f7485bc0d1290321dd 644
+    a7e2b141d2f5b4c79fb5f847f633557c4935dc0374da044a16b6dcc3134e9999 644
   install_fixed "$SOURCE_ROOT/host_runtime_probe.py" "$PACKAGE_ROOT/host-runtime-probe.py" \
     2d431e562cc2770bc33c8efc509fbb94414824a0e3967d5362a542b48fba69d8 755
   install_fixed "$SOURCE_ROOT/heartbeat.env" "$ENV_PATH" \

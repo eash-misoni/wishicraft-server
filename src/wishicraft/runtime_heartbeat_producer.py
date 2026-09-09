@@ -116,7 +116,8 @@ def load_previous(*, table: str, system_id: str, region: str) -> Optional[Runtim
     if response.returncode != 0:
         raise ProducerError("HEARTBEAT_READ_FAILED")
     try:
-        item = json.loads(response.stdout).get("Item")
+        document = json.loads(response.stdout) if response.stdout.strip() else {}
+        item = document.get("Item")
         if item is None:
             return None
         return _decode(item)

@@ -94,6 +94,20 @@ def test_decode_round_trip_preserves_boot_and_empty_identity() -> None:
     assert producer._decode(producer._encode(record())) == record()
 
 
+def test_empty_get_item_output_is_an_absent_previous_heartbeat(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(producer, "run", lambda command: completed(0, ""))
+    assert (
+        producer.load_previous(
+            table="wc-dev-runtime-heartbeats",
+            system_id="wishicraft-main",
+            region="ap-northeast-1",
+        )
+        is None
+    )
+
+
 def test_probe_game_mismatch_becomes_unknown(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
