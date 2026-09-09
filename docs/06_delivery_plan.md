@@ -802,9 +802,9 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 
 ### 8.2 無人自動停止
 
-1. **準備中:** D-092の60秒heartbeat agent/timer、専用RuntimeHeartbeats table、Target roleの限定GetItem/conditional PutItem。5分stale、24時間TTL、same-boot continuous known-zeroだけempty_sinceを維持する。
-2. RuntimeHeartbeats tableとEC2 roleの限定write
-3. player count/empty_since
+1. **Completed（2026-09-09）:** D-092の60秒heartbeat agent/timer、Retain/TTL付き専用RuntimeHeartbeats table、Target roleのtable/canonical key限定GetItem/conditional PutItemをdevへreleaseした。
+2. READY/player 0、unknown/null、Linux boot identity、24時間TTL、約60秒cadence、same-boot continuous known-zeroのempty_since、service-only restart continuity、stale CAS拒否をproductionで確認した。producerはMinecraft/EC2/SystemState/DNSを変更せず、STOP後の残存recordはobserved_atでstale判定する。
+3. 初回empty tableではAWS CLI GetItemが空stdoutを返す実環境差によりsafe failureしたが、absent recordとして扱うadapter回帰修正後に正常収束した。
 4. EventBridge判定
 5. stop workflow再利用
 6. 停止予告

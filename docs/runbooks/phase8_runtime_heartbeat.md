@@ -28,4 +28,10 @@ installerはAWS CLI/Python存在を確認し、fixed artifactsをatomic install�
 5. stale/out-of-order fixtureのconditional Putが現recordを変更しないことを確認する。
 6. canonical STOP後、EC2 stopped、DNS absent、Lock/Current Operationなしへ戻す。
 
+STOP/shutdown transition中にprotocol observationがunknownとなったheartbeatはplayer countとempty_sinceをnullへclearする。EC2停止後に残る最後のitemは現在のruntime/player状態ではなく、`observed_at`が5分を超えればstaleである。TTL物理削除を待たず、停止後にproducer更新が止まることを確認する。
+
+AWS CLI v2は存在しないitemへの正常なGetItemで空stdoutを返し得る。producerはこの境界をabsent previous recordとして扱い、それ以外のmalformed responseと区別する。
+
+既存`MonitoringObservationUnknown`はSystemStateの観測鮮度を監視しており、RuntimeHeartbeatの鮮度alarmではない。長時間RUNNING E2Eで発火した場合は両recordの`observed_at`を混同せず、fresh Reconcile後のmetric recoveryを確認する。alarmを手動変更しない。
+
 player出入りが必要な確認はoperatorへ一度だけ依頼する。unknownをzeroへ補正せず、recordをraw repairしない。
