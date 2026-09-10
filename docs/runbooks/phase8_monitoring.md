@@ -1,7 +1,8 @@
 # Phase 8.3 monitoring production gate
 
 - 対象は既存実環境のdev stage。`prod.yaml`はplaceholderのまま。
-- 状態: repository implementation / D-094 Proposed。production write未承認。
+- 状態: D-094 Accepted / production適用・実証待ち。基準HEAD `bc6b4ca52db3c3f72c97b2462181edb5ffe74f84`についてユーザーの限定GOを受領。Phase 8.3 Completedは実証後。
+- 実行時は直前deployed template/config/code識別情報を保存し、template diff後に`cdk deploy --method=prepare-change-set`で実ChangeSetを作る。全paginationを確認して承認差分・replacement/deletionなしの場合だけ、その同じChangeSetを実行する。rollback元はGitの直前commitではなく保存済みdeployed構成とする。
 - 最初のpreflight（2026-09-10）で`wishicraft-dev`のSTS確認がSSO期限切れにより失敗した。Account/実AWS状態/diffは未確認。過去closeoutを現在のevidenceにしない。
 
 ## Design and alarms

@@ -6,7 +6,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 Phase 0〜7とPhase 8.2は完了しています。停止中Data EBSのBACKUP、durable provenance、retention dry-run、Runtime heartbeat、warning付き無人自動停止をdevで検証済みです。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。
 
-Phase 8.3の監視・コスト整備はrepository実装・検証済み、production gate待ちです。D-094はProposedのままです。[監視runbook](docs/runbooks/phase8_monitoring.md)にheartbeat/SystemStateの分離、Data EBS使用率、定期Reconcile、承認対象と検証手順をまとめています。
+Phase 8.3の監視・コスト整備はrepository実装・検証済み、production適用・実証待ちです。D-094は設計と限定production writeのGOを受けAcceptedです。Phase 8.3はまだCompletedではありません。[監視runbook](docs/runbooks/phase8_monitoring.md)にheartbeat/SystemStateの分離、Data EBS使用率、定期Reconcile、承認対象と検証手順をまとめています。
 
 devは次の3層architectureです。
 

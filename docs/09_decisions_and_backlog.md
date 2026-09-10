@@ -12,7 +12,8 @@
 
 ### D-094 Phase 8.3はheartbeat・Control Plane observation・Data filesystemを別々に監視する
 
-- **状態:** Proposed（repository実装。production write未承認）
+- **状態:** Accepted（設計・限定production write承認済み。実環境検証待ち）
+- **承認記録:** ユーザーは基準HEAD `bc6b4ca52db3c3f72c97b2462181edb5ffe74f84`のD-094、Control Plane限定差分、通常START/STOP監視E2E、直前deployed構成への限定rollbackを明示GOした。設計承認をPhase 8.3 Completedとは扱わない。
 - **日付:** 2026-09-10
 - **背景:** D-088 observerは5分周期だがSystemStateの更新はOperation起点だった。正常heartbeatが継続してもSystemStateが10分を超える構成不整合を、staleの正常化や閾値緩和では解消しない。
 - **提案:** D-088のread-only observerは維持し、別EventBridge scheduleから既存Reconcileへ5分周期の固定`scheduled_reconcile`を送る。Lockが存在する場合（期限切れも含む）またはCurrent Operationがある場合はskipする。既存read-only EC2/SSM/Host/DNS観測を再利用し、Observedのみを保存する。保存時には通常のobserved_at条件に加え、開始前desired_revision一致とCurrent Operationが属性なしまたはnullであることを原子的に要求する。属性なしは既存Operation完了時のREMOVE表現であり、実AWS preflightでも確認した。競合はskip、その他の保存失敗はLambda errorとする。Lock取得・回復・Desired変更・START/STOPは行わない。
