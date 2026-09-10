@@ -200,7 +200,10 @@ class SystemStateRepository:
             values.update(
                 {":revision": _to_attribute(expected_desired_revision), ":null": {"NULL": True}}
             )
-            condition = f"({condition}) AND #revision = :revision AND #current = :null"
+            condition = (
+                f"({condition}) AND #revision = :revision "
+                "AND (attribute_not_exists(#current) OR #current = :null)"
+            )
         self._api.update_item(
             TableName=self._table,
             Key={"system_id": {"S": state.system_id}},

@@ -15,7 +15,7 @@
 - **状態:** Proposed（repository実装。production write未承認）
 - **日付:** 2026-09-10
 - **背景:** D-088 observerは5分周期だがSystemStateの更新はOperation起点だった。正常heartbeatが継続してもSystemStateが10分を超える構成不整合を、staleの正常化や閾値緩和では解消しない。
-- **提案:** D-088のread-only observerは維持し、別EventBridge scheduleから既存Reconcileへ5分周期の固定`scheduled_reconcile`を送る。Lockが存在する場合（期限切れも含む）またはCurrent Operationがある場合はskipする。既存read-only EC2/SSM/Host/DNS観測を再利用し、Observedのみを保存する。保存時には通常のobserved_at条件に加え、開始前desired_revision一致とCurrent Operation=nullを原子的に要求する。競合はskip、その他の保存失敗はLambda errorとする。Lock取得・回復・Desired変更・START/STOPは行わない。
+- **提案:** D-088のread-only observerは維持し、別EventBridge scheduleから既存Reconcileへ5分周期の固定`scheduled_reconcile`を送る。Lockが存在する場合（期限切れも含む）またはCurrent Operationがある場合はskipする。既存read-only EC2/SSM/Host/DNS観測を再利用し、Observedのみを保存する。保存時には通常のobserved_at条件に加え、開始前desired_revision一致とCurrent Operationが属性なしまたはnullであることを原子的に要求する。属性なしは既存Operation完了時のREMOVE表現であり、実AWS preflightでも確認した。競合はskip、その他の保存失敗はLambda errorとする。Lock取得・回復・Desired変更・START/STOPは行わない。
 - **負荷:** scheduleはretry 0 / event age 5分。通常は最大288 Reconcile/日。EC2 stopped時はSSMなし、runningかつonline時だけ既存fixed probe一回。Operation中は既存workflowのReconcileへ委ねる。事前check直後のAdmissionとのraceではread-only probeが重なる可能性はあるが、保存CASで混入を拒否する。新しい自動修復経路は作らない。
 - **Heartbeat:** D-092の60秒cadence、5分inclusive freshness、24時間cleanup TTL、producer書込契約は変更しない。missing/stale/future/launch以前、freshだがruntime unknown、Game/runtime/instance/boot不一致を区別する。bootはfresh Host probe telemetryと照合する。monitorはheartbeatをrepairしない。
 - **過渡状態:** EC2 stoppedではheartbeat・filesystemはnot-expected。pending/stoppingはtransitionとし、既存Desired divergence/not-ready監視で長期化を検出する。EC2 runningのSTART graceは10分、STOP graceは7分。Desired更新時刻が非futureで、Current Operationと有効Lock ownerが一致する場合だけ適用し、deadline到達時に終了する。異常を無期限に隠すgraceではない。

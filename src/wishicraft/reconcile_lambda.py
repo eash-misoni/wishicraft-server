@@ -74,14 +74,14 @@ def _scheduled_reconcile() -> dict[str, object]:
     if not state:
         raise RuntimeError("scheduled observation requires initialized SystemState")
     revision = integer(state.get("desired_revision"))
-    if revision is None or revision < 0 or "current_operation_id" not in state:
+    if revision is None or revision < 0:
         raise RuntimeError("invalid scheduled observation state")
     lock = ddb.get_item(
         TableName=_required_environment("LOCKS_TABLE"),
         Key={"lock_name": {"S": _required_environment("GLOBAL_LOCK_NAME")}},
         ConsistentRead=True,
     ).get("Item")
-    if state["current_operation_id"] is not None or lock:
+    if state.get("current_operation_id") is not None or lock:
         return {"result": "skipped-operation-or-lock"}
     # Even stable STOPPED gets direct EC2/DNS observation, but no SSM host probe.
     service = _get_service()

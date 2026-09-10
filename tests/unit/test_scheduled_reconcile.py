@@ -47,6 +47,33 @@ def test_scheduled_handler_observes_then_saves_with_revision_guard(
     assert writes == [{"expected_desired_revision": 42}]
 
 
+def test_scheduled_handler_accepts_operation_completion_removed_attribute(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    aws, writes = prepare(monkeypatch)
+    # OperationRepository completion uses REMOVE, not SET NULL. The adapter
+    # serializes/deserializes this real DynamoDB shape before handler evaluation.
+    del aws.values["state"]["current_operation_id"]
+    result = reconcile_lambda.handler(
+        {"schema_version": 1, "operation": "scheduled_reconcile"}, None
+    )
+    assert result["result"] == "observed"
+    assert writes == [{"expected_desired_revision": 42}]
+
+
+def test_missing_operation_attribute_does_not_bypass_existing_lock(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    aws, writes = prepare(monkeypatch)
+    del aws.values["state"]["current_operation_id"]
+    aws.values["lock"] = {"lease_expires_at": 0}
+    result = reconcile_lambda.handler(
+        {"schema_version": 1, "operation": "scheduled_reconcile"}, None
+    )
+    assert result["result"] == "skipped-operation-or-lock"
+    assert writes == []
+
+
 @pytest.mark.parametrize("lock,current", [({"lease_expires_at": 0}, None), ({}, "op-active")])
 def test_any_lock_or_current_operation_skips_without_ssm(
     monkeypatch: pytest.MonkeyPatch, lock: dict[str, Any], current: str | None
@@ -103,5 +130,7 @@ def test_scheduled_repository_condition_preserves_desired_and_operation_atomic_b
     request = updates[0]
     assert request["ExpressionAttributeValues"][":revision"] == {"N": "42"}
     assert request["ExpressionAttributeValues"][":null"] == {"NULL": True}
-    assert request["ConditionExpression"].endswith("AND #revision = :revision AND #current = :null")
+    assert request["ConditionExpression"].endswith(
+        "AND #revision = :revision AND (attribute_not_exists(#current) OR #current = :null)"
+    )
     assert "#current =" not in request["UpdateExpression"]

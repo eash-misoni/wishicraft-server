@@ -6,7 +6,7 @@
 
 ## Design and alarms
 
-既存SystemState observerを継続し、独立した5分Reconcile scheduleで実観測を更新する。SystemState freshnessは10分のままであり、古いsnapshotをfresh扱いしない。scheduled pathはCurrent Operation/Lock存在時にskipし、保存はmonotonic observed_at、Desired revision一致、Current Operation=null条件付き。checkとAdmissionのraceではSSM read-only probeが重なる可能性だけがあり、save CASでOperation前の状態を混入させない。
+既存SystemState observerを継続し、独立した5分Reconcile scheduleで実観測を更新する。SystemState freshnessは10分のままであり、古いsnapshotをfresh扱いしない。scheduled pathはCurrent Operation/Lock存在時にskipし、保存はmonotonic observed_at、Desired revision一致、Current Operationが属性なしまたはnullという条件付き。checkとAdmissionのraceではSSM read-only probeが重なる可能性だけがあり、save CASでOperation前の状態を混入させない。
 
 | Signal | Source / condition | Evaluation |
 |---|---|---|
@@ -44,16 +44,32 @@ Data capacityはHost probe v1.4のstrict telemetryから取得する。mount pat
 3. CloudFormation `describe-stacks`/`list-stack-resources`の全paginationでControl PlaneとTargetのoutputs/resources/statusを記録し、deploy対象と実Targetを一意に確定する。Game/SystemState/Lock/heartbeatをcanonical table/keyでconsistent GetItemする。Current OperationがあればそのOperationと実executionをread-only照合し、稼働中の作業を変更しない。
 4. EC2 DescribeInstances/DescribeVolumesでinstance、state、launch、Data EBS attachment、DeleteOnTermination=false、暗号化/gp3/size/SGを確認する。Route53 readでDNS状態を確認する。SSM SendCommand/Invoke/Reconcileはまだ実行しない。
 5. CloudWatch DescribeAlarms、log retention、EventBridge rules/targets、SNS confirmation件数（Email値は出力しない）、Budget actual/forecast/notification設定をread-backする。既存ALARMを無効化せず原因とsnapshot時刻を記録する。
-6. 新規専用temporary rootへsynth/diff evidenceを保存する。`cdk diff --change-set=false`を使用し、ChangeSet作成をしない。
+6. 新規専用temporary rootへsynth/diff evidenceを保存する。`cdk diff --method=template`（旧`--change-set=false`）を使用し、ChangeSet作成をしない。
 
 ```sh
-tools/dev-env run -- npx --no-install cdk diff WishicraftControlPlaneStack-dev --context stage=dev --context phase=8 --context deployment=control-plane --profile wishicraft-dev --change-set=false
-tools/dev-env run -- npx --no-install cdk diff MinecraftTargetStack-dev --context stage=dev --context deployment=target --profile wishicraft-dev --change-set=false
+tools/dev-env run -- npx --no-install cdk diff WishicraftControlPlaneStack-dev --context stage=dev --context phase=8 --context deployment=control-plane --profile wishicraft-dev --method=template
+tools/dev-env run -- npx --no-install cdk diff MinecraftTargetStack-dev --context stage=dev --context deployment=target --profile wishicraft-dev --method=template
 ```
 
 期待差分は上記監視構成とcode assetだけ。Target差分0、replacement/deletion0を実diffで確認する。Frozen Phase 1はdeployしない。unexpected IAM/resource/attachment/SG/DNS/durable data変更やresource曖昧性があればNO-GO。
 
 ## Production write gate and execution plan
+
+### 2026-09-10 read-only preflight再開
+
+14:15 UTC（23:15 JST）の実測で、canonical `wishicraft-dev`のSSO callerはAccount `385526546525`と一致した。Control Plane/TargetはUPDATE_COMPLETE。GameはACTIVE/MATERIALIZED、idle 30分、SystemStateはDesired revision 13 STOPPED、保存済みObserved stopped/HEALTHY（11:40:23 UTC）、discrepancy/errorなし、Current Operation属性なし、Lockなし、4 workflowのrunning executionなし。実EC2 `i-04fc0629dc4ea466e`もstopped、public IPv4/DNS absentである。保存済みObservationの古さをfreshとは扱わず、停止はdirect EC2で確認した。
+
+Data EBS `vol-03ac9f534326c345c`は同Targetへ`/dev/sdf`でattached、30 GiB encrypted gp3、DeleteOnTermination=false。SG ingressはTCP 25565だけ。停止中なのでmount/使用量を新規観測せず、heartbeatは11:39:14 UTCのunknown/null最終recordが残存しているだけで、現在のheartbeatはnot-expectedである。
+
+既存35 alarm全件OK、11 Lambda LogGroup全件14日、SNS confirmed email 1/pending 0（Email実値は証跡から除外）。Budgetは15 USD/HEALTHY、actual 2.85 USD/forecast 7.371 USD、actual 50/80/100%とforecast 100%の4通知すべて正本SNS subscriberを確認した。Budgetはcredit/discount込み設定であり、追加監視のgross単価見積と直接同一視しない。
+
+証跡は`/private/tmp/wishicraft-phase83-preflight-v1.paNm6j/preflight.jsonl`。全paginationを取得し、Lambda invoke/SSM/ChangeSet/deploy/metric投入は未実行。固定CDK CLIのhelpとAWS公式資料に従い、`--method=template`で実deploy済みtemplateを比較した（`--change-set=false`の推奨後継）。Target差分0、Control Plane差分は監視追加のみ。これはChangeSetによるreplacement検証ではなくtemplate diffである。[CDK公式diff](https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-diff.html)
+
+preflightで既存Operation完了処理が`REMOVE current_operation_id`を使うことを確認し、新schedulerの明示NULL限定不具合をlocalで3 failuresとして再現した。handlerと保存CASだけを属性なし/NULLの両方へ整合させ、既存Lock存在時のskipも回帰検証する。実SystemStateの補正・raw repairは行わない。修正後のvalidation/diffは新規root `wishicraft-phase83-validation-v5.dn7yRg` / `wishicraft-phase83-preflight-v2.3dOqL0`へ保存し、v1 evidenceを上書きしない。
+
+修正後はfocused 25 passed、full pytest **852 passed**、Ruff check/format成功、no-incremental mypy 128 files成功。最終Control Plane synth/template diffは追加9・削除0、既存変更は11 LambdaのCode（共通asset更新）、うち2 LambdaのEnvironment、2 IAM Policyだけで、replacement表示はない。新共通assetは`4e207af4c04b39696a8ba91fa7f055ff7835d3282052b9cde033f8f489e439fd`。未変更Targetの実diff 0とPhase 1 synth既存evidenceは再利用し、commit後CIで3 synth/shellcheck/synthetic integrationも確認する。
+
+`preflight-v2.3dOqL0/check.jsonl`には全resource property差分の機械的検査と実Reconcile/observerの公開environment・inline/attached IAM read-backを保存した。Reconcileは既存のtag限定SSM、固定Hosted Zone read、SystemState Get/Update、observerは既存のstate/lock Get・EC2 describe・metric publishと、双方のbasic loggingだけである。今回広いsecret/lifecycle権限を追加せず、上記2限定GetItemとmetric namespace制限だけを適用する。D-094はproduction GOまでProposedのままとする。
 
 基準commit `fb1b2c5`と今回実装のcredential不要template比較では、119→128 resources、35→41 alarms、新規9（6 alarm/EventBridge rule/Lambda permission/EventInvokeConfig）、削除0。既存変更は11 Lambda code、うちReconcile/observerのenvironment、2 IAM policyだけ。table/State Machine/Target/SG/DNS/Budget/log retention実値の変更はない。この比較は実AWS diffの代替ではない。baseline archiveとsynth evidenceは`/private/tmp/wishicraft-phase83-baseline-v2.N73DU5`に保持する。
 

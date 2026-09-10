@@ -520,7 +520,7 @@ SSM online時だけ、Control Planeがcommand文字列を受け取らない固�
 
 Phase 8.3のD-094 Proposed implementationではv1.3.0とv1.4.0を明示受理する。v1.4.0は下記runtime/READY契約を変更せず、独立`telemetry` mapを追加する。required keyは`schema_version=1`、`observed_at`、`boot_id`、`state=observed|unknown`、`error`、`mount_path`、`source`、`volume_id`、`filesystem_uuid`、`total_bytes`、`used_bytes`、`available_bytes`。数値は非負整数bytesまたはnull、失敗時は全capacity nullと固定error codeを返す。boot取得不能はboot_id=null。未知field/versionや型違反はstrict parserが拒否する。v1.3.0にはtelemetryを補完しない。TargetStatusからSystemStateの`observation.telemetry`へ保存し、telemetryのunknown自体はMinecraft protocol READYを書き換えない。監視で別途unknownとする。
 
-`{"schema_version":1,"operation":"scheduled_reconcile"}`はD-094の固定EventBridge入力である。system/game/instance/pathを外部入力にしない。開始前にSystemStateとLockをconsistent readし、Current OperationまたはLock存在ならskipする。通常Reconcileの観測を行い、保存時だけmonotonic observed_at、開始前desired_revision一致、Current Operationの明示nullを条件にする。条件競合はskip、権限/通信/保存失敗は失敗として伝播する。Desired/Operation/Lockを書き換えず、hostname/secret/commandを入力にしない。
+`{"schema_version":1,"operation":"scheduled_reconcile"}`はD-094の固定EventBridge入力である。system/game/instance/pathを外部入力にしない。開始前にSystemStateとLockをconsistent readし、Current OperationまたはLock存在ならskipする。通常Reconcileの観測を行い、保存時だけmonotonic observed_at、開始前desired_revision一致、Current Operationの属性なしまたは明示nullを条件にする。属性なしは既存Operation完了処理のREMOVE表現であり、state初期化済みと有効desired_revisionは引き続き必須。条件競合はskip、権限/通信/保存失敗は失敗として伝播する。Desired/Operation/Lockを書き換えず、hostname/secret/commandを入力にしない。
 
 probeは引数を持たず、stdoutへ次のversioned JSON一件だけを出力する。診断はstderr、component failure codeは`errors`へsecret-freeな固定codeとして出す。
 
