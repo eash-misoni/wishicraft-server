@@ -2,8 +2,8 @@
 set -eu
 
 GH_VERSION=2.100.0
-SCRIPT_DIR=$(CDPATH= cd -- "${0%/*}" && pwd)
-REPOSITORY_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+SCRIPT_DIR=$(CDPATH='' cd -- "${0%/*}" && pwd)
+REPOSITORY_ROOT=$(CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd)
 
 fail() {
     printf 'developer tool setup: %s\n' "$*" >&2
