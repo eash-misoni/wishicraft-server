@@ -196,9 +196,11 @@ Phase 7G E2E前:
 
 未確定値があってもPhase 0のrepository bootstrap、validation、dev向け`cdk synth`は開始できる。未確定値が必要なstageのsynth、deploy、integration testは開始しない。
 
-## 10. Phase 0完了時点のvalidation
+## 10. Phase 8.3 monitoring設定
 
-Phase 8.3 D-094 Proposedでmonitoringに`startup_grace_seconds=600`、`shutdown_grace_seconds=420`、`data_usage_warning_percent=80`を追加する。選定理由はD-094、production gateはPhase 8.3 runbookに記録する。observer/Reconcileは既存5分、SystemState freshnessは既存10分、heartbeatはD-092固定の60秒/5分/24時間cleanup TTLを維持する。Data Volume IDはstageのexisting_data_volume_id、XFS UUIDは既存固定Host probeの観測済みidentityを使用し、synth testでVolume bindingの一致を検証する。prod placeholderは補完しない。
+Phase 8.3 D-094 Acceptedでmonitoringに`startup_grace_seconds=600`、`shutdown_grace_seconds=420`、`data_usage_warning_percent=80`を追加する。選定理由はD-094、production evidenceはPhase 8.3 runbookに記録する。observer/Reconcileは5分、SystemState freshnessは既存10分、heartbeatはD-092固定の60秒/5分/24時間cleanup TTLを維持する。Data Volume IDはstageのexisting_data_volume_id、XFS UUIDは既存固定Host probeの観測済みidentityを使用し、synth testでVolume bindingの一致を検証する。prod placeholderは補完しない。
+
+## 11. Phase 0完了時点のvalidation
 
 Phase 0は2026-07-29に完了した。設定schema validationは、YAMLの型・必須構造・Parameter Store名だけを検証し、`null`を補完しない。required validationはschema validationと別に、stage・Phase・処理ごとに適用する。
 

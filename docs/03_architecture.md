@@ -1,6 +1,6 @@
 # 03. Architecture
 
-Phase 8.3 repository proposalはD-094を参照する。既存read-only Monitoring Observerと独立した5分EventBridge scheduleがReconcileのObserved更新を行い、固定Host probe v1.4のData EBS usage/boot telemetryも同じ観測経路へ載せる。新しい常駐agent、Lambda、START/STOP経路は追加しない。production適用は未承認である。
+Phase 8.3の監視はAccepted D-094を参照する。既存read-only Monitoring Observerと独立した5分EventBridge scheduleがReconcileのObserved更新を行い、固定Host probe v1.4のData EBS usage/boot telemetryも同じ観測経路へ載せる。新しい常駐agent、Lambda、START/STOP経路は追加しない。dev production適用・検証の証跡は[monitoring runbook](runbooks/phase8_monitoring.md)を正本とする。
 
 - **文書状態:** Canonical
 - **最終更新:** 2026-08-31

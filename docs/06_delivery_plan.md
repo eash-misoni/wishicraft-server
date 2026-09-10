@@ -760,6 +760,8 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 
 ## 11. Phase 8 — 運用保護
 
+- **状態:** Completed（2026-09-10 UTC、8.1/8.2の既存production evidenceと8.3監視E2Eを照合済み）。RETENTION実削除とRestoreを今回の完了条件へ戻さない。Phase 9は未着手。
+
 ### 8.1 Backup
 
 #### Phase 8A — Backup contract / storage model freeze
@@ -819,14 +821,18 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 - Log retentionの見直し
 - S3 lifecycle
 
-#### Repository slice（2026-09-10、production gate pending）
+#### Repository / production slice（2026-09-10 UTC、Completed）
 
-- D-094 ProposedとしてRuntimeHeartbeat missing/stale、runtime unknown、identity mismatch、SystemState stale、Data filesystem unknown/highの監視を追加する。
+- D-094 AcceptedとしてRuntimeHeartbeat missing/stale、runtime unknown、identity mismatch、SystemState stale、Data filesystem unknown/highの監視を追加した。
 - SystemState freshnessは既存10分を維持し、5分scheduled Reconcileの実観測で整合させる。Operation/Lock中はskip、保存はDesired revision/Current Operation CAS付き。
 - Host probe v1.4は正本Data EBSのmount/sourceを検証してfilesystem bytesを採取する。既存heartbeat producer/timer、30分idle/5分warning/final gateは維持する。
 - backup/retention/auto-stop失敗通知、Budgetとlog retentionは既存構成を確認する。S3 archiveはDeferred、Package S3はPhase 9以降のため今回のlifecycle追加対象はない。bootstrap asset削除policyは独立管理とする。
 - Phase 8完了はproduction適用後のfreshness継続、実Data EBS使用率、alarm evaluation/read-backと最終安全状態のevidenceを条件とする。repository validationだけではCompletedへ進めない。
 - RETENTION実削除はnatural 8件後の独立gate、RestoreはPhase 16、Game/PackageはPhase 9以降を維持する。
+
+Control Planeだけをdeployし、6 alarmと5分Reconcile scheduleを追加、11 Lambda code/2 environment/2限定IAM policyを更新した。全既存physical ID不変、replacement/deletionなし、deploy後template diff 0。通常STARTは14:55:27 UTCにREADY、14:58/15:03/15:08の独立scheduled observationと15分以上のheartbeat継続を確認した。Data EBSは正本mount/UUID/NVMe volume一致、使用率1.4389261074504176%。通常STOPは15:12:40 UTCにSUCCEEDED、停止後15:13/15:18/15:23のObserved更新はSSMなしだった。15:25 UTCに完全な2評価period、容量値未発行、41 alarm OK、最終STOPPED/HEALTHY、DNS/Lock/Current Operation/unfinished Operationなし、Data EBS保持を確認した。
+
+新alarm初期欠測で5件の実メールが届き、正常metric到着後に自然復帰した。障害注入や閾値緩和は行っていない。runtime異常・disk-high・競合・metric publication failureの異常遷移はsynthetic検証であり、実障害メール試験とは区別する。全852 tests、lint/format/type、3 synthを成功させた。詳細は[monitoring runbook](runbooks/phase8_monitoring.md)。
 
 ### 完了条件
 
@@ -836,6 +842,8 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 - 無人時間経過で通常stopを開始できる。
 - player再接続で停止条件を解除できる。
 - 停止漏れを通知できる。
+
+上記は8.1の実BACKUP/Discord/provenance/dry-run evidence、8.2の再接続・warning・通常STOP evidence、8.3の監視/通知配線・鮮度・容量・最終安全状態で充足する。retentionは実削除を未releaseに保ち、D-091の独立gateを維持している。S3 archiveはDeferred、Package S3はPhase 9以降であり、今回新たなlifecycle設定対象はない。Budget 15 USDと14日log保持は不変。
 
 ## 12. Phase 9 — 複数ゲーム抽象
 

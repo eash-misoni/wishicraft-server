@@ -265,7 +265,7 @@ monitoring observerは5分ごとにSystemState、global Lock、Target EC2をread
 
 ## 8. コスト保護
 
-Phase 8.3 D-094 Proposedの追加構成・費用算式・production gateは[monitoring runbook](runbooks/phase8_monitoring.md)を参照する。新規6 alarm/最大10 custom metricsと5分Reconcileを既存SNSへ追加する。Budget閾値は引き上げず、Control Planeログはstage設定の14日/30日へ統一する。D-088 observerは引き続きread-only、定期Observed更新は独立Reconcile scheduleの責務とし、監視異常によるSTART/STOPやrepairは行わない。
+Phase 8.3 D-094 Acceptedの追加構成・費用算式・production evidenceは[monitoring runbook](runbooks/phase8_monitoring.md)を参照する。新規6 alarm/最大10 custom metricsと5分Reconcileを既存SNSへ追加する。Budget閾値は引き上げず、Control Planeログはstage設定の14日/30日へ統一する。D-088 observerは引き続きread-only、定期Observed更新は独立Reconcile scheduleの責務とし、監視異常によるSTART/STOPやrepairは行わない。
 
 ### 初期閾値
 
@@ -370,7 +370,7 @@ actual STOPは既存STOP/SCHEDULEとしてshared Admission/global Lockへ統合�
 
 2026-09-10のdev production E2Eでは、最初のSCHEDULE STOPがStop taskのcanonical `GAME_ID`環境不足でpre-commit FAILEDとなった。runtime mutationはなく、deadline後にexact ownershipとfresh RUNNING/HEALTHYをpositive proofするoperatorから既存`recover_stale()`を呼び、Operation FAILED、Lock/Current Operation解放へatomic convergenceした。次periodはDynamoDB numberの`Decimal` decode不整合でpre-commit CANCELLEDとなり、やはりruntime mutationはなかった。finite integral Decimalだけを受理するtyped decoder修正後、新empty periodで実delivery warningから5分以上かつidle 30分以上を待ち、fresh Reconcileと独立player-zero probeの後だけcommit pointを越え、既存STOPがEC2 stopped、DNS absent、final HEALTHYへ成功収束した。同period再試行、duplicate warning/STOP、Evaluator principalによるEC2/SSM/DNS/EBS/Snapshot mutationはなかった。
 
-RUNNING中にはRuntimeHeartbeatがfreshでもSystemState observationが10分超となり、`DesiredRunningNotReady`と`MonitoringObservationUnknown`が一時ALARMになり得る。これらをautomatic STOP triggerにはせず、STOP final gateのfresh Reconcileを現在状態の安全根拠とする。今回もfinal Reconcile後にalarmは設定変更なしでOKへ復帰した。RuntimeHeartbeat stale alarmはPhase 8.3で分離して実装する。
+Phase 8.2当時のRUNNING中にはRuntimeHeartbeatがfreshでもSystemState observationが10分超となり、`DesiredRunningNotReady`と`MonitoringObservationUnknown`が一時ALARMとなった。これらをautomatic STOP triggerにはせず、STOP final gateのfresh Reconcileを現在状態の安全根拠とし、final Reconcile後にalarmは設定変更なしでOKへ復帰した。Phase 8.3のD-094ではRuntimeHeartbeat staleを別監視にし、独立5分ReconcileでSystemStateの実観測鮮度を維持する。10分閾値を引き上げず、既存alarmを維持する。
 
 ### 失敗
 

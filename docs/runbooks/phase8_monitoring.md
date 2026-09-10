@@ -1,9 +1,64 @@
-# Phase 8.3 monitoring production gate
+# Phase 8.3 monitoring production gate and evidence
 
 - 対象は既存実環境のdev stage。`prod.yaml`はplaceholderのまま。
-- 状態: D-094 Accepted / production適用・実証待ち。基準HEAD `bc6b4ca52db3c3f72c97b2462181edb5ffe74f84`についてユーザーの限定GOを受領。Phase 8.3 Completedは実証後。
+- 状態: D-094 Accepted / Phase 8.3 Completed（2026-09-10 UTC）。基準HEAD `bc6b4ca52db3c3f72c97b2462181edb5ffe74f84`についてユーザーの限定GOを受領し、設計承認後にdev production適用・監視E2Eを実証した。
 - 実行時は直前deployed template/config/code識別情報を保存し、template diff後に`cdk deploy --method=prepare-change-set`で実ChangeSetを作る。全paginationを確認して承認差分・replacement/deletionなしの場合だけ、その同じChangeSetを実行する。rollback元はGitの直前commitではなく保存済みdeployed構成とする。
-- 最初のpreflight（2026-09-10）で`wishicraft-dev`のSTS確認がSSO期限切れにより失敗した。Account/実AWS状態/diffは未確認。過去closeoutを現在のevidenceにしない。
+- 最初のpreflight（2026-09-10）はSSO期限切れで停止したが、人間のlogin後に実caller/account/state/diffを再確認した。以下の途中validation記録は履歴であり、当時の未確認状態を現在地点としない。
+
+## Production deployment evidence（2026-09-10 UTC）
+
+設計承認後のdeploy commitは`b2b867f6d9b5581d1fd756330ffafd61dc92693e`、CI `34489664870`はsuccess。直前のdeployed template、resource physical IDs、IAM、Lambda code SHA/S3 asset識別情報とconfiguration比較結果を専用rootへ保存した。Lambda environment値は出力せず、deployed templateとの一致booleanだけを記録した。
+
+`phase83-b2b867f-v1` ChangeSetをprepareし、property評価後の実ChangeSetは9 Add / 16 Modify、全ModifyのReplacement=false、Removeなしだった。templateの実変更は11 Lambda code、うち2 environment、2 IAM policy。追加表示された3 State Machineは参照再評価で、実ASLとsynthの意味的一致を確認した。初期previewの既存Permission Conditionalを見て直ちに実行せず、property評価後に当該変更が消えたことを確認してから同じChangeSetをexecuteした。
+
+Control Planeは14:43:25 UTCにUPDATE_COMPLETE。全既存physical IDが不変でreplacement/deletionなし。11 LambdaはActive/Successfulでhandler/runtime/architecture/role/timeout/memory/environmentがsynthと一致、実deployed assetのprobe/parserはrepository v1.4と一致した。41 alarmの全設定がsynthと一致し、新Reconcile ruleはENABLED / rate(5 minutes)、固定scheduled_reconcile payload、target側とLambda async側はretry 0 / maximum event age 300秒をread-backした。Target/Frozen、永続Host file/unit、Docker/Compose、installed heartbeat producerは更新していない。
+
+### 初期欠測通知と初回schedule delivery
+
+6 alarmは14:41:44 UTC頃に作成され、observer更新・最初のdatapoint到着より先行した。missing=breachingの5 alarmが14:42:07〜14:42:59 UTCにINSUFFICIENT_DATAからALARMへ遷移し、ユーザーは5件の実メール受信を確認した。これはRuntimeIdentityMismatch、DataFilesystemObservationUnknown、SystemStateObservationStale、RuntimeHeartbeatUnavailable、RuntimeObservationUnknownの**metric欠測通知**であり、実測flag=1のidentity不一致・容量取得失敗等ではない。新規alarm初回deployではこの過渡通知があり得ることを事前に説明する。通知隠しのalarm無効化、missing-data変更、試験metric投入は行わない。
+
+正常な停止中not-expected flag=0が到着し、5 alarmは14:46 UTC台に自然復帰、14:48:50 UTCのread-backで既存分を含む41 alarmすべてOKを確認した。ALARM actionだけなので復帰メールは送られない。容量highはmissing=ignoreであり、容量値がないことを容量正常の実測証拠とは扱わない。STOPPED中は4容量Percent/Bytes datapointなし、SSM commandなしだった。
+
+EventBridgeの最初の14:42 UTC invocationはinvoke permission作成完了前でFailedInvocations=1となった。14:47 UTCの次回deliveryでReconcileが実行され、停止中Observedを14:48:07.894585Zへ更新した。初回失敗を継続成功に数えず、以降のperiodic成功とerror metricを別途照合する。重複・遅延が絶対にないことは前提にしない。
+
+証跡: `/private/tmp/wishicraft-phase83-production-v1.sderKE/`（predeploy/readback/change-set/deploy/watch）、`/private/tmp/wishicraft-phase83-evidence-v2.Qr0JHW/stopped-evidence.jsonl`。最初の補助collectorはDescribeAlarmHistoryに未対応のAlarmNamePrefixを指定して途中失敗したため、その結果を完全証跡とは扱わない。公式APIに沿ってexact AlarmNameごとの取得へ修正したv2を別rootで実行し、元の失敗証跡を保持した。
+
+### RUNNING監視と通常STOP
+
+shared AdmissionのSTART `op-bbfcdb09-bc65-4532-880c-7b7e956ef839`は14:51:23 UTCに受付、14:55:27.085053ZにSUCCEEDED/READYとなった。手動Reconcileを繰り返さず、独立scheduleによるObserved更新を14:58:03.980022Z、15:03:04.185081Z、15:08:04.193742Zに確認した。15:10:45 UTCの最終RUNNING checkpointはREADY後15分18秒で、HEALTHY、heartbeat 15:10:13.790907Z、Current Operation/Lock/unfinished Operationなしだった。START grace終了後も通常監視を継続し、15:00–15:05と15:05–15:10 UTCの完了済みperiodで6異常flagと既存MonitoringObservationUnknownは0、41 alarmはOKだった。
+
+実probe v1.4はmount `/srv/minecraft`、source `/dev/nvme1n1`、XFS UUID `420cea6d-0520-4436-bb5a-db1191f1e63b`、NVMe volume identity `vol-03ac9f534326c345c`を確認した。root volume `vol-092c04a633ffc6010`とは異なる。Game `game-vanilla-main`、runtime `wishicraft-host-runtime`、instance `i-04fc0629dc4ea466e`、boot `3525f917-fd64-4283-969c-c87b41bf7fd6`もheartbeatと一致した。
+
+| 容量値 | 実probe / CloudWatch照合結果 |
+|---|---:|
+| total bytes | 32,145,145,856 |
+| used bytes | 462,544,896 |
+| available bytes | 31,682,600,960 |
+| 100 * used / (used + available) | 1.4389261074504176% |
+
+4容量metricの値・Percent/Bytes単位・namespace・固定Stage/SystemId dimensionsが実probeと一致した。80%未満という実測であり、high alarmのmissing=ignoreだけから正常とは判断していない。定期RUNNING ReconcileのLambda Durationは14:58に2,667.87 ms、15:03に2,638.01 msだった。これは今回の実測であり月間総費用の保証ではない。
+
+保存済み14:56〜15:10 UTCの15 checkpointでは、SystemState observation ageの最大は288.788秒、heartbeat ageの最大は47.018秒だった。これはcheckpoint実測であり全瞬間の連続観測ではない。独立scheduleの複数実行時刻・正常probe・metricを組み合わせ、手動更新なしに10分以内を維持したことを確認した。
+
+必要なRUNNING evidence取得後、shared Admissionのmanual STOP `op-8630fde9-a0ed-4133-8b02-4350ffcaad28`を15:11:07 UTCに一度だけ送信した。15:12:34の途中checkpointではEC2 stoppedでもCurrent Operation/Lockが残っていたためterminal assertionは失敗し、その証跡を保存して待機した。15:13:27 UTCにはSTOPPED/HEALTHY、DNS absent、Current Operation/Lock/unfinished Operationなしへ正常収束していた。結果不明の再送、Lock recovery、raw state補正は行っていない。
+
+STOP Operationのcompleted_atは15:12:40.641823Zだった。15:13:04.131208Zには、STOP完了後の独立scheduleがstopped observationを更新した。START/STOPの業務semanticsを変更せず、D-093 warning/automatic STOPに到達する前にmanual STOPで終了した。
+
+RUNNING証跡はproduction rootの`running-final-state.jsonl`、evidence-v2 rootの`running-final-evidence.jsonl`、`/private/tmp/wishicraft-phase83-probes-v3.jPc5WY/running-early.jsonl`。最初のprobe補助collectorはnested identityをtop-levelから投影してnullを出したため不完全として保持し、canonical nested identityをassertするv3で別rootへ再取得した。これはcollectorの失敗でありproduction telemetryのnullではない。
+
+### 停止後最終判定とPhase 8 closeout
+
+停止後の独立scheduled ReconcileはObservedを15:13:04.131208Z、15:18:04.507076Z、15:23:04.119999Zへ更新した。最終checkpointは15:25:39.038353Z、Desired revision 15 STOPPED / Actual stopped / Observed stopped / HEALTHY、discrepancy・observation error・DNS・Current Operation・Lock・unfinished Operationなし。最終heartbeatは15:11:14.602333Zのままで、TTL削除やheartbeat repairをせずnot-expectedとして扱った。
+
+15:15–15:20、15:20–15:25 UTCの完全な2 periodで、6異常flagとMonitoringObservationUnknownはCount 0、4容量Percent/Bytesはdatapointなし、41 alarmすべてOKだった。停止後のSSM command metadataは0件、定期Reconcile/observerのErrors/Throttlesは実datapoint 0。EventBridge FailedInvocationsには新しい失敗datapointがなく、permission作成前の初回1件と区別した。停止を容量0%へ補正せず、high flag 0はnot-expectedへの移行を示すものとした。
+
+最終inventoryと変更前の比較でTarget template/resources、Data EBS全metadata/attachment、SG、Game、SNS topic/subscription、Budget/全4通知・subscriberは不変。11 Lambda log retentionはすべて14日。Data EBSは同じ30 GiB encrypted gp3、DeleteOnTermination=falseを保持した。Budget actual 2.85 USD / forecast 7.371 USDはread-back時の値で、今月の確定請求や追加費用の実測ではない。RUNNING/STOPPED SystemStateのAttributeValue JSON表現はそれぞれ1,975/1,483 bytesだったが、これは通信表現サイズでありDynamoDB課金item sizeそのものではない。
+
+START/STOP双方の実Step FunctionsもSUCCEEDED、START約243.224秒、manual STOP約89.044秒を確認した。STOP途中のDEGRADEDをHEALTHYへ補正せず、workflowのDNS/Observed収束を待った。5分observerがSTARTING/STOPPINGの全瞬間を採取したとは主張しない。grace期限、clock anomaly、identity mismatch、missing/unknown、capacity high、publication failure、Admission/save CAS raceはsynthetic検証済みで、productionで故障・競合を注入していない。初期欠測以外の新alarm異常遷移や実障害メールは未実施。受信した5件は初期欠測の実SNS Email delivery evidenceだけである。
+
+最終read-backは全11 Lambda configuration/assetと41 alarmがsynth一致、schedule有効・5分・固定payload・target/async両retry 0・event age 300秒を確認した。Control Planeのpostdeploy canonical template diffは0。rollback・schedule無効化・追加のconfiguration修正deployは不要だった。production rootの`final-safe-state.jsonl`、`final-inventory.jsonl`、`final-readback.jsonl`、`final-template-diff.log`、`workflow-terminal-evidence.jsonl`とevidence-v2 rootの`stopped-final-evidence.jsonl`を保存した。
+
+Phase 8.3とPhase 8全体をCompletedと判定する。8.1の実BACKUP/Discord/provenance/dry-run、8.2のcanonical 30分/5分・再接続・warning・STOP evidenceを再利用し、今回の監視・容量・鮮度・通知配線・最終安全状態でcompletion criteriaを充足した。RETENTION実削除はnormal backup自然8件以降の独立gate、Restore/復元試験はPhase 16、Phase 1 retirement/ownership整理は独立debt、Phase 9は未着手。新CloudWatch分3.60 USD/月は見積、8,640回は30日分のReconcile概算であり、Lambda/DynamoDB/logs込みの総費用上限ではない。
 
 ## Design and alarms
 
@@ -92,7 +147,9 @@ tools/dev-env run -- npx --no-install cdk deploy WishicraftControlPlaneStack-dev
 
 停止条件は対象不一致、unknown mutation result、Lock recovery必要、広い権限、world/volume変更、継続的SSM failure、想定外alarm/cost増加。automatic repairは行わない。rollbackは保存済み直前template/HEADへControl Planeだけを戻し、新schedule/alarm/IAM追加を除去する。既存Observationをraw rollbackせず、元の正規Reconcileで収束させる。新規alarm削除等も承認済みrollback範囲に明示してから実施する。Target/world/heartbeatにはrollback write不要。
 
-## Phase 8 completion
+## Repository validation履歴（当時の状態）
+
+以下のSSO未完了・production未実行は各途中checkpointの履歴であり、現在の状態ではない。現在のproduction結果は上記evidenceを参照する。
 
 Repository validation（2026-09-10）: full pytest 849 passed、Ruff check/format成功、mypy 128 source files成功、shell syntax成功、dev Phase 1/Target/Phase 8 Control Plane synth成功。Docker CLI/local shellcheckは未導入（optional）。最初のfull runは847 passed/2 bundling DNS failures、最初のControl Plane synthもsandbox DNSで失敗し、既存`tools/setup-dev-tools bundling-cache`後、新しい専用rootで全件再検証した。skipで成功扱いにしていない。
 
@@ -108,7 +165,9 @@ Local evidence: `/private/tmp/wishicraft-phase83-validation-v1.1CT2Jn`（最初�
 
 2026-09-10にAWS公式公開Price List（publicationDate 2026-08-31）のTokyo単価をread-only確認した。classic custom metricは最初の10,000件で0.30 USD/metric-month、standard alarmは0.10 USD/alarm-month。新規10 metricsを全月発行する保守的見積は3.00+0.60=**3.60 USD/月**で、Lambda/DynamoDB/logsは別途。停止中は容量4 metricsを発行しないため実際は稼働時間に依存する。free tier/creditsを控除せず、Budget 15 USDは維持する。[公式regional Price List](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/current/ap-northeast-1/index.json)。現在のBudget actual/forecastはSSO復旧後のpreflightで確認する。
 
-今回閉じる項目はheartbeat/observation freshness/identity監視、Data EBS usage/unknown監視、既存失敗通知とコスト・ログ保持の整合。8.1 BACKUPとdurable provenance/dry-run RETENTION、8.2 automatic STOPの完了evidenceは再利用する。実削除release、Restore（Phase 16）、Package/Game抽象（Phase 9以降）、bootstrap/Phase 1 retirement debtは独立であり、今回へ戻さない。production validation完了まではPhase 8.3 pendingを維持する。
+GO後の最終local validationはcanonical toolchainでfull pytest **852 passed**、Ruff check/format成功（160 files）、`mypy --no-incremental`成功（128 files）、dev Phase 1/Target/Phase 8 Control Planeの3 synth成功。最初のrunは845 passed / 7 CDK bundling failures（sandbox DNSでPyPI依存を取得不能）で、実装失敗と分離し結果を保持した。同じlocked dependencyをnetwork許可下の新rootで全件再実行し、skipなしで852 passedとなった。証跡: `/private/tmp/wishicraft-phase83-closeout-validation-v1.NTNWzN/`（失敗）、`/private/tmp/wishicraft-phase83-closeout-validation-v2.NJAbzX/`（成功・3 synth）。Docker/local shellcheckはoptionalの未導入、CIで実行する。
+
+今回の対象はheartbeat/observation freshness/identity監視、Data EBS usage/unknown監視、既存失敗通知とコスト・ログ保持の整合。8.1 BACKUPとdurable provenance/dry-run RETENTION、8.2 automatic STOPの完了evidenceは再利用する。実削除release、Restore（Phase 16）、Package/Game抽象（Phase 9以降）、bootstrap/Phase 1 retirement debtは独立であり、今回へ戻さない。
 
 ## Official references
 
