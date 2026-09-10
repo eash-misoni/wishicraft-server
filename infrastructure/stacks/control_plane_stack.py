@@ -310,6 +310,7 @@ class ControlPlaneStack(Stack):
                 "OPERATIONS_TABLE": operations_table.table_name,
                 "LOCKS_TABLE": locks_table.table_name,
                 "SYSTEM_ID": project.system_id,
+                "GAME_ID": project.initial_game_id,
                 "PROJECT": project.project_slug,
                 "STAGE": stage.stage,
                 "GLOBAL_LOCK_NAME": stage.global_lock_name,

@@ -461,6 +461,12 @@ def test_phase_eight_auto_stop_has_durable_intents_minimal_evaluator_and_commit_
     )
     assert stop["States"]["ReconcileBeforeStop"]["Next"] == "AutomaticStopFinalGate"
     assert stop["States"]["AutomaticStopMayProceed"]["Default"] == "SetDesiredStopped"
+    stop_task = next(
+        value["Properties"]
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-stop-task"
+    )
+    assert stop_task["Environment"]["Variables"]["GAME_ID"] == "game-vanilla-main"
     retention = next(
         value["Properties"]
         for value in functions.values()
