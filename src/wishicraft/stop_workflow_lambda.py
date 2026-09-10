@@ -321,7 +321,7 @@ def _load_intent(runtime: Runtime, intent_id: str) -> AutoStopIntent:
     item = response.get("Item") if isinstance(response, dict) else None
     if not isinstance(item, dict):
         raise ValueError("automatic STOP intent is missing")
-    from boto3.dynamodb.types import TypeDeserializer  # type: ignore[import-not-found]
+    from boto3.dynamodb.types import TypeDeserializer  # type: ignore[import-untyped]
 
     decode = TypeDeserializer()
     plain = {str(name): decode.deserialize(value) for name, value in item.items()}

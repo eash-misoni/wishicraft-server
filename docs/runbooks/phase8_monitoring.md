@@ -83,6 +83,12 @@ Repository validation（2026-09-10）: full pytest 849 passed、Ruff check/forma
 
 Local evidence: `/private/tmp/wishicraft-phase83-validation-v1.1CT2Jn`（最初の結果、lint/type/Phase 1/Target synth）、`/private/tmp/wishicraft-phase83-validation-v2.8DX4aJ`（849 passed/Control Plane synth）。uvはvenvでPython user baseが変わる条件を再現し、既存macOS user installation discoveryで解消、子process/CDK bundlingでも利用できた。GitHub認証とorigin/mainはread-only確認成功。AWS STSはSSO期限切れのため実Account/実state/credential-backed diff未確認。production write/実環境E2Eは未実行。
 
+最初のCI `34485618133`はpytest/synthetic integration成功後、既存STOP Lambdaのboto3 import ignoreが`import-not-found`のままである不整合を検出した。boto3をdev依存へ追加したことで分類は`import-untyped`となるため、注釈だけを修正する。STOPの実行動作・30分/5分/final gateは変更しない。local incremental mypyの既存cacheで検出されなかったため、最終型検査は`--no-incremental`を使用する。
+
+修正後の`mypy --no-incremental src infrastructure tests`は128 filesで成功し、Ruff check/formatも成功した。証跡は`/private/tmp/wishicraft-phase83-validation-v4.Ok19v7/mypy.log`。実行コードは注釈以外に変更がないため、local full pytestの850 passedは再利用し、修正commitのCIでもfull validationを行う。
+
+2026-09-10にAWS公式公開Price List（publicationDate 2026-08-31）のTokyo単価をread-only確認した。classic custom metricは最初の10,000件で0.30 USD/metric-month、standard alarmは0.10 USD/alarm-month。新規10 metricsを全月発行する保守的見積は3.00+0.60=**3.60 USD/月**で、Lambda/DynamoDB/logsは別途。停止中は容量4 metricsを発行しないため実際は稼働時間に依存する。free tier/creditsを控除せず、Budget 15 USDは維持する。[公式regional Price List](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/current/ap-northeast-1/index.json)。現在のBudget actual/forecastはSSO復旧後のpreflightで確認する。
+
 今回閉じる項目はheartbeat/observation freshness/identity監視、Data EBS usage/unknown監視、既存失敗通知とコスト・ログ保持の整合。8.1 BACKUPとdurable provenance/dry-run RETENTION、8.2 automatic STOPの完了evidenceは再利用する。実削除release、Restore（Phase 16）、Package/Game抽象（Phase 9以降）、bootstrap/Phase 1 retirement debtは独立であり、今回へ戻さない。production validation完了まではPhase 8.3 pendingを維持する。
 
 ## Official references
