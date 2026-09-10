@@ -12,7 +12,7 @@
 
 ### D-093 Automatic STOPはdurable warning intentとSTOP commit前の二重観測でfail closedする
 
-- **状態:** Accepted（repository implementation / production release preparation）
+- **状態:** Accepted（dev production E2E completed）
 - **日付:** 2026-09-10
 - idle timeoutはGameの`runtime.idle_shutdown_minutes`を正本とし、初期dev値は30分である。専用Auto-stop EvaluatorをEventBridge rate 1 minuteで実行し、D-092 heartbeatのsame Game/runtime/boot、fresh、READY、known zero、continuous `empty_since`をcandidate evidenceにする。SystemState observationの古さだけでwarningを抑止しないが、明白なunhealthy/discrepancy/errorでは進めない。
 - warning leadは5分とする。Game/boot/empty_sinceから決定的なdurable AutoStopIntentを作り、既存Discord message componentのnonce/CAS/bounded retryで同一empty periodに一logical warningだけを配送する。STOP eligibilityは`max(empty_since + idle timeout, warning_delivered_at + 5 minutes)`以後である。terminal warning failureは当該empty periodをblockし、player positive/unknown、protocol非READY、stale/missing heartbeat、Game/runtime/boot/empty_since変更は旧intentを無効化する。
@@ -20,6 +20,8 @@
 - Lock所有下でfresh ReconcileがHEALTHY/no discrepancy/no observation error、canonical Game/Target/Data EBS binding、同一intentとfresh trusted-zero heartbeat、warning/idle時間を再検証し、その後に既存fixed Host Runtime probeでplayer countを独立再観測する。unknown/positive/mismatchはexisting `CANCELLED`へatomic terminalizeし、Lock/Current Operationを解放する。
 - cancel可能なcommit pointはexisting STOPの`verify_and_set_desired`およびMinecraft save/stop mutationの直前とする。final gate失敗はDesired、Minecraft、EC2、DNSを変更しない。gate成功後は既存STOP contractでsave/flush、graceful runtime stop、EC2 stop、DNS cleanup、final Reconcileへ収束し、途中のplayer変化では巻き戻さない。
 - Admission outcome不明はblind resendせずdeterministic identityをread-only照合する。mutation開始後のFAILEDも同empty periodで新Operationを作らない。RuntimeHeartbeatとSystemState/Reconcile freshnessは別の安全条件であり、MonitoringObservationUnknownをtriggerにしない。heartbeat stale alarmはPhase 8.3で扱う。
+- **Dev evidence:** 2026-09-10にRetainされたAutoStopIntents table、1分Evaluator、warning delivery、shared STOP/SCHEDULE Admission、STOP commit前final gateをdeployした。最初のSCHEDULE STOPはStop taskの`GAME_ID`環境不足でfinal gate中にFAILEDしたが、`SetDesiredStopped`前だったためDesired/EC2/Minecraft/DNSはRUNNING/presentのまま、save/stop/EC2/DNS mutationは0だった。deadline後、exact Operation/FAILED execution/lease/Lock/Current Operation/intentとfresh RUNNING/HEALTHY状態をpositive proofしたoperatorが既存`recover_stale()`を一度だけ使い、historical OperationをFAILED、Lockなし、Current Operationなしへatomic convergenceした。同empty periodのwarning/STOP再生成はなかった。
+- **Dev evidence continued:** canonical `GAME_ID`をStop taskへ渡す回帰修正後の次periodでは、DynamoDB numberを`Decimal`として復元する境界とinteger-only decoderの不整合によりfinal gateがfail closedし、OperationはCANCELLED、State MachineはSUCCEEDED、commit前mutationは0だった。finite integral `Decimal`だけをexact integerへ正規化し、fractional/non-finite/bool/float/string/nullを拒否するtyped-boundary修正をdeployした。同period再試行を抑止し、player join/leaveで作った新empty periodではwarningを一件だけ実deliveryした。`empty_since + 30分`と実`warning_delivered_at + 5分`の双方を満たした後、STOP/SCHEDULE Operation `op-5fdd2110-f7b2-4c0d-90a8-fff1c813c123`が一件だけAdmissionされ、fresh Reconcile、same Game/runtime/boot/empty_since heartbeat、独立direct probe zeroを検証してからcommit pointを越え、既存graceful STOPでSUCCEEDEDした。最終状態はDesired/Actual/Observed STOPPED、HEALTHY、discrepancy/observation errorなし、DNS absent、Lock/Current Operation/unfinished Operationなし、Data EBS不変である。Evaluator principalのEC2/SSM/DNS/EBS/Snapshot mutationは0で、historical FAILED/CANCELLED evidenceは保持した。
 - **関連:** D-031、D-074、D-092、Phase 8.2。
 
 ### D-092 Runtime heartbeatはTargetから専用tableへfail-closedで送る

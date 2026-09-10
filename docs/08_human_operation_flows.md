@@ -159,18 +159,17 @@ dev Phase 8C E2Eではadmin roleなしrequestがAdmission前に拒否され、ro
 
 ## 8. 無人自動停止
 
-Phase 8以降。
+Phase 8.2以降。D-092/D-093を正本とする。
 
-1. Minecraft上のplayer countが0になる。
-2. システムが`empty_since`を記録する。
-3. 設定時間内に再接続があれば解除する。
-4. 時間経過後、最新状態を再確認する。
-5. 停止予告をDiscordへ表示する。
-6. 通常stop workflowを実行する。
-7. EC2 stopped確認後に完了を表示する。
-8. 失敗時は管理者通知を行う。
+1. Target heartbeatが同一Game/runtime/bootでREADYかつplayer 0を継続観測し、`empty_since`を維持する。unknown、stale、再接続、identity変更はcontinuityを切る。
+2. Game設定のidle timeout（devは30分）の5分前以降、同一empty periodに一件だけ「約5分後に自動停止」のDiscord warningを配送する。
+3. STOPはidle timeout到達と実warning delivery成功から5分経過の両方を待つ。warning failureや再接続では当該periodを再利用しない。
+4. EvaluatorはSTOP/SCHEDULEをshared Admissionへ渡すだけで、EC2、Minecraft、DNS、heartbeat、SystemStateを変更しない。
+5. global Lock所有下でfresh Reconcileを行い、HEALTHY、矛盾なし、canonical Game/Target/Data EBSとfresh trusted-zero heartbeatを再検証する。
+6. さらにfixed Host Runtime probeでplayer 0を直接再観測する。unknown、positive、mismatchならDesired変更前にCANCELLEDとしてLock/Current Operationを解放する。
+7. final gate成功後だけDesired STOPPEDとsave/stopへ進み、既存通常STOPでgraceful runtime stop、EC2 stop、DNS cleanup、final Reconcileを完遂する。
 
-player countが確認不能の場合、自動停止しない。
+player countが確認不能の場合やSystemState/Reconcileをfreshかつhealthyと証明できない場合、自動停止しない。historical FAILED/CANCELLED Operationは削除せず、同一empty periodで自動再試行しない。stale Operationのbookkeeping recoveryが必要な場合は専用runbookを使用し、Lockやtableを手動修正しない。
 
 ## 9. 新しいゲームを作る
 

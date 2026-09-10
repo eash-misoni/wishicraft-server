@@ -366,6 +366,10 @@ D-093のEvaluatorは1分周期でGame設定（devは30分）を読み、25分の
 
 actual STOPは既存STOP/SCHEDULEとしてshared Admission/global Lockへ統合する。Desired変更とMinecraft save/stopがcommit pointであり、その直前にfresh Reconcileとfixed Host Runtime probeを別々に実行する。player positive/unknown、heartbeat stale/mismatch、unhealthy/discrepancy/error、Data EBS binding mismatchではCANCELLEDとしてLock/Current Operationを解放し、Desired、Minecraft、EC2、DNSを変更しない。commit point後はexisting graceful STOPを巻き戻さない。
 
+2026-09-10のdev production E2Eでは、最初のSCHEDULE STOPがStop taskのcanonical `GAME_ID`環境不足でpre-commit FAILEDとなった。runtime mutationはなく、deadline後にexact ownershipとfresh RUNNING/HEALTHYをpositive proofするoperatorから既存`recover_stale()`を呼び、Operation FAILED、Lock/Current Operation解放へatomic convergenceした。次periodはDynamoDB numberの`Decimal` decode不整合でpre-commit CANCELLEDとなり、やはりruntime mutationはなかった。finite integral Decimalだけを受理するtyped decoder修正後、新empty periodで実delivery warningから5分以上かつidle 30分以上を待ち、fresh Reconcileと独立player-zero probeの後だけcommit pointを越え、既存STOPがEC2 stopped、DNS absent、final HEALTHYへ成功収束した。同period再試行、duplicate warning/STOP、Evaluator principalによるEC2/SSM/DNS/EBS/Snapshot mutationはなかった。
+
+RUNNING中にはRuntimeHeartbeatがfreshでもSystemState observationが10分超となり、`DesiredRunningNotReady`と`MonitoringObservationUnknown`が一時ALARMになり得る。これらをautomatic STOP triggerにはせず、STOP final gateのfresh Reconcileを現在状態の安全根拠とする。今回もfinal Reconcile後にalarmは設定変更なしでOKへ復帰した。RuntimeHeartbeat stale alarmはPhase 8.3で分離して実装する。
+
 ### 失敗
 
 自動停止失敗は再試行回数を制限し、無限operationを作らない。管理者へ通知する。
