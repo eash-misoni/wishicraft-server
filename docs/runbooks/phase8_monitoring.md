@@ -87,6 +87,8 @@ Local evidence: `/private/tmp/wishicraft-phase83-validation-v1.1CT2Jn`（最初�
 
 修正後の`mypy --no-incremental src infrastructure tests`は128 filesで成功し、Ruff check/formatも成功した。証跡は`/private/tmp/wishicraft-phase83-validation-v4.Ok19v7/mypy.log`。実行コードは注釈以外に変更がないため、local full pytestの850 passedは再利用し、修正commitのCIでもfull validationを行う。
 
+続くCI `34486136649`はpytest/lint/type/3 synth/synthetic integration成功後、uv fallback条件の`A && B || continue`をshellcheck SC2015が指摘した。同じ判定を2つの明示checkへ分け、toolchain回帰testを再検証する。指摘を無効化・skipしない。
+
 2026-09-10にAWS公式公開Price List（publicationDate 2026-08-31）のTokyo単価をread-only確認した。classic custom metricは最初の10,000件で0.30 USD/metric-month、standard alarmは0.10 USD/alarm-month。新規10 metricsを全月発行する保守的見積は3.00+0.60=**3.60 USD/月**で、Lambda/DynamoDB/logsは別途。停止中は容量4 metricsを発行しないため実際は稼働時間に依存する。free tier/creditsを控除せず、Budget 15 USDは維持する。[公式regional Price List](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/current/ap-northeast-1/index.json)。現在のBudget actual/forecastはSSO復旧後のpreflightで確認する。
 
 今回閉じる項目はheartbeat/observation freshness/identity監視、Data EBS usage/unknown監視、既存失敗通知とコスト・ログ保持の整合。8.1 BACKUPとdurable provenance/dry-run RETENTION、8.2 automatic STOPの完了evidenceは再利用する。実削除release、Restore（Phase 16）、Package/Game抽象（Phase 9以降）、bootstrap/Phase 1 retirement debtは独立であり、今回へ戻さない。production validation完了まではPhase 8.3 pendingを維持する。
