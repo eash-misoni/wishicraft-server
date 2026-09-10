@@ -111,7 +111,7 @@ class ReconcileService:
     dns_observer: DnsObserver
     repository: StateRepository
 
-    def reconcile(self, *, observed_at: datetime) -> SystemState:
+    def reconcile(self, *, observed_at: datetime, persist: bool = True) -> SystemState:
         desired = self.repository.desired_state()
         dns = self.dns_observer.observe()
         errors: list[str] = []
@@ -136,7 +136,8 @@ class ReconcileService:
             errors=tuple(errors),
             observed_at=observed_at,
         )
-        self.repository.save(state)
+        if persist:
+            self.repository.save(state)
         return state
 
 

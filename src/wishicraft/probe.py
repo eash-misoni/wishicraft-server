@@ -146,6 +146,7 @@ class HostRuntimeProbe:
     protocol: ProtocolObservation
     ready: bool
     errors: tuple[str, ...]
+    telemetry: dict[str, object] | None = None
 
 
 def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostRuntimeProbe:
@@ -159,7 +160,8 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     document = _mapping(raw, "document")
     if _integer(document, "schema_version") != 1:
         raise ProbeContractError("unsupported probe schema version")
-    if _string(document, "probe_version") != "1.3.0":
+    version = _string(document, "probe_version")
+    if version not in {"1.3.0", "1.4.0"}:
         raise ProbeContractError("unsupported probe version")
     observed_at = _timestamp(document, "observed_at")
 
@@ -248,6 +250,11 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
         raise ProbeContractError("probe errors require an unknown observation")
 
     return HostRuntimeProbe(
+        telemetry=(
+            _parse_telemetry(_mapping(document.get("telemetry"), "telemetry"))
+            if version == "1.4.0"
+            else None
+        ),
         observed_at=observed_at,
         instance_id=instance_id,
         runtime_id=runtime_id,
@@ -265,6 +272,36 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
         ready=ready,
         errors=errors,
     )
+
+
+def _parse_telemetry(value: dict[str, object]) -> dict[str, object]:
+    names = {
+        "schema_version",
+        "observed_at",
+        "boot_id",
+        "state",
+        "error",
+        "mount_path",
+        "source",
+        "volume_id",
+        "filesystem_uuid",
+        "total_bytes",
+        "used_bytes",
+        "available_bytes",
+    }
+    if set(value) != names or _integer(value, "schema_version") != 1:
+        raise ProbeContractError("invalid monitoring telemetry schema")
+    _timestamp(value, "observed_at")
+    for name in ("boot_id", "error", "source", "volume_id", "filesystem_uuid"):
+        _optional_string(value, name)
+    for name in ("total_bytes", "used_bytes", "available_bytes"):
+        _optional_integer(value, name)
+    if (
+        _string(value, "state") not in {"observed", "unknown"}
+        or _string(value, "mount_path") != "/srv/minecraft"
+    ):
+        raise ProbeContractError("invalid monitoring telemetry state")
+    return value
 
 
 def _parse_mount(value: dict[str, object]) -> MountObservation:

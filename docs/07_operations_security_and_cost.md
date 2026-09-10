@@ -265,6 +265,8 @@ monitoring observerは5分ごとにSystemState、global Lock、Target EC2をread
 
 ## 8. コスト保護
 
+Phase 8.3 D-094 Proposedの追加構成・費用算式・production gateは[monitoring runbook](runbooks/phase8_monitoring.md)を参照する。新規6 alarm/最大10 custom metricsと5分Reconcileを既存SNSへ追加する。Budget閾値は引き上げず、Control Planeログはstage設定の14日/30日へ統一する。D-088 observerは引き続きread-only、定期Observed更新は独立Reconcile scheduleの責務とし、監視異常によるSTART/STOPやrepairは行わない。
+
 ### 初期閾値
 
 - 月額Budget: 15 USD

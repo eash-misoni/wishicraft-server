@@ -140,6 +140,24 @@ def test_run_exports_discovered_uv_and_repository_cache(tmp_path: Path) -> None:
     ]
 
 
+def test_macos_other_python_user_base_is_discovered_for_child_process(tmp_path: Path) -> None:
+    environment, bin_dir = isolated_environment(tmp_path)
+    make_executable(bin_dir, "uname", "printf '%s\\n' Darwin")
+    make_executable(bin_dir, "python3", "printf '%s\\n' /nonexistent-python-user-base")
+    user_bin = Path(environment["HOME"]) / "Library/Python/3.13/bin"
+    user_bin.mkdir(parents=True)
+    uv = make_executable(user_bin, "uv", "printf '%s\\n' 'uv discovered'")
+    child = make_executable(bin_dir, "child", "command -v uv; uv --version")
+    completed = subprocess.run(
+        [str(DEV_ENV), "run", "--", str(child)],
+        env=environment,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.stdout.splitlines() == [str(uv), "uv discovered"]
+
+
 def test_auth_check_uses_read_only_account_and_repository_queries(tmp_path: Path) -> None:
     environment, bin_dir = isolated_environment(tmp_path)
     gh = make_executable(

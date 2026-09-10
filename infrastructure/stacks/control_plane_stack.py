@@ -24,8 +24,15 @@ from aws_cdk import aws_stepfunctions as sfn
 from constructs import Construct
 
 from infrastructure.discord_command_bundle import discord_command_bundling
+from wishicraft.artifacts.host_runtime_probe import EXPECTED_FILESYSTEM_UUID
 from wishicraft.config import ProjectConfig, SecretsExampleConfig, StageConfig
 from wishicraft.naming import resource_name, resource_tags
+
+
+def _log_retention(stage: StageConfig) -> logs.RetentionDays:
+    return {14: logs.RetentionDays.TWO_WEEKS, 30: logs.RetentionDays.ONE_MONTH}[
+        stage.monitoring_int("log_retention_days")
+    ]
 
 
 class ControlPlaneStack(Stack):
@@ -132,7 +139,7 @@ class ControlPlaneStack(Stack):
             log_group_name=(
                 f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'reconcile')}"
             ),
-            retention=logs.RetentionDays.TWO_WEEKS,
+            retention=_log_retention(stage),
             removal_policy=RemovalPolicy.DESTROY,
         )
         function = lambda_.Function(
@@ -164,13 +171,41 @@ class ControlPlaneStack(Stack):
             )
         )
 
+        if phase >= 8:
+            function.add_environment("LOCKS_TABLE", locks_table.table_name)
+            function.configure_async_invoke(retry_attempts=0, max_event_age=Duration.minutes(5))
+            function.add_environment("GLOBAL_LOCK_NAME", stage.global_lock_name)
+            function.add_to_role_policy(
+                iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[locks_table.table_arn])
+            )
+            events.Rule(
+                self,
+                "MonitoringReconcileSchedule",
+                rule_name=resource_name(
+                    project.resource_prefix, stage.stage, "monitoring-reconcile"
+                ),
+                schedule=events.Schedule.rate(
+                    Duration.minutes(stage.monitoring_int("observer_schedule_minutes"))
+                ),
+                targets=[
+                    events_targets.LambdaFunction(
+                        function,
+                        event=events.RuleTargetInput.from_object(
+                            {"schema_version": 1, "operation": "scheduled_reconcile"}
+                        ),
+                        retry_attempts=0,
+                        max_event_age=Duration.minutes(5),
+                    )
+                ],
+            )
+
         start_task_log_group = logs.LogGroup(
             self,
             "StartTaskLogGroup",
             log_group_name=(
                 f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'start-task')}"
             ),
-            retention=logs.RetentionDays.TWO_WEEKS,
+            retention=_log_retention(stage),
             removal_policy=RemovalPolicy.DESTROY,
         )
         start_task = lambda_.Function(
@@ -291,7 +326,7 @@ class ControlPlaneStack(Stack):
             log_group_name=(
                 f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'stop-task')}"
             ),
-            retention=logs.RetentionDays.TWO_WEEKS,
+            retention=_log_retention(stage),
             removal_policy=RemovalPolicy.DESTROY,
         )
         stop_task = lambda_.Function(
@@ -466,7 +501,7 @@ class ControlPlaneStack(Stack):
                     "/aws/lambda/"
                     f"{resource_name(project.resource_prefix, stage.stage, 'backup-task')}"
                 ),
-                retention=logs.RetentionDays.TWO_WEEKS,
+                retention=_log_retention(stage),
                 removal_policy=RemovalPolicy.DESTROY,
             )
             backup_task = lambda_.Function(
@@ -588,7 +623,7 @@ class ControlPlaneStack(Stack):
                     "/aws/lambda/"
                     f"{resource_name(project.resource_prefix, stage.stage, 'retention-task')}"
                 ),
-                retention=logs.RetentionDays.TWO_WEEKS,
+                retention=_log_retention(stage),
                 removal_policy=RemovalPolicy.DESTROY,
             )
             retention_task = lambda_.Function(
@@ -723,7 +758,7 @@ class ControlPlaneStack(Stack):
             log_group_name=(
                 f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'admission')}"
             ),
-            retention=logs.RetentionDays.TWO_WEEKS,
+            retention=_log_retention(stage),
             removal_policy=RemovalPolicy.DESTROY,
         )
         admission = lambda_.Function(
@@ -854,6 +889,7 @@ class ControlPlaneStack(Stack):
                 stage=stage,
                 system_state_table=table,
                 locks_table=locks_table,
+                runtime_heartbeats_table=runtime_heartbeats_table,
                 start_workflow=start_workflow,
                 stop_workflow=stop_workflow,
                 backup_workflow=backup_workflow,
@@ -892,7 +928,7 @@ def _add_discord_ingress(
         log_group_name=(
             f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'discord-command')}"
         ),
-        retention=logs.RetentionDays.TWO_WEEKS,
+        retention=_log_retention(stage),
         removal_policy=RemovalPolicy.DESTROY,
     )
     function = lambda_.Function(
@@ -931,7 +967,7 @@ def _add_discord_ingress(
         log_group_name=(
             f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'status-executor')}"
         ),
-        retention=logs.RetentionDays.TWO_WEEKS,
+        retention=_log_retention(stage),
         removal_policy=RemovalPolicy.DESTROY,
     )
     status_executor = lambda_.Function(
@@ -1010,7 +1046,7 @@ def _add_discord_ingress(
         log_group_name=(
             f"/aws/lambda/{resource_name(project.resource_prefix, stage.stage, 'discord-message')}"
         ),
-        retention=logs.RetentionDays.TWO_WEEKS,
+        retention=_log_retention(stage),
         removal_policy=RemovalPolicy.DESTROY,
     )
     message = lambda_.Function(
@@ -1098,7 +1134,7 @@ def _add_discord_ingress(
                 "/aws/lambda/"
                 f"{resource_name(project.resource_prefix, stage.stage, 'auto-stop-evaluator')}"
             ),
-            retention=logs.RetentionDays.TWO_WEEKS,
+            retention=_log_retention(stage),
             removal_policy=RemovalPolicy.DESTROY,
         )
         evaluator = lambda_.Function(
@@ -1206,6 +1242,7 @@ def _add_release_monitoring(
     stage: StageConfig,
     system_state_table: dynamodb.Table,
     locks_table: dynamodb.Table,
+    runtime_heartbeats_table: dynamodb.Table | None,
     start_workflow: sfn.CfnStateMachine,
     stop_workflow: sfn.CfnStateMachine,
     backup_workflow: sfn.CfnStateMachine | None,
@@ -1244,7 +1281,7 @@ def _add_release_monitoring(
             f"/aws/lambda/"
             f"{resource_name(project.resource_prefix, stage.stage, 'monitoring-observer')}"
         ),
-        retention=logs.RetentionDays.TWO_WEEKS,
+        retention=_log_retention(stage),
         removal_policy=RemovalPolicy.DESTROY,
     )
     observer = lambda_.Function(
@@ -1277,18 +1314,48 @@ def _add_release_monitoring(
             "OBSERVATION_FRESHNESS_SECONDS": str(
                 stage.monitoring_int("observation_freshness_warning_minutes") * 60
             ),
+            **(
+                {
+                    "RUNTIME_HEARTBEATS_TABLE": runtime_heartbeats_table.table_name,
+                    "GAME_ID": project.initial_game_id,
+                    "DATA_VOLUME_ID": str(
+                        stage.host_runtime_value("target_host.existing_data_volume_id")
+                    ),
+                    "DATA_FILESYSTEM_UUID": EXPECTED_FILESYSTEM_UUID,
+                    "DATA_MOUNT_PATH": stage.data_volume_mount_path,
+                    "MONITORING_STARTUP_GRACE_SECONDS": str(
+                        stage.monitoring_int("startup_grace_seconds")
+                    ),
+                    "MONITORING_SHUTDOWN_GRACE_SECONDS": str(
+                        stage.monitoring_int("shutdown_grace_seconds")
+                    ),
+                    "DATA_USAGE_WARNING_PERCENT": str(
+                        stage.monitoring_int("data_usage_warning_percent")
+                    ),
+                }
+                if runtime_heartbeats_table is not None
+                else {}
+            ),
         },
         description="Phase 7 read-only monitoring observer",
     )
     observer.add_to_role_policy(
         iam.PolicyStatement(
             actions=["dynamodb:GetItem"],
-            resources=[system_state_table.table_arn, locks_table.table_arn],
+            resources=[system_state_table.table_arn, locks_table.table_arn]
+            + (
+                [runtime_heartbeats_table.table_arn] if runtime_heartbeats_table is not None else []
+            ),
         )
     )
     observer.add_to_role_policy(
+        iam.PolicyStatement(actions=["ec2:DescribeInstances"], resources=["*"])
+    )
+    observer.add_to_role_policy(
         iam.PolicyStatement(
-            actions=["ec2:DescribeInstances", "cloudwatch:PutMetricData"], resources=["*"]
+            actions=["cloudwatch:PutMetricData"],
+            resources=["*"],
+            conditions={"StringEquals": {"cloudwatch:namespace": namespace}},
         )
     )
     events.Rule(
@@ -1355,14 +1422,27 @@ def _add_release_monitoring(
             ),
         )
 
-    for metric_name, alarm_id, evaluations in (
+    state_alarms = [
         ("TargetRunningTooLong", "TargetRunningTooLongAlarm", 1),
         ("DesiredStoppedEc2Running", "DesiredStoppedEc2RunningAlarm", 1),
         ("DesiredActualDivergence", "DesiredActualDivergenceAlarm", 3),
         ("ExpiredOperationLock", "ExpiredOperationLockAlarm", 1),
         ("DesiredRunningNotReady", "DesiredRunningNotReadyAlarm", 1),
         ("MonitoringObservationUnknown", "MonitoringObservationUnknownAlarm", 2),
-    ):
+    ]
+    if runtime_heartbeats_table is not None:
+        state_alarms.extend(
+            (name, f"{name}Alarm", 2)
+            for name in (
+                "RuntimeHeartbeatUnavailable",
+                "RuntimeObservationUnknown",
+                "RuntimeIdentityMismatch",
+                "SystemStateObservationStale",
+                "DataFilesystemObservationUnknown",
+                "DataFilesystemUsageHigh",
+            )
+        )
+    for metric_name, alarm_id, evaluations in state_alarms:
         add_alarm(
             alarm_id,
             cloudwatch.Metric(
@@ -1374,7 +1454,11 @@ def _add_release_monitoring(
             ),
             evaluation_periods=evaluations,
             datapoints_to_alarm=evaluations,
-            missing=cloudwatch.TreatMissingData.BREACHING,
+            missing=(
+                cloudwatch.TreatMissingData.IGNORE
+                if metric_name == "DataFilesystemUsageHigh"
+                else cloudwatch.TreatMissingData.BREACHING
+            ),
         )
 
     for function in (*monitored_functions, observer):

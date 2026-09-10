@@ -10,6 +10,24 @@
 
 ## 2. 採用済み決定
 
+### D-094 Phase 8.3はheartbeat・Control Plane observation・Data filesystemを別々に監視する
+
+- **状態:** Proposed（repository実装。production write未承認）
+- **日付:** 2026-09-10
+- **背景:** D-088 observerは5分周期だがSystemStateの更新はOperation起点だった。正常heartbeatが継続してもSystemStateが10分を超える構成不整合を、staleの正常化や閾値緩和では解消しない。
+- **提案:** D-088のread-only observerは維持し、別EventBridge scheduleから既存Reconcileへ5分周期の固定`scheduled_reconcile`を送る。Lockが存在する場合（期限切れも含む）またはCurrent Operationがある場合はskipする。既存read-only EC2/SSM/Host/DNS観測を再利用し、Observedのみを保存する。保存時には通常のobserved_at条件に加え、開始前desired_revision一致とCurrent Operation=nullを原子的に要求する。競合はskip、その他の保存失敗はLambda errorとする。Lock取得・回復・Desired変更・START/STOPは行わない。
+- **負荷:** scheduleはretry 0 / event age 5分。通常は最大288 Reconcile/日。EC2 stopped時はSSMなし、runningかつonline時だけ既存fixed probe一回。Operation中は既存workflowのReconcileへ委ねる。事前check直後のAdmissionとのraceではread-only probeが重なる可能性はあるが、保存CASで混入を拒否する。新しい自動修復経路は作らない。
+- **Heartbeat:** D-092の60秒cadence、5分inclusive freshness、24時間cleanup TTL、producer書込契約は変更しない。missing/stale/future/launch以前、freshだがruntime unknown、Game/runtime/instance/boot不一致を区別する。bootはfresh Host probe telemetryと照合する。monitorはheartbeatをrepairしない。
+- **過渡状態:** EC2 stoppedではheartbeat・filesystemはnot-expected。pending/stoppingはtransitionとし、既存Desired divergence/not-ready監視で長期化を検出する。EC2 runningのSTART graceは10分、STOP graceは7分。Desired更新時刻が非futureで、Current Operationと有効Lock ownerが一致する場合だけ適用し、deadline到達時に終了する。異常を無期限に隠すgraceではない。
+- **Filesystem:** fixed Host probe v1.4の独立telemetryをSystemState observationへ保存する。既存installed heartbeat probe v1.3は更新不要。正本mount、XFS UUID、sourceのNVMe EBS serial、directory fdのdevice一致と採取前後mount一致を確認して`fstatvfs`する。world/log/secretは読まない。total=`f_blocks*f_frsize`、used=`(f_blocks-f_bfree)*f_frsize`、available=`f_bavail*f_frsize`（bytes）、usage=`100*used/(used+available)`。reserved blockをavailableへ含めない。
+- **監視値:** filesystemは10分以内のSystemState/telemetry、fresh same-identity heartbeatとboot照合が揃う場合だけ値を発行する。unknown/missing/source不一致/停止/古い値を0%にしない。80%以上をwarningとする。30 GiB上で概ね20%の余裕を残す運用通知であり、削除・volume拡張・STOPは行わない。復帰は有効値80%未満、または正規停止によるnot-expectedへの移行。unknown時は容量値なしと独立unknown flagを発行する。
+- **Alarm:** 新規6 boolean metricsは5分Maximum、2/2、threshold>=1。capacity high以外はmissing=breaching。capacity unknown時にはhigh flagを発行せず、high alarmだけmissing=ignoreにして観測不能から復帰値を捏造しない。unknown/silenceはDataFilesystemObservationUnknownとobserver監視が検出する。CloudWatchのcompleted period評価で2点違反時ALARM、2/2を満たさなくなればOKへ復帰する。gapではCloudWatchのevaluation range/backfill規則により厳密なwall-clock 10分保証ではない。SNSはALARM遷移時のみ、復帰はalarm history/consoleで確認する。高頻度Dimensionを追加せずStage/SystemIdの固定2 dimensionだけを使用する。既存MonitoringObservationUnknownと10分freshness条件は維持し、原因識別用SystemStateObservationStaleを追加する。
+- **Cost/retention:** 月額15 USD、50/80/100% actual・100% forecast、8時間running、15分stopped/running、20分not-readyを維持する。dev14日/prod30日をControl Plane全LogGroupでstage設定へ接続する。新規は6 alarm/最大10 custom metrics、1 schedule、追加Lambdaなし。S3 archiveはDeferred、Package S3はPhase 9以降、bootstrap assetsの削除policyは今回変更しない。
+- **IAM:** observerはRuntimeHeartbeats一tableのGetItemを追加し、PutMetricDataを既存namespaceに限定する。ReconcileはLocks一tableのGetItemを追加する。SSM/Observed保存は既存の限定権限を再利用し、secret/port/EC2 lifecycle/IAM wildcardの拡張はない。
+- **代替案:** heartbeatで古いSystemStateをfresh扱いする案は不採用。observerからReconcileを呼ぶ案は監視とstate更新の責務が混ざるため不採用。新agent/CloudWatch Agent導入は既存probeで足りるため不要。1分Reconcileはheartbeatと観測頻度が重複してSSM負荷が増えるため5分を選ぶ。
+- **承認範囲:** D-088の監視期待を満たす定期Observed更新、新alarm/IAM/転送probeのproduction適用はgate承認後。D-093 automatic STOP、manual workflow、BACKUP/provenance/RETENTION/Discord contractは変更しない。
+- **Runbook:** [Phase 8.3 monitoring](runbooks/phase8_monitoring.md)。AWS現在地・diffはpreflightで実測する。
+
 ### D-093 Automatic STOPはdurable warning intentとSTOP commit前の二重観測でfail closedする
 
 - **状態:** Accepted（dev production E2E completed）

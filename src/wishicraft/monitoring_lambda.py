@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
+import json
 import os
 from datetime import UTC, datetime
 from typing import Any
 
-import boto3  # type: ignore[import-not-found]
-from boto3.dynamodb.types import TypeDeserializer  # type: ignore[import-not-found]
+import boto3  # type: ignore[import-untyped]
+from boto3.dynamodb.types import TypeDeserializer  # type: ignore[import-untyped]
 
 from wishicraft.monitoring import (
     MonitoringSnapshot,
     MonitoringThresholds,
     evaluate_monitoring_snapshot,
 )
+from wishicraft.monitoring_telemetry import evaluate_telemetry, integer, timestamp
 
 _DESERIALIZER = TypeDeserializer()
 
@@ -44,6 +46,12 @@ def handler(event: dict[str, Any], context: object) -> dict[str, object]:
     target_instance_id = _string(state, "target_instance_id")
     instances = ec2.describe_instances(InstanceIds=[target_instance_id])["Reservations"]
     instance = instances[0]["Instances"][0]
+    if (
+        len(instances) != 1
+        or len(instances[0]["Instances"]) != 1
+        or instance.get("InstanceId") != target_instance_id
+    ):
+        raise RuntimeError("monitoring target identity is not unique")
     observation = state.get("observation")
     if not isinstance(observation, dict):
         observation = {}
@@ -69,6 +77,43 @@ def handler(event: dict[str, Any], context: object) -> dict[str, object]:
         observation_freshness_seconds=int(os.environ["OBSERVATION_FRESHNESS_SECONDS"]),
     )
     metrics = evaluate_monitoring_snapshot(snapshot, now=now, thresholds=thresholds)
+    if "RUNTIME_HEARTBEATS_TABLE" in os.environ:
+        heartbeat = _deserialize(
+            dynamodb.get_item(
+                TableName=os.environ["RUNTIME_HEARTBEATS_TABLE"],
+                Key={"system_id": {"S": os.environ["SYSTEM_ID"]}},
+                ConsistentRead=True,
+            ).get("Item")
+        )
+        telemetry_metrics, reasons = evaluate_telemetry(
+            state=state,
+            heartbeat=heartbeat,
+            lock=lock,
+            instance=instance,
+            now=now,
+            system_id=os.environ["SYSTEM_ID"],
+            game_id=os.environ["GAME_ID"],
+            volume_id=os.environ["DATA_VOLUME_ID"],
+            filesystem_uuid=os.environ["DATA_FILESYSTEM_UUID"],
+            mount_path=os.environ["DATA_MOUNT_PATH"],
+            observation_freshness_seconds=thresholds.observation_freshness_seconds,
+            startup_grace_seconds=int(os.environ["MONITORING_STARTUP_GRACE_SECONDS"]),
+            shutdown_grace_seconds=int(os.environ["MONITORING_SHUTDOWN_GRACE_SECONDS"]),
+            usage_warning_percent=int(os.environ["DATA_USAGE_WARNING_PERCENT"]),
+        )
+        metrics.update(telemetry_metrics)
+        print(
+            json.dumps(
+                {
+                    "component": "monitoring",
+                    "game_id": os.environ["GAME_ID"],
+                    "operation_id": state.get("current_operation_id"),
+                    "result": reasons,
+                }
+            )
+        )
+    if lock and _optional_int(lock.get("lease_expires_at")) is None:
+        metrics["MonitoringObservationUnknown"] = 1.0
     cloudwatch.put_metric_data(
         Namespace=os.environ["METRIC_NAMESPACE"],
         MetricData=[
@@ -80,7 +125,11 @@ def handler(event: dict[str, Any], context: object) -> dict[str, object]:
                 ],
                 "Timestamp": now,
                 "Value": value,
-                "Unit": "Count",
+                "Unit": "Percent"
+                if name.endswith("Percent")
+                else "Bytes"
+                if name.endswith("Bytes")
+                else "Count",
             }
             for name, value in metrics.items()
         ],
@@ -106,10 +155,8 @@ def _optional_string(value: object) -> str | None:
 
 
 def _optional_int(value: object) -> int | None:
-    return value if isinstance(value, int) and not isinstance(value, bool) else None
+    return integer(value)
 
 
 def _timestamp(value: object) -> datetime | None:
-    if not isinstance(value, str):
-        return None
-    return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)
+    return timestamp(value)

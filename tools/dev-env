@@ -48,6 +48,23 @@ resolve_uv() {
         printf '%s\n' "${HOME}/.local/bin/uv"
         return 0
     fi
+    # An activated venv can select a different Python user base on macOS.
+    # Discover existing installations without pinning a Python version or user path.
+    if [ "$(uname -s)" = Darwin ]; then
+        discovered_uv=
+        for candidate in "${HOME}"/Library/Python/*/bin/uv; do
+            [ -f "$candidate" ] && [ -x "$candidate" ] || continue
+            if [ -n "$discovered_uv" ]; then
+                printf '%s\n' 'multiple uv installations: set WISHICRAFT_UV_BIN' >&2
+                return 1
+            fi
+            discovered_uv=$candidate
+        done
+        if [ -n "$discovered_uv" ]; then
+            printf '%s\n' "$discovered_uv"
+            return 0
+        fi
+    fi
     return 1
 }
 

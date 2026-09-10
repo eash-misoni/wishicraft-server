@@ -20,10 +20,11 @@ from typing import Any, Optional
 # compatible with that interpreter even though the control-plane package targets 3.12.
 
 SCHEMA_VERSION = 1
-PROBE_VERSION = "1.3.0"
+PROBE_VERSION = "1.4.0"
 MOUNT_PATH = "/srv/minecraft"
 EXPECTED_FILESYSTEM_TYPE = "xfs"
 EXPECTED_FILESYSTEM_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"
+EXPECTED_DATA_VOLUME_ID = "vol-03ac9f534326c345c"
 DOCKER_UNIT = "docker.service"
 HOST_RUNTIME_UNIT = "wishicraft-host-runtime.service"
 RUNTIME_ID = "wishicraft-host-runtime"
@@ -108,6 +109,81 @@ def observe_mount() -> tuple[dict[str, Any], Optional[str]]:
     result["root_gid"] = metadata.st_gid
     result["root_mode"] = format(stat.S_IMODE(metadata.st_mode), "04o")
     return result, None
+
+
+def observe_telemetry() -> dict[str, Any]:
+    """Monitoring only: never change protocol readiness on telemetry failure."""
+    result: dict[str, Any] = {
+        "schema_version": 1,
+        "observed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "boot_id": None,
+        "state": "unknown",
+        "error": None,
+        "mount_path": MOUNT_PATH,
+        "source": None,
+        "volume_id": None,
+        "filesystem_uuid": None,
+        "total_bytes": None,
+        "used_bytes": None,
+        "available_bytes": None,
+    }
+    try:
+        with open("/proc/sys/kernel/random/boot_id", encoding="ascii") as stream:
+            boot = stream.read(128).strip()
+        if re.fullmatch(r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}", boot):
+            result["boot_id"] = boot
+    except (OSError, UnicodeError):
+        pass
+    command = ("findmnt", "-rn", "-o", "TARGET,SOURCE,FSTYPE,UUID", "--target", MOUNT_PATH)
+    before = run(*command)
+    fields = before.stdout.strip().split()
+    if before.returncode != 0 or len(fields) != 4:
+        result["error"] = "MOUNT_UNAVAILABLE"
+        return result
+    mount, source, filesystem, uuid = fields
+    if (mount, filesystem, uuid) != (
+        MOUNT_PATH,
+        EXPECTED_FILESYSTEM_TYPE,
+        EXPECTED_FILESYSTEM_UUID,
+    ) or re.fullmatch(r"/dev/nvme[0-9]+n[0-9]+", source) is None:
+        result["error"] = "MOUNT_IDENTITY_MISMATCH"
+        return result
+    serial = run("lsblk", "-dn", "-o", "SERIAL", "--", source)
+    if serial.returncode != 0 or serial.stdout.strip() != EXPECTED_DATA_VOLUME_ID.replace("-", ""):
+        result["error"] = "VOLUME_IDENTITY_MISMATCH"
+        return result
+    descriptor: Optional[int] = None
+    try:
+        descriptor = os.open(MOUNT_PATH, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        device = os.stat(source, follow_symlinks=False)
+        if not stat.S_ISBLK(device.st_mode) or os.fstat(descriptor).st_dev != device.st_rdev:
+            raise ValueError("device mismatch")
+        usage = os.fstatvfs(descriptor)
+        after = run(*command)
+        if after.returncode != 0 or after.stdout != before.stdout:
+            raise ValueError("mount changed")
+        if not (usage.f_frsize > 0 and 0 <= usage.f_bavail <= usage.f_bfree <= usage.f_blocks):
+            raise ValueError("invalid filesystem counters")
+        total = usage.f_blocks * usage.f_frsize
+        used = (usage.f_blocks - usage.f_bfree) * usage.f_frsize
+        available = usage.f_bavail * usage.f_frsize
+        if total <= 0 or used + available <= 0:
+            raise ValueError("empty filesystem counters")
+        result.update(
+            state="observed",
+            source=source,
+            volume_id=EXPECTED_DATA_VOLUME_ID,
+            filesystem_uuid=uuid,
+            total_bytes=total,
+            used_bytes=used,
+            available_bytes=available,
+        )
+    except (OSError, ValueError):
+        result["error"] = "FILESYSTEM_OBSERVATION_FAILED"
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+    return result
 
 
 def observe_unit(unit: str) -> tuple[str, Optional[str]]:
@@ -460,6 +536,7 @@ def main() -> int:
         "active_game": active_game,
         "minecraft": minecraft,
         "errors": sorted(errors),
+        "telemetry": observe_telemetry(),
     }
     print(json.dumps(document, sort_keys=True, separators=(",", ":")))
     return 0

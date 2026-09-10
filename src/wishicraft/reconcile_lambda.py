@@ -48,6 +48,8 @@ _service: ReconcileService | None = None
 
 def handler(event: object, context: object) -> dict[str, object]:
     del context
+    if event == {"schema_version": 1, "operation": "scheduled_reconcile"}:
+        return _scheduled_reconcile()
     if not isinstance(event, dict) or event != {
         "schema_version": 1,
         "operation": "reconcile",
@@ -55,6 +57,47 @@ def handler(event: object, context: object) -> dict[str, object]:
         raise ValueError("invalid Reconcile invocation")
     state = _get_service().reconcile(observed_at=datetime.now(UTC))
     return state.to_item()
+
+
+def _scheduled_reconcile() -> dict[str, object]:
+    from wishicraft.monitoring_telemetry import integer
+
+    boto3 = importlib.import_module("boto3")
+    deserializer = importlib.import_module("boto3.dynamodb.types").TypeDeserializer()
+    ddb = boto3.client("dynamodb")
+    raw = ddb.get_item(
+        TableName=_required_environment("SYSTEM_STATE_TABLE"),
+        Key={"system_id": {"S": _required_environment("SYSTEM_ID")}},
+        ConsistentRead=True,
+    ).get("Item", {})
+    state = {key: deserializer.deserialize(value) for key, value in raw.items()}
+    if not state:
+        raise RuntimeError("scheduled observation requires initialized SystemState")
+    revision = integer(state.get("desired_revision"))
+    if revision is None or revision < 0 or "current_operation_id" not in state:
+        raise RuntimeError("invalid scheduled observation state")
+    lock = ddb.get_item(
+        TableName=_required_environment("LOCKS_TABLE"),
+        Key={"lock_name": {"S": _required_environment("GLOBAL_LOCK_NAME")}},
+        ConsistentRead=True,
+    ).get("Item")
+    if state["current_operation_id"] is not None or lock:
+        return {"result": "skipped-operation-or-lock"}
+    # Even stable STOPPED gets direct EC2/DNS observation, but no SSM host probe.
+    service = _get_service()
+    observed = service.reconcile(observed_at=datetime.now(UTC), persist=False)
+    repository = cast(SystemStateRepository, service.repository)
+    try:
+        repository.save(observed, expected_desired_revision=revision)
+    except Exception as error:
+        response = getattr(error, "response", {})
+        if (
+            isinstance(response, dict)
+            and response.get("Error", {}).get("Code") == "ConditionalCheckFailedException"
+        ):
+            return {"result": "skipped-concurrent-state-change"}
+        raise
+    return {"result": "observed", "observed_at": observed.to_item()["observed_at"]}
 
 
 def _get_service() -> ReconcileService:

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly SOURCE_ROOT=/var/tmp/wishicraft-phase8-heartbeat-v1
+readonly SOURCE_ROOT=/var/tmp/wishicraft-phase8-heartbeat-v2
 readonly PACKAGE_ROOT=/usr/local/libexec/wishicraft
 readonly ENV_PATH=/etc/wishicraft/heartbeat.env
 readonly SERVICE_PATH=/etc/systemd/system/wishicraft-heartbeat.service
@@ -42,7 +42,7 @@ main() {
     "$PACKAGE_ROOT/runtime_heartbeat_producer.py" \
     a7e2b141d2f5b4c79fb5f847f633557c4935dc0374da044a16b6dcc3134e9999 644
   install_fixed "$SOURCE_ROOT/host_runtime_probe.py" "$PACKAGE_ROOT/host-runtime-probe.py" \
-    2d431e562cc2770bc33c8efc509fbb94414824a0e3967d5362a542b48fba69d8 755
+    0efcf7e493d85495e36c2234c8ebee3b7a35fdba0f855e527ec1a3d51e1bebb2 755
   install_fixed "$SOURCE_ROOT/heartbeat.env" "$ENV_PATH" \
     251792467184d0b01bb3bf76f953cd99744947dc4046027a853f268586a7f7c2 600
   install_fixed "$SOURCE_ROOT/wishicraft-heartbeat.service" "$SERVICE_PATH" \

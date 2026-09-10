@@ -224,6 +224,9 @@ class StageConfig:
     def monitoring_int(self, name: str) -> int:
         if name not in {
             "observer_schedule_minutes",
+            "startup_grace_seconds",
+            "shutdown_grace_seconds",
+            "data_usage_warning_percent",
             "observation_freshness_warning_minutes",
             "monthly_budget_usd",
             "ec2_running_warning_hours",
@@ -232,7 +235,12 @@ class StageConfig:
             "log_retention_days",
         }:
             raise ConfigValidationError([f"unsupported monitoring integer: {name}"])
-        return _require_positive_int(self.values, f"monitoring.{name}")
+        value = _require_positive_int(self.values, f"monitoring.{name}")
+        if name == "data_usage_warning_percent" and value > 100:
+            raise ConfigValidationError(["monitoring.data_usage_warning_percent must be <= 100"])
+        if name == "log_retention_days" and value not in {14, 30}:
+            raise ConfigValidationError(["monitoring.log_retention_days must be 14 or 30"])
+        return value
 
     @property
     def budget_threshold_percentages(self) -> tuple[int, ...]:
@@ -663,6 +671,9 @@ _POSITIVE_STAGE_INTS: Final = (
     "storage.root.size_gib",
     "storage.data.size_gib",
     "monitoring.observer_schedule_minutes",
+    "monitoring.startup_grace_seconds",
+    "monitoring.shutdown_grace_seconds",
+    "monitoring.data_usage_warning_percent",
     "monitoring.observation_freshness_warning_minutes",
     "monitoring.monthly_budget_usd",
     "monitoring.ec2_running_warning_hours",

@@ -72,6 +72,12 @@ def evaluate_monitoring_snapshot(
         observation_required
         and (not observation_fresh or snapshot.health not in {"HEALTHY", "DEGRADED"})
     )
+    observation_unknown = (
+        observation_unknown
+        or snapshot.actual_ec2_state in {"terminated", "shutting-down"}
+        or snapshot.desired_updated_at is None
+        or desired_age < 0
+    )
 
     divergence = False
     if desired_known and actual_known:
@@ -108,9 +114,9 @@ def evaluate_monitoring_snapshot(
     }
 
 
-def _age(now: datetime, value: datetime | None) -> int:
+def _age(now: datetime, value: datetime | None) -> float:
     if value is None:
         return 0
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("monitoring timestamps must be timezone-aware")
-    return max(0, int((now - value.astimezone(UTC)).total_seconds()))
+    return (now - value.astimezone(UTC)).total_seconds()

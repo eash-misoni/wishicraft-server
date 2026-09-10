@@ -127,6 +127,7 @@ class TargetStatus:
     discrepancies: tuple[Discrepancy, ...]
     ready: bool
     observed_at: datetime
+    telemetry: dict[str, object] | None = None
 
     def __post_init__(self) -> None:
         if self.observed_at.tzinfo is None or self.observed_at.utcoffset() is None:
@@ -157,6 +158,7 @@ class TargetStatus:
             "discrepancies": [item.value for item in self.discrepancies],
             "ready": self.ready,
             "observed_at": observed_at,
+            **({"telemetry": self.telemetry} if self.telemetry is not None else {}),
         }
 
 
@@ -411,6 +413,7 @@ def _status_from_probe(
         network_observation_source="ec2-describe-instances",
         ssm_state=ssm_state,
         mount_state=probe.mount.state,
+        telemetry=probe.telemetry,
         docker_state=probe.docker_state,
         host_runtime_state=host_runtime_state,
         container_state=probe.container.state,

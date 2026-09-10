@@ -114,6 +114,9 @@ billing:
   dynamodb_mode: on_demand
 
 monitoring:
+  startup_grace_seconds: 600
+  shutdown_grace_seconds: 420
+  data_usage_warning_percent: 80
   observer_schedule_minutes: 5
   observation_freshness_warning_minutes: 10
   monthly_budget_usd: 15

@@ -604,6 +604,8 @@ Transactionが失敗した場合、Operationを作成せず、workflowを開始�
 
 ## 15. SystemState更新ルール
 
+D-094 Proposedのscheduled ReconcileはObservationだけを更新する。Current OperationまたはLockがあればskipし、保存時のDesired revision一致とCurrent Operation=nullを追加条件とする。telemetry filesystem unknown、heartbeat stale、SystemState staleは別々の監視軸であり、UNKNOWNをHEALTHYへ変換しない。capacity取得失敗はprotocol READYの意味を変えず、独立したfilesystem unknown alarmで検出する。
+
 SystemState全体を読み取り、全属性をPutItemで書き戻さない。更新責務を次の属性群へ分ける。
 
 - Desired State更新

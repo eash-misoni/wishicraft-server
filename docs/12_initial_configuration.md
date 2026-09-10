@@ -198,6 +198,8 @@ Phase 7G E2E前:
 
 ## 10. Phase 0完了時点のvalidation
 
+Phase 8.3 D-094 Proposedでmonitoringに`startup_grace_seconds=600`、`shutdown_grace_seconds=420`、`data_usage_warning_percent=80`を追加する。選定理由はD-094、production gateはPhase 8.3 runbookに記録する。observer/Reconcileは既存5分、SystemState freshnessは既存10分、heartbeatはD-092固定の60秒/5分/24時間cleanup TTLを維持する。Data Volume IDはstageのexisting_data_volume_id、XFS UUIDは既存固定Host probeの観測済みidentityを使用し、synth testでVolume bindingの一致を検証する。prod placeholderは補完しない。
+
 Phase 0は2026-07-29に完了した。設定schema validationは、YAMLの型・必須構造・Parameter Store名だけを検証し、`null`を補完しない。required validationはschema validationと別に、stage・Phase・処理ごとに適用する。
 
 - devのPhase 0空stack synthはenvironment-agnosticであり、AWS Account IDやAWS profileを要求しない。Phase 1以降で必要になるAWS Account ID、Availability Zone、Minecraft port/version、Route 53 Hosted Zone IDも要求しない。

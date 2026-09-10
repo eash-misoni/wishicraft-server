@@ -15,6 +15,8 @@ D-092のproducer、専用table、Target role、systemd service/timerだけをrel
 
 ## Host install
 
+Phase 8.3のrepository installerは新規source root `wishicraft-phase8-heartbeat-v2`とprobe v1.4 checksumを使用する。既設v1.3 probeの上書きは引き続き拒否する。Phase 8.3 monitoring適用ではこのinstallerを実行しない。Control Planeの転送型probe v1.4を使い、既設heartbeat producer/probeはそのまま維持する。
+
 repositoryの固定7 artifactと`phase8_heartbeat_install.sh`を新しい専用temporary source rootへ転送する。各fileのSHA-256、owner/mode、既存target不存在を確認し、installerを一度実行する。任意payload/pathを受け取る常設interfaceは作らない。
 
 installerはAWS CLI/Python存在を確認し、fixed artifactsをatomic installして`wishicraft-heartbeat.timer`だけをenableする。Minecraft Host Runtimeをstart/stop/restartしない。

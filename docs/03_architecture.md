@@ -1,5 +1,7 @@
 # 03. Architecture
 
+Phase 8.3 repository proposalはD-094を参照する。既存read-only Monitoring Observerと独立した5分EventBridge scheduleがReconcileのObserved更新を行い、固定Host probe v1.4のData EBS usage/boot telemetryも同じ観測経路へ載せる。新しい常駐agent、Lambda、START/STOP経路は追加しない。production適用は未承認である。
+
 - **文書状態:** Canonical
 - **最終更新:** 2026-08-31
 

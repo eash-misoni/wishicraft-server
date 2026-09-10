@@ -819,6 +819,15 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 - Log retentionの見直し
 - S3 lifecycle
 
+#### Repository slice（2026-09-10、production gate pending）
+
+- D-094 ProposedとしてRuntimeHeartbeat missing/stale、runtime unknown、identity mismatch、SystemState stale、Data filesystem unknown/highの監視を追加する。
+- SystemState freshnessは既存10分を維持し、5分scheduled Reconcileの実観測で整合させる。Operation/Lock中はskip、保存はDesired revision/Current Operation CAS付き。
+- Host probe v1.4は正本Data EBSのmount/sourceを検証してfilesystem bytesを採取する。既存heartbeat producer/timer、30分idle/5分warning/final gateは維持する。
+- backup/retention/auto-stop失敗通知、Budgetとlog retentionは既存構成を確認する。S3 archiveはDeferred、Package S3はPhase 9以降のため今回のlifecycle追加対象はない。bootstrap asset削除policyは独立管理とする。
+- Phase 8完了はproduction適用後のfreshness継続、実Data EBS使用率、alarm evaluation/read-backと最終安全状態のevidenceを条件とする。repository validationだけではCompletedへ進めない。
+- RETENTION実削除はnatural 8件後の独立gate、RestoreはPhase 16、Game/PackageはPhase 9以降を維持する。
+
 ### 完了条件
 
 - 停止中Data EBSの検証済みEBS Snapshot backupを作成しDiscordから安全に実行できる（Phase 8B/8Cで完了）。

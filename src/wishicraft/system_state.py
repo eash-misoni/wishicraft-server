@@ -175,7 +175,7 @@ class SystemStateRepository:
         )
         return snapshot.desired_revision
 
-    def save(self, state: SystemState) -> None:
+    def save(self, state: SystemState, *, expected_desired_revision: int | None = None) -> None:
         if state.system_id != self._system_id:
             raise ValueError("SystemState repository identity mismatch")
         item = state.to_item()
@@ -194,13 +194,18 @@ class SystemStateRepository:
         initializers = [f"#{key} = if_not_exists(#{key}, :{key})" for key in initialize_only]
         observations = [f"#{key} = :{key}" for key in observed_fields]
         assignments = ", ".join(initializers + observations)
+        condition = "attribute_not_exists(#observed_at) OR #observed_at < :observed_at"
+        if expected_desired_revision is not None:
+            names.update({"#revision": "desired_revision", "#current": "current_operation_id"})
+            values.update(
+                {":revision": _to_attribute(expected_desired_revision), ":null": {"NULL": True}}
+            )
+            condition = f"({condition}) AND #revision = :revision AND #current = :null"
         self._api.update_item(
             TableName=self._table,
             Key={"system_id": {"S": state.system_id}},
             UpdateExpression=f"SET {assignments}",
-            ConditionExpression=(
-                "attribute_not_exists(#observed_at) OR #observed_at < :observed_at"
-            ),
+            ConditionExpression=condition,
             ExpressionAttributeNames=names,
             ExpressionAttributeValues=values,
         )

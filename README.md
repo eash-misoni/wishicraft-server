@@ -6,6 +6,8 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 Phase 0〜7とPhase 8.2は完了しています。停止中Data EBSのBACKUP、durable provenance、retention dry-run、Runtime heartbeat、warning付き無人自動停止をdevで検証済みです。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。
 
+Phase 8.3の監視・コスト整備はrepository実装・検証済み、production gate待ちです。D-094はProposedのままです。[監視runbook](docs/runbooks/phase8_monitoring.md)にheartbeat/SystemStateの分離、Data EBS使用率、定期Reconcile、承認対象と検証手順をまとめています。
+
 devは次の3層architectureです。
 
 ```text
@@ -39,6 +41,8 @@ tools/dev-env check
 ```
 
 `uv`が通常PATH外にある場合も、正規entrypointはPython user base等の確認済みinstallationを動的に発見し、repository-local `.uv-cache/`と`.jsii-cache/`を使います。`run`が構成したPATHはCDK local bundlingの子processにも継承されます。machine固有の絶対pathをrepositoryへ固定しません。
+
+macOSではvenv等でPython versionが変わった場合も、既存の`~/Library/Python/*/bin/uv`を発見します。通常のdiscoveryで見つからず、このfallbackに複数installationがある場合は`WISHICRAFT_UV_BIN`で使用対象を明示します。
 
 ```sh
 tools/dev-env run uv sync --frozen --all-groups
