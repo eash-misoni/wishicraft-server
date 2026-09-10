@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-Phase 0〜7とPhase 8Bは完了しています。停止中のpersistent Data EBSだけを対象とするBACKUP Operationをdevへdeployし、最初の実EBS Snapshotの作成・completion・source/owner/metadata検証まで完了しました。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。D-032のread-only observer、24 alarms、confirmed SNS Email通知、月額Budgetも実deploy・検証済みです。
+Phase 0〜7とPhase 8.2は完了しています。停止中Data EBSのBACKUP、durable provenance、retention dry-run、Runtime heartbeat、warning付き無人自動停止をdevで検証済みです。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。
 
 devは次の3層architectureです。
 
@@ -30,18 +30,40 @@ prod設定はplaceholderとして読み込めますが、未確定の必須値�
 
 - Python 3.12
 - [uv](https://docs.astral.sh/uv/)
+- Node.js 22とrepository lock済みCDK CLI
+
+最初に実行環境とtoolの実path/versionを確認します。checkはinstall、login、shell設定変更を行いません。Dockerとlocal shellcheckはoptionalとして状態を表示します。
 
 ```sh
-uv sync --all-groups
-npm ci
-uv run pytest
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy src infrastructure tests
-npx --no-install cdk synth MinecraftStack-dev --context stage=dev --context phase=1 --context deployment=phase1
-npx --no-install cdk synth MinecraftTargetStack-dev --context stage=dev --context deployment=target
-npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=8 --context deployment=control-plane
+tools/dev-env check
 ```
+
+`uv`が通常PATH外にある場合も、正規entrypointはPython user base等の確認済みinstallationを動的に発見し、repository-local `.uv-cache/`と`.jsii-cache/`を使います。`run`が構成したPATHはCDK local bundlingの子processにも継承されます。machine固有の絶対pathをrepositoryへ固定しません。
+
+```sh
+tools/dev-env run uv sync --frozen --all-groups
+tools/dev-env run npm ci
+tools/setup-dev-tools bundling-cache
+tools/dev-env run uv run pytest
+tools/dev-env run uv run ruff check .
+tools/dev-env run uv run ruff format --check .
+tools/dev-env run uv run mypy src infrastructure tests
+tools/dev-env run npx --no-install cdk synth MinecraftStack-dev --context stage=dev --context phase=1 --context deployment=phase1
+tools/dev-env run npx --no-install cdk synth MinecraftTargetStack-dev --context stage=dev --context deployment=target
+tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=8 --context deployment=control-plane
+```
+
+GitHub CLIが未導入の場合だけ、`tools/setup-dev-tools gh`で公式GitHub CLI 2.100.0のOS/architecture対応archiveを公開SHA-256 checksumで検証し、user-local領域へ導入します。既存installationは変更せず、同versionの再実行ではdownloadしません。導入後の認証・repository/account確認は別操作です。
+
+`tools/setup-dev-tools bundling-cache`はhash-lock済みLambda依存のLinux wheelをrepository-local uv cacheへ準備する明示的setupです。初回だけnetworkを必要とし、再実行とlocal bundlingは同じcacheを再利用します。wheel取得失敗、`uv`未検出、bundling code failureを別々に報告し、Docker fallbackで隠しません。
+
+```sh
+tools/dev-env auth-check
+```
+
+認証がなければ`gh auth login`を人間が実行します。token表示用commandは使わず、git credential helperも変更しません。AWS CLIのinstallationとAWS sessionも別物です。production操作前は`wishicraft-dev` profileのSTS caller Account IDをdev stage設定と照合し、不一致や期限切れをIAM変更で補いません。
+
+Dockerはdeveloper validationの必須条件ではありません。`tools/dev-env check`は「CLIなし」「CLIあり/daemon接続不可」「CLIとdaemon利用可能」を区別し、contextやdaemon設定を変更しません。固定itzg imageを使うsynthetic ownership integrationだけはDocker/Buildxを必要とし、通常のpytest/lint/type/synthとは分離されています。
 
 prod synthとdeployは初期リリース直前まで行いません。通常のrepository validationはAWS credentialやsecretを使用しません。
 

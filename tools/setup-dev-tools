@@ -1,0 +1,130 @@
+#!/bin/sh
+set -eu
+
+GH_VERSION=2.100.0
+SCRIPT_DIR=$(CDPATH= cd -- "${0%/*}" && pwd)
+REPOSITORY_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+
+fail() {
+    printf 'developer tool setup: %s\n' "$*" >&2
+    exit 1
+}
+
+first_line() {
+    IFS= read -r line || true
+    printf '%s\n' "$line"
+}
+
+install_gh() {
+    if command -v gh >/dev/null 2>&1; then
+        gh_path=$(command -v gh)
+        gh_version=$(gh --version 2>&1 | first_line)
+        printf 'gh already available: %s: %s\n' "$gh_path" "$gh_version"
+        return 0
+    fi
+
+    os_name=$(uname -s)
+    architecture=$(uname -m)
+    case "$os_name:$architecture" in
+        Darwin:arm64) archive_suffix=macOS_arm64.zip ;;
+        Darwin:x86_64) archive_suffix=macOS_amd64.zip ;;
+        Linux:aarch64|Linux:arm64) archive_suffix=linux_arm64.tar.gz ;;
+        Linux:x86_64|Linux:amd64) archive_suffix=linux_amd64.tar.gz ;;
+        *) fail "unsupported platform $os_name/$architecture" ;;
+    esac
+
+    for required_tool in curl awk mkdir mktemp cp chmod ln readlink rm; do
+        command -v "$required_tool" >/dev/null 2>&1 || fail "$required_tool is required"
+    done
+    case "$archive_suffix" in
+        *.zip) command -v unzip >/dev/null 2>&1 || fail 'unzip is required' ;;
+        *.tar.gz) command -v tar >/dev/null 2>&1 || fail 'tar is required' ;;
+    esac
+    if command -v sha256sum >/dev/null 2>&1; then
+        checksum_tool=sha256sum
+    elif command -v shasum >/dev/null 2>&1; then
+        checksum_tool='shasum -a 256'
+    else
+        fail 'sha256sum or shasum is required'
+    fi
+
+    data_root=${XDG_DATA_HOME:-"$HOME/.local/share"}
+    bin_root=${XDG_BIN_HOME:-"$HOME/.local/bin"}
+    cache_root=${XDG_CACHE_HOME:-"$HOME/.cache"}/wishicraft
+    install_root="$data_root/wishicraft/gh/$GH_VERSION"
+    installed_binary="$install_root/bin/gh"
+    link_path="$bin_root/gh"
+    if [ -x "$installed_binary" ]; then
+        installed_version=$($installed_binary --version 2>&1 | first_line)
+        printf 'gh already installed: %s: %s\n' "$installed_binary" "$installed_version"
+    else
+        archive_name="gh_${GH_VERSION}_${archive_suffix}"
+        checksum_name="gh_${GH_VERSION}_checksums.txt"
+        release_base="https://github.com/cli/cli/releases/download/v${GH_VERSION}"
+        mkdir -p "$cache_root"
+        archive_path="$cache_root/$archive_name"
+        checksum_path="$cache_root/$checksum_name"
+        [ -f "$archive_path" ] || curl -fsSL "$release_base/$archive_name" -o "$archive_path"
+        curl -fsSL "$release_base/$checksum_name" -o "$checksum_path"
+        expected_checksum=$(awk -v archive="$archive_name" '$2 == archive { print $1 }' "$checksum_path")
+        [ -n "$expected_checksum" ] || fail "checksum is absent for $archive_name"
+        case "$checksum_tool" in
+            sha256sum) actual_checksum=$(sha256sum "$archive_path" | awk '{ print $1 }') ;;
+            *) actual_checksum=$(shasum -a 256 "$archive_path" | awk '{ print $1 }') ;;
+        esac
+        [ "$actual_checksum" = "$expected_checksum" ] || fail "checksum mismatch for $archive_name"
+
+        temporary_root=$(mktemp -d "${TMPDIR:-/tmp}/wishicraft-gh.XXXXXX")
+        trap 'rm -rf "$temporary_root"' EXIT HUP INT TERM
+        case "$archive_suffix" in
+            *.zip) unzip -q "$archive_path" -d "$temporary_root" ;;
+            *.tar.gz) tar -xzf "$archive_path" -C "$temporary_root" ;;
+        esac
+        package_suffix=${archive_suffix%.zip}
+        package_suffix=${package_suffix%.tar.gz}
+        extracted_binary="$temporary_root/gh_${GH_VERSION}_${package_suffix}/bin/gh"
+        [ -x "$extracted_binary" ] || fail 'official archive did not contain the expected gh binary'
+        mkdir -p "$install_root/bin"
+        cp "$extracted_binary" "$installed_binary"
+        chmod 0755 "$installed_binary"
+        printf 'installed gh %s from the official release with SHA-256 verification: %s\n' \
+            "$GH_VERSION" "$installed_binary"
+    fi
+
+    mkdir -p "$bin_root"
+    if [ -L "$link_path" ] && [ "$(readlink "$link_path")" = "$installed_binary" ]; then
+        :
+    elif [ -e "$link_path" ] || [ -L "$link_path" ]; then
+        fail "$link_path already exists and was not changed"
+    else
+        ln -s "$installed_binary" "$link_path"
+    fi
+    "$installed_binary" --version | first_line
+}
+
+prepare_bundling_cache() {
+    requirements="$REPOSITORY_ROOT/infrastructure/lambda/discord-command-requirements.lock"
+    [ -f "$requirements" ] || fail "missing bundling lock: $requirements"
+    temporary_root=$(mktemp -d "${TMPDIR:-/tmp}/wishicraft-bundling.XXXXXX")
+    trap 'rm -rf "$temporary_root"' EXIT HUP INT TERM
+    "$REPOSITORY_ROOT/tools/dev-env" run uv pip install \
+        --target "$temporary_root/output" \
+        --python-platform x86_64-manylinux2014 \
+        --python-version 3.12 \
+        --only-binary :all: \
+        --require-hashes \
+        --requirements "$requirements"
+    printf '%s\n' 'local bundling cache ready: uv cache reused on subsequent runs'
+}
+
+case ${1:-} in
+    gh)
+        [ "$#" -eq 1 ] || fail 'usage: tools/setup-dev-tools gh'
+        install_gh
+        ;;
+    bundling-cache)
+        [ "$#" -eq 1 ] || fail 'usage: tools/setup-dev-tools bundling-cache'
+        prepare_bundling_cache
+        ;;
+    *) fail 'usage: tools/setup-dev-tools {gh|bundling-cache}' ;;
+esac

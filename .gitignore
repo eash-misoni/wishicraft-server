@@ -7,6 +7,7 @@ __pycache__/
 cdk.out/
 node_modules/
 .uv-cache/
+.jsii-cache/
 
 .env
 .env.*

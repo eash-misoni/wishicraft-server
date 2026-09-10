@@ -32,3 +32,12 @@ devを基本とし、prod deployや破壊的操作を勝手に行わない。
 - 完了したPhaseまたは明確な実装sliceの予定tracked変更がすべてcommitされた後、finalized HEADを根拠として最終handoff前に`$wishicraft-learning-wiki`を実行する。Phase途中や未commitの仕様変更には実行しない。
 - 自動実行は`.local/learning-wiki/`が存在するprimary/local checkoutだけで行う。temporary worktree、Codex cloud、または出力先がない環境では別Wikiを作らず、skip理由を最終報告する。
 - 同期失敗で完了済みPhaseやcommitを巻き戻さない。同期ではAWS、Discord、production、GitHub設定、実機を操作せず、学習Wiki生成物をcommitしない。
+
+## Developer execution environment
+
+- toolの初回利用時はavailability、実path、versionを確認し、未確認の絶対pathを推測実行しない。同一environmentの確認済み結果は再利用し、shell、session、OS、architecture、PATHが変わった場合だけ必要項目を再確認する。
+- repositoryの正規entrypointは`tools/dev-env check`と`tools/dev-env run -- COMMAND`とする。`gh`の明示的user-local導入だけは`tools/setup-dev-tools gh`を使い、利用可否と`tools/dev-env auth-check`による認証確認を分離する。既存toolを不要に再install・upgradeしない。
+- `uv`は正規entrypointが動的に発見してrepository-local cacheを使い、CDK local bundlingの子processへ同じPATHを渡す。Dockerはdeveloper validationではoptionalとし、CLI欠落、daemon接続不可、利用可能を区別する。
+- environment/tool/network failureとimplementation/test failureを区別し、fallbackやskipで実装failureを成功扱いしない。
+- 長時間E2Eは必要なcheckpointを観測し、保存済みevent evidenceを根拠にする。状態が変わらない間は同じ進捗コメントを繰り返さない。
+- AWS production操作前はcanonical profileと実caller identityのAccount IDをstage設定と照合する。認証切れやcaller不一致をIAM権限追加で解決せず、credential値を表示せず正規sessionへ戻す。

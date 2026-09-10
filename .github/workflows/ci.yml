@@ -19,24 +19,26 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-      - run: uv sync --frozen --all-groups
-      - run: npm ci
-      - run: uv run pytest
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run mypy src infrastructure tests
+      - run: tools/dev-env run uv sync --frozen --all-groups
+      - run: tools/dev-env run npm ci
+      - run: tools/dev-env check
+      - run: tools/dev-env run uv run pytest
+      - run: tools/dev-env run uv run ruff check .
+      - run: tools/dev-env run uv run ruff format --check .
+      - run: tools/dev-env run uv run mypy src infrastructure tests
       - run: >-
-          npx --no-install cdk synth MinecraftStack-dev
+          tools/dev-env run npx --no-install cdk synth MinecraftStack-dev
           --context stage=dev --context phase=1 --context deployment=phase1
       - run: >-
-          npx --no-install cdk synth MinecraftTargetStack-dev
+          tools/dev-env run npx --no-install cdk synth MinecraftTargetStack-dev
           --context stage=dev --context deployment=target
       - run: >-
-          npx --no-install cdk synth WishicraftControlPlaneStack-dev
-          --context stage=dev --context phase=7 --context deployment=control-plane
+          tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
+          --context stage=dev --context phase=8 --context deployment=control-plane
       - run: >-
           shellcheck infrastructure/host_runtime/docker_compose_install.sh
           infrastructure/host_runtime/target_host_validation.sh
+          tools/dev-env tools/setup-dev-tools
 
   host-runtime-integration:
     runs-on: ubuntu-latest

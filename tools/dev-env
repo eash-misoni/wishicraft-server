@@ -1,0 +1,213 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "${0%/*}" && pwd)
+REPOSITORY_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+
+first_line() {
+    IFS= read -r line || true
+    printf '%s\n' "$line"
+}
+
+configured_path() {
+    tool_name=$1
+    variable_name=$2
+    case "$variable_name" in
+        WISHICRAFT_UV_BIN) configured_value=${WISHICRAFT_UV_BIN:-} ;;
+        WISHICRAFT_GH_BIN) configured_value=${WISHICRAFT_GH_BIN:-} ;;
+        *) return 1 ;;
+    esac
+    if [ -n "$configured_value" ] && [ -x "$configured_value" ]; then
+        printf '%s\n' "$configured_value"
+        return 0
+    fi
+    if command -v "$tool_name" >/dev/null 2>&1; then
+        command -v "$tool_name"
+        return 0
+    fi
+    return 1
+}
+
+resolve_uv() {
+    if uv_path=$(configured_path uv WISHICRAFT_UV_BIN); then
+        printf '%s\n' "$uv_path"
+        return 0
+    fi
+    if [ -x "$REPOSITORY_ROOT/.venv/bin/uv" ]; then
+        printf '%s\n' "$REPOSITORY_ROOT/.venv/bin/uv"
+        return 0
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+        python_user_base=$(python3 -m site --user-base 2>/dev/null || true)
+        if [ -n "$python_user_base" ] && [ -x "$python_user_base/bin/uv" ]; then
+            printf '%s\n' "$python_user_base/bin/uv"
+            return 0
+        fi
+    fi
+    if [ -x "${HOME}/.local/bin/uv" ]; then
+        printf '%s\n' "${HOME}/.local/bin/uv"
+        return 0
+    fi
+    return 1
+}
+
+resolve_gh() {
+    if gh_path=$(configured_path gh WISHICRAFT_GH_BIN); then
+        printf '%s\n' "$gh_path"
+        return 0
+    fi
+    if [ -x "${HOME}/.local/bin/gh" ]; then
+        printf '%s\n' "${HOME}/.local/bin/gh"
+        return 0
+    fi
+    return 1
+}
+
+report_tool() {
+    tool_name=$1
+    tool_path=$2
+    shift 2
+    tool_version=$("$tool_path" "$@" 2>&1 | first_line)
+    printf 'required: %s: available: %s: %s\n' "$tool_name" "$tool_path" "$tool_version"
+}
+
+check_required_command() {
+    tool_name=$1
+    shift
+    if tool_path=$(command -v "$tool_name" 2>/dev/null); then
+        report_tool "$tool_name" "$tool_path" "$@"
+    else
+        printf 'required: %s: unavailable\n' "$tool_name"
+        missing_required=1
+    fi
+}
+
+check_environment() {
+    missing_required=0
+    printf 'environment: os=%s architecture=%s shell=%s\n' \
+        "$(uname -s)" "$(uname -m)" "${SHELL:-unknown}"
+
+    check_required_command git --version
+    if uv_path=$(resolve_uv); then
+        report_tool uv "$uv_path" --version
+    else
+        printf 'required: uv: unavailable: install uv or set WISHICRAFT_UV_BIN\n'
+        missing_required=1
+    fi
+    if gh_path=$(resolve_gh); then
+        report_tool gh "$gh_path" --version
+    else
+        printf 'required: gh: unavailable: run tools/setup-dev-tools gh\n'
+        missing_required=1
+    fi
+    check_required_command node --version
+    check_required_command npm --version
+    check_required_command npx --version
+
+    if [ -x "$REPOSITORY_ROOT/.venv/bin/python" ]; then
+        report_tool repository-python "$REPOSITORY_ROOT/.venv/bin/python" --version
+    else
+        printf 'required: repository-python: unavailable: run tools/dev-env run uv sync --frozen --all-groups\n'
+        missing_required=1
+    fi
+    if [ -x "$REPOSITORY_ROOT/node_modules/.bin/cdk" ]; then
+        cdk_version=$("$REPOSITORY_ROOT/node_modules/.bin/cdk" --version 2>&1 | first_line)
+        printf 'required: repository-cdk: available: %s: %s\n' \
+            "$REPOSITORY_ROOT/node_modules/.bin/cdk" "$cdk_version"
+    else
+        printf 'required: repository-cdk: unavailable: run tools/dev-env run npm ci\n'
+        missing_required=1
+    fi
+
+    for optional_tool in aws shellcheck; do
+        if optional_path=$(command -v "$optional_tool" 2>/dev/null); then
+            optional_version=$("$optional_path" --version 2>&1 | first_line)
+            printf 'optional: %s: available: %s: %s\n' \
+                "$optional_tool" "$optional_path" "$optional_version"
+        else
+            printf 'optional: %s: unavailable\n' "$optional_tool"
+        fi
+    done
+
+    if docker_path=$(command -v docker 2>/dev/null); then
+        docker_client=$("$docker_path" --version 2>&1 | first_line)
+        if DOCKER_CLIENT_TIMEOUT=5 COMPOSE_HTTP_TIMEOUT=5 \
+            "$docker_path" version --format '{{.Server.Version}}' >/dev/null 2>&1; then
+            printf 'optional: docker: CLI and daemon available: %s: %s\n' \
+                "$docker_path" "$docker_client"
+        else
+            printf 'optional: docker: CLI available, daemon unavailable: %s: %s\n' \
+                "$docker_path" "$docker_client"
+        fi
+    else
+        printf 'optional: docker: CLI unavailable\n'
+    fi
+
+    return "$missing_required"
+}
+
+prepare_environment() {
+    uv_path=$(resolve_uv || true)
+    gh_path=$(resolve_gh || true)
+    extra_path="$REPOSITORY_ROOT/.venv/bin:$REPOSITORY_ROOT/node_modules/.bin"
+    if [ -n "$uv_path" ]; then
+        extra_path="${uv_path%/*}:$extra_path"
+    fi
+    if [ -n "$gh_path" ]; then
+        extra_path="${gh_path%/*}:$extra_path"
+    fi
+    PATH="$extra_path:$PATH"
+    export PATH
+    UV_CACHE_DIR=${UV_CACHE_DIR:-"$REPOSITORY_ROOT/.uv-cache"}
+    export UV_CACHE_DIR
+    JSII_RUNTIME_PACKAGE_CACHE_ROOT=${JSII_RUNTIME_PACKAGE_CACHE_ROOT:-"$REPOSITORY_ROOT/.jsii-cache"}
+    export JSII_RUNTIME_PACKAGE_CACHE_ROOT
+}
+
+check_github_auth() {
+    prepare_environment
+    if ! command -v gh >/dev/null 2>&1; then
+        printf '%s\n' 'gh is unavailable; run tools/setup-dev-tools gh first' >&2
+        return 1
+    fi
+    gh auth status --hostname github.com
+    authenticated_login=$(gh api user --jq .login)
+    repository_name=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
+    repository_owner=${repository_name%%/*}
+    printf 'github-auth: account=%s repository=%s\n' "$authenticated_login" "$repository_name"
+    if [ "$authenticated_login" != "$repository_owner" ]; then
+        printf 'github-auth: account does not match repository owner %s\n' "$repository_owner" >&2
+        return 1
+    fi
+}
+
+usage() {
+    printf '%s\n' \
+        'usage: tools/dev-env check' \
+        '       tools/dev-env auth-check' \
+        '       tools/dev-env run COMMAND [ARG ...]'
+}
+
+case ${1:-} in
+    check)
+        [ "$#" -eq 1 ] || { usage >&2; exit 2; }
+        check_environment
+        ;;
+    auth-check)
+        [ "$#" -eq 1 ] || { usage >&2; exit 2; }
+        check_github_auth
+        ;;
+    run)
+        shift
+        if [ "${1:-}" = -- ]; then
+            shift
+        fi
+        [ "$#" -gt 0 ] || { usage >&2; exit 2; }
+        prepare_environment
+        exec "$@"
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac
