@@ -6,6 +6,7 @@ import importlib
 import json
 import os
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Any, Protocol, cast
 
 from wishicraft.auto_stop import AutoStopIntent, AutoStopIntentStatus, intent_matches_heartbeat
@@ -469,9 +470,19 @@ def _string(value: dict[str, object], name: str) -> str:
 
 def _integer(value: dict[str, object], name: str) -> int:
     result = value.get(name)
-    if not isinstance(result, int) or isinstance(result, bool) or result <= 0:
+    if isinstance(result, bool):
         raise ValueError(f"invalid {name}")
-    return result
+    if isinstance(result, int):
+        normalized = result
+    elif isinstance(result, Decimal):
+        if not result.is_finite() or result != result.to_integral_value():
+            raise ValueError(f"invalid {name}")
+        normalized = int(result)
+    else:
+        raise ValueError(f"invalid {name}")
+    if normalized <= 0:
+        raise ValueError(f"invalid {name}")
+    return normalized
 
 
 def _timestamp(value: dict[str, object], name: str) -> datetime:
