@@ -1122,3 +1122,6 @@ Phase 7 release monitoring observerはSystemStateとfixed global Lockをconsiste
 観測更新はUpdateItemを使い、`attribute_not_exists(observed_at) OR observed_at < :observed_at`を必須とする。timestampは`YYYY-MM-DDTHH:MM:SS.ffffffZ`へ正規化し、lexicographic orderとUTC chronological orderを一致させる。同一timestampも上書きせずConditionalCheckFailedで拒否し、異なる結果が同じ観測順序を共有する曖昧さを許さない。DynamoDB write failureは呼出元へ伝播する。
 
 Route 53 observerはcanonical Hosted Zone/FQDNに対するread-only ListResourceRecordSetsだけを使う。record absent、単一A record、unexpected valuesを分離し、duplicate、Alias/unsupported shape、malformed response、API failureはunknownへfail-closedする。
+## AutoStopIntents
+
+D-093の停止予告はRuntimeHeartbeats/SystemState/Operationsへ混在させず、専用tableの`game_id` partition keyと`intent_id` sort keyでdurableに保持する。`intent_id`はGame ID、boot ID、`empty_since`から決定的に導出し、同じempty periodのEvaluator再実行で増殖しない。warning delivery identity/state/attempt、`warning_delivered_at`、idle/warning policy、created/updated、block/cancel reason、STOP Operation IDを保持する。TTLは設定せず、freshnessやeligibilityは必ずsource heartbeatとtimestampを再検証する。

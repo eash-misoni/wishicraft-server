@@ -362,6 +362,10 @@ Minecraft EC2上のheartbeat agent/timerが専用`RuntimeHeartbeats` itemへ次�
 - 新しいplayer接続で`empty_since`を解除する。
 - stop operation開始前に最新heartbeat/reconcileを再確認する。
 
+D-093のEvaluatorは1分周期でGame設定（devは30分）を読み、25分のcontinuous trusted-zeroから5分warningを一empty period一件だけ送る。warning delivery時刻からも必ず5分を確保するため、遅延warningを理由に即停止しない。warning/STOP identityはGame・boot・empty_sinceから決定し、専用のRetainされたAutoStopIntents tableへ保存する。
+
+actual STOPは既存STOP/SCHEDULEとしてshared Admission/global Lockへ統合する。Desired変更とMinecraft save/stopがcommit pointであり、その直前にfresh Reconcileとfixed Host Runtime probeを別々に実行する。player positive/unknown、heartbeat stale/mismatch、unhealthy/discrepancy/error、Data EBS binding mismatchではCANCELLEDとしてLock/Current Operationを解放し、Desired、Minecraft、EC2、DNSを変更しない。commit point後はexisting graceful STOPを巻き戻さない。
+
 ### 失敗
 
 自動停止失敗は再試行回数を制限し、無限operationを作らない。管理者へ通知する。

@@ -425,6 +425,24 @@ def test_normal_completion_releases_only_current_unexpired_lease_and_operation()
     assert current_update["ConditionExpression"] == "current_operation_id = :operation_id"
 
 
+def test_owned_cancellation_atomically_releases_lock_and_current_operation() -> None:
+    api = FakeDynamo()
+    now = datetime(2026, 8, 29, tzinfo=UTC)
+    proof = LeaseProof("wishicraft-main", "op-001", "lease-001", int(now.timestamp()) + 10)
+    operation_repository(api).complete_owned(
+        proof=proof,
+        status=OperationStatus.CANCELLED,
+        completed_at=now,
+        result={"reason": "PLAYER_RECONNECTED"},
+    )
+    items = transaction_items(api)
+    operation_update = cast(dict[str, object], items[0]["Update"])
+    values = cast(dict[str, object], operation_update["ExpressionAttributeValues"])
+    assert values[":status"] == {"S": "CANCELLED"}
+    assert "Delete" in items[1]
+    assert "Update" in items[2]
+
+
 def test_backup_provenance_writes_are_atomic_with_terminalization_and_cleanup() -> None:
     api = FakeDynamo()
     now = datetime(2026, 8, 29, tzinfo=UTC)

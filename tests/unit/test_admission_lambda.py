@@ -45,9 +45,21 @@ class Launcher:
     def __init__(self) -> None:
         self.calls: list[dict[str, object]] = []
 
-    def start(self, *, operation_id: str, lease_id: str, started_at: datetime) -> None:
+    def start(
+        self,
+        *,
+        operation_id: str,
+        lease_id: str,
+        started_at: datetime,
+        **metadata: object,
+    ) -> None:
         self.calls.append(
-            {"operation_id": operation_id, "lease_id": lease_id, "started_at": started_at}
+            {
+                "operation_id": operation_id,
+                "lease_id": lease_id,
+                "started_at": started_at,
+                **metadata,
+            }
         )
 
 
@@ -86,6 +98,29 @@ def test_stop_admission_launches_stop_workflow_once(monkeypatch: pytest.MonkeyPa
     assert result["operation_id"] == "op-stop"
     assert service.calls[0]["operation_type"] is OperationType.STOP
     assert launcher.calls[0]["lease_id"] == "lease-stop"
+
+
+def test_scheduled_stop_requires_and_forwards_auto_stop_intent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = Service(AdmissionResult("op-auto-stop", True, "lease-auto-stop"))
+    launcher = Launcher()
+    monkeypatch.setattr(admission_lambda, "_service", service)
+    monkeypatch.setattr(admission_lambda, "_stop_launcher", launcher)
+    scheduled = {
+        **event(),
+        "operation_type": "STOP",
+        "requested_by": "SCHEDULE",
+        "idempotency_key": "auto-stop:asi-example",
+        "auto_stop_intent_id": "asi-example",
+    }
+    assert admission_lambda.handler(scheduled, None)["operation_id"] == "op-auto-stop"
+    assert service.calls[0]["requested_by"] is RequestSource.SCHEDULE
+    assert launcher.calls[0]["auto_stop_intent_id"] == "asi-example"
+
+    scheduled.pop("auto_stop_intent_id")
+    with pytest.raises(ValueError, match="invalid Operation admission"):
+        admission_lambda.handler(scheduled, None)
 
 
 def test_duplicate_stop_admission_does_not_launch_new_execution(

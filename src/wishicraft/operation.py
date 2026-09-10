@@ -600,8 +600,12 @@ class OperationRepository:
         result: dict[str, object] | None = None,
         additional_writes: tuple[dict[str, object], ...] = (),
     ) -> None:
-        if status not in {OperationStatus.SUCCEEDED, OperationStatus.FAILED}:
-            raise ValueError("normal completion must be SUCCEEDED or FAILED")
+        if status not in {
+            OperationStatus.SUCCEEDED,
+            OperationStatus.FAILED,
+            OperationStatus.CANCELLED,
+        }:
+            raise ValueError("owned completion must be SUCCEEDED, FAILED, or CANCELLED")
         now_epoch = int(completed_at.timestamp())
         self._api.transact_write_items(
             TransactItems=[

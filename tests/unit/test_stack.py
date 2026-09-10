@@ -391,6 +391,89 @@ def test_phase_eight_retention_is_standard_dry_run_only_with_read_only_aws_iam()
         "dynamodb:DeleteItem",
         "dynamodb:TransactWriteItems",
     }
+
+
+def test_phase_eight_auto_stop_has_durable_intents_minimal_evaluator_and_commit_gate() -> None:
+    app = build_app(REPOSITORY_ROOT, "dev", phase=8, deployment="control-plane")
+    stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
+    template = Template.from_stack(stack)
+    tables = template.find_resources("AWS::DynamoDB::Table")
+    intent_id, intent = next(
+        (logical_id, value)
+        for logical_id, value in tables.items()
+        if value["Properties"]["TableName"] == "wc-dev-auto-stop-intents"
+    )
+    assert intent["Properties"]["KeySchema"] == [
+        {"AttributeName": "game_id", "KeyType": "HASH"},
+        {"AttributeName": "intent_id", "KeyType": "RANGE"},
+    ]
+    assert "TimeToLiveSpecification" not in intent["Properties"]
+    assert intent["DeletionPolicy"] == "Retain"
+    assert intent["UpdateReplacePolicy"] == "Retain"
+
+    functions = template.find_resources("AWS::Lambda::Function")
+    evaluator = next(
+        value["Properties"]
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-auto-stop-evaluator"
+    )
+    policies = template.find_resources("AWS::IAM::Policy")
+    role = evaluator["Role"]["Fn::GetAtt"][0]
+    statements = [
+        statement
+        for policy in policies.values()
+        if {"Ref": role} in policy["Properties"]["Roles"]
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+    ]
+    actions = {action for statement in statements for action in _action_list(statement["Action"])}
+    assert {
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:UpdateItem",
+    } <= actions
+    assert not actions & {
+        "ec2:StopInstances",
+        "ssm:SendCommand",
+        "route53:ChangeResourceRecordSets",
+        "states:StartExecution",
+        "dynamodb:DeleteItem",
+    }
+    intent_arn = {"Fn::GetAtt": [intent_id, "Arn"]}
+    assert any(
+        statement["Resource"] == intent_arn or intent_arn in statement["Resource"]
+        for statement in statements
+        if "dynamodb:PutItem" in _action_list(statement["Action"])
+    )
+
+    rules = template.find_resources("AWS::Events::Rule")
+    schedule = next(
+        value["Properties"]["ScheduleExpression"]
+        for value in rules.values()
+        if value["Properties"].get("Name") == "wc-dev-auto-stop-evaluator"
+    )
+    assert schedule == "rate(1 minute)"
+    machines = template.find_resources("AWS::StepFunctions::StateMachine")
+    stop = next(
+        value["Properties"]["Definition"]
+        for value in machines.values()
+        if value["Properties"]["StateMachineName"] == "wc-dev-stop"
+    )
+    assert stop["States"]["ReconcileBeforeStop"]["Next"] == "AutomaticStopFinalGate"
+    assert stop["States"]["AutomaticStopMayProceed"]["Default"] == "SetDesiredStopped"
+    retention = next(
+        value["Properties"]
+        for value in functions.values()
+        if value["Properties"]["FunctionName"] == "wc-dev-retention-task"
+    )
+    role = retention["Role"]["Fn::GetAtt"][0]
+    statements = [
+        statement
+        for policy in policies.values()
+        if {"Ref": role} in policy["Properties"]["Roles"]
+        for statement in policy["Properties"]["PolicyDocument"]["Statement"]
+    ]
+    actions = {action for statement in statements for action in _action_list(statement["Action"])}
     forbidden = {
         "ec2:DeleteSnapshot",
         "ec2:CreateSnapshot",

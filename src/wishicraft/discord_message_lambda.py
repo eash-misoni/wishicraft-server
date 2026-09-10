@@ -6,8 +6,10 @@ import importlib
 import json
 import os
 from dataclasses import replace
+from datetime import UTC, datetime
 from typing import Protocol, cast
 
+from wishicraft.auto_stop_warning import WarningDelivery
 from wishicraft.discord_delivery import (
     DeliveryRecord,
     DeliveryStatus,
@@ -371,10 +373,24 @@ class LazyMessages:
 
 
 _service: DiscordDeliveryService | None = None
+_warning_service: WarningDelivery | None = None
 
 
 def handler(event: object, context: object) -> dict[str, object]:
     del context
+    if (
+        isinstance(event, dict)
+        and set(event) == {"schema_version", "operation", "intent_id", "game_id"}
+        and event.get("schema_version") == 1
+        and event.get("operation") == "deliver_auto_stop_warning"
+        and isinstance(event.get("intent_id"), str)
+        and isinstance(event.get("game_id"), str)
+    ):
+        return _get_warning_service().deliver(
+            game_id=cast(str, event["game_id"]),
+            intent_id=cast(str, event["intent_id"]),
+            now=datetime.now(UTC),
+        )
     service = _get_service()
     records = _delivery_events(event)
     for operation_id, source_revision, attempt_id in records:
@@ -384,6 +400,25 @@ def handler(event: object, context: object) -> dict[str, object]:
             attempt_id=attempt_id,
         )
     return {"batchItemFailures": []}
+
+
+def _get_warning_service() -> WarningDelivery:
+    global _warning_service
+    if _warning_service is None:
+        boto3 = importlib.import_module("boto3")
+        region = _required_environment("AWS_REGION")
+        dynamodb = cast(DynamoApi, boto3.client("dynamodb", region_name=region))
+        ssm = cast(SsmApi, boto3.client("ssm", region_name=region))
+        _warning_service = WarningDelivery(
+            dynamodb,
+            LazyMessages(
+                ParameterToken(
+                    ssm, parameter_name=_required_environment("BOT_TOKEN_PARAMETER_NAME")
+                )
+            ),
+            table_name=_required_environment("AUTO_STOP_INTENTS_TABLE"),
+        )
+    return _warning_service
 
 
 def _delivery_events(event: object) -> tuple[tuple[str, int, str], ...]:

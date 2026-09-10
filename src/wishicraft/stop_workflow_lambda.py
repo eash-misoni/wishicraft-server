@@ -6,8 +6,9 @@ import importlib
 import json
 import os
 from datetime import UTC, datetime
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 
+from wishicraft.auto_stop import AutoStopIntent, AutoStopIntentStatus, intent_matches_heartbeat
 from wishicraft.operation import (
     DynamoApi,
     LeaseProof,
@@ -16,6 +17,8 @@ from wishicraft.operation import (
     OperationStatus,
 )
 from wishicraft.reconcile import TargetEc2Api, TargetResolver
+from wishicraft.reconcile_lambda import AwsStatusFactory
+from wishicraft.runtime_heartbeat_producer import _decode
 from wishicraft.stop_workflow import (
     Ec2StopAdapter,
     Ec2StopApi,
@@ -51,8 +54,13 @@ class Runtime:
         self.ec2 = session.client("ec2", region_name=region)
         self.ssm = session.client("ssm", region_name=region)
         self.route53 = session.client("route53", region_name=region)
+        self.cloudwatch = session.client("cloudwatch", region_name=region)
         dynamodb = cast(DynamoApi, session.client("dynamodb", region_name=region))
         self.system_id = _env("SYSTEM_ID")
+        self.game_id = _env("GAME_ID")
+        self.runtime_id = "wishicraft-host-runtime"
+        self.data_volume_id = _env("DATA_VOLUME_ID")
+        self.data_volume_device = _env("DATA_VOLUME_DEVICE")
         self.record_name = _env("RECORD_NAME")
         self.hosted_zone_id = _env("HOSTED_ZONE_ID")
         self.resolver = TargetResolver(
@@ -75,6 +83,15 @@ class Runtime:
             system_id=self.system_id,
             lock_name=_env("GLOBAL_LOCK_NAME"),
         )
+        self.dynamodb = dynamodb
+        self.heartbeats_table = _env("RUNTIME_HEARTBEATS_TABLE")
+        self.intents_table = _env("AUTO_STOP_INTENTS_TABLE")
+        self.status_factory = AwsStatusFactory(
+            self.ec2,
+            self.ssm,
+            game_id=self.game_id,
+            timeout_seconds=int(_env("SSM_PROBE_TIMEOUT_SECONDS")),
+        )
         self.ec2_stop = Ec2StopAdapter(cast(Ec2StopApi, self.ec2))
         self.host_stop = FixedHostStopAdapter(
             cast(SsmStopApi, self.ssm), timeout_seconds=int(_env("HOST_STOP_TIMEOUT_SECONDS"))
@@ -93,6 +110,52 @@ def handler(event: object, context: object) -> dict[str, object]:
         runtime.system_id, _string(payload, "operation_id"), _string(payload, "lease_id"), 0
     )
     action = payload["action"]
+    if action == "automatic_final_gate":
+        if payload.get("requested_by") != "SCHEDULE":
+            return {"proceed": True, "automatic": False}
+        intent_id = _string(payload, "auto_stop_intent_id")
+        runtime.coordinator.leases.verify_owned(proof, now=now)
+        try:
+            reason = _automatic_gate_reason(runtime, payload, intent_id=intent_id, now=now)
+        except Exception:  # noqa: BLE001 - observation failures cancel before mutation.
+            reason = "FINAL_GATE_OBSERVATION_UNKNOWN"
+        if reason is not None:
+            runtime.operations.complete_owned(
+                proof=proof,
+                status=OperationStatus.CANCELLED,
+                completed_at=now,
+                result={"automatic_stop": True, "intent_id": intent_id, "reason": reason},
+            )
+            try:
+                _cancel_intent(runtime, intent_id=intent_id, reason=reason, now=now)
+            except Exception:  # noqa: BLE001 - Operation/Lock convergence remains authoritative.
+                pass
+            print(
+                json.dumps(
+                    {
+                        "event": "automatic_stop_cancelled",
+                        "operation_id": proof.owner_operation_id,
+                        "reason": reason,
+                    },
+                    separators=(",", ":"),
+                )
+            )
+            try:
+                cast(Any, runtime.cloudwatch).put_metric_data(
+                    Namespace=_env("METRIC_NAMESPACE"),
+                    MetricData=[
+                        {
+                            "MetricName": "ScheduledStopCancelled",
+                            "Dimensions": [{"Name": "Stage", "Value": _env("STAGE")}],
+                            "Value": 1,
+                            "Unit": "Count",
+                        }
+                    ],
+                )
+            except Exception:  # noqa: BLE001 - monitoring cannot undo safe cancellation.
+                pass
+            return {"proceed": False, "automatic": True, "reason": reason}
+        return {"proceed": True, "automatic": True}
     if action == "set_desired":
         observation = StopObservation.from_item(_mapping(payload, "state"))
         revision, already_stopped = runtime.coordinator.verify_and_set_desired(
@@ -175,6 +238,126 @@ def handler(event: object, context: object) -> dict[str, object]:
         )
         return {"status": "FAILED"}
     raise ValueError("unsupported STOP workflow action")
+
+
+def _automatic_gate_reason(
+    runtime: Runtime, payload: dict[str, object], *, intent_id: str, now: datetime
+) -> str | None:
+    state = _mapping(payload, "state")
+    if (
+        state.get("game_id") != runtime.game_id
+        or state.get("desired_state") != "RUNNING"
+        or state.get("health") != "HEALTHY"
+        or state.get("discrepancies") != []
+        or state.get("observation_errors") != []
+    ):
+        return "RECONCILE_NOT_SAFE"
+    intent = _load_intent(runtime, intent_id)
+    heartbeat_response = runtime.dynamodb.get_item(
+        TableName=runtime.heartbeats_table,
+        Key={"system_id": {"S": runtime.system_id}},
+        ConsistentRead=True,
+    )
+    heartbeat_item = (
+        heartbeat_response.get("Item") if isinstance(heartbeat_response, dict) else None
+    )
+    heartbeat = _decode(heartbeat_item) if isinstance(heartbeat_item, dict) else None
+    if not intent_matches_heartbeat(intent, heartbeat, runtime_id=runtime.runtime_id, now=now):
+        return "HEARTBEAT_NOT_TRUSTED_EMPTY"
+    eligible_at = intent.stop_eligible_at()
+    if (
+        intent.status
+        not in {
+            AutoStopIntentStatus.ADMISSION_ATTEMPTED,
+            AutoStopIntentStatus.STOP_REQUESTED,
+        }
+        or intent.warning_delivery_state != "DELIVERED"
+        or eligible_at is None
+        or now < eligible_at
+    ):
+        return "WARNING_OR_IDLE_WINDOW_INCOMPLETE"
+    instance_id = runtime.resolver.resolve()
+    if state.get("target_instance_id") != instance_id:
+        return "TARGET_IDENTITY_MISMATCH"
+    if not _volume_binding_safe(runtime, instance_id=instance_id):
+        return "DATA_VOLUME_BINDING_MISMATCH"
+    direct = runtime.status_factory.create(instance_id).observe(observed_at=now)
+    if (
+        not direct.ready
+        or direct.observed_active_game_id != runtime.game_id
+        or direct.player_count != 0
+    ):
+        return "DIRECT_PLAYER_OBSERVATION_NOT_ZERO"
+    return None
+
+
+def _volume_binding_safe(runtime: Runtime, *, instance_id: str) -> bool:
+    response = cast(Any, runtime.ec2).describe_volumes(VolumeIds=[runtime.data_volume_id])
+    volumes = response.get("Volumes") if isinstance(response, dict) else None
+    if not isinstance(volumes, list) or len(volumes) != 1:
+        return False
+    volume = volumes[0]
+    if not isinstance(volume, dict) or volume.get("VolumeId") != runtime.data_volume_id:
+        return False
+    attachments = volume.get("Attachments")
+    return bool(
+        isinstance(attachments, list)
+        and len(attachments) == 1
+        and isinstance(attachments[0], dict)
+        and attachments[0].get("InstanceId") == instance_id
+        and attachments[0].get("Device") == runtime.data_volume_device
+        and attachments[0].get("State") == "attached"
+        and attachments[0].get("DeleteOnTermination") is False
+    )
+
+
+def _load_intent(runtime: Runtime, intent_id: str) -> AutoStopIntent:
+    response = runtime.dynamodb.get_item(
+        TableName=runtime.intents_table,
+        Key={"game_id": {"S": runtime.game_id}, "intent_id": {"S": intent_id}},
+        ConsistentRead=True,
+    )
+    item = response.get("Item") if isinstance(response, dict) else None
+    if not isinstance(item, dict):
+        raise ValueError("automatic STOP intent is missing")
+    from boto3.dynamodb.types import TypeDeserializer  # type: ignore[import-not-found]
+
+    decode = TypeDeserializer()
+    plain = {str(name): decode.deserialize(value) for name, value in item.items()}
+    return AutoStopIntent(
+        intent_id=_string(plain, "intent_id"),
+        game_id=_string(plain, "game_id"),
+        boot_id=_string(plain, "boot_id"),
+        empty_since=_timestamp(plain, "empty_since"),
+        idle_timeout_minutes=_integer(plain, "idle_timeout_minutes"),
+        warning_lead_minutes=_integer(plain, "warning_lead_minutes"),
+        warning_delivery_id=_string(plain, "warning_delivery_id"),
+        warning_delivery_state=_string(plain, "warning_delivery_state"),
+        warning_delivered_at=_optional_timestamp(plain, "warning_delivered_at"),
+        status=AutoStopIntentStatus(_string(plain, "status")),
+        created_at=_timestamp(plain, "created_at"),
+        updated_at=_timestamp(plain, "updated_at"),
+        block_reason=plain.get("block_reason")
+        if isinstance(plain.get("block_reason"), str)
+        else None,
+    )
+
+
+def _cancel_intent(runtime: Runtime, *, intent_id: str, reason: str, now: datetime) -> None:
+    runtime.dynamodb.update_item(
+        TableName=runtime.intents_table,
+        Key={"game_id": {"S": runtime.game_id}, "intent_id": {"S": intent_id}},
+        UpdateExpression="SET #status = :cancelled, block_reason = :reason, updated_at = :now",
+        ConditionExpression="#status IN (:attempted, :requested)",
+        ExpressionAttributeNames={"#status": "status"},
+        ExpressionAttributeValues={
+            ":cancelled": {"S": AutoStopIntentStatus.CANCELLED.value},
+            ":attempted": {"S": AutoStopIntentStatus.ADMISSION_ATTEMPTED.value},
+            ":requested": {"S": AutoStopIntentStatus.STOP_REQUESTED.value},
+            ":reason": {"S": reason},
+            ":now": {"S": now.isoformat().replace("+00:00", "Z")},
+        },
+    )
 
 
 def _command_result(
@@ -282,6 +465,27 @@ def _string(value: dict[str, object], name: str) -> str:
     if not isinstance(result, str) or not result:
         raise ValueError(f"invalid {name}")
     return result
+
+
+def _integer(value: dict[str, object], name: str) -> int:
+    result = value.get(name)
+    if not isinstance(result, int) or isinstance(result, bool) or result <= 0:
+        raise ValueError(f"invalid {name}")
+    return result
+
+
+def _timestamp(value: dict[str, object], name: str) -> datetime:
+    result = value.get(name)
+    if not isinstance(result, str):
+        raise ValueError(f"invalid {name}")
+    parsed = datetime.fromisoformat(result.replace("Z", "+00:00"))
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ValueError(f"invalid {name}")
+    return parsed.astimezone(UTC)
+
+
+def _optional_timestamp(value: dict[str, object], name: str) -> datetime | None:
+    return None if value.get(name) is None else _timestamp(value, name)
 
 
 def _env(name: str) -> str:

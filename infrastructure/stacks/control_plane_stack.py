@@ -62,8 +62,10 @@ class ControlPlaneStack(Stack):
             encryption=dynamodb.TableEncryption.AWS_MANAGED,
             removal_policy=RemovalPolicy.RETAIN,
         )
+        runtime_heartbeats_table: dynamodb.Table | None = None
+        auto_stop_intents_table: dynamodb.Table | None = None
         if phase >= 8:
-            dynamodb.Table(
+            runtime_heartbeats_table = dynamodb.Table(
                 self,
                 "RuntimeHeartbeatsTable",
                 table_name=resource_name(
@@ -75,6 +77,18 @@ class ControlPlaneStack(Stack):
                 billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
                 encryption=dynamodb.TableEncryption.AWS_MANAGED,
                 time_to_live_attribute="expires_at",
+                removal_policy=RemovalPolicy.RETAIN,
+            )
+            auto_stop_intents_table = dynamodb.Table(
+                self,
+                "AutoStopIntentsTable",
+                table_name=resource_name(project.resource_prefix, stage.stage, "auto-stop-intents"),
+                partition_key=dynamodb.Attribute(
+                    name="game_id", type=dynamodb.AttributeType.STRING
+                ),
+                sort_key=dynamodb.Attribute(name="intent_id", type=dynamodb.AttributeType.STRING),
+                billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+                encryption=dynamodb.TableEncryption.AWS_MANAGED,
                 removal_policy=RemovalPolicy.RETAIN,
             )
         games_table = _table(
@@ -301,13 +315,50 @@ class ControlPlaneStack(Stack):
                 "GLOBAL_LOCK_NAME": stage.global_lock_name,
                 "LOCK_LEASE_SECONDS": str(stage.lock_lease_seconds),
                 "HOST_STOP_TIMEOUT_SECONDS": str(stage.host_runtime_timeout_seconds("ssm")),
+                "DATA_VOLUME_ID": str(
+                    stage.host_runtime_value("target_host.existing_data_volume_id")
+                ),
+                "DATA_VOLUME_DEVICE": str(
+                    stage.host_runtime_value("target_host.existing_data_volume_device")
+                ),
+                "METRIC_NAMESPACE": "Wishicraft/ControlPlane",
+                **(
+                    {
+                        "RUNTIME_HEARTBEATS_TABLE": runtime_heartbeats_table.table_name,
+                        "AUTO_STOP_INTENTS_TABLE": auto_stop_intents_table.table_name,
+                        "SSM_PROBE_TIMEOUT_SECONDS": str(stage.ssm_probe_timeout_seconds),
+                    }
+                    if runtime_heartbeats_table is not None and auto_stop_intents_table is not None
+                    else {}
+                ),
                 "HOSTED_ZONE_ID": stage.route53_hosted_zone_id,
                 "RECORD_NAME": stage.route53_record_name,
             },
         )
         stop_task.add_to_role_policy(
-            iam.PolicyStatement(actions=["ec2:DescribeInstances"], resources=["*"])
+            iam.PolicyStatement(
+                actions=["ec2:DescribeInstances", "ec2:DescribeVolumes"], resources=["*"]
+            )
         )
+        if runtime_heartbeats_table is not None and auto_stop_intents_table is not None:
+            stop_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["dynamodb:GetItem"],
+                    resources=[runtime_heartbeats_table.table_arn],
+                )
+            )
+            stop_task.add_to_role_policy(
+                iam.PolicyStatement(actions=["cloudwatch:PutMetricData"], resources=["*"])
+            )
+            stop_task.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["dynamodb:GetItem", "dynamodb:UpdateItem"],
+                    resources=[auto_stop_intents_table.table_arn],
+                )
+            )
+            stop_task.add_to_role_policy(
+                iam.PolicyStatement(actions=["ssm:DescribeInstanceInformation"], resources=["*"])
+            )
         stop_task.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["ec2:StopInstances"],
@@ -791,6 +842,9 @@ class ControlPlaneStack(Stack):
                 operations_table=operations_table,
                 locks_table=locks_table,
                 system_state_table=table,
+                games_table=games_table,
+                runtime_heartbeats_table=runtime_heartbeats_table,
+                auto_stop_intents_table=auto_stop_intents_table,
                 bot_token_parameter_name=secrets.discord_bot_token_parameter_name(stage.stage),
             )
             _add_release_monitoring(
@@ -825,8 +879,11 @@ def _add_discord_ingress(
     operations_table: dynamodb.Table,
     locks_table: dynamodb.Table,
     system_state_table: dynamodb.Table,
+    games_table: dynamodb.Table,
+    runtime_heartbeats_table: dynamodb.Table | None,
+    auto_stop_intents_table: dynamodb.Table | None,
     bot_token_parameter_name: str,
-) -> tuple[lambda_.Function, lambda_.Function, lambda_.Function]:
+) -> tuple[lambda_.Function, ...]:
     repository_root = Path(__file__).resolve().parents[2]
     log_group = logs.LogGroup(
         stack,
@@ -970,6 +1027,11 @@ def _add_discord_ingress(
             "OPERATIONS_TABLE": operations_table.table_name,
             "BOT_TOKEN_PARAMETER_NAME": bot_token_parameter_name,
             "DELIVERY_RETRY_QUEUE_URL": delivery_queue.queue_url,
+            **(
+                {"AUTO_STOP_INTENTS_TABLE": auto_stop_intents_table.table_name}
+                if auto_stop_intents_table is not None
+                else {}
+            ),
         },
         description="Phase 7D idempotent Discord message delivery",
     )
@@ -979,6 +1041,13 @@ def _add_discord_ingress(
             resources=[operations_table.table_arn],
         )
     )
+    if auto_stop_intents_table is not None:
+        message.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["dynamodb:GetItem", "dynamodb:UpdateItem"],
+                resources=[auto_stop_intents_table.table_arn],
+            )
+        )
     message.add_to_role_policy(
         iam.PolicyStatement(
             actions=["ssm:GetParameter"],
@@ -1019,6 +1088,86 @@ def _add_discord_ingress(
             report_batch_item_failures=True,
         )
     )
+    evaluator: lambda_.Function | None = None
+    if runtime_heartbeats_table is not None and auto_stop_intents_table is not None:
+        evaluator_log_group = logs.LogGroup(
+            stack,
+            "AutoStopEvaluatorLogGroup",
+            log_group_name=(
+                "/aws/lambda/"
+                f"{resource_name(project.resource_prefix, stage.stage, 'auto-stop-evaluator')}"
+            ),
+            retention=logs.RetentionDays.TWO_WEEKS,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+        evaluator = lambda_.Function(
+            stack,
+            "AutoStopEvaluatorFunction",
+            function_name=resource_name(
+                project.resource_prefix, stage.stage, "auto-stop-evaluator"
+            ),
+            runtime=lambda_.Runtime.PYTHON_3_12,
+            architecture=lambda_.Architecture.X86_64,
+            code=lambda_.Code.from_asset(str(repository_root / "src")),
+            handler="wishicraft.auto_stop_evaluator_lambda.handler",
+            timeout=Duration.seconds(30),
+            memory_size=256,
+            log_group=evaluator_log_group,
+            environment={
+                "GAMES_TABLE": games_table.table_name,
+                "RUNTIME_HEARTBEATS_TABLE": runtime_heartbeats_table.table_name,
+                "SYSTEM_STATE_TABLE": system_state_table.table_name,
+                "AUTO_STOP_INTENTS_TABLE": auto_stop_intents_table.table_name,
+                "SYSTEM_ID": project.system_id,
+                "GAME_ID": project.initial_game_id,
+                "DISCORD_OPERATION_CHANNEL_ID": stage.discord_public_id("operation_channel_id"),
+                "DISCORD_MESSAGE_FUNCTION_NAME": message.function_name,
+                "ADMISSION_FUNCTION_NAME": admission.function_name,
+                "METRIC_NAMESPACE": "Wishicraft/ControlPlane",
+                "STAGE": stage.stage,
+            },
+            description="D-093 one-minute automatic STOP candidate evaluator",
+        )
+        evaluator.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["dynamodb:GetItem"],
+                resources=[
+                    games_table.table_arn,
+                    runtime_heartbeats_table.table_arn,
+                    system_state_table.table_arn,
+                ],
+            )
+        )
+        evaluator.add_to_role_policy(
+            iam.PolicyStatement(actions=["cloudwatch:PutMetricData"], resources=["*"])
+        )
+        evaluator.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:Query",
+                    "dynamodb:UpdateItem",
+                ],
+                resources=[auto_stop_intents_table.table_arn],
+            )
+        )
+        message.grant_invoke(evaluator)
+        admission.grant_invoke(evaluator)
+        events.Rule(
+            stack,
+            "AutoStopEvaluatorSchedule",
+            rule_name=resource_name(project.resource_prefix, stage.stage, "auto-stop-evaluator"),
+            schedule=events.Schedule.rate(Duration.minutes(1)),
+            targets=[
+                events_targets.LambdaFunction(
+                    evaluator,
+                    event=events.RuleTargetInput.from_object(
+                        {"schema_version": 1, "operation": "evaluate_auto_stop"}
+                    ),
+                )
+            ],
+        )
     api = apigwv2.HttpApi(
         stack,
         "DiscordInteractionsApi",
@@ -1041,7 +1190,12 @@ def _add_discord_ingress(
         "DiscordInteractionsEndpoint",
         value=f"{api.api_endpoint}/discord/interactions",
     )
-    return function, status_executor, message
+    return (
+        function,
+        status_executor,
+        message,
+        *([evaluator] if evaluator is not None else []),
+    )
 
 
 def _add_release_monitoring(
@@ -1228,6 +1382,44 @@ def _add_release_monitoring(
             ("Throttles", function.metric_throttles(period=Duration.minutes(5), statistic="Sum")),
         ):
             add_alarm(f"{function.node.id}{metric_name}Alarm", metric)
+
+    evaluator = next(
+        (
+            function
+            for function in monitored_functions
+            if function.node.id == "AutoStopEvaluatorFunction"
+        ),
+        None,
+    )
+    if evaluator is not None:
+        silence = cloudwatch.Alarm(
+            stack,
+            "AutoStopEvaluatorSilenceAlarm",
+            alarm_name=resource_name(
+                project.resource_prefix, stage.stage, "auto-stop-evaluator-silence"
+            ),
+            metric=evaluator.metric_invocations(period=Duration.minutes(5), statistic="Sum"),
+            threshold=1,
+            evaluation_periods=2,
+            datapoints_to_alarm=2,
+            comparison_operator=cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
+            treat_missing_data=cloudwatch.TreatMissingData.BREACHING,
+        )
+        silence.add_alarm_action(alarm_action)
+        for metric_name in (
+            "AutoStopWarningBlocked",
+            "ScheduledStopCancelled",
+        ):
+            add_alarm(
+                f"{metric_name}Alarm",
+                cloudwatch.Metric(
+                    namespace=namespace,
+                    metric_name=metric_name,
+                    dimensions_map={"Stage": stage.stage},
+                    statistic="Sum",
+                    period=Duration.minutes(5),
+                ),
+            )
 
     subscribers = [
         budgets.CfnBudget.SubscriberProperty(address=topic.topic_arn, subscription_type="SNS")
@@ -1818,7 +2010,36 @@ def _stop_definition(
             "ResultPath": "$.workflow_error",
             "Next": "ReconcileBeforeStop",
         },
-        "ReconcileBeforeStop": reconcile("SetDesiredStopped"),
+        "ReconcileBeforeStop": reconcile("AutomaticStopFinalGate"),
+        "AutomaticStopFinalGate": {
+            **invoke("automatic_final_gate", "SetPreconditionFailure", state=True),
+            "Parameters": {
+                "FunctionName": stop_task_arn,
+                "Payload": {
+                    "schema_version": 1,
+                    "action": "automatic_final_gate",
+                    "operation_id.$": "$.operation_id",
+                    "lease_id.$": "$.lease_id",
+                    "requested_by.$": "$.requested_by",
+                    "auto_stop_intent_id.$": "$.auto_stop_intent_id",
+                    "state.$": "$.reconcile.state",
+                },
+            },
+            "ResultPath": "$.automatic_gate",
+            "Next": "AutomaticStopMayProceed",
+        },
+        "AutomaticStopMayProceed": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.automatic_gate.Payload.proceed",
+                    "BooleanEquals": False,
+                    "Next": "AutomaticStopCancelled",
+                }
+            ],
+            "Default": "SetDesiredStopped",
+        },
+        "AutomaticStopCancelled": {"Type": "Succeed"},
         "SetDesiredStopped": {
             **invoke("set_desired", "SetPreconditionFailure", state=True),
             "ResultPath": "$.desired",

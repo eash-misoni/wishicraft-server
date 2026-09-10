@@ -10,6 +10,18 @@
 
 ## 2. 採用済み決定
 
+### D-093 Automatic STOPはdurable warning intentとSTOP commit前の二重観測でfail closedする
+
+- **状態:** Accepted（repository implementation / production release preparation）
+- **日付:** 2026-09-10
+- idle timeoutはGameの`runtime.idle_shutdown_minutes`を正本とし、初期dev値は30分である。専用Auto-stop EvaluatorをEventBridge rate 1 minuteで実行し、D-092 heartbeatのsame Game/runtime/boot、fresh、READY、known zero、continuous `empty_since`をcandidate evidenceにする。SystemState observationの古さだけでwarningを抑止しないが、明白なunhealthy/discrepancy/errorでは進めない。
+- warning leadは5分とする。Game/boot/empty_sinceから決定的なdurable AutoStopIntentを作り、既存Discord message componentのnonce/CAS/bounded retryで同一empty periodに一logical warningだけを配送する。STOP eligibilityは`max(empty_since + idle timeout, warning_delivered_at + 5 minutes)`以後である。terminal warning failureは当該empty periodをblockし、player positive/unknown、protocol非READY、stale/missing heartbeat、Game/runtime/boot/empty_since変更は旧intentを無効化する。
+- automatic STOPは新Operation typeを作らず既存STOPを`RequestSource.SCHEDULE`でshared Admissionへ渡す。idempotency keyはempty periodのintentから決定し、同periodでOperationを増殖させない。EvaluatorはLock取得やState Machine直接起動、EC2/SSM/DNS/SystemState/heartbeat mutationを行わない。
+- Lock所有下でfresh ReconcileがHEALTHY/no discrepancy/no observation error、canonical Game/Target/Data EBS binding、同一intentとfresh trusted-zero heartbeat、warning/idle時間を再検証し、その後に既存fixed Host Runtime probeでplayer countを独立再観測する。unknown/positive/mismatchはexisting `CANCELLED`へatomic terminalizeし、Lock/Current Operationを解放する。
+- cancel可能なcommit pointはexisting STOPの`verify_and_set_desired`およびMinecraft save/stop mutationの直前とする。final gate失敗はDesired、Minecraft、EC2、DNSを変更しない。gate成功後は既存STOP contractでsave/flush、graceful runtime stop、EC2 stop、DNS cleanup、final Reconcileへ収束し、途中のplayer変化では巻き戻さない。
+- Admission outcome不明はblind resendせずdeterministic identityをread-only照合する。mutation開始後のFAILEDも同empty periodで新Operationを作らない。RuntimeHeartbeatとSystemState/Reconcile freshnessは別の安全条件であり、MonitoringObservationUnknownをtriggerにしない。heartbeat stale alarmはPhase 8.3で扱う。
+- **関連:** D-031、D-074、D-092、Phase 8.2。
+
 ### D-092 Runtime heartbeatはTargetから専用tableへfail-closedで送る
 
 - **状態:** Accepted（repository implementation / production release preparation）

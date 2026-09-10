@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from wishicraft import stop_workflow_lambda
+from wishicraft.operation import OperationStatus
 from wishicraft.stop_workflow import StopErrorCode, StopWorkflowError
 from wishicraft.stop_workflow_lambda import (
     _command_result,
@@ -197,3 +198,53 @@ def test_stop_side_effects_publish_progress_only_after_lease_verification(
         ("verify", None),
         ("progress", "ENDPOINT_CLEANUP"),
     ]
+
+
+def test_automatic_gate_cancels_and_releases_before_any_stop_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, object]] = []
+
+    class Leases:
+        def verify_owned(self, proof: object, *, now: object) -> None:
+            calls.append(("verify", proof))
+
+    class Operations:
+        def complete_owned(self, **kwargs: object) -> None:
+            calls.append(("complete", kwargs["status"]))
+
+    runtime = SimpleNamespace(
+        system_id="wishicraft-main",
+        coordinator=SimpleNamespace(leases=Leases()),
+        operations=Operations(),
+    )
+    monkeypatch.setattr(stop_workflow_lambda, "_runtime", runtime)
+    monkeypatch.setattr(
+        stop_workflow_lambda,
+        "_automatic_gate_reason",
+        lambda *args, **kwargs: "PLAYER_RECONNECTED",
+    )
+    monkeypatch.setattr(
+        stop_workflow_lambda,
+        "_cancel_intent",
+        lambda *args, **kwargs: calls.append(("intent", kwargs["reason"])),
+    )
+    result = stop_workflow_lambda.handler(
+        {
+            "schema_version": 1,
+            "action": "automatic_final_gate",
+            "operation_id": "op-stop-001",
+            "lease_id": "lease-001",
+            "requested_by": "SCHEDULE",
+            "auto_stop_intent_id": "asi-example",
+            "state": {},
+        },
+        None,
+    )
+    assert result == {
+        "proceed": False,
+        "automatic": True,
+        "reason": "PLAYER_RECONNECTED",
+    }
+    assert calls[1] == ("complete", OperationStatus.CANCELLED)
+    assert calls[2] == ("intent", "PLAYER_RECONNECTED")

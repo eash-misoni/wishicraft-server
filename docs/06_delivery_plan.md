@@ -805,10 +805,10 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 1. **Completed（2026-09-09）:** D-092の60秒heartbeat agent/timer、Retain/TTL付き専用RuntimeHeartbeats table、Target roleのtable/canonical key限定GetItem/conditional PutItemをdevへreleaseした。
 2. READY/player 0、unknown/null、Linux boot identity、24時間TTL、約60秒cadence、same-boot continuous known-zeroのempty_since、service-only restart continuity、stale CAS拒否をproductionで確認した。producerはMinecraft/EC2/SystemState/DNSを変更せず、STOP後の残存recordはobserved_atでstale判定する。
 3. 初回empty tableではAWS CLI GetItemが空stdoutを返す実環境差によりsafe failureしたが、absent recordとして扱うadapter回帰修正後に正常収束した。
-4. EventBridge判定
-5. stop workflow再利用
-6. 停止予告
-7. 再接続時キャンセル条件
+4. **Repository implementation:** D-093によりGame設定の30分idle、5分warning、1分Evaluator、durable AutoStopIntent、deterministic STOP/SCHEDULE admissionを実装する。
+5. warningは同一empty periodに一件だけ配送し、成功から最低5分を確保する。failure、再接続、unknown、stale、boot/empty period変更はfail closedする。
+6. existing STOP workflowのDesired変更前に、Lock所有下のfresh Reconcileとfixed Host Runtime direct player probeを追加する。gate failureはDesired/Minecraft/EC2/DNS mutation前にCANCELLEDへ収束する。
+7. dev E2Eではcanonical 30分/5分を短縮せず、warning後reconnect cancellationと新empty periodからのreal automatic STOPを確認する。
 
 ### 8.3 追加監視・コスト調整
 

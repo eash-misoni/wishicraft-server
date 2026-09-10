@@ -40,7 +40,9 @@ _retention_launcher: WorkflowLauncher | None = None
 
 def handler(event: object, context: object) -> dict[str, object]:
     del context
-    operation_type, idempotency_key, requested_by, discord = _parse_event(event)
+    operation_type, idempotency_key, requested_by, discord, auto_stop_intent_id = _parse_event(
+        event
+    )
     if operation_type is OperationType.BACKUP and not os.environ.get("BACKUP_STATE_MACHINE_ARN"):
         raise ValueError("BACKUP workflow is not configured")
     if operation_type is OperationType.RETENTION and not os.environ.get(
@@ -69,6 +71,8 @@ def handler(event: object, context: object) -> dict[str, object]:
             operation_id=result.operation_id,
             lease_id=result.lease_id,
             started_at=datetime.now(UTC),
+            requested_by=requested_by,
+            auto_stop_intent_id=auto_stop_intent_id,
         )
     if result.created and operation_type is OperationType.BACKUP:
         if result.lease_id is None:
@@ -115,7 +119,15 @@ class WorkflowLauncher:
             lock_name=_required_environment("GLOBAL_LOCK_NAME"),
         )
 
-    def start(self, *, operation_id: str, lease_id: str, started_at: datetime) -> None:
+    def start(
+        self,
+        *,
+        operation_id: str,
+        lease_id: str,
+        started_at: datetime,
+        requested_by: RequestSource | None = None,
+        auto_stop_intent_id: str | None = None,
+    ) -> None:
         proof = LeaseProof(_required_environment("SYSTEM_ID"), operation_id, lease_id, 0)
         prefix, separator, state_machine_name = self._state_machine_arn.rpartition(":stateMachine:")
         if not separator or not state_machine_name:
@@ -145,17 +157,18 @@ class WorkflowLauncher:
                 },
             )
             execution_registered = True
+            workflow_input: dict[str, object] = {
+                "schema_version": 1,
+                "operation_id": operation_id,
+                "lease_id": lease_id,
+            }
+            if requested_by is not None:
+                workflow_input["requested_by"] = requested_by.value
+                workflow_input["auto_stop_intent_id"] = auto_stop_intent_id
             response = self._step_functions.start_execution(
                 stateMachineArn=self._state_machine_arn,
                 name=operation_id,
-                input=json.dumps(
-                    {
-                        "schema_version": 1,
-                        "operation_id": operation_id,
-                        "lease_id": lease_id,
-                    },
-                    separators=(",", ":"),
-                ),
+                input=json.dumps(workflow_input, separators=(",", ":")),
             )
             returned_arn = response.get("executionArn") if isinstance(response, dict) else None
             if returned_arn != execution_arn:
@@ -200,7 +213,7 @@ class WorkflowLauncher:
 
 def _parse_event(
     event: object,
-) -> tuple[OperationType, str, RequestSource, DiscordOperationContext | None]:
+) -> tuple[OperationType, str, RequestSource, DiscordOperationContext | None, str | None]:
     if not isinstance(event, dict) or set(event) not in (
         {
             "schema_version",
@@ -216,6 +229,14 @@ def _parse_event(
             "idempotency_key",
             "requested_by",
             "discord",
+        },
+        {
+            "schema_version",
+            "operation",
+            "operation_type",
+            "idempotency_key",
+            "requested_by",
+            "auto_stop_intent_id",
         },
     ):
         raise ValueError("invalid Operation admission invocation")
@@ -246,7 +267,19 @@ def _parse_event(
             )
         else:
             raise ValueError("invalid Discord admission metadata")
-        return OperationType(operation_type), idempotency_key, source, discord
+        parsed_type = OperationType(operation_type)
+        auto_stop_intent_id = event.get("auto_stop_intent_id")
+        if auto_stop_intent_id is not None and (
+            parsed_type is not OperationType.STOP
+            or source is not RequestSource.SCHEDULE
+            or not isinstance(auto_stop_intent_id, str)
+            or not auto_stop_intent_id.startswith("asi-")
+        ):
+            raise ValueError("invalid automatic STOP admission metadata")
+        if parsed_type is OperationType.STOP and source is RequestSource.SCHEDULE:
+            if not isinstance(auto_stop_intent_id, str):
+                raise ValueError("automatic STOP intent is required")
+        return parsed_type, idempotency_key, source, discord, auto_stop_intent_id
     except ValueError as error:
         raise ValueError("invalid Operation admission invocation") from error
 
