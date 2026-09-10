@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -25,10 +26,22 @@ def isolated_environment(tmp_path: Path) -> tuple[dict[str, str], Path]:
     home.mkdir()
     environment = {
         "HOME": str(home),
-        "PATH": f"{bin_dir}:/usr/bin:/bin",
+        "PATH": str(bin_dir),
         "SHELL": "/bin/sh",
     }
+    make_executable(
+        bin_dir,
+        "uname",
+        "[ \"${1:-}\" = -s ] && printf '%s\\n' TestOS || printf '%s\\n' test-arch",
+    )
     return environment, bin_dir
+
+
+def expose_system_tools(bin_dir: Path, names: tuple[str, ...]) -> None:
+    for name in names:
+        source = shutil.which(name)
+        assert source is not None
+        (bin_dir / name).symlink_to(source)
 
 
 def test_check_reports_discovered_tools_and_optional_docker_absence(tmp_path: Path) -> None:
@@ -166,6 +179,7 @@ def test_gh_setup_uses_official_checksum_and_user_local_roots(tmp_path: Path) ->
             "XDG_BIN_HOME": str(user_bin),
         }
     )
+    expose_system_tools(bin_dir, ("awk", "chmod", "cp", "ln", "mkdir", "mktemp", "readlink", "rm"))
     make_executable(
         bin_dir,
         "uname",
@@ -209,6 +223,7 @@ chmod 0755 \"$destination/gh_2.100.0_macOS_arm64/bin/gh\"""",
 
 def test_bundling_cache_setup_uses_discovered_uv_and_locked_requirements(tmp_path: Path) -> None:
     environment, bin_dir = isolated_environment(tmp_path)
+    expose_system_tools(bin_dir, ("mktemp", "rm"))
     invocation_log = tmp_path / "uv-invocation"
     uv = make_executable(bin_dir, "uv", 'printf \'%s\\n\' "$*" > "$FAKE_UV_LOG"')
     environment["WISHICRAFT_UV_BIN"] = str(uv)
