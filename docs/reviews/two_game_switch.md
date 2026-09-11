@@ -14,7 +14,8 @@ Paths and commands are not supplied by Discord callers. Games records describe t
 registered Games; the Git catalog limits what the host can execute. Distribution of
 that catalog is configuration deployment, not synchronization of an active pointer.
 
-`SystemState.desired_game_id` is the selected Game. STOP retains it. A legacy unset
+`SystemState.desired_game_id` is the selected Game. STOP retains it. The existing `SystemState.game_id` is updated atomically in the same
+Desired CAS for legacy consumers; it is not an independently writable selector. A legacy unset
 selection resolves to A until the first successful desired update. Actual Game/run
 comes from the validated container/receipt, never from the selection. `runtime_id`
 continues to name the host runtime slot; `run_id` names one execution.
@@ -49,8 +50,9 @@ permission or guaranteed advance notice needs a separate explicit policy decisio
 
 New backups protect the shared physical volume and carry a frozen recovery description
 in the existing durable provenance. No separate manifest service or archive subsystem.
-The description identifies both registered Games, Game-derived paths, runtime image
-and configuration revision. Failure to freeze that information must prevent creation;
+The description identifies both registered Games, Game-derived paths, runtime image,
+manifest, Compose and runtime.env bytes. Game-local properties/whitelist/world/player files
+are protected in the Snapshot itself, not copied into a second mutable settings store. Failure to freeze that information must prevent creation;
 post-create uncertainty protects the existing Snapshot and reservation until read-back.
 
 Retention remains dry-run-only. New shared-volume normal backups form their own newest
@@ -68,5 +70,32 @@ been authorized by this request. The final migration plan must identify fresh pr
 exact deployed predecessors, admission drain, B materialization, compatible host/CP
 cutover, A→B→A measurements, failure checkpoints, and final STOPPED/HEALTHY.
 
-Repository tests, Docker CI, deployment difference review, and the concrete runbook
-remain work in progress. This document is not execution evidence or a readiness claim.
+The [migration runbook](../runbooks/two_game_switch_migration.md) owns execution ordering and
+checkpoints. Validation/CI evidence is finalized separately before readiness; no production
+SWITCH or new backup format has been exercised yet.
+
+
+## Canonical document integration
+
+| 文書 | 今回の扱いと正本の責務 |
+|---|---|
+| README | 現行D-096契約と未承認D-097の入口を分ける |
+| AGENTS / 10 working agreement | 明示された一括承認とローカル委任を再利用。範囲外write・未知identity/outcomeで停止 |
+| 01 scope/glossary | 既存runtime slotとrun/processを区別。将来モデルを今回の必須fieldにしない |
+| 02 requirements | D-096 START/STOP保証とD-095復元順序を現行本文に統合。GAME LATER計画は見直し対象 |
+| 03 architecture | 現行の実行境界と単一Game保護単位を明記。詳細契約は05へ参照 |
+| 04 domain/state | Operation targetとhost実観測の責務、選択/観測の区別を説明 |
+| 05 data/interface | D-096の対象固定・排他・停止削除・失敗再開の正本をrunbookから移設。CP v1 schemaは引き続き現行 |
+| 06 delivery | Phase 9〜16を従来計画として保持し見直し対象と明記。D-095/D-096 Completedを維持 |
+| 07 operations/security/cost | 正常STOPのデータ保持、root receiptとData EBSの異なる回復限界、復元実証範囲 |
+| 08 human flow | 現行の日常操作と未公開のSWITCH/Resetを区別。正常container cleanupを人間の日常作業にしない |
+| 09 Decisions | D-095/D-096の採用履歴を保持、D-097のみProposed。意味変更の採否はproduction gate |
+| 11 external constraints | 更新不要。既存EULA/公式仕様の責務を変更せず、Bに適用する初期設定を承認計画で確認 |
+| 12 initial configuration | initial Gameとrun IDを区別。新catalog/contextはProposedの明示配布設定 |
+| targeted runtime runbook | 詳細契約の重複を05参照へ置換、旧手順/hash/失敗と適用証跡は保持 |
+| backup safety runbook/evidence | 更新不要。完了した隔離復元の復旧点・限界・証跡は過去事実として保持 |
+| phase8 review | 当時の未承認/未実施と後続D-095/D-096完了を区別し、本提案へ参照 |
+| 本提案 / two-Game runbook | 未承認の契約差分と、実行順序をそれぞれ一か所で所有 |
+
+Reset認可/旧world保持削除、共通whitelist反映、異なるruntime/spec、Web/Package管理は未決のまま。
+新しい共有BACKUP newest 7は削除releaseではない。既存v1 normalとmigration anchorを数え直さない。

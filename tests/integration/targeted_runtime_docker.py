@@ -94,7 +94,7 @@ services:
             "game-ci\n", "${WISHICRAFT_GAME_ID:?targeted Game required}\n"
         )
         (artifacts / "compose.yaml").write_text(compose)
-    manifest = {
+    manifest: dict[str, Any] = {
         "image": IMAGE,
         "compose_sha256": hashlib.sha256(compose.encode()).hexdigest(),
         "runtime_env_sha256": hashlib.sha256(environment.encode()).hexdigest(),
@@ -110,7 +110,7 @@ services:
         "config_digest": hashlib.sha256(manifest_bytes).hexdigest(),
         "run_id": "op-first",
     }
-    config = {**target, "system_id": "ci-only", "lock_name": "ci-only"}
+    config: dict[str, Any] = {**target, "system_id": "ci-only", "lock_name": "ci-only"}
     if two_games:
         config["games"] = game_ids
     host.ROOT = root
@@ -235,6 +235,7 @@ services:
 
     missing_env = dict(os.environ)
     missing_env.pop("WISHICRAFT_RUN_ID", None)
+    missing_env.update(WISHICRAFT_GAME_ID=target["game_id"], GAME_DIRECTORY=target["data_source"])
     missing = subprocess.run(
         [
             "docker",
@@ -256,6 +257,7 @@ services:
     host.execute = execute
     assert not host.inspect(), "preexisting project: refuse to touch it"
     container_ids = []
+    b_saved: dict[str, str] = {}
     for index in range(3 if two_games else 2):
         if two_games:
             game_id = game_ids[index % 2]
@@ -349,6 +351,19 @@ services:
         assert (data / "world/level.dat").is_file()
         assert (data / "world/players/data").is_dir()  # Synthetic world; no human player claim.
         assert (data / "sentinel").read_text() == "existing data outside the container layer"
+        if two_games and index == 1:
+            b_saved = {
+                str(p): hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in (data / "world").rglob("*")
+                if p.is_file()
+            }
+    if two_games:
+        assert b_saved and all(
+            hashlib.sha256(Path(p).read_bytes()).hexdigest() == digest
+            for p, digest in b_saved.items()
+        )
+        print("B saved world unchanged during A restart", flush=True)
+    assert len(set(container_ids)) == len(container_ids)
     assert state["stop_observations"] == (3 if two_games else 2)
     print(
         "PASS real v2 START/STOP/new-run START, saved scoreboard=42, rm reply loss, bind preserved"
