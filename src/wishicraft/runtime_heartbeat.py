@@ -34,6 +34,8 @@ class RuntimeObservation:
     protocol_state: ProtocolState
     player_count: Optional[int]
     observed_at: datetime
+    run_id: Optional[str] = None
+    process_id: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -49,6 +51,8 @@ class RuntimeHeartbeat:
     empty_since: Optional[datetime]
     observed_at: datetime
     expires_at: int
+    run_id: Optional[str] = None
+    process_id: Optional[str] = None
 
     def is_fresh(self, now: datetime) -> bool:
         return _utc(now) - self.observed_at <= timedelta(seconds=HEARTBEAT_STALE_SECONDS)
@@ -93,6 +97,8 @@ def derive_heartbeat(
         schema_version=1,
         instance_id=observation.instance_id,
         runtime_id=observation.runtime_id,
+        run_id=observation.run_id,
+        process_id=observation.process_id,
         boot_id=observation.boot_id,
         active_game_id=observation.active_game_id,
         protocol_state=observation.protocol_state,
@@ -115,6 +121,8 @@ def _continuous_zero(
     return (
         previous.instance_id == observation.instance_id
         and previous.runtime_id == observation.runtime_id
+        and previous.run_id == observation.run_id
+        and previous.process_id == observation.process_id
         and previous.boot_id == observation.boot_id
         and previous.active_game_id == canonical_game_id
         and previous.protocol_state is ProtocolState.READY

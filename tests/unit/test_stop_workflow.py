@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 import pytest
 
 from wishicraft.operation import LeaseProof
+from wishicraft.runtime_contract import command
 from wishicraft.stop_workflow import (
     Ec2StopAdapter,
     FixedHostStopAdapter,
@@ -135,11 +136,14 @@ def test_desired_stopped_convergence_does_not_increment_revision(
 def test_host_stop_is_one_fixed_typed_command() -> None:
     api = FakeSsm()
     assert (
-        FixedHostStopAdapter(api, timeout_seconds=360).stop(instance_id="i-0123456789abcdef0")
+        FixedHostStopAdapter(api, timeout_seconds=360).stop(
+            instance_id="i-0123456789abcdef0", operation_id="op-test", lease_id="lease-test"
+        )
         == "command-stop"
     )
     assert api.calls[0]["Parameters"] == {
-        "commands": ["sudo /usr/local/libexec/wishicraft/operation-v1 STOP"]
+        "commands": [command(operation_id="op-test", lease_id="lease-test", action="STOP")],
+        "executionTimeout": ["360"],
     }
 
 

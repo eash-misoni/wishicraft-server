@@ -847,6 +847,8 @@ Control Planeだけをdeployし、6 alarmと5分Reconcile scheduleを追加、11
 
 ## 12. Phase 9 — 複数ゲーム抽象
 
+**現在の限定作業:** D-096の既存Game targeted runtime契約を独立sliceとしてrepository実装・移行準備する。production未適用。以下のPackage/Preset/Templateを含むPhase 9全体の計画は再設計比較の対象であり、今回まとめて開始・Accepted化しない。[移行gate](runbooks/targeted_runtime_migration.md)参照。
+
 ### 目的
 
 固定バニラ専用コードを、Package/Preset/Template/Gameモデルへ一般化する。

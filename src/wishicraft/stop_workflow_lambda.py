@@ -19,6 +19,7 @@ from wishicraft.operation import (
 )
 from wishicraft.reconcile import TargetEc2Api, TargetResolver
 from wishicraft.reconcile_lambda import AwsStatusFactory
+from wishicraft.runtime_contract import RuntimeTargetRepository, bound_instance, select_target
 from wishicraft.runtime_heartbeat_producer import _decode
 from wishicraft.stop_workflow import (
     Ec2StopAdapter,
@@ -59,6 +60,9 @@ class Runtime:
         dynamodb = cast(DynamoApi, session.client("dynamodb", region_name=region))
         self.system_id = _env("SYSTEM_ID")
         self.game_id = _env("GAME_ID")
+        self.data_source = _env("RUNTIME_DATA_SOURCE")
+        self.config_digest = _env("RUNTIME_CONFIG_DIGEST")
+        self.targets = RuntimeTargetRepository(dynamodb, _env("OPERATIONS_TABLE"))
         self.runtime_id = "wishicraft-host-runtime"
         self.data_volume_id = _env("DATA_VOLUME_ID")
         self.data_volume_device = _env("DATA_VOLUME_DEVICE")
@@ -158,6 +162,8 @@ def handler(event: object, context: object) -> dict[str, object]:
             return {"proceed": False, "automatic": True, "reason": reason}
         return {"proceed": True, "automatic": True}
     if action == "set_desired":
+        runtime.coordinator.leases.verify_owned(proof, now=now)
+        select_target(runtime, proof, _mapping(payload, "state"), action="STOP")
         observation = StopObservation.from_item(_mapping(payload, "state"))
         revision, already_stopped = runtime.coordinator.verify_and_set_desired(
             proof=proof, observation=observation, now=now
@@ -171,7 +177,8 @@ def handler(event: object, context: object) -> dict[str, object]:
         return {
             "desired_revision": revision,
             "already_stopped": already_stopped,
-            "runtime_stopped": observation.runtime_stopped,
+            "runtime_stopped": observation.runtime_stopped
+            and _receipt_stopped(payload, runtime, proof.owner_operation_id),
         }
     if action == "renew":
         renewed = runtime.coordinator.renew(proof, now=now)
@@ -184,16 +191,25 @@ def handler(event: object, context: object) -> dict[str, object]:
             status=OperationStatus.RUNNING,
             updated_at=now,
         )
-        command_id = runtime.host_stop.stop(instance_id=runtime.resolver.resolve())
+        command_id = runtime.host_stop.stop(
+            instance_id=bound_instance(runtime, proof.owner_operation_id),
+            operation_id=proof.owner_operation_id,
+            lease_id=proof.lease_id,
+        )
         return {"command_id": command_id}
     if action == "check_host_stop":
         result = _command_result(
             cast(SsmInvocationApi, runtime.ssm),
-            instance_id=runtime.resolver.resolve(),
+            instance_id=bound_instance(runtime, proof.owner_operation_id),
             command_id=_string(payload, "command_id"),
         )
         return result
     if action == "stop_ec2":
+        state = _mapping(payload, "state")
+        if StopObservation.from_item(state).ec2_state != "stopped" and not _receipt_stopped(
+            payload, runtime, proof.owner_operation_id
+        ):
+            raise ValueError("runtime stop receipt not confirmed")
         runtime.coordinator.leases.verify_owned(proof, now=now)
         runtime.operations.update_step(
             operation_id=proof.owner_operation_id,
@@ -202,7 +218,7 @@ def handler(event: object, context: object) -> dict[str, object]:
             updated_at=now,
         )
         stopped = runtime.ec2_stop.stop_if_needed(
-            instance_id=runtime.resolver.resolve(),
+            instance_id=bound_instance(runtime, proof.owner_operation_id),
             observation=StopObservation.from_item(_mapping(payload, "state")),
         )
         return {"stopped": stopped}
@@ -289,6 +305,14 @@ def _automatic_gate_reason(
         or direct.player_count != 0
     ):
         return "DIRECT_PLAYER_OBSERVATION_NOT_ZERO"
+    if intent.run_id is not None:
+        execution = direct.execution
+        if not isinstance(execution, dict) or not isinstance(execution.get("target"), dict):
+            return "DIRECT_RUN_ID_UNKNOWN"
+        if cast(dict[str, object], execution["target"]).get("run_id") != intent.run_id:
+            return "DIRECT_RUN_ID_MISMATCH"
+        if execution.get("process_id") != intent.process_id:
+            return "DIRECT_PROCESS_ID_MISMATCH"
     return None
 
 
@@ -329,6 +353,8 @@ def _load_intent(runtime: Runtime, intent_id: str) -> AutoStopIntent:
         intent_id=_string(plain, "intent_id"),
         game_id=_string(plain, "game_id"),
         boot_id=_string(plain, "boot_id"),
+        run_id=cast(str | None, plain.get("run_id")),
+        process_id=cast(str | None, plain.get("process_id")),
         empty_since=_timestamp(plain, "empty_since"),
         idle_timeout_minutes=_integer(plain, "idle_timeout_minutes"),
         warning_lead_minutes=_integer(plain, "warning_lead_minutes"),
@@ -511,3 +537,14 @@ def _get_runtime() -> Runtime:
     if _runtime is None:
         _runtime = Runtime()
     return _runtime
+
+
+def _receipt_stopped(payload: dict[str, object], runtime: Runtime, operation_id: str) -> bool:
+    state = _mapping(payload, "state")
+    observation = _mapping(state, "observation")
+    execution = observation.get("execution")
+    return (
+        isinstance(execution, dict)
+        and execution.get("phase") == "stopped"
+        and execution.get("target") == runtime.targets.read(operation_id)
+    )

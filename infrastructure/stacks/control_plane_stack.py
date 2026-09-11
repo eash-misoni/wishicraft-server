@@ -26,6 +26,7 @@ from constructs import Construct
 from infrastructure.discord_command_bundle import discord_command_bundling
 from wishicraft.artifacts.host_runtime_probe import EXPECTED_FILESYSTEM_UUID
 from wishicraft.config import ProjectConfig, SecretsExampleConfig, StageConfig
+from wishicraft.host_runtime import render_boot_time_artifacts
 from wishicraft.naming import resource_name, resource_tags
 
 
@@ -208,6 +209,15 @@ class ControlPlaneStack(Stack):
             retention=_log_retention(stage),
             removal_policy=RemovalPolicy.DESTROY,
         )
+        targeted_artifacts = render_boot_time_artifacts(
+            project,
+            stage,
+            observed_uid=int(str(stage.host_runtime_value("identity.uid"))),
+            observed_gid=int(str(stage.host_runtime_value("identity.gid"))),
+            enable_rcon=True,
+            rcon_parameter_name=f"/wishicraft/{stage.stage}/secret/rcon-password",
+            targeted=True,
+        )
         start_task = lambda_.Function(
             self,
             "StartTaskFunction",
@@ -229,6 +239,10 @@ class ControlPlaneStack(Stack):
                 "STAGE": stage.stage,
                 "GLOBAL_LOCK_NAME": stage.global_lock_name,
                 "LOCK_LEASE_SECONDS": str(stage.lock_lease_seconds),
+                "RUNTIME_DATA_SOURCE": (
+                    f"{stage.data_volume_mount_path}/games/{project.initial_game_id}/server"
+                ),
+                "RUNTIME_CONFIG_DIGEST": targeted_artifacts.digest,
                 "HOST_START_TIMEOUT_SECONDS": str(stage.host_runtime_timeout_seconds("ssm")),
                 "HOSTED_ZONE_ID": stage.route53_hosted_zone_id,
                 "RECORD_NAME": stage.route53_record_name,
@@ -350,6 +364,10 @@ class ControlPlaneStack(Stack):
                 "STAGE": stage.stage,
                 "GLOBAL_LOCK_NAME": stage.global_lock_name,
                 "LOCK_LEASE_SECONDS": str(stage.lock_lease_seconds),
+                "RUNTIME_DATA_SOURCE": (
+                    f"{stage.data_volume_mount_path}/games/{project.initial_game_id}/server"
+                ),
+                "RUNTIME_CONFIG_DIGEST": targeted_artifacts.digest,
                 "HOST_STOP_TIMEOUT_SECONDS": str(stage.host_runtime_timeout_seconds("ssm")),
                 "DATA_VOLUME_ID": str(
                     stage.host_runtime_value("target_host.existing_data_volume_id")

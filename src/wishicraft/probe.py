@@ -147,6 +147,7 @@ class HostRuntimeProbe:
     ready: bool
     errors: tuple[str, ...]
     telemetry: dict[str, object] | None = None
+    execution: dict[str, object] | None = None
 
 
 def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostRuntimeProbe:
@@ -249,7 +250,14 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     ):
         raise ProbeContractError("probe errors require an unknown observation")
 
+    execution = _execution(document.get("execution"))
+    if execution is not None:
+        execution_target = execution["target"]
+        assert isinstance(execution_target, dict)
+        if execution_target["instance_id"] != instance_id:
+            raise ProbeContractError("execution instance mismatch")
     return HostRuntimeProbe(
+        execution=execution,
         telemetry=(
             _parse_telemetry(_mapping(document.get("telemetry"), "telemetry"))
             if version == "1.4.0"
@@ -573,3 +581,28 @@ def _errors(value: object) -> tuple[str, ...]:
     if len(value) != len(set(value)):
         raise ProbeContractError("errors must be unique")
     return tuple(value)
+
+
+def _execution(value: object) -> dict[str, object] | None:
+    if value is None:
+        return None
+    from wishicraft.runtime_contract import validate_target
+
+    if (
+        not isinstance(value, dict)
+        or (set(value) - {"target", "phase", "process_id"})
+        or not {"target", "phase"} <= set(value)
+    ):
+        raise ProbeContractError("invalid execution receipt")
+    if value["phase"] not in {"starting", "running", "stopping", "stopped"}:
+        raise ProbeContractError("invalid execution phase")
+    try:
+        target = validate_target(value["target"])
+    except ValueError as error:
+        raise ProbeContractError("invalid execution target") from error
+    process_id = value.get("process_id")
+    if process_id is not None and (
+        not isinstance(process_id, str) or re.fullmatch(r"[0-9a-f]{64}", process_id) is None
+    ):
+        raise ProbeContractError("invalid process identity")
+    return {"target": target, "phase": value["phase"], "process_id": process_id}

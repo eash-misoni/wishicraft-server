@@ -8,6 +8,16 @@
 
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
+## 今回の承認待ち提案
+
+### D-096 既存Gameの対象を固定したruntime実行契約
+
+- **状態:** Proposed（repository局所実装、production gate待ち）
+- **対象:** 既存Gameの通常START/STOPのみ。Phase 9全体や新Game/worldモデルの採用ではない。
+- **提案:** Operationへinstance/Game/data/config/runを固定し、hostが排他内で既存Operation/leaseをread-backする。runと実processの識別を分離し、heartbeat/停止予告を新processへ持ち越さない。data directoryは維持する。
+- **差分:** D-075のoperation-v1を新入口v2へ置換する案。D-074のCP ownershipを残しつつhostの検証を加える。新table/workflowなし。詳細・移行・復旧・検証範囲は[単一runbook](runbooks/targeted_runtime_migration.md)を正本とする。
+- **未適用:** Accepted化、AWS write、実データ変更は今回の準備に含まない。既存Acceptedのproduction実績は変更しない。
+
 ## 2. 採用済み決定
 
 ### D-095 既存Snapshotの隔離復元確認を実データ移行・Resetより前に行う

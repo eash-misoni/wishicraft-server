@@ -151,3 +151,12 @@ CDK→実handler環境、DynamoDB wire形式→domain、Operation→delivery loa
 通常のローカル修正はslice内で委任し、外部writeは差分・停止点・rollbackをまとめて一回レビューする。
 今回のrepo修正は[BACKUP契約補足](../05_data_and_interface_contracts.md#backup-create-reservation)とrunbookへ限定し、
 本書のProposed内容の承認を含まない。
+
+
+## 次の限定slice: targeted runtime（Proposed）
+
+D-096として既存GameのSTART/STOPに対象固定とhost側検証を追加するrepository実装を準備する。
+固定runtime_idを起動IDへ読み替えず、Operation由来runとcontainer由来process観測を区別する。
+ディレクトリ移動、新Game/world台帳、Package管理は追加しない。
+契約・正本・途中失敗・新旧混在・移行の詳細は[移行runbook](../runbooks/targeted_runtime_migration.md)へ集約した。
+ここで他の再設計案をAcceptedへ変更していない。

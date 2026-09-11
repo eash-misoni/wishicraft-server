@@ -16,6 +16,12 @@ from wishicraft.operation import (
     OperationStatus,
 )
 from wishicraft.reconcile import TargetEc2Api, TargetResolver
+from wishicraft.runtime_contract import (
+    RuntimeTargetRepository,
+    assert_observed,
+    bound_instance,
+    select_target,
+)
 from wishicraft.start_workflow import (
     Ec2LifecycleAdapter,
     Ec2LifecycleApi,
@@ -52,6 +58,9 @@ class Runtime:
         self.route53 = session.client("route53", region_name=region)
         dynamodb = cast(DynamoApi, session.client("dynamodb", region_name=region))
         self.game_id = _env("GAME_ID")
+        self.data_source = _env("RUNTIME_DATA_SOURCE")
+        self.config_digest = _env("RUNTIME_CONFIG_DIGEST")
+        self.targets = RuntimeTargetRepository(dynamodb, _env("OPERATIONS_TABLE"))
         self.system_id = _env("SYSTEM_ID")
         self.record_name = _env("RECORD_NAME")
         self.hosted_zone_id = _env("HOSTED_ZONE_ID")
@@ -97,6 +106,8 @@ def handler(event: object, context: object) -> dict[str, object]:
     )
     action = payload["action"]
     if action == "set_desired":
+        runtime.coordinator.leases.verify_owned(proof, now=now)
+        select_target(runtime, proof, _mapping(payload, "state"), action="START")
         observation = StartObservation.from_item(_mapping(payload, "state"))
         revision, already_ready = runtime.coordinator.verify_and_set_desired(
             proof=proof, observation=observation, game_id=runtime.game_id, now=now
@@ -118,7 +129,8 @@ def handler(event: object, context: object) -> dict[str, object]:
         )
         observation = StartObservation.from_item(_mapping(payload, "state"))
         started = runtime.ec2_lifecycle.start_if_needed(
-            instance_id=runtime.resolver.resolve(), current_state=observation.ec2_state
+            instance_id=bound_instance(runtime, proof.owner_operation_id),
+            current_state=observation.ec2_state,
         )
         return {"started": started}
     if action == "renew":
@@ -132,16 +144,21 @@ def handler(event: object, context: object) -> dict[str, object]:
             status=OperationStatus.RUNNING,
             updated_at=now,
         )
-        command_id = runtime.host_start.start(instance_id=runtime.resolver.resolve())
+        command_id = runtime.host_start.start(
+            instance_id=bound_instance(runtime, proof.owner_operation_id),
+            operation_id=proof.owner_operation_id,
+            lease_id=proof.lease_id,
+        )
         return {"command_id": command_id}
     if action == "check_host_start":
         status = _command_status(
             cast(SsmInvocationApi, runtime.ssm),
-            instance_id=runtime.resolver.resolve(),
+            instance_id=bound_instance(runtime, proof.owner_operation_id),
             command_id=_string(payload, "command_id"),
         )
         return {"status": status, "complete": status == "Success"}
     if action == "upsert_dns":
+        assert_observed(runtime, proof.owner_operation_id, _mapping(payload, "state"))
         runtime.coordinator.leases.verify_owned(proof, now=now)
         runtime.operations.update_step(
             operation_id=proof.owner_operation_id,
@@ -164,6 +181,7 @@ def handler(event: object, context: object) -> dict[str, object]:
         )
         return {"status": status, "complete": status == "INSYNC"}
     if action == "complete":
+        assert_observed(runtime, proof.owner_operation_id, _mapping(payload, "state"))
         observation = StartObservation.from_item(_mapping(payload, "state"))
         if not observation.ready_for_success(runtime.game_id):
             raise StartWorkflowError(StartErrorCode.ENDPOINT_DISCREPANCY)

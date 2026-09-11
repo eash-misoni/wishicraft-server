@@ -7,6 +7,7 @@ This artifact intentionally has no arguments and performs no repair or lifecycle
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -477,6 +478,34 @@ def observe_protocol(container_id: str) -> tuple[dict[str, Any], str, bool]:
     return observation, "ready" if version_match else "not-ready", version_match
 
 
+def observe_execution(container: dict[str, Any]) -> Optional[dict[str, Any]]:
+    try:
+        with open("/var/lib/wishicraft/runtime/receipt.json", encoding="utf-8") as stream:
+            receipt = json.load(stream)
+        target = receipt["target"]
+        if container["state"] == "running":
+            result = run("docker", "inspect", container["container_id"])
+            actual = json.loads(result.stdout)[0]
+            if actual["Config"]["Labels"].get("com.wishicraft.run-id") != target["run_id"]:
+                return None
+            with open("/etc/wishicraft/host-runtime/manifest.json", "rb") as stream:
+                manifest_bytes = stream.read()
+            manifest = json.loads(manifest_bytes)
+            if hashlib.sha256(manifest_bytes).hexdigest() != target["config_digest"]:
+                return None
+            if actual["Config"]["Image"] != manifest["image"]:
+                return None
+            receipt["process_id"] = hashlib.sha256(
+                (actual["Id"] + "\n" + actual["State"]["StartedAt"]).encode()
+            ).hexdigest()
+            binds = [m for m in actual["Mounts"] if m["Destination"] == "/data"]
+            if len(binds) != 1 or binds[0]["Source"] != target["data_source"]:
+                return None
+        return dict(receipt)
+    except (OSError, KeyError, ValueError, TypeError):
+        return None
+
+
 def main() -> int:
     errors: list[str] = []
     observed_instance_id, identity_error = instance_id()
@@ -520,6 +549,7 @@ def main() -> int:
             "ready": False,
         }
     document = {
+        "execution": observe_execution(container),
         "schema_version": SCHEMA_VERSION,
         "probe_version": PROBE_VERSION,
         "observed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),

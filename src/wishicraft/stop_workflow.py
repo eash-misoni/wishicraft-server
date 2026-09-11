@@ -8,6 +8,7 @@ from enum import StrEnum
 from typing import Protocol
 
 from wishicraft.operation import LeaseProof, LeaseRepository
+from wishicraft.runtime_contract import command as runtime_command
 from wishicraft.system_state import DesiredState, SystemStateRepository
 
 
@@ -148,11 +149,16 @@ class FixedHostStopAdapter:
         self._api = api
         self._timeout = timeout_seconds
 
-    def stop(self, *, instance_id: str) -> str:
+    def stop(self, *, instance_id: str, operation_id: str, lease_id: str) -> str:
         response = self._api.send_command(
             InstanceIds=[instance_id],
             DocumentName="AWS-RunShellScript",
-            Parameters={"commands": [self.COMMAND]},
+            Parameters={
+                "commands": [
+                    runtime_command(operation_id=operation_id, lease_id=lease_id, action="STOP")
+                ],
+                "executionTimeout": [str(self._timeout)],
+            },
             TimeoutSeconds=self._timeout,
         )
         command = response.get("Command") if isinstance(response, dict) else None

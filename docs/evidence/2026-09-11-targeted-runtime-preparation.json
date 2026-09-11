@@ -1,0 +1,214 @@
+{
+  "status": "PREPARED_NOT_DEPLOYED",
+  "decision": "D-096 Proposed",
+  "baseline_head": "30b029295c3cd94d00fbfe1aacd0f60094d2f011",
+  "aws_writes_performed": false,
+  "preflight": {
+    "at": "2026-09-11T05:44:29.189990+00:00",
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "target": {
+      "id": "i-04fc0629dc4ea466e",
+      "state": "stopped"
+    },
+    "volume": {
+      "id": "vol-03ac9f534326c345c",
+      "attachments": [
+        {
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "VolumeId": "vol-03ac9f534326c345c",
+          "InstanceId": "i-04fc0629dc4ea466e",
+          "Device": "/dev/sdf",
+          "State": "attached",
+          "AttachTime": "2026-08-23 08:29:36+00:00"
+        }
+      ]
+    },
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "desired_revision": 15,
+    "locks": [],
+    "unfinished_operations": [],
+    "snapshot": {
+      "id": "snap-0989e090822d69d1e",
+      "state": "completed",
+      "source": "vol-03ac9f534326c345c"
+    },
+    "dns": "absent in persisted SystemState; not directly queried in this preflight",
+    "game_item": "not re-read in this preflight",
+    "ssm_workflow_drain": "must be checked again at migration GO"
+  },
+  "validation": {
+    "pytest": "896 passed in 46.94s",
+    "results": {
+      "pytest": 0,
+      "ruff": 0,
+      "format": 0,
+      "mypy": 0,
+      "synth-phase1": 0,
+      "synth-target": 0,
+      "synth-control": 0
+    },
+    "root": "/private/tmp/wishicraft-targeted-runtime-final-v4.p30evcu5",
+    "local_docker": "CLI unavailable",
+    "local_shellcheck": "unavailable; CI required",
+    "production_runtime_v2_e2e": "not performed"
+  },
+  "template_comparison": {
+    "WishicraftControlPlaneStack-dev": [
+      {
+        "logical_id": "AdmissionFunction23082B67",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "BackupTaskFunctionA44639DC",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "DiscordCommandFunction7D25102A",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "DiscordMessageFunction78FA388B",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "MonitoringObserverFunction584DA7C7",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "ReconcileFunction30829CB6",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "RetentionTaskFunction9F285CE4",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "StartTaskFunction8C564C4A",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      {
+        "logical_id": "StatusExecutorFunction6E5C9869",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "logical_id": "StopTaskFunction11473A8C",
+        "type": "AWS::Lambda::Function",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      }
+    ],
+    "MinecraftTargetStack-dev": [
+      {
+        "logical_id": "TargetManagedNodeRoleDefaultPolicy7209F5BF",
+        "type": "AWS::IAM::Policy",
+        "addition": false,
+        "deletion": false,
+        "properties": [
+          "PolicyDocument"
+        ]
+      }
+    ]
+  },
+  "validated_implementation_sha256": {
+    "infrastructure/host_runtime/wishicraft-targeted-runtime.service": "1a072ee060062af861b69ce40455f3a19faf3b1a53428f29de67dec196482a9a",
+    "infrastructure/stacks/control_plane_stack.py": "4e764114a867f894353dbc789d340ed94c84d3c0327fcc9329cf1a03f5a6be3b",
+    "infrastructure/stacks/minecraft_target_stack.py": "db0028c44b98156c8c8cb23e435fad4cde530b5a59a5a72b9687991a66dfe669",
+    "src/wishicraft/artifacts/host_runtime_probe.py": "9d84214fb40fd05e2faf3682dd27433dce129ae62d76466f3caac5ef80d3d327",
+    "src/wishicraft/artifacts/runtime_install.py": "d908d7d3b55ee030bfadba20171526c1db0f6086e0d7d35479cafb89bedf6648",
+    "src/wishicraft/artifacts/targeted_runtime.py": "2ec4c75b8b508178ac45fe296888263d18166b2b54c9b18cc8d1ca67cee1cd06",
+    "src/wishicraft/auto_stop.py": "2edc1cbe3e1e6beb4838aeed1663a7c1c2e775b3f75e6d5ea804a2c650f98eb3",
+    "src/wishicraft/auto_stop_evaluator_lambda.py": "5326ae3e3955aa80e4f253d73ac38e9bf77f43841aeab71fa39b9bc0b81ea76d",
+    "src/wishicraft/host_runtime.py": "f584368b0c21791d6c32895c23435cc3a34f30846a03f6ae2ab0e618e191eecf",
+    "src/wishicraft/probe.py": "3627fe9dabbe862cafa6d382bec5d99696e6d5b0cf3dd39785c33f8135a5eecc",
+    "src/wishicraft/runtime_contract.py": "467f361becbf015c283ba602a6a0152333d9517df7608a911ee8e2e5b4a0c391",
+    "src/wishicraft/runtime_heartbeat.py": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
+    "src/wishicraft/runtime_heartbeat_producer.py": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
+    "src/wishicraft/runtime_migration.py": "d67e5e857a4965b5dd6c109bf5b84a69490d8f50eb8896ac01ce4d7a9316ecae",
+    "src/wishicraft/start_workflow.py": "68b95f65553da83ec0e391fd0c78296a631538fb59bb94fca2fb7073042ecbfd",
+    "src/wishicraft/start_workflow_lambda.py": "c7d5624d7e04211ed15bf76a24f082e511cb73c820e49d33d3eb0ec072ad5dfd",
+    "src/wishicraft/status.py": "62fa90e4ab5f4a630202d1050b0e3501cf67c47b630ebfddf05ae59ebc23d163",
+    "src/wishicraft/stop_workflow.py": "d3c5106b1ea290f0520fd1aba41cb1390c995eb376cb91f51861b7cf6cf8ac64",
+    "src/wishicraft/stop_workflow_lambda.py": "23e26c6e94ac2065f97165fd8183cdc2dc02085b165727c110d5fc01744f3278",
+    "tests/unit/test_phase8_heartbeat_host_artifacts.py": "e5e156c5ebcb572118e158a35016f78e5e484a61c84c95d049ebcec47cdaa334",
+    "tests/unit/test_runtime_heartbeat_producer.py": "a4e1d0f8d89cd6e1008eca9bf3f4b83a1eaa16a771b383ed530972a586eb3637",
+    "tests/unit/test_start_workflow.py": "e34b45cb4751309523fa479cdd18ef2f0706ec1a98701bcfb85091f2caed6a00",
+    "tests/unit/test_stop_workflow.py": "ebebfdfdad1beb7cf32cfe9a9b5278c084c89803e46638a61e5bad9085de9a6f",
+    "tests/unit/test_stop_workflow_lambda.py": "0ee478c7514f2fa2d12798485a46d5a29188e2b8322f28e09ea8e0997dfbae75",
+    "tests/unit/test_targeted_runtime_contract.py": "01083338bbb8f66084975aa1af6e17f8c2bd9d2054d84266dd310ddfcea8cf06",
+    "tests/unit/test_targeted_runtime_infrastructure.py": "61246180b9766eb4dc2050a99acca0e5a14bb865f9f5ca5740da68dd2f2e02f2"
+  },
+  "interruption_recovery": {
+    "head_unchanged": true,
+    "remaining_validation_processes": false,
+    "previous_validation": "895 passed; v3 results retained; v4 includes exact STOP receipt target check",
+    "commit_push_before_recovery": "not performed"
+  },
+  "limitations": [
+    "process/AWS boundaries in targeted runtime tests are synthetic",
+    "fresh BACKUP and latest recovery-point protection await production GO",
+    "managed Lambda SDK version remains unmeasured",
+    "no SWITCH or RESET implementation/adoption"
+  ]
+}

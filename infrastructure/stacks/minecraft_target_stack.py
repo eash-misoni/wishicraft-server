@@ -100,6 +100,16 @@ class MinecraftTargetStack(Stack):
                 ],
             )
         )
+        role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["dynamodb:GetItem"],
+                resources=[
+                    f"arn:aws:dynamodb:{stage.aws_region}:{stage.aws_account_id}:table/"
+                    + resource_name(project.resource_prefix, stage.stage, suffix)
+                    for suffix in ("operations", "locks")
+                ],
+            )
+        )
         heartbeat_table_name = resource_name(
             project.resource_prefix, stage.stage, "runtime-heartbeats"
         )

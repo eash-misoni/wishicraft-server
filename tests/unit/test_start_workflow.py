@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 import pytest
 
 from wishicraft.operation import LeaseProof
+from wishicraft.runtime_contract import command
 from wishicraft.start_workflow import (
     Ec2LifecycleAdapter,
     FixedHostStartAdapter,
@@ -103,14 +104,19 @@ def test_ec2_adapter_rejects_unsafe_transitional_state() -> None:
 def test_host_start_adapter_uses_only_fixed_typed_command() -> None:
     api = FakeSsm()
     command_id = FixedHostStartAdapter(api, timeout_seconds=360).start(
-        instance_id="i-0123456789abcdef0"
+        instance_id="i-0123456789abcdef0", operation_id="op-test", lease_id="lease-test"
     )
     assert command_id == "command-1"
     assert api.calls == [
         {
             "InstanceIds": ["i-0123456789abcdef0"],
             "DocumentName": "AWS-RunShellScript",
-            "Parameters": {"commands": ["sudo /usr/local/libexec/wishicraft/operation-v1 START"]},
+            "Parameters": {
+                "commands": [
+                    command(operation_id="op-test", lease_id="lease-test", action="START")
+                ],
+                "executionTimeout": ["360"],
+            },
             "TimeoutSeconds": 360,
         }
     ]

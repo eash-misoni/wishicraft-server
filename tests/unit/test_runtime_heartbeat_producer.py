@@ -127,5 +127,6 @@ def test_probe_game_mismatch_becomes_unknown(
     monkeypatch.setattr(producer, "run", lambda command: completed(0, json.dumps(payload)))
     value = producer.observe(now=NOW)
     assert value.active_game_id is None
-    assert value.player_count == 0
+    assert value.player_count is None
+    assert value.protocol_state is ProtocolState.UNKNOWN
     # Domain derivation converts this unbound observation to unknown/null empty state.

@@ -38,6 +38,8 @@ class AutoStopIntent:
     created_at: datetime
     updated_at: datetime
     block_reason: str | None = None
+    run_id: str | None = None
+    process_id: str | None = None
 
     @property
     def warning_at(self) -> datetime:
@@ -61,8 +63,19 @@ class AutoStopCandidate:
     intent_id: str | None = None
 
 
-def deterministic_intent_id(*, game_id: str, boot_id: str, empty_since: datetime) -> str:
+def deterministic_intent_id(
+    *,
+    game_id: str,
+    boot_id: str,
+    empty_since: datetime,
+    run_id: str | None = None,
+    process_id: str | None = None,
+) -> str:
     identity = f"{game_id}\n{boot_id}\n{utc_timestamp(empty_since)}"
+    if run_id is not None:
+        identity += "\n" + run_id
+    if process_id is not None:
+        identity += "\n" + process_id
     return "asi-" + hashlib.sha256(identity.encode()).hexdigest()[:32]
 
 
@@ -101,7 +114,11 @@ def evaluate_candidate(
         True,
         "WARNING_ELIGIBLE",
         deterministic_intent_id(
-            game_id=game_id, boot_id=heartbeat.boot_id, empty_since=heartbeat.empty_since
+            game_id=game_id,
+            boot_id=heartbeat.boot_id,
+            empty_since=heartbeat.empty_since,
+            run_id=heartbeat.run_id,
+            process_id=heartbeat.process_id,
         ),
     )
 
@@ -120,6 +137,8 @@ def intent_matches_heartbeat(
         and heartbeat.active_game_id == intent.game_id
         and heartbeat.runtime_id == runtime_id
         and heartbeat.boot_id == intent.boot_id
+        and heartbeat.run_id == intent.run_id
+        and heartbeat.process_id == intent.process_id
         and heartbeat.protocol_state is ProtocolState.READY
         and heartbeat.player_count == 0
         and heartbeat.empty_since == intent.empty_since

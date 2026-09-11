@@ -133,7 +133,8 @@ def test_stop_side_effects_publish_progress_only_after_lease_verification(
             calls.append(("progress", str(kwargs["current_step"])))
 
     class HostStop:
-        def stop(self, *, instance_id: str) -> str:
+        def stop(self, *, instance_id: str, operation_id: str, lease_id: str) -> str:
+            assert operation_id == "op-stop-001" and lease_id == "lease-stop-001"
             assert instance_id == "i-target"
             calls.append(("host_stop", None))
             return "command-1"
@@ -152,6 +153,7 @@ def test_stop_side_effects_publish_progress_only_after_lease_verification(
     route53 = Route53([])
     runtime = SimpleNamespace(
         system_id="wishicraft-main",
+        targets=SimpleNamespace(read=lambda operation_id: {"instance_id": "i-target"}),
         coordinator=SimpleNamespace(leases=Leases()),
         operations=Operations(),
         host_stop=HostStop(),
@@ -177,6 +179,7 @@ def test_stop_side_effects_publish_progress_only_after_lease_verification(
             "action": "stop_ec2",
             "state": {
                 "observation": {
+                    "execution": {"phase": "stopped", "target": {"instance_id": "i-target"}},
                     "ec2_state": "running",
                     "ssm_state": "online",
                     "host_runtime_state": "not-running",
@@ -221,6 +224,7 @@ def test_automatic_gate_cancels_and_releases_before_any_stop_mutation(
 
     runtime = SimpleNamespace(
         system_id="wishicraft-main",
+        targets=SimpleNamespace(read=lambda operation_id: {"instance_id": "i-target"}),
         coordinator=SimpleNamespace(leases=Leases()),
         operations=Operations(),
     )

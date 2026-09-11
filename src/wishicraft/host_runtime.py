@@ -54,6 +54,7 @@ def render_boot_time_artifacts(
     publish_minecraft_port: bool = True,
     enable_rcon: bool = False,
     rcon_parameter_name: str | None = None,
+    targeted: bool = False,
 ) -> RenderedHostRuntime:
     """Render one canonical boot-time configuration from validated sources of truth."""
     runtime = _runtime_mapping(stage.values)
@@ -112,6 +113,8 @@ def render_boot_time_artifacts(
         },
         "volumes": volumes,
     }
+    if targeted:
+        service["labels"]["com.wishicraft.run-id"] = "${WISHICRAFT_RUN_ID:?targeted START required}"  # type: ignore[index]
     compose = {
         "name": "wishicraft-host-runtime",
         "services": {"minecraft": service},

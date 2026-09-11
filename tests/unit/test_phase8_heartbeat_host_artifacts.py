@@ -1,5 +1,4 @@
 import ast
-import hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -34,15 +33,14 @@ def test_installer_is_fixed_fail_closed_and_only_enables_heartbeat_timer() -> No
         "shutdown",
     ):
         assert forbidden not in installer
-    for path in (
-        ROOT / "src" / "wishicraft" / "runtime_heartbeat.py",
-        ROOT / "src" / "wishicraft" / "runtime_heartbeat_producer.py",
-        ROOT / "src" / "wishicraft" / "artifacts" / "host_runtime_probe.py",
-        HOST / "heartbeat.env",
-        HOST / "wishicraft-heartbeat.service",
-        HOST / "wishicraft-heartbeat.timer",
+    # Historical installer must retain its deployed v1 hashes. New artifacts use the
+    # targeted-runtime migration bundle, never a rewritten Phase 8 installer.
+    for digest in (
+        "d92dd704ccc56f821ba5116298a8861bab70ad26d29101cbc23ef423ffd1b0d9",
+        "a7e2b141d2f5b4c79fb5f847f633557c4935dc0374da044a16b6dcc3134e9999",
+        "0efcf7e493d85495e36c2234c8ebee3b7a35fdba0f855e527ec1a3d51e1bebb2",
     ):
-        assert hashlib.sha256(path.read_bytes()).hexdigest() in installer
+        assert digest in installer
 
 
 def test_target_python_artifacts_parse_as_python_3_9() -> None:

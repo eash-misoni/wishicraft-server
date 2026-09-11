@@ -71,6 +71,14 @@ def observe(*, now: datetime) -> RuntimeObservation:
         player_count = (
             protocol.get("player_count") if protocol_state is ProtocolState.READY else None
         )
+        execution = document.get("execution")
+        if (
+            not isinstance(execution, dict)
+            or execution.get("phase") != "running"
+            or not isinstance(execution.get("process_id"), str)
+        ):
+            protocol_state = ProtocolState.UNKNOWN
+            player_count = None
         errors = document["errors"]
         if not isinstance(errors, list) or errors:
             protocol_state = ProtocolState.UNKNOWN
@@ -88,6 +96,8 @@ def observe(*, now: datetime) -> RuntimeObservation:
     return RuntimeObservation(
         instance_id=instance_id,
         runtime_id=runtime_id,
+        run_id=(document.get("execution") or {}).get("target", {}).get("run_id"),
+        process_id=(document.get("execution") or {}).get("process_id"),
         boot_id=boot_id,
         active_game_id=active_game_id,
         protocol_state=protocol_state,
@@ -194,6 +204,8 @@ def _encode(value: RuntimeHeartbeat) -> dict[str, Any]:
         "instance_id": {"S": value.instance_id},
         "runtime_id": {"S": value.runtime_id},
         "boot_id": {"S": value.boot_id},
+        "run_id": {"S": value.run_id} if value.run_id else {"NULL": True},
+        "process_id": {"S": value.process_id} if value.process_id else {"NULL": True},
         "protocol_state": {"S": value.protocol_state.value},
         "observed_at": {"S": format_timestamp(value.observed_at)},
         "expires_at": {"N": str(value.expires_at)},
@@ -229,6 +241,8 @@ def _decode(item: dict[str, Any]) -> RuntimeHeartbeat:
         schema_version=int(item["schema_version"]["N"]),
         instance_id=text("instance_id"),
         runtime_id=text("runtime_id"),
+        run_id=optional_text("run_id") if "run_id" in item else None,
+        process_id=optional_text("process_id") if "process_id" in item else None,
         boot_id=text("boot_id"),
         active_game_id=optional_text("active_game_id"),
         protocol_state=ProtocolState(text("protocol_state")),
