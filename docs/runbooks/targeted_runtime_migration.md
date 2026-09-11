@@ -108,3 +108,5 @@ preflightは2026-09-11 05:44:29 UTC、元Target stopped、元EBS attachment維�
 DNS absentは保存済みSystemStateからの確認であり、このpreflightでRoute 53を直接再照会したとは扱わない。
 途中の中断後にprocess残存なしとログ完了を確認し、停止receiptと要求targetの不一致拒否を追加して最終validationを行った。
 AWS write、v2実機試験、新BACKUPは未実行。CIと最終HEADはGitHubの当該commitを参照する。
+
+CI初回（541e55b）は895 tests成功／bundle test 1件失敗。浅いcheckoutに基準commitが存在しなかったため、quality jobでGit履歴を取得する設定へ修正した。predecessor照合やtestをskipする変更はしていない。移行bundle生成には基準commitを保持したcheckoutを使用する。Dockerの既存固定runtime integrationは初回CIでも成功した。

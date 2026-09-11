@@ -210,5 +210,12 @@
     "fresh BACKUP and latest recovery-point protection await production GO",
     "managed Lambda SDK version remains unmeasured",
     "no SWITCH or RESET implementation/adoption"
-  ]
+  ],
+  "ci_initial": {
+    "run_id": 34573774807,
+    "head": "541e55b61e2aca45f93c23bf36da97f473c8e588",
+    "quality": "895 passed; bundle test failed because shallow checkout lacks baseline commit",
+    "host_runtime_integration": "success",
+    "fix": "quality checkout fetch-depth 0; predecessor validation retained"
+  }
 }
