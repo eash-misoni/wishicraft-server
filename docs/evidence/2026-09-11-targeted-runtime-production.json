@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "BLOCKED_RECOVERY_ADMISSION_GATE",
+  "status": "COMPLETED",
   "approval_head": "f89c869cc613e9530e0e16c4d455feb3073c571a",
   "execution_head": "9635073232f9addbd240a55d99e0d1de841d73c7",
   "decision": "D-096 Accepted; production migration incomplete",
@@ -2677,6 +2677,1447 @@
         "comparison": "all mount fields retained; only list order ignored",
         "original_failure": "before removal intent; reobservation exact identity unchanged"
       }
+    }
+  },
+  "latest_checkpoint": "limited_stop_forward_continuation",
+  "historical_checkpoints_note": "Top-level earlier preflight/final_readback/not_executed/resume_requirement and conditional_continuation describe the preserved earlier blocked checkpoints; limited_stop_forward_continuation is the current closeout.",
+  "limited_stop_forward_continuation": {
+    "status": "COMPLETED",
+    "approval_head": "d6f3b67adf828e56a3460d1ab0c4002d19b22af4",
+    "implementation_head": "daeb538e61ac260c5b790dc30444209b9b5cd319",
+    "source_code_equal_to_approval_head": true,
+    "preflight_at": "2026-09-11T11:38:05.638433+00:00",
+    "recovery_stop": {
+      "operation_id": "op-796eca37-a1ff-457f-9d74-b74904c1d391",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-796eca37-a1ff-457f-9d74-b74904c1d391",
+      "entered_states": [
+        "InitializeWorkflow",
+        "ReconcileBeforeStop",
+        "AutomaticStopFinalGate",
+        "AutomaticStopMayProceed",
+        "SetDesiredStopped",
+        "AlreadyEc2Stopped",
+        "RenewBeforeDnsDelete",
+        "DeleteDns",
+        "DnsAlreadyAbsent",
+        "ReconcileAfterStop",
+        "MarkSucceeded"
+      ],
+      "no_host_stop_or_ec2_stop": true,
+      "only_new_operation_in_recovery_window": [
+        "op-796eca37-a1ff-457f-9d74-b74904c1d391"
+      ]
+    },
+    "ingress": {
+      "discord_original": "UNSET",
+      "admission_original": "UNSET",
+      "discord_pause": {
+        "at": "2026-09-11T11:40:12.156854+00:00",
+        "action": "pause",
+        "arg": "wc-dev-discord-command",
+        "before": {
+          "ResponseMetadata": {
+            "RequestId": "3a1812f0-9f87-4756-be09-bca3d930d1e0",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+              "date": "Fri, 11 Sep 2026 11:40:12 GMT",
+              "content-type": "application/json",
+              "content-length": "37",
+              "connection": "keep-alive",
+              "x-amzn-requestid": "3a1812f0-9f87-4756-be09-bca3d930d1e0"
+            },
+            "RetryAttempts": 0
+          }
+        }
+      },
+      "drain_observation_at": "2026-09-11T11:40:33.996264+00:00",
+      "auto_stop_candidate": {
+        "eligible": false,
+        "reason": "HEARTBEAT_STALE_OR_MISSING"
+      },
+      "deployed_auto_stop_result": "CONTROL_PLANE_UNSAFE",
+      "command_admission_no_start_events_in_previous_eight_minutes": true,
+      "auto_stop_invocations_completed_without_admission": true,
+      "known_admission_callers": [
+        "Discord Command RequestResponse",
+        "Auto-stop Evaluator RequestResponse",
+        "operator ADMIN"
+      ],
+      "admission_recovery_open": {
+        "at": "2026-09-11T11:40:52.707250+00:00",
+        "action": "unpause",
+        "arg": "wc-dev-admission",
+        "before": {
+          "ResponseMetadata": {
+            "RequestId": "abf9c578-e1d6-463b-b288-065b6ce3bdf9",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+              "date": "Fri, 11 Sep 2026 11:40:52 GMT",
+              "content-type": "application/json",
+              "content-length": "34",
+              "connection": "keep-alive",
+              "x-amzn-requestid": "abf9c578-e1d6-463b-b288-065b6ce3bdf9"
+            },
+            "RetryAttempts": 0
+          },
+          "ReservedConcurrentExecutions": 0
+        }
+      },
+      "admission_repause": {
+        "at": "2026-09-11T11:42:06.040745+00:00",
+        "action": "pause",
+        "arg": "wc-dev-admission",
+        "before": {
+          "ResponseMetadata": {
+            "RequestId": "3d199fae-a2d6-46ba-83f8-2d0e0bfecf3b",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+              "date": "Fri, 11 Sep 2026 11:42:06 GMT",
+              "content-type": "application/json",
+              "content-length": "37",
+              "connection": "keep-alive",
+              "x-amzn-requestid": "3d199fae-a2d6-46ba-83f8-2d0e0bfecf3b"
+            },
+            "RetryAttempts": 0
+          }
+        }
+      },
+      "admission_restore": {
+        "at": "2026-09-11T11:48:45.670802+00:00",
+        "action": "unpause",
+        "arg": "wc-dev-admission",
+        "before": {
+          "ResponseMetadata": {
+            "RequestId": "414d96c3-a705-4751-b2fa-3fbd69a55c50",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+              "date": "Fri, 11 Sep 2026 11:48:45 GMT",
+              "content-type": "application/json",
+              "content-length": "34",
+              "connection": "keep-alive",
+              "x-amzn-requestid": "414d96c3-a705-4751-b2fa-3fbd69a55c50"
+            },
+            "RetryAttempts": 0
+          },
+          "ReservedConcurrentExecutions": 0
+        }
+      },
+      "discord_restore": {
+        "at": "2026-09-11T11:48:51.119113+00:00",
+        "action": "unpause",
+        "arg": "wc-dev-discord-command",
+        "before": {
+          "ResponseMetadata": {
+            "RequestId": "980af024-2a3a-46e3-9dcf-3c382aa75c31",
+            "HTTPStatusCode": 200,
+            "HTTPHeaders": {
+              "date": "Fri, 11 Sep 2026 11:48:51 GMT",
+              "content-type": "application/json",
+              "content-length": "34",
+              "connection": "keep-alive",
+              "x-amzn-requestid": "980af024-2a3a-46e3-9dcf-3c382aa75c31"
+            },
+            "RetryAttempts": 0
+          },
+          "ReservedConcurrentExecutions": 0
+        }
+      },
+      "final_concurrency": {
+        "wc-dev-admission": "UNSET",
+        "wc-dev-discord-command": "UNSET"
+      }
+    },
+    "host_forward": {
+      "plan": {
+        "source_head": "daeb538e61ac260c5b790dc30444209b9b5cd319",
+        "deployed_source_head": "e503530985fcc3099cc21b12cf2a83e9db72ae1c",
+        "host_diff": [
+          {
+            "destination": "/usr/local/libexec/wishicraft/operation-v2",
+            "old_sha256": "abecc64cbb007c699451bb4c120760d4b33d0909c23de0af3ef0f29f730bc7f4",
+            "new_sha256": "aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee"
+          }
+        ],
+        "cp_code_only": [
+          "ReconcileFunction30829CB6",
+          "StartTaskFunction8C564C4A",
+          "StopTaskFunction11473A8C",
+          "BackupTaskFunctionA44639DC",
+          "RetentionTaskFunction9F285CE4",
+          "AdmissionFunction23082B67",
+          "DiscordCommandFunction7D25102A",
+          "StatusExecutorFunction6E5C9869",
+          "DiscordMessageFunction78FA388B",
+          "AutoStopEvaluatorFunctionF85F8B50",
+          "MonitoringObserverFunction584DA7C7"
+        ],
+        "forward_bundle_hashes": {
+          "6.artifact": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
+          "7.artifact": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
+          "1.artifact": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995",
+          "0.artifact": "3a761b10c01b75759c60d56cb196ead24b84275cbf3a5029b203c21fa9d78117",
+          "5.artifact": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
+          "4.artifact": "1a072ee060062af861b69ce40455f3a19faf3b1a53428f29de67dec196482a9a",
+          "install.py": "850a569d68a0e6a610a4c7689466be13997ae5dd75197b01f9a485ce58708c44",
+          "8.artifact": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a",
+          "9.artifact": "aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee",
+          "2.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+          "install.json": "beccd97de65fdf6cc62a0c7d7d9b10f9d8f88b9c6533b41e03af33e731b0e847",
+          "3.artifact": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97"
+        },
+        "admission_exception": "Allow exact canonical STOP admission while actual EC2 stopped and Desired RUNNING after known pre-start failure; original UNSET temporarily restored only under supervised recovery window",
+        "no_new_backup": true,
+        "receipt_required_absent": true
+      },
+      "preflight": {
+        "command_id": "852059f0-b92d-4f40-a7b8-801c166d638d",
+        "status": "Success",
+        "proof": {
+          "all_exact_predecessors": [
+            {
+              "path": "/usr/local/libexec/wishicraft/operation-v1",
+              "sha256": "3a761b10c01b75759c60d56cb196ead24b84275cbf3a5029b203c21fa9d78117",
+              "mode": 493
+            },
+            {
+              "path": "/etc/wishicraft/host-runtime/compose.yaml",
+              "sha256": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995",
+              "mode": 384
+            },
+            {
+              "path": "/etc/wishicraft/host-runtime/runtime.env",
+              "sha256": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+              "mode": 384
+            },
+            {
+              "path": "/etc/wishicraft/host-runtime/manifest.json",
+              "sha256": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+              "mode": 384
+            },
+            {
+              "path": "/etc/systemd/system/wishicraft-host-runtime.service",
+              "sha256": "1a072ee060062af861b69ce40455f3a19faf3b1a53428f29de67dec196482a9a",
+              "mode": 420
+            },
+            {
+              "path": "/usr/local/libexec/wishicraft/host-runtime-probe.py",
+              "sha256": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
+              "mode": 493
+            },
+            {
+              "path": "/usr/local/libexec/wishicraft/runtime_heartbeat.py",
+              "sha256": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
+              "mode": 420
+            },
+            {
+              "path": "/usr/local/libexec/wishicraft/runtime_heartbeat_producer.py",
+              "sha256": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
+              "mode": 420
+            },
+            {
+              "path": "/etc/wishicraft/runtime-contract.json",
+              "sha256": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a",
+              "mode": 384
+            },
+            {
+              "path": "/usr/local/libexec/wishicraft/operation-v2",
+              "sha256": "abecc64cbb007c699451bb4c120760d4b33d0909c23de0af3ef0f29f730bc7f4",
+              "mode": 493
+            }
+          ],
+          "receipt_absent": true,
+          "containers_absent": true,
+          "runtime_inactive": true,
+          "preflight_passed_with_validation_context": "op-f662ecac-c9ce-4b97-9416-ffea7f16633f",
+          "old_inventory_keys": [
+            "at",
+            "container_id",
+            "data_source",
+            "expected_player_exists",
+            "files",
+            "no_file_mtime_after_backup",
+            "world_exists"
+          ]
+        }
+      },
+      "delivery": {
+        "command_id": "ea248f33-8727-4e02-994a-ade43e95f2ac",
+        "status": "Success",
+        "proof": {
+          "bundle_verified": {
+            "6.artifact": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
+            "7.artifact": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
+            "1.artifact": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995",
+            "0.artifact": "3a761b10c01b75759c60d56cb196ead24b84275cbf3a5029b203c21fa9d78117",
+            "5.artifact": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
+            "4.artifact": "1a072ee060062af861b69ce40455f3a19faf3b1a53428f29de67dec196482a9a",
+            "install.py": "850a569d68a0e6a610a4c7689466be13997ae5dd75197b01f9a485ce58708c44",
+            "8.artifact": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a",
+            "9.artifact": "aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee",
+            "2.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+            "install.json": "beccd97de65fdf6cc62a0c7d7d9b10f9d8f88b9c6533b41e03af33e731b0e847",
+            "3.artifact": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97"
+          }
+        }
+      },
+      "install": {
+        "command_id": "8f07a881-1264-4c40-9908-2eb5a10786f1",
+        "status": "Success",
+        "proof": {
+          "all_installed_hashes_verified": true,
+          "saved_predecessors": [
+            {
+              "source": "9.artifact",
+              "old_sha256": "abecc64cbb007c699451bb4c120760d4b33d0909c23de0af3ef0f29f730bc7f4",
+              "new_sha256": "aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee"
+            }
+          ],
+          "new_receipt_exists": false
+        }
+      },
+      "transport_path": "/var/tmp/wishicraft-targeted-runtime-forward-v1",
+      "installer_bytes_unchanged": true,
+      "installer_bundle_directory_injected_by_reviewed_operator_wrapper": true,
+      "all_108_files_hash_owner_mode_mtime_unchanged_before_install": true,
+      "maintenance_start": {
+        "at": "2026-09-11T11:42:29.903556+00:00",
+        "action": "start",
+        "arg": null
+      },
+      "maintenance_stop": {
+        "at": "2026-09-11T11:45:25.805391+00:00",
+        "action": "stop",
+        "arg": null
+      }
+    },
+    "control_plane": {
+      "at": "2026-09-11T11:48:08.023146+00:00",
+      "stack_status": "UPDATE_COMPLETE",
+      "template_resources_exact": true,
+      "lambda_readback": [
+        {
+          "name": "wc-dev-reconcile",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {}
+        },
+        {
+          "name": "wc-dev-start-task",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {
+            "RUNTIME_CONFIG_DIGEST": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+            "RUNTIME_DATA_SOURCE": "/srv/minecraft/games/game-vanilla-main/server"
+          }
+        },
+        {
+          "name": "wc-dev-stop-task",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {
+            "RUNTIME_CONFIG_DIGEST": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+            "RUNTIME_DATA_SOURCE": "/srv/minecraft/games/game-vanilla-main/server"
+          }
+        },
+        {
+          "name": "wc-dev-backup-task",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {}
+        },
+        {
+          "name": "wc-dev-retention-task",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {}
+        },
+        {
+          "name": "wc-dev-admission",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {}
+        },
+        {
+          "name": "wc-dev-discord-command",
+          "last_update": "Successful",
+          "code_sha256": "E3LXik3/A3Fg1vmG32AIwE5IrlCnc5s8OKX0bEUFDGE=",
+          "target_config": {}
+        },
+        {
+          "name": "wc-dev-status-executor",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {}
+        },
+        {
+          "name": "wc-dev-discord-message",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {}
+        },
+        {
+          "name": "wc-dev-auto-stop-evaluator",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {}
+        },
+        {
+          "name": "wc-dev-monitoring-observer",
+          "last_update": "Successful",
+          "code_sha256": "xpQVd+vdVuhjpqj3LgigN6LT9vbfBo85hYjxMKCylVk=",
+          "target_config": {}
+        }
+      ],
+      "admission_concurrency": 0,
+      "reconcile_function": "wc-dev-reconcile"
+    },
+    "reconcile_before_restore": {
+      "system_id": "wishicraft-main",
+      "schema_version": 1,
+      "environment": "dev",
+      "game_id": "game-vanilla-main",
+      "desired_state": "STOPPED",
+      "target_instance_id": "i-04fc0629dc4ea466e",
+      "observation": {
+        "schema_version": 1,
+        "instance_id": "i-04fc0629dc4ea466e",
+        "ec2_state": "stopped",
+        "public_ipv4_state": "absent",
+        "public_ipv4": null,
+        "private_ipv4": "10.0.0.125",
+        "network_observation_source": "ec2-describe-instances",
+        "ssm_state": "not-applicable",
+        "mount_state": "unknown",
+        "docker_state": "unknown",
+        "host_runtime_state": "not-running",
+        "container_state": "unknown",
+        "minecraft_service_state": "not-applicable",
+        "minecraft_protocol_state": "not-applicable",
+        "expected_game_id": "game-vanilla-main",
+        "active_game_state": "not-applicable",
+        "observed_active_game_id": null,
+        "player_count": null,
+        "observed_at": "2026-09-11T11:48:22.674727Z",
+        "runtime_ready": false,
+        "dns_state": "absent",
+        "dns_record_name": "mc-dev.wishicraft.net.",
+        "dns_ipv4_values": [],
+        "dns_observation_source": "route53-list-resource-record-sets"
+      },
+      "discrepancies": [],
+      "health": "HEALTHY",
+      "observation_errors": [],
+      "observed_at": "2026-09-11T11:48:22.674727Z"
+    },
+    "rounds": [
+      {
+        "start_operation": "op-1af2bda9-4227-47d4-9d65-26cc4fb89482",
+        "start_execution": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-1af2bda9-4227-47d4-9d65-26cc4fb89482",
+        "start_completed_at": "2026-09-11 20:53:03.167000+09:00",
+        "stop_operation": "op-d843a03a-d7ef-4a72-b4cc-8a19afb5e2c5",
+        "stop_execution": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-d843a03a-d7ef-4a72-b4cc-8a19afb5e2c5",
+        "stop_completed_at": "2026-09-11 20:55:27.475000+09:00",
+        "start_states": [
+          "InitializeWorkflow",
+          "ReconcileBeforeStart",
+          "SetDesiredRunning",
+          "AlreadyReady",
+          "StartEc2IfNeeded",
+          "InitEc2Poll",
+          "WaitEc2Running",
+          "IncrementEc2Poll",
+          "Ec2PollWithinDeadline",
+          "RenewBeforeEc2Probe",
+          "ReconcileEc2",
+          "Ec2Running",
+          "InitSsmPoll",
+          "WaitSsmOnline",
+          "IncrementSsmPoll",
+          "SsmPollWithinDeadline",
+          "RenewBeforeSsmProbe",
+          "ReconcileSsm",
+          "SsmOnline",
+          "RunStartScript",
+          "InitHostPoll",
+          "WaitHostStart",
+          "IncrementHostPoll",
+          "HostPollWithinDeadline",
+          "RenewBeforeHostCheck",
+          "CheckHostStart",
+          "HostStartComplete",
+          "InitReadyPoll",
+          "WaitReady",
+          "IncrementReadyPoll",
+          "ReadyPollWithinDeadline",
+          "RenewBeforeReadyProbe",
+          "ReconcileReady",
+          "RuntimeReady",
+          "UpdateDnsRecord",
+          "InitDnsPoll",
+          "WaitDnsInSync",
+          "IncrementDnsPoll",
+          "DnsPollWithinDeadline",
+          "RenewBeforeDnsProbe",
+          "CheckDnsChange",
+          "DnsChangeInSync",
+          "ReconcileDns",
+          "EndpointReady",
+          "MarkSucceeded"
+        ],
+        "stop_states": [
+          "InitializeWorkflow",
+          "ReconcileBeforeStop",
+          "AutomaticStopFinalGate",
+          "AutomaticStopMayProceed",
+          "SetDesiredStopped",
+          "AlreadyEc2Stopped",
+          "AlreadyRuntimeStopped",
+          "RenewBeforeHostStop",
+          "RunHostStop",
+          "InitHostPoll",
+          "WaitHostStop",
+          "IncrementHostPoll",
+          "HostPollWithinDeadline",
+          "RenewBeforeHostCheck",
+          "CheckHostStop",
+          "HostStopComplete",
+          "ReconcileRuntimeStopped",
+          "RuntimeStopped",
+          "RenewBeforeEc2Stop",
+          "StopEc2",
+          "InitEc2Poll",
+          "WaitEc2Stopped",
+          "IncrementEc2Poll",
+          "Ec2PollWithinDeadline",
+          "RenewBeforeEc2Probe",
+          "ReconcileEc2Stopped",
+          "Ec2Stopped",
+          "RenewBeforeDnsDelete",
+          "DeleteDns",
+          "DnsAlreadyAbsent",
+          "InitDnsPoll",
+          "WaitDnsInSync",
+          "IncrementDnsPoll",
+          "DnsPollWithinDeadline",
+          "RenewBeforeDnsCheck",
+          "CheckDnsChange",
+          "DnsInSync",
+          "ReconcileAfterStop",
+          "MarkSucceeded"
+        ],
+        "runtime_target": {
+          "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-1af2bda9-4227-47d4-9d65-26cc4fb89482",
+          "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "game_id": "game-vanilla-main"
+        },
+        "ready_observation": {
+          "private_ipv4": "10.0.0.125",
+          "active_game_state": "observed",
+          "ssm_state": "online",
+          "network_observation_source": "ec2-describe-instances",
+          "expected_game_id": "game-vanilla-main",
+          "dns_observation_source": "route53-list-resource-record-sets",
+          "schema_version": "1",
+          "container_state": "running",
+          "mount_state": "expected",
+          "runtime_ready": true,
+          "ec2_state": "running",
+          "minecraft_service_state": "running",
+          "public_ipv4": "54.92.99.165",
+          "docker_state": "active",
+          "execution": {
+            "phase": "running",
+            "process_id": "09d73c30627e7afbe838e4a306a2a79d335565fc89bfc196188cf3e4e0b00e1b",
+            "target": {
+              "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-1af2bda9-4227-47d4-9d65-26cc4fb89482",
+              "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+              "game_id": "game-vanilla-main"
+            }
+          },
+          "observed_active_game_id": "game-vanilla-main",
+          "dns_state": "present",
+          "public_ipv4_state": "assigned",
+          "dns_record_name": "mc-dev.wishicraft.net.",
+          "player_count": "0",
+          "observed_at": "2026-09-11T11:53:04.018190Z",
+          "dns_ipv4_values": [
+            "54.92.99.165"
+          ],
+          "instance_id": "i-04fc0629dc4ea466e",
+          "telemetry": {
+            "schema_version": "1",
+            "observed_at": "2026-09-11T11:53:05.071968Z",
+            "mount_path": "/srv/minecraft",
+            "volume_id": "vol-03ac9f534326c345c",
+            "available_bytes": "31682596864",
+            "boot_id": "64dfc083-b3fb-41e3-8438-24069752625f",
+            "used_bytes": "462548992",
+            "total_bytes": "32145145856",
+            "source": "/dev/nvme1n1",
+            "state": "observed",
+            "error": null,
+            "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b"
+          },
+          "host_runtime_state": "running",
+          "minecraft_protocol_state": "ready"
+        },
+        "ready_heartbeat": {
+          "player_count": "0",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "runtime_id": "wishicraft-host-runtime",
+          "observed_at": "2026-09-11T11:53:33.845169Z",
+          "protocol_state": "ready",
+          "boot_id": "64dfc083-b3fb-41e3-8438-24069752625f",
+          "empty_since": "2026-09-11T11:51:32.833825Z",
+          "system_id": "wishicraft-main",
+          "schema_version": "1",
+          "active_game_id": "game-vanilla-main",
+          "expires_at": "1789214013",
+          "process_id": "09d73c30627e7afbe838e4a306a2a79d335565fc89bfc196188cf3e4e0b00e1b",
+          "run_id": "op-1af2bda9-4227-47d4-9d65-26cc4fb89482"
+        },
+        "running_host": {
+          "command_id": "16e2b5e8-216d-4421-86c2-cb2dc87a0ea2",
+          "status": "Success",
+          "proof": {
+            "at": "2026-09-11T11:52:32.567304+00:00",
+            "receipt": {
+              "target": {
+                "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+                "instance_id": "i-04fc0629dc4ea466e",
+                "run_id": "op-1af2bda9-4227-47d4-9d65-26cc4fb89482",
+                "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+                "game_id": "game-vanilla-main"
+              },
+              "phase": "running"
+            },
+            "container": {
+              "id": "9620d3a51b75e4574eb09d9805d0bf3b1b51c355a5ebec36bcc0435d865b455f",
+              "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+              "image_id": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+              "state": {
+                "Status": "running",
+                "Running": true,
+                "Paused": false,
+                "Restarting": false,
+                "OOMKilled": false,
+                "Dead": false,
+                "Pid": 4912,
+                "ExitCode": 0,
+                "Error": "",
+                "StartedAt": "2026-09-11T11:50:21.291039013Z",
+                "FinishedAt": "0001-01-01T00:00:00Z",
+                "Health": {
+                  "Status": "healthy",
+                  "FailingStreak": 0,
+                  "Log": [
+                    {
+                      "Start": "2026-09-11T11:50:51.297461874Z",
+                      "End": "2026-09-11T11:50:51.708746613Z",
+                      "ExitCode": 0,
+                      "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+                    },
+                    {
+                      "Start": "2026-09-11T11:51:21.710053949Z",
+                      "End": "2026-09-11T11:51:21.817891901Z",
+                      "ExitCode": 0,
+                      "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+                    },
+                    {
+                      "Start": "2026-09-11T11:51:51.819692851Z",
+                      "End": "2026-09-11T11:51:51.925686199Z",
+                      "ExitCode": 0,
+                      "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+                    },
+                    {
+                      "Start": "2026-09-11T11:52:21.927275233Z",
+                      "End": "2026-09-11T11:52:22.026949157Z",
+                      "ExitCode": 0,
+                      "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+                    }
+                  ]
+                }
+              },
+              "labels": {
+                "com.docker.compose.config-hash": "c35103d267476a71687608b35b9f7692390748a6b6243c1f83c49fde606fadf9",
+                "com.docker.compose.container-number": "1",
+                "com.docker.compose.depends_on": "",
+                "com.docker.compose.image": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+                "com.docker.compose.oneoff": "False",
+                "com.docker.compose.project": "wishicraft-host-runtime",
+                "com.docker.compose.project.config_files": "/etc/wishicraft/host-runtime/compose.yaml",
+                "com.docker.compose.project.working_dir": "/etc/wishicraft/host-runtime",
+                "com.docker.compose.service": "minecraft",
+                "com.docker.compose.version": "5.4.0",
+                "com.wishicraft.active-game-data-source": "/srv/minecraft/games/game-vanilla-main/server",
+                "com.wishicraft.active-game-id": "game-vanilla-main",
+                "com.wishicraft.run-id": "op-1af2bda9-4227-47d4-9d65-26cc4fb89482",
+                "org.opencontainers.image.authors": "Geoff Bourne <itzgeoff@gmail.com>",
+                "org.opencontainers.image.created": "2026-07-20T18:50:00.880Z",
+                "org.opencontainers.image.description": "Docker image that provides a Minecraft Server for Java Edition that automatically installs/upgrades versions, modloaders, modpacks and more at startup",
+                "org.opencontainers.image.licenses": "Apache-2.0",
+                "org.opencontainers.image.revision": "4cbdf520c88d57713637c5e4c30b5ba5caa40698",
+                "org.opencontainers.image.source": "https://github.com/itzg/docker-minecraft-server",
+                "org.opencontainers.image.title": "docker-minecraft-server",
+                "org.opencontainers.image.url": "https://github.com/itzg/docker-minecraft-server",
+                "org.opencontainers.image.version": "2026.7.2"
+              },
+              "mounts": [
+                {
+                  "Type": "bind",
+                  "Source": "/srv/minecraft/games/game-vanilla-main/server",
+                  "Destination": "/data",
+                  "Mode": "rw",
+                  "RW": true,
+                  "Propagation": "rprivate"
+                },
+                {
+                  "Type": "bind",
+                  "Source": "/run/wishicraft/rcon-password",
+                  "Destination": "/run/secrets/rcon-password",
+                  "Mode": "ro",
+                  "RW": false,
+                  "Propagation": "rprivate"
+                },
+                {
+                  "Type": "bind",
+                  "Source": "/run/wishicraft/rcon-cli.env",
+                  "Destination": "/data/.rcon-cli.env",
+                  "Mode": "rw",
+                  "RW": true,
+                  "Propagation": "rprivate"
+                },
+                {
+                  "Type": "bind",
+                  "Source": "/run/wishicraft/rcon-cli.yaml",
+                  "Destination": "/data/.rcon-cli.yaml",
+                  "Mode": "rw",
+                  "RW": true,
+                  "Propagation": "rprivate"
+                }
+              ]
+            },
+            "unit": "Result=success\nActiveState=active\nSubState=exited\n",
+            "run_env_matches": true,
+            "level_dat_exists": true,
+            "expected_player_exists": true,
+            "player_sha256": "bb6b5f740c20e8b7144846af610d901c86a41234ba6195ce6f6a4b981e3da132",
+            "operation_artifact_sha256": "aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee"
+          }
+        },
+        "stopped_host": {
+          "command_id": "ce10fb67-b681-4e8a-961d-1d2f96257b3d",
+          "status": "Success",
+          "proof": {
+            "at": "2026-09-11T11:54:13.954868+00:00",
+            "receipt": {
+              "target": {
+                "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+                "instance_id": "i-04fc0629dc4ea466e",
+                "run_id": "op-1af2bda9-4227-47d4-9d65-26cc4fb89482",
+                "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+                "game_id": "game-vanilla-main"
+              },
+              "phase": "stopped",
+              "stop": {
+                "container_id": "9620d3a51b75e4574eb09d9805d0bf3b1b51c355a5ebec36bcc0435d865b455f",
+                "started_at": "2026-09-11T11:50:21.291039013Z",
+                "save_confirmed": true,
+                "removal_ready": true
+              }
+            },
+            "observed_phases": [
+              "running",
+              "stopping",
+              "stopped"
+            ],
+            "unit": "Result=success\nActiveState=inactive\nSubState=dead\n",
+            "containers_absent": true,
+            "listeners_absent": true,
+            "world_exists": true
+          }
+        },
+        "initial_heartbeat": {
+          "player_count": null,
+          "instance_id": "i-04fc0629dc4ea466e",
+          "runtime_id": "wishicraft-host-runtime",
+          "observed_at": "2026-09-11T11:44:56.719051Z",
+          "protocol_state": "unknown",
+          "boot_id": "daa93239-8a38-4c0a-988d-ba3fe9ff4184",
+          "empty_since": null,
+          "system_id": "wishicraft-main",
+          "schema_version": "1",
+          "active_game_id": null,
+          "expires_at": "1789213496",
+          "process_id": null,
+          "run_id": null
+        }
+      },
+      {
+        "start_operation": "op-2f5287ab-b435-46e8-b415-46f9c5320c05",
+        "start_execution": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-2f5287ab-b435-46e8-b415-46f9c5320c05",
+        "start_completed_at": "2026-09-11 20:59:59.037000+09:00",
+        "stop_operation": "op-76445f1a-8c4b-4ca4-b9e7-baa9e8f137d1",
+        "stop_execution": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-76445f1a-8c4b-4ca4-b9e7-baa9e8f137d1",
+        "stop_completed_at": "2026-09-11 21:01:54.041000+09:00",
+        "start_states": [
+          "InitializeWorkflow",
+          "ReconcileBeforeStart",
+          "SetDesiredRunning",
+          "AlreadyReady",
+          "StartEc2IfNeeded",
+          "InitEc2Poll",
+          "WaitEc2Running",
+          "IncrementEc2Poll",
+          "Ec2PollWithinDeadline",
+          "RenewBeforeEc2Probe",
+          "ReconcileEc2",
+          "Ec2Running",
+          "InitSsmPoll",
+          "WaitSsmOnline",
+          "IncrementSsmPoll",
+          "SsmPollWithinDeadline",
+          "RenewBeforeSsmProbe",
+          "ReconcileSsm",
+          "SsmOnline",
+          "RunStartScript",
+          "InitHostPoll",
+          "WaitHostStart",
+          "IncrementHostPoll",
+          "HostPollWithinDeadline",
+          "RenewBeforeHostCheck",
+          "CheckHostStart",
+          "HostStartComplete",
+          "InitReadyPoll",
+          "WaitReady",
+          "IncrementReadyPoll",
+          "ReadyPollWithinDeadline",
+          "RenewBeforeReadyProbe",
+          "ReconcileReady",
+          "RuntimeReady",
+          "UpdateDnsRecord",
+          "InitDnsPoll",
+          "WaitDnsInSync",
+          "IncrementDnsPoll",
+          "DnsPollWithinDeadline",
+          "RenewBeforeDnsProbe",
+          "CheckDnsChange",
+          "DnsChangeInSync",
+          "ReconcileDns",
+          "EndpointReady",
+          "MarkSucceeded"
+        ],
+        "stop_states": [
+          "InitializeWorkflow",
+          "ReconcileBeforeStop",
+          "AutomaticStopFinalGate",
+          "AutomaticStopMayProceed",
+          "SetDesiredStopped",
+          "AlreadyEc2Stopped",
+          "AlreadyRuntimeStopped",
+          "RenewBeforeHostStop",
+          "RunHostStop",
+          "InitHostPoll",
+          "WaitHostStop",
+          "IncrementHostPoll",
+          "HostPollWithinDeadline",
+          "RenewBeforeHostCheck",
+          "CheckHostStop",
+          "HostStopComplete",
+          "ReconcileRuntimeStopped",
+          "RuntimeStopped",
+          "RenewBeforeEc2Stop",
+          "StopEc2",
+          "InitEc2Poll",
+          "WaitEc2Stopped",
+          "IncrementEc2Poll",
+          "Ec2PollWithinDeadline",
+          "RenewBeforeEc2Probe",
+          "ReconcileEc2Stopped",
+          "Ec2Stopped",
+          "RenewBeforeDnsDelete",
+          "DeleteDns",
+          "DnsAlreadyAbsent",
+          "InitDnsPoll",
+          "WaitDnsInSync",
+          "IncrementDnsPoll",
+          "DnsPollWithinDeadline",
+          "RenewBeforeDnsCheck",
+          "CheckDnsChange",
+          "DnsInSync",
+          "ReconcileAfterStop",
+          "MarkSucceeded"
+        ],
+        "runtime_target": {
+          "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-2f5287ab-b435-46e8-b415-46f9c5320c05",
+          "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "game_id": "game-vanilla-main"
+        },
+        "ready_observation": {
+          "private_ipv4": "10.0.0.125",
+          "active_game_state": "observed",
+          "ssm_state": "online",
+          "network_observation_source": "ec2-describe-instances",
+          "expected_game_id": "game-vanilla-main",
+          "dns_observation_source": "route53-list-resource-record-sets",
+          "schema_version": "1",
+          "container_state": "running",
+          "mount_state": "expected",
+          "runtime_ready": true,
+          "ec2_state": "running",
+          "minecraft_service_state": "running",
+          "public_ipv4": "54.250.165.7",
+          "docker_state": "active",
+          "execution": {
+            "phase": "running",
+            "process_id": "d189d91a877af14b6a97943434f8b88ddc4bd0ff6193e37ef530e3fb120e4557",
+            "target": {
+              "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-2f5287ab-b435-46e8-b415-46f9c5320c05",
+              "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+              "game_id": "game-vanilla-main"
+            }
+          },
+          "observed_active_game_id": "game-vanilla-main",
+          "dns_state": "present",
+          "public_ipv4_state": "assigned",
+          "dns_record_name": "mc-dev.wishicraft.net.",
+          "player_count": "0",
+          "observed_at": "2026-09-11T11:59:57.175439Z",
+          "dns_ipv4_values": [
+            "54.250.165.7"
+          ],
+          "instance_id": "i-04fc0629dc4ea466e",
+          "telemetry": {
+            "schema_version": "1",
+            "observed_at": "2026-09-11T11:59:58.284414Z",
+            "mount_path": "/srv/minecraft",
+            "volume_id": "vol-03ac9f534326c345c",
+            "available_bytes": "31682592768",
+            "boot_id": "d683955e-e269-4f08-94f7-58d23dffff5c",
+            "used_bytes": "462553088",
+            "total_bytes": "32145145856",
+            "source": "/dev/nvme1n1",
+            "state": "observed",
+            "error": null,
+            "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b"
+          },
+          "host_runtime_state": "running",
+          "minecraft_protocol_state": "ready"
+        },
+        "ready_heartbeat": {
+          "player_count": "0",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "runtime_id": "wishicraft-host-runtime",
+          "observed_at": "2026-09-11T11:59:28.583404Z",
+          "protocol_state": "ready",
+          "boot_id": "d683955e-e269-4f08-94f7-58d23dffff5c",
+          "empty_since": "2026-09-11T11:58:27.575685Z",
+          "system_id": "wishicraft-main",
+          "schema_version": "1",
+          "active_game_id": "game-vanilla-main",
+          "expires_at": "1789214368",
+          "process_id": "d189d91a877af14b6a97943434f8b88ddc4bd0ff6193e37ef530e3fb120e4557",
+          "run_id": "op-2f5287ab-b435-46e8-b415-46f9c5320c05"
+        },
+        "running_host": {
+          "command_id": "c686d6aa-6069-492f-98db-5ed6283cfca1",
+          "status": "Success",
+          "proof": {
+            "at": "2026-09-11T11:59:42.865448+00:00",
+            "receipt": {
+              "target": {
+                "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+                "instance_id": "i-04fc0629dc4ea466e",
+                "run_id": "op-2f5287ab-b435-46e8-b415-46f9c5320c05",
+                "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+                "game_id": "game-vanilla-main"
+              },
+              "phase": "running"
+            },
+            "container": {
+              "id": "dfcfecebb08fd49c35ba76d057ac3d67edea26b8b4f3689359f1f7dc84cff224",
+              "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+              "image_id": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+              "state": {
+                "Status": "running",
+                "Running": true,
+                "Paused": false,
+                "Restarting": false,
+                "OOMKilled": false,
+                "Dead": false,
+                "Pid": 4914,
+                "ExitCode": 0,
+                "Error": "",
+                "StartedAt": "2026-09-11T11:57:17.566662309Z",
+                "FinishedAt": "0001-01-01T00:00:00Z",
+                "Health": {
+                  "Status": "healthy",
+                  "FailingStreak": 0,
+                  "Log": [
+                    {
+                      "Start": "2026-09-11T11:57:47.572890019Z",
+                      "End": "2026-09-11T11:57:48.044459382Z",
+                      "ExitCode": 1,
+                      "Output": "failed to ping localhost:25565 : EOF"
+                    },
+                    {
+                      "Start": "2026-09-11T11:58:18.045189604Z",
+                      "End": "2026-09-11T11:58:18.173549142Z",
+                      "ExitCode": 0,
+                      "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+                    },
+                    {
+                      "Start": "2026-09-11T11:58:48.175291478Z",
+                      "End": "2026-09-11T11:58:48.292342574Z",
+                      "ExitCode": 0,
+                      "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+                    },
+                    {
+                      "Start": "2026-09-11T11:59:18.293111469Z",
+                      "End": "2026-09-11T11:59:18.414569113Z",
+                      "ExitCode": 0,
+                      "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+                    }
+                  ]
+                }
+              },
+              "labels": {
+                "com.docker.compose.config-hash": "c9acbc4e102023357fbd0e1ae5a23fe8d5ba6c1f29cb46893fbbff10b3d25946",
+                "com.docker.compose.container-number": "1",
+                "com.docker.compose.depends_on": "",
+                "com.docker.compose.image": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+                "com.docker.compose.oneoff": "False",
+                "com.docker.compose.project": "wishicraft-host-runtime",
+                "com.docker.compose.project.config_files": "/etc/wishicraft/host-runtime/compose.yaml",
+                "com.docker.compose.project.working_dir": "/etc/wishicraft/host-runtime",
+                "com.docker.compose.service": "minecraft",
+                "com.docker.compose.version": "5.4.0",
+                "com.wishicraft.active-game-data-source": "/srv/minecraft/games/game-vanilla-main/server",
+                "com.wishicraft.active-game-id": "game-vanilla-main",
+                "com.wishicraft.run-id": "op-2f5287ab-b435-46e8-b415-46f9c5320c05",
+                "org.opencontainers.image.authors": "Geoff Bourne <itzgeoff@gmail.com>",
+                "org.opencontainers.image.created": "2026-07-20T18:50:00.880Z",
+                "org.opencontainers.image.description": "Docker image that provides a Minecraft Server for Java Edition that automatically installs/upgrades versions, modloaders, modpacks and more at startup",
+                "org.opencontainers.image.licenses": "Apache-2.0",
+                "org.opencontainers.image.revision": "4cbdf520c88d57713637c5e4c30b5ba5caa40698",
+                "org.opencontainers.image.source": "https://github.com/itzg/docker-minecraft-server",
+                "org.opencontainers.image.title": "docker-minecraft-server",
+                "org.opencontainers.image.url": "https://github.com/itzg/docker-minecraft-server",
+                "org.opencontainers.image.version": "2026.7.2"
+              },
+              "mounts": [
+                {
+                  "Type": "bind",
+                  "Source": "/run/wishicraft/rcon-cli.env",
+                  "Destination": "/data/.rcon-cli.env",
+                  "Mode": "rw",
+                  "RW": true,
+                  "Propagation": "rprivate"
+                },
+                {
+                  "Type": "bind",
+                  "Source": "/run/wishicraft/rcon-cli.yaml",
+                  "Destination": "/data/.rcon-cli.yaml",
+                  "Mode": "rw",
+                  "RW": true,
+                  "Propagation": "rprivate"
+                },
+                {
+                  "Type": "bind",
+                  "Source": "/srv/minecraft/games/game-vanilla-main/server",
+                  "Destination": "/data",
+                  "Mode": "rw",
+                  "RW": true,
+                  "Propagation": "rprivate"
+                },
+                {
+                  "Type": "bind",
+                  "Source": "/run/wishicraft/rcon-password",
+                  "Destination": "/run/secrets/rcon-password",
+                  "Mode": "ro",
+                  "RW": false,
+                  "Propagation": "rprivate"
+                }
+              ]
+            },
+            "unit": "Result=success\nActiveState=active\nSubState=exited\n",
+            "run_env_matches": true,
+            "level_dat_exists": true,
+            "expected_player_exists": true,
+            "player_sha256": "bb6b5f740c20e8b7144846af610d901c86a41234ba6195ce6f6a4b981e3da132",
+            "operation_artifact_sha256": "aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee"
+          }
+        },
+        "stopped_host": {
+          "command_id": "5c5e58a4-fade-401c-bd35-920757e9b7b5",
+          "status": "Success",
+          "proof": {
+            "at": "2026-09-11T12:00:40.029495+00:00",
+            "receipt": {
+              "target": {
+                "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+                "instance_id": "i-04fc0629dc4ea466e",
+                "run_id": "op-2f5287ab-b435-46e8-b415-46f9c5320c05",
+                "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+                "game_id": "game-vanilla-main"
+              },
+              "phase": "stopped",
+              "stop": {
+                "container_id": "dfcfecebb08fd49c35ba76d057ac3d67edea26b8b4f3689359f1f7dc84cff224",
+                "started_at": "2026-09-11T11:57:17.566662309Z",
+                "save_confirmed": true,
+                "removal_ready": true
+              }
+            },
+            "observed_phases": [
+              "running",
+              "stopping",
+              "stopped"
+            ],
+            "unit": "Result=success\nActiveState=inactive\nSubState=dead\n",
+            "containers_absent": true,
+            "listeners_absent": true,
+            "world_exists": true
+          }
+        },
+        "initial_heartbeat": {
+          "player_count": null,
+          "instance_id": "i-04fc0629dc4ea466e",
+          "runtime_id": "wishicraft-host-runtime",
+          "observed_at": "2026-09-11T11:56:26.363698Z",
+          "protocol_state": "unknown",
+          "boot_id": "d683955e-e269-4f08-94f7-58d23dffff5c",
+          "empty_since": null,
+          "system_id": "wishicraft-main",
+          "schema_version": "1",
+          "active_game_id": null,
+          "expires_at": "1789214186",
+          "process_id": null,
+          "run_id": "op-1af2bda9-4227-47d4-9d65-26cc4fb89482"
+        }
+      }
+    ],
+    "historical_failed_start_unchanged": true,
+    "auto_stop_intents_unchanged": true,
+    "final": {
+      "at": "2026-09-11T12:02:13.584765+00:00",
+      "state": {
+        "desired_updated_at": "2026-09-11T12:00:31.929295Z",
+        "schema_version": "1",
+        "environment": "dev",
+        "desired_state": "STOPPED",
+        "desired_revision": "21",
+        "observation_errors": [],
+        "observed_at": "2026-09-11T12:01:53.332172Z",
+        "desired_game_id": null,
+        "observation": {
+          "public_ipv4": null,
+          "docker_state": "unknown",
+          "private_ipv4": "10.0.0.125",
+          "active_game_state": "not-applicable",
+          "observed_active_game_id": null,
+          "dns_state": "absent",
+          "ssm_state": "not-applicable",
+          "public_ipv4_state": "absent",
+          "dns_record_name": "mc-dev.wishicraft.net.",
+          "network_observation_source": "ec2-describe-instances",
+          "expected_game_id": "game-vanilla-main",
+          "dns_observation_source": "route53-list-resource-record-sets",
+          "schema_version": "1",
+          "container_state": "unknown",
+          "mount_state": "unknown",
+          "player_count": null,
+          "observed_at": "2026-09-11T12:01:53.332172Z",
+          "dns_ipv4_values": [],
+          "runtime_ready": false,
+          "instance_id": "i-04fc0629dc4ea466e",
+          "ec2_state": "stopped",
+          "minecraft_service_state": "not-applicable",
+          "host_runtime_state": "not-running",
+          "minecraft_protocol_state": "not-applicable"
+        },
+        "discrepancies": [],
+        "game_id": "game-vanilla-main",
+        "health": "HEALTHY",
+        "requested_operation_id": "op-76445f1a-8c4b-4ca4-b9e7-baa9e8f137d1",
+        "system_id": "wishicraft-main",
+        "target_instance_id": "i-04fc0629dc4ea466e"
+      },
+      "target_instance_id": "i-04fc0629dc4ea466e",
+      "ec2_state": "stopped",
+      "data_volume_id": "vol-03ac9f534326c345c",
+      "data_attachments": [
+        {
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "VolumeId": "vol-03ac9f534326c345c",
+          "InstanceId": "i-04fc0629dc4ea466e",
+          "Device": "/dev/sdf",
+          "State": "attached",
+          "AttachTime": "2026-08-23 08:29:36+00:00"
+        }
+      ],
+      "encrypted": true,
+      "dns": [],
+      "locks": [],
+      "unfinished_operations": [],
+      "running_executions": [],
+      "nonterminal_ssm": [],
+      "concurrency": {
+        "wc-dev-admission": "UNSET",
+        "wc-dev-discord-command": "UNSET"
+      },
+      "snapshot_ids": [
+        "snap-005ce340d03a42340",
+        "snap-0762ec7637f489d5b",
+        "snap-079c0aa0c06935d8f",
+        "snap-0989e090822d69d1e",
+        "snap-0b1d9536e9c476c0f"
+      ],
+      "all_five_snapshots_and_provenance_unchanged": true,
+      "game_unchanged": true,
+      "alarm_count": 41,
+      "non_ok_alarms": []
+    },
+    "alarm_state_history": [
+      {
+        "AlarmName": "wc-dev-desiredactualdivergencealarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:56:31.529000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 3 out of the last 3 datapoints [1.0 (11/09/26 11:16:00), 1.0 (11/09/26 11:11:00), 1.0 (11/09/26 11:06:00)] were greater than or equal to the threshold (1.0) (minimum 3 datapoints for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:21:31.527+0000\",\"startDate\":\"2026-09-11T11:06:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0,1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:16:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T11:11:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T11:06:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 3 datapoints [0.0 (11/09/26 11:51:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:56:31.527+0000\",\"startDate\":\"2026-09-11T11:41:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0,0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:51:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredrunningnotreadyalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:46:22.956000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [1.0 (11/09/26 11:26:00)] was greater than or equal to the threshold (1.0) (minimum 1 datapoint for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:31:22.956+0000\",\"startDate\":\"2026-09-11T11:26:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:26:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [0.0 (11/09/26 11:41:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:46:22.955+0000\",\"startDate\":\"2026-09-11T11:41:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:41:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredrunningnotreadyalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:31:22.958000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [0.0 (10/09/26 11:36:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-10T11:41:22.955+0000\",\"startDate\":\"2026-09-10T11:36:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-10T11:36:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [1.0 (11/09/26 11:26:00)] was greater than or equal to the threshold (1.0) (minimum 1 datapoint for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:31:22.956+0000\",\"startDate\":\"2026-09-11T11:26:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:26:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-starttaskfunctionerrorsalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:24:43.682000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 datapoint [1.0 (11/09/26 11:04:00)] was greater than or equal to the threshold (1.0).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:09:43.679+0000\",\"startDate\":\"2026-09-11T11:04:00.000+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:04:00.000+0000\",\"sampleCount\":8.0,\"value\":1.0}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:24:43.680+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:19:00.000+0000\"}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-startworkflowfailurealarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:24:37.550000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 datapoint [1.0 (11/09/26 11:04:00)] was greater than or equal to the threshold (1.0).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:09:37.542+0000\",\"startDate\":\"2026-09-11T11:04:00.000+0000\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:04:00.000+0000\",\"value\":1.0}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:24:37.548+0000\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:19:00.000+0000\"}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredactualdivergencealarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:21:31.529000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 3 datapoints [0.0 (11/09/26 11:01:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:06:31.527+0000\",\"startDate\":\"2026-09-11T10:51:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0,0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:01:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 3 out of the last 3 datapoints [1.0 (11/09/26 11:16:00), 1.0 (11/09/26 11:11:00), 1.0 (11/09/26 11:06:00)] were greater than or equal to the threshold (1.0) (minimum 3 datapoints for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:21:31.527+0000\",\"startDate\":\"2026-09-11T11:06:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0,1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:16:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T11:11:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T11:06:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-starttaskfunctionerrorsalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:09:43.680000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-08-31T16:06:30.014+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-08-31T16:01:00.000+0000\"}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 datapoint [1.0 (11/09/26 11:04:00)] was greater than or equal to the threshold (1.0).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:09:43.679+0000\",\"startDate\":\"2026-09-11T11:04:00.000+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:04:00.000+0000\",\"sampleCount\":8.0,\"value\":1.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-startworkflowfailurealarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:09:37.543000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-08-31T16:06:39.737+0000\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-08-31T16:01:00.000+0000\"}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 datapoint [1.0 (11/09/26 11:04:00)] was greater than or equal to the threshold (1.0).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:09:37.542+0000\",\"startDate\":\"2026-09-11T11:04:00.000+0000\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:04:00.000+0000\",\"value\":1.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-runtimeobservationunknownalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:06:59.389000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 2 out of the last 2 datapoints [1.0 (11/09/26 10:51:00), 1.0 (11/09/26 10:46:00)] were greater than or equal to the threshold (1.0) (minimum 2 datapoints for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T10:56:59.387+0000\",\"startDate\":\"2026-09-11T10:46:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:51:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T10:46:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 2 datapoints [0.0 (11/09/26 11:01:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:06:59.387+0000\",\"startDate\":\"2026-09-11T10:56:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:01:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredstoppedec2runningalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:06:53.497000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [1.0 (11/09/26 10:46:00)] was greater than or equal to the threshold (1.0) (minimum 1 datapoint for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T10:51:53.497+0000\",\"startDate\":\"2026-09-11T10:46:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:46:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [0.0 (11/09/26 11:01:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:06:53.496+0000\",\"startDate\":\"2026-09-11T11:01:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:01:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredactualdivergencealarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:06:31.529000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 3 out of the last 3 datapoints [1.0 (11/09/26 10:56:00), 1.0 (11/09/26 10:51:00), 1.0 (11/09/26 10:46:00)] were greater than or equal to the threshold (1.0) (minimum 3 datapoints for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:01:31.527+0000\",\"startDate\":\"2026-09-11T10:46:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0,1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:56:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T10:51:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T10:46:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 3 datapoints [0.0 (11/09/26 11:01:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:06:31.527+0000\",\"startDate\":\"2026-09-11T10:51:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0,0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T11:01:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredactualdivergencealarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 20:01:31.530000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 3 datapoints [0.0 (31/08/26 16:03:00)] was not greater than or equal to the threshold (1.0) and 2 missing datapoints were treated as [Breaching] (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-08-31T16:08:45.897+0000\",\"startDate\":\"2026-08-31T16:03:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-08-31T16:03:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 3 out of the last 3 datapoints [1.0 (11/09/26 10:56:00), 1.0 (11/09/26 10:51:00), 1.0 (11/09/26 10:46:00)] were greater than or equal to the threshold (1.0) (minimum 3 datapoints for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T11:01:31.527+0000\",\"startDate\":\"2026-09-11T10:46:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0,1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:56:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T10:51:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T10:46:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-runtimeobservationunknownalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 19:56:59.388000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 2 datapoints [0.0 (10/09/26 14:41:00)] was not greater than or equal to the threshold (1.0) and 1 missing datapoint was treated as [Breaching] (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-10T14:46:59.387+0000\",\"startDate\":\"2026-09-10T14:41:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-10T14:41:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 2 out of the last 2 datapoints [1.0 (11/09/26 10:51:00), 1.0 (11/09/26 10:46:00)] were greater than or equal to the threshold (1.0) (minimum 2 datapoints for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T10:56:59.387+0000\",\"startDate\":\"2026-09-11T10:46:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0,1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:51:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0},{\"timestamp\":\"2026-09-11T10:46:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredstoppedec2runningalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 19:51:53.499000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [0.0 (11/09/26 10:26:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T10:31:53.497+0000\",\"startDate\":\"2026-09-11T10:26:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:26:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [1.0 (11/09/26 10:46:00)] was greater than or equal to the threshold (1.0) (minimum 1 datapoint for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T10:51:53.497+0000\",\"startDate\":\"2026-09-11T10:46:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:46:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredstoppedec2runningalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 19:31:53.499000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [1.0 (11/09/26 10:21:00)] was greater than or equal to the threshold (1.0) (minimum 1 datapoint for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T10:26:53.497+0000\",\"startDate\":\"2026-09-11T10:21:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:21:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [0.0 (11/09/26 10:26:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T10:31:53.497+0000\",\"startDate\":\"2026-09-11T10:26:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:26:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}}}"
+      },
+      {
+        "AlarmName": "wc-dev-desiredstoppedec2runningalarm",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-11 19:26:53.498000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [0.0 (31/08/26 16:03:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-08-31T16:08:24.232+0000\",\"startDate\":\"2026-08-31T16:03:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-08-31T16:03:00.000+0000\",\"sampleCount\":1.0,\"value\":0.0}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: 1 out of the last 1 datapoints [1.0 (11/09/26 10:21:00)] was greater than or equal to the threshold (1.0) (minimum 1 datapoint for OK -> ALARM transition).\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-11T10:26:53.497+0000\",\"startDate\":\"2026-09-11T10:21:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-11T10:21:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}}}"
+      }
+    ],
+    "limitations": [
+      "No forced replay or fault injection",
+      "No repeated 30-minute auto-stop E2E",
+      "No repeated isolated restore",
+      "No human building/inventory inspection or production scoreboard mutation",
+      "No managed Lambda SDK version measurement"
+    ],
+    "validation": {
+      "implementation_ci": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34593137552",
+      "approval_ci": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34593631815",
+      "tests": 921,
+      "lint_format_type": "passed",
+      "synth": "all three stacks passed in CI",
+      "real_docker": "targeted stop/new run persistence integration passed in CI",
+      "local_docker": "CLI unavailable; not installed"
+    },
+    "local_evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-forward-continuation-v1.6ue19lq_",
+    "raw_evidence_sha256": {
+      "MinecraftTargetStack-dev.before.template.json": "cbf19a780a4555b5e3d30081803a4a69664e5763dca2d631c23272178f452118",
+      "WishicraftControlPlaneStack-dev.before.template.json": "fa262c70a6679d23f9e7f17b5e6289ea981745c972ece83ec05820093b1899f8",
+      "alarms-after-recovery.json": "0a5bdc934723d5e75c24f52bd855a60de1d6ed4cd4d4b1cb2bd7b0df5ccd1290",
+      "cp-diff-v2.json": "db31bfe0ccb6f0b25cf03508482a1698d08c9691fbc2c405e331e6fa96270599",
+      "cp-outputs.json": "b712834752f5a5de5f89324219a2ae25e8cc3db26a678b3f2700437c42cf85ba",
+      "cp-readback.json": "09148c39ee1949ea88adb0ecce583a156fe3d77a8b374e810e3083a5aab1d674",
+      "discord-pause-intent.json": "5d083d45c3e12fcbcaed4bf6cf1084b401425896c8792ed314f62fb7274ee108",
+      "discord-pause-response.json": "b1c3700ab64275d071a87ecdfcc98cd847883c857e2102b71d28810ceace0190",
+      "final-admission-restore-intent.json": "8b94d60d502d0ddd289f0c582d35d30a2e1437362d3504340ca198771d6a8d22",
+      "final-admission-restore-response.json": "414e0a536c3604efcf1af8725d77886c21cb77041e9c63f92276c98aa40e1144",
+      "final-discord-restore-intent.json": "af98b9c0b356aaa66ccaf0950314a5391eacd2ff4f10bffc6a130abfcff6e66d",
+      "final-discord-restore-response.json": "e4911ee159d70eae32b49e3288893482dae76d261b5419f6870d923d015f1cda",
+      "final-extra.json": "60f16d754267fc99e8721b9d38cce2ad6327873ff0b854158c143577e981c0a1",
+      "final-preflight/MinecraftTargetStack-dev.before.template.json": "cbf19a780a4555b5e3d30081803a4a69664e5763dca2d631c23272178f452118",
+      "final-preflight/WishicraftControlPlaneStack-dev.before.template.json": "f72b96cf07c32f23c5fddc789121f2c4842b6d407ea17a1d6b1bdc03cbaeb795",
+      "final-preflight/preflight.json": "f40b0c6dc8426f29a028eed4952c4797b2c77d4fec6913c2c49346367aba85b5",
+      "forward-bundle-delivery-command.json": "dc4cb655ca319155c9e10767dd793f2660451dfcc55712d02cc607ae8a454147",
+      "forward-bundle-delivery-intent.json": "30cccd0b6bd0c8c4ee1e31eb182b53664ff6790afc4adfeba7be081153fb450c",
+      "forward-bundle-delivery-result.json": "bf70f5bbe04fb26dbda932a8e78d9d4b96a73285e99705ad17e3a20970157c73",
+      "forward-final-reconcile-intent.json": "e7759c8e395de11a5cdcdc51caf1a379c24ccab9f672e6dea78c22e1e7fd1c82",
+      "forward-final-reconcile-response.json": "3ef541019a6532bd91365130c30490425947ee9f8636b54871c0387313035d7e",
+      "forward-host-install-command.json": "ceed2f40b09c12b6ee426681ea2113f29952c859b43535aed0570a27ccf1df92",
+      "forward-host-install-intent.json": "11ec0278ef2ff42cfd56cd57893d094d1c08111712535c09bb34ceaf5241ccbb",
+      "forward-host-install-result.json": "e5841993d8bd7b4d3e24491f7af015c1c53348434f941d924741ff93e29c9c0a",
+      "forward-host-preflight-command.json": "bd2eec43091389f6745a22a16c51edf14a56ac6ae5dfb2850848a1753d1c9fae",
+      "forward-host-preflight-intent.json": "fda19d7a71f09056a17e793cbe12d412b51654cea8e6efd033afd0833091351a",
+      "forward-host-preflight-result.json": "b1bbb21e9df32f704a74193180c6767e7734a292ab93338dde5c27bef440dd8a",
+      "forward-maintenance-start-intent.json": "07411714fd22f97c016cd6fa36e8cd78a9fac65fc079400a5d92f528a642adc0",
+      "forward-maintenance-start-response.json": "7704d8d350e8b27ded2fc146a05a3df7bb9932bb48c5a1903e62728c0d4a3844",
+      "forward-maintenance-stop-intent.json": "a55a66acb6a19a15a58dc773c71b5c08dd705aca4b74b84e3f1f18f7fe82e162",
+      "forward-maintenance-stop-response.json": "ee36b29c66f13cfde3a7ce615a071857bda24981dfb66cb60a3143735a3e4ef0",
+      "ingress-before.json": "552253621741f7179504de749ebff59ff6be8fe8b773bb411e46aecfba627033",
+      "ingress-drained.json": "31180509ace3bc09110fea6135d05e46fabd110a4a09a5dac63440778367797f",
+      "post-recovery-admission-pause-intent.json": "ca2dcecc6878b763d3272c7b74e7cb05df71f9eec7aa77d2ad00863a4da3c067",
+      "post-recovery-admission-pause-response.json": "97de847e2d2e53d70099126e41b3cb160bc815f70b796dc82ec10413d68aba7d",
+      "preflight.json": "77c2ded4b8c58ca9b5967dd4524b3798eb7fb211725798fee2a7ac10eab333f0",
+      "recovery-admission-open-intent.json": "74f9e390088753b25e401f3aee488fb077f4e8a607c3e3172e9ef5b570d6ce40",
+      "recovery-admission-open-response.json": "5751aceb61ec16720a2559a45b7131b710a7a8c988673ee8f68fd02138b34dd9",
+      "recovery-stop-admission-intent.json": "45ab024863719bb14fe530b8330d76094144ce70bee2347e18834eff9d403131",
+      "recovery-stop-admission-response.json": "60a31ca4448bf9c965fd73a7b46c967c84edb14beb202dcce1ef95a4525203bf",
+      "recovery-stop-execution.json": "05d08a8b4949116116f06b253cc1bb3dd48c9699c3eb3f286483ab8f3375824c",
+      "recovery-stop-observation-114134.json": "a47a37bd231d336b287a4f0e13ddcb0092ff0233e62fb626273538dac7cef098",
+      "round1-start-admission-intent.json": "185a841aa28ab3dc0238179828add8dc745897d9af642d29326c9481a5294b5e",
+      "round1-start-admission-response.json": "7d74a5a58d86fd075cd857955d1b7ed73beaee4734ea4d6ea48597717e451c4f",
+      "round1-start-execution.json": "d4daf39b29241b0bc0da166ad271efa3e03180ae3d1835a789b210174d7a9766",
+      "round1-start-host-proof-command.json": "05cf06d509b8e3092ba68d085711b67db8e849207f0e77570d8a69d68b545b2b",
+      "round1-start-host-proof-intent.json": "c755e7ed3866f41e70f0cee762add2b399ba212fbc7ab29e297242258da2a142",
+      "round1-start-host-proof-result.json": "19e49d2d093abf8d81d0d6f1b3b309d5dd467fe8f4656f94d54500206662cc21",
+      "round1-start-observation-114920.json": "8b73002cbf259928b50da6c87ae9c74b14f78b2fb706a06107ad2e00058a0e2a",
+      "round1-start-observation-114958.json": "7e8887e9b79efe57b7e52c11fbfeb581e46ee1e86fe37e0383164432d747ca74",
+      "round1-start-observation-115031.json": "0b02a696e1945f2ec3ce6ce0699d080c6bd0e06764ef5af5286d795884812fe2",
+      "round1-start-observation-115138.json": "8387882692df73fd64e11d3451b39ed138fedfe6e6c3ce54758cfcb27dab9f32",
+      "round1-start-observation-115300.json": "de71ff2f9ce993b5679942a68aa1603dca0a41c2f17a0fbb054b5d336cb8eeb6",
+      "round1-start-observation-115335.json": "5750c7bf0a14d52c87ffe41d80ef6ded1dbfa317c99ccb8867fd1b676069ffbb",
+      "round1-start-stop-watch-command.json": "3e580c24f40509486ae1ba9dd793bbe167e2a0459aad306cbbb075d8fd14869a",
+      "round1-start-stop-watch-intent.json": "437398137dddc34259139201fec1b232f36ffaaca3c793837f5715fb9ee86f7a",
+      "round1-start-stop-watch-result.json": "69643593d2687b06afa83b57454175847c22b3d114cd2d22d7ab3028353c076b",
+      "round1-stop-admission-intent.json": "99126a0be3e5fd105eb443db54752153a5526b5ad2797db3baef675d15c1b12b",
+      "round1-stop-admission-response.json": "61ed10add84c8fc2129282f6e21f6f6f05ab893047fa5fe0323bcfd7058b3bfd",
+      "round1-stop-execution.json": "db7037d760f6ee93e52048c4797ea8fc1c6c8cd93c2c688b772c5834c6207c80",
+      "round1-stop-observation-115433.json": "9a09c51dbea1bb89ea6cb56724c3eef0ac9173c3814ed75f845b63243126f27a",
+      "round1-stop-observation-115452.json": "5382cdd4c70213e29b200b2499c302f9880908a78482e7fbca43727833694885",
+      "round1-stop-observation-115522.json": "5272ae9afbf0bf2f32a897db422731b9f805af7d4057443478c18b6e7184cd15",
+      "round1-stop-observation-115541.json": "b80143c074218fd374cb31dbf6fcd7672df55d4e8a140e6a9a8d350fa44c66c3",
+      "round2-start-admission-intent.json": "7fcb16793893fa2d0723c269095a5dad37ed2613b8368121bfe98143b0a942d6",
+      "round2-start-admission-response.json": "e319658ce6828109ed94a83b74cc4e1fb420b2e2eaf9601a6d41d42ba7cad36d",
+      "round2-start-execution.json": "157960e6191d87ad2d2e68fbc88dbc68ef6d8447cf265367a85d1399e49dd8f4",
+      "round2-start-host-proof-command.json": "9f3183d623bffe39c34d4b3458a0bc3f6c81b3e45f7f761a8126f1453b5e2427",
+      "round2-start-host-proof-intent.json": "c173c250e35eabb3f87ccd26c68ce76dcdde66c73cc9a8c33091780403fbc09c",
+      "round2-start-host-proof-result.json": "904b0e972d05b36ff842a13501e31b99ff5026951c4c4ebd1efa78cba8911216",
+      "round2-start-observation-115653.json": "ab94a7fa3699c6ff8976c62ae105f5f35f03bfa8056894b175d3c035136aa166",
+      "round2-start-observation-115754.json": "beed97870ddab78e8778a876cefe76c1390992f5fa7547cffb99627e82c2ce75",
+      "round2-start-observation-115910.json": "fb89ef35ca4b495b51d65ea1cdabf1f1dd5ec271583726bbd130421108377a20",
+      "round2-start-observation-120003.json": "28f9e67f07f8e3d3cd7e3c9d4b887125faee7556a51692001b0427efd3618981",
+      "round2-start-stop-watch-command.json": "f76f2dfc5b01da2a6c359bd16441a1cf453231e1addbf6370598b6bb3c75147d",
+      "round2-start-stop-watch-intent.json": "9840795dd5e8f73dcfdba3c85446d9f0dbe42f849f4461473cd7206cf87f164d",
+      "round2-start-stop-watch-result.json": "c3c7bce2c383be0968923e7622ffda0676e7966bfacf33a16f3084980340b2b2",
+      "round2-stop-admission-intent.json": "13457cc030b690653da133e07140862740879e010aa4c21466c5b106ec4d3b56",
+      "round2-stop-admission-response.json": "4a2c90fb01032cc221bcbfa8e65d3eb7916a12b61c44aa74726b82fdd7bf3064",
+      "round2-stop-execution.json": "eea4d692a524fe2327563f8531180d3ff2914fb0e54a5e7f70cd1ee36d0444f8",
+      "round2-stop-observation-120107.json": "c4fc295e3c6833316ed5435ae3065a2a346b093a12e133bc9c1ec39a83739f1a",
+      "round2-stop-observation-120155.json": "6471c2e0968562a87d4e907827a58ed6e4eab108712600cd7ee4eb00fd102ace",
+      "target-iam-readback-v2.json": "75e3ae6d7e9072ab3b5c67ab4ee5b903373e9cb399d697069da726fac2b5399a"
     }
   }
 }

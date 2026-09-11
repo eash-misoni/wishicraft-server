@@ -1,6 +1,7 @@
 # Targeted runtime contract / inactive-only migration
 
-**状態: Accepted — 2026-09-11ユーザーGO。旧manifest不一致は解決。host/CP適用後のSTART失敗と受付復旧gateでBLOCKED、実機検証は未完了。**
+**状態: Completed — D-096 Accepted。2026-09-11 UTC、限定STOP復旧・前進修正・通常START/STOP二巡・受付復元・最終STOPPED/HEALTHYを実機確認済み。**
+以下の途中BLOCKED／未実施記録は当時のcheckpointとして保持し、現在の結果は末尾のcloseoutを正本とする。
 基準は `30b029295c3cd94d00fbfe1aacd0f60094d2f011`。Phase 8およびBACKUP安全性／隔離復元sliceのCompletedを変更しない。
 D-096の承認対象はこの単一Game START/STOP契約と移行だけである。
 
@@ -202,3 +203,54 @@ repoの前進修正は `daeb538e61ac260c5b790dc30444209b9b5cd319`。local 921 te
 5. 失敗一件を履歴に残したまま、新Operationによる通常START/STOP二巡を検証する。今回まだ一巡も成功していない。新BACKUP／Snapshot作成・raw修復・逆方向rollbackは不要。
 
 この案の受付例外を未承認のまま実行しない。旧host/旧CPへ戻して受付だけ再開する案は、既に新runtime_targetが保存され旧containerも削除済みのため、単純なコード差し戻しでは採用しない。
+
+## Production closeout — limited STOP / forward migration
+
+2026-09-11の追加GO（基準 `d6f3b67adf828e56a3460d1ab0c4002d19b22af4`）で、11:17 checkpointの限定受付例外を承認された。適用codeは `daeb538e61ac260c5b790dc30444209b9b5cd319` と同一で、基準HEADまでの後続差分は文書のみ。旧manifest調査や旧container削除、BACKUP、Target IAM deployは繰り返していない。
+
+### 復旧STOPと受付
+
+11:38 UTCにcanonical caller/account/region、実EC2 stopped／Desired RUNNING／DEGRADED、FAILED START、DNSなし、Lock/Current Operation/未終了workflow・SSMなしを再観測した。適用済みe503530のSTOP code hashとdefinitionを照合し、`AlreadyEc2Stopped → RenewBeforeDnsDelete` がhost STOP／EC2 Stopを呼ばないことを確認した。
+
+Discord Commandの元concurrencyはUNSET。11:40:12に0へ変更し、Command 10秒／Admission 30秒のtimeoutを越えてdrainした。直前8分の両LambdaにSTART記録なし、Evaluatorは各呼出しのEND/REPORTと `CONTROL_PLANE_UNSAFE` を確認。heartbeat stale/unknown、empty_sinceなしで非eligible、既存intentはterminalまたは過去のSTOP_REQUESTEDであり、未確定なAdmission要求はなかった。既知の通常呼出し元はDiscord CommandとEvaluatorの同期RequestResponse、今回のoperator ADMIN。Admissionを開くこと自体がSTOP-only制限になるとは扱っていない。
+
+11:40:52にAdmissionだけUNSETへ限定復元し、固定key `d096-d6f3b67-forward-recovery-stop` でADMIN STOPを一回送信した。Operation `op-796eca37-a1ff-457f-9d74-b74904c1d391`、execution `arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-796eca37-a1ff-457f-9d74-b74904c1d391` がSUCCEEDED。fresh Reconcile、owned Desired STOPPED、既停止分岐、DNS不存在処理、最終Reconcile、Lock解放まで進み、RunHostStop／StopEc2は実行していない。限定窓の新Operationはこの一件だけ。11:42:06にAdmissionを0へ戻した。
+
+### 前進修正
+
+11:42:31に同じTargetを保守起動し、全10 artifactのexact predecessor、root owner/mode/type、receipt/container/listenerなし、unit inactiveを照合した。旧inventoryの108ファイルについてhash・owner・mode・mtimeが変わっておらず、既存BACKUP `snap-005ce340d03a42340` を継続使用した。
+
+承認bundleを新規 `/var/tmp/wishicraft-targeted-runtime-forward-v1` へ配送し全hashを検証。旧配送directoryは保持した。byte同一のinstaller moduleへ今回のbundle directoryだけを渡し、過去FAILED STARTのrun値はCompose解決用の環境contextだけに使用した。Operation再送・receipt作成は行っていない。
+
+`operation-v2` は `abecc64cbb007c699451bb4c120760d4b33d0909c23de0af3ef0f29f730bc7f4` から `aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee` へ更新し、旧fileを `predecessor-9.artifact` に保存した。他artifactはcanonicalとして不変。install.json hashは `beccd97de65fdf6cc62a0c7d7d9b10f9d8f88b9c6533b41e03af33e731b0e847`。同じhost排他、全件事前検証、atomic replace、receipt不存在条件を維持した。
+
+11:45:26の保守正常停止後、Control Planeを保存済み検証assemblyからdeploy。実production差分は11 Lambda Codeと対応するCDK asset-path metadataだけで、IAM/config/State Machine/resource lifecycle差分なし。UPDATE_COMPLETE、全11 Lambda Active/更新成功・実code SHA・target設定・template全一致をread-backした。Target IAMは既存heartbeat権限と区別してOperations/Locks限定GetItemを確認し、再deployしなかった。
+
+両Lambdaのconcurrency 0はdeploy中・後も維持した。11:48:22のfresh STOPPED/HEALTHY・DNSなしを確認後、11:48:45にAdmission、11:48:51にDiscord Commandを元UNSETへ復元した。
+
+### 通常二巡の実証
+
+| 巡 | START Operation / run | 実container | STOP Operation |
+|---|---|---|---|
+| 1 | `op-1af2bda9-4227-47d4-9d65-26cc4fb89482` | `9620d3a51b75e4574eb09d9805d0bf3b1b51c355a5ebec36bcc0435d865b455f` | `op-d843a03a-d7ef-4a72-b4cc-8a19afb5e2c5` |
+| 2 | `op-2f5287ab-b435-46e8-b415-46f9c5320c05` | `dfcfecebb08fd49c35ba76d057ac3d67edea26b8b4f3689359f1f7dc84cff224` | `op-76445f1a-8c4b-4ca4-b9e7-baa9e8f137d1` |
+
+四Operationともshared Admission ADMIN経路でSUCCEEDED。target、receipt、実Compose project/service、Game/run label、固定image、data bind、RUN_ENV、READY、DNS、fresh heartbeatを照合した。preflightの必須run条件を緩和せず、認可済みrunをsubprocessへ渡す修正を通って起動した。
+
+二巡とも既存 `world/level.dat` とplayer dataを確認し、同じGame/data pathを使用した。player file hashは二巡で一致。通常起動・保存で更新されるworld/log全体のbyte一致や、人間による建築物・所持品の目視確認は主張しない。本番へ試験値を追加していない。
+
+STOP時には別のread-only SSM観測で、同じtargetの `running → stopping → stopped`、exact container/StartedAt、save_confirmed、removal_ready、unit inactive/Result=success、container/listener不存在、world残存を保存した。force/volume/pruneは使用せず、その後通常workflowがEC2停止・DNS削除・最終HEALTHYまで収束した。
+
+二巡目の新bootでは旧stopped receiptが観測できたが、process/empty_sinceはnull。その後新run/processへ変わり、empty_sinceは11:58:27から始まった（一巡目は11:51:32）。AutoStopIntentsは全件不変で旧予告の採用・新規予告・SCHEDULE STOPはなかった。長時間自動停止の再実証とは区別する。
+
+### 最終状態・失敗・限界
+
+12:02:13 UTC最終観測: STOPPED/HEALTHY、DNS/Lock/Current Operation/unfinished Operation/running execution/nonterminal SSMなし。元Data EBS identity/attachment/encryption、Game参照、既存5 Snapshot/provenanceを保持。今回のcontinuationで新BACKUP/Snapshotは0。移行全体の新保護Snapshotは先行取得済みの一件のみ。両受付UNSETとhistorical FAILED START `op-f662ecac-c9ce-4b97-9416-ffea7f16633f` の完全不変も確認した。
+
+41 alarmは全件OK。保守中のDesired STOPPED/EC2 runningとruntime unknown、実START失敗のtask/workflow error、その後のDesired RUNNING/EC2 stoppedの不一致を別原因として記録した。START failure alarmは11:24、DesiredRunningNotReadyは11:46:22、最後のDesiredActualDivergenceは11:56:31 UTCに自然復帰。閾値・通知・metricを変更していない。
+
+今回の開始時SSO期限切れは人間の再ログインで解消した。read-only補助parserではCDK asset metadataと既存heartbeat GetItemを区別するassertion不足を修正したが、deploy差分やIAMを変更して通したものではない。実host修正／通常二巡には新しい失敗や強制処理はなかった。前のmanifest停止とFAILED STARTの履歴・証跡は保持している。
+
+実装validationは921 tests、ruff/format/mypy、3 stack synth、実Dockerの必須run・保存・STOP・新run起動を含むCI成功。local Docker CLIは未導入でCI実証と分離する。強制replay、故障注入、30分auto-stop E2E、隔離復元再実行、managed Lambda SDK version実測は今回行っていない。Phase 8 Completedを維持し、Phase 9全体、SWITCH/RESET、その他Proposed再設計へ進んでいない。
+
+完全なidentity・SSM command・execution・hashと時刻は[既存production evidence](../evidence/2026-09-11-targeted-runtime-production.json)の `limited_stop_forward_continuation` を参照する。前のcheckpointはhistoricalとして残す。

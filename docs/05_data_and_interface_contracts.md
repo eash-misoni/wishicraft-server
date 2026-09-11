@@ -3,8 +3,8 @@
 - **文書状態:** Canonical
 - **最終更新:** 2026-08-31
 
-**Productionと準備中の差分:** D-096 Acceptedの対象固定・operation-v2・heartbeat run/process観測は2026-09-11にhost/Control Planeへ適用済み。本書の既存v1記述は移行元の契約であり、新field／入口の差分は以下のrunbookを優先する。
-一巡目STARTはreceipt作成前のpreflight環境不足で失敗した。修正はrepository/CI検証済み・未deploy、通常二巡の実機検証と移行完了は未確認。
+**Production適用済み契約:** D-096 Acceptedの対象固定・operation-v2・heartbeat run/process観測は2026-09-11にhost/Control Planeへ適用済み。本書の既存v1記述は移行元の契約であり、新field／入口の差分は以下のrunbookを優先する。
+初回STARTのpreflight環境不足を修正して適用後、新Operationの通常START/STOP二巡を実証し移行Completed。停止container限定削除・新run分離・既存world保持を確認した。初回FAILED STARTは履歴として残す。
 追加field、新旧混在、移行／復旧の正本は[targeted runtime runbook](runbooks/targeted_runtime_migration.md)。既存Acceptedの適用実績と区別する。
 
 ## 1. 契約変更ルール

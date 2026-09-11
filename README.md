@@ -8,7 +8,7 @@ Phase 0〜8は完了しています。停止中Data EBSのBACKUP、durable prove
 
 Phase 8.3は2026-09-10 UTCにControl Plane限定deployと通常START/STOP監視E2Eを完了しました。D-094 Accepted、READY後15分以上のfreshness維持、正しいData EBS使用率1.4389%、停止後SSM/容量値発行なし、41 alarm OK、最終STOPPED/HEALTHYを確認済みです。初期欠測による5件の実メール通知と自然復帰も[監視runbook](docs/runbooks/phase8_monitoring.md)へ記録しています。次のPhase 9は未着手です。RETENTION実削除はnormal backup自然8件以降の独立gate、Restore UI・汎用workflowはPhase 16です。D-095の独立sliceとして、2026-09-11にBACKUP安全性deployと既存Snapshotの隔離復元・保存・再起動・抽出・cleanupを完了しました。[実証範囲と限界](docs/runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照してください。この独立復元slice時点では新BACKUP経路の実AWS E2Eは未実施でした。
 
-D-096はAccepted。旧manifestの独立再現・実機照合を終え、既存BACKUPを再利用して旧container限定削除、host/Control Plane更新まで進めました。一巡目STARTがrun環境のpreflight不具合で失敗し、修正はrepository/CI検証済み・未deployです。現在は実EC2 stopped／Desired RUNNING／DEGRADED、Admission 0で、通常STOPを限定受付する復旧gateが必要です。[最新checkpoint・再開案](docs/runbooks/targeted_runtime_migration.md#最終checkpointと再開承認対象--1117-utc)を参照してください。通常二巡は未完了、その他再設計はProposedです。
+D-096の既存Game対象付きruntime移行は2026-09-11にCompleted。限定canonical STOPで前の失敗状態を復旧し、host/Control Plane修正後の通常START/STOP二巡、既存world保持、停止container限定削除、新run heartbeatを実証しました。最終STOPPED/HEALTHY、両受付UNSET、41 alarm OK、元EBSと5 Snapshot/provenance保持を確認済みです。[closeout](docs/runbooks/targeted_runtime_migration.md#production-closeout--limited-stop--forward-migration)を参照してください。Phase 9全体は未着手、その他再設計はProposedです。
 
 devは次の3層architectureです。
 

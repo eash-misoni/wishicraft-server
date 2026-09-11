@@ -847,7 +847,7 @@ Control Planeだけをdeployし、6 alarmと5分Reconcile scheduleを追加、11
 
 ## 12. Phase 9 — 複数ゲーム抽象
 
-**現在の限定作業:** D-096の既存Game targeted runtime契約を独立sliceとして実行する。2026-09-11に限定production migrationのGOを取得（D-096 Accepted）。最新BACKUPとTarget限定IAM更新済み。旧manifest照合は解決しhost/CP更新済み。一巡目START失敗後の限定STOP受付gateでBLOCKED。実EC2停止／Desired RUNNING／DEGRADED、Admission 0を維持する。preflight修正はrepo/CI検証済み・未deploy、通常二巡は未完了。以下のPackage/Preset/Templateを含むPhase 9全体の計画は再設計比較の対象であり、今回まとめて開始・Accepted化しない。[移行gate](runbooks/targeted_runtime_migration.md)参照。
+**独立slice Completed:** D-096 Acceptedの既存Game targeted runtime移行を2026-09-11 UTCに完了した。限定STOP復旧、host/CP前進修正、通常START/STOP二巡、world保持・新run分離を実証し、最終STOPPED/HEALTHY・両受付UNSET・41 alarm OKへ収束した。途中FAILED STARTは履歴として保持する。以下のPhase 9全体は未着手で、Package/Preset/Templateや他のProposed再設計をまとめて採用したものではない。[closeout](runbooks/targeted_runtime_migration.md#production-closeout--limited-stop--forward-migration)参照。
 
 ### 目的
 
