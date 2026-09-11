@@ -114,3 +114,14 @@ IMDS/SSM/systemd/本番mountや実AWS workflowを再現したものではない�
 詳細な差分・hash・read-only時点・失敗CIは[準備証跡](../evidence/2026-09-11-two-game-preparation.json)を参照。
 採用判断は、Admin限定/観測0人かつ明示確認のSWITCH、Bの初期設定、共有volume保護とv2 newest 7分類。
 接続直前raceを完全に防ぐ保証や、実multi-Game単独復元の実証は含めない。
+
+
+### RETENTION限定是正（production未適用）
+
+前準備HEAD `82bfda8` の初期Game固定をfull handler境界で再現し、
+`56124e8ae6537befb63a5c87feaf3b9d1a6e1d7f` でOperation根拠の呼出し別照合へ修正した。
+[CI 34609430186](https://github.com/eash-misoni/wishicraft-server/actions/runs/34609430186)で
+959 tests、quality、既存実Docker integrationが成功。A/B・同一Runtime A→B→A、共有保持群の同一分類、
+不一致拒否・owned failureを確認した。監視の診断ログも判定対象と同じGameに合わせた。
+前準備との差分は11 Lambda code assetだけで、IAM/host/workflowの追加変更はない。
+B稼働中のcanonical RETENTION dry-runを移行計画へ追加したが、実AWSでは未実施。D-097はProposedのまま。

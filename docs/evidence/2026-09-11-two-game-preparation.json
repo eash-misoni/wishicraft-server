@@ -332,7 +332,7 @@
         "single-Game existing handler regressions preserved"
       ],
       "fixture_corrections": "New inventory fixture initially expected ascending candidates and seven KEEP on boundary tie; aligned with unchanged documented planner: descending candidates, all retained on tie. No selector/oracle production change.",
-      "docker": "Local CLI absent; existing CI ownership, targeted STOP/restart and two-Game real Docker jobs retained; current HEAD CI pending."
+      "docker": "CI 34609430186 passed existing ownership, targeted STOP/restart and A -> B -> A real fixed-image Docker integrations. Local CLI absent. AWS, systemd/IMDS and production mount authority remain simulated."
     },
     "additional_diff": {
       "lambda_code_assets": 11,
@@ -363,6 +363,20 @@
       "No production two-Game SWITCH/shared BACKUP",
       "No real multi-Game single-Game restore"
     ],
-    "policy_unchanged": "D-097 Proposed: admin-only SWITCH, observed zero and explicit confirmation; connection race remains. Shared whole-volume backup; legacy/migration/protected excluded from new newest seven; B declaration fixed without altering A settings."
+    "policy_unchanged": "D-097 Proposed: admin-only SWITCH, observed zero and explicit confirmation; connection race remains. Shared whole-volume backup; legacy/migration/protected excluded from new newest seven; B declaration fixed without altering A settings.",
+    "implementation_head": "56124e8ae6537befb63a5c87feaf3b9d1a6e1d7f",
+    "ci": {
+      "run_id": 34609430186,
+      "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34609430186",
+      "conclusion": "success",
+      "jobs": {
+        "quality": "success",
+        "host-runtime-integration": "success"
+      },
+      "docker_pass_evidence": [
+        "host-runtime-integration\tVerify targeted STOP removal and next START with real Docker\t2026-09-11T14:20:32.5062174Z PASS real v2 START/STOP/new-run START, saved scoreboard=42, rm reply loss, bind preserved",
+        "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T14:21:28.5462153Z PASS real v2 START/STOP/new-run START, saved scoreboard=42, rm reply loss, bind preserved"
+      ]
+    }
   }
 }
