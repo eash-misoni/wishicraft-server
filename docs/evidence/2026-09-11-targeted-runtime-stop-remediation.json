@@ -10,22 +10,6 @@
     "change": "systemctl stop stub retains non-running container",
     "result": "1 failed: STOP_RESULT_UNKNOWN"
   },
-  "validation": {
-    "root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-stop-remediation-v3.p0ze2myx",
-    "results": {
-      "pytest": 0,
-      "lint": 0,
-      "format": 0,
-      "mypy": 0,
-      "phase1": 0,
-      "target": 0,
-      "control": 0
-    },
-    "pytest": "913 passed in 42.44s",
-    "local_docker": "CLI absent",
-    "first_full_attempt": "v2: 904 passed, 8 failed at CDK dependency retrieval due sandbox DNS; logs retained",
-    "docker_ci": "pending commit CI; do not infer success from previous integration"
-  },
   "template_delta_from_review_baseline": {
     "MinecraftStack-dev": [],
     "MinecraftTargetStack-dev": [],
@@ -131,7 +115,51 @@
       }
     ]
   },
-  "bundle": {
+  "bundle_file_sha256": {
+    "0.artifact": "3a761b10c01b75759c60d56cb196ead24b84275cbf3a5029b203c21fa9d78117",
+    "1.artifact": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995",
+    "2.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+    "3.artifact": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+    "4.artifact": "1a072ee060062af861b69ce40455f3a19faf3b1a53428f29de67dec196482a9a",
+    "5.artifact": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
+    "6.artifact": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
+    "7.artifact": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
+    "8.artifact": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a",
+    "9.artifact": "abecc64cbb007c699451bb4c120760d4b33d0909c23de0af3ef0f29f730bc7f4",
+    "install.json": "dd16eeceaa89f9502064f02a3a43bdbdfbd2830ae1c9e212a2da0ac0f7e68c3a",
+    "install.py": "850a569d68a0e6a610a4c7689466be13997ae5dd75197b01f9a485ce58708c44"
+  },
+  "source_sha256": {
+    "src/wishicraft/artifacts/targeted_runtime.py": "8c88307fa736ef64c40101bfdad0fa11472984463de8a7468297ee73c062342f",
+    "src/wishicraft/artifacts/runtime_install.py": "850a569d68a0e6a610a4c7689466be13997ae5dd75197b01f9a485ce58708c44",
+    "src/wishicraft/artifacts/host_runtime_probe.py": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
+    "src/wishicraft/runtime_migration.py": "5034a574378de07487f8c2400314bade5be302ce407af9f2915840a2a1615ab8",
+    "tests/unit/test_targeted_runtime_contract.py": "78121fdfd567ee65c7619915a2bef4df0d8e46236bf643a5ab80e88282741a58",
+    "tests/integration/targeted_runtime_docker.py": "11bda9ac6d65f61379d9e1900043b50498b7a1e0ca950951fced35dbb9a0405c"
+  },
+  "limitations": [
+    "systemd/AWS/IMDS/filesystem-guard/production secret delivery are substituted in the real Docker integration",
+    "no live targeted runtime migration or BACKUP performed",
+    "installed predecessor hashes require exact live read-back at approved migration",
+    "legacy stopped-container cleanup is a separately reviewed operator procedure, not a v2 fallback"
+  ],
+  "previous_validation_v3": {
+    "root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-stop-remediation-v3.p0ze2myx",
+    "results": {
+      "pytest": 0,
+      "lint": 0,
+      "format": 0,
+      "mypy": 0,
+      "phase1": 0,
+      "target": 0,
+      "control": 0
+    },
+    "pytest": "913 passed in 42.44s",
+    "local_docker": "CLI absent",
+    "first_full_attempt": "v2: 904 passed, 8 failed at CDK dependency retrieval due sandbox DNS; logs retained",
+    "docker_ci": "pending commit CI; do not infer success from previous integration"
+  },
+  "previous_bundle_v3": {
     "instance_id": "i-04fc0629dc4ea466e",
     "files": [
       {
@@ -206,32 +234,156 @@
       }
     ]
   },
-  "bundle_file_sha256": {
-    "0.artifact": "3a761b10c01b75759c60d56cb196ead24b84275cbf3a5029b203c21fa9d78117",
-    "1.artifact": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995",
-    "2.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
-    "3.artifact": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
-    "4.artifact": "1a072ee060062af861b69ce40455f3a19faf3b1a53428f29de67dec196482a9a",
-    "5.artifact": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
-    "6.artifact": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
-    "7.artifact": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
-    "8.artifact": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a",
-    "9.artifact": "9254511c4687200577e7a0a7eeef40c2ca1c1eb4e2bddb32ee6dc36e2c682a89",
-    "install.json": "22e689f58ca5b83dcbdfbe32038194756040872bda6d7ce72281e2bfb05bd74c",
-    "install.py": "850a569d68a0e6a610a4c7689466be13997ae5dd75197b01f9a485ce58708c44"
+  "validation": {
+    "root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-stop-remediation-v4.zh9g_1bl",
+    "results": {
+      "pytest": 0,
+      "lint": 0,
+      "format": 0,
+      "mypy": 0,
+      "control": 0,
+      "bundle": 0
+    },
+    "pytest": "913 passed in 46.79s",
+    "unchanged_phase1_target_synth": "v3 results reused; no source/config changes affecting those stacks",
+    "local_docker": "CLI absent",
+    "docker_ci": {
+      "head": "52ac7717371c5db1c0c93b90b24dbe3299545073",
+      "run_id": 34578767884,
+      "job_id": 103197230256,
+      "conclusion": "success",
+      "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34578767884/job/103197230256",
+      "real_boundary": [
+        "host apply/inspect/validate/atomic receipt",
+        "fixed Minecraft 26.2 RCON save-all flush",
+        "Compose stop leaves same stopped container",
+        "normal exited=0, OOM=false",
+        "exact rm and stopped receipt",
+        "new run/container, persisted scoreboard=42 and world/sentinel",
+        "actual rm completed + injected reply loss converges by re-observation"
+      ],
+      "substituted": [
+        "systemd unit",
+        "AWS/IMDS/host filesystem preflight/secret delivery"
+      ],
+      "human_player_join": false,
+      "observed_containers": [
+        {
+          "container_id": "9ccd7382a938a5523846c5d6c0aa213de03b7c16beba6560122a22089e1b5e0f",
+          "stopped_state": {
+            "Status": "exited",
+            "Running": false,
+            "ExitCode": 0,
+            "OOMKilled": false,
+            "Error": "",
+            "StartedAt": "2026-09-11T08:21:56.979350107Z",
+            "FinishedAt": "2026-09-11T08:22:19.105581547Z"
+          }
+        },
+        {
+          "container_id": "4e5511ff873fd8a9a8372a34960903daa8b51bed9112c1ba745780d97b401241",
+          "stopped_state": {
+            "Status": "exited",
+            "Running": false,
+            "ExitCode": 0,
+            "OOMKilled": false,
+            "Error": "",
+            "StartedAt": "2026-09-11T08:22:19.486073255Z",
+            "FinishedAt": "2026-09-11T08:22:33.946522827Z"
+          }
+        }
+      ]
+    },
+    "first_docker_ci": {
+      "head": "705d8c3772a0f87de493b2bef73b4c1e1d9356ac",
+      "run_id": 34578512144,
+      "result": "failed before removal: PERSISTENCE_UNPROVEN",
+      "reason": "validation assumed legacy /start shim instead of pinned image /image/scripts/start entrypoint",
+      "correction": "exact expected entrypoint corrected; no broad allowlist fallback"
+    },
+    "implementation_ci": {
+      "head": "52ac7717371c5db1c0c93b90b24dbe3299545073",
+      "run_id": 34578767884,
+      "conclusion": "success",
+      "jobs": {
+        "quality": "success",
+        "host-runtime-integration": "success"
+      }
+    }
   },
-  "source_sha256": {
-    "src/wishicraft/artifacts/targeted_runtime.py": "04d206086009ff3dd0cb81645aefda4b398b89571bd134f4590b099c4d302f40",
-    "src/wishicraft/artifacts/runtime_install.py": "850a569d68a0e6a610a4c7689466be13997ae5dd75197b01f9a485ce58708c44",
-    "src/wishicraft/artifacts/host_runtime_probe.py": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
-    "src/wishicraft/runtime_migration.py": "5034a574378de07487f8c2400314bade5be302ce407af9f2915840a2a1615ab8",
-    "tests/unit/test_targeted_runtime_contract.py": "2c8b37eb7e1df54b7eaf8a30847e0c64c5da17569bbb0897284d0f34e7dec310",
-    "tests/integration/targeted_runtime_docker.py": "391057c727f93a808e4d815188e5802a3762a2ce8603642859a3d49f99bf4dce"
-  },
-  "limitations": [
-    "systemd/AWS/IMDS/filesystem-guard/production secret delivery are substituted in the real Docker integration",
-    "no live targeted runtime migration or BACKUP performed",
-    "installed predecessor hashes require exact live read-back at approved migration",
-    "legacy stopped-container cleanup is a separately reviewed operator procedure, not a v2 fallback"
-  ]
+  "bundle": {
+    "instance_id": "i-04fc0629dc4ea466e",
+    "files": [
+      {
+        "destination": "/usr/local/libexec/wishicraft/operation-v1",
+        "source": "0.artifact",
+        "mode": 493,
+        "sha256": "3a761b10c01b75759c60d56cb196ead24b84275cbf3a5029b203c21fa9d78117",
+        "predecessor": "33ff20dda9575ca1a3df27edcaf19d397e5f67eef441173ad621f8aefa742744"
+      },
+      {
+        "destination": "/etc/wishicraft/host-runtime/compose.yaml",
+        "source": "1.artifact",
+        "mode": 384,
+        "sha256": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995",
+        "predecessor": "df4db90566e6dc743414de2a680f647d5463eee3280e62d7c940e94d37e6e339"
+      },
+      {
+        "destination": "/etc/wishicraft/host-runtime/runtime.env",
+        "source": "2.artifact",
+        "mode": 384,
+        "sha256": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+        "predecessor": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce"
+      },
+      {
+        "destination": "/etc/wishicraft/host-runtime/manifest.json",
+        "source": "3.artifact",
+        "mode": 384,
+        "sha256": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+        "predecessor": null
+      },
+      {
+        "destination": "/etc/systemd/system/wishicraft-host-runtime.service",
+        "source": "4.artifact",
+        "mode": 420,
+        "sha256": "1a072ee060062af861b69ce40455f3a19faf3b1a53428f29de67dec196482a9a",
+        "predecessor": "6de3ea3ecfa68537f804872b467400e1e0316ed6627d50e5ed96fa80af2c1608"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/host-runtime-probe.py",
+        "source": "5.artifact",
+        "mode": 493,
+        "sha256": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
+        "predecessor": "2d431e562cc2770bc33c8efc509fbb94414824a0e3967d5362a542b48fba69d8"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/runtime_heartbeat.py",
+        "source": "6.artifact",
+        "mode": 420,
+        "sha256": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
+        "predecessor": "d92dd704ccc56f821ba5116298a8861bab70ad26d29101cbc23ef423ffd1b0d9"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/runtime_heartbeat_producer.py",
+        "source": "7.artifact",
+        "mode": 420,
+        "sha256": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
+        "predecessor": "a7e2b141d2f5b4c79fb5f847f633557c4935dc0374da044a16b6dcc3134e9999"
+      },
+      {
+        "destination": "/etc/wishicraft/runtime-contract.json",
+        "source": "8.artifact",
+        "mode": 384,
+        "sha256": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a",
+        "predecessor": null
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/operation-v2",
+        "source": "9.artifact",
+        "mode": 493,
+        "sha256": "abecc64cbb007c699451bb4c120760d4b33d0909c23de0af3ef0f29f730bc7f4",
+        "predecessor": null
+      }
+    ]
+  }
 }

@@ -144,3 +144,7 @@ bundleは旧Compose/runtime.envのPhase 6適用済みhashを直接固定する�
 限定是正の[機械可読証跡](../evidence/2026-09-11-targeted-runtime-stop-remediation.json)に全bundle hashと比較を保存した。local full validationは913 tests、ruff check/format、mypy、3 synth成功。前案からのtemplate差分はControl Planeの11 Lambda code assetのみ、Target/Phase 1は差分なし。今回AWS照会・writeは実施していない。CIの実Docker結果は当該commitのjob結果で確認する。
 
 実Docker初回CI `705d8c3` はCompose stop後の同ID残存まで確認し、PERSISTENCE_UNPROVENで削除前に停止した。追加した永続化検証が旧shim `/start` をentrypointと仮定していたためで、固定releaseの[公式Dockerfile](https://github.com/itzg/docker-minecraft-server/blob/2026.7.2/Dockerfile)の `/image/scripts/start` に一致させた（許可対象を広げるfallbackではない）。synthetic player directoryも、既存復元証跡で確認済みの26.2配置 `world/players/data` を使用する。失敗したCIを成功へ補正せず、新commitの実Dockerで再検証する。
+
+訂正後commit `52ac771` の[実Docker CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/34578767884/job/103197230256)は成功。異なる2 containerでCompose stop直後の残存、ExitCode=0/OOMなし、adapterによる削除、stopped receipt、新runで保存済みscoreboard値42、worldとsentinelの保持、実rm後の応答喪失からの収束を確認した。local修正後full validationも913 tests、lint/format/mypy、変更対象Control Plane再synth、新bundle生成が成功した。未変更のTarget/Phase 1 synthは直前成功結果を再利用する。これはsynthetic data上のDocker境界の実証であり、実systemd/SSM/production移行は未実施である。
+
+実装commit `52ac7717371c5db1c0c93b90b24dbe3299545073` のCI `34578767884` はquality／host-runtime-integrationともsuccess。以降の証跡確定commitに対するCIはGitHubの当該HEADと照合する。D-096はProposedのまま、上記追加container操作を含む移行GO前で停止する。
