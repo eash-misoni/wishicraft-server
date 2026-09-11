@@ -1,0 +1,296 @@
+{
+  "status": "READY_FOR_APPROVAL",
+  "production_applied": false,
+  "baseline": "bb78deacc4daf1ad195887f337b3d4fa6a53c30f",
+  "decision": "D-097 Proposed",
+  "read_only_preflight": {
+    "at": "2026-09-11T12:38:31.265988+00:00",
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "target_state": "stopped",
+    "target_id": "i-04fc0629dc4ea466e",
+    "volume_id": "vol-03ac9f534326c345c",
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "locks": [],
+    "unfinished_operations": [],
+    "running_executions": [],
+    "nonterminal_ssm": [],
+    "dns": [],
+    "snapshot_count": 5,
+    "admission_concurrency": "UNSET",
+    "discord_concurrency": "UNSET",
+    "game_b_registered": false,
+    "alarms_ok": 41
+  },
+  "template_diff": {
+    "added": {
+      "SwitchWorkflowFailureAlarm1CB19679": "AWS::CloudWatch::Alarm",
+      "SwitchWorkflowRoleB026EAE7": "AWS::IAM::Role",
+      "SwitchWorkflowRoleDefaultPolicyFAA6078D": "AWS::IAM::Policy",
+      "SwitchWorkflow": "AWS::StepFunctions::StateMachine"
+    },
+    "removed": [],
+    "changed": {
+      "StartTaskFunction8C564C4A": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "AutoStopEvaluatorFunctionF85F8B50": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "AdmissionFunction23082B67": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "BackupTaskFunctionServiceRoleDefaultPolicy32340A85": {
+        "type": "AWS::IAM::Policy",
+        "properties": [
+          "PolicyDocument"
+        ]
+      },
+      "StatusExecutorFunction6E5C9869": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "AdmissionFunctionServiceRoleDefaultPolicyA8CF483E": {
+        "type": "AWS::IAM::Policy",
+        "properties": [
+          "PolicyDocument"
+        ]
+      },
+      "StopTaskFunction11473A8C": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "DiscordCommandFunction7D25102A": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "RetentionTaskFunction9F285CE4": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "BackupTaskFunctionA44639DC": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "ReconcileFunction30829CB6": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "DiscordMessageFunction78FA388B": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      "DiscordMessageFunctionServiceRoleDefaultPolicyEEC1B116": {
+        "type": "AWS::IAM::Policy",
+        "properties": [
+          "PolicyDocument"
+        ]
+      },
+      "DiscordMessageFunctionDynamoDBEventSourceWishicraftControlPlaneStackdevOperationsTable67C69D40F4D37469": {
+        "type": "AWS::Lambda::EventSourceMapping",
+        "properties": [
+          "FilterCriteria"
+        ]
+      },
+      "MonitoringObserverFunction584DA7C7": {
+        "type": "AWS::Lambda::Function",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      }
+    },
+    "target_resources_equal_production": true
+  },
+  "host_bundle": {
+    "backup_namespace": "two-game-v1",
+    "files": [
+      {
+        "destination": "/etc/wishicraft/host-runtime/compose.yaml",
+        "mode": 384,
+        "predecessor": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995",
+        "sha256": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+        "source": "0.artifact"
+      },
+      {
+        "destination": "/etc/wishicraft/host-runtime/runtime.env",
+        "mode": 384,
+        "predecessor": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+        "sha256": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+        "source": "1.artifact"
+      },
+      {
+        "destination": "/etc/wishicraft/host-runtime/manifest.json",
+        "mode": 384,
+        "predecessor": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+        "sha256": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "source": "2.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/runtime_heartbeat_producer.py",
+        "mode": 420,
+        "predecessor": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
+        "sha256": "831645ac04e0f8f0affe44dc51e071ec77ca0a2bdb2ddb251796c64b4bce229a",
+        "source": "3.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/operation-v2",
+        "mode": 493,
+        "predecessor": "aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee",
+        "sha256": "84c257855962ca5a5a46547f21362d07062d5e3ccabc320256066c1af54a6729",
+        "source": "4.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/rcon-secret-v2",
+        "mode": 493,
+        "predecessor": null,
+        "sha256": "f840582aaa22a00b6acf70ff99b95adb22dac0c688d7e3678be32a362cb2681d",
+        "source": "5.artifact"
+      },
+      {
+        "destination": "/etc/wishicraft/runtime-contract.json",
+        "mode": 384,
+        "predecessor": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a",
+        "sha256": "dab6d1837a8efb497c90ba9dae62eb4743752aaa965dd6031d5afaf92433bdb2",
+        "source": "6.artifact"
+      }
+    ],
+    "instance_id": "i-04fc0629dc4ea466e",
+    "receipt_predecessor": {
+      "phase": "stopped",
+      "stop": {
+        "container_id": "dfcfecebb08fd49c35ba76d057ac3d67edea26b8b4f3689359f1f7dc84cff224",
+        "removal_ready": true,
+        "save_confirmed": true,
+        "started_at": "2026-09-11T11:57:17.566662309Z"
+      },
+      "target": {
+        "config_digest": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97",
+        "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+        "game_id": "game-vanilla-main",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-2f5287ab-b435-46e8-b415-46f9c5320c05"
+      }
+    }
+  },
+  "bundle_hashes": {
+    "0.artifact": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+    "1.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+    "2.artifact": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+    "3.artifact": "831645ac04e0f8f0affe44dc51e071ec77ca0a2bdb2ddb251796c64b4bce229a",
+    "4.artifact": "84c257855962ca5a5a46547f21362d07062d5e3ccabc320256066c1af54a6729",
+    "5.artifact": "f840582aaa22a00b6acf70ff99b95adb22dac0c688d7e3678be32a362cb2681d",
+    "6.artifact": "dab6d1837a8efb497c90ba9dae62eb4743752aaa965dd6031d5afaf92433bdb2",
+    "install.json": "420be66b8c3bc2178011466490c829720e3d9c46d16bb1f7f0125bd36d3768a1",
+    "install.py": "fadd2ca3f0b4122567b5817157e2405e6d1d85f08525e4433228d01ae2b4f0bf",
+    "prepare-game.py": "4f5d66a7c44352adc3e7cc673c73b7eab6e5866dd73896df53e26da46f03248b",
+    "second-game.json": "684aae93f868879fc74360850d84333a9c7d7e12a2e603e9c44a4d69d7661023"
+  },
+  "local_validation": {
+    "pytest": {
+      "passed": 934
+    },
+    "ruff": "passed",
+    "mypy_mac": "passed",
+    "mypy_linux": "passed",
+    "docker": "CLI unavailable; CI required",
+    "cdk_synth": [
+      "Phase 1",
+      "Target",
+      "single-Game Control Plane",
+      "two-Game Control Plane"
+    ]
+  },
+  "ci": {
+    "first": {
+      "id": 34603566407,
+      "head": "53f9bb6b7e25a30379946315ef12c88b7691e1d0",
+      "result": "failure",
+      "causes": [
+        "Linux-only fixture typing",
+        "missing-run fixture also omitted required Game values"
+      ],
+      "legacy_docker": "passed",
+      "two_game_docker": "not demonstrated"
+    },
+    "retry": {
+      "id": 34603989495,
+      "head": "b96bf3cd28f2257695631dab5d08843e4f4d1555",
+      "result": "success",
+      "quality": "success",
+      "host_runtime_integration": "success"
+    }
+  },
+  "pricing": {
+    "source": "AWS Pricing GetProducts",
+    "queried_region": "us-east-1",
+    "price_region": "ap-northeast-1",
+    "sku": "4NHX4ZW7X52XZACJ",
+    "effective_date": "2026-09-01T00:00:00Z",
+    "snapshot_usd_per_gb_month": 0.05,
+    "assumption_extra_unique_snapshot_gb": 10,
+    "incremental_snapshot_month_usd": 0.5,
+    "conservative_two_full_30gb_month_usd": 3.0,
+    "budget_changed": false
+  },
+  "not_demonstrated": [
+    "production two-Game SWITCH",
+    "production v2 backup/provenance",
+    "real multi-Game A-only restore",
+    "atomic player connection exclusion",
+    "human world/build/inventory inspection"
+  ],
+  "approval_plan": "docs/runbooks/two_game_switch_migration.md",
+  "validated_implementation_head": "b96bf3cd28f2257695631dab5d08843e4f4d1555",
+  "docker_ci_evidence": {
+    "log_sha256": "6a9e57b1cac360a456f47671a0574aee62dc5381d4d3ed82637a13e9e5c6bd7a",
+    "run_id": 34603989495,
+    "proof_lines": [
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:24:12.2715995Z REAL_PREFLIGHT_REJECTS_MISSING_RUN",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:24:12.3565519Z REAL_PREFLIGHT_COMPOSE_RESOLVED /srv/minecraft/games/game-ci-a-4rpkulqj/server",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:24:32.1583380Z REAL_PREFLIGHT_COMPOSE_RESOLVED /srv/minecraft/games/game-ci-a-4rpkulqj/server",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:24:33.1053052Z REAL_PREFLIGHT_COMPOSE_RESOLVED /srv/minecraft/games/game-ci-b-4rpkulqj/server",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:24:53.0761973Z REAL_PREFLIGHT_COMPOSE_RESOLVED /srv/minecraft/games/game-ci-b-4rpkulqj/server",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:24:54.0276867Z REAL_PREFLIGHT_COMPOSE_RESOLVED /srv/minecraft/games/game-ci-b-4rpkulqj/server",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:24:54.1798696Z REAL_PREFLIGHT_COMPOSE_RESOLVED /srv/minecraft/games/game-ci-a-4rpkulqj/server",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:25:07.5183309Z REAL_PREFLIGHT_COMPOSE_RESOLVED /srv/minecraft/games/game-ci-a-4rpkulqj/server",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:25:09.9905573Z B saved world unchanged during A restart",
+      "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:25:09.9906289Z PASS real v2 START/STOP/new-run START, saved scoreboard=42, rm reply loss, bind preserved"
+    ],
+    "scope": "synthetic fixed-image Docker; real host adapter/Compose/RCON; systemd, IMDS, AWS authority and production filesystem mount guard simulated"
+  }
+}

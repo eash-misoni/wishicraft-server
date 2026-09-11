@@ -1,6 +1,6 @@
 # Two-Game SWITCH / BACKUP contract
 
-**Status: Proposed — repository implementation in progress; no production writes authorized.**
+**Status: Proposed — repository preparation validated; no production writes authorized.**
 
 Baseline: `bb78deacc4daf1ad195887f337b3d4fa6a53c30f`. D-096 remains Completed.
 This proposal does not accept the rest of Phase 9, RESET, whitelist synchronization,
@@ -99,3 +99,16 @@ SWITCH or new backup format has been exercised yet.
 
 Reset認可/旧world保持削除、共通whitelist反映、異なるruntime/spec、Web/Package管理は未決のまま。
 新しい共有BACKUP newest 7は削除releaseではない。既存v1 normalとmigration anchorを数え直さない。
+
+
+## Preparation result
+
+実装HEAD `b96bf3cd28f2257695631dab5d08843e4f4d1555` の
+[CI 34603989495](https://github.com/eash-misoni/wishicraft-server/actions/runs/34603989495)は
+quality/host-runtime-integrationとも成功。934 tests、lint/format、Linux型検査、4 context synthを確認。
+実Dockerではmissing run拒否、A保存/正常停止/exact removal→B→A、異なるcontainer、A保存値42、
+A再起動中のB world不変、rm応答喪失後のreceipt収束を確認した。
+IMDS/SSM/systemd/本番mountや実AWS workflowを再現したものではない。準備の完了とproduction適用は別である。
+詳細な差分・hash・read-only時点・失敗CIは[準備証跡](../evidence/2026-09-11-two-game-preparation.json)を参照。
+採用判断は、Admin限定/観測0人かつ明示確認のSWITCH、Bの初期設定、共有volume保護とv2 newest 7分類。
+接続直前raceを完全に防ぐ保証や、実multi-Game単独復元の実証は含めない。

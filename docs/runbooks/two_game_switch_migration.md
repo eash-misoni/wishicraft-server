@@ -95,6 +95,16 @@ B側directory/参照を保持する。v2は保存したGame定義とruntime情�
 STOPPED/HEALTHY、DNSなし、Lock/Current Operation/unfinished Operationなし、両受付元設定、
 元EBS identity/attachment/encryption、A既存配置、B独立配置、既存Snapshot/provenance保持を確認する。
 alarmは実収束で戻し、無効化/fake metricをしない。新しい常時instance/serviceやvolumeは追加しない。
-Bの使用容量とSnapshotの変更block分、SWITCH State transitions/Lambda/SSM/ログが追加コストとなる。
+Bの使用容量とSnapshotの変更block分、SWITCH State transitions/Lambda/SSM/ログが追加コストとなる。SWITCH用CloudWatch alarmの通常料金も別途発生する。
 同じEC2を維持する切替時間も通常の稼働料金に含む。容量不足は安全停止し、自動EBS拡張/削除はしない。
 Budgetは変更しない。実単価・仮定・template差分は最終準備証跡へ記録する。
+
+
+東京EBS Snapshot公式Price List（2026-09-11照会、SKU `4NHX4ZW7X52XZACJ`）は
+USD 0.05/GB-month。追加保持blockが計10 GBなら月USD 0.50、二件が各30 GB全量相当という
+保守的な上限計算は月USD 3.00。実際は既存Snapshotとの共有blockと変更量で変わるため件数×volume容量を
+実課金量と断定しない。[AWSの増分Snapshot説明](https://docs.aws.amazon.com/ebs/latest/userguide/how_snapshots_work.html)。
+既存volumeの課金容量は増やさない。保守/E2Eの稼働時間は既存東京t3a.mediumとIPv4の合計USD 0.054/hを
+同日確認済み復元runbookの単価から参照し、4時間なら約USD 0.216にSnapshot/実行/通信/ログを加える。
+4時間で費用と状態を見直すが、時間だけを理由に強制停止やデータ削除はしない。
+価格照会・template差分・検証範囲は[準備証跡](../evidence/2026-09-11-two-game-preparation.json)に保存する。
