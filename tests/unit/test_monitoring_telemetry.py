@@ -338,3 +338,16 @@ def test_handler_missing_required_configuration_does_not_publish_success(
     with pytest.raises(KeyError):
         monitoring_lambda.handler({}, None)
     assert not aws.published
+
+
+def test_monitoring_log_uses_selected_game(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import json
+
+    aws = setup_handler(monkeypatch)
+    monkeypatch.setenv("RUNTIME_GAMES", '["game-vanilla-main","game-vanilla-secondary"]')
+    for game in ("game-vanilla-main", "game-vanilla-secondary", "game-vanilla-main"):
+        aws.values["state"]["desired_game_id"] = game
+        monitoring_lambda.handler({}, None)
+        assert json.loads(capsys.readouterr().out)["game_id"] == game

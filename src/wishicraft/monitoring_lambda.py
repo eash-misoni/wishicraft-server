@@ -85,6 +85,11 @@ def handler(event: dict[str, Any], context: object) -> dict[str, object]:
                 ConsistentRead=True,
             ).get("Item")
         )
+        game_id = (
+            str(state.get("desired_game_id") or os.environ["GAME_ID"])
+            if os.environ.get("RUNTIME_GAMES")
+            else os.environ["GAME_ID"]
+        )
         telemetry_metrics, reasons = evaluate_telemetry(
             state=state,
             heartbeat=heartbeat,
@@ -92,9 +97,7 @@ def handler(event: dict[str, Any], context: object) -> dict[str, object]:
             instance=instance,
             now=now,
             system_id=os.environ["SYSTEM_ID"],
-            game_id=str(state.get("desired_game_id") or os.environ["GAME_ID"])
-            if os.environ.get("RUNTIME_GAMES")
-            else os.environ["GAME_ID"],
+            game_id=game_id,
             volume_id=os.environ["DATA_VOLUME_ID"],
             filesystem_uuid=os.environ["DATA_FILESYSTEM_UUID"],
             mount_path=os.environ["DATA_MOUNT_PATH"],
@@ -108,7 +111,7 @@ def handler(event: dict[str, Any], context: object) -> dict[str, object]:
             json.dumps(
                 {
                     "component": "monitoring",
-                    "game_id": os.environ["GAME_ID"],
+                    "game_id": game_id,
                     "operation_id": state.get("current_operation_id"),
                     "result": reasons,
                 }

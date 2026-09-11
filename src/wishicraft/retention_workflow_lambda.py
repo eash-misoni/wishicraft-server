@@ -29,6 +29,7 @@ from wishicraft.retention import (
     plan_retention,
     with_lock_states,
 )
+from wishicraft.runtime_catalog import configured_catalog
 
 
 class AwsSession(Protocol):
@@ -96,6 +97,24 @@ def handler(event: object, context: object) -> dict[str, object]:
     action = _string(payload, "action")
     if action == "run":
         runtime.leases.verify_owned(proof, now=now)
+        state = _mapping(payload, "state")
+        # Execution identity is per request; the cached retention context describes
+        # the protected volume and must never become a mutable "last selected Game".
+        execution_game = runtime.context.game_id
+        catalog = configured_catalog()
+        if catalog is not None:
+            execution_game = runtime.operations.retention_target(
+                proof=proof, now=now, reconciled_at=parse_rfc3339(_string(state, "observed_at"))
+            )
+            catalog.data_source(execution_game)
+            if (
+                state.get("system_id") != runtime.system_id
+                or state.get("selected_game_id") != execution_game
+                or state.get("current_operation_id") != proof.owner_operation_id
+            ):
+                raise ValueError("RETENTION execution observation mismatch")
+        instance_id = _validate_fresh_state(state, execution_game)
+        _validate_source_volume(runtime, instance_id)
         runtime.leases.renew(proof, now=now, lease_seconds=runtime.lease_seconds)
         runtime.operations.update_step(
             operation_id=proof.owner_operation_id,
@@ -103,9 +122,6 @@ def handler(event: object, context: object) -> dict[str, object]:
             status=OperationStatus.RUNNING,
             updated_at=now,
         )
-        state = _mapping(payload, "state")
-        instance_id = _validate_fresh_state(state, runtime.context.game_id)
-        _validate_source_volume(runtime, instance_id)
         inventory = with_lock_states(
             load_complete_inventory(runtime.ec2, owner_id=runtime.context.owner_id),
             load_complete_snapshot_locks(runtime.ec2),

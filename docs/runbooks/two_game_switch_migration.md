@@ -14,7 +14,7 @@ Aのwhitelist/propertiesやworldをコピー、再生成、上書きしない。
 承認に必要なwriteは、normal BACKUP二回（下記の異なる目的）、二Lambdaの一時concurrency制御、
 既存Targetの保守起動/正常停止とexact SSM、承認bundleのhost更新、B初期配置/条件付きGames登録、
 Control Plane限定deploy（SWITCH State Machine/role/alarm、既存code/configと限定IAM）、
-Discord command body更新、通常START/SWITCH/STOP、必要なcontrolled Reconcile。
+Discord command body更新、通常START/SWITCH/STOP、canonical RETENTION dry-run二回、必要なcontrolled Reconcile。
 Target stack/IAM、EBS配置、SG/DNS構成、既存Snapshot/provenance、retention削除権限は変更しない。
 通常START/STOPによる既存DNS recordの作成/削除は通常経路だけを使用する。
 
@@ -58,7 +58,13 @@ operation-v2は当時と同じshebang付与を含むGit artifactと照合する�
    deploy前後も受付0を照合。Discordは宣言内command bodyだけを正規登録手順で反映する。
 7. 新host/CPのcatalogとdigest一致、EC2停止/DNSなし、fresh STOPPED/HEALTHY、Lock/未終了Operationなし
    を確認し、Admission、Discordの順で各元設定を復元する。元UNSETならUNSETへ戻す。
-8. canonical START A → SWITCH B → SWITCH A → STOP。全てshared Admissionで別固定request identityを記録。
+8. canonical START A → SWITCH B → RETENTION dry-run → SWITCH A → STOP。全てshared Admissionで別固定request identityを記録。
+   BへのSWITCH成功・Lock/Current Operation解放後、B稼働中のfresh HEALTHYを確認し、
+   canonical operator（`python -m wishicraft.retention_operator`）から固定request identityでRETENTIONを一回実行。
+   ADMIN受付のOperation対象B、fresh Reconcile B、SUCCEEDEDとowned解放、実inventory/schema別分類を保存する。
+   この時点でv2が0件ならKEEP/CANDIDATE=0が正常。旧5件と直前v1は新形式の件数へ含めず、
+   A時の過去件数を期待値へ流用しない。この確認用の追加Snapshotは作らない。
+   結果不明・分類不一致なら別requestで補わず同一Operationを観測して停止する。
    A/B/AのOperation target、receipt、container/image/bind、Game/run/process、READY/DNS、heartbeatを照合。
    二つのSWITCHで同一instance/boot IDが続きEC2 stop/startがないこと、保存停止/removalを確認する。
    Aの既存world/player dataと再入場時の保持を確認し、Bは初回のみ新world生成を確認する。
@@ -67,7 +73,9 @@ operation-v2は当時と同じshebang付与を含むGit artifactと照合する�
    productionへ試験用scoreboardを書かない。人間目視をしない場合は建築物等の目視確認済みとはしない。
 9. final STOP後、v2 shared-volume normal BACKUPを一回取得する。新契約の実正常系と、初回保存済みBを含む
    recovery description/provenanceの一致確認が目的。最初のv1保護Snapshotとは混同しない。
-   既存5件と手順1の一件を保持し、この一件だけ追加。新旧retentionはdry-run分類だけを検証する。
+   既存5件と手順1の一件を保持し、この一件だけ追加。新旧retentionはcanonical RETENTION dry-runをもう一回実行して分類を検証する。
+   この時点の実inventory/provenanceを照合し、移行中の追加が計画どおりならv2 KEEP=1、
+   legacy/migration/protectedは共有newest 7外、delete_action_count=0を確認する。
    Aだけの抽出方法は下記。隔離復元試験/30分auto-stopの無条件再実行はこの計画に含めない。
 
 ## 失敗・再開と戻し方

@@ -572,6 +572,43 @@ class OperationRepository:
         except ValueError:
             return False
 
+    def retention_target(self, *, proof: LeaseProof, now: datetime, reconciled_at: datetime) -> str:
+        """Read the admitted target, independently of the Reconcile payload/selected Game.
+
+        Admission's atomic Game condition proves registration at acceptance. The owned
+        global lease excludes normal Game registration/removal while this task executes.
+        """
+        response = self._api.get_item(
+            TableName=self._operations,
+            Key={"operation_id": {"S": proof.owner_operation_id}},
+            ConsistentRead=True,
+        )
+        item = response.get("Item") if isinstance(response, dict) else None
+        if not isinstance(item, dict):
+            raise ValueError("RETENTION admission evidence missing")
+        requested_by = _decode_attribute(item.get("requested_by"))
+        requested = datetime.fromisoformat(
+            _string_attribute(item, "requested_at").replace("Z", "+00:00")
+        )
+        timeout = datetime.fromisoformat(
+            _string_attribute(item, "timeout_at").replace("Z", "+00:00")
+        )
+        if (
+            _string_attribute(item, "operation_id") != proof.owner_operation_id
+            or _integer_attribute(item, "schema_version") != 1
+            or _string_attribute(item, "operation_type") != OperationType.RETENTION.value
+            or _string_attribute(item, "status") not in {"PENDING", "RUNNING"}
+            or _string_attribute(item, "lease_id") != proof.lease_id
+            or _string_attribute(item, "lock_name") != self._lock_name
+            or not isinstance(requested_by, dict)
+            or requested_by.get("source") != RequestSource.ADMIN.value
+            or requested.tzinfo is None
+            or timeout.tzinfo is None
+            or not requested <= reconciled_at <= now < timeout
+        ):
+            raise ValueError("RETENTION admission/observation mismatch")
+        return _string_attribute(item, "target_game_id")
+
     def load_backup_evidence(self, operation_id: str) -> dict[str, object]:
         """Load the authoritative BACKUP fields needed for durable provenance."""
         response = self._api.get_item(

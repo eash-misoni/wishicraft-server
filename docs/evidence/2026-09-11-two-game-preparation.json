@@ -292,5 +292,77 @@
       "host-runtime-integration\tVerify A to B to A with real Docker under one warm host\t2026-09-11T13:25:09.9906289Z PASS real v2 START/STOP/new-run START, saved scoreboard=42, rm reply loss, bind preserved"
     ],
     "scope": "synthetic fixed-image Docker; real host adapter/Compose/RCON; systemd, IMDS, AWS authority and production filesystem mount guard simulated"
+  },
+  "retention_multigame_remediation": {
+    "baseline": "82bfda8408771b87cfe37cb6d4090ceb97de3c56",
+    "scope": "Local preparation only; D-097 Proposed; no AWS/Discord/host calls or writes in this remediation.",
+    "reproduction": {
+      "boundary": "synthesized two_games Lambda environment -> real Admission transaction/TypeSerializer -> real Reconcile handler with external observation fixture -> real RETENTION handler",
+      "before_fix": "A STOPPED passed; B STOPPED and B RUNNING failed at RETENTION precondition; no compensating binding existed",
+      "saved_log": "wishicraft-retention-multigame-v2.4g6pwd5n/reproduction.log",
+      "earlier_fixture_failures": "v1 clock and enum fixture corrected separately; not counted as product reproduction"
+    },
+    "fix": {
+      "execution_identity": "Per-invocation consistent Operation read: RETENTION, ADMIN, schema 1, PENDING/RUNNING, matching operation/lease/lock; observation inside request/timeout window. Catalog allowlist plus Reconcile system/current Operation/selected Game/expected Game must agree. Existing lease and canonical Data EBS attachment checks retained.",
+      "registration_authority": "Existing Admission atomic ACTIVE Game ConditionCheck plus Operation/lease creation; no new Games read IAM. Normal Game registration cannot run under this owned lock.",
+      "retention_scope": "Cached immutable volume/owner context reused; no request-selected Game written into it. Shared v2 plan unchanged; initial Game retained only for existing single-mode/default and legacy classification context.",
+      "other_consumer": "Monitoring telemetry already used selected Game, but its structured diagnostic log printed initial A; log now uses the same per-call Game as evaluation."
+    },
+    "tests": {
+      "new_boundary_cases": 24,
+      "additional_monitoring_log_case": 1,
+      "full_pytest": "959 passed in 51.25s",
+      "ruff_check": "passed",
+      "ruff_format": "187 files passed",
+      "mypy_linux": "150 source files passed",
+      "cdk_synth": [
+        "phase1",
+        "target",
+        "single-Game control-plane",
+        "two-Game control-plane"
+      ],
+      "coverage": [
+        "A STOPPED, B STOPPED/RUNNING",
+        "one cached Runtime A -> B -> A",
+        "Operation target/type/status/lease/lock/source/schema mismatch; missing Operation; stale/mismatched Reconcile; invalid volume/attachment and lock ownership",
+        "unregistered Game Admission rejected; outside catalog rejected",
+        "owned failure terminalization removes only matching Lock/current Operation",
+        "real v1/v2 durable provenance pair loader; snapshot owner/missing provenance remain unsafe",
+        "same 9 shared snapshots created alternately for A/B plus legacy normal/migration/protected; identical plans across A/B/A; newest 7, oldest max-one plan, boundary tie retains all 9",
+        "single-Game existing handler regressions preserved"
+      ],
+      "fixture_corrections": "New inventory fixture initially expected ascending candidates and seven KEEP on boundary tie; aligned with unchanged documented planner: descending candidates, all retained on tie. No selector/oracle production change.",
+      "docker": "Local CLI absent; existing CI ownership, targeted STOP/restart and two-Game real Docker jobs retained; current HEAD CI pending."
+    },
+    "additional_diff": {
+      "lambda_code_assets": 11,
+      "environment": 0,
+      "iam": 0,
+      "workflow": 0,
+      "host_bundle": 0,
+      "new_resources": 0,
+      "snapshot_mutation_api_or_permission": 0,
+      "basis": "Local synthesized template compared with prior prepared two-Game template. Actual-production overall migration diff remains the original template_diff above; not merely 11 code assets."
+    },
+    "consumer_audit": {
+      "checked": [
+        "admission_lambda selected_game/transaction",
+        "reconcile_lambda desired_game_id",
+        "start_workflow_lambda/stop_workflow_lambda bind_operation per invocation",
+        "backup_workflow_lambda Operation target/recovery",
+        "auto_stop_evaluator_lambda selected Game each evaluation",
+        "monitoring_lambda evaluation/log",
+        "runtime_heartbeat_producer/runtime_heartbeat run/Game identity",
+        "status_executor_lambda Reconcile projection"
+      ],
+      "result": "RETENTION safety check and monitoring diagnostic log corrected. No additional initial-Game-as-current binding found in this scoped audit."
+    },
+    "e2e_plan_addition": "After SWITCH to B succeeds and Lock/current Operation release: one canonical ADMIN RETENTION dry-run while B running/HEALTHY. Expected classification uses then-current inventory/schema; zero v2 KEEP is valid. No extra snapshot for B check. Retain second dry-run after final v2 BACKUP.",
+    "unverified": [
+      "No real AWS RETENTION on selected B",
+      "No production two-Game SWITCH/shared BACKUP",
+      "No real multi-Game single-Game restore"
+    ],
+    "policy_unchanged": "D-097 Proposed: admin-only SWITCH, observed zero and explicit confirmation; connection race remains. Shared whole-volume backup; legacy/migration/protected excluded from new newest seven; B declaration fixed without altering A settings."
   }
 }

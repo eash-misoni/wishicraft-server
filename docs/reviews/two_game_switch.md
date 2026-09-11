@@ -58,6 +58,8 @@ post-create uncertainty protects the existing Snapshot and reservation until rea
 Retention remains dry-run-only. New shared-volume normal backups form their own newest
 seven group. Old per-Game schema records and migration anchors are preserved separately;
 they are not rewritten, counted as new shared records, or silently made deletion eligible.
+Execution safety is separate from that retention group: each shared-mode RETENTION task consistently reads its admitted Operation, validates RETENTION/Admin/nonterminal status and the owned lease, and checks its fixed Game against the Git catalog and fresh Reconcile (including current Operation and system). Admission’s atomic ACTIVE Game condition supplies registration evidence; normal Game registration is excluded by the same global lock. The canonical Data EBS attachment/owner/provenance checks remain in force. Reused Lambda clients do not retain a request-selected Game in the volume classification context.
+
 Restoring A alone means extracting A from an isolated restored copy and validating it,
 not replacing the shared EBS and rolling back B. Snapshot-time configuration evidence
 must be distinguished from configuration reconstructed later.
