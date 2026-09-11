@@ -178,3 +178,9 @@ BACKUP後に別のSTART／書込みが入っていれば最新保護と断定し
 10:50:52 UTC、exact TargetのSSM `04692e81-2d5e-4cf5-ba46-fa98d537bb80` で通常file・非symlink・root:root・0600・全byte・全schema/fieldの一致を確認した。全文を無条件出力せず、既知再構成値との一致だけを記録した。全15対象artifactの旧配置一致（新v2二fileは不存在）、新receiptなし、unit inactive/static、停止container同一、listenerなしを一度に照合した。Admission 0、未終了Operation/workflow/SSMなし、成功済みBACKUP以後の新Operationなし、Game/EBS attachment不変を再確認。Targetの実IAMも既適用policyと一致し、再deployしない。
 
 manifest predecessorだけをABSENTから証明済みexact hashへ訂正する。新runtime semantics、bundle内新artifact内容、IAMは変えない。未知／欠損／owner／mode／symlink拒否、全件検証後の置換、旧file保存、部分適用後の同bundle再開、新receipt拒否、新manifestと新Compose/env対応を実installer境界で回帰検証する。既存BACKUP `snap-005ce340d03a42340` を再利用し、新BACKUPは作らない。host更新／container整理／本番二巡の成功はこの訂正だけでは主張しない。
+
+### 一巡目STARTのpreflight失敗と同契約内の前進修正
+
+修正HEAD e503530のCI成功後、旧container一件を削除し108 file不変を確認、host installer／旧file保存／11 Lambda codeとSTART/STOP設定deploy／受付UNSET復元まで完了。一巡目START `op-f662ecac-c9ce-4b97-9416-ffea7f16633f` は11:08:14 UTCにFAILED。新Composeの必須WISHICRAFT_RUN_IDをfilesystem preflightへ渡す前にCompose psが評価されたためで、実mount guard自体は成功した。receiptなし、containerなし、listenerなしをSSMで確認し、結果不明とは区別した。失敗Operationのreplayや別runによる成功偽装は行わない。
+
+認可・対象固定後の同じrun IDをpreflight subprocessへ明示的に渡す限定修正を行う。Composeの必須値条件や対象照合を緩めず、新しいruntime semantics/IAMは加えない。実Docker fixtureも本番と同じ必須interpolationへ合わせ、未設定拒否とSTART/STOP各preflightでの解決を検証する。受付0へ再停止し、同一契約内の限定前進修正を検証後に適用する。

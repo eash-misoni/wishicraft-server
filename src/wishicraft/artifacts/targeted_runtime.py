@@ -283,8 +283,11 @@ def apply(request: dict[str, Any]) -> None:
             [
                 "bash",
                 "-c",
-                "set -aeu; source /etc/wishicraft/host-runtime.env; "
+                'set -aeu; export WISHICRAFT_RUN_ID="$1"; '
+                "source /etc/wishicraft/host-runtime.env; "
                 "/usr/local/lib/wishicraft-host-runtime/filesystem_preflight.sh",
+                "wishicraft-preflight",
+                target["run_id"],
             ]
         )
         unit_state = execute(

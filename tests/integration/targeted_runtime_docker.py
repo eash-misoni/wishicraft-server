@@ -50,7 +50,7 @@ services:
     volumes:
       - {data}:/data
     labels:
-      com.wishicraft.run-id: ${{WISHICRAFT_RUN_ID}}
+      com.wishicraft.run-id: ${{WISHICRAFT_RUN_ID:?targeted START required}}
       com.wishicraft.active-game-id: game-ci
       com.wishicraft.active-game-data-source: {data}
 """
@@ -110,8 +110,32 @@ services:
         )
 
     def execute(args: list[str], *, timeout: int = 30) -> str:
-        if args[0] == "bash" or args[0].endswith("/rcon-secret-v1"):
-            # No production filesystem/secret paths or credentials on this runner.
+        if args[0] == "bash":
+            # Exercise the real Compose parsing done by the host filesystem preflight.
+            # Platform mount/ownership checks remain replaced by this synthetic boundary.
+            assert args[-2] == "wishicraft-preflight" and args[-1] == target["run_id"]
+            assert 'export WISHICRAFT_RUN_ID="$1"' in args[2]
+            env = dict(os.environ, WISHICRAFT_RUN_ID=args[-1])
+            subprocess.run(
+                [
+                    "docker",
+                    "compose",
+                    "--file",
+                    str(artifacts / "compose.yaml"),
+                    "ps",
+                    "--status",
+                    "running",
+                    "--quiet",
+                    "minecraft",
+                ],
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            print("REAL_PREFLIGHT_COMPOSE_RESOLVED", args[-1], flush=True)
+            return ""
+        if args[0].endswith("/rcon-secret-v1"):
             return ""
         if args[:2] == ["systemctl", "show"]:
             return "success" if "--property=Result" in args else str(state["unit"])
@@ -156,6 +180,26 @@ services:
             raise TimeoutError("real rm succeeded; injected lost reply")
         return result
 
+    missing_env = dict(os.environ)
+    missing_env.pop("WISHICRAFT_RUN_ID", None)
+    missing = subprocess.run(
+        [
+            "docker",
+            "compose",
+            "--file",
+            str(artifacts / "compose.yaml"),
+            "ps",
+            "--status",
+            "running",
+            "--quiet",
+            "minecraft",
+        ],
+        env=missing_env,
+        capture_output=True,
+        text=True,
+    )
+    assert missing.returncode != 0 and "WISHICRAFT_RUN_ID" in missing.stderr
+    print("REAL_PREFLIGHT_REJECTS_MISSING_RUN", flush=True)
     host.execute = execute
     assert not host.inspect(), "preexisting project: refuse to touch it"
     for index in range(2):
