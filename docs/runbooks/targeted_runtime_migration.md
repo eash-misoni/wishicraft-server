@@ -1,6 +1,6 @@
 # Targeted runtime contract / inactive-only migration
 
-**状態: Accepted — 2026-09-11ユーザーGO。production移行は旧manifest不一致でBLOCKED、実機検証は未完了。**
+**状態: Accepted — 2026-09-11ユーザーGO。旧manifest不一致は解決。host/CP適用後のSTART失敗と受付復旧gateでBLOCKED、実機検証は未完了。**
 基準は `30b029295c3cd94d00fbfe1aacd0f60094d2f011`。Phase 8およびBACKUP安全性／隔離復元sliceのCompletedを変更しない。
 D-096の承認対象はこの単一Game START/STOP契約と移行だけである。
 
@@ -184,3 +184,21 @@ manifest predecessorだけをABSENTから証明済みexact hashへ訂正する�
 修正HEAD e503530のCI成功後、旧container一件を削除し108 file不変を確認、host installer／旧file保存／11 Lambda codeとSTART/STOP設定deploy／受付UNSET復元まで完了。一巡目START `op-f662ecac-c9ce-4b97-9416-ffea7f16633f` は11:08:14 UTCにFAILED。新Composeの必須WISHICRAFT_RUN_IDをfilesystem preflightへ渡す前にCompose psが評価されたためで、実mount guard自体は成功した。receiptなし、containerなし、listenerなしをSSMで確認し、結果不明とは区別した。失敗Operationのreplayや別runによる成功偽装は行わない。
 
 認可・対象固定後の同じrun IDをpreflight subprocessへ明示的に渡す限定修正を行う。Composeの必須値条件や対象照合を緩めず、新しいruntime semantics/IAMは加えない。実Docker fixtureも本番と同じ必須interpolationへ合わせ、未設定拒否とSTART/STOP各preflightでの解決を検証する。受付0へ再停止し、同一契約内の限定前進修正を検証後に適用する。
+
+### 最終checkpointと再開承認対象 — 11:17 UTC
+
+旧manifestは解決済み。productionはe503530の新host＋新CPであり、旧host/旧CPへの復帰は行っていない。旧停止containerは削除済み、旧fileはrootのpredecessor copyへ保存済み。STARTはFAILED、receipt・新container・listenerは存在しないことを確認した。安全な通常EC2停止後にReconcileを実施し、**実EC2 stopped／Desired RUNNING／Health DEGRADED／Admission 0**で停止する。DNS、Lock、Current Operation、未終了Operationなし。元EBS identity/attachment/encryption、全5 Snapshot/provenanceは不変。保守中の3 alarmは11:17時点でOKへ復帰し、START task/workflow失敗の2 alarmは同時点ALARMとして残る。閾値や通知を変更していない。
+
+repoの前進修正は `daeb538e61ac260c5b790dc30444209b9b5cd319`。local 921 tests・ruff/format/mypy・CP synth、CI 34593137552のquality／実Docker／3 synth成功。最初のlocal環境ではwheel取得DNS失敗5件を916成功と分離し、その5件を再検証して成功した。修正後のfull 921 testsも成功。新Composeの必須run値欠落拒否と、認可済みrunによる実Compose ps、保存・STOP・新STARTをsynthetic Dockerで確認した。本番に修正を適用した証明ではない。
+
+現行select_targetはEC2 stoppedならSTOPのruntime targetを要求しないため、通常STOPでDesiredを正規に収束できる。一方、受付0ではshared Admissionを呼べず、今回GOの「STOPPED/HEALTHYになるまで受付復元しない」と両立しない。これをraw Desired編集、terminal Operation replay、旧コードへのdowngradeで迂回しない。**この例外となる限定STOP受付を追加承認する必要がある**。これはmanifest調査の再承認ではない。
+
+具体的な再開案（未実施）:
+
+1. 元Target stopped、FAILED START、receipt/containerなし、元EBS、DNS/Lock/未終了処理なしを再照合。Discord Command Lambdaの元concurrencyを記録し一時0＋drainとして、shared Admissionの限定受付中にDiscordから別STARTが入らないようにする。この追加の受付制御も承認対象とする。
+2. Admissionを元UNSETへ一時復元し、shared AdmissionのADMIN経路からcanonical STOP一回だけを実行。EC2 already-stopped分岐でDesired STOPPED/HEALTHYへ収束させる。FAILED STARTを再利用しない。結果不明なら再送・別Operationを行わない。完了後はhost修正窓のためAdmission 0へ戻す。
+3. 既存Targetの保守起動、全artifact・receipt不存在・unit/container/listenerを確認。配布済み新hashをexact predecessorとするreviewed-forward-bundleで、operation-v2だけを `abecc64c…` から `aaf0233b…` へ更新する。新manifest/config/Compose/worldは変更しない。installerのCompose preflightには記録済みfailed STARTのrun値を環境として渡すだけで、そのOperationを実行・再送しない。旧v2 file保存・全件照合・atomic replaceを維持する。bundle全hashは既存JSON証跡のpreflight_fix_not_appliedへ保存済み。
+4. 保守停止後、CPの11 Lambda codeだけを同じ修正HEADへ更新（現在e503530から環境/IAM差分なし）。read-backとReconcileでSTOPPED/HEALTHYを確認してAdmission UNSETとDiscord Commandの元設定を復元する。
+5. 失敗一件を履歴に残したまま、新Operationによる通常START/STOP二巡を検証する。今回まだ一巡も成功していない。新BACKUP／Snapshot作成・raw修復・逆方向rollbackは不要。
+
+この案の受付例外を未承認のまま実行しない。旧host/旧CPへ戻して受付だけ再開する案は、既に新runtime_targetが保存され旧containerも削除済みのため、単純なコード差し戻しでは採用しない。
