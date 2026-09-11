@@ -168,3 +168,13 @@ BACKUP後に別のSTART／書込みが入っていれば最新保護と断定し
 - DesiredStoppedEc2Runningは保守起動に伴い10:25のmetricが1、10:26:53 ALARM。正常停止後10:30のmetricが0、**10:31:53 UTCに自然OK復帰**。ユーザーへの通知はこの保守期間の評価に対応する。alarm無効化・閾値変更・fake metricは行っていない。
 
 再開には、既存manifestの安全な内容照合と過去適用artifactの対応を確定し、exact predecessorと更新bundle／testsをレビューする必要がある。観測hashだけを許可値へ追加しない。現在の受付0、旧host＋旧CP、追加済みIAMと新Snapshotを起点に再preflightし、BACKUPを別requestで再作成しない。受付再開・逆方向rollbackを手順の終了だけで実行しない。Phase 8 Completed、Phase 9未着手、その他再設計Proposedは維持する。
+
+## Conditional GO / 旧manifest由来確認 — 2026-09-11 UTC
+
+基準c44f20dの停止に対し、ユーザーが旧manifestの独立再現・実機照合、exact predecessor訂正と関連tests、条件成立後の既承認移行続行を承認した。無条件hash追加ではない。
+
+`b3e27e1`のrendererと同commitのproject/stage設定（UID/GID 993、publish_minecraft_port=False）を独立に実行し、canonical JSON全byteのSHA256 `58218d144da8eb85fcda0bdf7383c6127896db11a7c5e93f3a781828f3bd300d` を再現した。portありの生成物とは一致しない。配置の根拠はPhase 2実データ移行runbook手順9のportless artifact導入、rendererのwrite_newによるmanifest生成、およびb56516fの実データ移行完了記録。Phase 5 upgradeは旧Compose `08c5cee…`を更新し、Phase 6 upgradeはruntime.env `271ce8be…`を`62c9bda…`へ更新するが、双方ともmanifestを置換しない。旧start/stopはCompose/envを使用し、既設v1.3 probeにもmanifest参照はない。このfileは生成時点の履歴artifactであり、現在Composeとのhash不一致をv2部分適用と扱わない。
+
+10:50:52 UTC、exact TargetのSSM `04692e81-2d5e-4cf5-ba46-fa98d537bb80` で通常file・非symlink・root:root・0600・全byte・全schema/fieldの一致を確認した。全文を無条件出力せず、既知再構成値との一致だけを記録した。全15対象artifactの旧配置一致（新v2二fileは不存在）、新receiptなし、unit inactive/static、停止container同一、listenerなしを一度に照合した。Admission 0、未終了Operation/workflow/SSMなし、成功済みBACKUP以後の新Operationなし、Game/EBS attachment不変を再確認。Targetの実IAMも既適用policyと一致し、再deployしない。
+
+manifest predecessorだけをABSENTから証明済みexact hashへ訂正する。新runtime semantics、bundle内新artifact内容、IAMは変えない。未知／欠損／owner／mode／symlink拒否、全件検証後の置換、旧file保存、部分適用後の同bundle再開、新receipt拒否、新manifestと新Compose/env対応を実installer境界で回帰検証する。既存BACKUP `snap-005ce340d03a42340` を再利用し、新BACKUPは作らない。host更新／container整理／本番二巡の成功はこの訂正だけでは主張しない。

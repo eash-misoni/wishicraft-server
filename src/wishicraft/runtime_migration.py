@@ -1,4 +1,4 @@
-"""Offline, invocation-specific bundle for the proposed inactive-only cutover."""
+"""Offline, invocation-specific bundle for the approved inactive-only cutover."""
 
 from __future__ import annotations
 
@@ -36,6 +36,9 @@ def prepare(root: Path, output: Path, instance_id: str) -> None:
     installed = {
         "compose.yaml": "df4db90566e6dc743414de2a680f647d5463eee3280e62d7c940e94d37e6e339",
         "runtime.env": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+        # b3e27e1 portless renderer; Phase 5/6 changed compose/env, not this file.
+        # Exact bytes and root:root 0600 verified on the Target on 2026-09-11.
+        "manifest.json": "58218d144da8eb85fcda0bdf7383c6127896db11a7c5e93f3a781828f3bd300d",
     }
     new = render_boot_time_artifacts(
         project,
@@ -93,7 +96,7 @@ def prepare(root: Path, output: Path, instance_id: str) -> None:
     for name, body, previous in [
         ("compose.yaml", new.compose_yaml, installed["compose.yaml"]),
         ("runtime.env", new.runtime_env, installed["runtime.env"]),
-        ("manifest.json", new.manifest_json, None),
+        ("manifest.json", new.manifest_json, installed["manifest.json"]),
     ]:
         add("/etc/wishicraft/host-runtime/" + name, body, None, 0o600, previous)
     add(

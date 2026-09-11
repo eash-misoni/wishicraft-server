@@ -1337,5 +1337,137 @@
     "blocked-final-readback.json": "8fb9175660380081e580982cea7a6e31272abfab224d9f8ac02f58847173b4ff",
     "maintenance-alarm-observation-2.json": "a6d5e171fde83dda5836a68d8d674fa275835031f39ad793af296b2422278c88",
     "blocked-final-readback-v2.json": "1bd8b53a59d13f4fbd3e7f286a76f66653974c0900dd3c42319a84b7be75124b"
+  },
+  "conditional_continuation": {
+    "status": "PREDECESSOR_VERIFIED_VALIDATION_IN_PROGRESS",
+    "historical_reconstruction": {
+      "commit": "b3e27e150066a5fe406da3f15755e45bfd5bca06",
+      "results": [
+        {
+          "ports": false,
+          "digest": "58218d144da8eb85fcda0bdf7383c6127896db11a7c5e93f3a781828f3bd300d",
+          "manifest": {
+            "apply_class": "boot-time",
+            "compose_sha256": "08c5cee203eb8350e30778456ccd1e240eeff5e9cc65494b292684092c0108a7",
+            "game_id": "game-vanilla-main",
+            "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+            "minecraft_version": "26.2",
+            "runtime_env_sha256": "271ce8bea4effa701c90c35c9ff3e93266437cfa76a84ed917d6381900d26837",
+            "schema_version": 1,
+            "secret_material_included": false,
+            "server_type": "VANILLA"
+          }
+        },
+        {
+          "ports": true,
+          "digest": "a0d9dd26e90c1f615f8fc4a7ef311ac04a21c2074c3498d0259a164a7e1b8c58",
+          "manifest": {
+            "apply_class": "boot-time",
+            "compose_sha256": "559f3db4f4cfa7de43101503dc78ab60629c764ecb220b95b49575b5b0d43397",
+            "game_id": "game-vanilla-main",
+            "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+            "minecraft_version": "26.2",
+            "runtime_env_sha256": "271ce8bea4effa701c90c35c9ff3e93266437cfa76a84ed917d6381900d26837",
+            "schema_version": 1,
+            "secret_material_included": false,
+            "server_type": "VANILLA"
+          }
+        }
+      ]
+    },
+    "host_manifest": {
+      "command_id": "04692e81-2d5e-4cf5-ba46-fa98d537bb80",
+      "exact_bytes_fields_verified": true,
+      "all_artifacts_match": true,
+      "receipt_absent": true
+    },
+    "bundle_files": {
+      "6.artifact": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
+      "7.artifact": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5",
+      "1.artifact": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995",
+      "0.artifact": "3a761b10c01b75759c60d56cb196ead24b84275cbf3a5029b203c21fa9d78117",
+      "5.artifact": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46",
+      "4.artifact": "1a072ee060062af861b69ce40455f3a19faf3b1a53428f29de67dec196482a9a",
+      "install.py": "850a569d68a0e6a610a4c7689466be13997ae5dd75197b01f9a485ce58708c44",
+      "8.artifact": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a",
+      "9.artifact": "abecc64cbb007c699451bb4c120760d4b33d0909c23de0af3ef0f29f730bc7f4",
+      "2.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+      "install.json": "91861293c3b3fe86001e96c33b5416de9786247dd6230a1fd70a2458e00b8b76",
+      "3.artifact": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97"
+    },
+    "bundle_change": "install.json manifest predecessor only; new artifacts unchanged",
+    "production_diff": [
+      {
+        "resource": "ReconcileFunction30829CB6",
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "resource": "StartTaskFunction8C564C4A",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      {
+        "resource": "StopTaskFunction11473A8C",
+        "properties": [
+          "Code",
+          "Environment"
+        ]
+      },
+      {
+        "resource": "BackupTaskFunctionA44639DC",
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "resource": "RetentionTaskFunction9F285CE4",
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "resource": "AdmissionFunction23082B67",
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "resource": "DiscordCommandFunction7D25102A",
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "resource": "StatusExecutorFunction6E5C9869",
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "resource": "DiscordMessageFunction78FA388B",
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "resource": "AutoStopEvaluatorFunctionF85F8B50",
+        "properties": [
+          "Code"
+        ]
+      },
+      {
+        "resource": "MonitoringObserverFunction584DA7C7",
+        "properties": [
+          "Code"
+        ]
+      }
+    ],
+    "backup_reused": "snap-005ce340d03a42340",
+    "target_iam_readback": "matches already applied policy; no redeploy",
+    "new_backup_count": 0
   }
 }
