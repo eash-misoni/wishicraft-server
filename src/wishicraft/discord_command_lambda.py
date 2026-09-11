@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
-from typing import Protocol, cast
+from typing import Protocol, TypedDict, cast
 
 from wishicraft.discord_interaction_callback import DiscordInteractionCallbackClient
 from wishicraft.discord_interactions import (
@@ -33,8 +33,20 @@ class PayloadStream(Protocol):
 
 class OperationAdmission(Protocol):
     def admit(
-        self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
+        self,
+        *,
+        operation_type: str,
+        interaction_id: str,
+        guild_id: str,
+        channel_id: str,
+        target_game_id: str | None = None,
+        confirmed: bool = False,
     ) -> str: ...
+
+
+class GameSelection(TypedDict, total=False):
+    target_game_id: str
+    confirmed: bool
 
 
 class InteractionCallback(Protocol):
@@ -50,9 +62,16 @@ class LambdaOperationAdmission:
         self._function_name = function_name
 
     def admit(
-        self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
+        self,
+        *,
+        operation_type: str,
+        interaction_id: str,
+        guild_id: str,
+        channel_id: str,
+        target_game_id: str | None = None,
+        confirmed: bool = False,
     ) -> str:
-        if operation_type not in {"STATUS", "START", "STOP", "BACKUP"}:
+        if operation_type not in {"STATUS", "START", "STOP", "BACKUP", "SWITCH"}:
             raise ValueError("unsupported Discord admission type")
         response = self._api.invoke(
             FunctionName=self._function_name,
@@ -64,6 +83,8 @@ class LambdaOperationAdmission:
                     "operation_type": operation_type,
                     "idempotency_key": f"discord:{interaction_id}",
                     "requested_by": "DISCORD",
+                    **({"target_game_id": target_game_id} if target_game_id is not None else {}),
+                    **({"confirmed": True} if confirmed else {}),
                     "discord": {
                         "guild_id": guild_id,
                         "channel_id": channel_id,
@@ -106,11 +127,18 @@ def handler(event: object, context: object) -> dict[str, object]:
     except Exception:  # noqa: BLE001 - fail closed before Admission, with no credential detail.
         return _http_response(502, {"error": "interaction acknowledgement failed"})
     try:
+        selection: GameSelection = {}
+        if interaction.target_game_id is not None:
+            selection = {
+                "target_game_id": interaction.target_game_id,
+                "confirmed": interaction.confirmed,
+            }
         _get_operation_admission().admit(
             operation_type=interaction.kind.value,
             interaction_id=interaction.interaction_id,
             guild_id=config.guild_id,
             channel_id=config.operation_channel_id,
+            **selection,
         )
         accepted = True
     except Exception:  # noqa: BLE001 - AWS boundary is projected without internal detail.

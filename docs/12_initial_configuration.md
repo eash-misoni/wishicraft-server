@@ -8,6 +8,13 @@
 
 Codexが未確定値を推測したり、秘密情報をGitへ保存したりしないように、初期設定の正本、実行時への配布方法、秘密情報の扱いを定義する。
 
+## 現行の実行構成と提案の区別
+
+D-096適用済みのGame/run/container契約は[05 §0](05_data_and_interface_contracts.md)を正本とする。
+`initial_game_id`は初期Gameを示し、一回の起動IDではない。固定image/versionは引き続きstage設定から配布する。
+`config/two-game-dev.json`とCDK context `two_games=true`は[D-097 Proposed](reviews/two_game_switch.md)
+の明示的な配布選択であり、productionのGame追加や切替を意味しない。Aの設定やwhitelistは再生成しない。
+
 ## 2. 確定済み設定
 
 ```yaml

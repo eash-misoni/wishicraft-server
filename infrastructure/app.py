@@ -10,6 +10,7 @@ from infrastructure.stacks.control_plane_stack import ControlPlaneStack
 from infrastructure.stacks.minecraft_stack import MinecraftStack
 from infrastructure.stacks.minecraft_target_stack import MinecraftTargetStack
 from wishicraft.config import load_configuration, validate_stage_for_action
+from wishicraft.runtime_catalog import RuntimeCatalog
 
 
 def build_app(
@@ -19,6 +20,7 @@ def build_app(
     phase: int = 0,
     action: str = "synth",
     deployment: str = "phase1",
+    two_games: bool = False,
 ) -> App:
     """Build an environment-agnostic CDK app after phase-specific validation."""
     configuration = load_configuration(repository_root, stage)
@@ -34,6 +36,7 @@ def build_app(
             project=configuration.project,
             secrets=configuration.secrets,
             phase=phase,
+            games=_games(repository_root, stage) if two_games else None,
         )
     elif deployment == "phase1":
         MinecraftStack(
@@ -73,6 +76,9 @@ def main() -> None:
             project=configuration.project,
             secrets=configuration.secrets,
             phase=phase,
+            games=_games(repository_root, stage)
+            if app.node.try_get_context("two_games") == "true"
+            else None,
         )
     elif deployment == "phase1":
         MinecraftStack(
@@ -86,6 +92,10 @@ def main() -> None:
     else:
         raise ValueError("CDK context deployment must be phase1, target, or control-plane")
     app.synth()
+
+
+def _games(root: Path, stage: str) -> tuple[str, ...]:
+    return RuntimeCatalog.parse((root / "config" / f"two-game-{stage}.json").read_text()).game_ids
 
 
 if __name__ == "__main__":

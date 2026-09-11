@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 import tempfile
@@ -97,7 +98,7 @@ def authorize(
     if (
         operation["operation_id"] != request["operation_id"]
         or operation["lease_id"] != request["lease_id"]
-        or operation["operation_type"] != request["action"]
+        or operation["operation_type"] not in {request["action"], "SWITCH"}
         or operation["status"] != "RUNNING"
         or datetime.fromisoformat(operation["timeout_at"].replace("Z", "+00:00")) <= now
         or lease["owner_operation_id"] != request["operation_id"]
@@ -106,11 +107,26 @@ def authorize(
         or lease["lease_expires_at"] <= int(now.timestamp())
     ):
         raise ValueError("STALE_OPERATION")
-    target = operation["runtime_target"]
-    for name in ("instance_id", "game_id", "data_source", "config_digest"):
+    switching = operation["operation_type"] == "SWITCH"
+    if switching and "games" not in config:
+        raise ValueError("SWITCH_NOT_CONFIGURED")
+    target = (
+        operation["switch_source"]
+        if switching and request["action"] == "STOP"
+        else operation["runtime_target"]
+    )
+    for name in ("instance_id", "config_digest"):
         if target[name] != config[name]:
             raise ValueError("TARGET_MISMATCH")
-    if operation["target_game_id"] != target["game_id"]:
+    if "games" in config:
+        if (
+            target["game_id"] not in config["games"]
+            or target["data_source"] != "/srv/minecraft/games/" + target["game_id"] + "/server"
+        ):
+            raise ValueError("TARGET_MISMATCH")
+    elif target["game_id"] != config["game_id"] or target["data_source"] != config["data_source"]:
+        raise ValueError("TARGET_MISMATCH")
+    if operation["target_game_id"] != operation["runtime_target"]["game_id"]:
         raise ValueError("GAME_MISMATCH")
     if re.fullmatch(r"op-[a-z0-9-]+", target["run_id"]) is None:
         raise ValueError("INVALID_RUN_ID")
@@ -194,6 +210,23 @@ def stopped_environment() -> None:
             raise ValueError("STOP_LISTENER_REMAINS")
 
 
+def initial_world_permission(target: dict[str, str], *, stopped: bool = False) -> Path:
+    path = Path(target["data_source"]).parent / ".wishicraft-initialization.json"
+    if not path.is_file() or path.is_symlink():
+        raise ValueError("EXISTING_WORLD_MISSING")
+    info = path.stat()
+    document = json.loads(path.read_text())
+    phases = ("prepared", "initialized") if stopped else ("prepared",)
+    if (
+        info.st_uid != 0
+        or info.st_gid != 0
+        or stat.S_IMODE(info.st_mode) != 0o600
+        or document not in [{"game_id": target["game_id"], "phase": phase} for phase in phases]
+    ):
+        raise ValueError("INITIAL_WORLD_PERMISSION_INVALID")
+    return path
+
+
 def finish_stop(
     receipt_path: Path, receipt: dict[str, Any], target: dict[str, str], manifest: dict[str, Any]
 ) -> None:
@@ -220,6 +253,12 @@ def finish_stop(
         ):
             raise ValueError("STOP_PROOF_MISMATCH")
         validate_persistence(container, target)
+        initialization = Path(target["data_source"]).parent / ".wishicraft-initialization.json"
+        if "games" in manifest and initialization.exists():
+            initial_world_permission(target, stopped=True)
+            atomic(
+                initialization, json.dumps({"game_id": target["game_id"], "phase": "initialized"})
+            )
         proof["removal_ready"] = True
         atomic(receipt_path, json.dumps(receipt))
         execute(["docker", "rm", container["Id"]])
@@ -228,7 +267,8 @@ def finish_stop(
     if inspect():
         raise ValueError("STOP_RESULT_UNKNOWN")
     stopped_environment()
-    execute(["/usr/local/libexec/wishicraft/rcon-secret-v1", "remove"])
+    helper = "rcon-secret-v2" if "games" in manifest else "rcon-secret-v1"
+    execute(["/usr/local/libexec/wishicraft/" + helper, "remove"])
     atomic(receipt_path, json.dumps({**receipt, "phase": "stopped"}))
 
 
@@ -285,9 +325,12 @@ def apply(request: dict[str, Any]) -> None:
                 "-c",
                 'set -aeu; export WISHICRAFT_RUN_ID="$1"; '
                 "source /etc/wishicraft/host-runtime.env; "
+                'export WISHICRAFT_GAME_ID="$2" GAME_DIRECTORY="$3"; '
                 "/usr/local/lib/wishicraft-host-runtime/filesystem_preflight.sh",
                 "wishicraft-preflight",
                 target["run_id"],
+                target["game_id"],
+                target["data_source"],
             ]
         )
         unit_state = execute(
@@ -302,6 +345,11 @@ def apply(request: dict[str, Any]) -> None:
             validate_container(containers[0], target)
             configured_container(containers[0], manifest)
         if request["action"] == "START":
+            if (
+                "games" in config
+                and not (Path(target["data_source"]) / "world/level.dat").is_file()
+            ):
+                initial_world_permission(target)
             if receipt and receipt["phase"] == "stopping":
                 raise ValueError("UNRESOLVED_RUNTIME")
             if receipt and receipt["target"] != target and receipt["phase"] != "stopped":
@@ -312,10 +360,19 @@ def apply(request: dict[str, Any]) -> None:
             RUN_ENV.parent.mkdir(mode=0o700, exist_ok=True)
             atomic(
                 RUN_ENV,
-                "WISHICRAFT_RUN_ID=" + target["run_id"] + "\n",
+                "WISHICRAFT_RUN_ID="
+                + target["run_id"]
+                + "\n"
+                + "WISHICRAFT_GAME_ID="
+                + target["game_id"]
+                + "\n"
+                + "GAME_DIRECTORY="
+                + target["data_source"]
+                + "\n",
             )
             if not containers:
-                execute(["/usr/local/libexec/wishicraft/rcon-secret-v1", "prepare"])
+                secret_helper = "rcon-secret-v2" if "games" in config else "rcon-secret-v1"
+                execute(["/usr/local/libexec/wishicraft/" + secret_helper, "prepare"])
             execute(["systemctl", "start", UNIT], timeout=300)
             current = inspect()
             if len(current) != 1 or not current[0]["State"]["Running"]:
@@ -327,6 +384,15 @@ def apply(request: dict[str, Any]) -> None:
             if not receipt or receipt["target"] != target:
                 raise ValueError("STOP_TARGET_UNKNOWN")
             if containers and containers[0]["State"]["Running"]:
+                if operation["operation_type"] == "SWITCH":
+                    players = execute(["docker", "exec", containers[0]["Id"], "rcon-cli", "list"])
+                    if (
+                        re.fullmatch(
+                            r"There are 0 of a max of [0-9]+ players online: ?\s*", players
+                        )
+                        is None
+                    ):
+                        raise ValueError("SWITCH_PLAYERS_NOT_CONFIRMED_EMPTY")
                 if receipt["phase"] == "stopped" or (
                     receipt.get("stop")
                     and (

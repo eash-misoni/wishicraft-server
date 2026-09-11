@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 import urllib.error
 import urllib.request
 from collections.abc import Callable
@@ -215,7 +216,7 @@ def operation_nonce(operation_id: str) -> str:
 
 
 def render_status_projection(projection: object) -> str:
-    if not isinstance(projection, dict) or set(projection) != {
+    fields = {
         "schema_version",
         "kind",
         "status",
@@ -224,7 +225,9 @@ def render_status_projection(projection: object) -> str:
         "endpoint",
         "observed_at",
         "summary",
-    }:
+    }
+    selection = {"selected_game_id", "observed_game_id", "current_operation_id"}
+    if not isinstance(projection, dict) or set(projection) not in (fields, fields | selection):
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
     if projection.get("schema_version") != 1 or projection.get("kind") != "STATUS":
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
@@ -241,6 +244,18 @@ def render_status_projection(projection: object) -> str:
     ):
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
     lines = [f"Minecraft: {status}", summary]
+    if "selected_game_id" in projection:
+        for field, label, pattern in [
+            ("selected_game_id", "Selected Game", r"game-[a-z0-9-]{1,100}"),
+            ("observed_game_id", "Observed Game", r"game-[a-z0-9-]{1,100}"),
+            ("current_operation_id", "Current Operation", r"op-[a-z0-9-]{1,100}"),
+        ]:
+            value = projection[field]
+            if value is not None and (
+                not isinstance(value, str) or re.fullmatch(pattern, value) is None
+            ):
+                raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
+            lines.append(f"{label}: {value or 'none'}")
     if endpoint is not None:
         lines.append(f"Endpoint: {endpoint}")
     lines.append(f"Health: {health}")
@@ -250,8 +265,20 @@ def render_status_projection(projection: object) -> str:
 def render_operation_projection(record: DeliveryRecord) -> str:
     if record.operation_type == "STATUS":
         return render_status_projection(record.projection)
-    if record.operation_type not in {"START", "STOP", "BACKUP"}:
+    if record.operation_type not in {"START", "STOP", "BACKUP", "SWITCH"}:
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
+    if record.operation_type == "SWITCH":
+        if record.operation_status == "SUCCEEDED":
+            return "Minecraft SWITCH: online and ready. Use /mc status to see the Game."
+        if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
+            return (
+                "Minecraft SWITCH: did not complete. "
+                "Check selected/observed Game and Operation before retrying."
+            )
+        return {
+            "HOST_RUNTIME_STOPPING": "Minecraft SWITCH: saving and stopping the source Game.",
+            "HOST_RUNTIME_STARTING": "Minecraft SWITCH: starting the destination Game.",
+        }.get(record.current_step, "Minecraft SWITCH: in progress; the host remains running.")
     if record.operation_type == "BACKUP":
         if record.operation_status == "SUCCEEDED":
             return "Minecraft BACKUP: completed."

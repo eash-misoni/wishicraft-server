@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 from wishicraft.backup import REQUIRED_TAG_KEYS, SnapshotRecord
+from wishicraft.backup_recovery import SHARED_TAG_KEYS, recovery_digest, shared_tags
 from wishicraft.system_state import utc_timestamp
 
 
@@ -35,9 +36,10 @@ class BackupProvenanceRecord:
     verified_owner_id: str
     metadata: dict[str, str]
     schema_version: int = 1
+    recovery_json: str | None = None
 
     def __post_init__(self) -> None:
-        if self.schema_version != 1 or self.category != "backup" or self.protected:
+        if self.schema_version not in {1, 2} or self.category != "backup" or self.protected:
             raise ValueError("invalid Backup provenance classification")
         for value in (
             self.operation_requested_at,
@@ -56,6 +58,19 @@ class BackupProvenanceRecord:
             "WishicraftSchemaVersion": str(self.schema_version),
             "WishicraftProtected": "false",
         }
+        required = REQUIRED_TAG_KEYS
+        if self.schema_version == 2:
+            if self.recovery_json is None:
+                raise ValueError("shared Backup requires recovery metadata")
+            recovery = json.loads(self.recovery_json)
+            if recovery.get(
+                "source_volume_id"
+            ) != self.source_volume_id or self.game_id not in recovery.get("games", {}):
+                raise ValueError("shared Backup source mismatch")
+            expected_metadata = shared_tags(expected_metadata, self.recovery_json)
+            required |= SHARED_TAG_KEYS
+        elif self.recovery_json is not None:
+            raise ValueError("legacy Backup cannot acquire new recovery metadata")
         try:
             created_at = _parse_rfc3339(self.metadata.get("WishicraftCreatedAt", ""))
         except ValueError as error:
@@ -72,7 +87,7 @@ class BackupProvenanceRecord:
                     self.verified_owner_id,
                 )
             )
-            or set(self.metadata) != REQUIRED_TAG_KEYS
+            or set(self.metadata) != required
             or any(self.metadata.get(key) != value for key, value in expected_metadata.items())
             or created_at.astimezone(UTC) != self.wishicraft_created_at.astimezone(UTC)
         ):
@@ -102,6 +117,14 @@ class BackupProvenanceRecord:
 
     def _evidence(self) -> dict[str, object]:
         return {
+            **(
+                {
+                    "recovery_json": self.recovery_json,
+                    "recovery_digest": recovery_digest(self.recovery_json),
+                }
+                if self.recovery_json is not None
+                else {}
+            ),
             "schema_version": self.schema_version,
             "snapshot_id": self.snapshot_id,
             "operation_id": self.operation_id,
@@ -142,6 +165,7 @@ def build_verified_provenance(
     owner_id: str,
     provenance_recorded_at: datetime,
     require_succeeded_operation: bool = True,
+    recovery_json: str | None = None,
 ) -> BackupProvenanceRecord:
     tags = snapshot.tags
     operation_id = operation.operation_id
@@ -163,6 +187,13 @@ def build_verified_provenance(
         "WishicraftSchemaVersion": "1",
         "WishicraftProtected": "false",
     }
+    required = REQUIRED_TAG_KEYS
+    if recovery_json is not None:
+        expected_tags = shared_tags(expected_tags, recovery_json)
+        required |= SHARED_TAG_KEYS
+        expected_result.update(
+            {"scope": "shared-volume", "recovery_digest": recovery_digest(recovery_json)}
+        )
     operation_valid = (
         operation.status == "SUCCEEDED" and operation.result == expected_result
         if require_succeeded_operation
@@ -184,7 +215,7 @@ def build_verified_provenance(
         or snapshot.start_time is None
         or snapshot.storage_tier != "standard"
         or snapshot.description != f"Wishicraft backup {operation_id}"
-        or set(tags) != REQUIRED_TAG_KEYS
+        or set(tags) != required
         or any(tags.get(key) != value for key, value in expected_tags.items())
         or result_snapshot_mismatch
     ):
@@ -204,6 +235,8 @@ def build_verified_provenance(
         provenance_recorded_at=provenance_recorded_at,
         verified_owner_id=owner_id,
         metadata=tags,
+        schema_version=2 if recovery_json is not None else 1,
+        recovery_json=recovery_json,
     )
 
 

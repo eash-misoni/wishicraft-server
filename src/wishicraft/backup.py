@@ -132,7 +132,14 @@ class SnapshotAdapter:
             raise BackupWorkflowError(BackupErrorCode.SOURCE_VOLUME_MISMATCH)
 
     def create_once(self, *, volume_id: str, tags: dict[str, str]) -> SnapshotRecord:
-        if set(tags) != REQUIRED_TAG_KEYS:
+        from wishicraft.backup_recovery import SHARED_TAG_KEYS
+
+        required = (
+            REQUIRED_TAG_KEYS | SHARED_TAG_KEYS
+            if tags.get("WishicraftSchemaVersion") == "2"
+            else REQUIRED_TAG_KEYS
+        )
+        if set(tags) != required:
             raise ValueError("invalid backup tag contract")
         response = self._create_api.create_snapshot(
             VolumeId=volume_id,

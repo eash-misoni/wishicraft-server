@@ -5,6 +5,8 @@
 
 ## 1. 設計原則
 
+**D-096適用済みの補足:** Gameや固定runtime slot identityを、一回の起動を表すrun identityと混同しない。Operationの固定対象が要求、host receiptと実containerが実現結果であり、receiptをGame選択の別の正本にしない。START/STOP、stopped receipt、heartbeat run/processの現在契約は[Data/Interface §0](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)へ集約する。二Gameの選択保持・source/destination対は[D-097 Proposed](reviews/two_game_switch.md)であり、以下の将来generationモデルを採用済みと解釈しない。
+
 システム全体を1つの状態文字列で表現しない。
 
 たとえば`WAITING_FOR_SSM`は実世界のMinecraft状態ではなくoperationの進行段階であり、`ERROR`はEC2状態でもMinecraft状態でもない。これらを単一enumへ混在させると、再試行、状態ずれ、障害復旧の判断が不明確になる。

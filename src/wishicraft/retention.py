@@ -9,6 +9,7 @@ from enum import StrEnum
 from typing import Protocol, cast
 
 from wishicraft.backup import REQUIRED_TAG_KEYS
+from wishicraft.backup_recovery import SHARED_TAG_KEYS
 
 
 class SnapshotDisposition(StrEnum):
@@ -54,6 +55,7 @@ class RetentionContext:
     source_volume_id: str
     owner_id: str
     keep_count: int = 7
+    shared_volume: bool = False
 
     def __post_init__(self) -> None:
         if self.keep_count != 7:
@@ -89,9 +91,10 @@ class BackupProvenance:
     snapshot_start_time: datetime
     provenance_recorded_at: datetime
     schema_version: int = 1
+    recovery_digest: str | None = None
 
     def __post_init__(self) -> None:
-        if self.schema_version != 1:
+        if self.schema_version not in {1, 2}:
             raise ValueError("unsupported backup provenance schema")
         _aware_utc(self.operation_requested_at)
         _aware_utc(self.wishicraft_created_at)
@@ -347,18 +350,28 @@ def _classify(
         return ClassifiedSnapshot(item, SnapshotDisposition.EXCLUDED, "other-category")
     if tags.get("Project") != context.project or tags.get("Stage") != context.stage:
         return ClassifiedSnapshot(item, SnapshotDisposition.EXCLUDED, "other-project-or-stage")
-    if tags.get("WishicraftGameId") != context.game_id:
+    shared = tags.get("WishicraftSchemaVersion") == "2"
+    if shared and not context.shared_volume:
+        return ClassifiedSnapshot(item, SnapshotDisposition.ANOMALY, "shared-scope-not-enabled")
+    if not shared and tags.get("WishicraftGameId") != context.game_id:
         return ClassifiedSnapshot(item, SnapshotDisposition.EXCLUDED, "other-game")
     expected = {
         "Project": context.project,
         "Stage": context.stage,
         "WishicraftCategory": "backup",
-        "WishicraftGameId": context.game_id,
+        "WishicraftGameId": tags.get("WishicraftGameId", "") if shared else context.game_id,
         "WishicraftSourceVolumeId": context.source_volume_id,
-        "WishicraftSchemaVersion": "1",
+        "WishicraftSchemaVersion": "2" if shared else "1",
         "WishicraftProtected": "false",
     }
-    if set(tags) != REQUIRED_TAG_KEYS or any(tags.get(k) != v for k, v in expected.items()):
+    required = REQUIRED_TAG_KEYS | SHARED_TAG_KEYS if shared else REQUIRED_TAG_KEYS
+    if shared and (
+        tags.get("WishicraftBackupScope") != "shared-volume"
+        or provenance is None
+        or provenance.recovery_digest != tags.get("WishicraftRecoveryDigest")
+    ):
+        return ClassifiedSnapshot(item, SnapshotDisposition.ANOMALY, "invalid-shared-recovery")
+    if set(tags) != required or any(tags.get(k) != v for k, v in expected.items()):
         return ClassifiedSnapshot(item, SnapshotDisposition.ANOMALY, "invalid-d090-metadata")
     operation_id = tags.get("WishicraftOperationId", "")
     try:
@@ -379,14 +392,16 @@ def _classify(
     if (
         provenance.snapshot_id != item.snapshot_id
         or provenance.operation_id != operation_id
-        or provenance.game_id != context.game_id
+        or provenance.game_id != expected["WishicraftGameId"]
         or provenance.stage != context.stage
         or provenance.source_volume_id != context.source_volume_id
-        or provenance.schema_version != 1
+        or provenance.schema_version != (2 if shared else 1)
         or _aware_utc(provenance.wishicraft_created_at) != created_at
         or _aware_utc(provenance.snapshot_start_time) != _aware_utc(item.start_time)
     ):
         return ClassifiedSnapshot(item, SnapshotDisposition.ANOMALY, "provenance-mismatch")
+    if context.shared_volume and not shared:
+        return ClassifiedSnapshot(item, SnapshotDisposition.EXCLUDED, "legacy-scope-protected")
     return ClassifiedSnapshot(item, SnapshotDisposition.KEEP, "retention-owned")
 
 

@@ -6,9 +6,17 @@
 
 ## 1. Decision logの使い方
 
+時刻付き失敗・当時の未承認記録は履歴として保持する。現在契約は[Data/Interface](05_data_and_interface_contracts.md)、適用実績は各closeoutへ集約し、過去entryの保留を現在の保留と混同しない。Phase 9以降の計画はD-097等による見直し対象であり、Proposed実装をAcceptedへ自動昇格させない。
+
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-097 同一runtime構成の二つのGameの切替と共有保護
+
+- **状態:** Proposed（repository実装・検証準備中、production未承認）
+- **提案:** [two_game_switch.md](reviews/two_game_switch.md)。D-096の対象固定と保存・正常停止を再利用し、単一OperationでEC2を維持して切り替える。Game選択、共有backup/provenance、dry-run retention、Discord認可を同じproduction gateで審査する。
+- D-096 CompletedやD-095の復元順序承認を変更しない。新backup形式・認可は未Accepted。
 
 ### D-096 既存Gameの対象を固定したruntime実行契約
 

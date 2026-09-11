@@ -188,10 +188,20 @@ def produce_once(*, now: Optional[datetime] = None) -> bool:
     game_id = _required("GAME_ID")
     region = _required("AWS_REGION")
     previous = load_previous(table=table, system_id=system_id, region=region)
+    observation = observe(now=now or datetime.now(timezone.utc))  # noqa: UP017
+    # Host distribution supplies the same immutable allowlist as the execution adapter.
+    contract_path = Path("/etc/wishicraft/runtime-contract.json")
+    host_contract = json.loads(contract_path.read_text()) if contract_path.exists() else {}
+    games = host_contract.get("games")
+    if games is not None:
+        if not isinstance(games, list) or len(games) != 2:
+            raise ProducerError("INVALID_GAME_ALLOWLIST")
+        if isinstance(observation.active_game_id, str) and observation.active_game_id in games:
+            game_id = observation.active_game_id
     current = derive_heartbeat(
         system_id=system_id,
         canonical_game_id=game_id,
-        observation=observe(now=now or datetime.now(timezone.utc)),  # noqa: UP017
+        observation=observation,
         previous=previous,
     )
     return save(current, table=table, region=region, previous=previous)

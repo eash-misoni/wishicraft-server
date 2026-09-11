@@ -42,6 +42,8 @@ Phase 0最初のrepository bootstrapだけはREADMEが未作成であるため�
 
 ## 4. 1回の作業範囲
 
+ユーザーが一つの利用機能について横断実装を委任した場合は、その機能を完了単位とする。内部では検証可能な変更へ分けるが、部品ごとの承認待ちは増やさない。以下の例は通常のscope設定の目安であり、明示的な委任を縮小する規則ではない。
+
 1回の依頼では、原則1つの明確な機能または契約だけを変更する。
 
 適切な例:
@@ -297,8 +299,8 @@ bug修正時は、可能な限り再現testを先に追加する。
 - 各検証versionは新しい一意なtemporary rootを使い、既存version、正式結果、frozen artifactを変更・再利用・補正しない。
 - 失敗を成功として扱わず、結果JSONを手作業で補正しない。失敗時は新versionで原因を記録し、最小のtest-only修正と再検証を行う。
 - evidence runnerはwrapperが実際に比較する表現と、runner外側の比較表現が一致することを証明可能にする。capture、state、sidecar、audit、nonce、output rootはinvocationごとに分離する。
-- production wrapper、payload、oracle、fixture selection logic、実機のセキュリティ動作を変える必要が判明した時点で、変更前に影響と根拠を報告して停止する。
-- ローカル検証が合格しても、AWS CLI/SDK、SSO login、SSM/EC2/host接続、Run Command送信、deploy、DNS操作、実機変更、local production path変更、secret取得・表示、破壊的操作は自動実行しない。次に実行する外部command、影響、rollback方針を簡潔に示して明示承認を得る。
+- wrapper/payload/selection logicやセキュリティ契約の変更が委任範囲を越える場合は、影響・根拠を示して停止する。明示委任されたProposed設計のrepository実装・testsは継続できる。fixtureで安全条件を弱めて合格させない。
+- production変更は、対象・権限・実行順・停止条件・途中再開・cleanupを具体化して一括承認を受ける。承認済み範囲内の通常修正・再観測・同契約の再開に内部gateを追加しない。未知identity、結果不明mutation、権限拡大、未承認の破壊/復旧semanticsでは止める。read-only preflight、repository/CIとproduction writeを区別し、SSO期限切れは人間のcanonical再認証へ戻す。
 - 外部境界以外では、単なるtest failureを理由に途中停止せず、過去の証跡を保持した新versionで原因診断・修正・再検証を続ける。
 - 部分適用を再開するhost migrationでは、script、unit、drop-in、rules file、enable symlinkを個別に`absent`、`canonical`、`conflict`へ分類する。`canonical`はmtimeを含め書き換えず、`absent`だけをno-clobberで配置し、`conflict`または整合しない既存nft tableは永続変更前に停止する。
 - systemd enable symlinkの`canonical`判定はraw link文字列やbasenameではなく、正確なlink path、symlink type、非dangling、および解決後targetのcanonical unit file完全一致を使用する。絶対linkと相対linkを受容し、query failureとpredicate mismatchを別checkpointにする。

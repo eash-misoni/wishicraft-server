@@ -4,6 +4,8 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
+現在の通常実行契約は[Data/Interface §0](docs/05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)を参照してください。runbookは移行手順・証跡を所有します。次の作業は[D-097 二Game切替・共有BACKUPのProposed案](docs/reviews/two_game_switch.md)のrepository実装・移行準備です。production適用やPhase 9全体の採用を示すものではありません。
+
 Phase 0〜8は完了しています。停止中Data EBSのBACKUP、durable provenance、retention dry-run、Runtime heartbeat、warning付き無人自動停止、監視・コスト整備をdevで検証済みです。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。
 
 Phase 8.3は2026-09-10 UTCにControl Plane限定deployと通常START/STOP監視E2Eを完了しました。D-094 Accepted、READY後15分以上のfreshness維持、正しいData EBS使用率1.4389%、停止後SSM/容量値発行なし、41 alarm OK、最終STOPPED/HEALTHYを確認済みです。初期欠測による5件の実メール通知と自然復帰も[監視runbook](docs/runbooks/phase8_monitoring.md)へ記録しています。次のPhase 9は未着手です。RETENTION実削除はnormal backup自然8件以降の独立gate、Restore UI・汎用workflowはPhase 16です。D-095の独立sliceとして、2026-09-11にBACKUP安全性deployと既存Snapshotの隔離復元・保存・再起動・抽出・cleanupを完了しました。[実証範囲と限界](docs/runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照してください。この独立復元slice時点では新BACKUP経路の実AWS E2Eは未実施でした。

@@ -25,7 +25,14 @@ class Admission:
         self.calls: list[tuple[str, str]] = []
 
     def admit(
-        self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
+        self,
+        *,
+        operation_type: str,
+        interaction_id: str,
+        guild_id: str,
+        channel_id: str,
+        target_game_id: str | None = None,
+        confirmed: bool = False,
     ) -> str:
         self.calls.append((operation_type, interaction_id))
         assert guild_id == GUILD_ID
@@ -309,7 +316,14 @@ def test_signature_parse_authorization_ack_admission_order(signing_key: SigningK
 
     class OrderedAdmission(Admission):
         def admit(
-            self, *, operation_type: str, interaction_id: str, guild_id: str, channel_id: str
+            self,
+            *,
+            operation_type: str,
+            interaction_id: str,
+            guild_id: str,
+            channel_id: str,
+            target_game_id: str | None = None,
+            confirmed: bool = False,
         ) -> str:
             assert trace == ["ack"]
             trace.append("admission")

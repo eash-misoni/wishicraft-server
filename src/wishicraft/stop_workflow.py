@@ -173,6 +173,7 @@ class StopCoordinator:
     leases: LeaseRepository
     states: SystemStateRepository
     lease_seconds: int
+    preserve_selection: bool = False
 
     def verify_and_set_desired(
         self, *, proof: LeaseProof, observation: StopObservation, now: datetime
@@ -184,7 +185,7 @@ class StopCoordinator:
             return snapshot.desired_revision, already_stopped
         revision = self.states.update_desired(
             desired_state=DesiredState.STOPPED,
-            desired_game_id=None,
+            desired_game_id=snapshot.desired_game_id if self.preserve_selection else None,
             expected_revision=snapshot.desired_revision,
             operation_id=proof.owner_operation_id,
             updated_at=now,

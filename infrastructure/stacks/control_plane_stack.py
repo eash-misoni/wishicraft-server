@@ -45,6 +45,7 @@ class ControlPlaneStack(Stack):
         stage: StageConfig,
         secrets: SecretsExampleConfig,
         phase: int = 0,
+        games: tuple[str, ...] | None = None,
     ) -> None:
         super().__init__(
             scope,
@@ -568,7 +569,9 @@ class ControlPlaneStack(Stack):
                             "aws:RequestTag/Project": project.project_slug,
                             "aws:RequestTag/Stage": stage.stage,
                             "aws:RequestTag/WishicraftCategory": "backup",
-                            "aws:RequestTag/WishicraftGameId": project.initial_game_id,
+                            "aws:RequestTag/WishicraftGameId": list(games)
+                            if games
+                            else project.initial_game_id,
                             "aws:RequestTag/WishicraftProtected": "false",
                         }
                     },
@@ -905,6 +908,7 @@ class ControlPlaneStack(Stack):
                 runtime_heartbeats_table=runtime_heartbeats_table,
                 auto_stop_intents_table=auto_stop_intents_table,
                 bot_token_parameter_name=secrets.discord_bot_token_parameter_name(stage.stage),
+                two_games=games is not None,
             )
             _add_release_monitoring(
                 self,
@@ -927,6 +931,113 @@ class ControlPlaneStack(Stack):
                     *discord_functions,
                 ),
             )
+        if games is not None:
+            if phase != 8:
+                raise ValueError("two-Game slice requires the completed Phase 8 control plane")
+            from infrastructure.switch_workflow import definition as switch_definition
+            from wishicraft.runtime_catalog import RuntimeCatalog
+
+            catalog = RuntimeCatalog.parse(__import__("json").dumps(games))
+            catalog.data_source(project.initial_game_id)
+            rendered = render_boot_time_artifacts(
+                project,
+                stage,
+                observed_uid=993,
+                observed_gid=993,
+                enable_rcon=True,
+                rcon_parameter_name=secrets.rcon_password_parameter_name(stage.stage),
+                targeted=True,
+                games=games,
+            )
+            switch_role = iam.Role(
+                self, "SwitchWorkflowRole", assumed_by=iam.ServicePrincipal("states.amazonaws.com")
+            )
+            for task in (function, start_task, stop_task):
+                task.grant_invoke(switch_role)
+            switch = sfn.CfnStateMachine(
+                self,
+                "SwitchWorkflow",
+                state_machine_name=resource_name(project.resource_prefix, stage.stage, "switch"),
+                role_arn=switch_role.role_arn,
+                definition=switch_definition(
+                    start=_start_definition(
+                        reconcile_arn=function.function_arn,
+                        start_task_arn=start_task.function_arn,
+                        lease_renew_seconds=stage.lock_renew_interval_seconds,
+                    ),
+                    stop=_stop_definition(
+                        reconcile_arn=function.function_arn,
+                        stop_task_arn=stop_task.function_arn,
+                        lease_renew_seconds=stage.lock_renew_interval_seconds,
+                    ),
+                    stop_task_arn=stop_task.function_arn,
+                ),
+            )
+            switch_alarm = cloudwatch.Alarm(
+                self,
+                "SwitchWorkflowFailureAlarm",
+                alarm_name=resource_name(
+                    project.resource_prefix, stage.stage, "switchworkflowfailurealarm"
+                ),
+                metric=cloudwatch.MathExpression(
+                    expression="failed + timedout + aborted",
+                    using_metrics={
+                        key: cloudwatch.Metric(
+                            namespace="AWS/States",
+                            metric_name=metric,
+                            dimensions_map={"StateMachineArn": switch.attr_arn},
+                            statistic="Sum",
+                            period=Duration.minutes(5),
+                        )
+                        for key, metric in [
+                            ("failed", "ExecutionsFailed"),
+                            ("timedout", "ExecutionsTimedOut"),
+                            ("aborted", "ExecutionsAborted"),
+                        ]
+                    },
+                    period=Duration.minutes(5),
+                ),
+                threshold=1,
+                evaluation_periods=1,
+                treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
+            )
+            topic = self.node.find_child("MonitoringTopic")
+            assert isinstance(topic, sns.Topic)
+            switch_alarm.add_alarm_action(cloudwatch_actions.SnsAction(topic))
+            admission.add_environment("SWITCH_STATE_MACHINE_ARN", switch.attr_arn)
+            admission.add_environment("SWITCH_TIMEOUT_SECONDS", "3000")
+            admission.add_to_role_policy(
+                iam.PolicyStatement(actions=["states:StartExecution"], resources=[switch.attr_arn])
+            )
+            admission.add_to_role_policy(
+                iam.PolicyStatement(
+                    actions=["states:DescribeExecution"],
+                    resources=[
+                        f"arn:aws:states:{stage.aws_region}:{stage.aws_account_id}:execution:wc-{stage.stage}-switch:*"
+                    ],
+                )
+            )
+            for child in self.node.find_all():
+                if isinstance(child, lambda_.Function):
+                    child.add_environment("RUNTIME_GAMES", catalog.serialize())
+            for task in (start_task, stop_task):
+                task.add_environment("RUNTIME_CONFIG_DIGEST", rendered.digest)
+            assert backup_task is not None
+            backup_task.add_environment("GAMES_TABLE", games_table.table_name)
+            backup_task.add_environment(
+                "RECOVERY_RUNTIME_JSON",
+                __import__("json").dumps(
+                    {
+                        "manifest_json": rendered.manifest_json,
+                        "runtime_env": rendered.runtime_env,
+                        "compose_yaml": rendered.compose_yaml,
+                    },
+                    separators=(",", ":"),
+                ),
+            )
+            backup_task.add_to_role_policy(
+                iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[games_table.table_arn])
+            )
 
 
 def _add_discord_ingress(
@@ -943,6 +1054,7 @@ def _add_discord_ingress(
     runtime_heartbeats_table: dynamodb.Table | None,
     auto_stop_intents_table: dynamodb.Table | None,
     bot_token_parameter_name: str,
+    two_games: bool = False,
 ) -> tuple[lambda_.Function, ...]:
     repository_root = Path(__file__).resolve().parents[2]
     log_group = logs.LogGroup(
@@ -1108,6 +1220,17 @@ def _add_discord_ingress(
                 resources=[auto_stop_intents_table.table_arn],
             )
         )
+    if two_games:
+        assert runtime_heartbeats_table is not None
+        message.add_environment("SYSTEM_ID", project.system_id)
+        message.add_environment("SYSTEM_STATE_TABLE", system_state_table.table_name)
+        message.add_environment("RUNTIME_HEARTBEATS_TABLE", runtime_heartbeats_table.table_name)
+        message.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["dynamodb:GetItem"],
+                resources=[system_state_table.table_arn, runtime_heartbeats_table.table_arn],
+            )
+        )
     message.add_to_role_policy(
         iam.PolicyStatement(
             actions=["ssm:GetParameter"],
@@ -1132,7 +1255,15 @@ def _add_discord_ingress(
                         "eventName": ["INSERT", "MODIFY"],
                         "dynamodb": {
                             "NewImage": {
-                                "operation_type": {"S": ["STATUS", "START", "STOP", "BACKUP"]},
+                                "operation_type": {
+                                    "S": [
+                                        "STATUS",
+                                        "START",
+                                        "STOP",
+                                        "BACKUP",
+                                        *(["SWITCH"] if two_games else []),
+                                    ]
+                                },
                                 "requested_by": {"M": {"source": {"S": ["DISCORD"]}}},
                             }
                         },

@@ -21,14 +21,30 @@ class DynamoApi(Protocol):
 
 
 class WarningDelivery:
-    def __init__(self, dynamodb: DynamoApi, messages: DiscordMessages, *, table_name: str) -> None:
+    def __init__(
+        self,
+        dynamodb: DynamoApi,
+        messages: DiscordMessages,
+        *,
+        table_name: str,
+        system_table: str | None = None,
+        heartbeat_table: str | None = None,
+        system_id: str | None = None,
+    ) -> None:
         self.ddb, self.messages, self.table = dynamodb, messages, table_name
+        self.system_table, self.heartbeat_table, self.system_id = (
+            system_table,
+            heartbeat_table,
+            system_id,
+        )
 
     def deliver(self, *, game_id: str, intent_id: str, now: datetime) -> dict[str, object]:
         item = self._load(game_id, intent_id)
         state = _text(item, "warning_delivery_state")
         if state in {"DELIVERED", "FAILED"}:
             return {"state": state, "created": False}
+        if self.system_table is not None and not self._current_candidate(item, now):
+            return {"state": "STALE_TARGET", "created": False}
         attempts = _integer(item, "warning_attempt_count")
         if attempts >= MAX_DELIVERY_ATTEMPTS:
             self._mark_failed(game_id, intent_id, attempts, "DISCORD_WARNING_RETRY_EXHAUSTED", now)
@@ -68,7 +84,10 @@ class WarningDelivery:
             message_id = self.messages.create(
                 channel_id=_text(item, "channel_id"),
                 nonce=operation_nonce(_text(item, "warning_delivery_id")),
-                content=WARNING_TEXT,
+                content=(
+                    f"Game {game_id} / run {_text(item, 'run_id')}: " if self.system_table else ""
+                )
+                + WARNING_TEXT,
             )
         except DiscordFailure as failure:
             retry = (
@@ -136,6 +155,48 @@ class WarningDelivery:
                 "created": True,
             }
         return {"state": "DELIVERED", "created": True}
+
+    def _current_candidate(self, item: dict[str, object], now: datetime) -> bool:
+        from wishicraft.auto_stop import evaluate_candidate
+        from wishicraft.runtime_heartbeat_producer import _decode
+
+        state = self.ddb.get_item(
+            TableName=self.system_table,
+            Key={"system_id": {"S": self.system_id}},
+            ConsistentRead=True,
+        )
+        heartbeat = self.ddb.get_item(
+            TableName=self.heartbeat_table,
+            Key={"system_id": {"S": self.system_id}},
+            ConsistentRead=True,
+        )
+        if not isinstance(state, dict) or not isinstance(heartbeat, dict):
+            return False
+        state_item = state.get("Item")
+        if not isinstance(state_item, dict):
+            return False
+        decoded = {
+            key: _deserialize(value)
+            for key, value in state_item.items()
+            if key in {"health", "current_operation_id", "desired_game_id", "desired_state"}
+        }
+        if (
+            not isinstance(decoded, dict)
+            or decoded.get("health") != "HEALTHY"
+            or decoded.get("current_operation_id") is not None
+            or decoded.get("desired_game_id") != item.get("game_id")
+        ):
+            return False
+        raw = heartbeat.get("Item")
+        candidate = evaluate_candidate(
+            heartbeat=_decode(raw) if isinstance(raw, dict) else None,
+            game_id=_text(item, "game_id"),
+            runtime_id="wishicraft-host-runtime",
+            idle_timeout_minutes=_integer(item, "idle_timeout_minutes"),
+            desired_state=str(decoded.get("desired_state")),
+            now=now,
+        )
+        return candidate.eligible and candidate.intent_id == item.get("intent_id")
 
     def _load(self, game_id: str, intent_id: str) -> dict[str, object]:
         response = self.ddb.get_item(

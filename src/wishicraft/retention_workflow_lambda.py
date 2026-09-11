@@ -75,6 +75,7 @@ class Runtime:
             game_id=_env("GAME_ID"),
             source_volume_id=_env("DATA_VOLUME_ID"),
             owner_id=_env("AWS_ACCOUNT_ID"),
+            shared_volume=bool(os.environ.get("RUNTIME_GAMES")),
         )
         self.availability_zone = _env("AVAILABILITY_ZONE")
         self.device = _env("DATA_VOLUME_DEVICE")
@@ -243,27 +244,43 @@ def _load_complete_provenance(
                 typed_metadata, ensure_ascii=True, sort_keys=True, separators=(",", ":")
             ).encode()
         ).hexdigest()
+        from wishicraft.backup_recovery import SHARED_TAG_KEYS, recovery_digest
+
+        version = _required_int(item, "schema_version")
+        required = REQUIRED_TAG_KEYS
+        digest = None
+        if version == 2:
+            digest = recovery_digest(_required_string(item, "recovery_json"))
+            required |= SHARED_TAG_KEYS
+            if (
+                typed_metadata.get("WishicraftBackupScope") != "shared-volume"
+                or typed_metadata.get("WishicraftRecoveryDigest") != digest
+                or item.get("recovery_digest") != digest
+            ):
+                raise ValueError("shared Backup recovery evidence mismatch")
+        elif version != 1:
+            raise ValueError("unknown Backup schema")
         if (
             reverse is None
             or reverse.get("snapshot_id") != snapshot_id
-            or reverse.get("schema_version") != 1
+            or reverse.get("schema_version") != version
             or item.get("project") != context.project
             or item.get("stage") != context.stage
-            or item.get("game_id") != context.game_id
+            or (not context.shared_volume and item.get("game_id") != context.game_id)
             or item.get("source_volume_id") != context.source_volume_id
             or item.get("verified_owner_id") != context.owner_id
             or item.get("category") != "backup"
             or item.get("protected") is not False
             or item.get("verification_status") != "VERIFIED_BACKUP_SUCCEEDED"
             or item.get("metadata_fingerprint") != fingerprint
-            or set(typed_metadata) != REQUIRED_TAG_KEYS
+            or set(typed_metadata) != required
             or typed_metadata.get("Project") != context.project
             or typed_metadata.get("Stage") != context.stage
             or typed_metadata.get("WishicraftCategory") != "backup"
-            or typed_metadata.get("WishicraftGameId") != context.game_id
+            or typed_metadata.get("WishicraftGameId") != item.get("game_id")
             or typed_metadata.get("WishicraftOperationId") != operation_id
             or typed_metadata.get("WishicraftSourceVolumeId") != context.source_volume_id
-            or typed_metadata.get("WishicraftSchemaVersion") != "1"
+            or typed_metadata.get("WishicraftSchemaVersion") != str(version)
             or typed_metadata.get("WishicraftProtected") != "false"
             or parse_rfc3339(typed_metadata.get("WishicraftCreatedAt", ""))
             != parse_rfc3339(_required_string(item, "wishicraft_created_at"))
@@ -280,6 +297,7 @@ def _load_complete_provenance(
             snapshot_start_time=parse_rfc3339(_required_string(item, "snapshot_start_time")),
             provenance_recorded_at=parse_rfc3339(_required_string(item, "provenance_recorded_at")),
             schema_version=_required_int(item, "schema_version"),
+            recovery_digest=digest,
         )
     if len(result) != len(operations):
         raise ValueError("orphan Backup provenance uniqueness record")

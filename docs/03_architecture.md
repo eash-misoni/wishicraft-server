@@ -7,6 +7,10 @@ Phase 8.3の監視はAccepted D-094を参照する。既存read-only Monitoring 
 
 ## 1. アーキテクチャ方針
 
+**現在の実行境界（D-096適用済み）:** Control PlaneはOperationに対象を固定し、hostのoperation-v2が同じ排他内でlease・実container・bindを検証して保存/停止/起動する。停止containerは証明済みexact IDだけを通常STOP内で除去する。fieldと失敗再開の正本は[Data/Interface §0](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)。以下のPhase 1/2構築経緯は履歴であり、旧operation-v1を現在の入口として使わない。
+
+現在は単一Game、停止中Data EBS全体Snapshot。D-095の隔離復元は実証済みだが汎用Restore UI/workflowは未実装。[D-097](reviews/two_game_switch.md)の二Game・共有保護は未承認の次案であり、Package等の汎用基盤を前提にしない。
+
 制御系をサーバーレスにし、常時稼働するコンピュートを持たない。Minecraft本体を動かすEC2だけを必要時に起動する。
 
 Phase 1はhost上のJava、固定server.jar、`minecraft.service`、host firewallでlocalhost到達性を保証するRCONとして実装・検証し、2026-08-22に正式完了した。この実装とPhase 1 runbookはas-built履歴であり、書き換えない。

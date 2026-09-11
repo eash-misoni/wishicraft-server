@@ -47,7 +47,7 @@ class DynamoDeliveryStore:
         if not isinstance(item, dict):
             raise ValueError("Discord delivery Operation does not exist")
         if _string(item, "operation_type") != "STATUS":
-            if _string(item, "operation_type") not in {"START", "STOP", "BACKUP"}:
+            if _string(item, "operation_type") not in {"START", "STOP", "BACKUP", "SWITCH"}:
                 raise ValueError("unsupported Discord delivery Operation")
         operation_status = _string(item, "status")
         operation_type = _string(item, "operation_type")
@@ -417,6 +417,11 @@ def _get_warning_service() -> WarningDelivery:
                 )
             ),
             table_name=_required_environment("AUTO_STOP_INTENTS_TABLE"),
+            system_table=os.environ.get("SYSTEM_STATE_TABLE")
+            if os.environ.get("RUNTIME_GAMES")
+            else None,
+            heartbeat_table=os.environ.get("RUNTIME_HEARTBEATS_TABLE"),
+            system_id=os.environ.get("SYSTEM_ID"),
         )
     return _warning_service
 
@@ -444,11 +449,11 @@ def _delivery_events(event: object) -> tuple[tuple[str, int, str], ...]:
             operation_id = _string(image, "operation_id")
             operation_type = _string(image, "operation_type")
             operation_status = _string(image, "status")
-            if operation_type not in {"STATUS", "START", "STOP", "BACKUP"}:
+            if operation_type not in {"STATUS", "START", "STOP", "BACKUP", "SWITCH"}:
                 continue
             if operation_type == "STATUS" and operation_status not in {"SUCCEEDED", "FAILED"}:
                 continue
-            if operation_type in {"START", "STOP", "BACKUP"} and operation_status not in {
+            if operation_type in {"START", "STOP", "BACKUP", "SWITCH"} and operation_status not in {
                 "PENDING",
                 "RUNNING",
                 "SUCCEEDED",

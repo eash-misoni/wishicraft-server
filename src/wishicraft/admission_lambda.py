@@ -20,6 +20,7 @@ from wishicraft.operation import (
     OperationType,
     RequestSource,
 )
+from wishicraft.runtime_catalog import configured_catalog, selected_game
 
 
 class AwsSession(Protocol):
@@ -40,6 +41,36 @@ _retention_launcher: WorkflowLauncher | None = None
 
 def handler(event: object, context: object) -> dict[str, object]:
     del context
+    extra: dict[str, str] = {}
+    catalog = configured_catalog()
+    if catalog is not None and isinstance(event, dict):
+        event = dict(event)
+        explicit_game = event.pop("target_game_id", None)
+        confirmed = event.pop("confirmed", None)
+        kind = event.get("operation_type")
+        if kind == "SWITCH":
+            if confirmed is not True or event.get("requested_by") not in {"ADMIN", "DISCORD"}:
+                raise ValueError("SWITCH requires an authorized explicit confirmation")
+            if not isinstance(explicit_game, str) or not os.environ.get("SWITCH_STATE_MACHINE_ARN"):
+                raise ValueError("SWITCH requires a configured destination")
+        elif confirmed is not None or (explicit_game is not None and kind != "START"):
+            raise ValueError("invalid Game selection request")
+        boto3 = importlib.import_module("boto3")
+        ddb = boto3.client("dynamodb", region_name=_required_environment("AWS_REGION"))
+        game_id = (
+            explicit_game
+            if explicit_game is not None
+            else selected_game(
+                ddb,
+                _required_environment("SYSTEM_STATE_TABLE"),
+                _required_environment("SYSTEM_ID"),
+                _required_environment("GAME_ID"),
+            )
+        )
+        if not isinstance(game_id, str):
+            raise ValueError("invalid Game selection")
+        catalog.data_source(game_id)
+        extra["target_game_id"] = game_id
     operation_type, idempotency_key, requested_by, discord, auto_stop_intent_id = _parse_event(
         event
     )
@@ -55,6 +86,7 @@ def handler(event: object, context: object) -> dict[str, object]:
         requested_by=requested_by,
         requested_at=datetime.now(UTC),
         discord=discord,
+        **extra,
     )
     if result.created and operation_type is OperationType.START:
         if result.lease_id is None:
@@ -89,6 +121,17 @@ def handler(event: object, context: object) -> dict[str, object]:
             operation_id=result.operation_id,
             lease_id=result.lease_id,
             started_at=datetime.now(UTC),
+        )
+    if result.created and operation_type is OperationType.SWITCH:
+        if result.lease_id is None:
+            raise RuntimeError("SWITCH admission did not create a lease")
+        boto3 = importlib.import_module("boto3")
+        WorkflowLauncher(
+            boto3.client("stepfunctions"),
+            boto3.client("dynamodb"),
+            state_machine_environment="SWITCH_STATE_MACHINE_ARN",
+        ).start(
+            operation_id=result.operation_id, lease_id=result.lease_id, started_at=datetime.now(UTC)
         )
     return {
         "schema_version": 1,
@@ -382,6 +425,8 @@ def _build_service() -> OperationAdmissionService:
             OperationType.RETENTION,
         )
     }
+    if configured_catalog() is not None:
+        timeout_by_type[OperationType.SWITCH] = int(_required_environment("SWITCH_TIMEOUT_SECONDS"))
     return OperationAdmissionService(
         repository,
         game_id=_required_environment("GAME_ID"),

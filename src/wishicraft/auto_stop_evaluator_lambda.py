@@ -70,8 +70,17 @@ class Evaluator:
         self.cloudwatch, self.metric_namespace, self.stage = cloudwatch, metric_namespace, stage
 
     def evaluate(self, *, now: datetime) -> dict[str, object]:
-        game = self._get(self.games_table, {"game_id": {"S": self.game_id}})
         state = self._get(self.system_state_table, {"system_id": {"S": self.system_id}})
+        from wishicraft.runtime_catalog import configured_catalog
+
+        catalog = configured_catalog()
+        if catalog is not None:
+            selected = state.get("desired_game_id")
+            if not isinstance(selected, str):
+                return {"candidate": False, "reason": "SELECTION_NOT_INITIALIZED"}
+            catalog.data_source(selected)
+            self.game_id = selected
+        game = self._get(self.games_table, {"game_id": {"S": self.game_id}})
         heartbeat_item = self._raw_get(self.heartbeats_table, {"system_id": {"S": self.system_id}})
         heartbeat = _decode(heartbeat_item) if heartbeat_item else None
         idle_minutes = _idle_minutes(game)

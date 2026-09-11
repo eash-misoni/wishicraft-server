@@ -5,6 +5,10 @@
 
 ## 1. この文書の対象
 
+現在使える日常操作は単一GameのDiscord status/start/stopと権限付きbackup。D-096の対象検証・正常STOP後のcontainer整理は内部処理であり、利用者へ手動docker cleanupを要求しない。失敗時は同じ対象のOperation/実観測を確認し、別runやraw編集で帳尻を合わせない。[現在契約](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)と[operator移行/失敗証跡](runbooks/targeted_runtime_migration.md)を分けて参照する。
+
+以下のGame作成・Reset等の将来flowは未提供。二Gameの選択・SWITCH command、管理者認可、接続者がいる時の扱いは[D-097 Proposed](reviews/two_game_switch.md)で承認対象とする。D-095のoperator隔離復元完了は、利用者向けRestore公開を意味しない。
+
 内部実装ではなく、人が何を実行し、何を見て、次に何を判断するかを定義する。
 
 役割:

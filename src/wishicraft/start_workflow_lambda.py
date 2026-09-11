@@ -16,6 +16,7 @@ from wishicraft.operation import (
     OperationStatus,
 )
 from wishicraft.reconcile import TargetEc2Api, TargetResolver
+from wishicraft.runtime_catalog import bind_operation
 from wishicraft.runtime_contract import (
     RuntimeTargetRepository,
     assert_observed,
@@ -97,6 +98,7 @@ def handler(event: object, context: object) -> dict[str, object]:
     del context
     payload = _payload(event)
     runtime = _get_runtime()
+    bind_operation(runtime, _string(payload, "operation_id"), action="START")
     now = datetime.now(UTC)
     proof = LeaseProof(
         runtime.system_id,

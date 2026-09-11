@@ -27,6 +27,7 @@ from wishicraft.backup_provenance import (
     BackupProvenanceRepository,
     build_verified_provenance,
 )
+from wishicraft.backup_recovery import RecoveryRepository, recovery_digest, shared_tags
 from wishicraft.operation import (
     DynamoApi,
     LeaseProof,
@@ -35,6 +36,7 @@ from wishicraft.operation import (
     OperationStatus,
     OperationType,
 )
+from wishicraft.runtime_catalog import configured_catalog
 
 
 class AwsSession(Protocol):
@@ -62,6 +64,9 @@ class Runtime:
             lock_name=_env("GLOBAL_LOCK_NAME"),
         )
         self.system_id = _env("SYSTEM_ID")
+        self.recovery = RecoveryRepository(
+            dynamodb, _env("OPERATIONS_TABLE"), os.environ.get("GAMES_TABLE", "")
+        )
         self.operations = OperationRepository(
             dynamodb,
             operations_table=_env("OPERATIONS_TABLE"),
@@ -103,8 +108,22 @@ def handler(event: object, context: object) -> dict[str, object]:
         0,
     )
     action = _string(payload, "action")
+    catalog = configured_catalog()
+    if catalog is not None:
+        raw = runtime.recovery.operation(proof.owner_operation_id)
+        game_id = raw["target_game_id"]["S"]
+        catalog.data_source(game_id)
+        runtime.coordinator.game_id = game_id
     if action == "preflight":
         runtime.coordinator.preflight(proof=proof, state=_mapping(payload, "state"), now=now)
+        if catalog is not None:
+            runtime.recovery.freeze(
+                operation_id=proof.owner_operation_id,
+                lease_id=proof.lease_id,
+                catalog=catalog,
+                volume=runtime.coordinator.expected_volume_id,
+                runtime_json=_env("RECOVERY_RUNTIME_JSON"),
+            )
         runtime.operations.update_step(
             operation_id=proof.owner_operation_id,
             current_step="SNAPSHOT_CREATING",
@@ -118,6 +137,8 @@ def handler(event: object, context: object) -> dict[str, object]:
             operation_id=proof.owner_operation_id,
             requested_at=now.isoformat().replace("+00:00", "Z"),
         )
+        if catalog is not None:
+            tags = shared_tags(tags, runtime.recovery.read(proof.owner_operation_id))
         runtime.create_guard.reserve(proof=proof, tags=tags, now=now)
         runtime.coordinator.leases.verify_owned(proof, now=datetime.now(UTC))
         try:
@@ -187,6 +208,9 @@ def handler(event: object, context: object) -> dict[str, object]:
             owner_id=record.owner_id,
             provenance_recorded_at=now,
             require_succeeded_operation=raw_operation["status"] == "SUCCEEDED",
+            recovery_json=runtime.recovery.read(proof.owner_operation_id)
+            if catalog is not None
+            else None,
         )
         should_create = runtime.provenance.assert_createable_or_exact(provenance)
         result: dict[str, object] = {
@@ -197,6 +221,15 @@ def handler(event: object, context: object) -> dict[str, object]:
             "game_id": runtime.coordinator.game_id,
             "category": "backup",
         }
+        if catalog is not None:
+            result.update(
+                {
+                    "scope": "shared-volume",
+                    "recovery_digest": recovery_digest(
+                        runtime.recovery.read(proof.owner_operation_id)
+                    ),
+                }
+            )
         if not should_create:
             if not runtime.operations.terminal_result_matches(
                 operation_id=proof.owner_operation_id,

@@ -8,10 +8,12 @@ import json
 import re
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Protocol
+from typing import Any, Protocol, cast
 
 from nacl.exceptions import BadSignatureError
 from nacl.signing import VerifyKey
+
+from wishicraft.runtime_catalog import configured_catalog
 
 PING = 1
 APPLICATION_COMMAND = 2
@@ -55,6 +57,7 @@ class InteractionKind(StrEnum):
     START = "START"
     STOP = "STOP"
     BACKUP = "BACKUP"
+    SWITCH = "SWITCH"
 
 
 @dataclass(frozen=True)
@@ -85,6 +88,8 @@ class AuthorizedInteraction:
     interaction_id: str
     interaction_token: str = field(repr=False)
     kind: InteractionKind
+    target_game_id: str | None = None
+    confirmed: bool = False
 
 
 def raw_body_from_event(event: object) -> tuple[bytes, dict[str, str]]:
@@ -176,7 +181,7 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
     kind = _parse_command(payload.get("data"), expected_guild_id=config.guild_id)
     allowed_roles = (
         {config.admin_role_id}
-        if kind is InteractionKind.BACKUP
+        if kind in {InteractionKind.BACKUP, InteractionKind.SWITCH}
         else {config.player_role_id, config.admin_role_id}
     )
     if not (allowed_roles & set(roles)):
@@ -185,6 +190,7 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
         interaction_id,
         interaction_token,
         kind,
+        *_selection(cast(dict[str, Any], payload["data"])["options"][0]),
     )
 
 
@@ -282,14 +288,41 @@ def _parse_command(raw_data: object, *, expected_guild_id: str) -> InteractionKi
         raise MalformedInteraction("invalid command")
     if set(option) - {"name", "type", "options"}:
         raise MalformedInteraction("invalid command")
-    if "options" in option and option["options"] != []:
-        raise MalformedInteraction("invalid command")
     name = option.get("name")
     if option.get("type") != SUB_COMMAND or not isinstance(name, str):
         raise MalformedInteraction("invalid command")
-    if name not in MVP_SUBCOMMANDS:
+    if name not in MVP_SUBCOMMANDS and not (name == "switch" and configured_catalog()):
         raise MalformedInteraction("invalid command")
+    _selection(option)
     return InteractionKind(name.upper())
+
+
+def _selection(option: dict[str, object]) -> tuple[str | None, bool]:
+    options = option.get("options", [])
+    name = option.get("name")
+    if options == [] and name != "switch":
+        return None, False
+    catalog = configured_catalog()
+    if catalog is None or name not in {"start", "switch"} or not isinstance(options, list):
+        raise MalformedInteraction("invalid Game selection")
+    values: dict[str, object] = {}
+    for item in options:
+        if not isinstance(item, dict) or set(item) != {"name", "type", "value"}:
+            raise MalformedInteraction("invalid Game option")
+        key = item["name"]
+        if key not in {"game", "confirm"} or key in values:
+            raise MalformedInteraction("invalid Game option")
+        if item["type"] != (3 if key == "game" else 5):
+            raise MalformedInteraction("invalid Game option type")
+        values[key] = item["value"]
+    game = values.get("game")
+    if not isinstance(game, str) or game not in catalog.game_ids:
+        raise MalformedInteraction("Game is not allowed")
+    if name == "switch" and values.get("confirm") is not True:
+        raise MalformedInteraction("SWITCH requires confirm:true")
+    if name == "start" and "confirm" in values:
+        raise MalformedInteraction("START does not accept confirmation")
+    return game, name == "switch"
 
 
 def _snowflake(value: object) -> str:

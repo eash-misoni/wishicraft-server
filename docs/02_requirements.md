@@ -119,6 +119,8 @@ EC2起動、SSM待機、Minecraft起動、READY待機はStep Functions Standard�
 
 同じ`operation_id`が再実行された場合、二重起動を起こさない。
 
+D-096適用済み: instance/Game/data/config/runをOperationへ固定し、再試行で作り直さない。古い命令の拒否と実観測の一致は[実行契約](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)による。SDK/host命令を世界全体でexactly-once実行できるという保証ではない。
+
 - 同じゲームが既にREADYなら成功相当として扱える。
 - 別ゲームがREADYなら競合として失敗する。
 - 同一operationがRUNNINGなら新規operationを開始しない。
@@ -151,6 +153,8 @@ Minecraftが応答可能な場合、停止前に保存要求を行う。
 ### STOP-003 完了条件 `MUST / MVP`
 
 EC2停止APIを呼び出した時点ではなく、EC2が実際に`stopped`になったことを確認して完了とする。
+
+D-096適用済み: 稼働runtimeを止めた場合は保存・正常exit・永続bind確認後、停止済みexact containerを削除してstopped receiptへ収束させる。world/volume削除やforce removalは含まない。EC2 already-stopped分岐では架空のrun/receiptを作らない。
 
 ### STOP-004 保存失敗 `MUST / MVP`
 
@@ -403,6 +407,8 @@ BACKUPは停止中だけ許可し、RUNNING/STARTING/STOPPING/unknown/degraded�
 ## 10. 複数ゲーム・Package要件
 
 ### GAME-001 管理単位 `LATER`
+
+以下のLATERモデルは見直し対象。[D-097 Proposed](reviews/two_game_switch.md)では、同一固定構成の二Game選択・EC2維持切替・共有BACKUP整合を一利用機能として準備する。認可、接続playerの扱い、共有保護/retention単位は未承認である。
 
 複数ゲーム対応後は、ワールド単体ではなくGameを起動単位とする。
 

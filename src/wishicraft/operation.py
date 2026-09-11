@@ -20,6 +20,7 @@ class OperationType(StrEnum):
     RETENTION = "RETENTION"
     CREATE = "CREATE"
     RESET = "RESET"
+    SWITCH = "SWITCH"
     OP_ADD = "OP_ADD"
     OP_REMOVE = "OP_REMOVE"
 
@@ -390,7 +391,9 @@ class OperationAdmissionService:
         requested_by: RequestSource,
         requested_at: datetime,
         discord: DiscordOperationContext | None = None,
+        target_game_id: str | None = None,
     ) -> AdmissionResult:
+        game_id = self._game_id if target_game_id is None else target_game_id
         timeout_seconds = self._timeouts.get(operation_type)
         if timeout_seconds is None or timeout_seconds <= 0:
             raise ValueError("operation timeout is not configured")
@@ -398,7 +401,7 @@ class OperationAdmissionService:
             idempotency_key=idempotency_key,
             operation_type=operation_type,
             requested_by=requested_by,
-            target_game_id=self._game_id,
+            target_game_id=game_id,
         )
         if existing is not None:
             return existing
@@ -407,7 +410,7 @@ class OperationAdmissionService:
             operation_id=operation_id,
             idempotency_key=idempotency_key,
             operation_type=operation_type,
-            target_game_id=self._game_id,
+            target_game_id=game_id,
             requested_by=requested_by,
             requested_at=requested_at,
             timeout_at=requested_at + timedelta(seconds=timeout_seconds),

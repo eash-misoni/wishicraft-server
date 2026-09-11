@@ -161,6 +161,16 @@ class SystemStateRepository:
         if require_current_operation:
             names["#current_operation_id"] = "current_operation_id"
             revision_condition += " AND #current_operation_id = :operation_id"
+        projection = ""
+        from wishicraft.runtime_catalog import configured_catalog
+
+        catalog = configured_catalog()
+        if catalog is not None:
+            if snapshot.desired_game_id is None:
+                raise ValueError("two-Game desired selection cannot be cleared")
+            catalog.data_source(snapshot.desired_game_id)
+            names["#game_id"] = "game_id"
+            projection = ", #game_id = :desired_game_id"
         self._api.update_item(
             TableName=self._table,
             Key={"system_id": {"S": self._system_id}},
@@ -168,6 +178,7 @@ class SystemStateRepository:
                 "SET #desired_state = :desired_state, #desired_game_id = :desired_game_id, "
                 "#desired_revision = :next_revision, "
                 "#requested_operation_id = :operation_id, #desired_updated_at = :updated_at"
+                + projection
             ),
             ConditionExpression=revision_condition,
             ExpressionAttributeNames=names,
@@ -175,7 +186,13 @@ class SystemStateRepository:
         )
         return snapshot.desired_revision
 
-    def save(self, state: SystemState, *, expected_desired_revision: int | None = None) -> None:
+    def save(
+        self,
+        state: SystemState,
+        *,
+        expected_desired_revision: int | None = None,
+        require_no_operation: bool = True,
+    ) -> None:
         if state.system_id != self._system_id:
             raise ValueError("SystemState repository identity mismatch")
         item = state.to_item()
@@ -196,14 +213,13 @@ class SystemStateRepository:
         assignments = ", ".join(initializers + observations)
         condition = "attribute_not_exists(#observed_at) OR #observed_at < :observed_at"
         if expected_desired_revision is not None:
-            names.update({"#revision": "desired_revision", "#current": "current_operation_id"})
-            values.update(
-                {":revision": _to_attribute(expected_desired_revision), ":null": {"NULL": True}}
-            )
-            condition = (
-                f"({condition}) AND #revision = :revision "
-                "AND (attribute_not_exists(#current) OR #current = :null)"
-            )
+            names["#revision"] = "desired_revision"
+            values[":revision"] = _to_attribute(expected_desired_revision)
+            condition = f"({condition}) AND #revision = :revision"
+            if require_no_operation:
+                names["#current"] = "current_operation_id"
+                values[":null"] = {"NULL": True}
+                condition += " AND (attribute_not_exists(#current) OR #current = :null)"
         self._api.update_item(
             TableName=self._table,
             Key={"system_id": {"S": state.system_id}},

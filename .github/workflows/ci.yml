@@ -39,6 +39,10 @@ jobs:
           tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
       - run: >-
+          tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
+          --context stage=dev --context phase=8 --context deployment=control-plane
+          --context two_games=true
+      - run: >-
           shellcheck infrastructure/host_runtime/docker_compose_install.sh
           infrastructure/host_runtime/target_host_validation.sh
           tools/dev-env tools/setup-dev-tools
@@ -57,3 +61,5 @@ jobs:
           command -v python3
           python3 --version
           python3 tests/integration/targeted_runtime_docker.py
+      - name: Verify A to B to A with real Docker under one warm host
+        run: sudo --preserve-env=CI python3 tests/integration/targeted_runtime_docker.py --two-games

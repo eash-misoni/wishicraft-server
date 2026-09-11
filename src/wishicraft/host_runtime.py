@@ -55,6 +55,7 @@ def render_boot_time_artifacts(
     enable_rcon: bool = False,
     rcon_parameter_name: str | None = None,
     targeted: bool = False,
+    games: tuple[str, ...] | None = None,
 ) -> RenderedHostRuntime:
     """Render one canonical boot-time configuration from validated sources of truth."""
     runtime = _runtime_mapping(stage.values)
@@ -69,6 +70,13 @@ def render_boot_time_artifacts(
     stop_duration = _positive_int(runtime, "timeouts.itzg_stop_duration")
     compose_stop = _positive_int(runtime, "timeouts.compose_stop_grace_period")
     game_directory = f"{stage.data_volume_mount_path}/games/{project.initial_game_id}/server"
+    if games is not None:
+        from wishicraft.runtime_catalog import RuntimeCatalog
+
+        RuntimeCatalog.parse(json.dumps(games)).data_source(project.initial_game_id)
+        if not targeted:
+            raise ValueError("two-Game runtime requires targeted execution")
+        game_directory = "${GAME_DIRECTORY:?targeted Game required}"
 
     if enable_rcon and not rcon_parameter_name:
         raise ConfigValidationError(["RCON parameter name is required when RCON is enabled"])
@@ -108,13 +116,17 @@ def render_boot_time_artifacts(
         "stop_grace_period": f"{compose_stop}s",
         "env_file": ["runtime.env"],
         "labels": {
-            "com.wishicraft.active-game-id": project.initial_game_id,
+            "com.wishicraft.active-game-id": "${WISHICRAFT_GAME_ID:?targeted Game required}"
+            if games
+            else project.initial_game_id,
             "com.wishicraft.active-game-data-source": game_directory,
         },
         "volumes": volumes,
     }
     if targeted:
         service["labels"]["com.wishicraft.run-id"] = "${WISHICRAFT_RUN_ID:?targeted START required}"  # type: ignore[index]
+    if games:
+        volumes[0]["bind"] = {"create_host_path": False}
     compose = {
         "name": "wishicraft-host-runtime",
         "services": {"minecraft": service},
@@ -161,6 +173,9 @@ def render_boot_time_artifacts(
         "rcon_enabled": enable_rcon,
     }
     canonical_manifest = json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n"
+    if games:
+        manifest["games"] = list(games)
+        canonical_manifest = json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n"
     digest = hashlib.sha256(canonical_manifest.encode()).hexdigest()
     return RenderedHostRuntime(compose_yaml, runtime_env, canonical_manifest, digest)
 

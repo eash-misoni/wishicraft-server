@@ -236,7 +236,12 @@ def test_host_start_loss_resume_stop_loss_and_old_replay(
     def execute(args: list[str], *, timeout: int = 30) -> str:
         del timeout
         if args[:2] == ["bash", "-c"]:
-            assert args[-2:] == ["wishicraft-preflight", target["run_id"]]
+            assert args[-4:] == [
+                "wishicraft-preflight",
+                target["run_id"],
+                target["game_id"],
+                target["data_source"],
+            ]
             assert 'export WISHICRAFT_RUN_ID="$1"' in args[2]
         if args[:2] == ["systemctl", "show"]:
             return "success" if "--property=Result" in args else str(state["unit"])

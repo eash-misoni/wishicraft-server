@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol
+from typing import Protocol, cast
 
 from wishicraft.endpoint import (
     DnsObservation,
@@ -20,7 +20,13 @@ from wishicraft.status import (
     SsmState,
     TargetStatus,
 )
-from wishicraft.system_state import DesiredState, Health, SystemState
+from wishicraft.system_state import (
+    DesiredState,
+    DesiredStateSnapshot,
+    Health,
+    SystemState,
+    SystemStateRepository,
+)
 
 
 class TargetEc2Api(Protocol):
@@ -110,9 +116,14 @@ class ReconcileService:
     status_factory: StatusFactory
     dns_observer: DnsObserver
     repository: StateRepository
+    selected_snapshot: DesiredStateSnapshot | None = None
 
     def reconcile(self, *, observed_at: datetime, persist: bool = True) -> SystemState:
-        desired = self.repository.desired_state()
+        desired = (
+            self.selected_snapshot.desired_state
+            if self.selected_snapshot
+            else self.repository.desired_state()
+        )
         dns = self.dns_observer.observe()
         errors: list[str] = []
         target_id: str | None = None
@@ -137,7 +148,14 @@ class ReconcileService:
             observed_at=observed_at,
         )
         if persist:
-            self.repository.save(state)
+            if self.selected_snapshot is None:
+                self.repository.save(state)
+            else:
+                cast(SystemStateRepository, self.repository).save(
+                    state,
+                    expected_desired_revision=self.selected_snapshot.desired_revision,
+                    require_no_operation=False,
+                )
         return state
 
 

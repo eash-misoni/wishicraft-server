@@ -19,6 +19,7 @@ from wishicraft.operation import (
 )
 from wishicraft.reconcile import TargetEc2Api, TargetResolver
 from wishicraft.reconcile_lambda import AwsStatusFactory
+from wishicraft.runtime_catalog import bind_operation, configured_catalog
 from wishicraft.runtime_contract import RuntimeTargetRepository, bound_instance, select_target
 from wishicraft.runtime_heartbeat_producer import _decode
 from wishicraft.stop_workflow import (
@@ -31,6 +32,7 @@ from wishicraft.stop_workflow import (
     StopObservation,
     StopWorkflowError,
 )
+from wishicraft.switch_contract import prepare_switch
 from wishicraft.system_state import SystemStateRepository
 
 
@@ -78,7 +80,10 @@ class Runtime:
             dynamodb, table_name=_env("SYSTEM_STATE_TABLE"), system_id=self.system_id
         )
         self.coordinator = StopCoordinator(
-            leases=leases, states=states, lease_seconds=int(_env("LOCK_LEASE_SECONDS"))
+            leases=leases,
+            states=states,
+            lease_seconds=int(_env("LOCK_LEASE_SECONDS")),
+            preserve_selection=configured_catalog() is not None,
         )
         self.operations = OperationRepository(
             dynamodb,
@@ -110,11 +115,28 @@ def handler(event: object, context: object) -> dict[str, object]:
     del context
     payload = _payload(event)
     runtime = _get_runtime()
+    if payload["action"] != "prepare_switch":
+        bind_operation(runtime, _string(payload, "operation_id"), action="STOP")
+        if configured_catalog() is not None:
+            runtime.status_factory = AwsStatusFactory(
+                runtime.ec2,
+                runtime.ssm,
+                game_id=runtime.game_id,
+                timeout_seconds=int(_env("SSM_PROBE_TIMEOUT_SECONDS")),
+            )
     now = datetime.now(UTC)
     proof = LeaseProof(
         runtime.system_id, _string(payload, "operation_id"), _string(payload, "lease_id"), 0
     )
     action = payload["action"]
+    if action == "prepare_switch":
+        prepare_switch(runtime, proof, _mapping(payload, "state"), now)
+        return {"prepared": True}
+    if action == "verify_switch_stopped":
+        runtime.coordinator.leases.verify_owned(proof, now=now)
+        if not _receipt_stopped(payload, runtime, proof.owner_operation_id):
+            raise ValueError("SWITCH source stop is not confirmed")
+        return {"source_stopped": True}
     if action == "automatic_final_gate":
         if payload.get("requested_by") != "SCHEDULE":
             return {"proceed": True, "automatic": False}

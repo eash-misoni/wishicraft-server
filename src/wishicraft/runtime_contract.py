@@ -49,14 +49,17 @@ def command(*, operation_id: str, lease_id: str, action: str) -> str:
 class RuntimeTargetRepository:
     def __init__(self, api: Any, table: str) -> None:
         self.api, self.table = api, table
+        self.field = "runtime_target"
 
     def read(self, operation_id: str) -> dict[str, str]:
         item = self.api.get_item(
             TableName=self.table, Key={"operation_id": {"S": operation_id}}, ConsistentRead=True
         )["Item"]
-        return validate_target({k: v["S"] for k, v in item["runtime_target"]["M"].items()})
+        return validate_target({k: v["S"] for k, v in item[self.field]["M"].items()})
 
     def freeze(self, *, operation_id: str, lease_id: str, target: dict[str, str]) -> dict[str, str]:
+        if self.field != "runtime_target":
+            raise ValueError("SWITCH source must be frozen with destination")
         target = validate_target(target)
         try:
             self.api.update_item(
@@ -78,6 +81,44 @@ class RuntimeTargetRepository:
             if self.read(operation_id) != target:
                 raise ValueError("frozen runtime target conflict") from None
         return self.read(operation_id)
+
+    def freeze_switch(
+        self, *, operation_id: str, lease_id: str, source: dict[str, str], target: dict[str, str]
+    ) -> None:
+        source, target = validate_target(source), validate_target(target)
+        if source["game_id"] == target["game_id"] or source["instance_id"] != target["instance_id"]:
+            raise ValueError("invalid SWITCH pair")
+        values = {
+            ":source": {"M": {k: {"S": v} for k, v in source.items()}},
+            ":target": {"M": {k: {"S": v} for k, v in target.items()}},
+            ":lease": {"S": lease_id},
+            ":switch": {"S": "SWITCH"},
+            ":pending": {"S": "PENDING"},
+            ":running": {"S": "RUNNING"},
+            ":game": {"S": target["game_id"]},
+        }
+        try:
+            self.api.update_item(
+                TableName=self.table,
+                Key={"operation_id": {"S": operation_id}},
+                UpdateExpression="SET switch_source = :source, runtime_target = :target",
+                ConditionExpression="lease_id = :lease AND operation_type = :switch "
+                "AND target_game_id = :game AND #s IN (:pending, :running) "
+                "AND attribute_not_exists(runtime_target) AND attribute_not_exists(switch_source)",
+                ExpressionAttributeNames={"#s": "status"},
+                ExpressionAttributeValues=values,
+            )
+        except Exception:
+            raw = self.api.get_item(
+                TableName=self.table,
+                Key={"operation_id": {"S": operation_id}},
+                ConsistentRead=True,
+            )["Item"]
+            if (
+                raw.get("runtime_target") != values[":target"]
+                or raw.get("switch_source") != values[":source"]
+            ):
+                raise ValueError("frozen SWITCH pair conflict") from None
 
 
 def select_target(

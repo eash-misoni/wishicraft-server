@@ -112,6 +112,8 @@ AWS上でMinecraftサーバーを必要なときだけ起動し、少人数の�
 
 利用者が実際に作成、起動して遊ぶ保存単位。
 
+現在のD-096単一Gameでは、具体的image/Java/memoryはGitの固定runtime構成が所有する。以下のPackage/Template等を含む一覧は将来モデルであり、Game itemに全設定を複製する指示ではない。[現在契約](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)、[二Game Proposed](reviews/two_game_switch.md)を参照する。
+
 ゲームには次が固定される。
 
 - ワールドデータ
@@ -211,6 +213,8 @@ Desired State、保存済みObserved State、現在の実測結果の差を確�
 初期版では、状態不一致を見つけても無条件に自動修復せず、正確な観測と通知を優先する。
 
 ### Control Plane / Host Runtime / Minecraft Runtime
+
+D-096の`runtime_id`は固定実行枠、`run_id`は一回の起動identity、`process_id`は実container起動の観測identityである。Game IDや将来のworld generationと同一視しない。field定義はData/Interface §0を正本とする。
 
 - Control PlaneはWishicraftのユーザー操作、認可、状態遷移、AWS resource、desired state、運用policy、mapping/apply orchestrationを指す。
 - Host RuntimeはEC2上のAL2023、EBS mount、Docker/Compose、systemd、secret injection、container lifecycle、host-local command pathを指す。

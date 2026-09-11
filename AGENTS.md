@@ -23,8 +23,8 @@ devを基本とし、prod deployや破壊的操作を勝手に行わない。
 
 - ローカルのtest-only harness、fixture、証跡は新しい専用temporary rootへ作成し、過去のrootと正式結果を上書きしない。
 - fixture失敗は既存結果を補正せず、新しいversionで原因診断・修正・再検証する。
-- production wrapper、payload、oracle、selection logicを変える必要が生じたら、根拠と影響を示して停止する。
-- AWS、SSM、EC2、host、deploy、DNS、secret、破壊的操作、またはセキュリティ動作変更の直前では停止して明示承認を求める。
+- wrapper/payload/selection logicの変更が委任済み範囲を越える場合は、根拠と影響を示して停止する。範囲内のrepository実装・回帰修正は、Proposedと適用済み契約を区別して継続する。
+- 未承認のAWS/Discord/実host等への変更直前では停止する。具体的な対象・操作・安全条件を含む一括承認は、その範囲内で再利用し、内部手順ごとに再承認を求めない。read-only調査の許可をwrite承認へ読み替えない。
 - 詳細な自律実行・証跡・停止境界は`docs/10_codex_working_agreement.md`を正本とする。
 
 ## 学習Wiki同期

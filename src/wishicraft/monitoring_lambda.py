@@ -92,7 +92,9 @@ def handler(event: dict[str, Any], context: object) -> dict[str, object]:
             instance=instance,
             now=now,
             system_id=os.environ["SYSTEM_ID"],
-            game_id=os.environ["GAME_ID"],
+            game_id=str(state.get("desired_game_id") or os.environ["GAME_ID"])
+            if os.environ.get("RUNTIME_GAMES")
+            else os.environ["GAME_ID"],
             volume_id=os.environ["DATA_VOLUME_ID"],
             filesystem_uuid=os.environ["DATA_FILESYSTEM_UUID"],
             mount_path=os.environ["DATA_MOUNT_PATH"],

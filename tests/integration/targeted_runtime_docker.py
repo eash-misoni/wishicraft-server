@@ -25,10 +25,44 @@ IMAGE = (
 
 
 def main() -> None:
+    two_games = "--two-games" in sys.argv
     root = Path(tempfile.mkdtemp(prefix="wishicraft-targeted-docker-"))
     print("fixture:", root, flush=True)
     data = root / "data"
-    data.mkdir()
+    game_ids = ["game-ci"]
+    if two_games:
+        if os.environ.get("CI") != "true" or sys.platform != "linux":
+            raise RuntimeError(
+                "canonical-path fixture is restricted to the disposable Linux CI runner"
+            )
+        game_ids = [
+            "game-ci-a-" + root.name.split("-")[-1].replace("_", "a"),
+            "game-ci-b-" + root.name.split("-")[-1].replace("_", "a"),
+        ]
+        for game in game_ids:
+            directory = Path("/srv/minecraft/games") / game / "server"
+            assert not directory.exists()
+            subprocess.run(
+                [
+                    "sudo",
+                    "install",
+                    "-d",
+                    "-m",
+                    "0777",
+                    "-o",
+                    str(os.getuid()),
+                    "-g",
+                    str(os.getgid()),
+                    str(directory),
+                ],
+                check=True,
+            )
+            marker = directory.parent / ".wishicraft-initialization.json"
+            marker.write_text(json.dumps({"game_id": game, "phase": "prepared"}))
+            marker.chmod(0o600)
+        data = Path("/srv/minecraft/games") / game_ids[0] / "server"
+    if not two_games:
+        data.mkdir()
     data.chmod(0o777)
     (data / "sentinel").write_text("existing data outside the container layer")
     artifacts = root / "artifacts"
@@ -55,21 +89,30 @@ services:
       com.wishicraft.active-game-data-source: {data}
 """
     (artifacts / "compose.yaml").write_text(compose)
+    if two_games:
+        compose = compose.replace(str(data), "${GAME_DIRECTORY:?targeted Game required}").replace(
+            "game-ci\n", "${WISHICRAFT_GAME_ID:?targeted Game required}\n"
+        )
+        (artifacts / "compose.yaml").write_text(compose)
     manifest = {
         "image": IMAGE,
         "compose_sha256": hashlib.sha256(compose.encode()).hexdigest(),
         "runtime_env_sha256": hashlib.sha256(environment.encode()).hexdigest(),
     }
+    if two_games:
+        manifest["games"] = game_ids
     manifest_bytes = json.dumps(manifest).encode()
     (artifacts / "manifest.json").write_bytes(manifest_bytes)
     target = {
         "instance_id": "i-0123456789abcdef0",
-        "game_id": "game-ci",
+        "game_id": game_ids[0],
         "data_source": str(data),
         "config_digest": hashlib.sha256(manifest_bytes).hexdigest(),
         "run_id": "op-first",
     }
     config = {**target, "system_id": "ci-only", "lock_name": "ci-only"}
+    if two_games:
+        config["games"] = game_ids
     host.ROOT = root
     host.CONFIG = root / "config.json"
     host.CONFIG.write_text(json.dumps(config))
@@ -83,7 +126,7 @@ services:
         "status": "RUNNING",
         "timeout_at": "2099-01-01T00:00:00Z",
         "runtime_target": target,
-        "target_game_id": "game-ci",
+        "target_game_id": game_ids[0],
     }
     lease = {
         "owner_operation_id": "op-first",
@@ -113,9 +156,19 @@ services:
         if args[0] == "bash":
             # Exercise the real Compose parsing done by the host filesystem preflight.
             # Platform mount/ownership checks remain replaced by this synthetic boundary.
-            assert args[-2] == "wishicraft-preflight" and args[-1] == target["run_id"]
+            assert args[-4:] == [
+                "wishicraft-preflight",
+                target["run_id"],
+                target["game_id"],
+                target["data_source"],
+            ]
             assert 'export WISHICRAFT_RUN_ID="$1"' in args[2]
-            env = dict(os.environ, WISHICRAFT_RUN_ID=args[-1])
+            env = dict(
+                os.environ,
+                WISHICRAFT_RUN_ID=args[-3],
+                WISHICRAFT_GAME_ID=args[-2],
+                GAME_DIRECTORY=args[-1],
+            )
             subprocess.run(
                 [
                     "docker",
@@ -135,7 +188,7 @@ services:
             )
             print("REAL_PREFLIGHT_COMPOSE_RESOLVED", args[-1], flush=True)
             return ""
-        if args[0].endswith("/rcon-secret-v1"):
+        if args[0].endswith(("/rcon-secret-v1", "/rcon-secret-v2")):
             return ""
         if args[:2] == ["systemctl", "show"]:
             return "success" if "--property=Result" in args else str(state["unit"])
@@ -202,10 +255,19 @@ services:
     print("REAL_PREFLIGHT_REJECTS_MISSING_RUN", flush=True)
     host.execute = execute
     assert not host.inspect(), "preexisting project: refuse to touch it"
-    for index in range(2):
+    container_ids = []
+    for index in range(3 if two_games else 2):
+        if two_games:
+            game_id = game_ids[index % 2]
+            data = Path("/srv/minecraft/games") / game_id / "server"
+            target = {**target, "game_id": game_id, "data_source": str(data)}
+            if index == 1:
+                (data / "sentinel").write_text("existing data outside the container layer")
+        operation["runtime_target"] = target
+        operation["target_game_id"] = target["game_id"]
         operation["operation_id"] = target["run_id"] = f"op-start-{index}"
         lease["owner_operation_id"] = operation["operation_id"]
-        operation["operation_type"] = "START"
+        operation["operation_type"] = "SWITCH" if two_games and index > 0 else "START"
         request = {
             "schema_version": 2,
             "operation_id": operation["operation_id"],
@@ -214,8 +276,10 @@ services:
         }
         host.apply(request)
         container = host.inspect()[0]
+        assert container["Id"] not in container_ids
+        container_ids.append(container["Id"])
         host.validate_container(container, target)
-        if index == 0:
+        if index == 0 or (two_games and index == 1):
             real_execute(
                 [
                     "docker",
@@ -240,7 +304,7 @@ services:
                     "set",
                     "sentinel",
                     "restore_ci",
-                    "42",
+                    str(42 + index),
                 ]
             )
         else:
@@ -259,6 +323,20 @@ services:
             )
             assert "42" in result, result
         operation["operation_type"] = request["action"] = "STOP"
+        if two_games and index < 2:
+            operation["switch_source"] = dict(target)
+            destination_game = game_ids[(index + 1) % 2]
+            operation["runtime_target"] = {
+                **target,
+                "game_id": destination_game,
+                "data_source": f"/srv/minecraft/games/{destination_game}/server",
+                "run_id": f"op-start-{index + 1}",
+            }
+            operation["target_game_id"] = destination_game
+            operation["operation_type"] = "SWITCH"
+            operation["operation_id"] = request["operation_id"] = lease["owner_operation_id"] = (
+                f"op-start-{index + 1}"
+            )
         state["lose_removal"] = index == 1
         try:
             host.apply(request)
@@ -271,7 +349,7 @@ services:
         assert (data / "world/level.dat").is_file()
         assert (data / "world/players/data").is_dir()  # Synthetic world; no human player claim.
         assert (data / "sentinel").read_text() == "existing data outside the container layer"
-    assert state["stop_observations"] == 2
+    assert state["stop_observations"] == (3 if two_games else 2)
     print(
         "PASS real v2 START/STOP/new-run START, saved scoreboard=42, rm reply loss, bind preserved"
     )

@@ -3,9 +3,75 @@
 - **文書状態:** Canonical
 - **最終更新:** 2026-08-31
 
-**Production適用済み契約:** D-096 Acceptedの対象固定・operation-v2・heartbeat run/process観測は2026-09-11にhost/Control Planeへ適用済み。本書の既存v1記述は移行元の契約であり、新field／入口の差分は以下のrunbookを優先する。
-初回STARTのpreflight環境不足を修正して適用後、新Operationの通常START/STOP二巡を実証し移行Completed。停止container限定削除・新run分離・既存world保持を確認した。初回FAILED STARTは履歴として残す。
-追加field、新旧混在、移行／復旧の正本は[targeted runtime runbook](runbooks/targeted_runtime_migration.md)。既存Acceptedの適用実績と区別する。
+## 0. Production適用済みruntime契約（D-096）
+
+D-096 Accepted、2026-09-11適用・通常START/STOP二巡確認済み。以下が現在の単一Game契約である。後続のv1 payload・旧入口例は移行前の履歴として読む。新しい二Game選択・SWITCH・共有BACKUPは[D-097 Proposed](reviews/two_game_switch.md)であり、本節の適用済み契約とは別である。
+
+### 選択と正本
+
+| 情報 | 正本・今回の扱い |
+|---|---|
+| Game | 既存Games item `game-vanilla-main`。Admissionの既存認可・lifecycle検証を維持 |
+| 保存対象 | 元Data EBS上の `/srv/minecraft/games/game-vanilla-main/server` 全体。移動・生成・新world参照なし。world内のファイル内容はEBSが正本 |
+| 実行構成 | Git stage `host_runtime`。同じrendererがCompose/runtime.env/manifestを生成し、manifest SHA-256をCP環境とhost設定へ配布。Gameへ設定を複製しない |
+| `runtime_id` | 既存の固定Compose実行枠 `wishicraft-host-runtime`。一回の起動ではない |
+| `run_id` | 最初のSTART Operation ID。同Operation再送・途中起動の再開では維持。新しいSTARTが残存runtimeへ収束する場合も観測済みrunを採用する |
+| `process_id` | 実container IDとDocker StartedAtのhash。再起動で変化する観測値で、別の永続管理台帳は作らない |
+| 実行要求 | 既存Operationの追加 `runtime_target`。instance/Game/data_source/config_digest/run_idを条件付きで一度だけ固定。lease、status、timeoutは既存fieldを再利用 |
+| host進行状態 | root EBSの `/var/lib/wishicraft/runtime/receipt.json`。targetとstarting/running/stopping/stopped。実現結果の証跡であり、Game選択の第二の正本ではない |
+
+`runtime_target`はSTARTのset_desiredでEC2操作前に固定する。既存recordがあれば再選択せずconsistent readする。
+RUNNINGの観測を採用する場合はreceiptのtargetを使用し、Git由来のGame/path/configと一致しなければ拒否する。
+既にEC2 stoppedのSTOPでは架空の起動IDを発行せず、従来どおりDesired/DNSを収束させる。
+STOP中の生存hostでは観測済みtargetが必須。resolverが別instanceを返した場合は再選択しない。
+
+新world ID、generation変更、Package管理、new table、workflow、汎用event journalは追加しない。
+単一保存directoryのままなので独立world IDはまだ必要ない。既存GameのgenerationやPackage fieldを今回の物理起動IDへ読み替えない。
+
+### host境界と観測
+
+SSM命令は `operation-v2 <base64 JSON>` の固定入口だけを使う。JSONはschema/action/operation_id/lease_idのみ。
+任意shell、path、Minecraft commandを受け取らず、対象はOperationから読む。base64は認証ではない。認可は既存SSM IAM、固定host入口、現lease照合である。
+
+hostはIMDSv2の実instance、root-owned設定、manifestと実artifactのhash、既存filesystem preflightを確認する。
+`flock`を保持したままOperationとLocksをconsistent readし、RUNNING、type、対象Game、lease、timeoutを照合してから実containerのrun/Game/bind/image/environmentを検証する。
+検証とsystemd/RCON操作は同じ排他区間に置く。待機中にleaseが変わった古いSSM命令は排他取得後の再照合で拒否する。
+既に効果が始まった命令をlease喪失で遡って取り消す保証はない。後続host操作は同じlockを待ち、未解決receiptとsystemd遷移状態を越えて新runを始めない。
+手動systemctl/docker操作による排他の迂回は通常契約の外であり、復旧時も実状態観測と個別承認が必要。
+
+STARTはstartingをdurable記録してから起動する。Composeにrun labelを渡し、実container照合後にrunningとする。
+START成功/DNS公開には従来のREADY/endpointに加え、観測receiptとOperationのtarget一致が必要。
+STOPはexact containerへsave-all flushし、応答成功後にstoppingを記録してsystemdを正常停止する。
+Compose stopは停止済みcontainerを残すため、その後に**確認済みexact IDだけを `docker rm <64桁ID>`** で削除する（Accepted A案）。
+保存成功後のstopping receiptにcontainer ID、StartedAt、save_confirmedをfsync保存する。同じhost排他下でproject/service、Game/run/bind、固定image/env、同じStartedAt、exited/ExitCode=0/OOMなし/errorなし、unit inactive/Result=success、listenerなしを再照合する。
+固定vanillaの `/image/scripts/start`、WorkingDir `/data`、追加commandなし、実world/level.dat、server.propertiesの `level-name=world`、data外へ向くsymlinkなしを確認する。`/data`配下の別mountは既存の2 RCON一時file bind以外を拒否する。world/player/configはData EBSのbindに残し、書込み層を保存先にする構成は削除しない。
+削除直前に同receiptへremoval_readyをdurable記録し、削除後にcontainerなし、unit/listener停止を再確認してstoppedへ進む。保存・停止・削除・receipt更新を同じflock内で行う。停止済みcontainerがあるのにstopped receiptだけをprobeが報告することも拒否する。
+停止container保持案Bは次回STARTで旧run削除とその再開状態が必要になるため採らない。STOPで完結させれば次のSTARTは新Operation/runのcontainerを作れる。停止途中のreceiptからSTARTで再起動することは禁止する。
+force removal、volume削除、prune、world削除、identity不明containerの自動cleanupは行わない。root権限で排他を迂回する操作まで防ぐ保証ではない。確認前にEC2停止へ進まない。
+
+heartbeatはrun_idとprocess_idを含む。既存instance/bootと合わせて無人時間の連続性を判断する。
+新producerは実行receipt/process identity不明ならunknown/count不明にし、古い0人を維持しない。
+AutoStopIntentとintent IDにもrun/processを含め、最終直接観測と照合する。旧recordの読み取りは可能だが、切替中の旧warningを新runへ引き継がない。
+
+### 失敗・再開
+
+| 失敗地点 | 残る状態・続行条件 |
+|---|---|
+| Operation target更新の応答喪失 | consistent readで完全一致した値だけを再利用。未確認ならSSM送信しない。別targetへの上書き禁止 |
+| SSM送信の応答喪失・再送 | 同じOperation/targetを使用。hostで排他と現lease照合。新run IDで帳尻を合わせない |
+| 起動途中・起動応答喪失 | startingとcontainer labelを観測。systemd activating中は待つ。正しいcontainerが稼働すれば同targetで収束できる。unknown artifact/bindは停止して診断 |
+| 保存応答喪失 | stoppedとは扱わない。同じcontainerへのsave再試行は可能。stopping記録前なら停止済みと断定しない |
+| 正常停止後の応答喪失 | stoppingとsave済みexact ID/StartedAtが残る。同じ停止containerの終了結果・bind・unit/listenerを再観測して削除へ進む。異常exitや別processなら保持して診断 |
+| 削除前／削除応答喪失 | removal_readyとexact IDが残る。存在すれば同じ全検証後にそのIDだけrmを再試行。不存在ならdurable removal_readyを根拠に停止状態を再確認しstoppedへ収束。単に検索で見つからないだけで、削除意図のないstoppingを成功にしない |
+| receipt書込み失敗・未知container | 外部効果の成否不明を保持。新runへの切替を止める。実container、systemd job、journal、receipt、Operation/leaseを照合してから限定復旧を判断 |
+| root EBS紛失 | receiptを失うため通常操作はfail closed。Data EBSやSnapshotがあるだけで実行証跡を復元したとはしない。別hostへの自動採用はしない |
+
+復旧ではまず同OperationがRUNNING/lease所有なら通常task再開で観測する。terminalなら旧命令を再送しない。
+既存D-074 recoveryが必要なstale Operationはfresh observationと旧execution/SSM完了確認の後に扱う。
+raw DynamoDB/receipt編集、予約削除、強制停止、別world生成は通常復旧手順に含めない。
+未知の実データ損失を許容して成功扱いする経路はない。退避が必要な実データは削除せず保持する。
+
+実行順序・旧artifact由来・失敗履歴・実機検証範囲は[移行runbook](runbooks/targeted_runtime_migration.md)。BACKUPの取得保証は本書末尾の安全性契約、隔離復元能力の実証範囲は[D-095 runbook](runbooks/backup_safety_isolated_restore.md)を参照する。
 
 ## 1. 契約変更ルール
 

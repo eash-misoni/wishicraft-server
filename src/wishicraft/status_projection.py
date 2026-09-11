@@ -49,7 +49,7 @@ def project_status(state: object) -> dict[str, object]:
     usable_endpoint = (
         endpoint.rstrip(".") if status is ProjectedStatus.ONLINE and dns == "present" else None
     )
-    return {
+    result = {
         "schema_version": 1,
         "kind": "STATUS",
         "status": status.value,
@@ -59,6 +59,32 @@ def project_status(state: object) -> dict[str, object]:
         "observed_at": observed_at,
         "summary": _summary(status),
     }
+    if "selected_game_id" in state:
+        selected = state["selected_game_id"]
+        actual = observation.get("observed_active_game_id")
+        operation = state.get("current_operation_id")
+        if (
+            not isinstance(selected, str)
+            or re.fullmatch(r"game-[a-z0-9-]{1,100}", selected) is None
+        ):
+            raise ValueError("invalid selected Game")
+        if actual is not None and (
+            not isinstance(actual, str) or re.fullmatch(r"game-[a-z0-9-]{1,100}", actual) is None
+        ):
+            raise ValueError("invalid observed Game")
+        if operation is not None and (
+            not isinstance(operation, str)
+            or re.fullmatch(r"op-[a-z0-9-]{1,100}", operation) is None
+        ):
+            raise ValueError("invalid current Operation")
+        result.update(
+            {
+                "selected_game_id": selected,
+                "observed_game_id": actual,
+                "current_operation_id": operation,
+            }
+        )
+    return result
 
 
 def unavailable_projection() -> dict[str, object]:
