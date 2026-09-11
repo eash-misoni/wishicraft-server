@@ -137,7 +137,9 @@ def validate_container(container: dict[str, Any], target: dict[str, str]) -> Non
     labels = container["Config"]["Labels"]
     binds = [m for m in container["Mounts"] if m["Destination"] == "/data"]
     if (
-        labels.get("com.wishicraft.run-id") != target["run_id"]
+        labels.get("com.docker.compose.project") != "wishicraft-host-runtime"
+        or labels.get("com.docker.compose.service") != "minecraft"
+        or labels.get("com.wishicraft.run-id") != target["run_id"]
         or labels.get("com.wishicraft.active-game-id") != target["game_id"]
         or labels.get("com.wishicraft.active-game-data-source") != target["data_source"]
         or len(binds) != 1
@@ -145,6 +147,89 @@ def validate_container(container: dict[str, Any], target: dict[str, str]) -> Non
         or binds[0]["Source"] != target["data_source"]
     ):
         raise ValueError("CONTAINER_TARGET_MISMATCH")
+
+
+def validate_persistence(container: dict[str, Any], target: dict[str, str]) -> None:
+    """Pinned vanilla /start stores world, players and configuration under /data."""
+    data = Path(target["data_source"])
+    config = container["Config"]
+    if (
+        config.get("WorkingDir") != "/data"
+        or config.get("Entrypoint") != ["/start"]
+        or config.get("Cmd") not in (None, [])
+        or any(
+            m["Destination"].startswith("/data/")
+            and (m["Destination"], m["Type"], m["Source"])
+            not in {
+                ("/data/.rcon-cli.env", "bind", "/run/wishicraft/rcon-cli.env"),
+                ("/data/.rcon-cli.yaml", "bind", "/run/wishicraft/rcon-cli.yaml"),
+            }
+            for m in container["Mounts"]
+        )
+        or data.is_symlink()
+        or not data.is_dir()
+    ):
+        raise ValueError("PERSISTENCE_UNPROVEN")
+    # No custom world path or symlink may redirect persistent data into the image layer.
+    properties = (data / "server.properties").read_text()
+    levels = [
+        line.partition("=")[2] for line in properties.splitlines() if line.startswith("level-name=")
+    ]
+    if levels != ["world"] or not (data / "world/level.dat").is_file():
+        raise ValueError("PERSISTENCE_UNPROVEN")
+    for path in data.rglob("*"):
+        if path.is_symlink() and data.resolve() not in path.resolve().parents:
+            raise ValueError("PERSISTENCE_UNPROVEN")
+
+
+def stopped_environment() -> None:
+    for field, expected in [("ActiveState", "inactive"), ("Result", "success")]:
+        if (
+            execute(["systemctl", "show", UNIT, "--property=" + field, "--value"]).strip()
+            != expected
+        ):
+            raise ValueError("STOP_RESULT_UNKNOWN")
+    for port in ("25565", "25575"):
+        if execute(["ss", "-H", "-ltn", "sport = :" + port]).strip():
+            raise ValueError("STOP_LISTENER_REMAINS")
+
+
+def finish_stop(
+    receipt_path: Path, receipt: dict[str, Any], target: dict[str, str], manifest: dict[str, Any]
+) -> None:
+    """Caller holds the host lock. A durable removal intent closes rm reply loss."""
+    stopped_environment()
+    current = inspect()
+    proof = receipt.get("stop", {})
+    if current:
+        container = current[0]
+        validate_container(container, target)
+        configured_container(container, manifest)
+        state = container["State"]
+        if (
+            receipt["phase"] != "stopping"
+            or proof.get("save_confirmed") is not True
+            or proof.get("container_id") != container["Id"]
+            or re.fullmatch(r"[0-9a-f]{64}", container["Id"]) is None
+            or proof.get("started_at") != state["StartedAt"]
+            or state["Running"]
+            or state["Status"] != "exited"
+            or state["ExitCode"] != 0
+            or state["OOMKilled"]
+            or state["Error"]
+        ):
+            raise ValueError("STOP_PROOF_MISMATCH")
+        validate_persistence(container, target)
+        proof["removal_ready"] = True
+        atomic(receipt_path, json.dumps(receipt))
+        execute(["docker", "rm", container["Id"]])
+    elif receipt["phase"] != "stopped" and not proof.get("removal_ready"):
+        raise ValueError("STOP_PROOF_MISMATCH")
+    if inspect():
+        raise ValueError("STOP_RESULT_UNKNOWN")
+    stopped_environment()
+    execute(["/usr/local/libexec/wishicraft/rcon-secret-v1", "remove"])
+    atomic(receipt_path, json.dumps({**receipt, "phase": "stopped"}))
 
 
 def actual_instance() -> str:
@@ -214,6 +299,8 @@ def apply(request: dict[str, Any]) -> None:
             validate_container(containers[0], target)
             configured_container(containers[0], manifest)
         if request["action"] == "START":
+            if receipt and receipt["phase"] == "stopping":
+                raise ValueError("UNRESOLVED_RUNTIME")
             if receipt and receipt["target"] != target and receipt["phase"] != "stopped":
                 raise ValueError("UNRESOLVED_RUNTIME")
             if receipt and receipt["target"] == target and receipt["phase"] == "stopped":
@@ -237,25 +324,33 @@ def apply(request: dict[str, Any]) -> None:
             if not receipt or receipt["target"] != target:
                 raise ValueError("STOP_TARGET_UNKNOWN")
             if containers and containers[0]["State"]["Running"]:
+                if receipt["phase"] == "stopped" or (
+                    receipt.get("stop")
+                    and (
+                        receipt["stop"]["container_id"] != containers[0]["Id"]
+                        or receipt["stop"]["started_at"] != containers[0]["State"]["StartedAt"]
+                    )
+                ):
+                    raise ValueError("STOP_PROOF_MISMATCH")
                 execute(
                     ["docker", "exec", containers[0]["Id"], "rcon-cli", "save-all", "flush"],
                     timeout=60,
                 )
-                atomic(receipt_path, json.dumps({"target": target, "phase": "stopping"}))
+                receipt = {
+                    "target": target,
+                    "phase": "stopping",
+                    "stop": {
+                        "container_id": containers[0]["Id"],
+                        "started_at": containers[0]["State"]["StartedAt"],
+                        "save_confirmed": True,
+                        "removal_ready": False,
+                    },
+                }
+                atomic(receipt_path, json.dumps(receipt))
                 execute(["systemctl", "stop", UNIT], timeout=210)
             elif receipt["phase"] not in {"stopping", "stopped"}:
                 raise ValueError("STOP_REQUIRES_RECOVERY_OBSERVATION")
-            if (
-                inspect()
-                or execute(["systemctl", "show", UNIT, "--property=ActiveState", "--value"]).strip()
-                != "inactive"
-            ):
-                raise ValueError("STOP_RESULT_UNKNOWN")
-            for port in ("25565", "25575"):
-                if execute(["ss", "-H", "-ltn", "sport = :" + port]).strip():
-                    raise ValueError("STOP_LISTENER_REMAINS")
-            execute(["/usr/local/libexec/wishicraft/rcon-secret-v1", "remove"])
-            atomic(receipt_path, json.dumps({"target": target, "phase": "stopped"}))
+            finish_stop(receipt_path, receipt, target, manifest)
 
 
 def main() -> int:
@@ -280,6 +375,8 @@ def main() -> int:
             "STOPPED_RUN_CANNOT_RESTART",
             "START_RESULT_UNKNOWN",
             "STOP_TARGET_UNKNOWN",
+            "STOP_PROOF_MISMATCH",
+            "PERSISTENCE_UNPROVEN",
             "STOP_REQUIRES_RECOVERY_OBSERVATION",
             "STOP_RESULT_UNKNOWN",
             "STOP_LISTENER_REMAINS",

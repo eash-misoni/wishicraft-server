@@ -47,6 +47,21 @@ def validate_entry(entry: dict[str, Any]) -> bool:
     return True
 
 
+def require_no_container() -> None:
+    """Legacy stopped containers require the separately approved migration cleanup."""
+    if run(
+        [
+            "docker",
+            "ps",
+            "--all",
+            "--quiet",
+            "--filter",
+            "label=com.docker.compose.project=wishicraft-host-runtime",
+        ]
+    ):
+        raise ValueError("CONTAINER_REMAINS")
+
+
 def install() -> None:
     if os.geteuid() != 0:
         raise ValueError("ROOT_REQUIRED")
@@ -84,17 +99,7 @@ def install() -> None:
         ]
     ) not in {"inactive", "failed"}:
         raise ValueError("RUNTIME_NOT_INACTIVE")
-    if run(
-        [
-            "docker",
-            "ps",
-            "--all",
-            "--quiet",
-            "--filter",
-            "label=com.docker.compose.project=wishicraft-host-runtime",
-        ]
-    ):
-        raise ValueError("CONTAINER_REMAINS")
+    require_no_container()
     if run(["ss", "-H", "-ltn", "sport = :25565 or sport = :25575"]):
         raise ValueError("LISTENER_REMAINS")
     for entry in manifest["files"]:

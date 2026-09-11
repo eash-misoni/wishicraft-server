@@ -483,6 +483,8 @@ def observe_execution(container: dict[str, Any]) -> Optional[dict[str, Any]]:
         with open("/var/lib/wishicraft/runtime/receipt.json", encoding="utf-8") as stream:
             receipt = json.load(stream)
         target = receipt["target"]
+        if receipt["phase"] == "stopped" and container["state"] != "not-found":
+            return None
         if container["state"] == "running":
             result = run("docker", "inspect", container["container_id"])
             actual = json.loads(result.stdout)[0]
@@ -501,7 +503,7 @@ def observe_execution(container: dict[str, Any]) -> Optional[dict[str, Any]]:
             binds = [m for m in actual["Mounts"] if m["Destination"] == "/data"]
             if len(binds) != 1 or binds[0]["Source"] != target["data_source"]:
                 return None
-        return dict(receipt)
+        return {key: receipt[key] for key in ("target", "phase", "process_id") if key in receipt}
     except (OSError, KeyError, ValueError, TypeError):
         return None
 

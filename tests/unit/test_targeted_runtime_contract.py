@@ -169,9 +169,11 @@ def test_data_path_cannot_escape_or_select_another_game() -> None:
         validate_target({**TARGET, "data_source": "/srv/minecraft/games/../server"})
 
 
+@pytest.mark.parametrize("removal_loss", ["before", "after", None])
 def test_host_start_loss_resume_stop_loss_and_old_replay(
     tmp_path: Any,
     monkeypatch: pytest.MonkeyPatch,
+    removal_loss: str | None,
 ) -> None:
     """Real host apply/atomic/flock with process+AWS boundary replaced, no real data."""
     import hashlib
@@ -199,7 +201,11 @@ def test_host_start_loss_resume_stop_loss_and_old_replay(
     receipt_root.mkdir()
     config_path = tmp_path / "config.json"
     operation, lease, config = authority()
-    target = {**TARGET, "config_digest": artifacts.digest}
+    data = tmp_path / "data"
+    (data / "world/playerdata").mkdir(parents=True)
+    (data / "world/level.dat").write_bytes(b"world sentinel")
+    (data / "server.properties").write_text("level-name=world\n")
+    target = {**TARGET, "config_digest": artifacts.digest, "data_source": str(data)}
     operation["runtime_target"] = target
     operation["timeout_at"] = "2099-01-01T00:00:00Z"
     lease["lease_expires_at"] = 4070908800
@@ -224,23 +230,36 @@ def test_host_start_loss_resume_stop_loss_and_old_replay(
         "lose_stop": True,
         "starts": 0,
         "saves": 0,
+        "removal_loss": removal_loss,
     }
 
     def execute(args: list[str], *, timeout: int = 30) -> str:
         del timeout
         if args[:2] == ["systemctl", "show"]:
-            return str(state["unit"])
+            return "success" if "--property=Result" in args else str(state["unit"])
         if args[:2] == ["systemctl", "start"]:
             if not containers:
                 state["starts"] += 1
                 containers.append(
                     {
                         "Id": "a" * 64,
-                        "State": {"Running": True},
+                        "State": {
+                            "Running": True,
+                            "StartedAt": "2026-09-11T00:00:00Z",
+                            "Status": "running",
+                            "ExitCode": 0,
+                            "OOMKilled": False,
+                            "Error": "",
+                        },
                         "Config": {
+                            "WorkingDir": "/data",
+                            "Entrypoint": ["/start"],
+                            "Cmd": None,
                             "Image": json.loads(artifacts.manifest_json)["image"],
                             "Env": artifacts.runtime_env.splitlines(),
                             "Labels": {
+                                "com.docker.compose.project": "wishicraft-host-runtime",
+                                "com.docker.compose.service": "minecraft",
                                 "com.wishicraft.run-id": target["run_id"],
                                 "com.wishicraft.active-game-id": target["game_id"],
                                 "com.wishicraft.active-game-data-source": target["data_source"],
@@ -263,11 +282,20 @@ def test_host_start_loss_resume_stop_loss_and_old_replay(
             assert args[2] == "a" * 64
             state["saves"] += 1
         if args[:2] == ["systemctl", "stop"]:
-            containers.clear()
+            containers[0]["State"].update(Running=False, Status="exited")
             state["unit"] = "inactive"
             if state["lose_stop"]:
                 state["lose_stop"] = False
                 raise TimeoutError("stopped but reply lost")
+        if args[:2] == ["docker", "rm"]:
+            assert args == ["docker", "rm", "a" * 64]
+            assert not containers[0]["State"]["Running"]
+            loss = state.pop("removal_loss", None)
+            if loss == "before":
+                raise TimeoutError("removal not sent")
+            containers.clear()
+            if loss == "after":
+                raise TimeoutError("removed but reply lost")
         return ""
 
     monkeypatch.setattr(host, "execute", execute)
@@ -277,14 +305,37 @@ def test_host_start_loss_resume_stop_loss_and_old_replay(
     host.apply(request())
     host.apply(request())
     assert state["starts"] == 1
+    target["run_id"] = "op-other"
+    with pytest.raises(ValueError, match="CONTAINER_TARGET_MISMATCH"):
+        host.apply(request())
+    target["run_id"] = "op-start"
     operation["operation_type"] = "STOP"
     with pytest.raises(TimeoutError):
         host.apply(request("STOP"))
     assert json.loads((receipt_root / "receipt.json").read_text())["phase"] == "stopping"
+    assert len(containers) == 1 and not containers[0]["State"]["Running"]
+    operation["operation_type"] = "START"
+    with pytest.raises(ValueError, match="UNRESOLVED_RUNTIME"):
+        host.apply(request())
+    operation["operation_type"] = "STOP"
+    if removal_loss:
+        with pytest.raises(TimeoutError):
+            host.apply(request("STOP"))
+        assert json.loads((receipt_root / "receipt.json").read_text())["stop"]["removal_ready"]
     host.apply(request("STOP"))
+    assert not containers and state["unit"] == "inactive"
+    assert (data / "world/level.dat").read_bytes() == b"world sentinel"
     assert state["saves"] == 1
     assert json.loads((receipt_root / "receipt.json").read_text())["phase"] == "stopped"
+    operation["operation_type"] = "START"
+    operation["operation_id"] = "op-new"
     lease["owner_operation_id"] = "op-new"
+    target["run_id"] = "op-new"
+    new_request = {**request(), "operation_id": "op-new"}
+    host.apply(new_request)
+    assert state["starts"] == 2 and containers[0]["State"]["Running"]
+    assert json.loads((receipt_root / "receipt.json").read_text())["target"]["run_id"] == "op-new"
+    assert (data / "world/level.dat").read_bytes() == b"world sentinel"
     with pytest.raises(ValueError, match="STALE_OPERATION"):
         host.apply(request("STOP"))
 
@@ -382,3 +433,170 @@ def test_stopped_receipt_for_other_run_cannot_authorize_ec2_stop() -> None:
     assert not _receipt_stopped(payload, runtime, "op-stop")
     payload = {"state": {"observation": {"execution": {"phase": "stopped", "target": TARGET}}}}
     assert _receipt_stopped(payload, runtime, "op-stop")
+
+
+@pytest.mark.parametrize(
+    "mismatch",
+    [
+        "run",
+        "game",
+        "bind",
+        "project",
+        "service",
+        "id",
+        "started",
+        "running",
+        "exit",
+        "oom",
+        "save",
+        "layer",
+    ],
+)
+def test_cleanup_rejects_unproven_container_without_removing_anything(
+    tmp_path: Any,
+    monkeypatch: pytest.MonkeyPatch,
+    mismatch: str,
+) -> None:
+    data = tmp_path / "data"
+    (data / "world").mkdir(parents=True)
+    (data / "world/level.dat").write_bytes(b"keep")
+    (data / "server.properties").write_text("level-name=world\n")
+    target = {**TARGET, "data_source": str(data)}
+    container: dict[str, Any] = {
+        "Id": "a" * 64,
+        "State": {
+            "Running": False,
+            "Status": "exited",
+            "ExitCode": 0,
+            "OOMKilled": False,
+            "Error": "",
+            "StartedAt": "original-start",
+        },
+        "Config": {
+            "Image": "pinned",
+            "Env": [],
+            "WorkingDir": "/data",
+            "Entrypoint": ["/start"],
+            "Cmd": None,
+            "Labels": {
+                "com.docker.compose.project": "wishicraft-host-runtime",
+                "com.docker.compose.service": "minecraft",
+                "com.wishicraft.run-id": target["run_id"],
+                "com.wishicraft.active-game-id": target["game_id"],
+                "com.wishicraft.active-game-data-source": str(data),
+            },
+        },
+        "Mounts": [{"Destination": "/data", "Type": "bind", "Source": str(data)}],
+    }
+    proof = {
+        "container_id": container["Id"],
+        "started_at": "original-start",
+        "save_confirmed": True,
+        "removal_ready": False,
+    }
+    receipt = {"phase": "stopping", "target": target, "stop": proof}
+    label_keys = {
+        "run": "com.wishicraft.run-id",
+        "game": "com.wishicraft.active-game-id",
+        "project": "com.docker.compose.project",
+        "service": "com.docker.compose.service",
+    }
+    if mismatch in label_keys:
+        container["Config"]["Labels"][label_keys[mismatch]] = "unknown"
+    elif mismatch == "bind":
+        container["Mounts"][0]["Source"] = "/elsewhere"
+    elif mismatch == "id":
+        container["Id"] = "b" * 64
+    elif mismatch == "started":
+        container["State"]["StartedAt"] = "restarted"
+    elif mismatch == "running":
+        container["State"]["Running"] = True
+    elif mismatch == "exit":
+        container["State"]["ExitCode"] = 137
+    elif mismatch == "oom":
+        container["State"]["OOMKilled"] = True
+    elif mismatch == "save":
+        proof["save_confirmed"] = False
+    elif mismatch == "layer":
+        container["Config"]["WorkingDir"] = "/tmp"
+    (tmp_path / "runtime.env").write_text("")
+    monkeypatch.setattr(host, "ARTIFACTS", tmp_path)
+    monkeypatch.setattr(host, "inspect", lambda: [container])
+    calls: list[list[str]] = []
+
+    def execute(args: list[str], *, timeout: int = 30) -> str:
+        calls.append(args)
+        if "--property=ActiveState" in args:
+            return "inactive"
+        if "--property=Result" in args:
+            return "success"
+        return ""
+
+    monkeypatch.setattr(host, "execute", execute)
+    with pytest.raises(ValueError):
+        host.finish_stop(tmp_path / "receipt.json", receipt, target, {"image": "pinned"})
+    assert not any(call[:2] == ["docker", "rm"] for call in calls)
+    assert (data / "world/level.dat").read_bytes() == b"keep"
+    assert not (tmp_path / "receipt.json").exists()
+
+
+def test_installer_rejects_legacy_stopped_container_until_separate_cleanup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wishicraft.artifacts import runtime_install as installer
+
+    def run(args: list[str]) -> str:
+        assert args[:3] == ["docker", "ps", "--all"]
+        return "a" * 64
+
+    monkeypatch.setattr(installer, "run", run)
+    with pytest.raises(ValueError, match="CONTAINER_REMAINS"):
+        installer.require_no_container()
+    monkeypatch.setattr(installer, "run", lambda args: "")
+    installer.require_no_container()
+
+
+def test_migration_predecessors_are_installed_artifacts_not_regenerated(tmp_path: Any) -> None:
+    from pathlib import Path
+
+    from wishicraft.runtime_migration import prepare
+
+    output = tmp_path / "bundle"
+    prepare(Path(__file__).resolve().parents[2], output, TARGET["instance_id"])
+    entries = {
+        entry["destination"]: entry
+        for entry in json.loads((output / "install.json").read_text())["files"]
+    }
+    assert (
+        entries["/etc/wishicraft/host-runtime/compose.yaml"]["predecessor"]
+        == "df4db90566e6dc743414de2a680f647d5463eee3280e62d7c940e94d37e6e339"
+    )
+    assert (
+        entries["/usr/local/libexec/wishicraft/host-runtime-probe.py"]["predecessor"]
+        == "2d431e562cc2770bc33c8efc509fbb94414824a0e3967d5362a542b48fba69d8"
+    )
+
+
+def test_probe_projects_private_stop_proof_and_rejects_stopped_receipt_with_container(
+    tmp_path: Any,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import builtins
+
+    from wishicraft.artifacts import host_runtime_probe as probe
+
+    path = tmp_path / "receipt.json"
+    path.write_text(
+        json.dumps(
+            {
+                "target": TARGET,
+                "phase": "stopped",
+                "stop": {"container_id": "a" * 64, "removal_ready": True},
+            }
+        )
+    )
+    original = builtins.open
+    monkeypatch.setattr(builtins, "open", lambda *args, **kwargs: original(path, **kwargs))
+    assert probe.observe_execution({"state": "stopped"}) is None
+    assert probe.observe_execution({"state": "running"}) is None
+    assert probe.observe_execution({"state": "not-found"}) == {"target": TARGET, "phase": "stopped"}

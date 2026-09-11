@@ -32,15 +32,11 @@ def prepare(root: Path, output: Path, instance_id: str) -> None:
     config = load_configuration(root, "dev")
     project, stage = config.project, config.stage
 
-    # Both outputs use the same canonical renderer; former is the installed baseline.
-    old = render_boot_time_artifacts(
-        project,
-        stage,
-        observed_uid=993,
-        observed_gid=993,
-        enable_rcon=True,
-        rcon_parameter_name="/wishicraft/dev/secret/rcon-password",
-    )
+    # Installed hashes come from the Phase 6 upgrade evidence, not today's renderer.
+    installed = {
+        "compose.yaml": "df4db90566e6dc743414de2a680f647d5463eee3280e62d7c940e94d37e6e339",
+        "runtime.env": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+    }
     new = render_boot_time_artifacts(
         project,
         stage,
@@ -53,7 +49,13 @@ def prepare(root: Path, output: Path, instance_id: str) -> None:
     output.mkdir(mode=0o700, parents=False, exist_ok=False)
     entries: list[dict[str, object]] = []
 
-    def add(destination: str, content: str, previous: str | None, mode: int) -> None:
+    def add(
+        destination: str,
+        content: str,
+        previous: str | None,
+        mode: int,
+        predecessor_digest: str | None = None,
+    ) -> None:
         name = str(len(entries)) + ".artifact"
         (output / name).write_text(content)
         entries.append(
@@ -62,9 +64,10 @@ def prepare(root: Path, output: Path, instance_id: str) -> None:
                 "source": name,
                 "mode": mode,
                 "sha256": hashlib.sha256(content.encode()).hexdigest(),
-                "predecessor": hashlib.sha256(previous.encode()).hexdigest()
-                if previous is not None
-                else None,
+                "predecessor": predecessor_digest
+                or (
+                    hashlib.sha256(previous.encode()).hexdigest() if previous is not None else None
+                ),
             }
         )
 
@@ -88,11 +91,11 @@ def prepare(root: Path, output: Path, instance_id: str) -> None:
         0o755,
     )
     for name, body, previous in [
-        ("compose.yaml", new.compose_yaml, old.compose_yaml),
-        ("runtime.env", new.runtime_env, old.runtime_env),
+        ("compose.yaml", new.compose_yaml, installed["compose.yaml"]),
+        ("runtime.env", new.runtime_env, installed["runtime.env"]),
         ("manifest.json", new.manifest_json, None),
     ]:
-        add("/etc/wishicraft/host-runtime/" + name, body, previous, 0o600)
+        add("/etc/wishicraft/host-runtime/" + name, body, None, 0o600, previous)
     add(
         "/etc/systemd/system/wishicraft-host-runtime.service",
         current("infrastructure/host_runtime/wishicraft-targeted-runtime.service"),
@@ -114,6 +117,10 @@ def prepare(root: Path, output: Path, instance_id: str) -> None:
             current(source),
             historic(source),
             0o755 if destination == "host-runtime-probe.py" else 0o644,
+            # D-094 kept the installed Phase 8.1 v1.3 probe; v1.4 was CP-delivered only.
+            "2d431e562cc2770bc33c8efc509fbb94414824a0e3967d5362a542b48fba69d8"
+            if destination == "host-runtime-probe.py"
+            else None,
         )
     settings = {
         "schema_version": 2,
