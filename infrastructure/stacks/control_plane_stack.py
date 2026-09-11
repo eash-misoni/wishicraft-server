@@ -2470,7 +2470,13 @@ def _backup_definition(
             "ResultSelector": {"state.$": "$.Payload"},
             "ResultPath": "$.reconcile",
             "Next": "ValidateStoppedHealthy",
-            "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "SetObservationFailure"}],
+            "Catch": [
+                {
+                    "ErrorEquals": ["States.ALL"],
+                    "ResultPath": "$.workflow_error",
+                    "Next": "SetObservationFailure",
+                }
+            ],
         },
         "ValidateStoppedHealthy": {
             **invoke("preflight", "SetPreconditionFailure"),
@@ -2490,8 +2496,16 @@ def _backup_definition(
         "CreateSnapshotOnce": {
             **invoke("create", "SetCreateOutcomeUnknown"),
             "Catch": [
-                {"ErrorEquals": ["BackupCreateRejected"], "Next": "SetCreateFailure"},
-                {"ErrorEquals": ["States.ALL"], "Next": "SetCreateOutcomeUnknown"},
+                {
+                    "ErrorEquals": ["BackupCreateRejected"],
+                    "ResultPath": "$.workflow_error",
+                    "Next": "SetCreateFailure",
+                },
+                {
+                    "ErrorEquals": ["States.ALL"],
+                    "ResultPath": "$.workflow_error",
+                    "Next": "SetCreateOutcomeUnknown",
+                },
             ],
             "ResultPath": "$.snapshot",
             "Next": "InitializeSnapshotPoll",
@@ -2575,7 +2589,6 @@ def _backup_definition(
         "SetProvenanceOutcomeUnknown": "BACKUP_PROVENANCE_OUTCOME_UNKNOWN",
         "SetSnapshotFailure": "BACKUP_SNAPSHOT_FAILED",
         "SetSnapshotTimeout": "BACKUP_SNAPSHOT_TIMEOUT",
-        "SetVerificationFailure": "BACKUP_SNAPSHOT_VERIFICATION_FAILED",
         "SetLockLostFailure": "LOCK_LOST",
     }
     for name, code in failures.items():

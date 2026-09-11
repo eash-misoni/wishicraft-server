@@ -136,6 +136,8 @@ SWITCH完成はResetの必須前提ではない。Hardcoreが直近の利用目�
 
 ## Decision / delivery planの差分案（未適用）
 
+2026-09-11のGOにより、既存Snapshotの隔離復元確認を実データ移行・Resetより前に置く順序だけはD-095でAcceptedとなった。以下の他の再設計案・retention gate案はProposedのまま。
+
 - D-017の手動復元前提を具体化。D-048/D-090/BAK-004の「Restore試験はPhase 16」との関係を整理する。
 - Phase 8のCompletedと過去証跡は維持。Phase 9開始前の独立準備sliceとして既存Snapshotの隔離復元確認を置く。
 - Phase 16にはRestore UI/汎用workflowを残す。Phase 11の復元試験前提は維持。

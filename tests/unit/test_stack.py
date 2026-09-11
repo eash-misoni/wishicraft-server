@@ -371,10 +371,38 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam(
         if value["Properties"]["StateMachineName"] == "wc-dev-backup"
     )
     assert definition["TimeoutSeconds"] == 900
+    reachable: set[str] = set()
+    pending = [definition["StartAt"]]
+    while pending:
+        name = pending.pop()
+        if name in reachable:
+            continue
+        reachable.add(name)
+        state = definition["States"][name]
+        for edge in [state, *state.get("Catch", []), *state.get("Choices", [])]:
+            if "Next" in edge:
+                pending.append(edge["Next"])
+        if "Default" in state:
+            pending.append(state["Default"])
+    assert reachable == set(definition["States"]), "ASL rejects unreachable states"
+    for state in definition["States"].values():
+        for catcher in state.get("Catch", []):
+            if catcher["Next"] != "UnrecoverableFailure":
+                assert catcher.get("ResultPath") == "$.workflow_error", (
+                    "Failure recording requires original operation_id and lease_id"
+                )
     assert definition["States"]["CreateSnapshotOnce"].get("Retry") is None
     assert definition["States"]["CreateSnapshotOnce"]["Catch"] == [
-        {"ErrorEquals": ["BackupCreateRejected"], "Next": "SetCreateFailure"},
-        {"ErrorEquals": ["States.ALL"], "Next": "SetCreateOutcomeUnknown"},
+        {
+            "ErrorEquals": ["BackupCreateRejected"],
+            "ResultPath": "$.workflow_error",
+            "Next": "SetCreateFailure",
+        },
+        {
+            "ErrorEquals": ["States.ALL"],
+            "ResultPath": "$.workflow_error",
+            "Next": "SetCreateOutcomeUnknown",
+        },
     ]
     assert definition["States"]["SetCreateOutcomeUnknown"]["Result"]["error_code"] == (
         "BACKUP_SNAPSHOT_CREATE_OUTCOME_UNKNOWN"

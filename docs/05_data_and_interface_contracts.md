@@ -1132,7 +1132,7 @@ D-093の停止予告はRuntimeHeartbeats/SystemState/Operationsへ混在させ�
 
 ## BACKUP create reservation
 
-2026-09-11 repository safety fix (not deployed at preparation time). This implements the
+2026-09-11 safety fix, deployed/read-back verified in the isolated-restore slice. This implements the
 existing D-090 one-attempt requirement without changing Snapshot v1/provenance format.
 Optional additive Operation fields are `backup_create_intent` (exact Snapshot tags,
 create-only) and `backup_snapshot_id` (accepted response identity). Existing records are

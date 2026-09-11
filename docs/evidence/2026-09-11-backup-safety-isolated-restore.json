@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "approved_base_head": "98ad665efda254c636117f2e7c9033e0c04f2e63",
+  "date_utc": "2026-09-11",
+  "scope": "BACKUP safety deployment and existing-Snapshot isolated operator restore; not Phase 9",
+  "source": {
+    "snapshot_id": "snap-0989e090822d69d1e",
+    "operation_id": "op-de3dd5bb-87c8-48ad-b9af-4631ec483f8d",
+    "source_volume_id": "vol-03ac9f534326c345c",
+    "owner_id": "385526546525",
+    "snapshot_start_time": "2026-09-08T13:06:56.332000+00:00",
+    "game_id": "game-vanilla-main",
+    "source_size_gib": 30,
+    "source_kms_key_id": "arn:aws:kms:ap-northeast-1:385526546525:key/56878db9-a185-4940-a371-eb06b02d1b5c",
+    "provenance_verified": true,
+    "runtime_reconstruction": "repository configuration; not a Snapshot-time manifest"
+  },
+  "control_plane": {
+    "stack": "WishicraftControlPlaneStack-dev",
+    "status": "UPDATE_COMPLETE",
+    "readback_at": "2026-09-11T04:55:11.827270+00:00",
+    "resource_count": 128,
+    "lambda_updates_verified": 11,
+    "backup_lambda": {
+      "FunctionName": "wc-dev-backup-task",
+      "Runtime": "python3.12",
+      "State": "Active",
+      "LastUpdateStatus": "Successful",
+      "CodeSha256": "Stgyhf06ngccS+auBfXSfpI8M2oM12Xupc+6fF0naCg=",
+      "LastModified": "2026-09-11T04:30:51.000+0000",
+      "RevisionId": "5380eb90-6e15-4b2a-909e-ed496df204a1"
+    },
+    "replacement_deletion": false,
+    "new_backup_e2e_executed": false,
+    "managed_lambda_sdk_version": "not measured",
+    "aws_asl_validation": "OK",
+    "retry_overrides": {}
+  },
+  "isolated_stack_id": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/wc-isolated-restore-20260911-b2022225/f3eb6d50-ad99-11f1-84ac-06ae127742a1",
+  "isolated_ids": {
+    "Attachment": "vol-0a993749ea7b8dca0|i-05a5af5b227c09cf5",
+    "Copy": "vol-0a993749ea7b8dca0",
+    "Host": "i-05a5af5b227c09cf5",
+    "Profile": "wc-isolated-restore-20260911-b2022225-Profile-czZwADNZAp6N",
+    "Role": "wc-isolated-restore-20260911-b2022225-Role-1bNdGO6fg2yz",
+    "SecurityGroup": "sg-08b23bc28234adc64",
+    "Root": "vol-0b7d545c029253037"
+  },
+  "commands": [
+    {
+      "step": "mount-inventory",
+      "command_id": "01027c40-9645-4ba7-be88-9a947d38add0",
+      "instance_id": "i-05a5af5b227c09cf5",
+      "status": "Success",
+      "response_code": 0,
+      "execution_end": "2026-09-11T04:37:53.658Z",
+      "assertion_output": [
+        "{\"checkpoint\": \"MOUNTED_READ_ONLY\", \"host\": \"i-05a5af5b227c09cf5\", \"copy\": \"vol-0a993749ea7b8dca0\", \"device\": \"/dev/nvme1n1\", \"options\": [\"ro\", \"relatime\", \"seclabel\", \"norecovery\", \"inode64\", \"logbufs=8\", \"logbsize=32k\", \"sunit=8\", \"swidth=8\", \"noquota\"]}",
+        "{\"world_metadata\": {\"DataVersion\": 4903, \"Version\": {\"Snapshot\": 0, \"Series\": \"main\", \"Id\": 4903, \"Name\": \"26.2\"}, \"LevelName\": \"world\", \"LastPlayed\": 1788270470967}, \"properties_allowlist\": {\"gamemode\": \"survival\", \"hardcore\": \"false\", \"level-name\": \"world\", \"online-mode\": \"true\", \"white-list\": \"true\"}, \"file_count\": 39, \"region_count\": 12, \"player_paths\": [\"players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat\"], \"world_inventory_sha256\": \"dd8951858c33f1209e4062400c08ed0d763a161d6637ef1672c8223def4db17b\"}"
+      ]
+    },
+    {
+      "step": "runtime-install",
+      "command_id": "83007b5f-02db-4c0f-8c99-f3e6994bbadd",
+      "instance_id": "i-05a5af5b227c09cf5",
+      "status": "Success",
+      "response_code": 0,
+      "execution_end": "2026-09-11T04:42:02.333Z",
+      "assertion_output": []
+    },
+    {
+      "step": "start-copy",
+      "command_id": "7bc5e468-f90f-46b8-82c4-a86a8893167c",
+      "instance_id": "i-05a5af5b227c09cf5",
+      "status": "Success",
+      "response_code": 0,
+      "execution_end": "2026-09-11T04:45:07.361Z",
+      "assertion_output": [
+        "{\"host\": \"127.0.0.1\", \"port\": 25565, \"server_info\": {\"version\": {\"name\": \"26.2\", \"protocol\": 776}, \"players\": {\"max\": 20, \"online\": 0, \"Sample\": null}, \"description\": {\"text\": \"A Minecraft Server\", \"bold\": false, \"italic\": false, \"underlined\": false, \"strikethrough\": false, \"obfuscated\": false, \"color\": \"\", \"extra\": null}, \"favicon\": \"\"}}",
+        "{\"checkpoint\": \"READY\", \"container_id\": \"98cd9b61b0a4be8cd2d0713946487091bdb7b406a6c50098324b458714d72777\", \"image\": \"ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77\", \"running\": true, \"restart_count\": 0}"
+      ]
+    },
+    {
+      "step": "save-stop",
+      "command_id": "b7d8c4cc-5e10-4fc1-90ea-8e2391156237",
+      "instance_id": "i-05a5af5b227c09cf5",
+      "status": "Success",
+      "response_code": 0,
+      "execution_end": "2026-09-11T04:46:24.462Z",
+      "assertion_output": [
+        "{\"command\": \"scoreboard objectives add wc_restore dummy\", \"reply\": [\"[04:46:21] [Server thread/INFO]: Created new objective [wc_restore]\"]}",
+        "{\"command\": \"scoreboard players set proof wc_restore 20260911\", \"reply\": [\"[04:46:21] [Server thread/INFO]: Set [wc_restore] for proof to 20260911\"]}",
+        "{\"command\": \"scoreboard players get proof wc_restore\", \"reply\": [\"[04:46:22] [Server thread/INFO]: proof has 20260911 [wc_restore]\"]}",
+        "{\"command\": \"save-all flush\", \"reply\": [\"[04:46:22] [Server thread/INFO]: Saved the game\"]}",
+        "{\"checkpoint\": \"SAVED_STOPPED\", \"container_id\": \"98cd9b61b0a4be8cd2d0713946487091bdb7b406a6c50098324b458714d72777\", \"exit_code\": 0, \"finished_at\": \"2026-09-11T04:46:24.030683062Z\", \"score\": 20260911}"
+      ]
+    },
+    {
+      "step": "restart-verify",
+      "command_id": "1095cae4-078f-4b3b-aa54-e03e6d9a65d2",
+      "instance_id": "i-05a5af5b227c09cf5",
+      "status": "Success",
+      "response_code": 0,
+      "execution_end": "2026-09-11T04:48:38.390Z",
+      "assertion_output": [
+        "{\"restart_protocol\": {\"host\": \"127.0.0.1\", \"port\": 25565, \"server_info\": {\"version\": {\"name\": \"26.2\", \"protocol\": 776}, \"players\": {\"max\": 20, \"online\": 0, \"Sample\": null}, \"description\": {\"text\": \"A Minecraft Server\", \"bold\": false, \"italic\": false, \"underlined\": false, \"strikethrough\": false, \"obfuscated\": false, \"color\": \"\", \"extra\": null}, \"favicon\": \"\"}}}",
+        "{\"command\": \"scoreboard players get proof wc_restore\", \"reply\": [\"[04:48:31] [Server thread/INFO]: proof has 20260911 [wc_restore]\"]}",
+        "{\"command\": \"save-all flush\", \"reply\": [\"[04:48:33] [Server thread/INFO]: Saved the game\"]}",
+        "{\"checkpoint\": \"SAVED_STOPPED\", \"container_id\": \"98cd9b61b0a4be8cd2d0713946487091bdb7b406a6c50098324b458714d72777\", \"exit_code\": 0, \"finished_at\": \"2026-09-11T04:48:38.681837177Z\", \"score\": 20260911}"
+      ]
+    },
+    {
+      "step": "extract-copy",
+      "command_id": "b571714e-3282-4772-90d1-2b7ad53e08a0",
+      "instance_id": "i-05a5af5b227c09cf5",
+      "status": "Success",
+      "response_code": 0,
+      "execution_end": "2026-09-11T04:49:36.421Z",
+      "assertion_output": [
+        "{\"checkpoint\": \"EXTRACTION_VERIFIED\", \"world_file_count\": 39, \"world_inventory_sha256\": \"3b9c648186f10cb3e2cdf2a3e890f4a7e3d443cadeeac358be422991811c2cc9\", \"synthetic_B_unchanged\": true, \"staging_path\": \"/var/tmp/wc-extraction-v1\", \"required_player_present\": true}"
+      ]
+    },
+    {
+      "step": "unmount-copy",
+      "command_id": "a82db940-b0cf-4f56-bfc6-24750f847941",
+      "instance_id": "i-05a5af5b227c09cf5",
+      "status": "Success",
+      "response_code": 0,
+      "execution_end": "2026-09-11T04:53:43.806Z",
+      "assertion_output": [
+        "{\"checkpoint\": \"UNMOUNTED\", \"container_exit\": 0, \"process_users\": [], \"copy\": \"vol-0a993749ea7b8dca0\", \"mounts_remaining\": 0}"
+      ]
+    }
+  ],
+  "initial_world": {
+    "world_metadata": {
+      "DataVersion": 4903,
+      "Version": {
+        "Snapshot": 0,
+        "Series": "main",
+        "Id": 4903,
+        "Name": "26.2"
+      },
+      "LevelName": "world",
+      "LastPlayed": 1788270470967
+    },
+    "properties_allowlist": {
+      "gamemode": "survival",
+      "hardcore": "false",
+      "level-name": "world",
+      "online-mode": "true",
+      "white-list": "true"
+    },
+    "file_count": 39,
+    "region_count": 12,
+    "player_paths": [
+      "players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+    ],
+    "world_inventory_sha256": "dd8951858c33f1209e4062400c08ed0d763a161d6637ef1672c8223def4db17b"
+  },
+  "cleanup": {
+    "time": "2026-09-11T04:58:45.873123+00:00",
+    "absent": [
+      "vol-0b7d545c029253037",
+      "vol-0a993749ea7b8dca0",
+      "sg-08b23bc28234adc64",
+      "wc-isolated-restore-20260911-b2022225-Role-1bNdGO6fg2yz",
+      "wc-isolated-restore-20260911-b2022225-Profile-czZwADNZAp6N",
+      "eni-0033eb77803bfbc1a"
+    ],
+    "host_state": "terminated",
+    "stack_status": "DELETE_COMPLETE"
+  },
+  "production_preservation": {
+    "observed_at": "2026-09-11T04:58:45.876409+00:00",
+    "target": "i-04fc0629dc4ea466e",
+    "target_state": "stopped",
+    "data_volume": "vol-03ac9f534326c345c",
+    "snapshot_provenance_game_volume_unchanged": true,
+    "desired_revision": 15,
+    "health": "HEALTHY",
+    "lock_absent": true,
+    "current_operation_absent": true,
+    "dns_absent": true,
+    "resolver_only_original_target": true,
+    "alarms_ok": 41,
+    "observed_timestamp_updates_allowed": true,
+    "original_filesystem_rehashed": false
+  },
+  "limits": [
+    "Recovery point is 2026-09-08; later progress was not recovered.",
+    "Runtime rebuilt from Git history plus copied data, not a Snapshot-time full configuration manifest.",
+    "Player file identity/presence/checksum verified; human login, buildings and inventory inspection not performed.",
+    "Synthetic sibling sentinel is not a real multi-Game noninterference test.",
+    "New BACKUP production path and managed Lambda SDK version remain unmeasured."
+  ],
+  "failures_resolved": [
+    "Initial deployment rejected unreachable SetVerificationFailure; automatic rollback completed with no creation reservations, then unreachable state removed.",
+    "Catch ResultPath omission found during review; observation/create failure branches now preserve operation_id and lease_id.",
+    "Initial readback used one resource page; complete pagination verified 128 resources and 11 Lambdas.",
+    "Preservation comparison initially mixed datetime objects and stored JSON strings; normalized comparison in new evidence version confirmed unchanged data."
+  ],
+  "local_validation": {
+    "pytest": 0,
+    "ruff": 0,
+    "format": 0,
+    "mypy": 0,
+    "pytest_count": 875,
+    "synth_phase1": 0,
+    "synth_target": 0,
+    "synth_control_plane": 0
+  },
+  "evidence_roots": [
+    "/private/tmp/wishicraft-restore-asl-v2.a8jr7h69",
+    "/private/tmp/wishicraft-backup-catch-v3._y3zha93",
+    "/private/tmp/wishicraft-restore-go-v1.c7kp4o93"
+  ],
+  "restore_test_completed": true
+}

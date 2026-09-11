@@ -800,7 +800,7 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 3. **Completed（2026-09-08）:** 新BACKUP producer pathをreal `/mc backup` 1回で検証し、normal backup 3件目と3組目のdurable provenanceが通常terminalization transactionから自動作成された。Snapshot/Operation一意性、D-090 metadata、4 timestamp、Lock/Current Operation解放をread-backし、manual backfillは使用していない。
 4. shared Admission/global Lock/Current Operationへ統合したdry-run-only RETENTION Standard workflow、read-only inventory task、operator entrypoint、failure/throttle/workflow alarmをdevへdeployした。初回Operationはresult内のlistを既存DynamoDB serializerが扱えず安全にFAILEDとなり、Snapshot mutationなしでLock/Current Operationを解放した。resultを必要なscalar evidenceへ限定する回帰修正後、Operation `op-c4bc275b-0622-4c8f-a6e7-c04eb948c017`がKEEP 3、CANDIDATE 0、EXCLUDED migration 1、ANOMALY 0、planned/delete action 0でSUCCEEDEDした。関連alarmは修正後datapoint 0でOKへ回復した。
 5. production RETENTION roleはSnapshot/Volume/Lock/Recycle Bin/provenanceのreadとOperation lifecycleの限定DynamoDB操作だけを持つ。State Machineにdelete task/pathはなく、`ec2:DeleteSnapshot` permission、DeleteSnapshot DryRun/実削除、Discord command、EventBridge scheduleは未deploy・未実施である。実Deleteはnatural 8件到達後の別release gateまで行わない。
-6. Restore runbook/UIと復元テストはPhase 16
+6. Restore UI・汎用workflowはPhase 16。既存Snapshotのoperator隔離復元確認はD-095により先行する。
 
 ### 8.2 無人自動停止
 
@@ -838,7 +838,7 @@ Control Planeだけをdeployし、6 alarmと5分Reconcile scheduleを追加、11
 
 - 停止中Data EBSの検証済みEBS Snapshot backupを作成しDiscordから安全に実行できる（Phase 8B/8Cで完了）。
 - retentionはD-091のdestructive release gateを満たしたnormal backupだけを扱う。
-- Restoreとstaging復元検証はPhase 16で扱う。
+- Restore UIはPhase 16。operator隔離復元確認はD-095の独立sliceで先行する。
 - 無人時間経過で通常stopを開始できる。
 - player再接続で停止条件を解除できる。
 - 停止漏れを通知できる。
@@ -1031,10 +1031,11 @@ repository実装としてpublic/private IPv4、Route 53 A record、endpoint disc
 
 repository validationだけではAWS完了としない。上記のcredential付きdiff、Control Plane-only deploy、stopped Target observationのcurrent SystemState保存を実測してPhase 3をcloseoutした。periodic reconcile、start/stop workflow、Discord/API、operation admission/lock、backupは後続Phaseのままとする。
 
-## Phase 8後の独立準備slice（2026-09-11）
+## Phase 8後の独立復元確認slice（2026-09-11、Completed）
 
-BACKUP安全性の限定repository修正・境界検証と、既存Snapshotからの隔離復元準備。
-Phase 9の実装開始ではなく、Phase 8 Completed、Phase 16のRestore UI計画を変更しない。
-実復元試験は未実施、修正は未deploy。[実行承認計画](runbooks/backup_safety_isolated_restore.md)へ進む。
-復元試験を移行/Reset前へ配置する順序変更は
-[Proposed差分](reviews/phase8_redesign_followup.md#decision--delivery-planの差分案未適用)として提示する。
+D-095の限定順序変更をAcceptedとし、BACKUP安全性修正のControl Plane deploy/read-backと、
+既存Snapshotの隔離復元・保存・正常停止・再起動・Game抽出・cleanupを完了した。
+Phase 8 Completedを維持し、Phase 9は未着手、Restore UI・汎用workflowはPhase 16のまま。
+新BACKUP経路の実AWS E2Eとmanaged Lambda SDK versionは未確認。人間の目視接続は未実施。
+[実証範囲・失敗と修正・exact evidence](runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照。
+共有backup、whitelist、Reset認可・保持policy、world参照、SWITCH/RESET順序はProposedのまま。

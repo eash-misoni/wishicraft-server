@@ -1,7 +1,7 @@
 # 09. Decisions and Backlog
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-09-07
+- **最終更新:** 2026-09-11
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
@@ -9,6 +9,15 @@
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
 ## 2. 採用済み決定
+
+### D-095 既存Snapshotの隔離復元確認を実データ移行・Resetより前に行う
+
+- **状態:** Accepted
+- **日付:** 2026-09-11
+- **決定:** ユーザーのGOにより、既存normal Snapshotのoperator隔離復元試験をPhase 9開始前の独立sliceとして実行する。BACKUP安全性の限定deployと、試験成功時のexact-ID cleanupを含む。
+- **範囲:** D-048/D-090/D-091等の「復元試験はPhase 16」という順序だけを変更する。Phase 8 Completedは維持し、Restore UI・汎用workflowはPhase 16に残す。
+- **対象外:** 新BACKUP、元Data EBS変更、Snapshot/provenance変更、RETENTION release gate変更。whitelist、Reset認可・保持policy、新Game/world/共有backup形式、SWITCH/RESET順序はProposedのまま。
+- **証跡:** [隔離復元runbook](runbooks/backup_safety_isolated_restore.md)。GO後に限定deployと既存worldの復元・保存・再起動・抽出・cleanupを完了した。新BACKUP E2Eと人間目視は未実施。実行承認と試験成功は別事実として記録する。
 
 ### D-094 Phase 8.3はheartbeat・Control Plane observation・Data filesystemを別々に監視する
 
@@ -1058,7 +1067,6 @@ Phase別に決める事項:
 ## Phase 8後の限定レビュー（Proposed、2026-09-11）
 
 [再設計レビューと限定補足](reviews/phase8_redesign_followup.md)へ集約する。
-復元試験の前倒し、共有backup/metadata、Reset cleanup/認可、whitelist、world参照、
-SWITCH/RESET順序は未Accepted。Phase 8 Completedは取り消さず、Phase 9は未着手。
-D-090の一回限りcreate契約を満たす限定repository修正と隔離復元準備はユーザー承認済みだが、
-[deploy/実試験計画](runbooks/backup_safety_isolated_restore.md)のAWS writeは別の承認待ち。
+復元試験の前倒しだけはD-095でAccepted。共有backup/metadata、Reset cleanup/認可、whitelist、
+world参照、SWITCH/RESET順序は未Accepted。Phase 8 Completedは取り消さず、Phase 9は未着手。
+[限定deploy/実試験計画](runbooks/backup_safety_isolated_restore.md)はユーザーのGOで実行承認済み。

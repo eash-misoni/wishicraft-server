@@ -1,13 +1,87 @@
 # BACKUP safety / isolated restore approval plan
 
-**Status: repository preparation; NOT deployed; restore NOT executed.**
+**Execution authorized by user GO, 2026-09-11. Results are recorded in the closeout section.**
 Phase 8 remains Completed and Phase 9 remains unstarted. Proposed redesign choices are
 [kept separately](../reviews/phase8_redesign_followup.md). This plan does not accept them.
 
+## Execution closeout — 2026-09-11 UTC
+
+**Completed: scoped BACKUP deploy/read-back and isolated recovery of the existing world.**
+The only newly Accepted design decision is D-095's restore-test ordering. Other redesign
+choices remain Proposed. [Sanitized execution evidence](../evidence/2026-09-11-backup-safety-isolated-restore.json)
+contains exact resource IDs, CommandIds, reply evidence and limitations.
+
+Control Plane's final update/read-back completed by 04:55 UTC. All 128 physical resources
+were accounted for, 11 Lambdas were Active/Successful, BACKUP definition matched the
+resolved synthesis, and ConditionCheckItem remained limited to wc-dev-locks. No replacement,
+deletion, new resource or additional permission was introduced into the Control Plane.
+BACKUP CodeSha256: `Stgyhf06ngccS+auBfXSfpI8M2oM12Xupc+6fF0naCg=`.
+No new BACKUP, Snapshot, forced replay or redrive was executed. Installed boto3/botocore
+1.43.91 SDK boundaries were tested locally; the managed Lambda SDK version is unmeasured.
+
+The first deployment failed because an unreachable `SetVerificationFailure` remained.
+AWS rejected the definition and CloudFormation completed automatic rollback at 04:26 UTC.
+No new creation reservations or running workflows existed, and the predecessor template
+and source evidence were confirmed unchanged. Removing that unused state reproduced a
+failing-to-passing reachability test; AWS ValidateStateMachineDefinition then returned OK.
+Further review found missing Catch ResultPath in observation/create failure paths. These
+now preserve Operation/lease input at `$.workflow_error`; a focused boundary assertion
+covers every failure-recording Catch. The final additional deployment changed only those
+three Catch fields. See [AWS's Catch input preservation semantics](https://docs.aws.amazon.com/step-functions/latest/dg/input-output-resultpath.html#input-output-resultpath-catch).
+
+Separate temporary stack `wc-isolated-restore-20260911-b2022225` was created at 04:33 UTC.
+Its host `i-05a5af5b227c09cf5`, copy `vol-0a993749ea7b8dca0`, root
+`vol-0b7d545c029253037`, SG `sg-08b23bc28234adc64`, dedicated role/profile and attachment
+were checked against creation receipts. The exact source was `snap-0989e090822d69d1e`.
+No original attachment, role, agent, DNS or public gameplay endpoint was reused.
+
+| Checkpoint | Evidence |
+|---|---|
+| Initial read-only mount, 04:37 | Exact NVMe volume/XFS UUID; ro,norecovery; 39 world files, 12 region files |
+| World/player | NBT Version 26.2 / DataVersion 4903; required UUID file under `world/players/data/`; initial world inventory checksum recorded |
+| Fixed runtime, 04:42 | AL2023/Docker NEVRA/Compose checksum matched; pinned itzg digest matched; no restored scripts/units/symlinks executed |
+| Initial protocol, 04:45 | Minecraft 26.2, protocol 776, online 0; correct bind, loopback port, no OOM/restart |
+| Save/normal stop, 04:46 | Score `proof=20260911` in `wc_restore`; explicit Saved the game reply; container exit 0, no listener |
+| Restart/save/normal stop, 04:48 | Same container/copy; score read back as 20260911; Saved the game reply; second exit 0 |
+| Extraction, 04:49 | Entire Game copied to test-root staging; world contents/UID/GID/mode matched; synthetic sibling B unchanged |
+| Unmount, 04:53 | No process using copy, normal unmount, no mount remained; no force or lazy operation |
+| Cleanup, 04:57–04:58 | Host normally stopped, exact stack DELETE_COMPLETE; retained root/copy available/unattached/receipt-matched before deletion |
+
+At 04:58 UTC both temporary volumes, SG, role/profile and ENI were confirmed absent;
+host was terminated. No running/stopped test host or diagnostic volume remains. Stack
+history, local evidence and normal CDK deployment assets remain; they are not orphaned
+test compute/storage. The trial stayed well below four hours. Rough compute/IPv4/EBS
+baseline for the observed lifetime is about USD 0.02, excluding transfer/tax; this is
+an estimate, not an observed billing line. No Budget change was made.
+
+Final production check at 04:58 UTC: original Target STOPPED/HEALTHY, original Data EBS
+identity/attachment unchanged, existing four Snapshots/provenance and Game unchanged,
+Desired revision 15, DNS absent, no Lock/current/unfinished Operation, 41 alarms OK.
+Resolver matched only the original Target. Captured CloudTrail showed no original
+Target/Data EBS write, and all ten SSM commands targeted the test host. Normal scheduled
+Observed updates continued. The original filesystem was not mounted or rehashed.
+
+Two observation-tool issues were corrected without AWS repair: resource-list pagination
+initially returned only nine Lambdas, and an in-memory datetime vs saved-JSON comparison
+falsely reported a Snapshot mismatch. Full pagination and normalized representations
+confirmed the actual data unchanged. Failed evidence versions remain preserved.
+
+This proves recovery of the existing single-Game world files from the September 8 recovery
+point, fixed-runtime launch, write/save/normal-stop/restart persistence, and directory
+extraction. It does not recover later progress, prove a full Snapshot-time configuration
+manifest, exercise player login/deserialization or human buildings/inventory inspection,
+or prove future real multi-Game independence. Human connection was optional and omitted.
+Restore UI/general workflow remain deferred. Repository validation: 875 tests, Ruff,
+format and mypy passed after the final ASL correction; full CI/HEAD are in final handoff.
+
+Raw evidence roots: `/private/tmp/wishicraft-restore-go-v1.c7kp4o93` (initial failed deploy),
+`/private/tmp/wishicraft-restore-asl-v2.a8jr7h69` (restore/cleanup),
+`/private/tmp/wishicraft-backup-catch-v3._y3zha93` (final BACKUP definition/read-back).
+
 ## Scope and evidence
 
-Preparation is authorized; the first AWS write is not. All commands in the execution
-sections below require the user's combined execution approval. No automatic credential
+The user approved the scoped BACKUP deploy, isolated test and successful-test cleanup.
+This is not approval for the separate Proposed redesign choices. No automatic credential
 search, SSO login, IAM escalation, production SSM or BACKUP is part of preparation.
 
 2026-09-11 03:27:28 UTC read-only preflight, profile `wishicraft-dev`, caller account
@@ -313,7 +387,10 @@ After confirmed graceful stop the test EC2 may be stopped to bound cost while th
 and evidence remain. Mark incomplete, not restored.
 
 Cleanup on successful closeout (and normal stopped test host) is included in requested
-approval. Save ledger/resource inventory and outcomes first. Verify exact StackId and all
+approval. Confirm Minecraft save and graceful exit, stopped container, and no process using
+the copy. Unmount the restored volume normally and prove no mount remains before stopping
+the test Host or deleting its stack. An unmount failure must not become lazy unmount,
+force detach or force-kill. Save ledger/resource inventory and outcomes first. Verify exact StackId and all
 physical IDs still match; `delete-stack --stack-name <exact-StackId>` removes only that
 stack's host/attachment/SG/role/profile. The clone and root are retained. Before deletion,
 record root EBS identity from the exact test Host; missing root receipt blocks volume cleanup.

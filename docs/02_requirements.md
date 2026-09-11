@@ -389,7 +389,7 @@ fresh stateがDesired/Actual/ObservedすべてSTOPPED、HEALTHY、discrepancy/ac
 
 ### BAK-004 復元可能性 `MUST`
 
-SnapshotにはGame ID、source volume ID、category、Operation ID、作成日時、stage、schema version、protected flagを保持する。Restore操作と復元試験はPhase 8 MVPの対象外としPhase 16で扱う。Phase 16前の削除は、D-091の明示的に承認されたRETENTION destructive-operation contractとrelease gateを満たし、durable provenanceで所有を証明できるD-090 v1 normal backupだけに許可する。それ以外のsnapshotは自動置換・削除しない。
+SnapshotにはGame ID、source volume ID、category、Operation ID、作成日時、stage、schema version、protected flagを保持する。Restore UI・汎用workflowはPhase 16で扱う。D-095により既存Snapshotのoperator隔離復元確認だけを実データ移行・Resetより前へ配置する。Phase 16前の削除は、D-091の明示的に承認されたRETENTION destructive-operation contractとrelease gateを満たし、durable provenanceで所有を証明できるD-090 v1 normal backupだけに許可する。それ以外のsnapshotは自動置換・削除しない。
 
 
 ### BAK-005 停止中の不要起動禁止 `SHOULD`
@@ -542,7 +542,7 @@ backup失敗、heartbeat stale、data volume使用率はPhase 8の機能導入�
 
 ### NFR-009 Backup導入前の試験運用保護 `MUST / MVP`
 
-Phase 8B/8Cで停止中Data EBSの検証済みEBS Snapshot backupとDiscord adapterは完成した。Restoreと復元試験はPhase 16で扱う。
+Phase 8B/8Cで停止中Data EBSの検証済みEBS Snapshot backupとDiscord adapterは完成した。Restore UI・汎用workflowはPhase 16で扱い、operator隔離復元確認はD-095で先行する。
 
 ### NFR-010 設定の単一正本 `MUST`
 
