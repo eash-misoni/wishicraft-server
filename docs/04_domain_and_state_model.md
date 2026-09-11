@@ -717,3 +717,11 @@ public IPv4は`assigned | absent | unknown`、Route 53 A recordは`present | abs
 Endpoint discrepancyは`dns-missing-when-required`、`dns-points-to-wrong-ipv4`、`dns-present-while-endpoint-should-be-absent`、`public-ipv4-unknown`、`dns-observation-unknown`を使用する。runtime READY、active game discrepancy、endpoint discrepancy、healthは別軸とする。
 
 desired STOPPEDでEC2 stoppedかつendpoint discrepancy/observation errorなしは`HEALTHY`。観測不能は`UNKNOWN`、desiredとの差分は`DEGRADED`とする。観測failure時はfresh `observed_at`、関連state unknown、runtime ready false、固定error classificationを持つ新しいSystemStateを保存し、過去のREADYを残さない。
+
+### BACKUP safety error clarification (repository implementation, 2026-09-11)
+
+Add `BACKUP_SNAPSHOT_CREATE_OUTCOME_UNKNOWN` and `BACKUP_PROVENANCE_OUTCOME_UNKNOWN`
+without new Operation lifecycle states. FAILED/timeout is not evidence of Snapshot absence.
+Existing operation-scoped create reservation persists through terminal failure;
+[the interface contract](05_data_and_interface_contracts.md#backup-create-reservation)
+and [operator procedure](runbooks/backup_safety_isolated_restore.md) define observation/retry limits.

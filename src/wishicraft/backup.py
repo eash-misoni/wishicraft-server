@@ -109,8 +109,11 @@ class SnapshotRecord:
 class SnapshotAdapter:
     """One-attempt snapshot creation; callers must never retry create after ambiguity."""
 
-    def __init__(self, api: Ec2SnapshotApi, *, account_id: str) -> None:
+    def __init__(
+        self, api: Ec2SnapshotApi, *, account_id: str, create_api: Ec2SnapshotApi | None = None
+    ) -> None:
         self._api = api
+        self._create_api = create_api if create_api is not None else api
         self._account_id = account_id
 
     def validate_source(self, *, volume_id: str, availability_zone: str) -> None:
@@ -131,7 +134,7 @@ class SnapshotAdapter:
     def create_once(self, *, volume_id: str, tags: dict[str, str]) -> SnapshotRecord:
         if set(tags) != REQUIRED_TAG_KEYS:
             raise ValueError("invalid backup tag contract")
-        response = self._api.create_snapshot(
+        response = self._create_api.create_snapshot(
             VolumeId=volume_id,
             Description=f"Wishicraft backup {tags['WishicraftOperationId']}",
             TagSpecifications=[

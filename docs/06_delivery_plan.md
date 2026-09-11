@@ -1030,3 +1030,11 @@ AdmitOperation
 repository実装としてpublic/private IPv4、Route 53 A record、endpoint discrepancy、Reconcile domain service、current SystemState conditional repository、on-demand DynamoDB、薄いReconcile Lambda、独立Control Plane stackを追加した。stopped TargetではSSM/Run Command/Host Runtimeを短絡し、public IPv4 absent + DNS absentを正常化する。focused/full test、Ruff、mypy、shell syntaxとPhase 1/Target/Control Planeの個別synthでrepository validationを行う。
 
 repository validationだけではAWS完了としない。上記のcredential付きdiff、Control Plane-only deploy、stopped Target observationのcurrent SystemState保存を実測してPhase 3をcloseoutした。periodic reconcile、start/stop workflow、Discord/API、operation admission/lock、backupは後続Phaseのままとする。
+
+## Phase 8後の独立準備slice（2026-09-11）
+
+BACKUP安全性の限定repository修正・境界検証と、既存Snapshotからの隔離復元準備。
+Phase 9の実装開始ではなく、Phase 8 Completed、Phase 16のRestore UI計画を変更しない。
+実復元試験は未実施、修正は未deploy。[実行承認計画](runbooks/backup_safety_isolated_restore.md)へ進む。
+復元試験を移行/Reset前へ配置する順序変更は
+[Proposed差分](reviews/phase8_redesign_followup.md#decision--delivery-planの差分案未適用)として提示する。

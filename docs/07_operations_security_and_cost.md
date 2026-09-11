@@ -482,3 +482,11 @@ Codexは`cdk diff`の結果を確認せず破壊的deployを推奨しない。
 - 次回起動前にワールド検証する。
 
 通常機能として安易に自動fallbackしない。
+
+### BACKUP安全性と隔離復元準備（2026-09-11、未deploy/未実行）
+
+BACKUP taskへの追加IAM案は既存Locks tableだけの`dynamodb:ConditionCheckItem`。
+新しい隔離試験hostは本番roleを再利用せず、SSM channel以外の制御権限を持たない。
+元Data EBS/Snapshot/provenanceを変更しない。
+[実行範囲・費用・中断/cleanup](runbooks/backup_safety_isolated_restore.md)を正本とする。
+Game/retentionのProposed変更とは別の実行承認であり、復元成功をまだ主張しない。

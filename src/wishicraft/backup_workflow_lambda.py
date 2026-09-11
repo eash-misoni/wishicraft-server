@@ -7,12 +7,20 @@ import os
 from datetime import UTC, datetime
 from typing import Protocol, cast
 
+from botocore.config import Config  # type: ignore[import-untyped]
+
 from wishicraft.backup import (
     BackupCoordinator,
     BackupErrorCode,
     BackupWorkflowError,
     Ec2SnapshotApi,
     SnapshotAdapter,
+)
+from wishicraft.backup_create import (
+    BackupCreateGuard,
+    BackupCreateOutcomeUnknown,
+    BackupCreateRejected,
+    BackupProvenanceOutcomeUnknown,
 )
 from wishicraft.backup_provenance import (
     BackupOperationEvidence,
@@ -39,6 +47,20 @@ class Runtime:
         region = _env("AWS_REGION")
         dynamodb = cast(DynamoApi, boto3.client("dynamodb", region_name=region))
         ec2 = cast(Ec2SnapshotApi, boto3.client("ec2", region_name=region))
+        create_ec2 = cast(
+            Ec2SnapshotApi,
+            boto3.client(
+                "ec2",
+                region_name=region,
+                config=Config(retries={"total_max_attempts": 1, "mode": "standard"}),
+            ),
+        )
+        self.create_guard = BackupCreateGuard(
+            dynamodb,
+            operations_table=_env("OPERATIONS_TABLE"),
+            locks_table=_env("LOCKS_TABLE"),
+            lock_name=_env("GLOBAL_LOCK_NAME"),
+        )
         self.system_id = _env("SYSTEM_ID")
         self.operations = OperationRepository(
             dynamodb,
@@ -54,7 +76,9 @@ class Runtime:
         )
         self.coordinator = BackupCoordinator(
             leases=leases,
-            snapshots=SnapshotAdapter(ec2, account_id=_env("AWS_ACCOUNT_ID")),
+            snapshots=SnapshotAdapter(
+                ec2, account_id=_env("AWS_ACCOUNT_ID"), create_api=create_ec2
+            ),
             expected_volume_id=_env("DATA_VOLUME_ID"),
             availability_zone=_env("AVAILABILITY_ZONE"),
             project=_env("PROJECT"),
@@ -94,11 +118,33 @@ def handler(event: object, context: object) -> dict[str, object]:
             operation_id=proof.owner_operation_id,
             requested_at=now.isoformat().replace("+00:00", "Z"),
         )
-        record = runtime.coordinator.snapshots.create_once(
-            volume_id=runtime.coordinator.expected_volume_id, tags=tags
-        )
+        runtime.create_guard.reserve(proof=proof, tags=tags, now=now)
+        runtime.coordinator.leases.verify_owned(proof, now=datetime.now(UTC))
+        try:
+            record = runtime.coordinator.snapshots.create_once(
+                volume_id=runtime.coordinator.expected_volume_id, tags=tags
+            )
+        except Exception as error:
+            response = getattr(error, "response", None)
+            detail = response.get("Error") if isinstance(response, dict) else None
+            metadata = response.get("ResponseMetadata") if isinstance(response, dict) else None
+            if (
+                isinstance(detail, dict)
+                and isinstance(metadata, dict)
+                and metadata.get("HTTPStatusCode") in {400, 403}
+                and detail.get("Code")
+                in {
+                    "UnauthorizedOperation",
+                    "AuthFailure",
+                    "InvalidVolume.NotFound",
+                    "InvalidParameterValue",
+                }
+            ):
+                raise BackupCreateRejected("EC2 explicitly rejected creation") from None
+            raise BackupCreateOutcomeUnknown("snapshot creation outcome unknown") from None
         if record.source_volume_id != runtime.coordinator.expected_volume_id or record.tags != tags:
-            raise BackupWorkflowError(BackupErrorCode.SNAPSHOT_VERIFICATION_FAILED)
+            raise BackupCreateOutcomeUnknown("snapshot response verification failed")
+        runtime.create_guard.record_snapshot(proof=proof, snapshot_id=record.snapshot_id, tags=tags)
         return {"snapshot_id": record.snapshot_id, "tags": tags}
     if action == "poll":
         runtime.coordinator.leases.verify_owned(proof, now=now)
@@ -140,7 +186,7 @@ def handler(event: object, context: object) -> dict[str, object]:
             source_volume_id=runtime.coordinator.expected_volume_id,
             owner_id=record.owner_id,
             provenance_recorded_at=now,
-            require_succeeded_operation=False,
+            require_succeeded_operation=raw_operation["status"] == "SUCCEEDED",
         )
         should_create = runtime.provenance.assert_createable_or_exact(provenance)
         result: dict[str, object] = {
@@ -159,13 +205,24 @@ def handler(event: object, context: object) -> dict[str, object]:
             ):
                 raise ValueError("Backup provenance exists without matching terminal Operation")
             return {"status": "SUCCEEDED"}
-        runtime.operations.complete_owned(
-            proof=proof,
-            status=OperationStatus.SUCCEEDED,
-            completed_at=now,
-            result=result,
-            additional_writes=runtime.provenance.transactional_puts(provenance),
-        )
+        try:
+            runtime.operations.complete_owned(
+                proof=proof,
+                status=OperationStatus.SUCCEEDED,
+                completed_at=now,
+                result=result,
+                additional_writes=runtime.provenance.transactional_puts(provenance),
+            )
+        except Exception:
+            if not (
+                runtime.provenance.exact_match(provenance)
+                and runtime.operations.terminal_result_matches(
+                    operation_id=proof.owner_operation_id,
+                    operation_type=OperationType.BACKUP,
+                    result=result,
+                )
+            ):
+                raise BackupProvenanceOutcomeUnknown("provenance commit not established") from None
         return {"status": "SUCCEEDED"}
     if action == "fail":
         runtime.operations.complete_owned(

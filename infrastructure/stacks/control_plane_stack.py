@@ -591,6 +591,11 @@ class ControlPlaneStack(Stack):
             )
             backup_task.add_to_role_policy(
                 iam.PolicyStatement(
+                    actions=["dynamodb:ConditionCheckItem"], resources=[locks_table.table_arn]
+                )
+            )
+            backup_task.add_to_role_policy(
+                iam.PolicyStatement(
                     actions=["dynamodb:GetItem", "dynamodb:PutItem"],
                     resources=[backups_table.table_arn],
                 )
@@ -2483,7 +2488,11 @@ def _backup_definition(
             "Next": "CreateSnapshotOnce",
         },
         "CreateSnapshotOnce": {
-            **invoke("create", "SetCreateFailure"),
+            **invoke("create", "SetCreateOutcomeUnknown"),
+            "Catch": [
+                {"ErrorEquals": ["BackupCreateRejected"], "Next": "SetCreateFailure"},
+                {"ErrorEquals": ["States.ALL"], "Next": "SetCreateOutcomeUnknown"},
+            ],
             "ResultPath": "$.snapshot",
             "Next": "InitializeSnapshotPoll",
         },
@@ -2543,7 +2552,7 @@ def _backup_definition(
             "Default": "WaitSnapshot",
         },
         "VerifyAndComplete": {
-            **invoke("complete", "SetVerificationFailure"),
+            **invoke("complete", "SetProvenanceOutcomeUnknown"),
             "Parameters": {
                 "FunctionName": backup_task_arn,
                 "Payload": {
@@ -2562,6 +2571,8 @@ def _backup_definition(
         "SetObservationFailure": "OBSERVATION_FAILED",
         "SetPreconditionFailure": "BACKUP_PRECONDITION_FAILED",
         "SetCreateFailure": "BACKUP_SNAPSHOT_CREATE_FAILED",
+        "SetCreateOutcomeUnknown": "BACKUP_SNAPSHOT_CREATE_OUTCOME_UNKNOWN",
+        "SetProvenanceOutcomeUnknown": "BACKUP_PROVENANCE_OUTCOME_UNKNOWN",
         "SetSnapshotFailure": "BACKUP_SNAPSHOT_FAILED",
         "SetSnapshotTimeout": "BACKUP_SNAPSHOT_TIMEOUT",
         "SetVerificationFailure": "BACKUP_SNAPSHOT_VERIFICATION_FAILED",

@@ -252,7 +252,9 @@ def test_dev_stack_is_empty_and_environment_agnostic() -> None:
     assert stack.environment == "aws://unknown-account/unknown-region"
 
 
-def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam() -> None:
+def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     app = build_app(REPOSITORY_ROOT, "dev", phase=8, deployment="control-plane")
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
@@ -273,6 +275,25 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam() -> 
     assert "TimeToLiveSpecification" not in backup_tables[0]
     assert backup["Environment"]["Variables"]["BACKUPS_TABLE"]["Ref"].startswith("BackupsTable")
     assert backup["Environment"]["Variables"]["DATA_VOLUME_ID"] == "vol-03ac9f534326c345c"
+    from types import SimpleNamespace
+
+    from wishicraft import backup_workflow_lambda as task
+
+    # Initialize the real runtime from the synthesized environment. CF references
+    # stand for deployment-generated names; no SDK call is made by this factory.
+    for key, value in backup["Environment"]["Variables"].items():
+        monkeypatch.setenv(key, value if isinstance(value, str) else "resolved-resource")
+    monkeypatch.setenv("AWS_REGION", "ap-northeast-1")
+    monkeypatch.setattr(
+        task,
+        "importlib",
+        SimpleNamespace(
+            import_module=lambda name: SimpleNamespace(client=lambda *args, **kwargs: object())
+        ),
+    )
+    runtime = task.Runtime()
+    assert runtime.coordinator.game_id == "game-vanilla-main"
+    assert runtime.create_guard.operations_table == "resolved-resource"
     policies = template.find_resources("AWS::IAM::Policy")
     backup_role = backup["Role"]["Fn::GetAtt"][0]
     actions = {
@@ -351,6 +372,13 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam() -> 
     )
     assert definition["TimeoutSeconds"] == 900
     assert definition["States"]["CreateSnapshotOnce"].get("Retry") is None
+    assert definition["States"]["CreateSnapshotOnce"]["Catch"] == [
+        {"ErrorEquals": ["BackupCreateRejected"], "Next": "SetCreateFailure"},
+        {"ErrorEquals": ["States.ALL"], "Next": "SetCreateOutcomeUnknown"},
+    ]
+    assert definition["States"]["SetCreateOutcomeUnknown"]["Result"]["error_code"] == (
+        "BACKUP_SNAPSHOT_CREATE_OUTCOME_UNKNOWN"
+    )
     assert definition["States"]["WaitSnapshot"]["Seconds"] == 120
     assert definition["States"]["SetSnapshotTimeout"]["Result"]["error_code"] == (
         "BACKUP_SNAPSHOT_TIMEOUT"

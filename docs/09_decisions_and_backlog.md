@@ -1054,3 +1054,11 @@ Phase別に決める事項:
 - **代替案:**
 - **関連文書:**
 ```
+
+## Phase 8後の限定レビュー（Proposed、2026-09-11）
+
+[再設計レビューと限定補足](reviews/phase8_redesign_followup.md)へ集約する。
+復元試験の前倒し、共有backup/metadata、Reset cleanup/認可、whitelist、world参照、
+SWITCH/RESET順序は未Accepted。Phase 8 Completedは取り消さず、Phase 9は未着手。
+D-090の一回限りcreate契約を満たす限定repository修正と隔離復元準備はユーザー承認済みだが、
+[deploy/実試験計画](runbooks/backup_safety_isolated_restore.md)のAWS writeは別の承認待ち。

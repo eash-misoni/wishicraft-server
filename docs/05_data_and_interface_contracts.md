@@ -1129,3 +1129,22 @@ Route 53 observerはcanonical Hosted Zone/FQDNに対するread-only ListResource
 ## AutoStopIntents
 
 D-093の停止予告はRuntimeHeartbeats/SystemState/Operationsへ混在させず、専用tableの`game_id` partition keyと`intent_id` sort keyでdurableに保持する。`intent_id`はGame ID、boot ID、`empty_since`から決定的に導出し、同じempty periodのEvaluator再実行で増殖しない。warning delivery identity/state/attempt、`warning_delivered_at`、idle/warning policy、created/updated、block/cancel reason、STOP Operation IDを保持する。TTLは設定せず、freshnessやeligibilityは必ずsource heartbeatとtimestampを再検証する。
+
+## BACKUP create reservation
+
+2026-09-11 repository safety fix (not deployed at preparation time). This implements the
+existing D-090 one-attempt requirement without changing Snapshot v1/provenance format.
+Optional additive Operation fields are `backup_create_intent` (exact Snapshot tags,
+create-only) and `backup_snapshot_id` (accepted response identity). Existing records are
+not backfilled. Reservation checks BACKUP/RUNNING, target Game, lease, deadline and
+absence of intent atomically with Lock owner/lease/expiry. Ambiguous reservation response
+never grants permission to create. The create-only SDK client uses total_max_attempts=1;
+read clients retain their retry settings. An accepted ID is persisted before returning.
+
+`BACKUP_SNAPSHOT_CREATE_FAILED` denotes a recognized explicit EC2 rejection;
+`BACKUP_SNAPSHOT_CREATE_OUTCOME_UNKNOWN` covers ambiguity/replayed reservation;
+`BACKUP_PROVENANCE_OUTCOME_UNKNOWN` denotes unresolved successful provenance completion.
+Existing Operation status vocabulary is unchanged. A failure code does not prove Snapshot
+absence. Terminal provenance replay requires the exact successful Operation result and
+both immutable records. See [safety and operator recovery](runbooks/backup_safety_isolated_restore.md).
+No universal exactly-once, automatic adoption of failed BACKUP, or cross-request dedup is claimed.
