@@ -4,7 +4,7 @@
 - **最終更新:** 2026-08-31
 
 **Productionと準備中の差分:** 現在のproductionは本書の既存v1 Host Runtime契約。
-D-096のrepository実装は対象固定・operation-v2・heartbeatのrun/process観測を追加するProposedであり、未deployである。
+D-096のrepository実装は対象固定・operation-v2・heartbeatのrun/process観測を追加するAccepted契約（2026-09-11 GO）である。production適用・実機検証は未完了。
 追加field、新旧混在、移行／復旧の正本は[targeted runtime runbook](runbooks/targeted_runtime_migration.md)。既存Acceptedの適用実績と区別する。
 
 ## 1. 契約変更ルール

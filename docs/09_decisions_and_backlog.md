@@ -8,18 +8,16 @@
 
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
-## 今回の承認待ち提案
+## 2. 採用済み決定
 
 ### D-096 既存Gameの対象を固定したruntime実行契約
 
-- **状態:** Proposed（repository局所実装、production gate待ち）
+- **状態:** Accepted（2026-09-11ユーザーGO、production適用・実機検証は未完了）
 - **対象:** 既存Gameの通常START/STOPのみ。Phase 9全体や新Game/worldモデルの採用ではない。
-- **提案:** Operationへinstance/Game/data/config/runを固定し、hostが排他内で既存Operation/leaseをread-backする。runと実processの識別を分離し、heartbeat/停止予告を新processへ持ち越さない。data directoryは維持する。
+- **決定:** Operationへinstance/Game/data/config/runを固定し、hostが排他内で既存Operation/leaseをread-backする。runと実processの識別を分離し、heartbeat/停止予告を新processへ持ち越さない。data directoryは維持する。
 - **差分:** D-075のoperation-v1を新入口v2へ置換する案。D-074のCP ownershipを残しつつhostの検証を加える。新table/workflowなし。詳細・移行・復旧・検証範囲は[単一runbook](runbooks/targeted_runtime_migration.md)を正本とする。
 - **停止container補足:** 正常保存・停止をexact container/StartedAtへ結び付け、同じhost排他下で終了・永続bindを再検証してcontainerのみ削除しstoppedへ収束する案。旧STOP残存containerの整理は別の移行専用検証で行う。実Docker境界testを追加し、旧stubの停止即削除は保証根拠から除く。
-- **未適用:** Accepted化、AWS write、実データ変更は今回の準備に含まない。既存Acceptedのproduction実績は変更しない。
-
-## 2. 採用済み決定
+- **承認:** 基準HEAD `f89c869cc613e9530e0e16c4d455feb3073c571a` の単一Game契約と停止container限定削除A案。最新normal BACKUP一回、受付停止／復元、二table GetItem、既存Target保守起動／停止、検証済み旧container整理、host／CP更新、通常START/STOP二巡を含む。設計Acceptedと移行Completedを区別する。逆方向rollback、raw repair、force操作、world変更は未承認。その他再設計はProposedのまま。
 
 ### D-095 既存Snapshotの隔離復元確認を実データ移行・Resetより前に行う
 

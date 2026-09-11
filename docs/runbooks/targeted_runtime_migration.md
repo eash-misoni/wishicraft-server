@@ -1,6 +1,6 @@
 # Targeted runtime contract / inactive-only migration
 
-**状態: Proposed — repository実装・検証段階。production未適用。**
+**状態: Accepted — 2026-09-11ユーザーGO。production移行・実機検証は未完了。**
 基準は `30b029295c3cd94d00fbfe1aacd0f60094d2f011`。Phase 8およびBACKUP安全性／隔離復元sliceのCompletedを変更しない。
 D-096の承認対象はこの単一Game START/STOP契約と移行だけである。
 
@@ -39,7 +39,7 @@ hostはIMDSv2の実instance、root-owned設定、manifestと実artifactのhash�
 STARTはstartingをdurable記録してから起動する。Composeにrun labelを渡し、実container照合後にrunningとする。
 START成功/DNS公開には従来のREADY/endpointに加え、観測receiptとOperationのtarget一致が必要。
 STOPはexact containerへsave-all flushし、応答成功後にstoppingを記録してsystemdを正常停止する。
-Compose stopは停止済みcontainerを残すため、その後に**確認済みexact IDだけを `docker rm <64桁ID>`** で削除する（Proposed A案）。
+Compose stopは停止済みcontainerを残すため、その後に**確認済みexact IDだけを `docker rm <64桁ID>`** で削除する（Accepted A案）。
 保存成功後のstopping receiptにcontainer ID、StartedAt、save_confirmedをfsync保存する。同じhost排他下でproject/service、Game/run/bind、固定image/env、同じStartedAt、exited/ExitCode=0/OOMなし/errorなし、unit inactive/Result=success、listenerなしを再照合する。
 固定vanillaの `/image/scripts/start`、WorkingDir `/data`、追加commandなし、実world/level.dat、server.propertiesの `level-name=world`、data外へ向くsymlinkなしを確認する。`/data`配下の別mountは既存の2 RCON一時file bind以外を拒否する。world/player/configはData EBSのbindに残し、書込み層を保存先にする構成は削除しない。
 削除直前に同receiptへremoval_readyをdurable記録し、削除後にcontainerなし、unit/listener停止を再確認してstoppedへ進む。保存・停止・削除・receipt更新を同じflock内で行う。停止済みcontainerがあるのにstopped receiptだけをprobeが報告することも拒否する。
@@ -68,7 +68,7 @@ AutoStopIntentとintent IDにもrun/processを含め、最終直接観測と照�
 raw DynamoDB/receipt編集、予約削除、強制停止、別world生成は通常復旧手順に含めない。
 未知の実データ損失を許容して成功扱いする経路はない。退避が必要な実データは削除せず保持する。
 
-## 移行計画（未実行・GO対象）
+## 移行計画（承認済み・実行結果は別記）
 
 1. caller/account/region、承認HEAD/CI、元Target/EBS、Game、Desired、Lock、Current Operation、関連workflow/SSM inventoryを再観測する。新旧のSTART/STOP/BACKUP作成処理が残存していれば切替しない。
 2. STOPPED/HEALTHYで**normal BACKUPを一回**実行する。host変更後の初回STARTは実worldを書き得るため、移行直前の復旧点を確保する。今回未実証の新BACKUP経路も同時に実AWSで確認する。Snapshot completed/source/tag/provenance/Operation一致まで待つ。結果不明・provenance不明なら追加作成せず既存runbookに従い停止する。9月8日の復元済みSnapshotで代用しない。
@@ -77,12 +77,12 @@ raw DynamoDB/receipt編集、予約削除、強制停止、別world生成は通�
 5. `./tools/dev-env run -- python -m wishicraft.runtime_migration --instance-id <再確認済みexact Target ID> --output <新規directory>` で承認HEADからbundle生成。全ファイルhashとinstall.jsonを保存し、exact Targetの `/var/tmp/wishicraft-targeted-runtime-v1` へSSMで配送・read-back照合する。installerを実行する前にsource/owner/mode、旧artifact hash、unit inactive、元EBS/mount一致を確認する。旧STOPの停止containerがあれば下記「移行専用の旧container整理」を先に実施し、全対象container/listenerなしにする。未知containerでは停止する。
 6. 固定installerを実行。旧operation-v1を拒否入口へ先に置換し、他artifactをatomic replaceする。旧ファイルはroot上のpredecessor copyへ保持する。途中中断は同bundleの旧/新hashを照合して前進再開できる。未知hashを上書きしない。receiptが既に作成されていればinstaller再実行せず診断する。新operation-v2とheartbeat/probe、unit、runtime configの全hashを読み戻す。heartbeat timerは既存設定を維持する。
 7. runtime inactiveのまま元Targetを正常EC2停止する。Control Planeだけをdeployする（code assetsとSTART/STOP環境設定）。既存BACKUP安全性修正を含む新しい基準からdeployし、旧BACKUPコードへ戻さない。definition/IAM/Lambda更新/環境allowlist/stack/alarmをread-backする。秘密を含む全environment dumpは禁止。
-8. Admissionの元concurrencyを復元し、通常認可のSTARTを一回実行する。Operation frozen target、host receipt、実bind/image/run/process、READY、DNS、fresh heartbeatを照合する。通常STOPで保存・正常停止・exact container削除・stopped receipt・EC2停止・DNS削除・STOPPED/HEALTHY・Lock/Current Operation解放を確認する。続けて新Operationで通常START→STOPをもう一巡し、異なるrun/containerでも同じworldが維持されることと最終STOPPED/HEALTHYを確認する。公開SWITCH/RESET、強制replay、長時間auto-stop E2E、隔離復元の再実行は含めない。
+8. 新host／CPのhash/config一致、実EC2 stopped／DNSなし、必要なcontrolled Reconcileでfresh STOPPED/HEALTHYを確認した後、Admissionの元concurrencyを復元し（元が未設定なら未設定へ戻す）、通常認可のSTARTを一回実行する。Operation frozen target、host receipt、実bind/image/run/process、READY、DNS、fresh heartbeatを照合する。通常STOPで保存・正常停止・exact container削除・stopped receipt・EC2停止・DNS削除・STOPPED/HEALTHY・Lock/Current Operation解放を確認する。続けて新Operationで通常START→STOPをもう一巡し、異なるrun/containerでも同じworldが維持されることと最終STOPPED/HEALTHYを確認する。公開SWITCH/RESET、強制replay、長時間auto-stop E2E、隔離復元の再実行は含めない。
 
 既存Targetを用いる理由は既存worldを移さず通常START/STOP契約を検証するため。今回のrepository準備では上記AWS writeを一切実施していない。
 費用は通常BACKUPの30GiB EBS Snapshotと短時間の既存t3a.medium起動が増える。新host/volume、恒久service、Budget変更は不要。実請求はSnapshot増分と起動時間に依存する。
 
-## 移行専用の旧container整理（未実行・追加GO対象）
+## 移行専用の旧container整理（承認済み・実在時のみ）
 
 実hostに停止containerが残っていることは今回未実測。installerの「`docker ps --all`で対象projectが空」というpreconditionは維持する。旧run label/receiptを省略するv2 fallbackは作らない。
 
@@ -148,3 +148,9 @@ bundleは旧Compose/runtime.envのPhase 6適用済みhashを直接固定する�
 訂正後commit `52ac771` の[実Docker CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/34578767884/job/103197230256)は成功。異なる2 containerでCompose stop直後の残存、ExitCode=0/OOMなし、adapterによる削除、stopped receipt、新runで保存済みscoreboard値42、worldとsentinelの保持、実rm後の応答喪失からの収束を確認した。local修正後full validationも913 tests、lint/format/mypy、変更対象Control Plane再synth、新bundle生成が成功した。未変更のTarget/Phase 1 synthは直前成功結果を再利用する。これはsynthetic data上のDocker境界の実証であり、実systemd/SSM/production移行は未実施である。
 
 実装commit `52ac7717371c5db1c0c93b90b24dbe3299545073` のCI `34578767884` はquality／host-runtime-integrationともsuccess。以降の証跡確定commitに対するCIはGitHubの当該HEADと照合する。D-096はProposedのまま、上記追加container操作を含む移行GO前で停止する。
+
+## Production実行承認 — 2026-09-11
+
+ユーザーは基準HEAD `f89c869cc613e9530e0e16c4d455feb3073c571a` のD-096と停止container A案をGOした。上記手順をそのまま実行正本とし、設計Acceptedを移行Completedとして先取りしない。
+BACKUP後に別のSTART／書込みが入っていれば最新保護と断定しない。受付停止は既存命令取消しではなく、workflow/SSM/host jobの完了を別に観測する。CP deploy前後もconcurrency 0をread-backし、新旧整合とfresh STOPPED/HEALTHY確認後だけ元設定へ戻す。
+二巡はshared Admissionを通し、正規起動・保存によるファイル更新を許容しつつ同じ既存worldの保持を確認する。本番scoreboard変更、強制replay、故障注入、長時間auto-stop／隔離復元再試験は追加しない。実行中のcheckpointと最終証跡で結果を確定する。
