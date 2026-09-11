@@ -6,7 +6,9 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 Phase 0〜8は完了しています。停止中Data EBSのBACKUP、durable provenance、retention dry-run、Runtime heartbeat、warning付き無人自動停止、監視・コスト整備をdevで検証済みです。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。
 
-Phase 8.3は2026-09-10 UTCにControl Plane限定deployと通常START/STOP監視E2Eを完了しました。D-094 Accepted、READY後15分以上のfreshness維持、正しいData EBS使用率1.4389%、停止後SSM/容量値発行なし、41 alarm OK、最終STOPPED/HEALTHYを確認済みです。初期欠測による5件の実メール通知と自然復帰も[監視runbook](docs/runbooks/phase8_monitoring.md)へ記録しています。次のPhase 9は未着手です。RETENTION実削除はnormal backup自然8件以降の独立gate、Restore UI・汎用workflowはPhase 16です。D-095の独立sliceとして、2026-09-11にBACKUP安全性deployと既存Snapshotの隔離復元・保存・再起動・抽出・cleanupを完了しました。[実証範囲と限界](docs/runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照してください。新BACKUP経路の実AWS E2Eは未実施、再設計案はProposedです。
+Phase 8.3は2026-09-10 UTCにControl Plane限定deployと通常START/STOP監視E2Eを完了しました。D-094 Accepted、READY後15分以上のfreshness維持、正しいData EBS使用率1.4389%、停止後SSM/容量値発行なし、41 alarm OK、最終STOPPED/HEALTHYを確認済みです。初期欠測による5件の実メール通知と自然復帰も[監視runbook](docs/runbooks/phase8_monitoring.md)へ記録しています。次のPhase 9は未着手です。RETENTION実削除はnormal backup自然8件以降の独立gate、Restore UI・汎用workflowはPhase 16です。D-095の独立sliceとして、2026-09-11にBACKUP安全性deployと既存Snapshotの隔離復元・保存・再起動・抽出・cleanupを完了しました。[実証範囲と限界](docs/runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照してください。この独立復元slice時点では新BACKUP経路の実AWS E2Eは未実施でした。
+
+D-096は2026-09-11に限定GOでAccepted。最新normal BACKUPの実AWS正常系とTarget限定IAM更新を確認しましたが、旧host manifest不一致で移行はBLOCKEDです。host/Control Plane更新と通常START/STOP二巡は未実施。TargetはSTOPPED/HEALTHY、Admissionは元UNSETから一時0のまま維持しています。[部分適用・再開条件](docs/runbooks/targeted_runtime_migration.md#production部分適用--2026-09-11-utcblocked)を参照してください。その他再設計案はProposedです。
 
 devは次の3層architectureです。
 

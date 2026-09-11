@@ -847,7 +847,7 @@ Control Planeだけをdeployし、6 alarmと5分Reconcile scheduleを追加、11
 
 ## 12. Phase 9 — 複数ゲーム抽象
 
-**現在の限定作業:** D-096の既存Game targeted runtime契約を独立sliceとして実行する。2026-09-11に限定production migrationのGOを取得（D-096 Accepted）。移行・実機検証は未完了。以下のPackage/Preset/Templateを含むPhase 9全体の計画は再設計比較の対象であり、今回まとめて開始・Accepted化しない。[移行gate](runbooks/targeted_runtime_migration.md)参照。
+**現在の限定作業:** D-096の既存Game targeted runtime契約を独立sliceとして実行する。2026-09-11に限定production migrationのGOを取得（D-096 Accepted）。最新BACKUPとTarget限定IAM更新済み。旧manifest不一致でBLOCKED、host/CP更新・実機検証は未完了。Target停止、Admission 0を維持する。以下のPackage/Preset/Templateを含むPhase 9全体の計画は再設計比較の対象であり、今回まとめて開始・Accepted化しない。[移行gate](runbooks/targeted_runtime_migration.md)参照。
 
 ### 目的
 

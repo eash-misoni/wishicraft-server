@@ -1,6 +1,6 @@
 # Targeted runtime contract / inactive-only migration
 
-**状態: Accepted — 2026-09-11ユーザーGO。production移行・実機検証は未完了。**
+**状態: Accepted — 2026-09-11ユーザーGO。production移行は旧manifest不一致でBLOCKED、実機検証は未完了。**
 基準は `30b029295c3cd94d00fbfe1aacd0f60094d2f011`。Phase 8およびBACKUP安全性／隔離復元sliceのCompletedを変更しない。
 D-096の承認対象はこの単一Game START/STOP契約と移行だけである。
 
@@ -154,3 +154,17 @@ bundleは旧Compose/runtime.envのPhase 6適用済みhashを直接固定する�
 ユーザーは基準HEAD `f89c869cc613e9530e0e16c4d455feb3073c571a` のD-096と停止container A案をGOした。上記手順をそのまま実行正本とし、設計Acceptedを移行Completedとして先取りしない。
 BACKUP後に別のSTART／書込みが入っていれば最新保護と断定しない。受付停止は既存命令取消しではなく、workflow/SSM/host jobの完了を別に観測する。CP deploy前後もconcurrency 0をread-backし、新旧整合とfresh STOPPED/HEALTHY確認後だけ元設定へ戻す。
 二巡はshared Admissionを通し、正規起動・保存によるファイル更新を許容しつつ同じ既存worldの保持を確認する。本番scoreboard変更、強制replay、故障注入、長時間auto-stop／隔離復元再試験は追加しない。実行中のcheckpointと最終証跡で結果を確定する。
+
+## Production部分適用 — 2026-09-11 UTC、BLOCKED
+
+[機械可読証跡](../evidence/2026-09-11-targeted-runtime-production.json)が今回の実測記録。適用sourceは `9635073232f9addbd240a55d99e0d1de841d73c7`（CI `34588237412` success）。承認基準f89c869からは承認記録のdocs差分だけで、bundleは承認時hashと一致した。以下は準備時の未実測事項を更新する実行結果であり、移行Completedではない。
+
+- 最新normal BACKUPは一回成功。Operation `op-22df4706-b2b1-4758-a86d-5dace4334f8a`、Snapshot `snap-005ce340d03a42340`、復旧点 `2026-09-11T10:16:48.543Z`。completed・source/owner/metadata・SUCCEEDED・provenance二record一致を実SDK decodeと既存verify_sourceで確認。新BACKUP安全性経路の実AWS正常系を確認したが、応答喪失／replay／このSnapshot自体の復元試験は未実施。
+- Admission元設定はUNSET。reserved concurrency 0とし、function timeoutを超えるdrain待ちとworkflow/SSM/Operation terminalを確認。BACKUP後の別STARTなし。現在も0を維持し、受付復元は未実施。
+- 実productionからのTarget差分は既存roleのOperations/Locks二table限定GetItemだけ。deploy UPDATE_COMPLETE、実IAM/templateを照合済み。EC2/UserData/EBS/SG/attachment変更なし。CP予定差分は11 Lambda Code＋START/STOPのRUNTIME_CONFIG_DIGEST/RUNTIME_DATA_SOURCEであるが、**CP deployは未実施**。
+- 元Targetを保守起動し、10:24:18にSSM `48c508e4-4137-4a44-8529-660bbbb98711` が旧artifact preflightでexit 1（UNKNOWN_ARTIFACT）。`/etc/wishicraft/host-runtime/manifest.json` は承認bundleでABSENTを期待したが、実際にはroot:root 0600の通常fileがあり、SHA256は `58218d144da8eb85fcda0bdf7383c6127896db11a7c5e93f3a781828f3bd300d`。他の照合artifactは一致。由来未確定のため、predecessor追加・上書き・installer実行へ進まなかった。
+- 旧停止container `b7e7d79eb38e54f7b1b78a25dc27060f9f68f315f86dfe2fc83168a614983b62` は実在。固定image・Game/data bind、exited/ExitCode 0/OOMなし、unit inactive/static、listenerなし、新receiptなしを観測。9月10日のSAVE_CONFIRMED/GRACEFUL_STOP_CONFIRMED journalを保存した。world/player inventoryと書込み層の最終分類までは完了しておらず、**削除していない**。本番world保持の二巡検証は未実施。
+- host上は `/var/tmp/wishicraft-d096-20260911/legacy-host.json` の診断証跡のみ保存。bundle配送／host更新なし。runtime inactive・SSM terminalを確認して10:25:55に通常EC2停止、10:26:46にcontrolled Reconcile。Target STOPPED/HEALTHY、DNSなし、Lock/Current/未終了Operationなし。元Data EBS identity/attachment/encryption・Game参照、元4 Snapshot/provenance不変、追加Snapshotは上記一件だけ。二table IAMは適用済みのまま残す。
+- DesiredStoppedEc2Runningは保守起動に伴い10:25のmetricが1、10:26:53 ALARM。正常停止後10:30のmetricが0、**10:31:53 UTCに自然OK復帰**。ユーザーへの通知はこの保守期間の評価に対応する。alarm無効化・閾値変更・fake metricは行っていない。
+
+再開には、既存manifestの安全な内容照合と過去適用artifactの対応を確定し、exact predecessorと更新bundle／testsをレビューする必要がある。観測hashだけを許可値へ追加しない。現在の受付0、旧host＋旧CP、追加済みIAMと新Snapshotを起点に再preflightし、BACKUPを別requestで再作成しない。受付再開・逆方向rollbackを手順の終了だけで実行しない。Phase 8 Completed、Phase 9未着手、その他再設計Proposedは維持する。

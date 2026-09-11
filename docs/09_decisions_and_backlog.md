@@ -19,6 +19,8 @@
 - **停止container補足:** 正常保存・停止をexact container/StartedAtへ結び付け、同じhost排他下で終了・永続bindを再検証してcontainerのみ削除しstoppedへ収束する案。旧STOP残存containerの整理は別の移行専用検証で行う。実Docker境界testを追加し、旧stubの停止即削除は保証根拠から除く。
 - **承認:** 基準HEAD `f89c869cc613e9530e0e16c4d455feb3073c571a` の単一Game契約と停止container限定削除A案。最新normal BACKUP一回、受付停止／復元、二table GetItem、既存Target保守起動／停止、検証済み旧container整理、host／CP更新、通常START/STOP二巡を含む。設計Acceptedと移行Completedを区別する。逆方向rollback、raw repair、force操作、world変更は未承認。その他再設計はProposedのまま。
 
+- **部分適用:** 最新BACKUPとTarget限定IAM更新後、旧manifestの未承認predecessorで移行停止。host/CP更新・二巡検証は未実施、Target停止・受付0を維持。[実行記録](runbooks/targeted_runtime_migration.md#production部分適用--2026-09-11-utcblocked)参照。
+
 ### D-095 既存Snapshotの隔離復元確認を実データ移行・Resetより前に行う
 
 - **状態:** Accepted
