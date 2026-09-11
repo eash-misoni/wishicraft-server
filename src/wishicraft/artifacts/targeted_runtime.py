@@ -150,12 +150,12 @@ def validate_container(container: dict[str, Any], target: dict[str, str]) -> Non
 
 
 def validate_persistence(container: dict[str, Any], target: dict[str, str]) -> None:
-    """Pinned vanilla /start stores world, players and configuration under /data."""
+    """Pinned vanilla /image/scripts/start stores world, players and configuration under /data."""
     data = Path(target["data_source"])
     config = container["Config"]
     if (
         config.get("WorkingDir") != "/data"
-        or config.get("Entrypoint") != ["/start"]
+        or config.get("Entrypoint") != ["/image/scripts/start"]
         or config.get("Cmd") not in (None, [])
         or any(
             m["Destination"].startswith("/data/")

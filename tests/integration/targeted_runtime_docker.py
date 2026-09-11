@@ -138,6 +138,17 @@ services:
             assert not stopped[0]["State"]["Running"]
             state["stop_observations"] += 1
             print("REAL_COMPOSE_STOP_RETAINS", before, flush=True)
+            print(
+                "PINNED_CONTAINER_CONFIG",
+                json.dumps(
+                    {
+                        key: stopped[0]["Config"].get(key)
+                        for key in ("Image", "WorkingDir", "Entrypoint", "Cmd")
+                    }
+                ),
+                flush=True,
+            )
+            print("STOPPED_STATE", json.dumps(stopped[0]["State"]), flush=True)
             return ""
         result = real_execute(args, timeout=timeout)
         if args[:2] == ["docker", "rm"] and state["lose_removal"]:
@@ -214,7 +225,7 @@ services:
         assert not host.inspect() and state["unit"] == "inactive"
         assert json.loads((root / "receipt.json").read_text())["phase"] == "stopped"
         assert (data / "world/level.dat").is_file()
-        assert (data / "world/playerdata").is_dir()  # Synthetic world; no human player claim.
+        assert (data / "world/players/data").is_dir()  # Synthetic world; no human player claim.
         assert (data / "sentinel").read_text() == "existing data outside the container layer"
     assert state["stop_observations"] == 2
     print(

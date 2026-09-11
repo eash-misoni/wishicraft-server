@@ -253,7 +253,7 @@ def test_host_start_loss_resume_stop_loss_and_old_replay(
                         },
                         "Config": {
                             "WorkingDir": "/data",
-                            "Entrypoint": ["/start"],
+                            "Entrypoint": ["/image/scripts/start"],
                             "Cmd": None,
                             "Image": json.loads(artifacts.manifest_json)["image"],
                             "Env": artifacts.runtime_env.splitlines(),
@@ -476,7 +476,7 @@ def test_cleanup_rejects_unproven_container_without_removing_anything(
             "Image": "pinned",
             "Env": [],
             "WorkingDir": "/data",
-            "Entrypoint": ["/start"],
+            "Entrypoint": ["/image/scripts/start"],
             "Cmd": None,
             "Labels": {
                 "com.docker.compose.project": "wishicraft-host-runtime",

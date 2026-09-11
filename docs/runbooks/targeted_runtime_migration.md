@@ -41,7 +41,7 @@ START成功/DNS公開には従来のREADY/endpointに加え、観測receiptとOp
 STOPはexact containerへsave-all flushし、応答成功後にstoppingを記録してsystemdを正常停止する。
 Compose stopは停止済みcontainerを残すため、その後に**確認済みexact IDだけを `docker rm <64桁ID>`** で削除する（Proposed A案）。
 保存成功後のstopping receiptにcontainer ID、StartedAt、save_confirmedをfsync保存する。同じhost排他下でproject/service、Game/run/bind、固定image/env、同じStartedAt、exited/ExitCode=0/OOMなし/errorなし、unit inactive/Result=success、listenerなしを再照合する。
-固定vanillaの `/start`、WorkingDir `/data`、追加commandなし、実world/level.dat、server.propertiesの `level-name=world`、data外へ向くsymlinkなしを確認する。`/data`配下の別mountは既存の2 RCON一時file bind以外を拒否する。world/player/configはData EBSのbindに残し、書込み層を保存先にする構成は削除しない。
+固定vanillaの `/image/scripts/start`、WorkingDir `/data`、追加commandなし、実world/level.dat、server.propertiesの `level-name=world`、data外へ向くsymlinkなしを確認する。`/data`配下の別mountは既存の2 RCON一時file bind以外を拒否する。world/player/configはData EBSのbindに残し、書込み層を保存先にする構成は削除しない。
 削除直前に同receiptへremoval_readyをdurable記録し、削除後にcontainerなし、unit/listener停止を再確認してstoppedへ進む。保存・停止・削除・receipt更新を同じflock内で行う。停止済みcontainerがあるのにstopped receiptだけをprobeが報告することも拒否する。
 停止container保持案Bは次回STARTで旧run削除とその再開状態が必要になるため採らない。STOPで完結させれば次のSTARTは新Operation/runのcontainerを作れる。停止途中のreceiptからSTARTで再起動することは禁止する。
 force removal、volume削除、prune、world削除、identity不明containerの自動cleanupは行わない。root権限で排他を迂回する操作まで防ぐ保証ではない。確認前にEC2停止へ進まない。
@@ -89,7 +89,7 @@ raw DynamoDB/receipt編集、予約削除、強制停止、別world生成は通�
 受付停止・旧execution/SSMの完了確認後、exact Target上でinstallerと同じ `/var/lib/wishicraft/runtime/lock` をflockし、次の一回限りのoperator整理を行う。新しいv2 receiptがあればこの旧host手順を適用しない。
 
 1. `docker ps --all --no-trunc`でinventoryを採取。対象はproject `wishicraft-host-runtime` / service `minecraft` の**一個の64桁ID**を固定する。全host inventoryに説明できないcontainerがあれば止める。旧operation-v1/stop-v1、Compose、runtime.env、unit、mount guardのhash/owner/modeを既存Phase 6・8.1適用証跡と照合する。生成した新artifactを旧artifactの根拠にしない。
-2. exact IDのinspectをメモリ内で検証する。期待image digest、旧Game/data labels、`/data`の元Game bind、固定 `/start` / WorkingDir `/data`、command overrideなし、未知のnested mountなし、新run labelなしを要求する。旧STOP Operationの成功と `wishicraft-stop` journalのSAVE_CONFIRMED/GRACEFUL_STOP_CONFIRMED、該当containerのStartedAt/FinishedAtを照合し、保存・正常停止の根拠がなければ削除しない。unit inactive、Result success、container exited/ExitCode=0/OOMなし/errorなし、25565/25575 listenerなしを要求する。
+2. exact IDのinspectをメモリ内で検証する。期待image digest、旧Game/data labels、`/data`の元Game bind、固定 `/image/scripts/start` / WorkingDir `/data`、command overrideなし、未知のnested mountなし、新run labelなしを要求する。旧STOP Operationの成功と `wishicraft-stop` journalのSAVE_CONFIRMED/GRACEFUL_STOP_CONFIRMED、該当containerのStartedAt/FinishedAtを照合し、保存・正常停止の根拠がなければ削除しない。unit inactive、Result success、container exited/ExitCode=0/OOMなし/errorなし、25565/25575 listenerなしを要求する。
 3. Data EBS/mount identity、world/level.dat・playerdata・設定の存在を確認する。固定vanillaの保存先がbind内にあり、外向きsymlinkがないこと、`docker diff <exact ID>`に保存すべき未知データがないことを確認する。必要データが書込み層だけにある疑いは診断へ戻す。推測で不要分類しない。必要なworld/playerはEBSに残し、safe inspect projection（ID/image/labels/mounts/stateのみ）、STOP journal/log、diff、data inventory/hashをroot-owned 0600の新しい証跡directoryへ保存する。Config.Env全文やRCON設定の内容は出力しない。
 4. 同じ排他内でID・全preconditionを再観測し、削除予定ID・image・StartedAt/FinishedAt・証跡hashをcheckpointへfsync保存してから、**`docker rm <照合済みexact ID>`だけ**を一回実行する。`--force`/`--volumes`/Compose down/pruneは禁止。実行直前にcontainerがrunningなら通常rmも拒否する。完了後、exact IDとprojectの不存在、unit/listener停止、元data inventory不変を照合してcheckpointを完了にする。その後だけinstallerへ進む。
 
@@ -142,3 +142,5 @@ bundleは旧Compose/runtime.envのPhase 6適用済みhashを直接固定する�
 新bundleと基準bundleの全hashは限定是正の機械可読証跡に記録する。新config_digest/Compose/runtime.envは本是正では変えない。IAM、workflow、runtime image、Game/data配置も本是正による追加変更なし。CPがpackageするprobeのcode assetは新hashになるため再synth結果を承認HEADへ合わせる。
 
 限定是正の[機械可読証跡](../evidence/2026-09-11-targeted-runtime-stop-remediation.json)に全bundle hashと比較を保存した。local full validationは913 tests、ruff check/format、mypy、3 synth成功。前案からのtemplate差分はControl Planeの11 Lambda code assetのみ、Target/Phase 1は差分なし。今回AWS照会・writeは実施していない。CIの実Docker結果は当該commitのjob結果で確認する。
+
+実Docker初回CI `705d8c3` はCompose stop後の同ID残存まで確認し、PERSISTENCE_UNPROVENで削除前に停止した。追加した永続化検証が旧shim `/start` をentrypointと仮定していたためで、固定releaseの[公式Dockerfile](https://github.com/itzg/docker-minecraft-server/blob/2026.7.2/Dockerfile)の `/image/scripts/start` に一致させた（許可対象を広げるfallbackではない）。synthetic player directoryも、既存復元証跡で確認済みの26.2配置 `world/players/data` を使用する。失敗したCIを成功へ補正せず、新commitの実Dockerで再検証する。
