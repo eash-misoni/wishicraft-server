@@ -1,23 +1,23 @@
-# D-098 対応Game限定Reset（Accepted、適用中）
+# D-098 対応Game限定Reset（Accepted、限定release Completed）
 
-2026-09-12ユーザーGOで設計採用。production適用・復旧検証・一般公開は未完了。
-D-095/096/097のAccepted・Completedを維持する。B限定policyとrunbookの操作を一括承認済み。二回の隔離復旧成功前に一般公開しない。
+2026-09-12ユーザーGOで設計採用。同日、production適用・二回の隔離復旧・条件付き一般公開を完了。実証範囲は[closeout](../runbooks/game_scoped_reset_migration.md#production-closeout)を参照する。
+D-095/096/097のAccepted・Completedを維持する。本書は現在の契約、runbookは手順・履歴、production evidenceは実測の正本である。
 
-## 推奨する利用方法
+## 採用した利用方法
 
 `/mc reset game:<対応Game> confirm:true seed:fixed|new` の一操作だけを公開する。
 初版は、選択中かつ稼働中の対応Gameのみ。停止中、別Game稼働中、人数positive/unknownは副作用前に拒否する。
 EC2を維持し、既存の保存・正常停止・exact container removal・起動を一つのOperation/leaseでつなぐ。
 Gameの削除・再登録、worldファイルの選択削除、通常STOP/STARTの再Admissionはしない。
 
-| 利用者判断 | 推奨案と負担・限界 |
+| 利用者判断 | 採用内容と負担・限界 |
 |---|---|
 | 有効化 | 管理者がGitの明示allowlistを承認し、CP/hostへ同じ宣言を配布。日常操作から変更できない。`config/reset-dev.json`にB限定の承認値を固定。A非対応、production反映は別途検証する |
 | 日常の実行 | 既存PlayerまたはAdmin role。遊ぶ人が管理者待ちせず使える。ただし新worldへ移り旧worldは保持policyに従うことを明示確認 |
 | 同席player | 最終観測0人、hostの停止直前RCONも0人。unknown/positiveは拒否。全員投票や死亡検知は追加しない。最後の確認後に接続するraceが残り、無切断保証ではない |
 | 外部保護 | 毎回のSnapshotを待たず、旧領域を同じEBSへ保持。EBS喪失時は最後の外部BACKUP以降の進捗を失い得る。移行直前とrelease検証用BACKUPは別目的で計画する |
-| 保持 | 直近3個のmanaged旧領域＋currentを保持し、それ以前を成功後に自動整理する案。最初の既存`server`は永久anchorとして自動削除対象外。過去の例「2」は採用しない |
-| 容量 | 準備前にfree ≥ max(4 GiB, 現保存領域のファイル総量×2)を要求する案。これは将来のworld成長を予約する保証ではない。不足時は旧worldを削って続行しない |
+| 保持 | 直近3個のmanaged旧領域＋currentを保持し、それ以前を成功後に自動整理する。最初の既存`server`は永久anchorとして自動削除対象外。過去の例「2」は採用しない |
+| 容量 | 準備前にfree ≥ max(4 GiB, 現保存領域のファイル総量×2)を要求する。これは将来のworld成長を予約する保証ではない。不足時は旧worldを削って続行しない |
 | seed | `fixed`はGame宣言のsigned 64-bit seed、`new`はUUID由来Operation IDのSHA-256から決定するsigned 64-bit値。再試行で再抽選しない。承認されたBの固定seedは具体値0 |
 
 既存のadmin-only SWITCHは他Gameを止める権限として維持する。Resetの有効化と日常実行を同じadmin-onlyにする案は、Hardcoreの反復操作を管理者へ集中させるため初版の推奨にしない。
@@ -86,26 +86,26 @@ foreground準備の確定非zero終了は既存owned failureへ終端化し、�
 ## BACKUPと復旧の差分
 
 D-097のSnapshot単位・tags schema v2・共有newest 7・dry-run-only RETENTIONを変えない。
-復旧JSONは既存Games.world全体に任意のcurrent_idを含め、data_sourceとの一致を検証する互換拡張を提案する。
+復旧JSONは既存Games.world全体に任意のcurrent_idを含め、data_sourceとの一致を検証する。
 旧JSON/旧digestを書換えず、current_id欠損なら旧固定pathとして読む。
 current以外の領域・owner record・deleting/deletedの状態はSnapshot内のEBSに含まれる。
 これによりOperation監査がなくても、選択参照はprovenance、所有と実データはSnapshotから再構築できる。
 
 同じEBS上の旧worldはEBS喪失からの保護ではない。またlive directory削除後も過去Snapshot内にデータが残り得る。
 Snapshot保持とworld directory保持は別の寿命であり、今回DeleteSnapshot能力は追加しない。
-実v2 multi-Game単独復元と、新world参照の実復元は未実証。[適用runbook](../runbooks/game_scoped_reset_migration.md)の隔離確認を先に行う。
+今回のshared v2復旧点では、A単独抽出とB非干渉、さらにB新currentのowner chain付き抽出・保存再起動を隔離copyで実証した。本番への上書き復元、任意の将来構成、削除済みworldの復元まで実証したわけではない。[実行証跡](../evidence/2026-09-12-reset-production.json)を参照する。
 
 ## 現行文書との差分
 
 既存`world.generation`はlegacy記録として残し、Reset回数や現在worldのidentityへ流用しない。新しい選択の正本は`current_id`だけである。
-RESET-001の連番generation増加、RESET-002と旧domain/deliveryの毎回最終BACKUP・Reset後停止は、D-098で置換を提案する。
-現時点のAccepted仕様を遡って変更しない。Reset以外のwhitelist、Web、異なるruntime、Phase 9全体は対象外。
+RESET-001の連番generation増加、RESET-002と旧domain/deliveryの毎回最終BACKUP・Reset後停止は、D-098で置換した。旧記録は当時の仕様として保持する。
+Reset以外のwhitelist、Web、異なるruntime、Phase 9全体は対象外。
 実装・テスト結果は[準備証跡](../evidence/2026-09-12-reset-preparation.json)に集約し、ここをproduction完了証跡にはしない。
 
 
 ## 文書の責務と確認結果
 
-READMEは現在適用済みと次期提案の入口、要件はRESET-001/002の見直し対象、architecture/domain/dataは新しい選択参照・実観測・復旧情報への提案参照を追加する。契約詳細は本書へ集約し重複定義しない。
-Delivery PlanはPhase番号より一利用機能の完了とv2復旧の先行条件を示し、operations/human flowは削除単位・一括承認・有効化と日常操作の違いを参照する。DecisionsはD-098をProposedに限定する。initial configurationは空のcapability宣言を明示する。
+READMEは適用済み機能の入口、要件はRESET-001/002の置換、architecture/domain/dataは新しい選択参照・実観測・復旧情報へのAccepted参照を持つ。契約詳細は本書へ集約し重複定義しない。
+Delivery Planは一利用機能の完了と復旧条件を示し、operations/human flowは削除単位・有効化と日常操作の違いを参照する。DecisionsはD-098 Acceptedと限定release完了を区別して記録し、initial configurationはGitのB限定宣言を参照する。
 AGENTS.mdとCodex working agreementは既にローカル実装の委任・一括production承認・Wiki triggerを満たすため変更しない。D-095/096/097 runbook/evidenceは実行履歴として保持し、未実行Resetの成功証跡を追記しない。Phase8 reviewは次期具体案への参照だけ追加する。
 Reset以外のwhitelist再設計、Web、異なるspec/runtime、旧Snapshot削除、Resetの自動死亡検知等は引き続き未採用である。

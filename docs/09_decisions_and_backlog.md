@@ -14,7 +14,8 @@
 
 ### D-098 対応Game限定Resetと所有済み旧worldの限定整理
 
-- **状態: Accepted（2026-09-12ユーザーGO、基準HEAD `1f89613694a5fb8f502d87b42a72e6cbb6efb247`）。production適用・二回の隔離復旧・一般公開は未完了。**
+- **状態: Accepted（2026-09-12ユーザーGO、基準HEAD `1f89613694a5fb8f502d87b42a72e6cbb6efb247`）。同日、production適用・二回の隔離復旧・条件付き一般公開 Completed。**
+- **適用結果:** PENDING/RUNNINGのplan固定不整合を限定修正し、追加GO後のfixed/newは成功。historical FAILEDは保持。新currentの通常STOP/START、A復帰、第二Snapshotからowner chain付きcurrent抽出・保存再起動を実証。両受付UNSET、A選択STOPPED/HEALTHY、43 alarms OK。本番旧world削除0件・実Discord RESET Interaction未実施。[closeout](runbooks/game_scoped_reset_migration.md#production-closeout)。
 - RESET-001/002の従来案を見直し、一つの操作で同一Gameの保存・正常停止、新領域準備、選択参照確定、同じEC2上の起動を行う。
 - 利用者policy・設定境界・失敗時の契約案は[Reset設計](reviews/game_scoped_reset.md)、適用条件は[runbook](runbooks/game_scoped_reset_migration.md)へ集約する。旧world保持は外部BACKUPの代替ではない。
 - B限定、Player/Admin、観測0人＋明示確認（接続raceあり）、fixed_seed=0、managed旧world3個＋current＋別枠legacy anchor、free >= max(4 GiB, source×2)、毎回外部BACKUPを待たない損失境界を採用。二回の隔離復旧成功を一般公開・自動cleanup公開の条件とする。A/Bの既存データを破棄可能とみなさない。

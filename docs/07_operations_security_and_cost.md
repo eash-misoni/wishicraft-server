@@ -1,6 +1,6 @@
 # 07. Operations, Security, and Cost
 
-> Reset保護契約（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)のB managed旧world整理は、二回の隔離復旧後に公開する条件付き承認。Snapshot削除は別で未承認。容量不足では先に既存データを削らず停止する。手順・費用は[runbook](runbooks/game_scoped_reset_migration.md)へ集約する。
+> Reset保護契約（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)のB managed旧world整理は、二回の隔離復旧条件を満たして公開済み。本番削除実績は0件。Snapshot削除は別で未承認。容量不足では先に既存データを削らず停止する。手順・費用は[runbook](runbooks/game_scoped_reset_migration.md)へ集約する。
 
 
 - **文書状態:** Canonical

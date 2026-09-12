@@ -2,8 +2,8 @@
   "approval_head": "1f89613694a5fb8f502d87b42a72e6cbb6efb247",
   "decision": "D-098 Accepted",
   "production_applied": true,
-  "restore_trials_completed": 1,
-  "public_release": false,
+  "restore_trials_completed": 2,
+  "public_release": true,
   "policy": {
     "game-vanilla-secondary": {
       "fixed_seed": 0,
@@ -11,7 +11,7 @@
       "minimum_free_bytes": 4294967296
     }
   },
-  "checkpoint": "BLOCKED_TERMINAL_FIXED_RESET_BEFORE_PLAN",
+  "checkpoint": "D098_PRODUCTION_RELEASE_COMPLETED",
   "production_mutations": [
     {
       "action": "Discord Command reserved concurrency 0",
@@ -50,6 +50,21 @@
     },
     {
       "action": "Admission0 after safe STOP"
+    },
+    {
+      "action": "PENDING/RUNNING code-only CP deploy at b6969c8"
+    },
+    {
+      "action": "Admission UNSET; canonical legacy B START; additional fixed and new each once succeeded"
+    },
+    {
+      "action": "canonical new-current STOP/START; SWITCH A; STOP succeeded"
+    },
+    {
+      "action": "second canonical shared BACKUP; Admission0; second isolated restore and exact cleanup succeeded"
+    },
+    {
+      "action": "Admission UNSET; canonical RETENTION dry-run succeeded; Command restored UNSET after two restore proofs"
     }
   ],
   "preflight": {
@@ -84,10 +99,10 @@
     "human_login_completed": true
   },
   "concurrency_last_confirmed": {
-    "wc-dev-admission": 0,
-    "wc-dev-discord-command": 0
+    "wc-dev-admission": "UNSET",
+    "wc-dev-discord-command": "UNSET"
   },
-  "runtime_last_confirmed": "B selected STOPPED/HEALTHY; Target stopped; DNS/Lock/current/unfinished absent; A/B Games unchanged; ingress both0, original bothUNSET",
+  "runtime_last_confirmed": "A selected STOPPED/HEALTHY; DNS/Lock/current/unfinished absent; original EBS unchanged; B new current + fixed retained + legacy anchor preserved; both ingress UNSET",
   "restore_source": {
     "snapshot_id": "snap-0be8e05ab05d70e84",
     "operation_id": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e",
@@ -99,13 +114,11 @@
     "state_machine_terminal_readback": "SUCCEEDED"
   },
   "not_executed": [
-    "successful fixed/new Reset",
-    "new world/owner/current_id creation",
-    "second BACKUP/isolated restore",
-    "final RETENTION",
-    "general release",
-    "production world cleanup",
-    "PENDING correction deploy"
+    "production old-world deletion (0 candidates; no extra Reset)",
+    "actual Discord RESET Interaction",
+    "human visual Minecraft inspection",
+    "DeleteSnapshot permission/DryRun/API",
+    "fault injection or blind redrive"
   ],
   "bundle": {
     "baseline": "1267ed5912e027ca2e0b1e1a419df62865f6bfcd",
@@ -208,8 +221,8 @@
     "t3a_medium_USD_hour": 0.049,
     "gp3_USD_GB_month": 0.096,
     "public_IPv4_USD_hour": 0.005,
-    "isolated_resource_cost_incurred": 0,
-    "snapshot_cost": "actual changed-block billing unknown; one approved protection Snapshot created",
+    "isolated_resource_cost_incurred": "not queried as billed cost; observed elapsed-usage estimates recorded per restore",
+    "snapshot_cost": "changed-block billed cost unknown; exactly two approved shared v2 Snapshots added",
     "budget_changed": false
   },
   "restore_1": {
@@ -573,6 +586,13 @@
       "billing_actual": "not measured; excludes stop latency/storage/traffic/tax/Snapshot blocks",
       "temporary_resources_remaining": 0,
       "budget_changed": false
+    },
+    "cost_estimate": {
+      "running_seconds_from_launch_to_stop_request": 1465.0,
+      "host_plus_ipv4_usd_at_0_054_per_hour": 0.02197,
+      "basis": "observed elapsed usage times official quoted rate; not billed cost",
+      "storage_transfer_tax_snapshot_delta_excluded": true,
+      "temporary_resources_remaining": 0
     }
   },
   "host_migration": {
@@ -1288,7 +1308,2354 @@
     ],
     "additional_reset_requests": 0
   },
-  "final_observation": {
+  "local_correction": {
+    "deployed": true,
+    "scope": "Reset plan freeze permits PENDING/RUNNING; terminal remains rejected; same exact-read recovery and ownership checks",
+    "reproduction": "1 failed (PENDING), 1 passed (RUNNING) before fix",
+    "focused": "24 passed",
+    "full_tests": "1023 passed",
+    "ruff": "passed",
+    "format": "203 files passed",
+    "mypy": "164 source files passed",
+    "synth": "all 5 configurations passed",
+    "diff": {
+      "added": [],
+      "removed": [],
+      "changed": {
+        "ReconcileFunction30829CB6": "AWS::Lambda::Function",
+        "StartTaskFunction8C564C4A": "AWS::Lambda::Function",
+        "StopTaskFunction11473A8C": "AWS::Lambda::Function",
+        "BackupTaskFunctionA44639DC": "AWS::Lambda::Function",
+        "RetentionTaskFunction9F285CE4": "AWS::Lambda::Function",
+        "AdmissionFunction23082B67": "AWS::Lambda::Function",
+        "DiscordCommandFunction7D25102A": "AWS::Lambda::Function",
+        "StatusExecutorFunction6E5C9869": "AWS::Lambda::Function",
+        "DiscordMessageFunction78FA388B": "AWS::Lambda::Function",
+        "AutoStopEvaluatorFunctionF85F8B50": "AWS::Lambda::Function",
+        "MonitoringObserverFunction584DA7C7": "AWS::Lambda::Function"
+      },
+      "code_only": true,
+      "IAM_host_policy_unchanged": true
+    },
+    "deployed_head": "b6969c80ad7f68d1b7a97693d8b1d85f1e35c6c0"
+  },
+  "automatic_approval_review": [
+    "maintenance start first attempt rejected before execution; explicit preflight/live identity checks added, then approved",
+    "fixed RESET first attempt rejected before execution for missing visible restore proof; final-host-proof revalidated, then approved; only one admitted RESET"
+  ],
+  "historical_auth_resume": "Human canonical SSO login; caller read-back, same BACKUP execution terminal status, no intervening write and ingress/drain; then close Admission and use the existing Snapshot, no repeated BACKUP",
+  "plan_state_continuation": {
+    "approval_head": "b6969c80ad7f68d1b7a97693d8b1d85f1e35c6c0",
+    "historical_failed_unchanged": "op-60552fa8-96fb-499c-a0fd-7b62cc5f73fc",
+    "deployed_head": "b6969c80ad7f68d1b7a97693d8b1d85f1e35c6c0",
+    "diff": "11 Lambda code assets only; no IAM/environment/workflow/host changes",
+    "start_operation": "op-2ceb6588-792f-41e6-a887-13b00a614558",
+    "fixed_operation": "op-f221de43-6a0c-46b8-b182-7892ce35e361",
+    "fixed_status": "SUCCEEDED",
+    "fixed_requested_at": "2026-09-12T12:21:36.112420Z",
+    "fixed_completed_at": "2026-09-12T12:25:34.218051Z",
+    "fixed_host_proof": {
+      "owners": {
+        "op-f221de43-6a0c-46b8-b182-7892ce35e361.owner.json": {
+          "plan": {
+            "policy": {
+              "fixed_seed": 0,
+              "minimum_free_bytes": 4294967296,
+              "retain_previous": 3
+            },
+            "schema_version": 1,
+            "seed": 0,
+            "source": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-2ceb6588-792f-41e6-a887-13b00a614558"
+            },
+            "target": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+            }
+          },
+          "phase": "initialized",
+          "files": {
+            "server.properties": "cce6632f503db53a43299c43d6d82f6c45289dbb0cbcafffefafebac98a7ac80",
+            "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969",
+            "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        }
+      },
+      "seed_response": "Seed: [0]",
+      "receipt": {
+        "target": {
+          "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361",
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+          "game_id": "game-vanilla-secondary"
+        },
+        "phase": "running"
+      },
+      "boot_id": "3ebf07f5-d66c-41b9-9aad-5b3ce92b0566",
+      "container": {
+        "id": "3f230f92f85452e16196ea3d036af828ce1ca4f05614d75587a8f7e334c523fc",
+        "image_id": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+        "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+        "labels": {
+          "com.docker.compose.config-hash": "798ae61f12aae9911b233d6a221ead18198eafca49478f418685f0f0ea6e20dc",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "wishicraft-host-runtime",
+          "com.docker.compose.project.config_files": "/etc/wishicraft/host-runtime/compose.yaml",
+          "com.docker.compose.project.working_dir": "/etc/wishicraft/host-runtime",
+          "com.docker.compose.service": "minecraft",
+          "com.docker.compose.version": "5.4.0",
+          "com.wishicraft.active-game-data-source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+          "com.wishicraft.active-game-id": "game-vanilla-secondary",
+          "com.wishicraft.run-id": "op-f221de43-6a0c-46b8-b182-7892ce35e361",
+          "org.opencontainers.image.authors": "Geoff Bourne <itzgeoff@gmail.com>",
+          "org.opencontainers.image.created": "2026-07-20T18:50:00.880Z",
+          "org.opencontainers.image.description": "Docker image that provides a Minecraft Server for Java Edition that automatically installs/upgrades versions, modloaders, modpacks and more at startup",
+          "org.opencontainers.image.licenses": "Apache-2.0",
+          "org.opencontainers.image.revision": "4cbdf520c88d57713637c5e4c30b5ba5caa40698",
+          "org.opencontainers.image.source": "https://github.com/itzg/docker-minecraft-server",
+          "org.opencontainers.image.title": "docker-minecraft-server",
+          "org.opencontainers.image.url": "https://github.com/itzg/docker-minecraft-server",
+          "org.opencontainers.image.version": "2026.7.2"
+        },
+        "state": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 8717,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-09-12T12:22:29.175619195Z",
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "Health": {
+            "Status": "healthy",
+            "FailingStreak": 0,
+            "Log": [
+              {
+                "Start": "2026-09-12T12:26:00.107856433Z",
+                "End": "2026-09-12T12:26:00.224102111Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:26:30.22518229Z",
+                "End": "2026-09-12T12:26:30.333812379Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:27:00.33475871Z",
+                "End": "2026-09-12T12:27:00.445366677Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:27:30.447014071Z",
+                "End": "2026-09-12T12:27:30.563545956Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:28:00.564896611Z",
+                "End": "2026-09-12T12:28:00.673631456Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              }
+            ]
+          }
+        },
+        "mounts": [
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-password",
+            "Destination": "/run/secrets/rcon-password",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-cli.env",
+            "Destination": "/data/.rcon-cli.env",
+            "Mode": "rw",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-cli.yaml",
+            "Destination": "/data/.rcon-cli.yaml",
+            "Mode": "rw",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          }
+        ]
+      },
+      "probe": {
+        "active_game": {
+          "binding_consistency": "consistent",
+          "game_id": "game-vanilla-secondary",
+          "state": "observed"
+        },
+        "container": {
+          "container_id": "3f230f92f85452e16196ea3d036af828ce1ca4f05614d75587a8f7e334c523fc",
+          "health": "healthy",
+          "image_digest": "sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+          "image_reference": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+          "name": "wishicraft-host-runtime-minecraft-1",
+          "oom_killed": false,
+          "published_ports": {
+            "25565/tcp": [
+              {
+                "HostIp": "",
+                "HostPort": "25565"
+              }
+            ]
+          },
+          "restart_count": 0,
+          "restart_policy": "no",
+          "state": "running"
+        },
+        "docker": {
+          "state": "active"
+        },
+        "errors": [],
+        "execution": {
+          "phase": "running",
+          "process_id": "4aeec753312c02920db50b1d10ea9554972081214bb197722c9c63dfadf9e49f",
+          "target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+          }
+        },
+        "host_runtime": {
+          "state": "active",
+          "unit": "wishicraft-host-runtime.service"
+        },
+        "identity": {
+          "compose_project": "wishicraft-host-runtime",
+          "compose_service": "minecraft",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "runtime_id": "wishicraft-host-runtime"
+        },
+        "minecraft": {
+          "protocol": {
+            "attempted": true,
+            "compatible_response": true,
+            "host": "localhost",
+            "observed_at": "2026-09-12T12:28:02.492947Z",
+            "player_count": 0,
+            "port": 25565,
+            "protocol_version": 776,
+            "reported_version": "26.2",
+            "result": "success",
+            "version_match": true
+          },
+          "protocol_state": "ready",
+          "ready": true,
+          "runtime_state": "running"
+        },
+        "mount": {
+          "expected_filesystem_type": "xfs",
+          "expected_filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "filesystem_type": "xfs",
+          "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "mount_path": "/srv/minecraft",
+          "root_gid": 0,
+          "root_mode": "0755",
+          "root_uid": 0,
+          "state": "expected"
+        },
+        "observed_at": "2026-09-12T12:28:02.633345Z",
+        "probe_version": "1.4.0",
+        "schema_version": 1,
+        "telemetry": {
+          "available_bytes": 31420198912,
+          "boot_id": "3ebf07f5-d66c-41b9-9aad-5b3ce92b0566",
+          "error": null,
+          "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "mount_path": "/srv/minecraft",
+          "observed_at": "2026-09-12T12:28:02.633380Z",
+          "schema_version": 1,
+          "source": "/dev/nvme1n1",
+          "state": "observed",
+          "total_bytes": 32145145856,
+          "used_bytes": 724946944,
+          "volume_id": "vol-03ac9f534326c345c"
+        }
+      },
+      "inventory": {
+        "game-vanilla-main": {
+          "files": 112,
+          "bytes": 142009533,
+          "level_dat": true,
+          "player_data": [
+            "world/players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+          ],
+          "level_dat_sha256": "2fa7c285bcf516e87fc13991c99b4b65e28b557093a8a91fb629eacc99fe3d84"
+        },
+        "game-vanilla-secondary": {
+          "files": 84,
+          "bytes": 130947805,
+          "level_dat": true,
+          "player_data": [],
+          "level_dat_sha256": "45edb0a21833ee6755112f5d5db8daed3dd17148112da5b0f8e43feff89f1f86"
+        }
+      }
+    },
+    "new_operation": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+    "new_status": "SUCCEEDED",
+    "new_seed": -8202942784802930866,
+    "fixed_request_count_including_historical_failure": 2,
+    "new_request_count": 1,
+    "first_backup_and_restore_reused": true,
+    "new_requested_at": "2026-09-12T12:28:53.332514Z",
+    "new_completed_at": "2026-09-12T12:32:49.937129Z",
+    "new_host_proof": {
+      "owners": {
+        "op-f221de43-6a0c-46b8-b182-7892ce35e361.owner.json": {
+          "plan": {
+            "policy": {
+              "fixed_seed": 0,
+              "minimum_free_bytes": 4294967296,
+              "retain_previous": 3
+            },
+            "schema_version": 1,
+            "seed": 0,
+            "source": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-2ceb6588-792f-41e6-a887-13b00a614558"
+            },
+            "target": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+            }
+          },
+          "phase": "initialized",
+          "files": {
+            "server.properties": "cce6632f503db53a43299c43d6d82f6c45289dbb0cbcafffefafebac98a7ac80",
+            "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969",
+            "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf.owner.json": {
+          "plan": {
+            "policy": {
+              "fixed_seed": 0,
+              "minimum_free_bytes": 4294967296,
+              "retain_previous": 3
+            },
+            "schema_version": 1,
+            "seed": -8202942784802930866,
+            "source": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+            },
+            "target": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+            }
+          },
+          "phase": "initialized",
+          "files": {
+            "server.properties": "ec0bb4f0b00292502496dcf3e7ea3101bf36b29e6ce9a92f792b4f5b79acbef9",
+            "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969",
+            "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        }
+      },
+      "seed_response": "Seed: [-8202942784802930866]",
+      "receipt": {
+        "target": {
+          "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "game_id": "game-vanilla-secondary"
+        },
+        "phase": "running"
+      },
+      "boot_id": "3ebf07f5-d66c-41b9-9aad-5b3ce92b0566",
+      "container": {
+        "id": "060d170cf7352cfacd59012f74d4f1cba228bf1296108beaa16e4464b3a34a32",
+        "image_id": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+        "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+        "labels": {
+          "com.docker.compose.config-hash": "ccb8db29065deaa1457351b5565b7a5f3ed4db17fea5064eb30c0bf52a5ea9d0",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "wishicraft-host-runtime",
+          "com.docker.compose.project.config_files": "/etc/wishicraft/host-runtime/compose.yaml",
+          "com.docker.compose.project.working_dir": "/etc/wishicraft/host-runtime",
+          "com.docker.compose.service": "minecraft",
+          "com.docker.compose.version": "5.4.0",
+          "com.wishicraft.active-game-data-source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "com.wishicraft.active-game-id": "game-vanilla-secondary",
+          "com.wishicraft.run-id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+          "org.opencontainers.image.authors": "Geoff Bourne <itzgeoff@gmail.com>",
+          "org.opencontainers.image.created": "2026-07-20T18:50:00.880Z",
+          "org.opencontainers.image.description": "Docker image that provides a Minecraft Server for Java Edition that automatically installs/upgrades versions, modloaders, modpacks and more at startup",
+          "org.opencontainers.image.licenses": "Apache-2.0",
+          "org.opencontainers.image.revision": "4cbdf520c88d57713637c5e4c30b5ba5caa40698",
+          "org.opencontainers.image.source": "https://github.com/itzg/docker-minecraft-server",
+          "org.opencontainers.image.title": "docker-minecraft-server",
+          "org.opencontainers.image.url": "https://github.com/itzg/docker-minecraft-server",
+          "org.opencontainers.image.version": "2026.7.2"
+        },
+        "state": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 14150,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-09-12T12:29:41.263896938Z",
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "Health": {
+            "Status": "healthy",
+            "FailingStreak": 0,
+            "Log": [
+              {
+                "Start": "2026-09-12T12:31:41.764921428Z",
+                "End": "2026-09-12T12:31:41.87401585Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:32:11.874783443Z",
+                "End": "2026-09-12T12:32:12.014523186Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:32:42.015695333Z",
+                "End": "2026-09-12T12:32:42.125910969Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:33:12.127808357Z",
+                "End": "2026-09-12T12:33:12.243878086Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:33:42.245980466Z",
+                "End": "2026-09-12T12:33:42.352139515Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              }
+            ]
+          }
+        },
+        "mounts": [
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-cli.env",
+            "Destination": "/data/.rcon-cli.env",
+            "Mode": "rw",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-cli.yaml",
+            "Destination": "/data/.rcon-cli.yaml",
+            "Mode": "rw",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-password",
+            "Destination": "/run/secrets/rcon-password",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          }
+        ]
+      },
+      "probe": {
+        "active_game": {
+          "binding_consistency": "consistent",
+          "game_id": "game-vanilla-secondary",
+          "state": "observed"
+        },
+        "container": {
+          "container_id": "060d170cf7352cfacd59012f74d4f1cba228bf1296108beaa16e4464b3a34a32",
+          "health": "healthy",
+          "image_digest": "sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+          "image_reference": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+          "name": "wishicraft-host-runtime-minecraft-1",
+          "oom_killed": false,
+          "published_ports": {
+            "25565/tcp": [
+              {
+                "HostIp": "",
+                "HostPort": "25565"
+              }
+            ]
+          },
+          "restart_count": 0,
+          "restart_policy": "no",
+          "state": "running"
+        },
+        "docker": {
+          "state": "active"
+        },
+        "errors": [],
+        "execution": {
+          "phase": "running",
+          "process_id": "cd36bf4a753b966cf8ae739b185ff9a99a25481faae7d83deb197ca79b0fd94c",
+          "target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+          }
+        },
+        "host_runtime": {
+          "state": "active",
+          "unit": "wishicraft-host-runtime.service"
+        },
+        "identity": {
+          "compose_project": "wishicraft-host-runtime",
+          "compose_service": "minecraft",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "runtime_id": "wishicraft-host-runtime"
+        },
+        "minecraft": {
+          "protocol": {
+            "attempted": true,
+            "compatible_response": true,
+            "host": "localhost",
+            "observed_at": "2026-09-12T12:33:43.984111Z",
+            "player_count": 0,
+            "port": 25565,
+            "protocol_version": 776,
+            "reported_version": "26.2",
+            "result": "success",
+            "version_match": true
+          },
+          "protocol_state": "ready",
+          "ready": true,
+          "runtime_state": "running"
+        },
+        "mount": {
+          "expected_filesystem_type": "xfs",
+          "expected_filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "filesystem_type": "xfs",
+          "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "mount_path": "/srv/minecraft",
+          "root_gid": 0,
+          "root_mode": "0755",
+          "root_uid": 0,
+          "state": "expected"
+        },
+        "observed_at": "2026-09-12T12:33:44.143306Z",
+        "probe_version": "1.4.0",
+        "schema_version": 1,
+        "telemetry": {
+          "available_bytes": 31287939072,
+          "boot_id": "3ebf07f5-d66c-41b9-9aad-5b3ce92b0566",
+          "error": null,
+          "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "mount_path": "/srv/minecraft",
+          "observed_at": "2026-09-12T12:33:44.143342Z",
+          "schema_version": 1,
+          "source": "/dev/nvme1n1",
+          "state": "observed",
+          "total_bytes": 32145145856,
+          "used_bytes": 857206784,
+          "volume_id": "vol-03ac9f534326c345c"
+        }
+      },
+      "inventory": {
+        "game-vanilla-main": {
+          "files": 112,
+          "bytes": 142009533,
+          "level_dat": true,
+          "player_data": [
+            "world/players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+          ],
+          "level_dat_sha256": "2fa7c285bcf516e87fc13991c99b4b65e28b557093a8a91fb629eacc99fe3d84"
+        },
+        "game-vanilla-secondary": {
+          "files": 84,
+          "bytes": 130947805,
+          "level_dat": true,
+          "player_data": [],
+          "level_dat_sha256": "45edb0a21833ee6755112f5d5db8daed3dd17148112da5b0f8e43feff89f1f86"
+        }
+      }
+    },
+    "successful_managed_world_generations": 2,
+    "production_world_deletions": 0,
+    "heartbeat_observations": {
+      "fixed-heartbeat-v2": {
+        "at": "2026-09-12T12:27:39.154867+00:00",
+        "runtime-heartbeats": [
+          {
+            "process_id": "4aeec753312c02920db50b1d10ea9554972081214bb197722c9c63dfadf9e49f",
+            "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "observed_at": "2026-09-12T12:27:10.526928Z",
+            "boot_id": "3ebf07f5-d66c-41b9-9aad-5b3ce92b0566",
+            "active_game_id": "game-vanilla-secondary",
+            "expires_at": "1789302430",
+            "player_count": "0",
+            "runtime_id": "wishicraft-host-runtime",
+            "protocol_state": "ready",
+            "empty_since": "2026-09-12T12:24:07.487963Z",
+            "system_id": "wishicraft-main",
+            "schema_version": "1"
+          }
+        ],
+        "auto-stop-intents": [
+          {
+            "stop_operation_id": "op-38cc0cde-ca79-4490-ad21-8d299c7ecf64",
+            "created_at": "2026-09-10T10:38:49.010870Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "CANCELLED",
+            "updated_at": "2026-09-10T10:45:00.393959Z",
+            "intent_id": "asi-0ab6a25b2fb78087cddc50fcf36b4536",
+            "warning_delivered_at": "2026-09-10T10:38:52.105532Z",
+            "warning_lead_minutes": "5",
+            "block_reason": "FINAL_GATE_OBSERVATION_UNKNOWN",
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T10:44:46.036481Z",
+            "empty_since": "2026-09-10T10:12:51.458260Z",
+            "warning_delivery_id": "asw-2c1c248dc4b5fcce3cc35de5a02455f3",
+            "schema_version": "1",
+            "warning_message_id": "1547556964714946583",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          },
+          {
+            "stop_operation_id": "op-5fdd2110-f7b2-4c0d-90a8-fff1c813c123",
+            "created_at": "2026-09-10T11:32:46.090284Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "STOP_REQUESTED",
+            "updated_at": "2026-09-10T11:38:46.169167Z",
+            "intent_id": "asi-5798ce1b94923361080eeb56af10c9ba",
+            "warning_delivered_at": "2026-09-10T11:32:48.554540Z",
+            "warning_lead_minutes": "5",
+            "block_reason": null,
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T11:38:46.169167Z",
+            "empty_since": "2026-09-10T11:07:44.420442Z",
+            "warning_delivery_id": "asw-d58f3ad5b9882103a93bb61224263783",
+            "schema_version": "1",
+            "warning_message_id": "1547570539634233435",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          },
+          {
+            "stop_operation_id": "op-2fc843bf-acee-4269-a0cf-427002375b74",
+            "created_at": "2026-09-10T04:05:46.098409Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "STOP_REQUESTED",
+            "updated_at": "2026-09-10T04:11:46.235860Z",
+            "intent_id": "asi-be4b0a59883022233f9584f988ad4056",
+            "warning_delivered_at": "2026-09-10T04:05:49.020196Z",
+            "warning_lead_minutes": "5",
+            "block_reason": null,
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T04:11:46.235860Z",
+            "empty_since": "2026-09-10T03:40:35.477765Z",
+            "warning_delivery_id": "asw-a3b1cc536f07c1c1cadb29f007fd2c1f",
+            "schema_version": "1",
+            "warning_message_id": "1547458053581053982",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          }
+        ],
+        "locks": []
+      },
+      "fixed-heartbeat-v3": {
+        "at": "2026-09-12T12:28:34.953486+00:00",
+        "runtime-heartbeats": [
+          {
+            "process_id": "4aeec753312c02920db50b1d10ea9554972081214bb197722c9c63dfadf9e49f",
+            "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "observed_at": "2026-09-12T12:28:11.481699Z",
+            "boot_id": "3ebf07f5-d66c-41b9-9aad-5b3ce92b0566",
+            "active_game_id": "game-vanilla-secondary",
+            "expires_at": "1789302491",
+            "player_count": "0",
+            "runtime_id": "wishicraft-host-runtime",
+            "protocol_state": "ready",
+            "empty_since": "2026-09-12T12:24:07.487963Z",
+            "system_id": "wishicraft-main",
+            "schema_version": "1"
+          }
+        ],
+        "auto-stop-intents": [
+          {
+            "stop_operation_id": "op-38cc0cde-ca79-4490-ad21-8d299c7ecf64",
+            "created_at": "2026-09-10T10:38:49.010870Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "CANCELLED",
+            "updated_at": "2026-09-10T10:45:00.393959Z",
+            "intent_id": "asi-0ab6a25b2fb78087cddc50fcf36b4536",
+            "warning_delivered_at": "2026-09-10T10:38:52.105532Z",
+            "warning_lead_minutes": "5",
+            "block_reason": "FINAL_GATE_OBSERVATION_UNKNOWN",
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T10:44:46.036481Z",
+            "empty_since": "2026-09-10T10:12:51.458260Z",
+            "warning_delivery_id": "asw-2c1c248dc4b5fcce3cc35de5a02455f3",
+            "schema_version": "1",
+            "warning_message_id": "1547556964714946583",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          },
+          {
+            "stop_operation_id": "op-5fdd2110-f7b2-4c0d-90a8-fff1c813c123",
+            "created_at": "2026-09-10T11:32:46.090284Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "STOP_REQUESTED",
+            "updated_at": "2026-09-10T11:38:46.169167Z",
+            "intent_id": "asi-5798ce1b94923361080eeb56af10c9ba",
+            "warning_delivered_at": "2026-09-10T11:32:48.554540Z",
+            "warning_lead_minutes": "5",
+            "block_reason": null,
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T11:38:46.169167Z",
+            "empty_since": "2026-09-10T11:07:44.420442Z",
+            "warning_delivery_id": "asw-d58f3ad5b9882103a93bb61224263783",
+            "schema_version": "1",
+            "warning_message_id": "1547570539634233435",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          },
+          {
+            "stop_operation_id": "op-2fc843bf-acee-4269-a0cf-427002375b74",
+            "created_at": "2026-09-10T04:05:46.098409Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "STOP_REQUESTED",
+            "updated_at": "2026-09-10T04:11:46.235860Z",
+            "intent_id": "asi-be4b0a59883022233f9584f988ad4056",
+            "warning_delivered_at": "2026-09-10T04:05:49.020196Z",
+            "warning_lead_minutes": "5",
+            "block_reason": null,
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T04:11:46.235860Z",
+            "empty_since": "2026-09-10T03:40:35.477765Z",
+            "warning_delivery_id": "asw-a3b1cc536f07c1c1cadb29f007fd2c1f",
+            "schema_version": "1",
+            "warning_message_id": "1547458053581053982",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          }
+        ],
+        "locks": []
+      },
+      "new-heartbeat-v2": {
+        "at": "2026-09-12T12:33:48.212549+00:00",
+        "runtime-heartbeats": [
+          {
+            "process_id": "cd36bf4a753b966cf8ae739b185ff9a99a25481faae7d83deb197ca79b0fd94c",
+            "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "observed_at": "2026-09-12T12:33:16.506818Z",
+            "boot_id": "3ebf07f5-d66c-41b9-9aad-5b3ce92b0566",
+            "active_game_id": "game-vanilla-secondary",
+            "expires_at": "1789302796",
+            "player_count": "0",
+            "runtime_id": "wishicraft-host-runtime",
+            "protocol_state": "ready",
+            "empty_since": "2026-09-12T12:31:14.546473Z",
+            "system_id": "wishicraft-main",
+            "schema_version": "1"
+          }
+        ],
+        "auto-stop-intents": [
+          {
+            "stop_operation_id": "op-38cc0cde-ca79-4490-ad21-8d299c7ecf64",
+            "created_at": "2026-09-10T10:38:49.010870Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "CANCELLED",
+            "updated_at": "2026-09-10T10:45:00.393959Z",
+            "intent_id": "asi-0ab6a25b2fb78087cddc50fcf36b4536",
+            "warning_delivered_at": "2026-09-10T10:38:52.105532Z",
+            "warning_lead_minutes": "5",
+            "block_reason": "FINAL_GATE_OBSERVATION_UNKNOWN",
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T10:44:46.036481Z",
+            "empty_since": "2026-09-10T10:12:51.458260Z",
+            "warning_delivery_id": "asw-2c1c248dc4b5fcce3cc35de5a02455f3",
+            "schema_version": "1",
+            "warning_message_id": "1547556964714946583",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          },
+          {
+            "stop_operation_id": "op-5fdd2110-f7b2-4c0d-90a8-fff1c813c123",
+            "created_at": "2026-09-10T11:32:46.090284Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "STOP_REQUESTED",
+            "updated_at": "2026-09-10T11:38:46.169167Z",
+            "intent_id": "asi-5798ce1b94923361080eeb56af10c9ba",
+            "warning_delivered_at": "2026-09-10T11:32:48.554540Z",
+            "warning_lead_minutes": "5",
+            "block_reason": null,
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T11:38:46.169167Z",
+            "empty_since": "2026-09-10T11:07:44.420442Z",
+            "warning_delivery_id": "asw-d58f3ad5b9882103a93bb61224263783",
+            "schema_version": "1",
+            "warning_message_id": "1547570539634233435",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          },
+          {
+            "stop_operation_id": "op-2fc843bf-acee-4269-a0cf-427002375b74",
+            "created_at": "2026-09-10T04:05:46.098409Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "STOP_REQUESTED",
+            "updated_at": "2026-09-10T04:11:46.235860Z",
+            "intent_id": "asi-be4b0a59883022233f9584f988ad4056",
+            "warning_delivered_at": "2026-09-10T04:05:49.020196Z",
+            "warning_lead_minutes": "5",
+            "block_reason": null,
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T04:11:46.235860Z",
+            "empty_since": "2026-09-10T03:40:35.477765Z",
+            "warning_delivery_id": "asw-a3b1cc536f07c1c1cadb29f007fd2c1f",
+            "schema_version": "1",
+            "warning_message_id": "1547458053581053982",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          }
+        ],
+        "locks": []
+      },
+      "new-heartbeat-v3": {
+        "at": "2026-09-12T12:35:05.300899+00:00",
+        "runtime-heartbeats": [
+          {
+            "process_id": "cd36bf4a753b966cf8ae739b185ff9a99a25481faae7d83deb197ca79b0fd94c",
+            "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "observed_at": "2026-09-12T12:34:17.475329Z",
+            "boot_id": "3ebf07f5-d66c-41b9-9aad-5b3ce92b0566",
+            "active_game_id": "game-vanilla-secondary",
+            "expires_at": "1789302857",
+            "player_count": "0",
+            "runtime_id": "wishicraft-host-runtime",
+            "protocol_state": "ready",
+            "empty_since": "2026-09-12T12:31:14.546473Z",
+            "system_id": "wishicraft-main",
+            "schema_version": "1"
+          }
+        ],
+        "auto-stop-intents": [
+          {
+            "stop_operation_id": "op-38cc0cde-ca79-4490-ad21-8d299c7ecf64",
+            "created_at": "2026-09-10T10:38:49.010870Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "CANCELLED",
+            "updated_at": "2026-09-10T10:45:00.393959Z",
+            "intent_id": "asi-0ab6a25b2fb78087cddc50fcf36b4536",
+            "warning_delivered_at": "2026-09-10T10:38:52.105532Z",
+            "warning_lead_minutes": "5",
+            "block_reason": "FINAL_GATE_OBSERVATION_UNKNOWN",
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T10:44:46.036481Z",
+            "empty_since": "2026-09-10T10:12:51.458260Z",
+            "warning_delivery_id": "asw-2c1c248dc4b5fcce3cc35de5a02455f3",
+            "schema_version": "1",
+            "warning_message_id": "1547556964714946583",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          },
+          {
+            "stop_operation_id": "op-5fdd2110-f7b2-4c0d-90a8-fff1c813c123",
+            "created_at": "2026-09-10T11:32:46.090284Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "STOP_REQUESTED",
+            "updated_at": "2026-09-10T11:38:46.169167Z",
+            "intent_id": "asi-5798ce1b94923361080eeb56af10c9ba",
+            "warning_delivered_at": "2026-09-10T11:32:48.554540Z",
+            "warning_lead_minutes": "5",
+            "block_reason": null,
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T11:38:46.169167Z",
+            "empty_since": "2026-09-10T11:07:44.420442Z",
+            "warning_delivery_id": "asw-d58f3ad5b9882103a93bb61224263783",
+            "schema_version": "1",
+            "warning_message_id": "1547570539634233435",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          },
+          {
+            "stop_operation_id": "op-2fc843bf-acee-4269-a0cf-427002375b74",
+            "created_at": "2026-09-10T04:05:46.098409Z",
+            "boot_id": "81517607-37cd-40d6-91e7-d6a12838dfcd",
+            "status": "STOP_REQUESTED",
+            "updated_at": "2026-09-10T04:11:46.235860Z",
+            "intent_id": "asi-be4b0a59883022233f9584f988ad4056",
+            "warning_delivered_at": "2026-09-10T04:05:49.020196Z",
+            "warning_lead_minutes": "5",
+            "block_reason": null,
+            "idle_timeout_minutes": "30",
+            "warning_attempt_count": "1",
+            "channel_id": "1531883129525244015",
+            "admission_attempted_at": "2026-09-10T04:11:46.235860Z",
+            "empty_since": "2026-09-10T03:40:35.477765Z",
+            "warning_delivery_id": "asw-a3b1cc536f07c1c1cadb29f007fd2c1f",
+            "schema_version": "1",
+            "warning_message_id": "1547458053581053982",
+            "warning_delivery_state": "DELIVERED",
+            "game_id": "game-vanilla-main"
+          }
+        ],
+        "locks": []
+      }
+    },
+    "normal_stop_operation": "op-1bcbb168-fc86-4dc7-bec5-404cf17ee7a8",
+    "normal_restart_operation": "op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b",
+    "restart_host_proof": {
+      "owners": {
+        "op-f221de43-6a0c-46b8-b182-7892ce35e361.owner.json": {
+          "plan": {
+            "policy": {
+              "fixed_seed": 0,
+              "minimum_free_bytes": 4294967296,
+              "retain_previous": 3
+            },
+            "schema_version": 1,
+            "seed": 0,
+            "source": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-2ceb6588-792f-41e6-a887-13b00a614558"
+            },
+            "target": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+            }
+          },
+          "phase": "initialized",
+          "files": {
+            "server.properties": "cce6632f503db53a43299c43d6d82f6c45289dbb0cbcafffefafebac98a7ac80",
+            "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969",
+            "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf.owner.json": {
+          "plan": {
+            "policy": {
+              "fixed_seed": 0,
+              "minimum_free_bytes": 4294967296,
+              "retain_previous": 3
+            },
+            "schema_version": 1,
+            "seed": -8202942784802930866,
+            "source": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+            },
+            "target": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+            }
+          },
+          "phase": "initialized",
+          "files": {
+            "server.properties": "ec0bb4f0b00292502496dcf3e7ea3101bf36b29e6ce9a92f792b4f5b79acbef9",
+            "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969",
+            "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        }
+      },
+      "seed_response": "Seed: [-8202942784802930866]",
+      "receipt": {
+        "target": {
+          "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b",
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "game_id": "game-vanilla-secondary"
+        },
+        "phase": "running"
+      },
+      "boot_id": "909e52eb-54b4-4e37-8be4-34e82553923a",
+      "container": {
+        "id": "070303a27dea91dd841ab7a08d8039998370c442db00833d4c2067225ebc14f6",
+        "image_id": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+        "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+        "labels": {
+          "com.docker.compose.config-hash": "ef4d6a979ebe2b5c6ec9f4f53ad36a2acb517d2bc8c27768f20cba61faff10aa",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "wishicraft-host-runtime",
+          "com.docker.compose.project.config_files": "/etc/wishicraft/host-runtime/compose.yaml",
+          "com.docker.compose.project.working_dir": "/etc/wishicraft/host-runtime",
+          "com.docker.compose.service": "minecraft",
+          "com.docker.compose.version": "5.4.0",
+          "com.wishicraft.active-game-data-source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "com.wishicraft.active-game-id": "game-vanilla-secondary",
+          "com.wishicraft.run-id": "op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b",
+          "org.opencontainers.image.authors": "Geoff Bourne <itzgeoff@gmail.com>",
+          "org.opencontainers.image.created": "2026-07-20T18:50:00.880Z",
+          "org.opencontainers.image.description": "Docker image that provides a Minecraft Server for Java Edition that automatically installs/upgrades versions, modloaders, modpacks and more at startup",
+          "org.opencontainers.image.licenses": "Apache-2.0",
+          "org.opencontainers.image.revision": "4cbdf520c88d57713637c5e4c30b5ba5caa40698",
+          "org.opencontainers.image.source": "https://github.com/itzg/docker-minecraft-server",
+          "org.opencontainers.image.title": "docker-minecraft-server",
+          "org.opencontainers.image.url": "https://github.com/itzg/docker-minecraft-server",
+          "org.opencontainers.image.version": "2026.7.2"
+        },
+        "state": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 4687,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-09-12T12:38:50.917596466Z",
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "Health": {
+            "Status": "healthy",
+            "FailingStreak": 0,
+            "Log": [
+              {
+                "Start": "2026-09-12T12:39:51.33055299Z",
+                "End": "2026-09-12T12:39:51.450166724Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:40:21.45087015Z",
+                "End": "2026-09-12T12:40:21.544185644Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:40:51.547105728Z",
+                "End": "2026-09-12T12:40:51.661602498Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:41:21.663385355Z",
+                "End": "2026-09-12T12:41:21.784184123Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:41:51.785647237Z",
+                "End": "2026-09-12T12:41:51.891972117Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              }
+            ]
+          }
+        },
+        "mounts": [
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-password",
+            "Destination": "/run/secrets/rcon-password",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-cli.env",
+            "Destination": "/data/.rcon-cli.env",
+            "Mode": "rw",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-cli.yaml",
+            "Destination": "/data/.rcon-cli.yaml",
+            "Mode": "rw",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          }
+        ]
+      },
+      "probe": {
+        "active_game": {
+          "binding_consistency": "consistent",
+          "game_id": "game-vanilla-secondary",
+          "state": "observed"
+        },
+        "container": {
+          "container_id": "070303a27dea91dd841ab7a08d8039998370c442db00833d4c2067225ebc14f6",
+          "health": "healthy",
+          "image_digest": "sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+          "image_reference": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+          "name": "wishicraft-host-runtime-minecraft-1",
+          "oom_killed": false,
+          "published_ports": {
+            "25565/tcp": [
+              {
+                "HostIp": "",
+                "HostPort": "25565"
+              }
+            ]
+          },
+          "restart_count": 0,
+          "restart_policy": "no",
+          "state": "running"
+        },
+        "docker": {
+          "state": "active"
+        },
+        "errors": [],
+        "execution": {
+          "phase": "running",
+          "process_id": "3b7be192b748de3fdf653a395b3da9958227beb256117b51c27b75d0120efa10",
+          "target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b"
+          }
+        },
+        "host_runtime": {
+          "state": "active",
+          "unit": "wishicraft-host-runtime.service"
+        },
+        "identity": {
+          "compose_project": "wishicraft-host-runtime",
+          "compose_service": "minecraft",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "runtime_id": "wishicraft-host-runtime"
+        },
+        "minecraft": {
+          "protocol": {
+            "attempted": true,
+            "compatible_response": true,
+            "host": "localhost",
+            "observed_at": "2026-09-12T12:42:09.096740Z",
+            "player_count": 0,
+            "port": 25565,
+            "protocol_version": 776,
+            "reported_version": "26.2",
+            "result": "success",
+            "version_match": true
+          },
+          "protocol_state": "ready",
+          "ready": true,
+          "runtime_state": "running"
+        },
+        "mount": {
+          "expected_filesystem_type": "xfs",
+          "expected_filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "filesystem_type": "xfs",
+          "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "mount_path": "/srv/minecraft",
+          "root_gid": 0,
+          "root_mode": "0755",
+          "root_uid": 0,
+          "state": "expected"
+        },
+        "observed_at": "2026-09-12T12:42:09.241091Z",
+        "probe_version": "1.4.0",
+        "schema_version": 1,
+        "telemetry": {
+          "available_bytes": 31288913920,
+          "boot_id": "909e52eb-54b4-4e37-8be4-34e82553923a",
+          "error": null,
+          "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "mount_path": "/srv/minecraft",
+          "observed_at": "2026-09-12T12:42:09.241129Z",
+          "schema_version": 1,
+          "source": "/dev/nvme1n1",
+          "state": "observed",
+          "total_bytes": 32145145856,
+          "used_bytes": 856231936,
+          "volume_id": "vol-03ac9f534326c345c"
+        }
+      },
+      "inventory": {
+        "game-vanilla-main": {
+          "files": 112,
+          "bytes": 142009533,
+          "level_dat": true,
+          "player_data": [
+            "world/players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+          ],
+          "level_dat_sha256": "2fa7c285bcf516e87fc13991c99b4b65e28b557093a8a91fb629eacc99fe3d84"
+        },
+        "game-vanilla-secondary": {
+          "files": 84,
+          "bytes": 130947805,
+          "level_dat": true,
+          "player_data": [],
+          "level_dat_sha256": "45edb0a21833ee6755112f5d5db8daed3dd17148112da5b0f8e43feff89f1f86"
+        }
+      }
+    },
+    "return_a_operation": "op-1d017419-e724-4e81-b68a-d33ba2fc23dc",
+    "alarm_1241": {
+      "name": "wc-dev-desiredactualdivergencealarm",
+      "evaluation_datapoints_utc": [
+        "12:26",
+        "12:31",
+        "12:36"
+      ],
+      "observed_alarm_at": "2026-09-12T12:41:31Z",
+      "latest_actual_state": "B HEALTHY, READY zero, no lock/current at 12:43; alarm remains based on preceding windows",
+      "settings_changed": false
+    },
+    "operations": {
+      "additional-fixed-progress-v3": {
+        "operation": {
+          "operation_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361",
+          "operation_type": "RESET",
+          "status": "SUCCEEDED",
+          "requested_at": "2026-09-12T12:21:36.112420Z",
+          "completed_at": "2026-09-12T12:25:34.218051Z",
+          "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-reset:op-f221de43-6a0c-46b8-b182-7892ce35e361",
+          "lease_id": "lease-afd1abf5-865f-443c-9fb0-ad60e08b1d3a",
+          "runtime_target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+            "game_id": "game-vanilla-secondary"
+          },
+          "result": {
+            "cleanup_pending": false
+          },
+          "error": {
+            "retryable": null,
+            "code": null,
+            "message": null,
+            "detail_ref": null
+          }
+        },
+        "execution_status": "SUCCEEDED",
+        "state_times": [
+          {
+            "at": "2026-09-12 21:21:40.144000+09:00",
+            "state": "PrepareSwitch"
+          },
+          {
+            "at": "2026-09-12 21:21:44.908000+09:00",
+            "state": "StopSetDesiredStopped"
+          },
+          {
+            "at": "2026-09-12 21:21:45.375000+09:00",
+            "state": "StopRunHostStop"
+          },
+          {
+            "at": "2026-09-12 21:22:00.975000+09:00",
+            "state": "StopCheckHostStop"
+          },
+          {
+            "at": "2026-09-12 21:22:01.268000+09:00",
+            "state": "StopReconcileRuntimeStopped"
+          },
+          {
+            "at": "2026-09-12 21:22:04.072000+09:00",
+            "state": "VerifySourceStopped"
+          },
+          {
+            "at": "2026-09-12 21:22:04.257000+09:00",
+            "state": "ResetPrepareSend"
+          },
+          {
+            "at": "2026-09-12 21:22:19.894000+09:00",
+            "state": "ResetPrepareCheck"
+          },
+          {
+            "at": "2026-09-12 21:22:20.143000+09:00",
+            "state": "ResetCommit"
+          },
+          {
+            "at": "2026-09-12 21:22:23.180000+09:00",
+            "state": "StartSetDesiredRunning"
+          },
+          {
+            "at": "2026-09-12 21:22:23.605000+09:00",
+            "state": "StartRunStartScript"
+          },
+          {
+            "at": "2026-09-12 21:24:42.964000+09:00",
+            "state": "StartRuntimeReady"
+          },
+          {
+            "at": "2026-09-12 21:25:17.943000+09:00",
+            "state": "ResetCleanupSend"
+          },
+          {
+            "at": "2026-09-12 21:25:33.742000+09:00",
+            "state": "ResetCleanupCheck"
+          },
+          {
+            "at": "2026-09-12 21:25:34.078000+09:00",
+            "state": "StartMarkSucceeded"
+          }
+        ]
+      },
+      "new-progress-v4": {
+        "operation": {
+          "operation_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+          "operation_type": "RESET",
+          "status": "SUCCEEDED",
+          "requested_at": "2026-09-12T12:28:53.332514Z",
+          "completed_at": "2026-09-12T12:32:49.937129Z",
+          "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-reset:op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+          "lease_id": "lease-a71b9eea-0761-497e-87e4-862045049bd7",
+          "runtime_target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary"
+          },
+          "result": {
+            "cleanup_pending": false
+          },
+          "error": {
+            "retryable": null,
+            "code": null,
+            "message": null,
+            "detail_ref": null
+          }
+        },
+        "execution_status": "SUCCEEDED",
+        "state_times": [
+          {
+            "at": "2026-09-12 21:28:56.855000+09:00",
+            "state": "PrepareSwitch"
+          },
+          {
+            "at": "2026-09-12 21:28:57.390000+09:00",
+            "state": "StopSetDesiredStopped"
+          },
+          {
+            "at": "2026-09-12 21:28:57.837000+09:00",
+            "state": "StopRunHostStop"
+          },
+          {
+            "at": "2026-09-12 21:29:13.443000+09:00",
+            "state": "StopCheckHostStop"
+          },
+          {
+            "at": "2026-09-12 21:29:13.722000+09:00",
+            "state": "StopReconcileRuntimeStopped"
+          },
+          {
+            "at": "2026-09-12 21:29:16.525000+09:00",
+            "state": "VerifySourceStopped"
+          },
+          {
+            "at": "2026-09-12 21:29:16.700000+09:00",
+            "state": "ResetPrepareSend"
+          },
+          {
+            "at": "2026-09-12 21:29:32.234000+09:00",
+            "state": "ResetPrepareCheck"
+          },
+          {
+            "at": "2026-09-12 21:29:32.446000+09:00",
+            "state": "ResetCommit"
+          },
+          {
+            "at": "2026-09-12 21:29:35.420000+09:00",
+            "state": "StartSetDesiredRunning"
+          },
+          {
+            "at": "2026-09-12 21:29:35.815000+09:00",
+            "state": "StartRunStartScript"
+          },
+          {
+            "at": "2026-09-12 21:31:55.675000+09:00",
+            "state": "StartRuntimeReady"
+          },
+          {
+            "at": "2026-09-12 21:32:29.949000+09:00",
+            "state": "ResetCleanupSend"
+          },
+          {
+            "at": "2026-09-12 21:32:49.520000+09:00",
+            "state": "ResetCleanupCheck"
+          },
+          {
+            "at": "2026-09-12 21:32:49.812000+09:00",
+            "state": "StartMarkSucceeded"
+          }
+        ]
+      },
+      "new-world-stop-v3": {
+        "operation": {
+          "operation_id": "op-1bcbb168-fc86-4dc7-bec5-404cf17ee7a8",
+          "operation_type": "STOP",
+          "status": "SUCCEEDED",
+          "requested_at": "2026-09-12T12:35:23.980747Z",
+          "completed_at": "2026-09-12T12:36:53.846778Z",
+          "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-1bcbb168-fc86-4dc7-bec5-404cf17ee7a8",
+          "lease_id": "lease-301a8dce-28ed-479f-9397-ad4434d00788",
+          "runtime_target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary"
+          },
+          "result": null,
+          "error": {
+            "retryable": null,
+            "code": null,
+            "message": null,
+            "detail_ref": null
+          }
+        },
+        "execution_status": "SUCCEEDED",
+        "state_times": [
+          {
+            "at": "2026-09-12 21:36:53.726000+09:00",
+            "state": "MarkSucceeded"
+          }
+        ]
+      },
+      "new-world-restart-v4": {
+        "operation": {
+          "operation_id": "op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b",
+          "operation_type": "START",
+          "status": "SUCCEEDED",
+          "requested_at": "2026-09-12T12:37:30.382173Z",
+          "completed_at": "2026-09-12T12:41:34.576295Z",
+          "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b",
+          "lease_id": "lease-f5030891-7792-434f-a7b4-fc2a7ad6d058",
+          "runtime_target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary"
+          },
+          "result": null,
+          "error": {
+            "retryable": null,
+            "code": null,
+            "message": null,
+            "detail_ref": null
+          }
+        },
+        "execution_status": "SUCCEEDED",
+        "state_times": [
+          {
+            "at": "2026-09-12 21:41:34.433000+09:00",
+            "state": "MarkSucceeded"
+          }
+        ]
+      },
+      "return-a-v4": {
+        "operation": {
+          "operation_id": "op-1d017419-e724-4e81-b68a-d33ba2fc23dc",
+          "operation_type": "SWITCH",
+          "status": "SUCCEEDED",
+          "requested_at": "2026-09-12T12:43:23.308874Z",
+          "completed_at": "2026-09-12T12:46:48.459678Z",
+          "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-switch:op-1d017419-e724-4e81-b68a-d33ba2fc23dc",
+          "lease_id": "lease-f453e287-5ed6-46fd-a460-8db0abb80c8e",
+          "runtime_target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-1d017419-e724-4e81-b68a-d33ba2fc23dc",
+            "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+            "game_id": "game-vanilla-main"
+          },
+          "result": null,
+          "error": {
+            "retryable": null,
+            "code": null,
+            "message": null,
+            "detail_ref": null
+          }
+        },
+        "execution_status": "SUCCEEDED",
+        "state_times": [
+          {
+            "at": "2026-09-12 21:43:26.794000+09:00",
+            "state": "PrepareSwitch"
+          },
+          {
+            "at": "2026-09-12 21:43:31.632000+09:00",
+            "state": "StopSetDesiredStopped"
+          },
+          {
+            "at": "2026-09-12 21:43:32.100000+09:00",
+            "state": "StopRunHostStop"
+          },
+          {
+            "at": "2026-09-12 21:43:47.737000+09:00",
+            "state": "StopCheckHostStop"
+          },
+          {
+            "at": "2026-09-12 21:43:48.087000+09:00",
+            "state": "StopReconcileRuntimeStopped"
+          },
+          {
+            "at": "2026-09-12 21:43:51.621000+09:00",
+            "state": "VerifySourceStopped"
+          },
+          {
+            "at": "2026-09-12 21:43:54.549000+09:00",
+            "state": "StartSetDesiredRunning"
+          },
+          {
+            "at": "2026-09-12 21:43:54.936000+09:00",
+            "state": "StartRunStartScript"
+          },
+          {
+            "at": "2026-09-12 21:46:14.059000+09:00",
+            "state": "StartRuntimeReady"
+          },
+          {
+            "at": "2026-09-12 21:46:48.345000+09:00",
+            "state": "StartMarkSucceeded"
+          }
+        ]
+      },
+      "final-a-stop-v1": {
+        "operation": {
+          "operation_id": "op-15b35608-f5f8-408a-be8c-b5e383ce0df5",
+          "operation_type": "STOP",
+          "status": "SUCCEEDED",
+          "requested_at": "2026-09-12T12:47:44.748624Z",
+          "completed_at": "2026-09-12T12:49:14.772443Z",
+          "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-15b35608-f5f8-408a-be8c-b5e383ce0df5",
+          "lease_id": "lease-82062749-5c49-4709-986b-b7daa52e242b",
+          "runtime_target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-1d017419-e724-4e81-b68a-d33ba2fc23dc",
+            "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+            "game_id": "game-vanilla-main"
+          },
+          "result": null,
+          "error": {
+            "retryable": null,
+            "code": null,
+            "message": null,
+            "detail_ref": null
+          }
+        },
+        "execution_status": "SUCCEEDED",
+        "state_times": [
+          {
+            "at": "2026-09-12 21:49:14.635000+09:00",
+            "state": "MarkSucceeded"
+          }
+        ]
+      }
+    },
+    "second_backup_operation": "op-c242bb75-c311-44d5-8470-6fbb319573e1",
+    "returned_a_host_proof": {
+      "owners": {
+        "op-f221de43-6a0c-46b8-b182-7892ce35e361.owner.json": {
+          "plan": {
+            "policy": {
+              "fixed_seed": 0,
+              "minimum_free_bytes": 4294967296,
+              "retain_previous": 3
+            },
+            "schema_version": 1,
+            "seed": 0,
+            "source": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-2ceb6588-792f-41e6-a887-13b00a614558"
+            },
+            "target": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+            }
+          },
+          "phase": "initialized",
+          "files": {
+            "server.properties": "cce6632f503db53a43299c43d6d82f6c45289dbb0cbcafffefafebac98a7ac80",
+            "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969",
+            "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf.owner.json": {
+          "plan": {
+            "policy": {
+              "fixed_seed": 0,
+              "minimum_free_bytes": 4294967296,
+              "retain_previous": 3
+            },
+            "schema_version": 1,
+            "seed": -8202942784802930866,
+            "source": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+            },
+            "target": {
+              "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+              "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+              "game_id": "game-vanilla-secondary",
+              "instance_id": "i-04fc0629dc4ea466e",
+              "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+            }
+          },
+          "phase": "initialized",
+          "files": {
+            "server.properties": "ec0bb4f0b00292502496dcf3e7ea3101bf36b29e6ce9a92f792b4f5b79acbef9",
+            "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969",
+            "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        }
+      },
+      "seed_response": "Seed: [2942173766003524590]",
+      "receipt": {
+        "target": {
+          "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-1d017419-e724-4e81-b68a-d33ba2fc23dc",
+          "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "game_id": "game-vanilla-main"
+        },
+        "phase": "running"
+      },
+      "boot_id": "909e52eb-54b4-4e37-8be4-34e82553923a",
+      "container": {
+        "id": "c8986553ec20f09a3fc483089d9141b9543006c8434f78c6371a2305dfd2c11e",
+        "image_id": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+        "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+        "labels": {
+          "com.docker.compose.config-hash": "279ae0e9ab381c312871464ecc91de4eba3169b47ba374b6c49422a198745ebe",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:b1db36ccd4bd782db6c13b2a2b3726cbd44b205818c875e4f2b6b44c65e117cd",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "wishicraft-host-runtime",
+          "com.docker.compose.project.config_files": "/etc/wishicraft/host-runtime/compose.yaml",
+          "com.docker.compose.project.working_dir": "/etc/wishicraft/host-runtime",
+          "com.docker.compose.service": "minecraft",
+          "com.docker.compose.version": "5.4.0",
+          "com.wishicraft.active-game-data-source": "/srv/minecraft/games/game-vanilla-main/server",
+          "com.wishicraft.active-game-id": "game-vanilla-main",
+          "com.wishicraft.run-id": "op-1d017419-e724-4e81-b68a-d33ba2fc23dc",
+          "org.opencontainers.image.authors": "Geoff Bourne <itzgeoff@gmail.com>",
+          "org.opencontainers.image.created": "2026-07-20T18:50:00.880Z",
+          "org.opencontainers.image.description": "Docker image that provides a Minecraft Server for Java Edition that automatically installs/upgrades versions, modloaders, modpacks and more at startup",
+          "org.opencontainers.image.licenses": "Apache-2.0",
+          "org.opencontainers.image.revision": "4cbdf520c88d57713637c5e4c30b5ba5caa40698",
+          "org.opencontainers.image.source": "https://github.com/itzg/docker-minecraft-server",
+          "org.opencontainers.image.title": "docker-minecraft-server",
+          "org.opencontainers.image.url": "https://github.com/itzg/docker-minecraft-server",
+          "org.opencontainers.image.version": "2026.7.2"
+        },
+        "state": {
+          "Status": "running",
+          "Running": true,
+          "Paused": false,
+          "Restarting": false,
+          "OOMKilled": false,
+          "Dead": false,
+          "Pid": 9853,
+          "ExitCode": 0,
+          "Error": "",
+          "StartedAt": "2026-09-12T12:44:05.253550418Z",
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "Health": {
+            "Status": "healthy",
+            "FailingStreak": 0,
+            "Log": [
+              {
+                "Start": "2026-09-12T12:44:35.259527207Z",
+                "End": "2026-09-12T12:44:35.617737705Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:45:05.618883463Z",
+                "End": "2026-09-12T12:45:05.734517831Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:45:35.736612868Z",
+                "End": "2026-09-12T12:45:35.834183634Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:46:05.835966131Z",
+                "End": "2026-09-12T12:46:05.93242855Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              },
+              {
+                "Start": "2026-09-12T12:46:35.934268574Z",
+                "End": "2026-09-12T12:46:36.052349226Z",
+                "ExitCode": 0,
+                "Output": "localhost:25565 : version=26.2 online=0 max=20 motd='A Minecraft Server'\n"
+              }
+            ]
+          }
+        },
+        "mounts": [
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-cli.env",
+            "Destination": "/data/.rcon-cli.env",
+            "Mode": "rw",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-cli.yaml",
+            "Destination": "/data/.rcon-cli.yaml",
+            "Mode": "rw",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/srv/minecraft/games/game-vanilla-main/server",
+            "Destination": "/data",
+            "Mode": "",
+            "RW": true,
+            "Propagation": "rprivate"
+          },
+          {
+            "Type": "bind",
+            "Source": "/run/wishicraft/rcon-password",
+            "Destination": "/run/secrets/rcon-password",
+            "Mode": "ro",
+            "RW": false,
+            "Propagation": "rprivate"
+          }
+        ]
+      },
+      "probe": {
+        "active_game": {
+          "binding_consistency": "consistent",
+          "game_id": "game-vanilla-main",
+          "state": "observed"
+        },
+        "container": {
+          "container_id": "c8986553ec20f09a3fc483089d9141b9543006c8434f78c6371a2305dfd2c11e",
+          "health": "healthy",
+          "image_digest": "sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+          "image_reference": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+          "name": "wishicraft-host-runtime-minecraft-1",
+          "oom_killed": false,
+          "published_ports": {
+            "25565/tcp": [
+              {
+                "HostIp": "",
+                "HostPort": "25565"
+              }
+            ]
+          },
+          "restart_count": 0,
+          "restart_policy": "no",
+          "state": "running"
+        },
+        "docker": {
+          "state": "active"
+        },
+        "errors": [],
+        "execution": {
+          "phase": "running",
+          "process_id": "8b0f2f29527bde67c4d0151f6ef75911f52662ce92e4a4047375b42ff9d7a9a6",
+          "target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+            "game_id": "game-vanilla-main",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-1d017419-e724-4e81-b68a-d33ba2fc23dc"
+          }
+        },
+        "host_runtime": {
+          "state": "active",
+          "unit": "wishicraft-host-runtime.service"
+        },
+        "identity": {
+          "compose_project": "wishicraft-host-runtime",
+          "compose_service": "minecraft",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "runtime_id": "wishicraft-host-runtime"
+        },
+        "minecraft": {
+          "protocol": {
+            "attempted": true,
+            "compatible_response": true,
+            "host": "localhost",
+            "observed_at": "2026-09-12T12:47:00.512124Z",
+            "player_count": 0,
+            "port": 25565,
+            "protocol_version": 776,
+            "reported_version": "26.2",
+            "result": "success",
+            "version_match": true
+          },
+          "protocol_state": "ready",
+          "ready": true,
+          "runtime_state": "running"
+        },
+        "mount": {
+          "expected_filesystem_type": "xfs",
+          "expected_filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "filesystem_type": "xfs",
+          "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "mount_path": "/srv/minecraft",
+          "root_gid": 0,
+          "root_mode": "0755",
+          "root_uid": 0,
+          "state": "expected"
+        },
+        "observed_at": "2026-09-12T12:47:00.655183Z",
+        "probe_version": "1.4.0",
+        "schema_version": 1,
+        "telemetry": {
+          "available_bytes": 31288909824,
+          "boot_id": "909e52eb-54b4-4e37-8be4-34e82553923a",
+          "error": null,
+          "filesystem_uuid": "420cea6d-0520-4436-bb5a-db1191f1e63b",
+          "mount_path": "/srv/minecraft",
+          "observed_at": "2026-09-12T12:47:00.655220Z",
+          "schema_version": 1,
+          "source": "/dev/nvme1n1",
+          "state": "observed",
+          "total_bytes": 32145145856,
+          "used_bytes": 856236032,
+          "volume_id": "vol-03ac9f534326c345c"
+        }
+      },
+      "inventory": {
+        "game-vanilla-main": {
+          "files": 115,
+          "bytes": 142008694,
+          "level_dat": true,
+          "player_data": [
+            "world/players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+          ],
+          "level_dat_sha256": "1d7188e985b0a20fc5546e8394cb0f1e9477fd6041664385977a57744c1bec07"
+        },
+        "game-vanilla-secondary": {
+          "files": 84,
+          "bytes": 130947805,
+          "level_dat": true,
+          "player_data": [],
+          "level_dat_sha256": "45edb0a21833ee6755112f5d5db8daed3dd17148112da5b0f8e43feff89f1f86"
+        }
+      }
+    },
+    "retention_operation": "op-1d58896e-c219-4619-911e-c38fbfe07a08",
+    "control_plane_readback": {
+      "stack_status": "UPDATE_COMPLETE",
+      "template_matches": true,
+      "iam_policies_verified": [
+        "ReconcileFunctionServiceRoleDefaultPolicyD01F2C45",
+        "StartTaskFunctionServiceRoleDefaultPolicy197CE916",
+        "StartWorkflowRoleDefaultPolicy310A63FD",
+        "StopTaskFunctionServiceRoleDefaultPolicyA75E149A",
+        "StopWorkflowRoleDefaultPolicy6028EB21",
+        "BackupTaskFunctionServiceRoleDefaultPolicy32340A85",
+        "BackupWorkflowRoleDefaultPolicy2D424890",
+        "RetentionTaskFunctionServiceRoleDefaultPolicy8FD8FE69",
+        "RetentionWorkflowRoleDefaultPolicyBF3EADF3",
+        "AdmissionFunctionServiceRoleDefaultPolicyA8CF483E",
+        "DiscordCommandFunctionServiceRoleDefaultPolicy68E9FAD3",
+        "StatusExecutorFunctionServiceRoleDefaultPolicy2164DB10",
+        "DiscordMessageFunctionServiceRoleDefaultPolicyEEC1B116",
+        "AutoStopEvaluatorFunctionServiceRoleDefaultPolicy15CC511B",
+        "MonitoringObserverFunctionServiceRoleDefaultPolicy2DA5B7F6",
+        "SwitchWorkflowRoleDefaultPolicyFAA6078D"
+      ],
+      "reset": {
+        "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+        "name": "wc-dev-reset",
+        "status": "ACTIVE",
+        "definition": "{\n  \"StartAt\" : \"StopInitializeWorkflow\",\n  \"States\" : {\n    \"PrepareSwitch\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetPreconditionFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StopSetDesiredStopped\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"prepare_reset\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.switch_prepared\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"ResetCleanupCheck\" : {\n      \"Next\" : \"ResetCleanupDone\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"check_reset_cleanup\",\n          \"command_id.$\" : \"$.reset_command.Payload.command_id\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reset_check\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"ResetCleanupDone\" : {\n      \"Choices\" : [ {\n        \"BooleanEquals\" : true,\n        \"Next\" : \"StartMarkSucceeded\",\n        \"Variable\" : \"$.reset_check.Payload.complete\"\n      } ],\n      \"Default\" : \"ResetCleanupWait\",\n      \"Type\" : \"Choice\"\n    },\n    \"ResetCleanupRenew\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetPreconditionFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"ResetCleanupCheck\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"renew\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.switch_prepared\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"ResetCleanupSend\" : {\n      \"Next\" : \"ResetCleanupWait\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"run_reset_cleanup\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reset_command\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"ResetCleanupWait\" : {\n      \"Next\" : \"ResetCleanupRenew\",\n      \"Seconds\" : 15,\n      \"Type\" : \"Wait\"\n    },\n    \"ResetCommit\" : {\n      \"Next\" : \"StartReconcileBeforeStart\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"commit_reset\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.switch_prepared\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"ResetPrepareCheck\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"ResetPreparationFailed\" ],\n        \"Next\" : \"StopSetHostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"ResetPrepareDone\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"check_reset_prepare\",\n          \"command_id.$\" : \"$.reset_command.Payload.command_id\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reset_check\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"ResetPrepareDone\" : {\n      \"Choices\" : [ {\n        \"BooleanEquals\" : true,\n        \"Next\" : \"ResetCommit\",\n        \"Variable\" : \"$.reset_check.Payload.complete\"\n      } ],\n      \"Default\" : \"ResetPrepareWait\",\n      \"Type\" : \"Choice\"\n    },\n    \"ResetPrepareRenew\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetPreconditionFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"ResetPrepareCheck\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"renew\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.switch_prepared\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"ResetPrepareSend\" : {\n      \"Next\" : \"ResetPrepareWait\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"run_reset_prepare\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reset_command\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"ResetPrepareWait\" : {\n      \"Next\" : \"ResetPrepareRenew\",\n      \"Seconds\" : 15,\n      \"Type\" : \"Wait\"\n    },\n    \"StartAlreadyReady\" : {\n      \"Choices\" : [ {\n        \"BooleanEquals\" : true,\n        \"Next\" : \"StartUpdateDnsRecord\",\n        \"Variable\" : \"$.desired.Payload.already_ready\"\n      } ],\n      \"Default\" : \"StartRunStartScript\",\n      \"Type\" : \"Choice\"\n    },\n    \"StartCheckDnsChange\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetEndpointFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartDnsChangeInSync\",\n      \"OutputPath\" : \"$\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"check_dns_change\",\n          \"change_id.$\" : \"$.dns_change.Payload.change_id\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.dns_check\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartCheckHostStart\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetHostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartHostStartComplete\",\n      \"OutputPath\" : \"$\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"check_host_start\",\n          \"command_id.$\" : \"$.host_start.Payload.command_id\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.host_check\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartDnsChangeInSync\" : {\n      \"Choices\" : [ {\n        \"BooleanEquals\" : true,\n        \"Next\" : \"StartReconcileDns\",\n        \"Variable\" : \"$.dns_check.Payload.complete\"\n      } ],\n      \"Default\" : \"StartWaitDnsInSync\",\n      \"Type\" : \"Choice\"\n    },\n    \"StartDnsPollWithinDeadline\" : {\n      \"Choices\" : [ {\n        \"Next\" : \"StartSetEndpointFailure\",\n        \"NumericGreaterThanEquals\" : 4,\n        \"Variable\" : \"$.dns_poll.count\"\n      } ],\n      \"Default\" : \"StartRenewBeforeDnsProbe\",\n      \"Type\" : \"Choice\"\n    },\n    \"StartEndpointReady\" : {\n      \"Choices\" : [ {\n        \"Next\" : \"ResetCleanupSend\",\n        \"StringEquals\" : \"HEALTHY\",\n        \"Variable\" : \"$.reconcile.state.health\"\n      } ],\n      \"Default\" : \"StartWaitDnsInSync\",\n      \"Type\" : \"Choice\"\n    },\n    \"StartHostPollWithinDeadline\" : {\n      \"Choices\" : [ {\n        \"Next\" : \"StartSetHostTimeout\",\n        \"NumericGreaterThanEquals\" : 24,\n        \"Variable\" : \"$.host_poll.count\"\n      } ],\n      \"Default\" : \"StartRenewBeforeHostCheck\",\n      \"Type\" : \"Choice\"\n    },\n    \"StartHostStartComplete\" : {\n      \"Choices\" : [ {\n        \"BooleanEquals\" : true,\n        \"Next\" : \"StartInitReadyPoll\",\n        \"Variable\" : \"$.host_check.Payload.complete\"\n      } ],\n      \"Default\" : \"StartWaitHostStart\",\n      \"Type\" : \"Choice\"\n    },\n    \"StartIncrementDnsPoll\" : {\n      \"Next\" : \"StartDnsPollWithinDeadline\",\n      \"Parameters\" : {\n        \"count.$\" : \"States.MathAdd($.dns_poll.count, 1)\"\n      },\n      \"ResultPath\" : \"$.dns_poll\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartIncrementHostPoll\" : {\n      \"Next\" : \"StartHostPollWithinDeadline\",\n      \"Parameters\" : {\n        \"count.$\" : \"States.MathAdd($.host_poll.count, 1)\"\n      },\n      \"ResultPath\" : \"$.host_poll\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartIncrementReadyPoll\" : {\n      \"Next\" : \"StartReadyPollWithinDeadline\",\n      \"Parameters\" : {\n        \"count.$\" : \"States.MathAdd($.ready_poll.count, 1)\"\n      },\n      \"ResultPath\" : \"$.ready_poll\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartInitDnsPoll\" : {\n      \"Next\" : \"StartWaitDnsInSync\",\n      \"Result\" : {\n        \"count\" : 0\n      },\n      \"ResultPath\" : \"$.dns_poll\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartInitHostPoll\" : {\n      \"Next\" : \"StartWaitHostStart\",\n      \"Result\" : {\n        \"count\" : 0\n      },\n      \"ResultPath\" : \"$.host_poll\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartInitReadyPoll\" : {\n      \"Next\" : \"StartWaitReady\",\n      \"Result\" : {\n        \"count\" : 0\n      },\n      \"ResultPath\" : \"$.ready_poll\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartMarkSucceeded\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetEndpointFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"End\" : true,\n      \"OutputPath\" : \"$.Payload\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"complete\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartReadyPollWithinDeadline\" : {\n      \"Choices\" : [ {\n        \"Next\" : \"StartSetReadyTimeout\",\n        \"NumericGreaterThanEquals\" : 5,\n        \"Variable\" : \"$.ready_poll.count\"\n      } ],\n      \"Default\" : \"StartRenewBeforeReadyProbe\",\n      \"Type\" : \"Choice\"\n    },\n    \"StartReconcileAfterFailure\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartUnrecoverableFailure\"\n      } ],\n      \"Next\" : \"StartRecordFailure\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile\",\n        \"Payload\" : {\n          \"operation\" : \"reconcile\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.failure_reconcile\",\n      \"Type\" : \"Task\"\n    },\n    \"StartReconcileBeforeStart\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetObservationFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartSetDesiredRunning\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile\",\n        \"Payload\" : {\n          \"operation\" : \"reconcile\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reconcile\",\n      \"ResultSelector\" : {\n        \"state.$\" : \"$.Payload\"\n      },\n      \"Type\" : \"Task\"\n    },\n    \"StartReconcileDns\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetObservationFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartEndpointReady\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile\",\n        \"Payload\" : {\n          \"operation\" : \"reconcile\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reconcile\",\n      \"ResultSelector\" : {\n        \"state.$\" : \"$.Payload\"\n      },\n      \"Type\" : \"Task\"\n    },\n    \"StartReconcileReady\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetObservationFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartRuntimeReady\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile\",\n        \"Payload\" : {\n          \"operation\" : \"reconcile\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reconcile\",\n      \"ResultSelector\" : {\n        \"state.$\" : \"$.Payload\"\n      },\n      \"Type\" : \"Task\"\n    },\n    \"StartRecordFailure\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartUnrecoverableFailure\"\n      } ],\n      \"Next\" : \"StartStartFailed\",\n      \"OutputPath\" : \"$.Payload\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"fail\",\n          \"error_code.$\" : \"$.failure.error_code\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"workflow_error.$\" : \"$.workflow_error\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartRenewBeforeDnsProbe\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetLockLostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartCheckDnsChange\",\n      \"OutputPath\" : \"$\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"renew\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.lease\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartRenewBeforeHostCheck\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetLockLostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartCheckHostStart\",\n      \"OutputPath\" : \"$\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"renew\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.lease\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartRenewBeforeReadyProbe\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetLockLostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartReconcileReady\",\n      \"OutputPath\" : \"$\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"renew\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.lease\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartRunStartScript\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetHostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartInitHostPoll\",\n      \"OutputPath\" : \"$\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"run_host_start\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.host_start\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartRuntimeReady\" : {\n      \"Choices\" : [ {\n        \"BooleanEquals\" : true,\n        \"Next\" : \"StartUpdateDnsRecord\",\n        \"Variable\" : \"$.reconcile.state.observation.runtime_ready\"\n      } ],\n      \"Default\" : \"StartWaitReady\",\n      \"Type\" : \"Choice\"\n    },\n    \"StartSetDesiredRunning\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetPreconditionFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartAlreadyReady\",\n      \"OutputPath\" : \"$\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"set_desired\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.desired\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartSetEndpointFailure\" : {\n      \"Next\" : \"StartReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"ENDPOINT_DISCREPANCY\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartSetHostFailure\" : {\n      \"Next\" : \"StartReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"SSM_COMMAND_FAILED\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartSetHostTimeout\" : {\n      \"Next\" : \"StartReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"SSM_COMMAND_TIMEOUT\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartSetLockLostFailure\" : {\n      \"Next\" : \"StartReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"LOCK_LOST\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartSetObservationFailure\" : {\n      \"Next\" : \"StartReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"OBSERVATION_FAILED\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartSetPreconditionFailure\" : {\n      \"Next\" : \"StartReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"START_PRECONDITION_FAILED\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartSetReadyTimeout\" : {\n      \"Next\" : \"StartReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"MINECRAFT_READY_TIMEOUT\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StartStartFailed\" : {\n      \"Error\" : \"START_WORKFLOW_FAILED\",\n      \"Type\" : \"Fail\"\n    },\n    \"StartUnrecoverableFailure\" : {\n      \"Error\" : \"START_CLEANUP_FAILED\",\n      \"Type\" : \"Fail\"\n    },\n    \"StartUpdateDnsRecord\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StartSetEndpointFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StartInitDnsPoll\",\n      \"OutputPath\" : \"$\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task\",\n        \"Payload\" : {\n          \"action\" : \"upsert_dns\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.dns_change\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StartWaitDnsInSync\" : {\n      \"Next\" : \"StartIncrementDnsPoll\",\n      \"Seconds\" : 30,\n      \"Type\" : \"Wait\"\n    },\n    \"StartWaitHostStart\" : {\n      \"Next\" : \"StartIncrementHostPoll\",\n      \"Seconds\" : 15,\n      \"Type\" : \"Wait\"\n    },\n    \"StartWaitReady\" : {\n      \"Next\" : \"StartIncrementReadyPoll\",\n      \"Seconds\" : 120,\n      \"Type\" : \"Wait\"\n    },\n    \"StopAlreadyRuntimeStopped\" : {\n      \"Choices\" : [ {\n        \"BooleanEquals\" : true,\n        \"Next\" : \"VerifySourceStopped\",\n        \"Variable\" : \"$.desired.Payload.runtime_stopped\"\n      } ],\n      \"Default\" : \"StopRenewBeforeHostStop\",\n      \"Type\" : \"Choice\"\n    },\n    \"StopCheckHostStop\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetHostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StopHostStopComplete\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"check_host_stop\",\n          \"command_id.$\" : \"$.host_stop.Payload.command_id\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.host_check\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StopHostPollWithinDeadline\" : {\n      \"Choices\" : [ {\n        \"Next\" : \"StopSetRuntimeTimeout\",\n        \"NumericGreaterThanEquals\" : 28,\n        \"Variable\" : \"$.host_poll.count\"\n      } ],\n      \"Default\" : \"StopRenewBeforeHostCheck\",\n      \"Type\" : \"Choice\"\n    },\n    \"StopHostStopComplete\" : {\n      \"Choices\" : [ {\n        \"BooleanEquals\" : true,\n        \"Next\" : \"StopReconcileRuntimeStopped\",\n        \"Variable\" : \"$.host_check.Payload.complete\"\n      } ],\n      \"Default\" : \"StopWaitHostStop\",\n      \"Type\" : \"Choice\"\n    },\n    \"StopIncrementHostPoll\" : {\n      \"Next\" : \"StopHostPollWithinDeadline\",\n      \"Parameters\" : {\n        \"count.$\" : \"States.MathAdd($.host_poll.count, 1)\"\n      },\n      \"ResultPath\" : \"$.host_poll\",\n      \"Type\" : \"Pass\"\n    },\n    \"StopInitHostPoll\" : {\n      \"Next\" : \"StopWaitHostStop\",\n      \"Result\" : {\n        \"count\" : 0\n      },\n      \"ResultPath\" : \"$.host_poll\",\n      \"Type\" : \"Pass\"\n    },\n    \"StopInitializeWorkflow\" : {\n      \"Next\" : \"StopReconcileBeforeStop\",\n      \"Result\" : { },\n      \"ResultPath\" : \"$.workflow_error\",\n      \"Type\" : \"Pass\"\n    },\n    \"StopReconcileAfterFailure\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopUnrecoverableFailure\"\n      } ],\n      \"Next\" : \"StopRecordFailure\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile\",\n        \"Payload\" : {\n          \"operation\" : \"reconcile\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.failure_reconcile\",\n      \"Type\" : \"Task\"\n    },\n    \"StopReconcileBeforeStop\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetObservationFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"PrepareSwitch\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile\",\n        \"Payload\" : {\n          \"operation\" : \"reconcile\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reconcile\",\n      \"ResultSelector\" : {\n        \"state.$\" : \"$.Payload\"\n      },\n      \"Type\" : \"Task\"\n    },\n    \"StopReconcileRuntimeStopped\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetObservationFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StopRuntimeStopped\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile\",\n        \"Payload\" : {\n          \"operation\" : \"reconcile\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.reconcile\",\n      \"ResultSelector\" : {\n        \"state.$\" : \"$.Payload\"\n      },\n      \"Type\" : \"Task\"\n    },\n    \"StopRecordFailure\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopUnrecoverableFailure\"\n      } ],\n      \"Next\" : \"StopStopFailed\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"fail\",\n          \"error_code.$\" : \"$.failure.error_code\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"workflow_error.$\" : \"$.workflow_error\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StopRenewBeforeHostCheck\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetLockLostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StopCheckHostStop\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"renew\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.lease\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StopRenewBeforeHostStop\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetLockLostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StopRunHostStop\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"renew\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.lease\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StopRunHostStop\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetHostFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StopInitHostPoll\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"run_host_stop\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.host_stop\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StopRuntimeStopped\" : {\n      \"Choices\" : [ {\n        \"And\" : [ {\n          \"StringEquals\" : \"not-running\",\n          \"Variable\" : \"$.reconcile.state.observation.host_runtime_state\"\n        }, {\n          \"StringEquals\" : \"not-running\",\n          \"Variable\" : \"$.reconcile.state.observation.minecraft_service_state\"\n        }, {\n          \"StringEquals\" : \"not-applicable\",\n          \"Variable\" : \"$.reconcile.state.observation.minecraft_protocol_state\"\n        } ],\n        \"Next\" : \"VerifySourceStopped\"\n      } ],\n      \"Default\" : \"StopSetRuntimeTimeout\",\n      \"Type\" : \"Choice\"\n    },\n    \"StopSetDesiredStopped\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetPreconditionFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"StopAlreadyRuntimeStopped\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"set_desired\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.desired\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    },\n    \"StopSetHostFailure\" : {\n      \"Next\" : \"StopReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"GRACEFUL_RUNTIME_STOP_FAILED\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StopSetLockLostFailure\" : {\n      \"Next\" : \"StopReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"LOCK_LOST\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StopSetObservationFailure\" : {\n      \"Next\" : \"StopReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"OBSERVATION_FAILED\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StopSetPreconditionFailure\" : {\n      \"Next\" : \"StopReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"STOP_PRECONDITION_FAILED\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StopSetRuntimeTimeout\" : {\n      \"Next\" : \"StopReconcileAfterFailure\",\n      \"Result\" : {\n        \"error_code\" : \"MINECRAFT_STOP_TIMEOUT\"\n      },\n      \"ResultPath\" : \"$.failure\",\n      \"Type\" : \"Pass\"\n    },\n    \"StopStopFailed\" : {\n      \"Error\" : \"STOP_WORKFLOW_FAILED\",\n      \"Type\" : \"Fail\"\n    },\n    \"StopUnrecoverableFailure\" : {\n      \"Error\" : \"STOP_CLEANUP_FAILED\",\n      \"Type\" : \"Fail\"\n    },\n    \"StopWaitHostStop\" : {\n      \"Next\" : \"StopIncrementHostPoll\",\n      \"Seconds\" : 15,\n      \"Type\" : \"Wait\"\n    },\n    \"VerifySourceStopped\" : {\n      \"Catch\" : [ {\n        \"ErrorEquals\" : [ \"States.ALL\" ],\n        \"Next\" : \"StopSetPreconditionFailure\",\n        \"ResultPath\" : \"$.workflow_error\"\n      } ],\n      \"Next\" : \"ResetPrepareSend\",\n      \"Parameters\" : {\n        \"FunctionName\" : \"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task\",\n        \"Payload\" : {\n          \"action\" : \"verify_switch_stopped\",\n          \"lease_id.$\" : \"$.lease_id\",\n          \"operation_id.$\" : \"$.operation_id\",\n          \"schema_version\" : 1,\n          \"state.$\" : \"$.reconcile.state\"\n        }\n      },\n      \"Resource\" : \"arn:aws:states:::lambda:invoke\",\n      \"ResultPath\" : \"$.switch_prepared\",\n      \"Retry\" : [ {\n        \"BackoffRate\" : 2,\n        \"ErrorEquals\" : [ \"Lambda.ServiceException\", \"Lambda.TooManyRequestsException\" ],\n        \"IntervalSeconds\" : 2,\n        \"MaxAttempts\" : 3\n      } ],\n      \"Type\" : \"Task\"\n    }\n  },\n  \"TimeoutSeconds\" : 3000\n}",
+        "roleArn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6",
+        "type": "STANDARD",
+        "creationDate": "2026-09-12 20:26:55.533000+09:00",
+        "loggingConfiguration": {
+          "level": "OFF",
+          "includeExecutionData": false
+        },
+        "tracingConfiguration": {
+          "enabled": false
+        },
+        "encryptionConfiguration": {
+          "type": "AWS_OWNED_KEY"
+        },
+        "ResponseMetadata": {
+          "RequestId": "422d1d17-303b-4b2f-b422-a1828bd0d0bf",
+          "HTTPStatusCode": 200,
+          "HTTPHeaders": {
+            "x-amzn-requestid": "422d1d17-303b-4b2f-b422-a1828bd0d0bf",
+            "date": "Sat, 12 Sep 2026 12:14:58 GMT",
+            "content-type": "application/x-amz-json-1.0",
+            "content-length": "40789",
+            "connection": "keep-alive"
+          },
+          "RetryAttempts": 0
+        }
+      },
+      "admission": 0,
+      "discord": 0
+    },
+    "control_plane_functions": {
+      "wc-dev-reconcile": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      },
+      "wc-dev-start-task": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e"
+      },
+      "wc-dev-stop-task": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e"
+      },
+      "wc-dev-backup-task": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      },
+      "wc-dev-retention-task": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      },
+      "wc-dev-admission": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      },
+      "wc-dev-discord-command": {
+        "code_sha256": "WG1EnZuCXI9jib7fislNI1DzvWZUL/0AZfdXvQh0T5c=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      },
+      "wc-dev-status-executor": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      },
+      "wc-dev-discord-message": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      },
+      "wc-dev-auto-stop-evaluator": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      },
+      "wc-dev-monitoring-observer": {
+        "code_sha256": "45tH8Cbvws1DGAEM2pyiy6tiDpd/p+/lQ6nmI5kvm84=",
+        "state": "Active",
+        "update": "Successful",
+        "environment_matches": true,
+        "catalog": "[\"game-vanilla-main\",\"game-vanilla-secondary\"]",
+        "config_digest": null
+      }
+    }
+  },
+  "second_backup": {
+    "operation_id": "op-c242bb75-c311-44d5-8470-6fbb319573e1",
+    "snapshot_id": "snap-07106a22069868738",
+    "status": "SUCCEEDED",
+    "recovery_digest": "e6b14e668047ec16673b00d66df91ed77cb5bef710ca73f1f3176e0e37b24780",
+    "source_verified": true
+  },
+  "restore_2": {
+    "status": "SUCCEEDED_CLEANED",
+    "stack_id": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/wc-reset-restore-20260912-1c78dfb4/f8b0ef80-aea8-11f1-8e1f-0e9b030e0485",
+    "resources": {
+      "Attachment": "vol-0b850542a7e44f5b9|i-06c005b40be97213c",
+      "Copy": "vol-0b850542a7e44f5b9",
+      "Host": "i-06c005b40be97213c",
+      "Profile": "wc-reset-restore-20260912-1c78dfb4-Profile-jABr5lGAM8im",
+      "Role": "wc-reset-restore-20260912-1c78dfb4-Role-eAI8drsEarDN",
+      "SecurityGroup": "sg-02bf1ec50e826227d",
+      "Root": "vol-06655f2f43ef524fc"
+    },
+    "snapshot_id": "snap-07106a22069868738",
+    "current_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+    "retained_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361",
+    "anchor": "/srv/minecraft/games/game-vanilla-secondary/server",
+    "proof": {
+      "at": "2026-09-12T13:09:46.673498+00:00",
+      "cleanup_precondition": {
+        "all_source_areas_unchanged": true,
+        "containers": [],
+        "copy_unmounted": true,
+        "current_owner_chain_and_anchor_verified": true,
+        "listeners": []
+      },
+      "container-current.json": {
+        "data": "/var/tmp/wc-reset-restore-2/extracted-current",
+        "id": "61939221e1c5b62c6baf26f93979ca0dacaa4c86224a98bebed1413cd876efd2",
+        "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+        "started": "2026-09-12T13:03:30.023792+00:00"
+      },
+      "extraction.json": {
+        "all_source_worlds_unchanged": true,
+        "current_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+        "destination": "/var/tmp/wc-reset-restore-2/extracted-current",
+        "owner_checked": true,
+        "source": "/mnt/wc-restore/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+        "source_mount_readonly": true
+      },
+      "packages.json": {
+        "al2023_release": "2023.12.20260803",
+        "compose_sha256": "837fd1d35bf6a494f41b5b5988269a7be79de337cf1a1a6ff0e45ab51bb4e9be",
+        "compose_version": "5.4.0",
+        "docker_nevra": "docker-25.0.16-1.amzn2023.0.3.x86_64",
+        "schema_version": 1
+      },
+      "ready-current.json": {
+        "id": "61939221e1c5b62c6baf26f93979ca0dacaa4c86224a98bebed1413cd876efd2",
+        "protocol": {
+          "host": "127.0.0.1",
+          "port": 25565,
+          "server_info": {
+            "description": {
+              "bold": false,
+              "color": "",
+              "extra": null,
+              "italic": false,
+              "obfuscated": false,
+              "strikethrough": false,
+              "text": "A Minecraft Server",
+              "underlined": false
+            },
+            "favicon": "",
+            "players": {
+              "Sample": null,
+              "max": 20,
+              "online": 0
+            },
+            "version": {
+              "name": "26.2",
+              "protocol": 776
+            }
+          }
+        },
+        "started_at": "2026-09-12T13:03:30.011183949Z"
+      },
+      "restarted-current.json": {
+        "id": "61939221e1c5b62c6baf26f93979ca0dacaa4c86224a98bebed1413cd876efd2",
+        "ready": {
+          "host": "127.0.0.1",
+          "port": 25565,
+          "server_info": {
+            "description": {
+              "bold": false,
+              "color": "",
+              "extra": null,
+              "italic": false,
+              "obfuscated": false,
+              "strikethrough": false,
+              "text": "A Minecraft Server",
+              "underlined": false
+            },
+            "favicon": "",
+            "players": {
+              "Sample": null,
+              "max": 20,
+              "online": 0
+            },
+            "version": {
+              "name": "26.2",
+              "protocol": 776
+            }
+          }
+        },
+        "started_at": "2026-09-12T13:06:17.762762525Z",
+        "value": 120912
+      },
+      "saved-stopped-current.json": {
+        "at": "2026-09-12T13:09:20.457505+00:00",
+        "exit": 0,
+        "id": "61939221e1c5b62c6baf26f93979ca0dacaa4c86224a98bebed1413cd876efd2",
+        "value": 120912
+      },
+      "inventory": {
+        "copy_id": "vol-0b850542a7e44f5b9",
+        "current_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+        "owner_chain": [
+          "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+          "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+        ],
+        "owners": {
+          "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf": {
+            "files": {
+              "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "server.properties": "ec0bb4f0b00292502496dcf3e7ea3101bf36b29e6ce9a92f792b4f5b79acbef9",
+              "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969"
+            },
+            "phase": "initialized",
+            "plan": {
+              "policy": {
+                "fixed_seed": 0,
+                "minimum_free_bytes": 4294967296,
+                "retain_previous": 3
+              },
+              "schema_version": 1,
+              "seed": -8202942784802930866,
+              "source": {
+                "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+                "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+                "game_id": "game-vanilla-secondary",
+                "instance_id": "i-04fc0629dc4ea466e",
+                "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+              },
+              "target": {
+                "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+                "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+                "game_id": "game-vanilla-secondary",
+                "instance_id": "i-04fc0629dc4ea466e",
+                "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+              }
+            }
+          },
+          "op-f221de43-6a0c-46b8-b182-7892ce35e361": {
+            "files": {
+              "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "server.properties": "cce6632f503db53a43299c43d6d82f6c45289dbb0cbcafffefafebac98a7ac80",
+              "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969"
+            },
+            "phase": "initialized",
+            "plan": {
+              "policy": {
+                "fixed_seed": 0,
+                "minimum_free_bytes": 4294967296,
+                "retain_previous": 3
+              },
+              "schema_version": 1,
+              "seed": 0,
+              "source": {
+                "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+                "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+                "game_id": "game-vanilla-secondary",
+                "instance_id": "i-04fc0629dc4ea466e",
+                "run_id": "op-2ceb6588-792f-41e6-a887-13b00a614558"
+              },
+              "target": {
+                "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+                "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+                "game_id": "game-vanilla-secondary",
+                "instance_id": "i-04fc0629dc4ea466e",
+                "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+              }
+            }
+          }
+        },
+        "areas": {
+          "A": {
+            "path": "/srv/minecraft/games/game-vanilla-main/server",
+            "files": 113,
+            "bytes": 142010382
+          },
+          "B_anchor": {
+            "path": "/srv/minecraft/games/game-vanilla-secondary/server",
+            "files": 84,
+            "bytes": 130947805
+          },
+          "B_current": {
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "files": 83,
+            "bytes": 130979922
+          },
+          "B_retained_op-f221de43-6a0c-46b8-b182-7892ce35e361": {
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+            "files": 82,
+            "bytes": 130938238
+          }
+        }
+      }
+    },
+    "cleanup": {
+      "at": "2026-09-12T13:13:13.104122+00:00",
+      "stack_status": "DELETE_COMPLETE",
+      "removed_volumes": [
+        "vol-06655f2f43ef524fc",
+        "vol-0b850542a7e44f5b9"
+      ],
+      "remaining_temporary_resources": []
+    },
+    "proof_sha256": "d5b537a6e5d0703b83fe38778ba43c04e0e77e7dd5dbbedff472ec00a7bbdd12",
+    "human_visual": false,
+    "cost_estimate": {
+      "running_seconds_from_launch_to_stop_request": 852.8,
+      "host_plus_ipv4_usd_at_0_054_per_hour": 0.01279,
+      "basis": "observed elapsed usage times official quoted rate; not billed cost",
+      "storage_transfer_tax_snapshot_delta_excluded": true,
+      "temporary_resources_remaining": 0
+    }
+  },
+  "historical_pre_continuation_final_observation": {
     "at": "2026-09-12T11:44:41.992174+00:00",
     "state": [
       {
@@ -1446,37 +3813,16 @@
     "only_added_snapshot": "snap-0be8e05ab05d70e84",
     "no_snapshot_or_world_deletion": true
   },
-  "local_correction": {
-    "deployed": false,
-    "scope": "Reset plan freeze permits PENDING/RUNNING; terminal remains rejected; same exact-read recovery and ownership checks",
-    "reproduction": "1 failed (PENDING), 1 passed (RUNNING) before fix",
-    "focused": "24 passed",
-    "full_tests": "1023 passed",
-    "ruff": "passed",
-    "format": "203 files passed",
-    "mypy": "164 source files passed",
-    "synth": "all 5 configurations passed",
-    "diff": {
-      "added": [],
-      "removed": [],
-      "changed": {
-        "ReconcileFunction30829CB6": "AWS::Lambda::Function",
-        "StartTaskFunction8C564C4A": "AWS::Lambda::Function",
-        "StopTaskFunction11473A8C": "AWS::Lambda::Function",
-        "BackupTaskFunctionA44639DC": "AWS::Lambda::Function",
-        "RetentionTaskFunction9F285CE4": "AWS::Lambda::Function",
-        "AdmissionFunction23082B67": "AWS::Lambda::Function",
-        "DiscordCommandFunction7D25102A": "AWS::Lambda::Function",
-        "StatusExecutorFunction6E5C9869": "AWS::Lambda::Function",
-        "DiscordMessageFunction78FA388B": "AWS::Lambda::Function",
-        "AutoStopEvaluatorFunctionF85F8B50": "AWS::Lambda::Function",
-        "MonitoringObserverFunction584DA7C7": "AWS::Lambda::Function"
-      },
-      "code_only": true,
-      "IAM_host_policy_unchanged": true
+  "historical_pre_continuation_resume": "Requires explicit continuation for one replacement fixed request after a terminal FAILED attempt. Preserve FAILED; do not redrive or raw repair. Apply tested PENDING correction, verify closed window, START same legacy B; only after authorization execute fixed then the unexecuted new/restore sequence. Original first Snapshot is preserved but B has since undergone ordinary START/save/STOP.",
+  "historical_pre_continuation_deployed_validation": {
+    "local": "1017 tests; lint/format/types; five synth configurations passed",
+    "CI": {
+      "run": 34690385149,
+      "commit": "0636f06f86f8b6f1d3dfb5a5d7500d77e41947f7",
+      "conclusion": "success"
     }
   },
-  "alarms": [
+  "historical_pre_continuation_alarms": [
     {
       "AlarmName": "wc-dev-admissionfunctionerrorsalarm",
       "StateValue": "OK",
@@ -1736,18 +4082,512 @@
       "StateUpdatedTimestamp": "2026-09-01 01:08:42.005000+09:00"
     }
   ],
-  "automatic_approval_review": [
-    "maintenance start first attempt rejected before execution; explicit preflight/live identity checks added, then approved",
-    "fixed RESET first attempt rejected before execution for missing visible restore proof; final-host-proof revalidated, then approved; only one admitted RESET"
-  ],
-  "historical_auth_resume": "Human canonical SSO login; caller read-back, same BACKUP execution terminal status, no intervening write and ingress/drain; then close Admission and use the existing Snapshot, no repeated BACKUP",
-  "resume": "Requires explicit continuation for one replacement fixed request after a terminal FAILED attempt. Preserve FAILED; do not redrive or raw repair. Apply tested PENDING correction, verify closed window, START same legacy B; only after authorization execute fixed then the unexecuted new/restore sequence. Original first Snapshot is preserved but B has since undergone ordinary START/save/STOP.",
+  "resume": "No production work remains. This evidence records the deployed implementation; final repository HEAD/CI and local Wiki synchronization are reported in the handoff.",
+  "publication": {
+    "at": "2026-09-12T13:16:32.581937+00:00",
+    "concurrency": {
+      "wc-dev-admission": "UNSET",
+      "wc-dev-discord-command": "UNSET"
+    },
+    "both_restore_conditions_verified": true
+  },
   "deployed_validation": {
-    "local": "1017 tests; lint/format/types; five synth configurations passed",
+    "local": "1023 tests, focused 24, ruff/format, mypy164, five synth passed; no application change in continuation",
     "CI": {
-      "run": 34690385149,
-      "commit": "0636f06f86f8b6f1d3dfb5a5d7500d77e41947f7",
-      "conclusion": "success"
-    }
+      "run": 34692026233,
+      "commit": "b6969c80ad7f68d1b7a97693d8b1d85f1e35c6c0",
+      "conclusion": "success",
+      "real_Docker_integration": "success"
+    },
+    "managed_Lambda_SDK_version": "not measured"
+  },
+  "alarms": {
+    "at": "2026-09-12T13:17:05.673234+00:00",
+    "alarms": [
+      {
+        "AlarmName": "wc-dev-admissionfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:05.656000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-admissionfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:05:38.013000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-auto-stop-evaluator-silence",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 2 datapoints [2.0 (10/09/26 03:32:00)] was not less than the threshold (1.0) and 1 missing datapoint was treated as [Breaching] (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-10 12:37:35.592000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-autostopevaluatorfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-10 12:36:00.736000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-autostopevaluatorfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-10 12:35:49.224000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-autostopwarningblockedalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-10 12:33:45.789000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-backuptaskfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 datapoint [0.0 (07/09/26 08:45:00)] was not greater than or equal to the threshold (1.0).",
+        "StateUpdatedTimestamp": "2026-09-07 17:50:04.692000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-backuptaskfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-07 17:34:46.697000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-backupworkflowfailurealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 datapoint [0.0 (07/09/26 08:45:00)] was not greater than or equal to the threshold (1.0).",
+        "StateUpdatedTimestamp": "2026-09-07 17:50:50.816000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-datafilesystemobservationunknownalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 2 datapoints [0.0 (10/09/26 14:41:00)] was not greater than or equal to the threshold (1.0) and 1 missing datapoint was treated as [Breaching] (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-10 23:46:38.626000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-datafilesystemusagehighalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 2 datapoints [0.0 (10/09/26 14:41:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-10 23:46:34.825000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-desiredactualdivergencealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 3 datapoints [0.0 (12/09/26 12:46:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-12 21:51:31.529000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-desiredrunningnotreadyalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (11/09/26 11:41:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-11 20:46:22.956000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-desiredstoppedec2runningalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (12/09/26 11:21:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-12 20:26:53.502000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-discordcommandfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 20:10:20.753000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-discordcommandfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:05:59.185000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-discordmessagefunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 datapoint [0.0 (12/09/26 03:19:00)] was not greater than or equal to the threshold (1.0).",
+        "StateUpdatedTimestamp": "2026-09-12 12:24:51.515000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-discordmessagefunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:35.270000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-expiredoperationlockalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (31/08/26 16:03:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-01 01:08:38.424000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-monitoringobservationunknownalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 2 datapoints [0.0 (10/09/26 11:36:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-10 20:41:27.121000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-monitoringobserverfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:25.030000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-monitoringobserverfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:32.791000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-reconcilefunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:16.980000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-reconcilefunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:12.184000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-resetworkflowfailurealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-12 20:53:04.622000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-retentiontaskfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 datapoint [0.0 (08/09/26 13:19:00)] was not greater than or equal to the threshold (1.0).",
+        "StateUpdatedTimestamp": "2026-09-08 22:24:54.043000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-retentiontaskfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-08 22:12:48.043000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-retentionworkflowfailurealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 datapoint [0.0 (08/09/26 13:19:00)] was not greater than or equal to the threshold (1.0).",
+        "StateUpdatedTimestamp": "2026-09-08 22:24:01.919000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-runtimeheartbeatunavailablealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 2 datapoints [0.0 (10/09/26 14:41:00)] was not greater than or equal to the threshold (1.0) and 1 missing datapoint was treated as [Breaching] (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-10 23:46:45.499000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-runtimeidentitymismatchalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 2 datapoints [0.0 (10/09/26 14:41:00)] was not greater than or equal to the threshold (1.0) and 1 missing datapoint was treated as [Breaching] (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-10 23:46:07.976000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-runtimeobservationunknownalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 2 datapoints [0.0 (12/09/26 11:21:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-12 20:26:59.389000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-scheduledstopcancelledalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-10 20:01:25.917000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-starttaskfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-11 20:24:43.682000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-starttaskfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:05:34.551000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-startworkflowfailurealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-11 20:24:37.550000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-statusexecutorfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:04.185000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-statusexecutorfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:52.888000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-stoptaskfunctionerrorsalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 datapoint [0.0 (12/09/26 11:38:00)] was not greater than or equal to the threshold (1.0).",
+        "StateUpdatedTimestamp": "2026-09-12 20:43:02.687000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-stoptaskfunctionthrottlesalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-01 01:06:04.304000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-stopworkflowfailurealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-10 13:28:45.358000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-switchworkflowfailurealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateUpdatedTimestamp": "2026-09-12 12:03:32.014000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-systemstateobservationstalealarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 2 datapoints [0.0 (10/09/26 14:41:00)] was not greater than or equal to the threshold (1.0) and 1 missing datapoint was treated as [Breaching] (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-10 23:46:41.503000+09:00"
+      },
+      {
+        "AlarmName": "wc-dev-targetrunningtoolongalarm",
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (31/08/26 16:03:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateUpdatedTimestamp": "2026-09-01 01:08:42.005000+09:00"
+      }
+    ]
+  },
+  "final_observation": {
+    "at": "2026-09-12T13:16:56.108448+00:00",
+    "state": [
+      {
+        "environment": "dev",
+        "observed_at": "2026-09-12T13:14:58.126104Z",
+        "health": "HEALTHY",
+        "observation_errors": [],
+        "desired_state": "STOPPED",
+        "discrepancies": [],
+        "desired_updated_at": "2026-09-12T12:47:48.511955Z",
+        "requested_operation_id": "op-15b35608-f5f8-408a-be8c-b5e383ce0df5",
+        "desired_revision": "39",
+        "desired_game_id": "game-vanilla-main",
+        "observation": {
+          "private_ipv4": "10.0.0.125",
+          "active_game_state": "not-applicable",
+          "ssm_state": "not-applicable",
+          "network_observation_source": "ec2-describe-instances",
+          "expected_game_id": "game-vanilla-main",
+          "dns_observation_source": "route53-list-resource-record-sets",
+          "schema_version": "1",
+          "container_state": "unknown",
+          "mount_state": "unknown",
+          "runtime_ready": false,
+          "ec2_state": "stopped",
+          "minecraft_service_state": "not-applicable",
+          "public_ipv4": null,
+          "docker_state": "unknown",
+          "observed_active_game_id": null,
+          "dns_state": "absent",
+          "public_ipv4_state": "absent",
+          "dns_record_name": "mc-dev.wishicraft.net.",
+          "player_count": null,
+          "observed_at": "2026-09-12T13:14:58.126104Z",
+          "dns_ipv4_values": [],
+          "instance_id": "i-04fc0629dc4ea466e",
+          "expected_data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "host_runtime_state": "not-running",
+          "minecraft_protocol_state": "not-applicable"
+        },
+        "target_instance_id": "i-04fc0629dc4ea466e",
+        "system_id": "wishicraft-main",
+        "schema_version": "1",
+        "game_id": "game-vanilla-main"
+      }
+    ],
+    "games": [
+      {
+        "created_from": {
+          "template_id": null,
+          "template_version": null
+        },
+        "version": "1",
+        "last_backup_at": null,
+        "created_at": "2026-08-28T15:41:54.346726Z",
+        "package": {
+          "package_id": "vanilla",
+          "package_version": "initial-fixed-version"
+        },
+        "lifecycle_state": "ACTIVE",
+        "world": {
+          "difficulty": null,
+          "generation": "1",
+          "seed": null,
+          "hardcore": null
+        },
+        "runtime": {
+          "idle_shutdown_minutes": "30",
+          "class": "default"
+        },
+        "materialization_state": "MATERIALIZED",
+        "display_name": "Wishicraft Vanilla",
+        "updated_at": "2026-08-28T15:41:54.346726Z",
+        "last_started_at": null,
+        "normalized_display_name": "wishicraft-vanilla",
+        "schema_version": "1",
+        "game_id": "game-vanilla-main"
+      },
+      {
+        "created_from": {
+          "template_id": null,
+          "template_version": null
+        },
+        "version": "1",
+        "last_backup_at": null,
+        "package": {
+          "package_id": "vanilla",
+          "package_version": "initial-fixed-version"
+        },
+        "created_at": "2026-09-12T02:28:57.440753Z",
+        "world": {
+          "current_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+          "difficulty": null,
+          "generation": "1",
+          "hardcore": null,
+          "seed": null
+        },
+        "lifecycle_state": "ACTIVE",
+        "runtime": {
+          "idle_shutdown_minutes": "30",
+          "class": "default"
+        },
+        "materialization_state": "MATERIALIZED",
+        "display_name": "Wishicraft Vanilla B",
+        "updated_at": "2026-09-12T02:28:57.440753Z",
+        "last_started_at": null,
+        "normalized_display_name": "wishicraft-vanilla-b",
+        "schema_version": "1",
+        "game_id": "game-vanilla-secondary"
+      }
+    ],
+    "locks": [],
+    "running_workflows": [],
+    "dns": [],
+    "concurrency": {
+      "wc-dev-admission": "UNSET",
+      "wc-dev-discord-command": "UNSET"
+    },
+    "ec2": {
+      "Code": 80,
+      "Name": "stopped"
+    },
+    "volume": {
+      "VolumeId": "vol-03ac9f534326c345c",
+      "Attachments": [
+        {
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "VolumeId": "vol-03ac9f534326c345c",
+          "InstanceId": "i-04fc0629dc4ea466e",
+          "Device": "/dev/sdf",
+          "State": "attached",
+          "AttachTime": "2026-08-23 08:29:36+00:00"
+        }
+      ],
+      "Encrypted": true,
+      "KmsKeyId": "arn:aws:kms:ap-northeast-1:385526546525:key/56878db9-a185-4940-a371-eb06b02d1b5c"
+    },
+    "snapshot_ids": [
+      "snap-07106a22069868738",
+      "snap-0be8e05ab05d70e84",
+      "snap-021079b3e3843652f",
+      "snap-0bc776ec580afd4ac",
+      "snap-005ce340d03a42340",
+      "snap-0989e090822d69d1e",
+      "snap-0762ec7637f489d5b",
+      "snap-079c0aa0c06935d8f",
+      "snap-0b1d9536e9c476c0f"
+    ],
+    "snapshot_count": 9,
+    "classification": {
+      "legacy_normal": 5,
+      "migration_anchor": 1,
+      "shared_v2_normal": 3
+    },
+    "baseline_7_and_provenance_exactly_unchanged": true,
+    "only_added_snapshots": [
+      "snap-0be8e05ab05d70e84",
+      "snap-07106a22069868738"
+    ],
+    "unfinished_ssm": [],
+    "historical_failed_unchanged": true
+  },
+  "retention": {
+    "lock_name": "minecraft-control",
+    "updated_at": "2026-09-12T13:15:03.260333Z",
+    "completed_at": "2026-09-12T13:15:03.260333Z",
+    "discord": {
+      "guild_id": null,
+      "message_id": null,
+      "interaction_id": null,
+      "channel_id": null
+    },
+    "result": {
+      "reason": "within-retention-limit",
+      "delete_action_count": "0",
+      "candidate_count": "0",
+      "keep_count": "3",
+      "excluded_count": "6",
+      "kind": "RETENTION_DRY_RUN",
+      "inventory_count": "9",
+      "deletion_plan_count": "0",
+      "anomaly_count": "0",
+      "matching_recycle_bin_rule_count": "0",
+      "recycle_bin_rule_count": "0"
+    },
+    "workflow_execution_name": "op-1d58896e-c219-4619-911e-c38fbfe07a08",
+    "timeout_at": "2026-09-12T13:19:56.489280Z",
+    "expires_at": null,
+    "started_at": "2026-09-12T13:14:56.828677Z",
+    "target_game_id": "game-vanilla-main",
+    "requested_at": "2026-09-12T13:14:56.489280Z",
+    "progress_revision": "2",
+    "status": "SUCCEEDED",
+    "idempotency_key": "retention:reset-release-63eba0a3-0a3b-47e3-a595-c4402622e212",
+    "current_step": "RETENTION_INVENTORY",
+    "operation_type": "RETENTION",
+    "requested_by": {
+      "display_name": null,
+      "source": "ADMIN",
+      "discord_user_id": null
+    },
+    "schema_version": "1",
+    "error": {
+      "retryable": null,
+      "code": null,
+      "message": null,
+      "detail_ref": null
+    },
+    "operation_id": "op-1d58896e-c219-4619-911e-c38fbfe07a08",
+    "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-1d58896e-c219-4619-911e-c38fbfe07a08",
+    "lease_id": "lease-53b8e2a7-4843-4a1e-9c6b-6e1e9791ba89"
+  },
+  "cleanup_release": {
+    "conditions_met": true,
+    "public": true,
+    "production_world_deletions": 0,
+    "current_managed": 1,
+    "retained_managed": 1,
+    "legacy_anchor": 1,
+    "retain_previous_policy": 3,
+    "snapshot_deletions": 0,
+    "production_deletion_E2E": false,
+    "isolated_cleanup_boundary_tests": true
   }
 }

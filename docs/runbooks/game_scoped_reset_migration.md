@@ -1,6 +1,6 @@
-# Game-scoped Reset 適用準備（D-098 Accepted、適用中）
+# Game-scoped Reset（D-098 Accepted、限定release Completed）
 
-**2026-09-12ユーザーGO。設計・B限定policy・本runbookの操作を承認済み。production適用、二回の隔離復旧、一般公開の成功はそれぞれ証跡で確定する。**
+**2026-09-12ユーザーGO。production適用、二回の隔離復旧、一般公開条件を確認し、限定release Completed。以下の適用手順・途中中断は履歴であり、再実行指示ではない。最終結果は[closeout](#production-closeout)とproduction証跡を参照する。**
 利用者policy・正本の責務は[設計](../reviews/game_scoped_reset.md)。D-097を再実行しない。
 
 ## 2026-09-12一括承認済みの対象
@@ -112,3 +112,36 @@ FAILEDのredrive/status修復はしない。失敗したfixedを別Operationで�
 再開案は、修正CP適用・整合確認後、同じ旧Bをcanonical STARTし、**未生成だったfixed worldのための追加fixed要求一回**を明示承認対象にする。その後のnew一回、通常STOP/START、AへSWITCH/STOP、第二BACKUP/隔離復旧/RETENTIONは未実施のまま残す。
 追加BACKUPを前提にしない。ただし第一保護点後にBの通常START/保存があったため、第一Snapshotを最新状態そのものとは説明しない。既存Bの最新進捗はEBSに保持される。
 第一隔離復旧を再実行せず、そのsource/proofを再利用する。一般Commandの復元は第二隔離復旧成功まで保留する。
+
+### 追加継続GO（基準 b6969c80ad7f68d1b7a97693d8b1d85f1e35c6c0）
+
+ユーザーはPENDING修正の11 Lambda code限定deployと、新しい固定requestによる追加fixed一回を明示承認した。historical FAILEDのredrive/status変更/idempotency key再利用はしない。fixed要求は失敗分と合わせて計二回、成功後のnewは未実施分一回だけ。さらにterminal failureが生じても別要求を自動追加しない。
+第一BACKUP/隔離復旧とhost/Discord適用は再利用する。実preflight、限定deploy/read-back、AdmissionだけUNSETのoperator窓、同じlegacy BのSTARTとfresh source確認を経て追加fixedへ進む。以後の未実施E2E・第二BACKUP/隔離復旧・RETENTION・公開条件は上記の既承認手順を維持する。
+
+
+## Production closeout
+
+2026-09-12 UTC、D-098限定releaseのproduction条件を完了。実適用コードは `b6969c80ad7f68d1b7a97693d8b1d85f1e35c6c0`。上の中断記録は当時の状態であり、現在は両受付UNSETへ復元済み。
+
+PENDINGで到達するplan固定の条件だけをPENDING/RUNNINGへ修正し、実diff 11 Lambda code assetのみを適用した。UPDATE_COMPLETE、code/config・IAM・workflow不変をread-back。host8 artifact・B policy・Discord schemaは前段の適用証跡を再利用し、再配布していない。historical FAILED `op-60552fa8-96fb-499c-a0fd-7b62cc5f73fc` は未変更である。
+
+| 操作 | Operation | 結果／UTC所要時間 |
+|---|---|---|
+| 追加fixed | `op-f221de43-6a0c-46b8-b182-7892ce35e361` | SUCCEEDED、12:21:36→12:25:34、約238秒、seed 0 |
+| new | `op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf` | SUCCEEDED、12:28:53→12:32:49、約237秒、seed -8202942784802930866 |
+| new通常STOP/START | `op-1bcbb168-fc86-4dc7-bec5-404cf17ee7a8` / `op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b` | 同じnew保存先・seed・owner chainで再起動 |
+| A復帰/STOP | `op-1d017419-e724-4e81-b68a-d33ba2fc23dc` / `op-15b35608-f5f8-408a-be8c-b5e383ce0df5` | A既存bind/player data、B保持を確認して正常停止 |
+
+fixed要求は失敗を含め計2回、new要求は1回、成功した新world生成は2回。両Resetは同じinstance/bootのまま別run/containerへ移った。常設heartbeatは各新run/processへ切り替わり、known zeroから新empty_sinceを開始し、次cycleで継続した。旧runの予告を採用していない。Games.current_idと実bind・receipt・owner記録を照合し、元B anchor、fixed managed旧world、new currentを保持した。本番旧world削除は0件であり、削除を試すための追加Resetはしていない。
+
+第一BACKUP `snap-0be8e05ab05d70e84`（`op-059abd53-92a6-469a-abb2-6eb8dfe5da8e`）と第一隔離復旧は再利用した。第一復旧ではAだけの抽出、B非干渉、保存再起動、隔離Reset fixtureを確認した。これは移行前の復旧点であり、その後のBの通常保存まで含む最新点とは説明しない。
+
+第二BACKUP `snap-07106a22069868738`（`op-c242bb75-c311-44d5-8470-6fbb319573e1`）は新currentと設定を固定したshared v2で、completed/source/owner/tags/digest/provenance pairを照合。第二隔離copyでは復旧情報とroot owner chainからnew current・fixed retained・元B anchor・Aを区別した。new currentだけを抽出し、固定26.2 runtimeで起動・試験値120912の保存・正常停止・再起動保持を確認した。source全領域とowner記録は不変。試験値は隔離copyだけで、本番へ追加していない。
+
+二つの一時stackは正常停止・container不在・通常unmount後に削除し、Retainされた各root/copyはexact作成receipt一致・available・attachmentなしを確認して削除、不存在をread-backした。残存一時resourceは0。実稼働時間に当日照合単価を掛けたhost＋IPv4概算は第一約$0.022、第二約$0.013。これは請求実績ではなく、storage・通信・税・Snapshot差分費用を含まない。Budgetは変更していない。
+
+最後のRETENTION `op-1d58896e-c219-4619-911e-c38fbfe07a08` はSUCCEEDED、shared KEEP=3/CANDIDATE=0/ANOMALY=0/delete_action_count=0。全9件はlegacy normal5、migration anchor1、shared v2 normal3。開始時7 Snapshot/provenance不変、追加は予定した二件だけ。DeleteSnapshot能力・DryRun・実削除は追加していない。
+
+二回の復旧成功と最終分類確認後に一般Command受付を復元。最終A選択STOPPED/HEALTHY、DNS/Lock/Current Operation/未終了Operation・SSMなし、両受付元UNSET、元Data EBSのidentity/attachment/encryption保持。43 alarmsは監視設定変更なしで全てOK。受信した12:41 UTCのdivergence alarmはReset/STOP遷移を含む評価期間の記録として残し、継続異常のないことと自然復帰を確認した。
+
+検証は1023 tests、focused24、lint/format、型検査、5構成synth、実Docker CIを根拠とする。productionでは通常成功経路と上記復旧点を実証した。実Discord RESET Interaction、人間の建築物・所持品目視、本番旧world実削除、故障注入・blind redriveは未実施。登録read-backやoperator E2Eでそれらを代替したと扱わない。詳細ID・hash・時刻・失敗履歴は[production evidence](../evidence/2026-09-12-reset-production.json)へ集約する。

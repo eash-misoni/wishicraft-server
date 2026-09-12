@@ -1,6 +1,6 @@
 # 08. Human Operation Flows
 
-> Resetは[D-098 Accepted](reviews/game_scoped_reset.md)。B限定policyの有効化とPlayer/Adminの日常実行を分離する。現在は移行・隔離復旧中で一般受付を閉じており、公開完了は実行証跡を参照する。
+> Resetは[D-098 Accepted](reviews/game_scoped_reset.md)。B限定policyの有効化とPlayer/Adminの日常実行を分離する。二回の隔離復旧後、一般受付を元設定へ復元済み。実行方法と損失境界は同契約、検証範囲は[closeout](runbooks/game_scoped_reset_migration.md#production-closeout)を参照する。
 
 
 - **文書状態:** Canonical

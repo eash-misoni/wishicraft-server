@@ -1,6 +1,6 @@
 # 06. Delivery Plan
 
-> Reset release（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)のB限定Resetを一利用機能として適用中。旧Phase番号・Package/Preset/Template・Restore UIは必須依存ではない。二回の隔離復旧成功を[一般公開の条件](runbooks/game_scoped_reset_migration.md)とする。Phase 9全体の完了ではない。
+> Reset release（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)のB限定Resetは限定release Completed。二回の隔離復旧条件を満たし、一般受付を元設定へ復元した。[closeout](runbooks/game_scoped_reset_migration.md#production-closeout)を参照。旧Phase番号・Package/Preset/Template・Restore UIは必須依存ではなく、Phase 9全体の完了ではない。
 
 
 - **文書状態:** Canonical
