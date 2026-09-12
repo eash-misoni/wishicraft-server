@@ -86,6 +86,7 @@ def prepare(runtime: Any, proof: Any, state: dict[str, object], now: datetime) -
         ":lease": {"S": proof.lease_id},
         ":kind": {"S": "RESET"},
         ":running": {"S": "RUNNING"},
+        ":pending": {"S": "PENDING"},
     }
     try:
         runtime.targets.api.update_item(
@@ -94,7 +95,8 @@ def prepare(runtime: Any, proof: Any, state: dict[str, object], now: datetime) -
             UpdateExpression=(
                 "SET reset_plan = :plan, switch_source = :source, runtime_target = :target"
             ),
-            ConditionExpression="lease_id = :lease AND operation_type = :kind AND #s = :running "
+            ConditionExpression="lease_id = :lease AND operation_type = :kind "
+            "AND #s IN (:pending, :running) "
             "AND attribute_not_exists(reset_plan) AND attribute_not_exists(runtime_target) "
             "AND attribute_not_exists(switch_source)",
             ExpressionAttributeNames={"#s": "status"},

@@ -3,11 +3,11 @@
 **2026-09-12ユーザーGO。設計・B限定policy・本runbookの操作を承認済み。production適用、二回の隔離復旧、一般公開の成功はそれぞれ証跡で確定する。**
 利用者policy・正本の責務は[設計](../reviews/game_scoped_reset.md)。D-097を再実行しない。
 
-## 一括承認で決める対象
+## 2026-09-12一括承認済みの対象
 
-- 推奨policyはPlayer/Admin・明示確認・観測0人、外部BACKUPを毎回待たない、旧managed 3個＋永久legacy anchor、free ≥ max(4 GiB, source×2)。last-observed-emptyのraceとEBS喪失時の損失を承認対象にする。
-- Aは非対応を維持。試験Gameの第一候補はBだが、既存Bを破棄可能と扱わない。**Bの現在worldを永久anchorとして保持して新領域へResetする許可と、固定seedの具体値 `0` を明示承認する必要がある。** 不承認なら別Game追加を自動で行わず、対象を再決定する。
-- `config/reset-dev.json`は空。承認した宣言だけを固定し、host manifest/CP RESET_POLICIES/Discord choicesへ同じ値を渡す。曖昧なdefault seedは使わない。
+- 承認policyはPlayer/Admin・明示確認・観測0人、外部BACKUPを毎回待たない、旧managed 3個＋永久legacy anchor、free ≥ max(4 GiB, source×2)。last-observed-emptyのraceとEBS喪失時の損失境界も承認済み。
+- Aは非対応を維持。試験対象はBだけ。既存Bを永久anchorとして保持し、新領域へResetすることと固定seedの具体値 `0` を承認済み。
+- `config/reset-dev.json`へ承認したB限定宣言を固定し、host manifest/CP RESET_POLICIES/Discord choicesへ同じ値を渡す。曖昧なdefault seedは使わない。
 - cleanupコードのproduction到達は、以下の復旧確認後に限る。未検証を隠してデータ削除へ進まない。
 
 ## 事前保護と最小の隔離復旧
@@ -42,7 +42,7 @@
 current_id確定後に起動が失敗した場合、選択先は新領域のままである。実runtime/receipt/未終了命令を確認し、通常START/STOPで扱える既知の対象だけに収束させる。
 raw Games/receipt/Lock編集や未知領域の削除を復旧手順にしない。既存recovery条件で扱えない状態では保持して報告する。
 
-### 常設probeの配布是正（未適用）
+### 常設probeの配布是正
 
 host更新対象は7から8 artifactへ増える。追加先は `/usr/local/libexec/wishicraft/host-runtime-probe.py`、root:root・0755・通常file・symlinkなし。旧hashは `eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46`。
 D-096の適用source `e503530985fcc3099cc21b12cf2a83e9db72ae1c` の生成物を再現し、[適用証跡](../evidence/2026-09-11-targeted-runtime-production.json)の `limited_stop_forward_continuation.host_forward.preflight.proof.all_exact_predecessors` と照合した。D-097 bundleはprobeを変更していない。これは保存済み実測の根拠であり、適用直前の実host照合は省略しない。
@@ -80,7 +80,7 @@ RETENTIONは共有形式の既存保持群としてdry-run一回。Game/worldご
 停止条件は、対象/owner/保存根拠/receipt不一致、未解決mutation、未知artifact/data、new policy/IAM拡大、force操作、元EBS/world repair、新しいrecovery semanticsが必要な場合。安全にできる範囲で受付を閉じ、適用済み/未適用と保護状態を明示する。
 
 
-### 再開用operator入口（Proposed）
+### 承認条件付きの再開用operator入口
 
 `python -m wishicraft.reset_operator --operation-id <固定ID>`はGet/Describeだけで、元のplan、選択参照、command ID、所有権と再開可否を表示する。
 同じexecutionの失敗TaskだけがREDRIVABLEで、Operation RUNNING・lease/deadline有効の場合に限り、明示した固定`--resume-token`と`--execute`で同一executionをredriveする。既に成功したstepを再実行しない。
@@ -93,3 +93,22 @@ lease期限切れ、終端FAILED後に同じTaskを再開できない状態は�
 前回の公式Price List取得（2026-09-11、[隔離runbook](backup_safety_isolated_restore.md)）ではTokyo t3a.medium Linuxが$0.049/時、gp3が$0.096/GiB月。[公開IPv4](https://aws.amazon.com/vpc/pricing/)は$0.005/時。
 同じ16 GiB root＋30 GiB copy、一時host4時間、月730時間換算なら約$0.2402/回（通信・税・Snapshot追加差分を除く）。二つの復旧点を順次試す場合は約$0.48。停止してvolumeを残す場合46 GiBで約$4.416/月。
 これは過去取得単価による準備見積で、今回の費用実測ではない。実行直前に単価を照合し、4時間地点で保持費用と診断継続を見直す。Snapshot追加費用は変更block量が未確定なので固定額を約束しない。
+
+## 2026-09-12実行中断: plan固定前のPENDING
+
+[production証跡](../evidence/2026-09-12-reset-production.json)を再開の正本とする。
+第一shared BACKUP `snap-0be8e05ab05d70e84` と第一隔離復旧は成功し、一時resourceは全て正常cleanup済み。
+8 artifact・常設probe、Control Plane、Discord schemaは適用済み。一般公開は未完了。
+
+fixed要求 `op-60552fa8-96fb-499c-a0fd-7b62cc5f73fc` はPrepareSwitch/prepare_resetのplan固定でFAILED。
+Admissionはexecutionを登録してもPENDINGのままで、RUNNING化は後続StopSetDesiredStoppedである。
+RUNNINGだけを許す更新条件を、既存SWITCHと同じPENDING/RUNNINGへ限定修正した。
+新plan/seed/target/current_idは未作成、Reset host命令・world生成・cleanupは未実行。
+元Bは同じrunでREADYを維持した後、canonical STOP `op-95d73990-2d10-48bb-bfc1-396681a0317d` で正常停止した。
+最後の実測は **B選択、STOPPED/HEALTHY、両受付0、DNS/Lock/未終了Operationなし**。元設定は両UNSETであり、0を元設定へ読み替えない。
+
+修正はrepository/testまでで未deploy。追加差分は11 Lambda codeのみで、IAM/host/policyは変わらない。
+FAILEDのredrive/status修復はしない。失敗したfixedを別Operationで置き換える実行は今回の上限と再送禁止に抵触するため、継続の明示判断が必要。
+再開案は、修正CP適用・整合確認後、同じ旧Bをcanonical STARTし、**未生成だったfixed worldのための追加fixed要求一回**を明示承認対象にする。その後のnew一回、通常STOP/START、AへSWITCH/STOP、第二BACKUP/隔離復旧/RETENTIONは未実施のまま残す。
+追加BACKUPを前提にしない。ただし第一保護点後にBの通常START/保存があったため、第一Snapshotを最新状態そのものとは説明しない。既存Bの最新進捗はEBSに保持される。
+第一隔離復旧を再実行せず、そのsource/proofを再利用する。一般Commandの復元は第二隔離復旧成功まで保留する。

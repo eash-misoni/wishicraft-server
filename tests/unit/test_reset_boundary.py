@@ -13,6 +13,7 @@ import pytest
 from aws_cdk import App, Stack
 from aws_cdk.assertions import Template
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer  # type: ignore[import-untyped]
+from botocore.exceptions import ClientError  # type: ignore[import-untyped]
 
 from infrastructure.stacks.control_plane_stack import ControlPlaneStack
 from wishicraft import start_workflow_lambda, stop_workflow_lambda
@@ -101,6 +102,16 @@ class Dynamo:
             for k, v in kwargs["ExpressionAttributeValues"].items()
         }
         if ":plan" in values:
+            condition = kwargs["ConditionExpression"]
+            allowed = (
+                [values[":pending"], values[":running"]]
+                if "#s IN (:pending, :running)" in condition
+                else [values[":running"]]
+            )
+            if self.op["status"] not in allowed:
+                raise ClientError(
+                    {"Error": {"Code": "ConditionalCheckFailedException"}}, "UpdateItem"
+                )
             assert "attribute_not_exists(reset_plan)" in kwargs["ConditionExpression"]
             self.op.update(
                 reset_plan=values[":plan"],
@@ -268,6 +279,9 @@ def test_graph_has_no_host_shutdown_and_one_completion_after_cleanup(
             "run_reset_cleanup",
         ]
     )
+    assert graph["States"]["StopReconcileBeforeStop"]["Next"] == "PrepareSwitch"
+    assert graph["States"]["PrepareSwitch"]["Parameters"]["Payload"]["action"] == "prepare_reset"
+    assert graph["States"]["PrepareSwitch"]["Next"] == "StopSetDesiredStopped"
     assert graph["States"]["ResetCleanupDone"]["Choices"][0]["Next"] == "StartMarkSucceeded"
 
     def edges(value: Any) -> list[str]:
@@ -487,3 +501,28 @@ def test_operator_resume_requires_same_execution_and_live_ownership(
     execution["name"] = "another-operation"
     with pytest.raises(ValueError, match="identity mismatch"):
         observe(api, sfn, **args)
+
+
+@pytest.mark.parametrize("status", ["PENDING", "RUNNING"])
+def test_reset_freezes_from_actual_pre_set_desired_operation_status(
+    monkeypatch: pytest.MonkeyPatch, resources: dict[str, Any], status: str
+) -> None:
+    api = setup_runtime(monkeypatch, resources)
+    # Admission registers execution/started_at while status remains PENDING.
+    # PrepareSwitch (prepare_reset) precedes StopSetDesiredStopped, which marks RUNNING.
+    api.op["status"] = status
+    assert invoke(api) == {"prepared": True}
+    plan = deepcopy(api.op["reset_plan"])
+    assert invoke(api) == {"prepared": True}
+    assert api.op["reset_plan"] == plan and len(api.calls) == 1
+
+
+@pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "CANCELLED", "TIMED_OUT"])
+def test_terminal_reset_cannot_freeze_new_plan(
+    monkeypatch: pytest.MonkeyPatch, resources: dict[str, Any], status: str
+) -> None:
+    api = setup_runtime(monkeypatch, resources)
+    api.op["status"] = status
+    with pytest.raises(ValueError, match="RESET plan freeze conflict"):
+        invoke(api)
+    assert "reset_plan" not in api.op and "runtime_target" not in api.op
