@@ -11,7 +11,7 @@
       "minimum_free_bytes": 4294967296
     }
   },
-  "checkpoint": "PROTECTION_BACKUP_ACCEPTED",
+  "checkpoint": "AUTHENTICATION_REQUIRED_BEFORE_ADMISSION_CLOSE",
   "production_mutations": [
     {
       "action": "Discord Command reserved concurrency 0",
@@ -47,6 +47,147 @@
   },
   "validation": {
     "local": "1017 tests; lint/format/types; five synth configurations passed",
-    "CI": "pending approved-policy commit"
+    "CI": {
+      "run": 34688719396,
+      "commit": "432599c2f41622a14dd8bc6bb8fc04c74b1def5a",
+      "conclusion": "success"
+    }
+  },
+  "applied_policy_commit": "432599c2f41622a14dd8bc6bb8fc04c74b1def5a",
+  "authentication": {
+    "error": "canonical SSO token expired; refresh failed",
+    "failed_action": "STS caller read before Admission concurrency update",
+    "admission_write_sent": false,
+    "human_login_requested": true
+  },
+  "concurrency_last_confirmed": {
+    "wc-dev-discord-command": 0,
+    "wc-dev-admission": "UNSET"
+  },
+  "runtime_last_confirmed": "A selected STOPPED/HEALTHY; Target stopped; DNS absent; no host writes since preflight",
+  "restore_source": {
+    "snapshot_id": "snap-0be8e05ab05d70e84",
+    "operation_id": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e",
+    "snapshot_start_time": "2026-09-12T10:31:35.625000+00:00",
+    "completed": true,
+    "operation_succeeded": true,
+    "provenance_pair_verified": true,
+    "recovery_runtime_and_AB_paths_verified": true,
+    "state_machine_terminal_readback": "pending; authentication expired before final describe"
+  },
+  "not_executed": [
+    "Admission closure",
+    "isolated resource creation and restore trials",
+    "production host/CP/Discord reset update",
+    "production Reset",
+    "second BACKUP",
+    "RETENTION",
+    "general release"
+  ],
+  "resume": "Human canonical SSO login; caller read-back, same BACKUP execution terminal status, no intervening write and ingress/drain; then close Admission and use the existing Snapshot, no repeated BACKUP",
+  "bundle": {
+    "baseline": "1267ed5912e027ca2e0b1e1a419df62865f6bfcd",
+    "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+    "plan": {
+      "instance_id": "i-04fc0629dc4ea466e",
+      "files": [
+        {
+          "destination": "/etc/wishicraft/host-runtime/compose.yaml",
+          "source": "0.artifact",
+          "mode": 384,
+          "sha256": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+          "predecessor": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0"
+        },
+        {
+          "destination": "/etc/wishicraft/host-runtime/runtime.env",
+          "source": "1.artifact",
+          "mode": 384,
+          "sha256": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+          "predecessor": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce"
+        },
+        {
+          "destination": "/etc/wishicraft/host-runtime/manifest.json",
+          "source": "2.artifact",
+          "mode": 384,
+          "sha256": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+          "predecessor": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4"
+        },
+        {
+          "destination": "/etc/wishicraft/runtime-contract.json",
+          "source": "3.artifact",
+          "mode": 384,
+          "sha256": "0e384a72794ee0f466096984ba6fd99c9f4861026b8be64173625a96c3cbfd08",
+          "predecessor": "dab6d1837a8efb497c90ba9dae62eb4743752aaa965dd6031d5afaf92433bdb2"
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/operation-v2",
+          "source": "4.artifact",
+          "mode": 493,
+          "sha256": "9010ae86535194a3a0d3c087f5526c7dbe29c35749cc0bcc3a8506d4635f509f",
+          "predecessor": "84c257855962ca5a5a46547f21362d07062d5e3ccabc320256066c1af54a6729"
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/rcon-secret-v2",
+          "source": "5.artifact",
+          "mode": 493,
+          "sha256": "5b1fbcd8e2e9109349b487cee63007abf27d707118c7f89449e129eef38b5cda",
+          "predecessor": "f840582aaa22a00b6acf70ff99b95adb22dac0c688d7e3678be32a362cb2681d"
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/reset_worlds.py",
+          "source": "6.artifact",
+          "mode": 420,
+          "sha256": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
+          "predecessor": null
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/host-runtime-probe.py",
+          "source": "7.artifact",
+          "mode": 493,
+          "sha256": "83244ae3f0aaae95192e9df8eeb6e05392f0f04e22290ca4a15e42c7e3373ce0",
+          "predecessor": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46"
+        }
+      ],
+      "receipt_predecessor": {
+        "target": {
+          "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-084d8509-d7d8-48ad-91d9-e3807cfda1d2",
+          "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "game_id": "game-vanilla-main"
+        },
+        "phase": "stopped",
+        "stop": {
+          "container_id": "a4bbb5de057b1771750399fedaa9be68a564a15fef33a8f25b4bebbef404e948",
+          "started_at": "2026-09-12T03:24:44.57245878Z",
+          "save_confirmed": true,
+          "removal_ready": true
+        }
+      },
+      "backup_namespace": "reset-v1"
+    },
+    "hashes": {
+      "6.artifact": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
+      "7.artifact": "83244ae3f0aaae95192e9df8eeb6e05392f0f04e22290ca4a15e42c7e3373ce0",
+      "1.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+      "0.artifact": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+      "5.artifact": "5b1fbcd8e2e9109349b487cee63007abf27d707118c7f89449e129eef38b5cda",
+      "4.artifact": "9010ae86535194a3a0d3c087f5526c7dbe29c35749cc0bcc3a8506d4635f509f",
+      "reset-policies.json": "5d477224848d34693db12f2431c056d7c8fca92bd1dfc64e5acc89bb6f5286d1",
+      "install.py": "0bcbff054e8d34b848ac1a14a9d52303d3144d5f0d7a078f1beca717d60e3752",
+      "2.artifact": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+      "install.json": "90c11cc5e573daf98939e2017c4aee86e0b6fd71b6061269bdc64464c17f016f",
+      "3.artifact": "0e384a72794ee0f466096984ba6fd99c9f4861026b8be64173625a96c3cbfd08"
+    }
+  },
+  "pricing": {
+    "checked_at": "2026-09-12T10:34:23.000165+00:00",
+    "source": "AWS Price List GetProducts",
+    "t3a_medium_USD_hour": 0.049,
+    "gp3_USD_GB_month": 0.096,
+    "public_IPv4_USD_hour": 0.005,
+    "isolated_resource_cost_incurred": 0,
+    "snapshot_cost": "actual changed-block billing unknown; one approved protection Snapshot created",
+    "budget_changed": false
   }
 }
