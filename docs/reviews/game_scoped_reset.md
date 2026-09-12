@@ -77,8 +77,10 @@ cleanupは全ancestor chainの所有を検査して候補を固定し、current�
 通常のファイルcleanup失敗は通知可能なpendingにする。SSM送信・結果が不明ならOperation/leaseを保持し、成功済みとして解放しない。
 
 新SSM作成はOperation内のdispatch予約＋SDK総試行数1。予約だけ残る場合は自動再送しない。
+予約保存後・送信前にprocessが落ちた場合は、未送信と送信結果不明を区別できないため自動再開できない。この例外はデータ保持して止める範囲であり、全失敗点の自動回復を保証しない。
 これはexactly-once一般基盤ではなく、作成結果不明を止める小さな境界である。再開時は同じOperation/SSMの結果を観測する。
 通常START/STOPで収束できないreceipt/未終了命令は、既存のstale Operation recovery条件を含めoperator観測が必要となる。
+foreground準備の確定非zero終了は既存owned failureへ終端化し、選択した旧worldを通常STARTで再開できる。timeout/cancel/結果不明はこの確定失敗へ含めない。
 失敗した準備領域は通常成功のancestor chain外なら保持する。失敗証跡や未知領域の自動掃除はしない。
 
 ## BACKUPと復旧の差分
@@ -95,6 +97,7 @@ Snapshot保持とworld directory保持は別の寿命であり、今回DeleteSna
 
 ## 現行文書との差分
 
+既存`world.generation`はlegacy記録として残し、Reset回数や現在worldのidentityへ流用しない。新しい選択の正本は`current_id`だけである。
 RESET-001の連番generation増加、RESET-002と旧domain/deliveryの毎回最終BACKUP・Reset後停止は、D-098で置換を提案する。
 現時点のAccepted仕様を遡って変更しない。Reset以外のwhitelist、Web、異なるruntime、Phase 9全体は対象外。
 実装・テスト結果は[準備証跡](../evidence/2026-09-12-reset-preparation.json)に集約し、ここをproduction完了証跡にはしない。

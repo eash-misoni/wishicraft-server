@@ -377,3 +377,113 @@ def test_fresh_start_and_stopped_receipt_after_selected_world_commit(
     obs["observation"]["execution"]["phase"] = "running"
     with pytest.raises(ValueError, match="selected target mismatch"):
         select_target(runtime, proof, obs, action="STOP")
+
+
+@pytest.mark.parametrize(
+    "status,code,error",
+    [
+        ("Failed", 1, "ResetPreparationFailed"),
+        ("TimedOut", -1, "RuntimeError"),
+        ("Cancelled", -1, "RuntimeError"),
+    ],
+)
+def test_preparation_exit_is_distinct_from_unknown_command(
+    monkeypatch: pytest.MonkeyPatch, resources: dict[str, Any], status: str, code: int, error: str
+) -> None:
+    api = setup_runtime(monkeypatch, resources)
+    invoke(api)
+    api.op["reset_prepare_command"] = "command-one"
+    monkeypatch.setattr(
+        api,
+        "get_command_invocation",
+        lambda **kwargs: {"Status": status, "ResponseCode": code},
+        raising=False,
+    )
+    with pytest.raises(RuntimeError) as failure:
+        stop_workflow_lambda.handler(
+            {
+                "schema_version": 1,
+                "action": "check_reset_prepare",
+                "operation_id": api.op["operation_id"],
+                "lease_id": api.op["lease_id"],
+                "command_id": "command-one",
+            },
+            None,
+        )
+    assert type(failure.value).__name__ == error
+    assert api.game["world"] == {}
+    graph = next(
+        r["Properties"]["Definition"]
+        for r in resources.values()
+        if r["Type"] == "AWS::StepFunctions::StateMachine"
+        and r["Properties"]["StateMachineName"] == "wc-dev-reset"
+    )
+    catch = graph["States"]["ResetPrepareCheck"]["Catch"]
+    assert catch == [
+        {
+            "ErrorEquals": ["ResetPreparationFailed"],
+            "ResultPath": "$.workflow_error",
+            "Next": "StopSetHostFailure",
+        }
+    ]
+
+
+def test_cleanup_exited_failure_preserves_ready_runtime_and_reports_pending(
+    monkeypatch: pytest.MonkeyPatch, resources: dict[str, Any]
+) -> None:
+    api = setup_runtime(monkeypatch, resources)
+    invoke(api)
+    api.op["reset_cleanup_command"] = "command-one"
+    monkeypatch.setattr(
+        api,
+        "get_command_invocation",
+        lambda **kwargs: {"Status": "Failed", "ResponseCode": 1},
+        raising=False,
+    )
+    result = stop_workflow_lambda.handler(
+        {
+            "schema_version": 1,
+            "action": "check_reset_cleanup",
+            "operation_id": api.op["operation_id"],
+            "lease_id": api.op["lease_id"],
+            "command_id": "command-one",
+        },
+        None,
+    )
+    assert result == {"complete": True}
+    assert any(c["ExpressionAttributeValues"].get(":pending") == {"BOOL": True} for c in api.calls)
+
+
+@pytest.mark.parametrize("owned", [True, False])
+def test_operator_resume_requires_same_execution_and_live_ownership(
+    monkeypatch: pytest.MonkeyPatch, resources: dict[str, Any], owned: bool
+) -> None:
+    from types import SimpleNamespace
+
+    from wishicraft.reset_operator import observe
+
+    api = setup_runtime(monkeypatch, resources)
+    invoke(api)
+    arn = "arn:aws:states:ap-northeast-1:123456789012:execution:wc-dev-reset:op-reset-one"
+    api.op["workflow_execution_arn"] = arn
+    if not owned:
+        api.lease["lease_expires_at"] = 0
+    execution = {
+        "executionArn": arn,
+        "name": "op-reset-one",
+        "status": "FAILED",
+        "redriveStatus": "REDRIVABLE",
+    }
+    sfn = SimpleNamespace(describe_execution=lambda **kwargs: execution)
+    args: dict[str, Any] = dict(
+        operation_id="op-reset-one",
+        system_id="wishicraft-main",
+        lock_name="synthetic-lock",
+        tables={k: "wc-dev-" + k for k in ("operations", "locks", "games")},
+        now=NOW,
+    )
+    result = observe(api, sfn, **args)
+    assert result["resume_eligible"] is owned and not api.calls[1:]
+    execution["name"] = "another-operation"
+    with pytest.raises(ValueError, match="identity mismatch"):
+        observe(api, sfn, **args)

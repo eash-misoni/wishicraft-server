@@ -50,6 +50,7 @@ Discord Commandを閉じたoperator限定窓で対象Bを通常STARTし、Game/r
 停止後の新BACKUPを一回作成し、新current_id/owner recordを含む復旧情報とSnapshotを確認する。
 この復旧点の隔離copyで、新currentとretainedの識別・抽出・保存再起動を確認してから、旧world directoryのproduction cleanup release可否を判断する。
 自然なReset回数で保持上限を越えるまで削除試験のためだけにResetを量産しない。release前は別policyで削除を省略するのではなく、削除を含む追加本番Resetを実施しない。
+現在の7件が不変で計画したBACKUP二件だけを追加した場合は、legacy normal 5・migration anchor 1・shared v2 normal 3、合計9件が見込み。件数を根拠に削除releaseしない。実inventoryでshared KEEP=3/CANDIDATE=0/ANOMALY=0を照合し、途中に別backupがあれば期待値を再算定する。
 RETENTIONは共有形式の既存保持群としてdry-run一回。Game/worldごとにnewest7を分けず、legacy/migrationを件数へ入れない。
 
 新world参照の隔離復旧成功後に初めてCommandを元設定へ復元する。失敗時は閉じたまま、A/Bの保存状態と適用済み範囲を報告する。これは二つ目の承認待ちではなく、一括承認内の検証条件である。
@@ -71,7 +72,8 @@ RETENTIONは共有形式の既存保持群としてdry-run一回。Game/worldご
 `python -m wishicraft.reset_operator --operation-id <固定ID>`はGet/Describeだけで、元のplan、選択参照、command ID、所有権と再開可否を表示する。
 同じexecutionの失敗TaskだけがREDRIVABLEで、Operation RUNNING・lease/deadline有効の場合に限り、明示した固定`--resume-token`と`--execute`で同一executionをredriveする。既に成功したstepを再実行しない。
 SSM予約後にID保存を失った場合は、instance/command本文/Operation/lease/commentがすべて一致する一意な既送信commandを観測する。見つからない・複数・本文不一致なら再送しない。
-lease期限切れ、確定したSSM失敗、終端FAILED後に同じTaskを再開できない状態は、この入口の自動復旧範囲外。データを保持して、既存canonical STOPで安全に収束できるかを確認する。raw repairや新world生成で埋め合わせない。
+容量不足等でforeground準備processが非zero終了した確定失敗は既存owned failure処理で終端化し、旧選択・旧worldを保持する。partial新領域は診断用として残し、通常STARTで旧対象へ戻せる。timeout/cancel/不明は確定終了とみなさない。cleanupの確定非zero終了はcleanup_pendingとして稼働成功を保持する。
+lease期限切れ、終端FAILED後に同じTaskを再開できない状態は、この入口の自動復旧範囲外。データを保持して、既存canonical STOPで安全に収束できるかを確認する。raw repairや新world生成で埋め合わせない。
 
 ### 費用根拠
 

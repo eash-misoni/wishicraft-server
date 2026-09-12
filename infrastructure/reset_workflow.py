@@ -45,6 +45,14 @@ def definition(
         check["Parameters"]["Payload"]["command_id.$"] = "$.reset_command.Payload.command_id"
         check["ResultPath"] = "$.reset_check"
         check.pop("Catch", None)
+        if action == "prepare":
+            check["Catch"] = [
+                {
+                    "ErrorEquals": ["ResetPreparationFailed"],
+                    "ResultPath": "$.workflow_error",
+                    "Next": "StopSetHostFailure",
+                }
+            ]
         states[name + "Check"] = check
         states[name + "Done"] = {
             "Type": "Choice",

@@ -11,6 +11,10 @@ from wishicraft import reset_contract
 from wishicraft.runtime_contract import command
 
 
+class ResetPreparationFailed(RuntimeError):
+    """Known exited preparation; source remains selected and stopped."""
+
+
 def task(runtime: Any, proof: Any, payload: dict[str, Any], now: datetime) -> dict[str, object]:
     action = payload["action"]
     if action == "prepare_reset":
@@ -116,8 +120,20 @@ def task(runtime: Any, proof: Any, payload: dict[str, Any], now: datetime) -> di
         )
         if response["Status"] in {"Pending", "InProgress", "Delayed"}:
             return {"complete": False}
-        if response["Status"] != "Success" or response.get("ResponseCode") != 0:
-            raise RuntimeError("RESET_HOST_TASK_FAILED")
+        failed_exit = (
+            response["Status"] == "Failed"
+            and isinstance(response.get("ResponseCode"), int)
+            and not isinstance(response["ResponseCode"], bool)
+            and response["ResponseCode"] > 0
+        )
+        if failed_exit and not cleanup:
+            # This foreground Python preparation has exited: no background runtime is launched.
+            # Existing source remains selected, and partial destination is retained for diagnosis.
+            raise ResetPreparationFailed("RESET_PREPARATION_EXITED_FAILED")
+        if not failed_exit and (
+            response["Status"] != "Success" or response.get("ResponseCode") != 0
+        ):
+            raise RuntimeError("RESET_HOST_TASK_OUTCOME_UNRESOLVED")
         if cleanup:
             summaries = []
             for line in response.get("StandardOutputContent", "").splitlines():
@@ -127,6 +143,8 @@ def task(runtime: Any, proof: Any, payload: dict[str, Any], now: datetime) -> di
                     continue
                 if isinstance(summary, dict) and isinstance(summary.get("cleanup_pending"), bool):
                     summaries.append(summary)
+            if failed_exit:
+                summaries = [{"cleanup_pending": True}]
             if len(summaries) != 1:
                 raise ValueError("RESET cleanup summary is unknown")
             runtime.targets.api.update_item(

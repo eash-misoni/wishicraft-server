@@ -106,24 +106,24 @@
       },
       "removed": {},
       "changed": {
-        "DiscordCommandFunction7D25102A": "AWS::Lambda::Function",
-        "DiscordMessageFunctionDynamoDBEventSourceWishicraftControlPlaneStackdevOperationsTable67C69D40F4D37469": "AWS::Lambda::EventSourceMapping",
-        "AutoStopEvaluatorFunctionF85F8B50": "AWS::Lambda::Function",
-        "StartTaskFunction8C564C4A": "AWS::Lambda::Function",
-        "StopTaskFunctionServiceRoleDefaultPolicyA75E149A": "AWS::IAM::Policy",
-        "StatusExecutorFunction6E5C9869": "AWS::Lambda::Function",
-        "BackupTaskFunctionA44639DC": "AWS::Lambda::Function",
-        "RetentionTaskFunction9F285CE4": "AWS::Lambda::Function",
-        "StartTaskFunctionServiceRoleDefaultPolicy197CE916": "AWS::IAM::Policy",
         "AdmissionFunction23082B67": "AWS::Lambda::Function",
         "AdmissionFunctionServiceRoleDefaultPolicyA8CF483E": "AWS::IAM::Policy",
+        "AutoStopEvaluatorFunctionF85F8B50": "AWS::Lambda::Function",
+        "BackupTaskFunctionA44639DC": "AWS::Lambda::Function",
+        "DiscordCommandFunction7D25102A": "AWS::Lambda::Function",
+        "DiscordMessageFunction78FA388B": "AWS::Lambda::Function",
+        "DiscordMessageFunctionDynamoDBEventSourceWishicraftControlPlaneStackdevOperationsTable67C69D40F4D37469": "AWS::Lambda::EventSourceMapping",
+        "MonitoringObserverFunction584DA7C7": "AWS::Lambda::Function",
         "ReconcileFunction30829CB6": "AWS::Lambda::Function",
         "ReconcileFunctionServiceRoleDefaultPolicyD01F2C45": "AWS::IAM::Policy",
-        "DiscordMessageFunction78FA388B": "AWS::Lambda::Function",
-        "MonitoringObserverFunction584DA7C7": "AWS::Lambda::Function",
-        "StopTaskFunction11473A8C": "AWS::Lambda::Function"
+        "RetentionTaskFunction9F285CE4": "AWS::Lambda::Function",
+        "StartTaskFunction8C564C4A": "AWS::Lambda::Function",
+        "StartTaskFunctionServiceRoleDefaultPolicy197CE916": "AWS::IAM::Policy",
+        "StatusExecutorFunction6E5C9869": "AWS::Lambda::Function",
+        "StopTaskFunction11473A8C": "AWS::Lambda::Function",
+        "StopTaskFunctionServiceRoleDefaultPolicyA75E149A": "AWS::IAM::Policy"
       },
-      "ignored_difference": "aws:cdk:path metadata absent in assertions.Template; resource properties compared unchanged"
+      "comparison_note": "Only aws:cdk:path metadata omitted by assertions.Template is excluded; no resource deletion/replacement proposed. No ChangeSet created."
     },
     "environment_size_upper_estimates": {
       "wc-dev-reconcile": 522,
@@ -140,7 +140,7 @@
     }
   },
   "validation": {
-    "pytest": "995 passed in 48.96s",
+    "pytest": "1001 passed in 50.31s",
     "lint": "passed",
     "format": "passed",
     "mypy": "passed;163 files",
@@ -152,7 +152,19 @@
       "reset"
     ],
     "docker_local": "CLI unavailable; no daemon installed",
-    "docker_ci": "pending on implementation commit"
+    "docker_ci": {
+      "verified_commit": "48c794562a4b4563cd543515c62c8b5e40c4736b",
+      "run_id": 34674791252,
+      "conclusion": "success",
+      "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34674791252",
+      "scope": "real fixed Docker: 3 Resets, new seed, old data retention, normal save/stop/removal/restart, limited cleanup, saved value 102; no production data"
+    },
+    "local_sdk": {
+      "boto3": "1.43.91",
+      "botocore": "1.43.91"
+    },
+    "latest_changes": "known foreground preparation failure terminalizes via existing owned failure; cleanup exited failure reports pending; timeout/cancel/unknown retain ownership",
+    "final_commit_ci": "verify final HEAD at handoff; previous successful code/Docker run recorded above"
   },
   "aws_readonly": {
     "account": "385526546525",
@@ -168,7 +180,13 @@
     "existing_v2_source": "snap-021079b3e3843652f",
     "v2_recovery_metadata_verified": true,
     "v2_restore_executed": false,
-    "host_ssm_invoked": false
+    "host_ssm_invoked": false,
+    "final_checked_at": "2026-09-12T05:17:50.575610+00:00",
+    "alarms": {
+      "OK": 42,
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0
+    }
   },
   "not_verified": [
     "Reset production E2E",
@@ -186,11 +204,22 @@
     "filesystem retention and deletion reply-loss",
     "v2 provenance/recovery reference roundtrip",
     "SDK internal total attempts 1",
-    "SSM exact command observation; no search-absence resend"
+    "SSM exact command observation; no search-absence resend",
+    "known prepare process exit versus timeout/cancel",
+    "cleanup exited failure retains successful runtime",
+    "operator same execution and live lease requirements"
   ],
   "references": {
     "ssm": "https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_ListCommands.html",
     "sdk": "https://docs.aws.amazon.com/botocore/latest/reference/config.html",
     "redrive": "https://docs.aws.amazon.com/step-functions/latest/apireference/API_RedriveExecution.html"
+  },
+  "cost": {
+    "basis": "2026-09-11 official price-list observation in isolated restore runbook, not current bill",
+    "test_hours_each": 4,
+    "isolated_trials": 2,
+    "estimate_usd_excluding_network_tax_snapshot": 0.4804,
+    "retained_46_gib_month_usd": 4.416,
+    "budget_changed": false
   }
 }
