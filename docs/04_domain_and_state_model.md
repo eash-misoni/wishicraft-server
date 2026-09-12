@@ -1,11 +1,11 @@
 # 04. Domain and State Model
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-29
+- **最終更新:** 2026-09-12
 
 ## 1. 設計原則
 
-**D-096適用済みの補足:** Gameや固定runtime slot identityを、一回の起動を表すrun identityと混同しない。Operationの固定対象が要求、host receiptと実containerが実現結果であり、receiptをGame選択の別の正本にしない。START/STOP、stopped receipt、heartbeat run/processの現在契約は[Data/Interface §0](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)へ集約する。二Gameの選択保持・source/destination対は[D-097 Accepted（移行未完了）](reviews/two_game_switch.md)であり、以下の将来generationモデルを採用済みと解釈しない。
+**D-096適用済みの補足:** Gameや固定runtime slot identityを、一回の起動を表すrun identityと混同しない。Operationの固定対象が要求、host receiptと実containerが実現結果であり、receiptをGame選択の別の正本にしない。START/STOP、stopped receipt、heartbeat run/processの現在契約は[Data/Interface §0](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)へ集約する。二Gameの選択保持・source/destination対は[D-097 Accepted・適用済み](reviews/two_game_switch.md)であり、以下の将来generationモデルを採用済みと解釈しない。
 
 システム全体を1つの状態文字列で表現しない。
 

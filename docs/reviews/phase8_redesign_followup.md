@@ -6,13 +6,13 @@
 - 未許可: AWS write、復元試験実行、Gameモデル・SWITCH/RESET・retention・whitelistの仕様確定と実装。
 - 本書は前回レビューと追加フィードバックの統合保存先。元の会話や外部メモリを正本にしない。
 
-## 後続の採用・適用状況（2026-09-11）
+## 後続の採用・適用状況（2026-09-12）
 
 以下の本文は当時のレビュー履歴であり、現在の実行許可や未実施状況を表さない。
 D-095の隔離復元確認とD-096の対象付きSTART/STOPは採用・production適用済み。
 現在契約の正本は[05 §0](../05_data_and_interface_contracts.md)、適用証跡は
 [production evidence](../evidence/2026-09-11-targeted-runtime-production.json)を参照する。
-二Game切替・共有BACKUPの今回の差分は[D-097提案](two_game_switch.md)に集約し、
+二Game切替・共有BACKUPの今回の差分は[D-097 Accepted・適用済み契約](two_game_switch.md)に集約し、
 Reset、whitelist、保持削除policy等は引き続きProposedとする。
 
 ## 維持する結論

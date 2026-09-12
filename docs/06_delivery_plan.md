@@ -1,7 +1,7 @@
 # 06. Delivery Plan
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-09-01
+- **最終更新:** 2026-09-12
 
 ## 1. 開発原則
 
@@ -847,7 +847,7 @@ Control Planeだけをdeployし、6 alarmと5分Reconcile scheduleを追加、11
 
 ## 12. Phase 9 — 複数ゲーム抽象
 
-**計画見直し中:** 以降のPhase 9〜16の一般化・table・archive・workflow順序は、以前の計画を残した検討材料であり、次の作業の必須依存ではない。現在の委任単位は[D-097 二Game切替・BACKUP整合](reviews/two_game_switch.md)の限定production移行（2026-09-12 JSTユーザーGO、設計Accepted、適用未完了）。実行状態は[production evidence](evidence/2026-09-12-two-game-production.json)を参照。Package/Preset/Template、Reset、Web、異なるruntime classは今回含めない。D-095/D-096のCompletedは維持する。
+**計画見直し中:** 以降のPhase 9〜16の一般化・table・archive・workflow順序は、以前の計画を残した検討材料であり、次の作業の必須依存ではない。現在の委任単位は[D-097 二Game切替・BACKUP整合](reviews/two_game_switch.md)の限定production移行（2026-09-12 JSTユーザーGO、設計Accepted、限定移行・E2E Completed）。実行状態は[production evidence](evidence/2026-09-12-two-game-production.json)を参照。Package/Preset/Template、Reset、Web、異なるruntime classは今回含めない。D-095/D-096のCompletedは維持する。
 
 **独立slice Completed:** D-096 Acceptedの既存Game targeted runtime移行を2026-09-11 UTCに完了した。限定STOP復旧、host/CP前進修正、通常START/STOP二巡、world保持・新run分離を実証し、最終STOPPED/HEALTHY・両受付UNSET・41 alarm OKへ収束した。途中FAILED STARTは履歴として保持する。以下のPhase 9全体は未着手で、Package/Preset/Templateや他のProposed再設計をまとめて採用したものではない。[closeout](runbooks/targeted_runtime_migration.md#production-closeout--limited-stop--forward-migration)参照。
 

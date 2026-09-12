@@ -1,7 +1,7 @@
 # Two-Game SWITCH migration
 
-**Accepted — 2026-09-12 JST、基準HEAD `25fc0064727aea81cd449c29d97e4adef2308b47` にユーザーGO。production移行は未完了。**
-現在productionはD-096単一Game契約。意味・認可・保護単位の差分の正本は
+**Accepted — 2026-09-12 JST、基準HEAD `25fc0064727aea81cd449c29d97e4adef2308b47` にユーザーGO。production移行・承認済みE2Eは2026-09-12 Completed。**
+現在productionはD-096を基礎とするD-097二Game契約。意味・認可・保護単位の差分の正本は
 [採用契約](../reviews/two_game_switch.md)。過去のD-096 migrationを再実行しない。
 
 ## 承認対象と固定入力
@@ -122,3 +122,64 @@ USD 0.05/GB-month。追加保持blockが計10 GBなら月USD 0.50、二件が各
 [2026-09-12 production evidence](../evidence/2026-09-12-two-game-production.json)へcheckpointを集約する。
 B宣言・bundleはそこで固定したものを再利用し、認証待ちや中断だけを理由に再生成しない。
 設計Acceptedと移行Completedを分離し、未適用・未実証を現在値として明示する。
+
+## Production closeout（2026-09-12）
+
+D-097の限定sliceはCompleted。実適用HEADは`a2980bd1e233e0932968cac43d5da20c933f8e68`
+（承認記録のみを追加し、実装は承認基準`25fc006`と同じ）。Phase 9全体の完了ではない。
+詳細identity・固定宣言・hash・分類・最終read-backは上記production evidenceを正本とする。
+
+- 直前v1 BACKUP: `op-e69d7b47-f44d-48c8-84c3-8a463b901354` / `snap-0bc776ec580afd4ac`。
+  completed、source/owner/tag、durable provenance pair一致を確認。
+- Discord Command→Admissionを0にしてdrain。元設定は両方UNSET。
+  exact Targetの保守起動中はMinecraft inactive、DNSなしを維持。旧container整理は再実行していない。
+  全artifact/receiptを検証後に固定bundleを適用し、旧fileを保存。Aの110ファイルの内容・mtimeは保守前後一致。
+  Bは固定宣言の二fileだけを準備し、proofによるcanonical条件付き登録を実施した。
+- Control Planeだけを`two_games=true`でdeploy。実template、11 Lambda code/environment、IAM、SWITCH定義が固定成果物と一致。
+  Target stack/IAM/EBS/SG/DNS構成は不変。Discordは既存Guildの`mc`だけPOST upsertし、固定body一致・global 0を確認。
+  新旧照合、保守停止、fresh STOPPED/HEALTHY確認後、Admission→DiscordをUNSETへ復元した。
+
+| 操作 | UTC開始→完了 | 結果 |
+|---|---|---|
+| Discord START A | 03:07:42→03:11:51 | 既存world/player data、公開READY |
+| Discord SWITCH B | 03:17:57→03:21:26 | 約209.66秒。source停止確認03:18:24、READY観測開始03:20:48 |
+| RETENTION B | 03:22:30→03:22:37 | B対象、KEEP 0 / CANDIDATE 0 / EXCLUDED 6 / ANOMALY 0 / delete 0 |
+| ADMIN SWITCH A | 03:24:03→03:27:28 | 約204.71秒。source停止確認03:24:31、READY観測開始03:26:50 |
+| ADMIN STOP | 03:28:43→03:30:12 | 保存・正常停止・exact removal、stopped receipt、EC2停止・DNSなし |
+
+両SWITCHはboot `21ce017f-5db5-4033-9c46-9cf0d52d75f2`を維持し、3回のruntimeは別run/container。
+Aの既存保存先とplayer dataを維持し、Bのみ初回world生成した。B停止時と最後のA停止時は、
+read-only観測でsave_confirmed/removal_readyのstopped receipt、containerなし、unit inactiveを確認した。
+新runごとにheartbeatのGame/run/processとempty_sinceが更新された。切替所要時間は正常終了までの実測であり、
+Minecraft内部READYまでの厳密な時間保証ではない。既存poll待機とDNS確認も含む。
+
+共有v2 BACKUPは`op-2e906afa-e8bf-4e65-9205-66504ef29465` / `snap-021079b3e3843652f`。
+03:30:55受付、03:33:03成功。復旧情報のdigestは
+`cfbe8a4b0c16f7595a48c9127827ddde0b4c0df704a2f579f3b17691959603b9`。
+Snapshot tag・作成予約・Operation・provenance pairが一致し、両登録Gameの定義/pathと
+実適用したmanifest/Compose/runtime.envのbyteを照合した。データはSnapshot、定義・構成は復旧情報が保持する。
+最後のRETENTION `op-b0d63cab-fea3-4ef5-ab7d-0b0685f4705b`はKEEP 1 / CANDIDATE 0 /
+EXCLUDED 6 / ANOMALY 0 / delete 0。計7 Snapshot、旧5件のmetadataとprovenanceは不変。追加は承認した二件だけ。
+
+03:36:29 UTCの最終read-backはA選択、STOPPED/HEALTHY、DNS/Lock/Current Operation/未終了Operationなし、
+両受付UNSET、42 alarm OK、元EBS identity/attachment/encryption・A Game record・Target template保持。
+保守中のDesiredStoppedEc2Running/RuntimeObservationUnknown/DesiredActualDivergenceは実収束でOKへ復帰。
+Discord配送完了の条件付き更新競合を2件観測したが、backendは再実行せず、STARTとSWITCHの最終公開READYと
+delivery convergenceを確認した。alarm設定は変更していない。ローカル診断のPython 3.9差異、旧player path想定、
+CloudFormation pagination、DynamoDB wire decode等は別versionの診断で訂正し、production artifactの未知値受理は行っていない。
+
+実Discord InteractionはSTART AとSWITCH BのACK・公開READY。戻りのSWITCH/STOP、BACKUP/RETENTIONはADMIN入口。
+建築物・所持品の人間目視、実multi-Game単独復元、故障注入/強制replay、30分auto-stop再試験は未実施。
+last-observed-emptyの接続raceは残る。実Dockerの保存値検証を本番のscoreboard変更や人間目視と混同しない。
+追加の恒久EC2/EBSはなく、B保存後inventoryは約131 MB。Snapshotの実課金block量と請求額は未測定。
+4時間の見直し地点には到達せず、Budgetは維持した。
+
+文書整合はREADME（現在地）、要件（D-097採用/保護単位）、architecture（適用境界）、domain/state（選択と実観測）、
+data/interface（実行契約）、delivery（限定sliceと将来計画）、運用/human flow（操作/認可/復旧参照）、
+Decisions/初期設定（採用と適用）、review/runbook（契約と履歴）へ反映。
+AGENTS.mdとCodex working agreementは既に委任範囲と一括承認の再利用を定義しており変更不要。
+Reset、whitelist再設計、旧world保持削除、Web、異なるruntime/spec、RETENTION実削除は採用していない。
+
+Validation: 959 pytest成功、ruff check/format成功、mypy 150 files成功、Phase1/Target/単一CP/二Game CP synth成功。
+最初のローカルpytestはsandboxのPyPI DNS制限でbundlingが失敗し、network許可後に全件再実行して成功した。
+local Docker CLIは未導入。実DockerのSTOP/次回STARTとA→B→A検証は既存CIを維持し、最終commitのquality/host-runtime-integration結果はhandoffで照合する。

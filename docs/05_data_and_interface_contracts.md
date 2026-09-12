@@ -1,21 +1,21 @@
 # 05. Data and Interface Contracts
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-31
+- **最終更新:** 2026-09-12
 
 ## 0. Production適用済みruntime契約（D-096）
 
-D-096 Accepted、2026-09-11適用・通常START/STOP二巡確認済み。以下が現在の単一Game契約である。後続のhost `operation-v1`命令例は移行前の履歴として読む。Admission/task等の`schema_version: 1`は別interfaceであり、現行のままである。新しい二Game選択・SWITCH・共有BACKUPは[D-097 Accepted（移行未完了）](reviews/two_game_switch.md)であり、本節の適用済み契約とは別である。
+D-096 Accepted、2026-09-11適用・通常START/STOP二巡確認済み。以下は現在も使用する対象付き実行の基礎契約である。後続のhost `operation-v1`命令例は移行前の履歴として読む。Admission/task等の`schema_version: 1`は別interfaceであり、現行のままである。D-097のhost/Control Plane・B登録は2026-09-12に適用済み、利用機能E2Eも完了。二Game選択・SWITCH・共有BACKUPの差分の正本は[D-097契約](reviews/two_game_switch.md)。本節と異なる単一Game固定の記述はD-096の履歴として読む。
 
 ### 選択と正本
 
 | 情報 | 正本・今回の扱い |
 |---|---|
-| Game | 既存Games item `game-vanilla-main`。Admissionの既存認可・lifecycle検証を維持 |
-| 保存対象 | 元Data EBS上の `/srv/minecraft/games/game-vanilla-main/server` 全体。移動・生成・新world参照なし。world内のファイル内容はEBSが正本 |
+| Game | Gamesの登録とGit catalogが許可対象。選択対象の正本はD-097の `desired_game_id`、実稼働対象はreceipt/container。Admissionの認可・lifecycle検証を維持 |
+| 保存対象 | 元Data EBS上のGame別server directory。Aの `/srv/minecraft/games/game-vanilla-main/server` は維持し、Bのみ独立配置。world内の内容はEBSが正本。pathはGit catalogから固定 |
 | 実行構成 | Git stage `host_runtime`。同じrendererがCompose/runtime.env/manifestを生成し、manifest SHA-256をCP環境とhost設定へ配布。Gameへ設定を複製しない |
 | `runtime_id` | 既存の固定Compose実行枠 `wishicraft-host-runtime`。一回の起動ではない |
-| `run_id` | 最初のSTART Operation ID。同Operation再送・途中起動の再開では維持。新しいSTARTが残存runtimeへ収束する場合も観測済みrunを採用する |
+| `run_id` | 最初のSTART、またはSWITCH destinationのOperation ID。同Operation再送・途中起動の再開では維持。新しいSTARTが残存runtimeへ収束する場合も観測済みrunを採用する |
 | `process_id` | 実container IDとDocker StartedAtのhash。再起動で変化する観測値で、別の永続管理台帳は作らない |
 | 実行要求 | 既存Operationの追加 `runtime_target`。instance/Game/data_source/config_digest/run_idを条件付きで一度だけ固定。lease、status、timeoutは既存fieldを再利用 |
 | host進行状態 | root EBSの `/var/lib/wishicraft/runtime/receipt.json`。targetとstarting/running/stopping/stopped。実現結果の証跡であり、Game選択の第二の正本ではない |
@@ -25,8 +25,8 @@ RUNNINGの観測を採用する場合はreceiptのtargetを使用し、Git由来
 既にEC2 stoppedのSTOPでは架空の起動IDを発行せず、従来どおりDesired/DNSを収束させる。
 STOP中の生存hostでは観測済みtargetが必須。resolverが別instanceを返した場合は再選択しない。
 
-新world ID、generation変更、Package管理、new table、workflow、汎用event journalは追加しない。
-単一保存directoryのままなので独立world IDはまだ必要ない。既存GameのgenerationやPackage fieldを今回の物理起動IDへ読み替えない。
+新world ID、generation変更、Package管理、new table、汎用event journalは追加しない。D-096は既存workflowだけで導入し、D-097では既存STOP/START処理を一つのleaseで呼ぶSWITCH State Machineを追加した。
+各Gameの保存directoryは一つで、独立world IDはまだ導入しない。既存GameのgenerationやPackage fieldを今回の物理起動IDへ読み替えない。
 
 ### host境界と観測
 
@@ -1093,7 +1093,7 @@ Phase 7E以降のSTART/STOP Operationは`progress_revision: integer`を持つ。
 
 ## 19.1 Phase 7 MVP Interaction contract
 
-- command schemaのGit正本`config/discord/commands.v1.json`はdev Guildへ登録する`/mc status`、`/mc start`、`/mc stop`、`/mc backup`を定義する。いずれも引数を持たず、backupだけはDIS-007どおりadmin roleに限定する。`integration_types`と`contexts`はDiscord API上global commandだけのfieldであるためGuild registration payloadには含めず、Guild scopeそのものとCommand LambdaのGuild/channel/role認可で境界を固定する。
+- command schemaのGit基礎`config/discord/commands.v1.json`は`status/start/stop/backup`を定義する。現行D-097の登録bodyは`two_game_admin`の固定宣言でstartのgame選択とswitchを加える。SWITCHのadmin/confirm/0人条件は[D-097契約](reviews/two_game_switch.md)を正本とし、BACKUPのadmin条件を維持する。`integration_types`と`contexts`はDiscord API上global commandだけのfieldであるためGuild registration payloadには含めず、Guild scopeそのものとCommand LambdaのGuild/channel/role認可で境界を固定する。
 - HTTP API v2 eventの`body`は、`isBase64Encoded=true`ならstrict base64 decodeし、falseなら受信文字列のUTF-8 bytesとする。JSON objectへparseしてから署名用bodyを再構築しない。`X-Signature-Timestamp || raw body`をEd25519署名対象とし、署名検証をparse・authorization・side effectより先に行う。
 - PINGはPONGを返す。APPLICATION_COMMANDはinteraction/application/guild/channel/command/member rolesをstrictに検証し、unsupported interaction、unknown/duplicate option、欠落member/rolesを拒否する。引数を持たないMVP subcommandのnested `options`はkey省略またはexact empty arrayだけを受理し、non-empty、non-array、unknown key、nested subcommand/groupを拒否する。error responseはinternal detailを含めない。
 - Phase 7Bの認証・認可済みcommand responseはephemeral type 4で、Control Plane Operationを受付けていない事実を明示する。このsliceはAdmission、Reconcile、State Machine、DynamoDB、EC2、SSM、Route 53を呼ばない。Phase 7C以降でAdmissionへ接続した時点からdeferred responseを使用する。

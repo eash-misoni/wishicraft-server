@@ -2,7 +2,7 @@
 
 - **文書状態:** Canonical
 - **対象:** Phase 0開始時点の初期設定
-- **最終更新:** 2026-08-30
+- **最終更新:** 2026-09-12
 
 ## 1. 目的
 
@@ -12,8 +12,8 @@ Codexが未確定値を推測したり、秘密情報をGitへ保存したりし
 
 D-096適用済みのGame/run/container契約は[05 §0](05_data_and_interface_contracts.md)を正本とする。
 `initial_game_id`は初期Gameを示し、一回の起動IDではない。固定image/versionは引き続きstage設定から配布する。
-`config/two-game-dev.json`とCDK context `two_games=true`は[D-097 Accepted（移行未完了）](reviews/two_game_switch.md)
-の明示的な配布選択であり、productionのGame追加や切替を意味しない。Aの設定やwhitelistは再生成しない。
+`config/two-game-dev.json`とCDK context `two_games=true`は[D-097 Accepted・適用済み](reviews/two_game_switch.md)
+の明示的な配布選択。2026-09-12にBの固定宣言・初期配置・登録とcatalogを適用済み。設定fileだけの変更がproduction登録を自動実行するわけではない。Aの設定やwhitelistは再生成しない。
 
 ## 2. 確定済み設定
 

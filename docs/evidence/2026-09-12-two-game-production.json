@@ -1,6 +1,6 @@
 {
-  "status": "BLOCKED_SSO_REAUTHENTICATION",
-  "decision": "D-097 Accepted; production migration not completed",
+  "status": "COMPLETED",
+  "decision": "D-097 Accepted; bounded production migration and planned E2E completed",
   "approved_head": "25fc0064727aea81cd449c29d97e4adef2308b47",
   "baseline_ci": {
     "run_id": 34609841956,
@@ -8,12 +8,46 @@
     "head_verified": true
   },
   "aws_preflight": {
-    "caller_verified": false,
-    "error": "SSO token expired and refresh failed",
-    "current_production_state": "not measured this continuation; prior evidence is historical only"
+    "caller_verified": true,
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "at": "2026-09-12T02:36:22.539394+00:00",
+    "target_id": "i-04fc0629dc4ea466e",
+    "ec2": "stopped",
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "unfinished_operations": 0,
+    "locks": 0,
+    "alarms_ok": 41,
+    "original_snapshots": [
+      "snap-005ce340d03a42340",
+      "snap-0989e090822d69d1e",
+      "snap-0762ec7637f489d5b",
+      "snap-079c0aa0c06935d8f",
+      "snap-0b1d9536e9c476c0f"
+    ]
   },
-  "aws_discord_host_writes": [],
-  "admission_settings": "not read or modified this continuation",
+  "aws_discord_host_writes": [
+    "One shared Admission ADMIN legacy BACKUP",
+    "Discord Command reserved concurrency 0",
+    "Admission reserved concurrency 0",
+    "Exact Target maintenance start/normal stop",
+    "Approved bundle delivery/install, old files saved",
+    "Fixed B materialization and conditional canonical registration",
+    "Control Plane two_games=true deploy only",
+    "Guild mc POST upsert",
+    "Controlled Reconcile, Admission then Discord restored UNSET"
+  ],
+  "admission_settings": {
+    "original": {
+      "admission": "UNSET",
+      "discord_command": "UNSET"
+    },
+    "current": {
+      "admission": "UNSET",
+      "discord_command": "UNSET"
+    }
+  },
   "local_artifacts": {
     "declaration_sha256": "eb40959d3c42a9748d5d018ad0cf7b1440457805e4b6ba43399e5ce419e8ee2a",
     "bundle_index_sha256": "73c5327c161d33d4883d817e7fd0006957c3c1cab60d00b57009028e26349e22",
@@ -204,5 +238,735 @@
     },
     "local_root_name": "wishicraft-two-game-production-v1.zh3uuny1"
   },
-  "resume_from": "Reauthenticate canonical wishicraft-dev; verify caller and all runbook step 1 conditions before first BACKUP. Reuse fixed declaration/bundle."
+  "legacy_backup": {
+    "operation_id": "op-e69d7b47-f44d-48c8-84c3-8a463b901354",
+    "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-e69d7b47-f44d-48c8-84c3-8a463b901354",
+    "snapshot_id": "snap-0bc776ec580afd4ac",
+    "completed": true,
+    "owner_source_metadata_provenance_verified": true,
+    "verification_at": "2026-09-12T02:41:57.064123+00:00"
+  },
+  "host_readback": {
+    "A_files": 110,
+    "A_inventory_unchanged": true,
+    "B_declared_only": true,
+    "boot_id": "17620d6a-85bb-4a9c-8079-d8237f4c4877",
+    "containers": [],
+    "host_hashes_match": true,
+    "old_files_preserved": true,
+    "runtime": "inactive",
+    "stopped_receipt_preserved": true
+  },
+  "B_preparation": {
+    "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+    "files": {
+      "server.properties": "a7c2f32edd09701c0d00c290e012cde355d642cb620c3e1b61a8bbb2d99b10af",
+      "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969"
+    },
+    "game_id": "game-vanilla-secondary",
+    "schema_version": 1
+  },
+  "B_registration_verified": true,
+  "maintenance_alarm_notifications": [
+    {
+      "alarm": "DesiredStoppedEc2Running",
+      "at": "2026-09-12T02:46:53Z"
+    },
+    {
+      "alarm": "RuntimeObservationUnknown",
+      "at": "2026-09-12T02:51:59Z"
+    },
+    {
+      "alarm": "DesiredActualDivergence",
+      "at": "2026-09-12T02:56:31Z"
+    }
+  ],
+  "diagnostic_failures": [
+    "Host Python 3.9 does not export datetime.UTC: v2 uses timezone.utc; first script failed before checks/mutation.",
+    "v2 inventory expected world/playerdata path; historical restore evidence proves Minecraft 26.2 world/players/data path. v3 exact historical path verified.",
+    "Read-back resolver needed CloudFormation pagination and StepFunctions Arn support; corrected local versions retained, actual deployed template/IAM/code matched.",
+    "Backup verification initially treated create_intent as nested tags; actual contract stores tag map directly. Corrected reader and same Snapshot verified.",
+    "Final provenance comparison initially omitted DynamoDB wire decoding. Real TypeDeserializer restored types; all original records matched."
+  ],
+  "host_ssm": {
+    "preflight": "e39ab08e-85be-44a3-aab6-556368849835",
+    "delivery": "071f8b73-d8ab-4c5e-92e4-14d404d1150e",
+    "installer": "fc6f5912-c5fe-4fdc-a022-b21d8b446009",
+    "prepare_B": "7352fed8-c862-4518-b196-09ac31e6a847",
+    "readback": "8e053909-8fa9-4088-8121-c7ab17b366d1"
+  },
+  "control_plane": {
+    "applied_head": "a2980bd1e233e0932968cac43d5da20c933f8e68",
+    "stack_status": "UPDATE_COMPLETE",
+    "template_11_code_environment_iam_verified": true,
+    "target_stack_deployed": false,
+    "switch_state_machine_active": true,
+    "delete_snapshot_permission_added": false
+  },
+  "discord": {
+    "command_id": "1544004156543737876",
+    "fixed_declaration_readback_matches": true,
+    "subcommands": [
+      "status",
+      "start",
+      "stop",
+      "backup",
+      "switch"
+    ],
+    "global_commands": 0,
+    "real_interaction": "START A and SWITCH B: real human Interaction ACK and public READY confirmed. SWITCH A/STOP/RETENTION/BACKUP used canonical ADMIN operator, not Discord Interaction.",
+    "start_terminal_delivery": "DELIVERED",
+    "transient_error": "One ConditionalCheckFailedException when mark_delivered conflicted with current delivery revision. START backend succeeded and terminal delivery converged; no backend retry was issued.",
+    "switch_B_public_ready_confirmed_by_human": true,
+    "transient_error_count": 2,
+    "alarm_final": "OK"
+  },
+  "maintenance_stop_verified": true,
+  "pre_open_reconcile": {
+    "system_id": "wishicraft-main",
+    "schema_version": 1,
+    "environment": "dev",
+    "game_id": "game-vanilla-main",
+    "desired_state": "STOPPED",
+    "target_instance_id": "i-04fc0629dc4ea466e",
+    "observation": {
+      "schema_version": 1,
+      "instance_id": "i-04fc0629dc4ea466e",
+      "ec2_state": "stopped",
+      "public_ipv4_state": "absent",
+      "public_ipv4": null,
+      "private_ipv4": "10.0.0.125",
+      "network_observation_source": "ec2-describe-instances",
+      "ssm_state": "not-applicable",
+      "mount_state": "unknown",
+      "docker_state": "unknown",
+      "host_runtime_state": "not-running",
+      "container_state": "unknown",
+      "minecraft_service_state": "not-applicable",
+      "minecraft_protocol_state": "not-applicable",
+      "expected_game_id": "game-vanilla-main",
+      "active_game_state": "not-applicable",
+      "observed_active_game_id": null,
+      "player_count": null,
+      "observed_at": "2026-09-12T03:05:48.855727Z",
+      "runtime_ready": false,
+      "dns_state": "absent",
+      "dns_record_name": "mc-dev.wishicraft.net.",
+      "dns_ipv4_values": [],
+      "dns_observation_source": "route53-list-resource-record-sets"
+    },
+    "discrepancies": [],
+    "health": "HEALTHY",
+    "observation_errors": [],
+    "observed_at": "2026-09-12T03:05:48.855727Z",
+    "selected_game_id": "game-vanilla-main",
+    "current_operation_id": null
+  },
+  "start_A": {
+    "operation_id": "op-4cc19257-6870-412c-9c98-06c36137ed3d",
+    "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-4cc19257-6870-412c-9c98-06c36137ed3d",
+    "requested_at": "2026-09-12T03:07:42.428558Z",
+    "completed_at": "2026-09-12T03:11:51.611114Z",
+    "status": "SUCCEEDED",
+    "runtime_target": {
+      "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+      "instance_id": "i-04fc0629dc4ea466e",
+      "run_id": "op-4cc19257-6870-412c-9c98-06c36137ed3d",
+      "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+      "game_id": "game-vanilla-main"
+    },
+    "proof": {
+      "boot_id": "21ce017f-5db5-4033-9c46-9cf0d52d75f2",
+      "container_id": "babfc210b20c36eb150efabb87b0ae8fcd030c77f4ad09edceaabbb10f77362f",
+      "inventory": {
+        "game-vanilla-main": {
+          "files": 113,
+          "bytes": 142007322,
+          "level_dat": true,
+          "player_data": [
+            "world/players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+          ],
+          "level_dat_sha256": "2bef2d811d82fa42cb2543d3e88cea91d2520640036bcee9fd73c4806eaf4233"
+        },
+        "game-vanilla-secondary": {
+          "files": 2,
+          "bytes": 145,
+          "level_dat": false,
+          "player_data": [],
+          "level_dat_sha256": null
+        }
+      },
+      "process_id": "762c6d969939fba24144838114dded0c89c0e2abf9265690afb177d962dbfa3b"
+    },
+    "heartbeat": {
+      "player_count": "0",
+      "instance_id": "i-04fc0629dc4ea466e",
+      "runtime_id": "wishicraft-host-runtime",
+      "observed_at": "2026-09-12T03:12:23.313397Z",
+      "protocol_state": "ready",
+      "boot_id": "21ce017f-5db5-4033-9c46-9cf0d52d75f2",
+      "empty_since": "2026-09-12T03:10:21.313673Z",
+      "system_id": "wishicraft-main",
+      "schema_version": "1",
+      "active_game_id": "game-vanilla-main",
+      "expires_at": "1789269143",
+      "process_id": "762c6d969939fba24144838114dded0c89c0e2abf9265690afb177d962dbfa3b",
+      "run_id": "op-4cc19257-6870-412c-9c98-06c36137ed3d"
+    }
+  },
+  "post_maintenance_alarms": {
+    "OK": 42,
+    "ALARM": 0,
+    "INSUFFICIENT_DATA": 0,
+    "note": "Read before subsequent Discord delivery error alarm; final recovery still to verify."
+  },
+  "e2e": {
+    "start_A": {
+      "operation_id": "op-4cc19257-6870-412c-9c98-06c36137ed3d",
+      "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-4cc19257-6870-412c-9c98-06c36137ed3d",
+      "requested_at": "2026-09-12T03:07:42.428558Z",
+      "completed_at": "2026-09-12T03:11:51.611114Z",
+      "status": "SUCCEEDED",
+      "target_game_id": "game-vanilla-main",
+      "runtime_target": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-4cc19257-6870-412c-9c98-06c36137ed3d",
+        "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+        "game_id": "game-vanilla-main"
+      },
+      "result": null
+    },
+    "switch_B": {
+      "operation_id": "op-62161495-9511-4cdb-91be-cb5f8b8469a1",
+      "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-switch:op-62161495-9511-4cdb-91be-cb5f8b8469a1",
+      "requested_at": "2026-09-12T03:17:57.187697Z",
+      "completed_at": "2026-09-12T03:21:26.843620Z",
+      "status": "SUCCEEDED",
+      "target_game_id": "game-vanilla-secondary",
+      "runtime_target": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-62161495-9511-4cdb-91be-cb5f8b8469a1",
+        "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+        "game_id": "game-vanilla-secondary"
+      },
+      "result": null,
+      "switch_source": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-4cc19257-6870-412c-9c98-06c36137ed3d",
+        "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+        "game_id": "game-vanilla-main"
+      },
+      "elapsed_seconds": 209.655923,
+      "stages": {
+        "VerifySourceStopped": "2026-09-12 12:18:24.706000+09:00",
+        "StartReconcileReady": "2026-09-12 12:20:48.912000+09:00",
+        "StartMarkSucceeded": "2026-09-12 12:21:26.727000+09:00"
+      }
+    },
+    "retention_B": {
+      "operation_id": "op-97d2b48b-1495-43b7-bee1-a12854fb40ab",
+      "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-97d2b48b-1495-43b7-bee1-a12854fb40ab",
+      "requested_at": "2026-09-12T03:22:30.116862Z",
+      "completed_at": "2026-09-12T03:22:37.328798Z",
+      "status": "SUCCEEDED",
+      "target_game_id": "game-vanilla-secondary",
+      "runtime_target": null,
+      "result": {
+        "reason": "within-retention-limit",
+        "delete_action_count": "0",
+        "candidate_count": "0",
+        "keep_count": "0",
+        "excluded_count": "6",
+        "kind": "RETENTION_DRY_RUN",
+        "inventory_count": "6",
+        "deletion_plan_count": "0",
+        "anomaly_count": "0",
+        "matching_recycle_bin_rule_count": "0",
+        "recycle_bin_rule_count": "0"
+      }
+    },
+    "switch_A": {
+      "operation_id": "op-084d8509-d7d8-48ad-91d9-e3807cfda1d2",
+      "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-switch:op-084d8509-d7d8-48ad-91d9-e3807cfda1d2",
+      "requested_at": "2026-09-12T03:24:03.604594Z",
+      "completed_at": "2026-09-12T03:27:28.318399Z",
+      "status": "SUCCEEDED",
+      "target_game_id": "game-vanilla-main",
+      "runtime_target": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-084d8509-d7d8-48ad-91d9-e3807cfda1d2",
+        "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+        "game_id": "game-vanilla-main"
+      },
+      "result": null,
+      "switch_source": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-62161495-9511-4cdb-91be-cb5f8b8469a1",
+        "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+        "game_id": "game-vanilla-secondary"
+      },
+      "elapsed_seconds": 204.713805,
+      "stages": {
+        "VerifySourceStopped": "2026-09-12 12:24:31.305000+09:00",
+        "StartReconcileReady": "2026-09-12 12:26:50.969000+09:00",
+        "StartMarkSucceeded": "2026-09-12 12:27:28.175000+09:00"
+      }
+    },
+    "stop_A": {
+      "operation_id": "op-611764cb-b7a2-4bb1-9f4c-2fa54d85cecb",
+      "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-611764cb-b7a2-4bb1-9f4c-2fa54d85cecb",
+      "requested_at": "2026-09-12T03:28:43.271155Z",
+      "completed_at": "2026-09-12T03:30:12.457420Z",
+      "status": "SUCCEEDED",
+      "target_game_id": "game-vanilla-main",
+      "runtime_target": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-084d8509-d7d8-48ad-91d9-e3807cfda1d2",
+        "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+        "game_id": "game-vanilla-main"
+      },
+      "result": null
+    },
+    "A_first_observed": {
+      "boot_id": "21ce017f-5db5-4033-9c46-9cf0d52d75f2",
+      "target": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-4cc19257-6870-412c-9c98-06c36137ed3d",
+        "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+        "game_id": "game-vanilla-main"
+      },
+      "container_id": "babfc210b20c36eb150efabb87b0ae8fcd030c77f4ad09edceaabbb10f77362f",
+      "process_id": "762c6d969939fba24144838114dded0c89c0e2abf9265690afb177d962dbfa3b",
+      "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+      "inventory": {
+        "game-vanilla-main": {
+          "files": 113,
+          "bytes": 142007322,
+          "level_dat": true,
+          "player_data": [
+            "world/players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+          ],
+          "level_dat_sha256": "2bef2d811d82fa42cb2543d3e88cea91d2520640036bcee9fd73c4806eaf4233"
+        },
+        "game-vanilla-secondary": {
+          "files": 2,
+          "bytes": 145,
+          "level_dat": false,
+          "player_data": [],
+          "level_dat_sha256": null
+        }
+      },
+      "heartbeat": {
+        "player_count": "0",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "runtime_id": "wishicraft-host-runtime",
+        "observed_at": "2026-09-12T03:12:23.313397Z",
+        "protocol_state": "ready",
+        "boot_id": "21ce017f-5db5-4033-9c46-9cf0d52d75f2",
+        "empty_since": "2026-09-12T03:10:21.313673Z",
+        "system_id": "wishicraft-main",
+        "schema_version": "1",
+        "active_game_id": "game-vanilla-main",
+        "expires_at": "1789269143",
+        "process_id": "762c6d969939fba24144838114dded0c89c0e2abf9265690afb177d962dbfa3b",
+        "run_id": "op-4cc19257-6870-412c-9c98-06c36137ed3d"
+      }
+    },
+    "B_observed": {
+      "boot_id": "21ce017f-5db5-4033-9c46-9cf0d52d75f2",
+      "target": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-62161495-9511-4cdb-91be-cb5f8b8469a1",
+        "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+        "game_id": "game-vanilla-secondary"
+      },
+      "container_id": "9fc82c28c139f50a743804c3c8ad58017d9d5abbb06679f59285751347ec3c8c",
+      "process_id": "836c3cbe144cdd4db7aab8ad58519f10db15972ad24b2b59b418fb52e027186b",
+      "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+      "inventory": {
+        "game-vanilla-main": {
+          "files": 111,
+          "bytes": 142009008,
+          "level_dat": true,
+          "player_data": [
+            "world/players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+          ],
+          "level_dat_sha256": "42d93de59dcfa660b65e7bd658ce9a6bfe1a12b8d27f327bbe9e0e153283b79d"
+        },
+        "game-vanilla-secondary": {
+          "files": 84,
+          "bytes": 130929473,
+          "level_dat": true,
+          "player_data": [],
+          "level_dat_sha256": "9c95930f3d77e3d4d24c24e1a71e462935a1635a69c5f9cad5ea1c6c973f13ed"
+        }
+      },
+      "heartbeat": {
+        "player_count": "0",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "runtime_id": "wishicraft-host-runtime",
+        "observed_at": "2026-09-12T03:21:32.297945Z",
+        "protocol_state": "ready",
+        "boot_id": "21ce017f-5db5-4033-9c46-9cf0d52d75f2",
+        "empty_since": "2026-09-12T03:20:31.306546Z",
+        "system_id": "wishicraft-main",
+        "schema_version": "1",
+        "active_game_id": "game-vanilla-secondary",
+        "expires_at": "1789269692",
+        "process_id": "836c3cbe144cdd4db7aab8ad58519f10db15972ad24b2b59b418fb52e027186b",
+        "run_id": "op-62161495-9511-4cdb-91be-cb5f8b8469a1"
+      }
+    },
+    "A_return_observed": {
+      "boot_id": "21ce017f-5db5-4033-9c46-9cf0d52d75f2",
+      "target": {
+        "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-084d8509-d7d8-48ad-91d9-e3807cfda1d2",
+        "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+        "game_id": "game-vanilla-main"
+      },
+      "container_id": "a4bbb5de057b1771750399fedaa9be68a564a15fef33a8f25b4bebbef404e948",
+      "process_id": "4cbe335812e9639fb642893dc229e128c9a2211946d268b5fd186be1004cc08e",
+      "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+      "inventory": {
+        "game-vanilla-main": {
+          "files": 114,
+          "bytes": 142007944,
+          "level_dat": true,
+          "player_data": [
+            "world/players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat"
+          ],
+          "level_dat_sha256": "8f572846c962e04b5ce336ce0ba621cf32108110ae914f91f6f18cdd3c3c4aca"
+        },
+        "game-vanilla-secondary": {
+          "files": 82,
+          "bytes": 130946284,
+          "level_dat": true,
+          "player_data": [],
+          "level_dat_sha256": "56cd53d2e954eae5bcf676813002eddbba6df0d35b3d6d057c4885d4f91a3d7e"
+        }
+      },
+      "heartbeat": {
+        "player_count": "0",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "runtime_id": "wishicraft-host-runtime",
+        "observed_at": "2026-09-12T03:25:35.358243Z",
+        "protocol_state": "ready",
+        "boot_id": "21ce017f-5db5-4033-9c46-9cf0d52d75f2",
+        "empty_since": "2026-09-12T03:25:35.358243Z",
+        "system_id": "wishicraft-main",
+        "schema_version": "1",
+        "active_game_id": "game-vanilla-main",
+        "expires_at": "1789269935",
+        "process_id": "4cbe335812e9639fb642893dc229e128c9a2211946d268b5fd186be1004cc08e",
+        "run_id": "op-084d8509-d7d8-48ad-91d9-e3807cfda1d2"
+      }
+    },
+    "B-stop_receipt": {
+      "receipt": {
+        "target": {
+          "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-62161495-9511-4cdb-91be-cb5f8b8469a1",
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+          "game_id": "game-vanilla-secondary"
+        },
+        "phase": "stopped",
+        "stop": {
+          "container_id": "9fc82c28c139f50a743804c3c8ad58017d9d5abbb06679f59285751347ec3c8c",
+          "started_at": "2026-09-12T03:18:38.195252004Z",
+          "save_confirmed": true,
+          "removal_ready": true
+        }
+      },
+      "containers": [],
+      "unit": "inactive",
+      "observed_epoch": 1789183459.7725008
+    },
+    "A-final-stop_receipt": {
+      "receipt": {
+        "target": {
+          "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-084d8509-d7d8-48ad-91d9-e3807cfda1d2",
+          "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "game_id": "game-vanilla-main"
+        },
+        "phase": "stopped",
+        "stop": {
+          "container_id": "a4bbb5de057b1771750399fedaa9be68a564a15fef33a8f25b4bebbef404e948",
+          "started_at": "2026-09-12T03:24:44.57245878Z",
+          "save_confirmed": true,
+          "removal_ready": true
+        }
+      },
+      "containers": [],
+      "unit": "inactive",
+      "observed_epoch": 1789183734.9671824
+    }
+  },
+  "validation": {
+    "pytest": {
+      "sandbox": "926 passed, 9 failures and 24 setup errors caused by PyPI DNS blocked during CDK bundling",
+      "network_enabled": "959 passed in 45.99s"
+    },
+    "ruff_check": "passed",
+    "ruff_format": "187 files formatted",
+    "mypy": "150 source files passed",
+    "docker_local": "CLI unavailable; existing and final CI execute real Docker",
+    "synth": "Phase1, Target, single-Game CP, two-Game CP succeeded; deployed two-Game assembly exactly read back",
+    "application_changes_during_execution": false
+  },
+  "final_aws": {
+    "at": "2026-09-12T03:36:29.546470+00:00",
+    "state": {
+      "environment": "dev",
+      "observed_at": "2026-09-12T03:35:00.791675Z",
+      "health": "HEALTHY",
+      "observation_errors": [],
+      "desired_state": "STOPPED",
+      "discrepancies": [],
+      "desired_updated_at": "2026-09-12T03:28:47.076695Z",
+      "requested_operation_id": "op-611764cb-b7a2-4bb1-9f4c-2fa54d85cecb",
+      "desired_revision": "27",
+      "desired_game_id": "game-vanilla-main",
+      "observation": {
+        "public_ipv4": null,
+        "docker_state": "unknown",
+        "private_ipv4": "10.0.0.125",
+        "active_game_state": "not-applicable",
+        "observed_active_game_id": null,
+        "dns_state": "absent",
+        "ssm_state": "not-applicable",
+        "public_ipv4_state": "absent",
+        "dns_record_name": "mc-dev.wishicraft.net.",
+        "network_observation_source": "ec2-describe-instances",
+        "expected_game_id": "game-vanilla-main",
+        "dns_observation_source": "route53-list-resource-record-sets",
+        "schema_version": "1",
+        "container_state": "unknown",
+        "mount_state": "unknown",
+        "player_count": null,
+        "observed_at": "2026-09-12T03:35:00.791675Z",
+        "dns_ipv4_values": [],
+        "runtime_ready": false,
+        "instance_id": "i-04fc0629dc4ea466e",
+        "ec2_state": "stopped",
+        "minecraft_service_state": "not-applicable",
+        "host_runtime_state": "not-running",
+        "minecraft_protocol_state": "not-applicable"
+      },
+      "target_instance_id": "i-04fc0629dc4ea466e",
+      "system_id": "wishicraft-main",
+      "schema_version": "1",
+      "game_id": "game-vanilla-main"
+    },
+    "concurrency": {
+      "wc-dev-admission": "UNSET",
+      "wc-dev-discord-command": "UNSET"
+    },
+    "alarms": {
+      "OK": 42,
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0
+    },
+    "non_ok_alarms": [],
+    "original_provenance_unchanged": true,
+    "A_game_record_unchanged": true,
+    "target_stack_unchanged": true,
+    "ssm_terminal": true,
+    "unfinished_operations": 0,
+    "running_workflows": 0,
+    "locks": 0,
+    "data_volume": {
+      "VolumeId": "vol-03ac9f534326c345c",
+      "Encrypted": true,
+      "Size": 30,
+      "Attachments": [
+        {
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "VolumeId": "vol-03ac9f534326c345c",
+          "InstanceId": "i-04fc0629dc4ea466e",
+          "Device": "/dev/sdf",
+          "State": "attached",
+          "AttachTime": "2026-08-23 08:29:36+00:00"
+        }
+      ],
+      "AvailabilityZone": "ap-northeast-1a"
+    }
+  },
+  "shared_backup": {
+    "operation_id": "op-2e906afa-e8bf-4e65-9205-66504ef29465",
+    "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-2e906afa-e8bf-4e65-9205-66504ef29465",
+    "requested_at": "2026-09-12T03:30:55.232776Z",
+    "completed_at": "2026-09-12T03:33:03.474368Z",
+    "status": "SUCCEEDED",
+    "backup_snapshot_id": "snap-021079b3e3843652f",
+    "backup_create_intent": {
+      "Project": "wishicraft",
+      "WishicraftGameId": "game-vanilla-main",
+      "WishicraftCreatedAt": "2026-09-12T03:31:01.902887Z",
+      "WishicraftOperationId": "op-2e906afa-e8bf-4e65-9205-66504ef29465",
+      "WishicraftRecoveryDigest": "cfbe8a4b0c16f7595a48c9127827ddde0b4c0df704a2f579f3b17691959603b9",
+      "WishicraftSchemaVersion": "2",
+      "Stage": "dev",
+      "WishicraftSourceVolumeId": "vol-03ac9f534326c345c",
+      "WishicraftProtected": "false",
+      "WishicraftBackupScope": "shared-volume",
+      "WishicraftCategory": "backup"
+    },
+    "result": {
+      "backup_id": "backup-2e906afa-e8bf-4e65-9205-66504ef29465",
+      "snapshot_id": "snap-021079b3e3843652f",
+      "kind": "BACKUP",
+      "scope": "shared-volume",
+      "category": "backup",
+      "recovery_digest": "cfbe8a4b0c16f7595a48c9127827ddde0b4c0df704a2f579f3b17691959603b9",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "game_id": "game-vanilla-main"
+    },
+    "recovery_description": {
+      "games": {
+        "game-vanilla-main": {
+          "created_at": "2026-08-28T15:41:54.346726Z",
+          "created_from": {
+            "template_id": null,
+            "template_version": null
+          },
+          "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "display_name": "Wishicraft Vanilla",
+          "game_id": "game-vanilla-main",
+          "last_backup_at": null,
+          "last_started_at": null,
+          "lifecycle_state": "ACTIVE",
+          "materialization_state": "MATERIALIZED",
+          "normalized_display_name": "wishicraft-vanilla",
+          "package": {
+            "package_id": "vanilla",
+            "package_version": "initial-fixed-version"
+          },
+          "runtime": {
+            "class": "default",
+            "idle_shutdown_minutes": 30
+          },
+          "schema_version": 1,
+          "updated_at": "2026-08-28T15:41:54.346726Z",
+          "version": 1,
+          "world": {
+            "difficulty": null,
+            "generation": 1,
+            "hardcore": null,
+            "seed": null
+          }
+        },
+        "game-vanilla-secondary": {
+          "created_at": "2026-09-12T02:28:57.440753Z",
+          "created_from": {
+            "template_id": null,
+            "template_version": null
+          },
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+          "display_name": "Wishicraft Vanilla B",
+          "game_id": "game-vanilla-secondary",
+          "last_backup_at": null,
+          "last_started_at": null,
+          "lifecycle_state": "ACTIVE",
+          "materialization_state": "MATERIALIZED",
+          "normalized_display_name": "wishicraft-vanilla-b",
+          "package": {
+            "package_id": "vanilla",
+            "package_version": "initial-fixed-version"
+          },
+          "runtime": {
+            "class": "default",
+            "idle_shutdown_minutes": 30
+          },
+          "schema_version": 1,
+          "updated_at": "2026-09-12T02:28:57.440753Z",
+          "version": 1,
+          "world": {
+            "difficulty": null,
+            "generation": 1,
+            "hardcore": null,
+            "seed": null
+          }
+        }
+      },
+      "runtime": {
+        "compose_yaml": "name: wishicraft-host-runtime\nservices:\n  minecraft:\n    env_file:\n    - runtime.env\n    image: ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77\n    labels:\n      com.wishicraft.active-game-data-source: ${GAME_DIRECTORY:?targeted Game required}\n      com.wishicraft.active-game-id: ${WISHICRAFT_GAME_ID:?targeted Game required}\n      com.wishicraft.run-id: ${WISHICRAFT_RUN_ID:?targeted START required}\n    mem_limit: 2816MiB\n    ports:\n    - 25565:25565/tcp\n    pull_policy: never\n    restart: 'no'\n    stop_grace_period: 150s\n    volumes:\n    - bind:\n        create_host_path: false\n      source: ${GAME_DIRECTORY:?targeted Game required}\n      target: /data\n      type: bind\n    - read_only: true\n      source: /run/wishicraft/rcon-password\n      target: /run/secrets/rcon-password\n      type: bind\n    - read_only: false\n      source: /run/wishicraft/rcon-cli.env\n      target: /data/.rcon-cli.env\n      type: bind\n    - read_only: false\n      source: /run/wishicraft/rcon-cli.yaml\n      target: /data/.rcon-cli.yaml\n      type: bind\n",
+        "manifest_json": "{\"apply_class\":\"boot-time\",\"compose_sha256\":\"24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0\",\"game_id\":\"game-vanilla-main\",\"games\":[\"game-vanilla-main\",\"game-vanilla-secondary\"],\"image\":\"ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77\",\"minecraft_version\":\"26.2\",\"rcon_enabled\":true,\"runtime_env_sha256\":\"62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce\",\"schema_version\":1,\"secret_material_included\":false,\"server_type\":\"VANILLA\"}\n",
+        "runtime_env": "ENABLE_RCON=true\nEULA=TRUE\nGID=993\nINIT_MEMORY=1G\nMAX_MEMORY=2G\nRCON_PASSWORD_FILE=/run/secrets/rcon-password\nSKIP_CHOWN_DATA=true\nSTOP_DURATION=120\nTYPE=VANILLA\nUID=993\nVERSION=26.2\n"
+      },
+      "schema_version": 1,
+      "source_volume_id": "vol-03ac9f534326c345c"
+    },
+    "recovery_digest": "cfbe8a4b0c16f7595a48c9127827ddde0b4c0df704a2f579f3b17691959603b9",
+    "games_runtime_manifest_and_provenance_verified": true
+  },
+  "snapshot_counts": {
+    "legacy_normal": 5,
+    "migration_anchor": 1,
+    "shared_normal": 1,
+    "total": 7
+  },
+  "snapshot_ids": [
+    "snap-021079b3e3843652f",
+    "snap-0bc776ec580afd4ac",
+    "snap-005ce340d03a42340",
+    "snap-0989e090822d69d1e",
+    "snap-0762ec7637f489d5b",
+    "snap-079c0aa0c06935d8f",
+    "snap-0b1d9536e9c476c0f"
+  ],
+  "verified_provenance_pairs": 6,
+  "final_retention": {
+    "operation_id": "op-b0d63cab-fea3-4ef5-ab7d-0b0685f4705b",
+    "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-b0d63cab-fea3-4ef5-ab7d-0b0685f4705b",
+    "requested_at": "2026-09-12T03:34:59.931929Z",
+    "completed_at": "2026-09-12T03:35:05.832450Z",
+    "status": "SUCCEEDED",
+    "target_game_id": "game-vanilla-main",
+    "result": {
+      "reason": "within-retention-limit",
+      "delete_action_count": "0",
+      "candidate_count": "0",
+      "keep_count": "1",
+      "excluded_count": "6",
+      "kind": "RETENTION_DRY_RUN",
+      "inventory_count": "7",
+      "deletion_plan_count": "0",
+      "anomaly_count": "0",
+      "matching_recycle_bin_rule_count": "0",
+      "recycle_bin_rule_count": "0"
+    }
+  },
+  "unverified": [
+    "Real multi-Game isolated single-Game restore",
+    "Human inspection of builds/inventory or Minecraft login",
+    "Fault injection, forced replay/redrive, uncertain CreateSnapshot E2E",
+    "30-minute auto-stop E2E repeated under two Games",
+    "Atomic guarantee that no player joins after last empty observation"
+  ],
+  "cost": {
+    "estimate": "Existing t3a.medium + IPv4 USD 0.054/hour; Snapshot USD 0.05/GB-month. No new EC2/EBS or Budget changes. One SWITCH alarm and execution/log/SSM charges added.",
+    "observed": "One maintenance boot and one normal boot; same normal boot across both SWITCHes. B inventory after save 130946284 bytes; billable incremental Snapshot blocks not measured.",
+    "billing_actual_usd": null
+  },
+  "repository_validation": {
+    "implementation_applied_head": "a2980bd1e233e0932968cac43d5da20c933f8e68",
+    "predeploy_ci_run_id": 34667916010,
+    "predeploy_ci_conclusion": "success",
+    "postexecution_changes": "Canonical documentation and evidence only; no application/host/IAM semantics changed during execution. Final closeout commit and its CI are reported in the handoff.",
+    "full_validation": "959 pytest passed; ruff check/format passed; mypy 150 files; four CDK synth configurations passed. Docker CLI absent locally; real Docker validation retained in CI."
+  }
 }

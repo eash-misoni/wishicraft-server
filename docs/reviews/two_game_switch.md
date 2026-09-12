@@ -1,9 +1,9 @@
 # Two-Game SWITCH / BACKUP contract
 
-**Status: Accepted — 2026-09-12 JST user GO at `25fc0064727aea81cd449c29d97e4adef2308b47`; production migration not yet complete.**
+**Status: Accepted — 2026-09-12 JST user GO at `25fc0064727aea81cd449c29d97e4adef2308b47`; production migration and approved E2E completed on 2026-09-12.**
 
 Baseline: `bb78deacc4daf1ad195887f337b3d4fa6a53c30f`. D-096 remains Completed.
-This proposal does not accept the rest of Phase 9, RESET, whitelist synchronization,
+This decision does not accept the rest of Phase 9, RESET, whitelist synchronization,
 Package/Preset/Template management, or different runtime classes.
 
 ## Scope and ownership

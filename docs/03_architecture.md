@@ -3,13 +3,13 @@
 Phase 8.3の監視はAccepted D-094を参照する。既存read-only Monitoring Observerと独立した5分EventBridge scheduleがReconcileのObserved更新を行い、固定Host probe v1.4のData EBS usage/boot telemetryも同じ観測経路へ載せる。新しい常駐agent、Lambda、START/STOP経路は追加しない。dev production適用・検証の証跡は[monitoring runbook](runbooks/phase8_monitoring.md)を正本とする。
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-31
+- **最終更新:** 2026-09-12
 
 ## 1. アーキテクチャ方針
 
 **現在の実行境界（D-096適用済み）:** Control PlaneはOperationに対象を固定し、hostのoperation-v2が同じ排他内でlease・実container・bindを検証して保存/停止/起動する。停止containerは証明済みexact IDだけを通常STOP内で除去する。fieldと失敗再開の正本は[Data/Interface §0](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)。以下のPhase 1/2構築経緯は履歴であり、旧operation-v1を現在の入口として使わない。
 
-現在は単一Game、停止中Data EBS全体Snapshot。D-095の隔離復元は実証済みだが汎用Restore UI/workflowは未実装。[D-097](reviews/two_game_switch.md)の二Game・共有保護は未承認の次案であり、Package等の汎用基盤を前提にしない。
+[D-097](reviews/two_game_switch.md)の二Game catalog・単一Operation/leaseのSWITCH・共有保護を採用し、2026-09-12にhost/Control Planeへ適用、利用機能E2Eも完了。同じEC2内のruntimeを切り替える。構成・選択・復旧情報の正本は同契約を参照する。D-095の隔離復元は実証済みだが、実multi-Game単独復元と汎用Restore UI/workflowは未実証・未実装。Package等の汎用基盤を前提にしない。
 
 制御系をサーバーレスにし、常時稼働するコンピュートを持たない。Minecraft本体を動かすEC2だけを必要時に起動する。
 

@@ -1,7 +1,7 @@
 # 02. Requirements
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-31
+- **最終更新:** 2026-09-12
 
 ## 1. 要件の読み方
 
@@ -410,7 +410,7 @@ D-097 Acceptedの移行後は、新形式shared-volume normalだけを共有volu
 
 ### GAME-001 管理単位 `LATER`
 
-以下のLATERモデルは見直し対象。[D-097 Proposed](reviews/two_game_switch.md)では、同一固定構成の二Game選択・EC2維持切替・共有BACKUP整合を一利用機能として準備する。認可、接続playerの扱い、共有保護/retention単位は未承認である。
+以下のLATERモデルは見直し対象。[D-097 Accepted](reviews/two_game_switch.md)では、同一固定構成の二Game選択・EC2維持切替・共有BACKUP整合を一利用機能として準備する。認可、接続playerの扱い、共有保護/retention単位は未承認である。
 
 複数ゲーム対応後は、ワールド単体ではなくGameを起動単位とする。
 
