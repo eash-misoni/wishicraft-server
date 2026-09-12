@@ -14,9 +14,10 @@
 
 ### D-097 同一runtime構成の二つのGameの切替と共有保護
 
-- **状態:** Proposed（repository実装・検証準備中、production未承認）
-- **提案:** [two_game_switch.md](reviews/two_game_switch.md)。D-096の対象固定と保存・正常停止を再利用し、単一OperationでEC2を維持して切り替える。Game選択、共有backup/provenance、dry-run retention、Discord認可を同じproduction gateで審査する。
-- D-096 CompletedやD-095の復元順序承認を変更しない。新backup形式・認可は未Accepted。
+- **状態:** Accepted（2026-09-12 JSTユーザーGO。production移行は未完了）
+- **決定:** [two_game_switch.md](reviews/two_game_switch.md)。基準HEAD `25fc0064727aea81cd449c29d97e4adef2308b47` の契約とRETENTION是正を採用。単一Operation/leaseでEC2を維持し、既存保存・正常停止・起動を再利用する。SWITCHはadmin-only、confirm:true、観測0人（直後接続raceあり）。共有volume v2と復旧情報のOperation固定・durable provenance保存、共有形式newest 7を採用する。legacy/migration/protectedは別保持、RETENTIONはdry-run-only。総Snapshot数による削除releaseは行わず、共有保護単位・復旧手順に対応した独立承認を必要とする。
+- **適用:** [migration runbook](runbooks/two_game_switch_migration.md)を一括承認。直前v1 BACKUP、受付制御、host/B/CP/Discord更新、A→B→RETENTION→A→STOP、v2 BACKUPと最終RETENTIONを含む。実行状態は[production evidence](evidence/2026-09-12-two-game-production.json)を参照。設計Acceptedを適用Completedと扱わない。
+- D-096/D-095 Completedを維持。実multi-Game単独復元、Reset/whitelist再設計/Web/異なるruntime・Phase 9全体は今回の採用・実装対象外。
 
 ### D-096 既存Gameの対象を固定したruntime実行契約
 

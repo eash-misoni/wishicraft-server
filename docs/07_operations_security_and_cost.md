@@ -7,7 +7,7 @@
 
 D-096の通常STOPは保存・正常停止後に停止containerだけを限定除去し、永続Data EBSを残す。対象/receipt/再試行の正本は[Data/Interface §0](05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)。root上のreceipt紛失とworld復元は別の障害であり、Snapshotだけで制御状態を復元したとは扱わない。
 
-D-095の隔離復元は2026-09-08復旧点のcopy上で検証済み。後日の進捗・Snapshot時点の全設定・人間目視まで復元した保証ではない。実証範囲と診断copyの扱いは[復元runbook](runbooks/backup_safety_isolated_restore.md)。共有BACKUPと切替認可は[D-097 Proposed](reviews/two_game_switch.md)、RETENTIONは引き続きdry-run-onlyである。
+D-095の隔離復元は2026-09-08復旧点のcopy上で検証済み。後日の進捗・Snapshot時点の全設定・人間目視まで復元した保証ではない。実証範囲と診断copyの扱いは[復元runbook](runbooks/backup_safety_isolated_restore.md)。共有BACKUPと切替認可は[D-097 Accepted（移行未完了）](reviews/two_game_switch.md)、RETENTIONは引き続きdry-run-onlyである。
 
 - 日常操作はDiscordで完結させる。
 - シェル接続は初期構築、Package検証、障害調査、手動復元に限定する。
@@ -328,7 +328,7 @@ Phase 8B/8Cで停止中Data EBSの検証済みEBS Snapshot backupとDiscord経�
 
 D-090 v1のnormal EBS Snapshot backupをGameごとnewest 7保持する。migration rollback anchor、protected、manual/operator-created、別stage/Game/source、normal retention ownershipをpositive proofできないSnapshotは削除対象外である。旧S3 archive案は現行backup contractではなく、archive機能としてDeferredである。package artifact/CDK assetのS3利用は別契約である。
 
-D-091のRETENTIONはBACKUPと分離したOperationでglobal Lockを取り、完全inventory、durable provenance、StartTime ordering、Recycle Bin preflightとdelete直前再検証を要求する。初版は1 Operation最大1件で、relevant anomalyがあればrun全体no-deleteとする。実Delete releaseはnaturalにnormal backupが8件以上となった後の別gateで行う。
+D-091のRETENTIONはBACKUPと分離したOperationでglobal Lockを取り、完全inventory、durable provenance、StartTime ordering、Recycle Bin preflightとdelete直前再検証を要求する。初版は1 Operation最大1件で、relevant anomalyがあればrun全体no-deleteとする。このv1の件数条件は旧契約の履歴である。D-097採用後は総Snapshot数でreleaseせず、新しい共有保護単位の候補・保持群・復旧手順を確認した独立承認が必要。今回の移行はdry-run-onlyを維持する。
 
 2026-09-08にdevへ非TTL `wc-dev-backups`をdeployし、Phase 8B/8Cの成功済みnormal backup 2件をproduction evidence再検証後のcreate-only transactionで登録した。さらにreal `/mc backup`で3件目のnormal backupとdurable provenance pairが通常terminalizationから自動作成されることを検証した。3件はいずれもstandard tierで、Recycle Bin matching ruleとactive Snapshot Lockは0である。
 

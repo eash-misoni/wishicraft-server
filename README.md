@@ -4,7 +4,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
-現在の通常実行契約は[Data/Interface §0](docs/05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)を参照してください。runbookは移行手順・証跡を所有します。次の作業は[D-097 二Game切替・共有BACKUPのProposed案](docs/reviews/two_game_switch.md)のrepository実装・移行準備です。production適用やPhase 9全体の採用を示すものではありません。
+現在の通常実行契約は[Data/Interface §0](docs/05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)を参照してください。runbookは移行手順・証跡を所有します。現在は[D-097 二Game切替・共有BACKUP](docs/reviews/two_game_switch.md)の設計と限定移行計画がAcceptedです。production適用は未完了で、[実行証跡](docs/evidence/2026-09-12-two-game-production.json)へ別途記録します。Phase 9全体の採用ではありません。
 
 Phase 0〜8は完了しています。停止中Data EBSのBACKUP、durable provenance、retention dry-run、Runtime heartbeat、warning付き無人自動停止、監視・コスト整備をdevで検証済みです。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。
 

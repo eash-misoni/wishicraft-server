@@ -1,0 +1,208 @@
+{
+  "status": "BLOCKED_SSO_REAUTHENTICATION",
+  "decision": "D-097 Accepted; production migration not completed",
+  "approved_head": "25fc0064727aea81cd449c29d97e4adef2308b47",
+  "baseline_ci": {
+    "run_id": 34609841956,
+    "conclusion": "success",
+    "head_verified": true
+  },
+  "aws_preflight": {
+    "caller_verified": false,
+    "error": "SSO token expired and refresh failed",
+    "current_production_state": "not measured this continuation; prior evidence is historical only"
+  },
+  "aws_discord_host_writes": [],
+  "admission_settings": "not read or modified this continuation",
+  "local_artifacts": {
+    "declaration_sha256": "eb40959d3c42a9748d5d018ad0cf7b1440457805e4b6ba43399e5ce419e8ee2a",
+    "bundle_index_sha256": "73c5327c161d33d4883d817e7fd0006957c3c1cab60d00b57009028e26349e22",
+    "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+    "declaration": {
+      "schema_version": 1,
+      "game": {
+        "game_id": "game-vanilla-secondary",
+        "schema_version": 1,
+        "version": 1,
+        "display_name": "Wishicraft Vanilla B",
+        "normalized_display_name": "wishicraft-vanilla-b",
+        "lifecycle_state": "ACTIVE",
+        "materialization_state": "MATERIALIZED",
+        "created_from": {
+          "template_id": null,
+          "template_version": null
+        },
+        "package": {
+          "package_id": "vanilla",
+          "package_version": "initial-fixed-version"
+        },
+        "runtime": {
+          "class": "default",
+          "idle_shutdown_minutes": 30
+        },
+        "world": {
+          "seed": null,
+          "difficulty": null,
+          "hardcore": null,
+          "generation": 1
+        },
+        "created_at": "2026-09-12T02:28:57.440753Z",
+        "updated_at": "2026-09-12T02:28:57.440753Z",
+        "last_started_at": null,
+        "last_backup_at": null
+      },
+      "materialization": {
+        "game_id": "game-vanilla-secondary",
+        "files": {
+          "server.properties": "level-name=world\nonline-mode=true\nwhite-list=true\nenforce-whitelist=true\n",
+          "whitelist.json": "[{\"name\": \"NEWISHIN_\", \"uuid\": \"e912ab95-758e-4b7f-b32e-292eda293104\"}]\n"
+        }
+      },
+      "discord_commands": [
+        {
+          "type": 1,
+          "name": "mc",
+          "description": "Wishicraft Minecraft controls",
+          "options": [
+            {
+              "type": 1,
+              "name": "status",
+              "description": "Show fresh Wishicraft status"
+            },
+            {
+              "type": 1,
+              "name": "start",
+              "description": "Start the Wishicraft server",
+              "options": [
+                {
+                  "type": 3,
+                  "name": "game",
+                  "description": "Game to start",
+                  "choices": [
+                    {
+                      "name": "game-vanilla-main",
+                      "value": "game-vanilla-main"
+                    },
+                    {
+                      "name": "game-vanilla-secondary",
+                      "value": "game-vanilla-secondary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": 1,
+              "name": "stop",
+              "description": "Save and stop the Wishicraft server"
+            },
+            {
+              "type": 1,
+              "name": "backup",
+              "description": "Back up the stopped Wishicraft server"
+            },
+            {
+              "type": 1,
+              "name": "switch",
+              "description": "Admin: save/stop the empty current Game and start another",
+              "options": [
+                {
+                  "type": 3,
+                  "name": "game",
+                  "description": "Game to start",
+                  "choices": [
+                    {
+                      "name": "game-vanilla-main",
+                      "value": "game-vanilla-main"
+                    },
+                    {
+                      "name": "game-vanilla-secondary",
+                      "value": "game-vanilla-secondary"
+                    }
+                  ],
+                  "required": true
+                },
+                {
+                  "type": 5,
+                  "name": "confirm",
+                  "description": "Confirm stopping the current Game",
+                  "required": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "bundle_plan": {
+      "baseline": "bb78deacc4daf1ad195887f337b3d4fa6a53c30f",
+      "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+      "files": [
+        {
+          "destination": "/etc/wishicraft/host-runtime/compose.yaml",
+          "source": "0.artifact",
+          "mode": 384,
+          "sha256": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+          "predecessor": "110e0756131048fdeac16bad08f7abe7edaacc6e8d4cd0871444ed2b85758995"
+        },
+        {
+          "destination": "/etc/wishicraft/host-runtime/runtime.env",
+          "source": "1.artifact",
+          "mode": 384,
+          "sha256": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+          "predecessor": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce"
+        },
+        {
+          "destination": "/etc/wishicraft/host-runtime/manifest.json",
+          "source": "2.artifact",
+          "mode": 384,
+          "sha256": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+          "predecessor": "1e92fd0002eaebe540a0654646b0bfd0afc5fad79be88d5567711f4cb431fd97"
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/runtime_heartbeat_producer.py",
+          "source": "3.artifact",
+          "mode": 420,
+          "sha256": "831645ac04e0f8f0affe44dc51e071ec77ca0a2bdb2ddb251796c64b4bce229a",
+          "predecessor": "ab7a8e5714f0b18b4a70196d03258dfeb1d0b8318987d83de8dc0cbbbe7c8ef5"
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/operation-v2",
+          "source": "4.artifact",
+          "mode": 493,
+          "sha256": "84c257855962ca5a5a46547f21362d07062d5e3ccabc320256066c1af54a6729",
+          "predecessor": "aaf0233b0d4ad73c49aea3d7525413de62de27f2df880423a8f692569f9f61ee"
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/rcon-secret-v2",
+          "source": "5.artifact",
+          "mode": 493,
+          "sha256": "f840582aaa22a00b6acf70ff99b95adb22dac0c688d7e3678be32a362cb2681d",
+          "predecessor": null
+        },
+        {
+          "destination": "/etc/wishicraft/runtime-contract.json",
+          "source": "6.artifact",
+          "mode": 384,
+          "sha256": "dab6d1837a8efb497c90ba9dae62eb4743752aaa965dd6031d5afaf92433bdb2",
+          "predecessor": "5fed0f7aacce88db8b0bbe3aa9244050e93264b0a18fcaab19c899464bbc2e4a"
+        }
+      ],
+      "hashes": {
+        "6.artifact": "dab6d1837a8efb497c90ba9dae62eb4743752aaa965dd6031d5afaf92433bdb2",
+        "1.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+        "0.artifact": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+        "5.artifact": "f840582aaa22a00b6acf70ff99b95adb22dac0c688d7e3678be32a362cb2681d",
+        "4.artifact": "84c257855962ca5a5a46547f21362d07062d5e3ccabc320256066c1af54a6729",
+        "install.py": "fadd2ca3f0b4122567b5817157e2405e6d1d85f08525e4433228d01ae2b4f0bf",
+        "second-game.json": "4eec0fd9eb3961fa97908d70f350685cea2f0dc6e9de35386d543264750a0ec1",
+        "prepare-game.py": "4f5d66a7c44352adc3e7cc673c73b7eab6e5866dd73896df53e26da46f03248b",
+        "2.artifact": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+        "install.json": "420be66b8c3bc2178011466490c829720e3d9c46d16bb1f7f0125bd36d3768a1",
+        "3.artifact": "831645ac04e0f8f0affe44dc51e071ec77ca0a2bdb2ddb251796c64b4bce229a"
+      }
+    },
+    "local_root_name": "wishicraft-two-game-production-v1.zh3uuny1"
+  },
+  "resume_from": "Reauthenticate canonical wishicraft-dev; verify caller and all runbook step 1 conditions before first BACKUP. Reuse fixed declaration/bundle."
+}

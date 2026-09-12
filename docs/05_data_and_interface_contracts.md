@@ -5,7 +5,7 @@
 
 ## 0. Production適用済みruntime契約（D-096）
 
-D-096 Accepted、2026-09-11適用・通常START/STOP二巡確認済み。以下が現在の単一Game契約である。後続のhost `operation-v1`命令例は移行前の履歴として読む。Admission/task等の`schema_version: 1`は別interfaceであり、現行のままである。新しい二Game選択・SWITCH・共有BACKUPは[D-097 Proposed](reviews/two_game_switch.md)であり、本節の適用済み契約とは別である。
+D-096 Accepted、2026-09-11適用・通常START/STOP二巡確認済み。以下が現在の単一Game契約である。後続のhost `operation-v1`命令例は移行前の履歴として読む。Admission/task等の`schema_version: 1`は別interfaceであり、現行のままである。新しい二Game選択・SWITCH・共有BACKUPは[D-097 Accepted（移行未完了）](reviews/two_game_switch.md)であり、本節の適用済み契約とは別である。
 
 ### 選択と正本
 

@@ -1,8 +1,8 @@
 # Two-Game SWITCH migration
 
-**Proposed — production未承認。D-097の設計承認と、この実行計画のGOを一括して求める。**
+**Accepted — 2026-09-12 JST、基準HEAD `25fc0064727aea81cd449c29d97e4adef2308b47` にユーザーGO。production移行は未完了。**
 現在productionはD-096単一Game契約。意味・認可・保護単位の差分の正本は
-[設計提案](../reviews/two_game_switch.md)。過去のD-096 migrationを再実行しない。
+[採用契約](../reviews/two_game_switch.md)。過去のD-096 migrationを再実行しない。
 
 ## 承認対象と固定入力
 
@@ -11,7 +11,7 @@ B=`game-vanilla-secondary`は独立したserver directoryを新設。同じstage
 同じ既存Target/Data EBS、同時一つのみ。Bの表示名・初期whitelist・EULA適用は生成した宣言で確認する。
 Aのwhitelist/propertiesやworldをコピー、再生成、上書きしない。Bの初回world生成だけを明示許可する。
 
-承認に必要なwriteは、normal BACKUP二回（下記の異なる目的）、二Lambdaの一時concurrency制御、
+承認済みwriteは、normal BACKUP二回（下記の異なる目的）、二Lambdaの一時concurrency制御、
 既存Targetの保守起動/正常停止とexact SSM、承認bundleのhost更新、B初期配置/条件付きGames登録、
 Control Plane限定deploy（SWITCH State Machine/role/alarm、既存code/configと限定IAM）、
 Discord command body更新、通常START/SWITCH/STOP、canonical RETENTION dry-run二回、必要なcontrolled Reconcile。
@@ -116,3 +116,9 @@ USD 0.05/GB-month。追加保持blockが計10 GBなら月USD 0.50、二件が各
 同日確認済み復元runbookの単価から参照し、4時間なら約USD 0.216にSnapshot/実行/通信/ログを加える。
 4時間で費用と状態を見直すが、時間だけを理由に強制停止やデータ削除はしない。
 価格照会・template差分・検証範囲は[準備証跡](../evidence/2026-09-11-two-game-preparation.json)に保存する。
+
+## Production実行記録
+
+[2026-09-12 production evidence](../evidence/2026-09-12-two-game-production.json)へcheckpointを集約する。
+B宣言・bundleはそこで固定したものを再利用し、認証待ちや中断だけを理由に再生成しない。
+設計Acceptedと移行Completedを分離し、未適用・未実証を現在値として明示する。

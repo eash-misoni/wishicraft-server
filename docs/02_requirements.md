@@ -402,6 +402,8 @@ BACKUPは停止中だけ許可し、RUNNING/STARTING/STOPPING/unknown/degraded�
 
 ### BAK-006 Retentionと分類 `MUST`
 
+D-097 Acceptedの移行後は、新形式shared-volume normalだけを共有volume単位のnewest 7群とする。legacy normal/migration/protectedは件数に含めず保持する。移行未完了時の既存v1経路と以下の従来Game単位規則を、新形式へ自動変換しない。実削除は未releaseであり、総Snapshot数8件ではgateを開かない。新保護単位の候補・復旧手順に対応した別承認を必要とする。
+
 通常backupはGameごとにnewest 7を保持する。`backup`、`migration`、将来のcategoryをmetadataで区別し、migration、protected、既知のmanual/operator snapshotは通常retentionから除外する。削除は独立RETENTION Operation、global Lock、positive proof、delete直前再検証、1 Operation最大1件、明示的outcome reconciliationを必要とする。実DeleteSnapshotと権限のreleaseはD-091の別gateとする。
 
 ## 10. 複数ゲーム・Package要件

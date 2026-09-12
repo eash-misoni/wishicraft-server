@@ -1,6 +1,6 @@
 # Two-Game SWITCH / BACKUP contract
 
-**Status: Proposed — repository preparation validated; no production writes authorized.**
+**Status: Accepted — 2026-09-12 JST user GO at `25fc0064727aea81cd449c29d97e4adef2308b47`; production migration not yet complete.**
 
 Baseline: `bb78deacc4daf1ad195887f337b3d4fa6a53c30f`. D-096 remains Completed.
 This proposal does not accept the rest of Phase 9, RESET, whitelist synchronization,
@@ -37,7 +37,7 @@ created to conceal an unresolved one. A later ordinary START may resume the sele
 unresolved run only under D-096 target validation. Returning to A first requires B
 to be confirmed normally stopped. Terminal execution replay is not a recovery API.
 
-## User policy proposed for approval
+## Accepted user policy
 
 `/mc start game:<A|B>` retains current START authorization, but cannot stop a running
 different Game. `/mc switch game:<A|B> confirm:true` requires Admin authorization.
@@ -46,7 +46,7 @@ before saving/stopping. This is a last-observed-empty policy: a connection can r
 that check. It is not a promise of an atomic player admission fence. Broader player
 permission or guaranteed advance notice needs a separate explicit policy decision.
 
-## Backup proposal
+## Accepted backup contract
 
 New backups protect the shared physical volume and carry a frozen recovery description
 in the existing durable provenance. No separate manifest service or archive subsystem.
@@ -66,18 +66,14 @@ must be distinguished from configuration reconstructed later.
 
 ## Production gate
 
-No BACKUP, Game registration, host directory creation, SSM, command registration,
-deploy, IAM, START/STOP/SWITCH, Snapshot/provenance update, or retention execution has
-been authorized by this request. The final migration plan must identify fresh protection,
-exact deployed predecessors, admission drain, B materialization, compatible host/CP
-cutover, A→B→A measurements, failure checkpoints, and final STOPPED/HEALTHY.
+The user approved the bounded migration in the runbook: two purpose-specific BACKUPs, admission drain/restoration, host update and fixed B registration, Control Plane and Discord command update, A→B→A with B-side RETENTION, and final shared BACKUP/RETENTION. This is not approval for Snapshot deletion, additional Games, RESET, or broader recovery semantics. Production completion is tracked separately in [execution evidence](../evidence/2026-09-12-two-game-production.json).
 
 The [migration runbook](../runbooks/two_game_switch_migration.md) owns execution ordering and
 checkpoints. Validation/CI evidence is finalized separately before readiness; no production
 SWITCH or new backup format has been exercised yet.
 
 
-## Canonical document integration
+## Canonical document integration（承認前準備の履歴）
 
 | 文書 | 今回の扱いと正本の責務 |
 |---|---|
@@ -103,7 +99,7 @@ Reset認可/旧world保持削除、共通whitelist反映、異なるruntime/spec
 新しい共有BACKUP newest 7は削除releaseではない。既存v1 normalとmigration anchorを数え直さない。
 
 
-## Preparation result
+## Preparation result（承認前の検証履歴）
 
 実装HEAD `b96bf3cd28f2257695631dab5d08843e4f4d1555` の
 [CI 34603989495](https://github.com/eash-misoni/wishicraft-server/actions/runs/34603989495)は
