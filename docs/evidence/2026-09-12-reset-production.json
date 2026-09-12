@@ -1,0 +1,52 @@
+{
+  "approval_head": "1f89613694a5fb8f502d87b42a72e6cbb6efb247",
+  "decision": "D-098 Accepted",
+  "production_applied": false,
+  "restore_trials_completed": 0,
+  "public_release": false,
+  "policy": {
+    "game-vanilla-secondary": {
+      "fixed_seed": 0,
+      "retain_previous": 3,
+      "minimum_free_bytes": 4294967296
+    }
+  },
+  "checkpoint": "PROTECTION_BACKUP_ACCEPTED",
+  "production_mutations": [
+    {
+      "action": "Discord Command reserved concurrency 0",
+      "at": "2026-09-12T10:29:37.386974+00:00"
+    },
+    {
+      "action": "canonical BACKUP admitted",
+      "operation_id": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e"
+    }
+  ],
+  "preflight": {
+    "at": "2026-09-12T10:28:06.156268+00:00",
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "target": "i-04fc0629dc4ea466e",
+    "data_volume": "vol-03ac9f534326c345c",
+    "state": "A selected; STOPPED/HEALTHY",
+    "both_game_current_id_absent": true,
+    "concurrency_original": {
+      "wc-dev-admission": "UNSET",
+      "wc-dev-discord-command": "UNSET"
+    },
+    "snapshot_count": 7,
+    "locks": 0,
+    "running_executions": 0,
+    "ssm_inflight": 0
+  },
+  "protection_backup": {
+    "schema_version": 1,
+    "operation_id": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e",
+    "created": true,
+    "lease_id": "lease-b437b326-6067-4adf-9de6-cb8294e27a56"
+  },
+  "validation": {
+    "local": "1017 tests; lint/format/types; five synth configurations passed",
+    "CI": "pending approved-policy commit"
+  }
+}

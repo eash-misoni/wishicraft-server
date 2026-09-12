@@ -1,6 +1,6 @@
-# Game-scoped Reset 適用準備（D-098 Proposed）
+# Game-scoped Reset 適用準備（D-098 Accepted、適用中）
 
-**現在はrepository準備のみ。AWS/Discord/Host/data writeは未承認。**
+**2026-09-12ユーザーGO。設計・B限定policy・本runbookの操作を承認済み。production適用、二回の隔離復旧、一般公開の成功はそれぞれ証跡で確定する。**
 利用者policy・正本の責務は[設計](../reviews/game_scoped_reset.md)。D-097を再実行しない。
 
 ## 一括承認で決める対象
@@ -11,6 +11,8 @@
 - cleanupコードのproduction到達は、以下の復旧確認後に限る。未検証を隠してデータ削除へ進まない。
 
 ## 事前保護と最小の隔離復旧
+
+保護窓はユーザーGOにより前倒しする。元concurrencyを記録しCommandを0へ、既存要求・他callerをdrainしてからoperator BACKUPを一回実行する。成功後Admissionも0へしてdrainし、隔離復旧へ進む。
 
 まずcanonical caller/account/region、HEAD/CI、元Target/EBS、A/B、受付、Operation/Lock/SFN/SSM、7 Snapshotとprovenanceの現在値を再照合する。準備時の値を将来の実測にしない。
 移行直前の停止中shared-volume BACKUPを一回取得し、completed/owner/source/tags/recovery digest/provenance pairを確認する。過去の9月8日/12日Snapshotは最新保護の代替ではない。

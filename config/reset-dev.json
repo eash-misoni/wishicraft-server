@@ -1,1 +1,7 @@
-{}
+{
+  "game-vanilla-secondary": {
+    "fixed_seed": 0,
+    "retain_previous": 3,
+    "minimum_free_bytes": 4294967296
+  }
+}

@@ -1,7 +1,7 @@
-# D-098 対応Game限定Reset（Proposed）
+# D-098 対応Game限定Reset（Accepted、適用中）
 
-2026-09-12。設計・repository実装の提案であり、production releaseではない。
-D-095/096/097のAccepted・Completedを維持する。Reset、Game capability、旧world削除のproduction承認は未取得。
+2026-09-12ユーザーGOで設計採用。production適用・復旧検証・一般公開は未完了。
+D-095/096/097のAccepted・Completedを維持する。B限定policyとrunbookの操作を一括承認済み。二回の隔離復旧成功前に一般公開しない。
 
 ## 推奨する利用方法
 
@@ -12,13 +12,13 @@ Gameの削除・再登録、worldファイルの選択削除、通常STOP/START�
 
 | 利用者判断 | 推奨案と負担・限界 |
 |---|---|
-| 有効化 | 管理者がGitの明示allowlistを承認し、CP/hostへ同じ宣言を配布。日常操作から変更できない。現在の`config/reset-dev.json`は空。A/Bは未有効化 |
+| 有効化 | 管理者がGitの明示allowlistを承認し、CP/hostへ同じ宣言を配布。日常操作から変更できない。`config/reset-dev.json`にB限定の承認値を固定。A非対応、production反映は別途検証する |
 | 日常の実行 | 既存PlayerまたはAdmin role。遊ぶ人が管理者待ちせず使える。ただし新worldへ移り旧worldは保持policyに従うことを明示確認 |
 | 同席player | 最終観測0人、hostの停止直前RCONも0人。unknown/positiveは拒否。全員投票や死亡検知は追加しない。最後の確認後に接続するraceが残り、無切断保証ではない |
 | 外部保護 | 毎回のSnapshotを待たず、旧領域を同じEBSへ保持。EBS喪失時は最後の外部BACKUP以降の進捗を失い得る。移行直前とrelease検証用BACKUPは別目的で計画する |
 | 保持 | 直近3個のmanaged旧領域＋currentを保持し、それ以前を成功後に自動整理する案。最初の既存`server`は永久anchorとして自動削除対象外。過去の例「2」は採用しない |
 | 容量 | 準備前にfree ≥ max(4 GiB, 現保存領域のファイル総量×2)を要求する案。これは将来のworld成長を予約する保証ではない。不足時は旧worldを削って続行しない |
-| seed | `fixed`はGame宣言のsigned 64-bit seed、`new`はUUID由来Operation IDのSHA-256から決定するsigned 64-bit値。再試行で再抽選しない。固定seed値は有効化承認時に指定する |
+| seed | `fixed`はGame宣言のsigned 64-bit seed、`new`はUUID由来Operation IDのSHA-256から決定するsigned 64-bit値。再試行で再抽選しない。承認されたBの固定seedは具体値0 |
 
 既存のadmin-only SWITCHは他Gameを止める権限として維持する。Resetの有効化と日常実行を同じadmin-onlyにする案は、Hardcoreの反復操作を管理者へ集中させるため初版の推奨にしない。
 全員接続中でもconfirmだけで止める案は手軽だが、他playerへの影響が大きいため採らない。

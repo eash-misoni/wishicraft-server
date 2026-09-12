@@ -14,11 +14,11 @@
 
 ### D-098 対応Game限定Resetと所有済み旧worldの限定整理
 
-- **状態: Proposed。repository実装・隔離testsまで。production未適用。**
+- **状態: Accepted（2026-09-12ユーザーGO、基準HEAD `1f89613694a5fb8f502d87b42a72e6cbb6efb247`）。production適用・二回の隔離復旧・一般公開は未完了。**
 - RESET-001/002の従来案を見直し、一つの操作で同一Gameの保存・正常停止、新領域準備、選択参照確定、同じEC2上の起動を行う。
 - 利用者policy・設定境界・失敗時の契約案は[Reset設計](reviews/game_scoped_reset.md)、適用条件は[runbook](runbooks/game_scoped_reset_migration.md)へ集約する。旧world保持は外部BACKUPの代替ではない。
-- 対応Game、実行権限、接続player、seed、保持数・容量、毎回外部BACKUPを省く損失境界、隔離復旧後の削除releaseを一括production gateで判断する。A/Bの既存データを破棄可能とみなさない。
-- D-095/096/097のAccepted・限定Completedを維持する。Phase 9全体、Resetの採用・production変更をこの記録から推論しない。
+- B限定、Player/Admin、観測0人＋明示確認（接続raceあり）、fixed_seed=0、managed旧world3個＋current＋別枠legacy anchor、free >= max(4 GiB, source×2)、毎回外部BACKUPを待たない損失境界を採用。二回の隔離復旧成功を一般公開・自動cleanup公開の条件とする。A/Bの既存データを破棄可能とみなさない。
+- D-095/096/097のAccepted・限定Completedを維持する。Phase 9全体の採用・完了をこの記録から推論しない。
 
 ## 2. 採用済み決定
 
