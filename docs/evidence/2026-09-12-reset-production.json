@@ -2,7 +2,7 @@
   "approval_head": "1f89613694a5fb8f502d87b42a72e6cbb6efb247",
   "decision": "D-098 Accepted",
   "production_applied": false,
-  "restore_trials_completed": 0,
+  "restore_trials_completed": 1,
   "public_release": false,
   "policy": {
     "game-vanilla-secondary": {
@@ -11,7 +11,7 @@
       "minimum_free_bytes": 4294967296
     }
   },
-  "checkpoint": "AUTHENTICATION_REQUIRED_BEFORE_ADMISSION_CLOSE",
+  "checkpoint": "FIRST_ISOLATED_RESTORE_VERIFIED_CLEANUP",
   "production_mutations": [
     {
       "action": "Discord Command reserved concurrency 0",
@@ -58,11 +58,12 @@
     "error": "canonical SSO token expired; refresh failed",
     "failed_action": "STS caller read before Admission concurrency update",
     "admission_write_sent": false,
-    "human_login_requested": true
+    "human_login_requested": true,
+    "human_login_completed": true
   },
   "concurrency_last_confirmed": {
     "wc-dev-discord-command": 0,
-    "wc-dev-admission": "UNSET"
+    "wc-dev-admission": 0
   },
   "runtime_last_confirmed": "A selected STOPPED/HEALTHY; Target stopped; DNS absent; no host writes since preflight",
   "restore_source": {
@@ -73,7 +74,7 @@
     "operation_succeeded": true,
     "provenance_pair_verified": true,
     "recovery_runtime_and_AB_paths_verified": true,
-    "state_machine_terminal_readback": "pending; authentication expired before final describe"
+    "state_machine_terminal_readback": "SUCCEEDED"
   },
   "not_executed": [
     "Admission closure",
@@ -189,5 +190,352 @@
     "isolated_resource_cost_incurred": 0,
     "snapshot_cost": "actual changed-block billing unknown; one approved protection Snapshot created",
     "budget_changed": false
+  },
+  "restore_1": {
+    "stack_id": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/wc-reset-restore-20260912-c6c30453/cbf56320-ae96-11f1-8c9d-0e2be6146e9b",
+    "ids": {
+      "Attachment": "vol-0224302bd4cdd9420|i-0151fe0754eb0431e",
+      "Copy": "vol-0224302bd4cdd9420",
+      "Host": "i-0151fe0754eb0431e",
+      "Profile": "wc-reset-restore-20260912-c6c30453-Profile-54f3YfZNm4Z8",
+      "Role": "wc-reset-restore-20260912-c6c30453-Role-tGS1h06zy8QX",
+      "SecurityGroup": "sg-082f37bf3ff844f87",
+      "Root": "vol-07e1420706a8bfca8"
+    },
+    "source": "snap-0be8e05ab05d70e84",
+    "mount": "read-only,norecovery",
+    "inventory": "{\"copy\": \"vol-0224302bd4cdd9420\", \"mount_readonly\": true, \"games\": {\"game-vanilla-main\": {\"world_files\": 39, \"player_files\": [\"players/advancements/e912ab95-758e-4b7f-b32e-292eda293104.json\", \"players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat\", \"players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat_old\", \"players/stats/e912ab95-758e-4b7f-b32e-292eda293104.json\"], \"server_bytes\": 142009533}, \"game-vanilla-secondary\": {\"world_files\": 31, \"player_files\": [], \"server_bytes\": 130946284}}}\n",
+    "extraction": "A exact world hashes; B unchanged; source remained read-only",
+    "runtime_install": "fixed Docker/Compose/image successful",
+    "runtime_save_restart": "pending",
+    "cleanup": "copy unmounted; host stop submitted; stack/volumes not deleted yet",
+    "result": "SUCCESS",
+    "proof": {
+      "inventory.json": {
+        "copy_id": "vol-0224302bd4cdd9420",
+        "device": "/dev/nvme1n1",
+        "games": {
+          "game-vanilla-main": {
+            "player_files": [
+              "players/advancements/e912ab95-758e-4b7f-b32e-292eda293104.json",
+              "players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat",
+              "players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat_old",
+              "players/stats/e912ab95-758e-4b7f-b32e-292eda293104.json"
+            ],
+            "server_bytes": 142009533,
+            "world_files": 39,
+            "world_hashes": {
+              "data/minecraft/custom_boss_events.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "data/minecraft/game_rules.dat": "2df142fa6218275daf8d94e58b95a6f391fd495c73bace8a13641245602e9af1",
+              "data/minecraft/random_sequences.dat": "baa85c3ee31f3357b56ff937fc8cbeb5f6875e5331dcf8aab056b91b46f6a475",
+              "data/minecraft/scheduled_events.dat": "ce2e6dd5438c192edd35018243c99fb343b268a2a471ce3cb85c2a65184c163e",
+              "data/minecraft/scoreboard.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "data/minecraft/stopwatches.dat": "e1cfab0753c6040172525467c952005cdfe616fc209a15fc06cd0028dc0b80d6",
+              "data/minecraft/wandering_trader.dat": "508fa99a5614bda7d532b27b71dd933b6a6de055e91ed3d278155a7faaaaa6d9",
+              "data/minecraft/weather.dat": "dff7949163a4b87bc1c1b873c771097220ed592fdcacdcab4fec4e636033a44b",
+              "data/minecraft/world_clocks.dat": "f2f363fedceca1872a28345ebf08c302393f8dec385a70d00ef7566bf24d64aa",
+              "data/minecraft/world_gen_settings.dat": "079815954ee1bb4bbf829aee13d4df3de705c9b2216892961df48ce0273c6384",
+              "dimensions/minecraft/overworld/data/minecraft/chunk_tickets.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "dimensions/minecraft/overworld/data/minecraft/raids.dat": "b6c4fbd749b9206409fe98683fc8c17029087a56cc66b5f65b1ba968d39041da",
+              "dimensions/minecraft/overworld/data/minecraft/world_border.dat": "db53306eeaa8468faf0ad141256319c533c6cc3b9703e9f1f34947e9ad4ef083",
+              "dimensions/minecraft/overworld/entities/r.-1.0.mca": "ccc0ed970585b856fc69636b15c44f213b5be3396159af8ac32e0b079ef2bd73",
+              "dimensions/minecraft/overworld/entities/r.-1.1.mca": "969c15ee08ff2b339160b100ba9ad027871dcaafaa81a91c72d0af785be2fe35",
+              "dimensions/minecraft/overworld/entities/r.0.0.mca": "6519d7880cfcb5efaa16a306f0d2d4d3931ced719198a570fad2fbbc17310676",
+              "dimensions/minecraft/overworld/entities/r.0.1.mca": "ba0dbead7f002c3625f4b883057e7f032a272a9a43b71b845b904b89ef0f68be",
+              "dimensions/minecraft/overworld/poi/r.-1.0.mca": "0ed283b8e0687ded1460a68b5adbcb45fba6f0a784539625b2ae0b691bbd5a82",
+              "dimensions/minecraft/overworld/poi/r.-1.1.mca": "400a22a077cda60a6f61414cdcd4c42c003e6eba1b4ef5377d6917a7950747d9",
+              "dimensions/minecraft/overworld/poi/r.0.0.mca": "db11816e9995d1f1c853eb20b9d0749a65a4f72502c8acd365bf733cc6d31cc2",
+              "dimensions/minecraft/overworld/poi/r.0.1.mca": "de3620dba1d8bf90ca244cd0a76ca7cec14cd5175b0acb570260ecbc4f235026",
+              "dimensions/minecraft/overworld/region/r.-1.0.mca": "448a98df9aa386f62c46739ccc9dd5c8543395b737b2eb3ed4112d0123bd1491",
+              "dimensions/minecraft/overworld/region/r.-1.1.mca": "5c7ebca28974d50d451984eaeef5a4bdab8107bd79697e8ce6c288df0c2fd604",
+              "dimensions/minecraft/overworld/region/r.0.0.mca": "b15b09ca84e9a6e623542b58ea0d7ce0dedaddfb363d57f840be30242283e60c",
+              "dimensions/minecraft/overworld/region/r.0.1.mca": "b90028aa9a35c2b30863ee072f517d02d95377355a2e9eca5d98fb964649479b",
+              "dimensions/minecraft/the_end/data/minecraft/chunk_tickets.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "dimensions/minecraft/the_end/data/minecraft/ender_dragon_fight.dat": "4747fcb64d0ae5205cd624f726dfa38ecb01494518696e40e5d500ebf4b5a8e9",
+              "dimensions/minecraft/the_end/data/minecraft/raids.dat": "b6c4fbd749b9206409fe98683fc8c17029087a56cc66b5f65b1ba968d39041da",
+              "dimensions/minecraft/the_end/data/minecraft/world_border.dat": "db53306eeaa8468faf0ad141256319c533c6cc3b9703e9f1f34947e9ad4ef083",
+              "dimensions/minecraft/the_nether/data/minecraft/chunk_tickets.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "dimensions/minecraft/the_nether/data/minecraft/raids.dat": "b6c4fbd749b9206409fe98683fc8c17029087a56cc66b5f65b1ba968d39041da",
+              "dimensions/minecraft/the_nether/data/minecraft/world_border.dat": "db53306eeaa8468faf0ad141256319c533c6cc3b9703e9f1f34947e9ad4ef083",
+              "level.dat": "2fa7c285bcf516e87fc13991c99b4b65e28b557093a8a91fb629eacc99fe3d84",
+              "level.dat_old": "8990fa4324c08643e675a737316dbf48f3f81fe3f671601625f32bdc32b0be2e",
+              "players/advancements/e912ab95-758e-4b7f-b32e-292eda293104.json": "11593da39134a838481b871170fdb33b5fa956c875fba09df668d89d4883e72a",
+              "players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat": "bb6b5f740c20e8b7144846af610d901c86a41234ba6195ce6f6a4b981e3da132",
+              "players/data/e912ab95-758e-4b7f-b32e-292eda293104.dat_old": "5ab4e59fe845fe78c87d6419470f336b52097380f185d3be9fea13ff1369e072",
+              "players/stats/e912ab95-758e-4b7f-b32e-292eda293104.json": "6ad38271929d6fa9366034320c3652b48416c4fd85eec2f8ec3d15854475c2cd",
+              "session.lock": "51643361c79ecaef25a8de802de24f570ba25d9c2df1d22d94fade11b4f466cc"
+            }
+          },
+          "game-vanilla-secondary": {
+            "player_files": [],
+            "server_bytes": 130946284,
+            "world_files": 31,
+            "world_hashes": {
+              "data/minecraft/custom_boss_events.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "data/minecraft/game_rules.dat": "5440d0527d62a2c9ef6d7ee9a7d60c4aadb738e9205598a1008ff50e03cd88fa",
+              "data/minecraft/random_sequences.dat": "1ade18391e9ffdc703b951278ea8777c7dacfc709a8e07616bd8d732beea497b",
+              "data/minecraft/scheduled_events.dat": "ce2e6dd5438c192edd35018243c99fb343b268a2a471ce3cb85c2a65184c163e",
+              "data/minecraft/scoreboard.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "data/minecraft/stopwatches.dat": "e1cfab0753c6040172525467c952005cdfe616fc209a15fc06cd0028dc0b80d6",
+              "data/minecraft/weather.dat": "470f6552d58ab9eeaa67ff06d94b9d4ec3b7ccf6d649db4e1ca20d51a265d32b",
+              "data/minecraft/world_clocks.dat": "fbf72d44f20a19e3cfd8a2d27787dc0b0022641ae2a36529073efcc9c17d099b",
+              "data/minecraft/world_gen_settings.dat": "f574689d44afe672a08b9e24ac3ad825916664900f506fbb5d807dd01914a640",
+              "dimensions/minecraft/overworld/data/minecraft/chunk_tickets.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "dimensions/minecraft/overworld/data/minecraft/raids.dat": "1124b5a628860ee689430049d8c5cdf8b635b2c6ae9212c8a9694b35e15cda43",
+              "dimensions/minecraft/overworld/data/minecraft/world_border.dat": "db53306eeaa8468faf0ad141256319c533c6cc3b9703e9f1f34947e9ad4ef083",
+              "dimensions/minecraft/overworld/entities/r.-1.0.mca": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dimensions/minecraft/overworld/poi/r.-1.-1.mca": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dimensions/minecraft/overworld/poi/r.-1.0.mca": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dimensions/minecraft/overworld/poi/r.0.-1.mca": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dimensions/minecraft/overworld/poi/r.0.0.mca": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "dimensions/minecraft/overworld/region/r.-1.-1.mca": "2c8ede555d0e8b1c9b96df25e74779d45ece00e8525e61e370379bce7f8e2c1e",
+              "dimensions/minecraft/overworld/region/r.-1.0.mca": "43a281e67491c1ca742339d816e9b4b92419881c4cd086f5f4caf544f78f4f9b",
+              "dimensions/minecraft/overworld/region/r.0.-1.mca": "751c720141b3108d5d597dabf2392de111f70a5e8f8ede0ecc43e92218a9bdba",
+              "dimensions/minecraft/overworld/region/r.0.0.mca": "347a69e620330e96789fefc487df2aeb15ed8f60ac20e0da570060ca2996bcad",
+              "dimensions/minecraft/the_end/data/minecraft/chunk_tickets.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "dimensions/minecraft/the_end/data/minecraft/ender_dragon_fight.dat": "ec789a50dda962e244a63500c1c56943765e1608503de07a92fe9276b0d5325d",
+              "dimensions/minecraft/the_end/data/minecraft/raids.dat": "1124b5a628860ee689430049d8c5cdf8b635b2c6ae9212c8a9694b35e15cda43",
+              "dimensions/minecraft/the_end/data/minecraft/world_border.dat": "db53306eeaa8468faf0ad141256319c533c6cc3b9703e9f1f34947e9ad4ef083",
+              "dimensions/minecraft/the_nether/data/minecraft/chunk_tickets.dat": "109b72faf6cc8256c38c76506d99ddd00389fb9a7f45e9008f99e2c08ea3bea7",
+              "dimensions/minecraft/the_nether/data/minecraft/raids.dat": "1124b5a628860ee689430049d8c5cdf8b635b2c6ae9212c8a9694b35e15cda43",
+              "dimensions/minecraft/the_nether/data/minecraft/world_border.dat": "db53306eeaa8468faf0ad141256319c533c6cc3b9703e9f1f34947e9ad4ef083",
+              "level.dat": "56cd53d2e954eae5bcf676813002eddbba6df0d35b3d6d057c4885d4f91a3d7e",
+              "level.dat_old": "8f176f5d9ad78275098dc1d4636d142b48b5698b4be0e2d9b95b37e95476c847",
+              "session.lock": "51643361c79ecaef25a8de802de24f570ba25d9c2df1d22d94fade11b4f466cc"
+            }
+          }
+        },
+        "mount": {
+          "fstype": "xfs",
+          "options": "ro,relatime,seclabel,norecovery,inode64,logbufs=8,logbsize=32k,sunit=8,swidth=8,noquota",
+          "source": "/dev/nvme1n1",
+          "target": "/mnt/wc-restore"
+        }
+      },
+      "extraction.json": {
+        "source": "/mnt/wc-restore/games/game-vanilla-main/server",
+        "destination": "/var/tmp/wc-reset-restore-1/extracted-a",
+        "A_world_exact": true,
+        "B_world_unchanged": true,
+        "source_mount_readonly": true
+      },
+      "packages.json": {
+        "schema_version": 1,
+        "al2023_release": "2023.12.20260803",
+        "docker_nevra": "docker-25.0.16-1.amzn2023.0.3.x86_64",
+        "compose_version": "5.4.0",
+        "compose_sha256": "837fd1d35bf6a494f41b5b5988269a7be79de337cf1a1a6ff0e45ab51bb4e9be"
+      },
+      "container-a.json": {
+        "id": "37483b60589ebeb69e1b717833d73c67d4bb9d1008ff3fe5008695654a78a45f",
+        "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+        "data": "/var/tmp/wc-reset-restore-1/extracted-a",
+        "started": "2026-09-12T10:53:10.225983+00:00"
+      },
+      "ready-a.json": {
+        "id": "37483b60589ebeb69e1b717833d73c67d4bb9d1008ff3fe5008695654a78a45f",
+        "protocol": {
+          "host": "127.0.0.1",
+          "port": 25565,
+          "server_info": {
+            "version": {
+              "name": "26.2",
+              "protocol": 776
+            },
+            "players": {
+              "max": 20,
+              "online": 0,
+              "Sample": null
+            },
+            "description": {
+              "text": "A Minecraft Server",
+              "bold": false,
+              "italic": false,
+              "underlined": false,
+              "strikethrough": false,
+              "obfuscated": false,
+              "color": "",
+              "extra": null
+            },
+            "favicon": ""
+          }
+        },
+        "started_at": "2026-09-12T10:53:10.206675132Z"
+      },
+      "saved-stopped-a.json": {
+        "id": "37483b60589ebeb69e1b717833d73c67d4bb9d1008ff3fe5008695654a78a45f",
+        "value": 120912,
+        "exit": 0,
+        "at": "2026-09-12T10:59:40.604739+00:00"
+      },
+      "restarted-a.json": {
+        "id": "37483b60589ebeb69e1b717833d73c67d4bb9d1008ff3fe5008695654a78a45f",
+        "value": 120912,
+        "ready": {
+          "host": "127.0.0.1",
+          "port": 25565,
+          "server_info": {
+            "version": {
+              "name": "26.2",
+              "protocol": 776
+            },
+            "players": {
+              "max": 20,
+              "online": 0,
+              "Sample": null
+            },
+            "description": {
+              "text": "A Minecraft Server",
+              "bold": false,
+              "italic": false,
+              "underlined": false,
+              "strikethrough": false,
+              "obfuscated": false,
+              "color": "",
+              "extra": null
+            },
+            "favicon": ""
+          }
+        },
+        "started_at": "2026-09-12T10:56:21.787893225Z"
+      },
+      "fixture-plan.json": {
+        "source": {
+          "instance_id": "i-0151fe0754eb0431e",
+          "game_id": "game-isolated-reset",
+          "data_source": "/var/tmp/wc-reset-restore-1/fixture/games/game-isolated-reset/server",
+          "config_digest": "100df62d721506f5b119b8d941ef693bb61a48acfbcd5ee19dbf5ce9d0366b0c",
+          "run_id": "op-fixture-source"
+        },
+        "target": {
+          "instance_id": "i-0151fe0754eb0431e",
+          "game_id": "game-isolated-reset",
+          "data_source": "/var/tmp/wc-reset-restore-1/fixture/games/game-isolated-reset/worlds/op-fixture-reset/server",
+          "config_digest": "100df62d721506f5b119b8d941ef693bb61a48acfbcd5ee19dbf5ce9d0366b0c",
+          "run_id": "op-fixture-reset"
+        },
+        "seed": 0,
+        "policy": {
+          "retain_previous": 3,
+          "minimum_free_bytes": 4294967296
+        }
+      },
+      "container-fixture.json": {
+        "id": "a04af12f40157721385dc03901273024dfef7b2dabc143c46bfefa70dd42caf5",
+        "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+        "data": "/var/tmp/wc-reset-restore-1/fixture/games/game-isolated-reset/worlds/op-fixture-reset/server",
+        "started": "2026-09-12T11:02:23.444521+00:00"
+      },
+      "ready-fixture.json": {
+        "id": "a04af12f40157721385dc03901273024dfef7b2dabc143c46bfefa70dd42caf5",
+        "protocol": {
+          "host": "127.0.0.1",
+          "port": 25565,
+          "server_info": {
+            "version": {
+              "name": "26.2",
+              "protocol": 776
+            },
+            "players": {
+              "max": 20,
+              "online": 0,
+              "Sample": null
+            },
+            "description": {
+              "text": "A Minecraft Server",
+              "bold": false,
+              "italic": false,
+              "underlined": false,
+              "strikethrough": false,
+              "obfuscated": false,
+              "color": "",
+              "extra": null
+            },
+            "favicon": ""
+          }
+        },
+        "started_at": "2026-09-12T11:02:23.433632346Z"
+      },
+      "fixture-owner-proof.json": {
+        "current_id": "op-fixture-reset",
+        "owner": {
+          "plan": {
+            "source": {
+              "instance_id": "i-0151fe0754eb0431e",
+              "game_id": "game-isolated-reset",
+              "data_source": "/var/tmp/wc-reset-restore-1/fixture/games/game-isolated-reset/server",
+              "config_digest": "100df62d721506f5b119b8d941ef693bb61a48acfbcd5ee19dbf5ce9d0366b0c",
+              "run_id": "op-fixture-source"
+            },
+            "target": {
+              "instance_id": "i-0151fe0754eb0431e",
+              "game_id": "game-isolated-reset",
+              "data_source": "/var/tmp/wc-reset-restore-1/fixture/games/game-isolated-reset/worlds/op-fixture-reset/server",
+              "config_digest": "100df62d721506f5b119b8d941ef693bb61a48acfbcd5ee19dbf5ce9d0366b0c",
+              "run_id": "op-fixture-reset"
+            },
+            "seed": 0,
+            "policy": {
+              "retain_previous": 3,
+              "minimum_free_bytes": 4294967296
+            }
+          },
+          "phase": "initialized",
+          "files": {
+            "server.properties": "5847fe03bb43f5f9ab71b8227aeb3d768958d769b09bf77dae8775d2df135e05",
+            "whitelist.json": "55e225b339b7d3806754eadf6cb568f2eea978a458ef7e26e3b3d1eaed4bac70",
+            "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "seed_observed": 0,
+        "legacy_preserved": true
+      },
+      "saved-stopped-fixture.json": {
+        "id": "a04af12f40157721385dc03901273024dfef7b2dabc143c46bfefa70dd42caf5",
+        "value": 120912,
+        "exit": 0,
+        "at": "2026-09-12T11:08:15.086758+00:00"
+      },
+      "restarted-fixture.json": {
+        "id": "a04af12f40157721385dc03901273024dfef7b2dabc143c46bfefa70dd42caf5",
+        "value": 120912,
+        "ready": {
+          "host": "127.0.0.1",
+          "port": 25565,
+          "server_info": {
+            "version": {
+              "name": "26.2",
+              "protocol": 776
+            },
+            "players": {
+              "max": 20,
+              "online": 0,
+              "Sample": null
+            },
+            "description": {
+              "text": "A Minecraft Server",
+              "bold": false,
+              "italic": false,
+              "underlined": false,
+              "strikethrough": false,
+              "obfuscated": false,
+              "color": "",
+              "extra": null
+            },
+            "favicon": ""
+          }
+        },
+        "started_at": "2026-09-12T11:06:32.355679616Z"
+      },
+      "cleanup_precondition": {
+        "A_and_B_source_copy_unchanged": true,
+        "containers": [],
+        "listeners": [],
+        "copy_unmounted": true,
+        "fixture_owner_current_and_legacy_verified": true
+      }
+    }
   }
 }

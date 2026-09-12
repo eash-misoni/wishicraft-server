@@ -1,6 +1,6 @@
 # 02. Requirements
 
-> Reset準備（2026-09-12）: RESET-001/002は従来のLATER案。毎Resetの外部BACKUP、世代モデル一式を必須にせず、[D-098 Proposed](reviews/game_scoped_reset.md)で再評価する。まだ採用済み要件へ置換しない。D-097の認可・共有保護はAccepted/限定適用済み。
+> Reset要件（2026-09-12）: RESET-001/002の従来LATER案を[D-098 Accepted](reviews/game_scoped_reset.md)の契約で置換する。毎回の外部BACKUPや連番generationは必須ではない。B限定の適用・復旧・一般公開は[実行証跡](evidence/2026-09-12-reset-production.json)で区別する。
 
 
 - **文書状態:** Canonical

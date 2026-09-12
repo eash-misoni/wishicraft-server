@@ -1,6 +1,6 @@
 # 08. Human Operation Flows
 
-> 次期Resetは[D-098 Proposed](reviews/game_scoped_reset.md)。有効化と日常実行権限を分離し、policyとproduction操作を一括承認する。現在の利用可能操作へ未承認Resetを含めない。
+> Resetは[D-098 Accepted](reviews/game_scoped_reset.md)。B限定policyの有効化とPlayer/Adminの日常実行を分離する。現在は移行・隔離復旧中で一般受付を閉じており、公開完了は実行証跡を参照する。
 
 
 - **文書状態:** Canonical

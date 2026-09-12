@@ -10,7 +10,7 @@
 
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
-## Resetの次期提案
+## 2. 採用済み決定
 
 ### D-098 対応Game限定Resetと所有済み旧worldの限定整理
 
@@ -19,8 +19,6 @@
 - 利用者policy・設定境界・失敗時の契約案は[Reset設計](reviews/game_scoped_reset.md)、適用条件は[runbook](runbooks/game_scoped_reset_migration.md)へ集約する。旧world保持は外部BACKUPの代替ではない。
 - B限定、Player/Admin、観測0人＋明示確認（接続raceあり）、fixed_seed=0、managed旧world3個＋current＋別枠legacy anchor、free >= max(4 GiB, source×2)、毎回外部BACKUPを待たない損失境界を採用。二回の隔離復旧成功を一般公開・自動cleanup公開の条件とする。A/Bの既存データを破棄可能とみなさない。
 - D-095/096/097のAccepted・限定Completedを維持する。Phase 9全体の採用・完了をこの記録から推論しない。
-
-## 2. 採用済み決定
 
 ### D-097 同一runtime構成の二つのGameの切替と共有保護
 

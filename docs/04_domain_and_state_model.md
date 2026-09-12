@@ -1,6 +1,6 @@
 # 04. Domain and State Model
 
-> Reset準備（2026-09-12）: [D-098 Proposed](reviews/game_scoped_reset.md)ではGames.world.current_idが選択world、Operationの固定targetが実行意図、receipt/containerが実状態を表す。起動成功前の参照確定を正常稼働の証明としない。詳細の二重定義はせず提案先を参照する。
+> Reset契約（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)ではGames.world.current_idが選択world、Operationの固定targetが実行意図、receipt/containerが実状態。起動成功前の参照確定を正常稼働の証明としない。詳細はリンク先を正本とする。
 
 
 - **文書状態:** Canonical
