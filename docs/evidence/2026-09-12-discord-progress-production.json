@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "decision": "D-099 Accepted",
+  "release_status": "DEPLOY_IN_PROGRESS",
+  "authorized_baseline": "9e217cdec7bb166de0271bffcaaac82d6e31d8d1",
+  "deployment_head": "3df2b611b776fa64ff17233c061040eab1384df0",
+  "deployment_ci": {
+    "run_id": 34699287419,
+    "result": "success"
+  },
+  "checkpoint_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-discord-release-v1.ye0bzkf4",
+  "preflight": {
+    "at": "2026-09-12T14:26:22.567439+00:00",
+    "stack": "UPDATE_COMPLETE",
+    "target": {
+      "id": "i-04fc0629dc4ea466e",
+      "state": "stopped"
+    },
+    "data": {
+      "VolumeId": "vol-03ac9f534326c345c",
+      "Encrypted": true,
+      "Attachments": [
+        {
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "VolumeId": "vol-03ac9f534326c345c",
+          "InstanceId": "i-04fc0629dc4ea466e",
+          "Device": "/dev/sdf",
+          "State": "attached",
+          "AttachTime": "2026-08-23 08:29:36+00:00"
+        }
+      ]
+    },
+    "state": {
+      "health": {
+        "S": "HEALTHY"
+      },
+      "observed_at": {
+        "S": "2026-09-12T14:23:04.445181Z"
+      },
+      "desired_game_id": {
+        "S": "game-vanilla-main"
+      },
+      "desired_state": {
+        "S": "STOPPED"
+      }
+    },
+    "locks": [],
+    "unfinished": [],
+    "delivery_pending": [],
+    "concurrency": {
+      "wc-dev-discord-command": "UNSET",
+      "wc-dev-admission": "UNSET"
+    },
+    "running_workflows": {
+      "wc-dev-backup": 0,
+      "wc-dev-reset": 0,
+      "wc-dev-retention": 0,
+      "wc-dev-start": 0,
+      "wc-dev-stop": 0,
+      "wc-dev-switch": 0
+    },
+    "active_ssm": [],
+    "dns_present": false,
+    "queues": {
+      "wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      }
+    }
+  },
+  "baseline_operation_count": 67,
+  "command_close": {
+    "at": "2026-09-12T14:30:17.681638+00:00",
+    "operation": "put_function_concurrency",
+    "function": "wc-dev-discord-command",
+    "original": "UNSET",
+    "requested": 0,
+    "confirmed_at": "2026-09-12T14:30:17.784392+00:00"
+  },
+  "drain": {
+    "at": "2026-09-12T14:33:11.400407+00:00",
+    "closed_elapsed_seconds": 173.616015,
+    "functions": {
+      "wc-dev-discord-command": {
+        "start_count": 0,
+        "report_count": 0,
+        "unmatched_start_count": 0
+      },
+      "wc-dev-admission": {
+        "start_count": 0,
+        "report_count": 0,
+        "unmatched_start_count": 0
+      },
+      "wc-dev-status-executor": {
+        "start_count": 0,
+        "report_count": 0,
+        "unmatched_start_count": 0
+      },
+      "wc-dev-discord-message": {
+        "start_count": 0,
+        "report_count": 0,
+        "unmatched_start_count": 0
+      }
+    },
+    "state": "A/STOPPED/HEALTHY",
+    "automatic_stop_eligible": false
+  },
+  "approved_diff": {
+    "changed": [
+      {
+        "logical_id": "ReconcileFunction30829CB6",
+        "function": "wc-dev-reconcile",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "StartTaskFunction8C564C4A",
+        "function": "wc-dev-start-task",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "StopTaskFunction11473A8C",
+        "function": "wc-dev-stop-task",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "BackupTaskFunctionA44639DC",
+        "function": "wc-dev-backup-task",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "RetentionTaskFunction9F285CE4",
+        "function": "wc-dev-retention-task",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "AdmissionFunction23082B67",
+        "function": "wc-dev-admission",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "DiscordCommandFunction7D25102A",
+        "function": "wc-dev-discord-command",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "StatusExecutorFunction6E5C9869",
+        "function": "wc-dev-status-executor",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "DiscordMessageFunction78FA388B",
+        "function": "wc-dev-discord-message",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+        "function": "wc-dev-auto-stop-evaluator",
+        "change": "Code and asset metadata only"
+      },
+      {
+        "logical_id": "MonitoringObserverFunction584DA7C7",
+        "function": "wc-dev-monitoring-observer",
+        "change": "Code and asset metadata only"
+      }
+    ],
+    "new_resources": 0,
+    "deleted_resources": 0,
+    "iam_workflow_environment_diff": 0,
+    "template_sha256": "64d7699cfe78631875cfc7ab537f55383200422e26eb8101a7d7648ff615e597"
+  },
+  "read_only_preflight_review": "Initial proposal rejected before execution for raw Environment persistence; replaced by digest-only configuration evidence and minimal Operation projection. No secrets/actor details persisted.",
+  "interaction": {
+    "at": "2026-09-12T14:41:22.534332+00:00",
+    "operation_id": "op-5c7f82a9-987e-4b2b-b425-565affef83d3",
+    "operation_type": "STATUS",
+    "status": "SUCCEEDED",
+    "idempotency_pair_matches": true,
+    "new_operation_count": 1,
+    "actor_source": "DISCORD",
+    "actor_saved_name_matches_human_report": true,
+    "actor_id_present": true,
+    "requested_at": "2026-09-12T14:39:32.815870Z",
+    "progress_reconciling_at": "2026-09-12T14:39:36.249977Z",
+    "completed_at": "2026-09-12T14:39:38.288229Z",
+    "milestones": [
+      [
+        "RECONCILING",
+        "2026-09-12T14:39:36.249977Z"
+      ]
+    ],
+    "source_revision": 2,
+    "delivered_revision": 2,
+    "delivery_status": "DELIVERED",
+    "delivery_attempt_count": 1,
+    "message_id": "1548342334507327489",
+    "message_matches_record_projection": true,
+    "message_content": "Minecraft STATUS: Completed\nRequested by: ゐしーん (Discord)\nGame: game-vanilla-main\nMinecraft: stopped\nThe server is stopped.\nSelected Game: game-vanilla-main\nObserved Game: none\nCurrent Operation: none\nSelected world: legacy\nObserved world: none\nHealth: healthy\nRecorded progress (phase entry, not proof of completion):\n• Request accepted\n• State observation started\nState observation completed.",
+    "message_sha256": "350a94a8fdaaafb7d65a1ba82917c3b4d750606302936b7540b4058d9e4a3e8b",
+    "mention_count": 0,
+    "utf16_length": 393,
+    "non_lock_operation": true,
+    "ack_order_evidence": "deployed signed/authorized ACK-before-Admission code path + human ACK; no wire timing capture"
+  },
+  "prohibited_business_operations_executed": 0,
+  "status": "PRODUCTION_VERIFIED",
+  "deploy_readback": {
+    "at": "2026-09-12T14:37:17.151386+00:00",
+    "stack": "UPDATE_COMPLETE",
+    "functions": {
+      "wc-dev-reconcile": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "5b097cf43408f7b20728f047337bf7f4bbb9524d82c49c185f8e289a504ccf86",
+        "update": "Successful"
+      },
+      "wc-dev-start-task": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "46a984b1ead399646277224bdf6951cdc3f0e7c5ebb2c739f32646f30122d9a2",
+        "update": "Successful"
+      },
+      "wc-dev-stop-task": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "4529fbdd4cc2e50d26ffb07d20f3de0d875b95261fc7438de545b084dd5f9ba6",
+        "update": "Successful"
+      },
+      "wc-dev-backup-task": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "47a3e8f2c48245711e341f715e9c7801dcdc75443b6baf142511c9ce981f8d5e",
+        "update": "Successful"
+      },
+      "wc-dev-retention-task": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "032309612ba333a8948cdcc27e0b4c660186a1eef503a742f5c6b519a8d18911",
+        "update": "Successful"
+      },
+      "wc-dev-admission": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "00ad708979f729957012b1a2306ed594172464ac68d2b55b2d0782d8e4fcb71a",
+        "update": "Successful"
+      },
+      "wc-dev-discord-command": {
+        "CodeSha256": "c9gv3DxynSFnu7hRWypozfIfF3XN0cyWExYgvDr06c0=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "b34dd92a1a5e673acd1c3810142813f42c596e585fe66c6bea5f03739cdd2234",
+        "update": "Successful"
+      },
+      "wc-dev-status-executor": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "d81a52ed2a626fc5dde3f9b8b910e52e375f0ab0d40f6082e1ed0e4c1ffc6c5d",
+        "update": "Successful"
+      },
+      "wc-dev-discord-message": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "a5e49c3d0ea1caebd282b5a726da6c28f47eeaa378e454f2efca7084ca559b7f",
+        "update": "Successful"
+      },
+      "wc-dev-auto-stop-evaluator": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "d905645a18311220a0f30dc8c8bafe9a372345ffa7397b46ea4f8c7d75ad482d",
+        "update": "Successful"
+      },
+      "wc-dev-monitoring-observer": {
+        "CodeSha256": "PeH7IjALTVnLiPVlO5uIjFB1QuCziqWIb6aTw7aVxkw=",
+        "source_files_verified": 66,
+        "configuration_unchanged": true,
+        "environment_digest": "1c80299ff1452af85750510bf2341e58c48899df7aa5bc5a44c48d248df55cf1",
+        "update": "Successful"
+      }
+    },
+    "concurrency": {
+      "wc-dev-discord-command": 0,
+      "wc-dev-admission": "UNSET"
+    }
+  },
+  "command_restored": {
+    "at": "2026-09-12T14:38:15.604873+00:00",
+    "concurrency": {
+      "wc-dev-discord-command": "UNSET",
+      "wc-dev-admission": "UNSET"
+    },
+    "state": "A/STOPPED/HEALTHY",
+    "dns_present": false,
+    "locks": 0,
+    "unfinished": 0
+  },
+  "final_state": {
+    "at": "2026-09-12T14:41:47.153134+00:00",
+    "template_digest": "64d7699cfe78631875cfc7ab537f55383200422e26eb8101a7d7648ff615e597",
+    "stack": "UPDATE_COMPLETE",
+    "target": {
+      "id": "i-04fc0629dc4ea466e",
+      "state": "stopped"
+    },
+    "data": {
+      "VolumeId": "vol-03ac9f534326c345c",
+      "Encrypted": true,
+      "Attachments": [
+        {
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "VolumeId": "vol-03ac9f534326c345c",
+          "InstanceId": "i-04fc0629dc4ea466e",
+          "Device": "/dev/sdf",
+          "State": "attached",
+          "AttachTime": "2026-08-23 08:29:36+00:00"
+        }
+      ]
+    },
+    "state": {
+      "health": {
+        "S": "HEALTHY"
+      },
+      "desired_game_id": {
+        "S": "game-vanilla-main"
+      },
+      "desired_state": {
+        "S": "STOPPED"
+      },
+      "observed_at": {
+        "S": "2026-09-12T14:39:37.086492Z"
+      }
+    },
+    "locks": [],
+    "unfinished": [],
+    "delivery_pending": [],
+    "concurrency": {
+      "wc-dev-discord-command": "UNSET",
+      "wc-dev-admission": "UNSET"
+    },
+    "running_workflows": {
+      "wc-dev-backup": 0,
+      "wc-dev-reset": 0,
+      "wc-dev-retention": 0,
+      "wc-dev-start": 0,
+      "wc-dev-stop": 0,
+      "wc-dev-switch": 0
+    },
+    "active_ssm": [],
+    "dns_present": false,
+    "queues": {
+      "wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      }
+    },
+    "alarms": {
+      "wc-dev-admissionfunctionerrorsalarm": "OK",
+      "wc-dev-admissionfunctionthrottlesalarm": "OK",
+      "wc-dev-auto-stop-evaluator-silence": "OK",
+      "wc-dev-autostopevaluatorfunctionerrorsalarm": "OK",
+      "wc-dev-autostopevaluatorfunctionthrottlesalarm": "OK",
+      "wc-dev-autostopwarningblockedalarm": "OK",
+      "wc-dev-backuptaskfunctionerrorsalarm": "OK",
+      "wc-dev-backuptaskfunctionthrottlesalarm": "OK",
+      "wc-dev-backupworkflowfailurealarm": "OK",
+      "wc-dev-datafilesystemobservationunknownalarm": "OK",
+      "wc-dev-datafilesystemusagehighalarm": "OK",
+      "wc-dev-desiredactualdivergencealarm": "OK",
+      "wc-dev-desiredrunningnotreadyalarm": "OK",
+      "wc-dev-desiredstoppedec2runningalarm": "OK",
+      "wc-dev-discordcommandfunctionerrorsalarm": "OK",
+      "wc-dev-discordcommandfunctionthrottlesalarm": "OK",
+      "wc-dev-discordmessagefunctionerrorsalarm": "OK",
+      "wc-dev-discordmessagefunctionthrottlesalarm": "OK",
+      "wc-dev-expiredoperationlockalarm": "OK",
+      "wc-dev-monitoringobservationunknownalarm": "OK",
+      "wc-dev-monitoringobserverfunctionerrorsalarm": "OK",
+      "wc-dev-monitoringobserverfunctionthrottlesalarm": "OK",
+      "wc-dev-reconcilefunctionerrorsalarm": "OK",
+      "wc-dev-reconcilefunctionthrottlesalarm": "OK",
+      "wc-dev-resetworkflowfailurealarm": "OK",
+      "wc-dev-retentiontaskfunctionerrorsalarm": "OK",
+      "wc-dev-retentiontaskfunctionthrottlesalarm": "OK",
+      "wc-dev-retentionworkflowfailurealarm": "OK",
+      "wc-dev-runtimeheartbeatunavailablealarm": "OK",
+      "wc-dev-runtimeidentitymismatchalarm": "OK",
+      "wc-dev-runtimeobservationunknownalarm": "OK",
+      "wc-dev-scheduledstopcancelledalarm": "OK",
+      "wc-dev-starttaskfunctionerrorsalarm": "OK",
+      "wc-dev-starttaskfunctionthrottlesalarm": "OK",
+      "wc-dev-startworkflowfailurealarm": "OK",
+      "wc-dev-statusexecutorfunctionerrorsalarm": "OK",
+      "wc-dev-statusexecutorfunctionthrottlesalarm": "OK",
+      "wc-dev-stoptaskfunctionerrorsalarm": "OK",
+      "wc-dev-stoptaskfunctionthrottlesalarm": "OK",
+      "wc-dev-stopworkflowfailurealarm": "OK",
+      "wc-dev-switchworkflowfailurealarm": "OK",
+      "wc-dev-systemstateobservationstalealarm": "OK",
+      "wc-dev-targetrunningtoolongalarm": "OK"
+    }
+  },
+  "validation": {
+    "applied_ci_run": 34699287419,
+    "tests": 1068,
+    "ruff": "passed",
+    "mypy": "passed",
+    "synth_configurations": 5,
+    "real_docker": "CI passed; local CLI unavailable",
+    "code_changes_since_applied_head": false
+  },
+  "unverified": [
+    "All ten milestone writes in production",
+    "Long-running multi-edit production delivery",
+    "Failure/CANCELLED production display",
+    "Wire-level ACK timing; code path and actual ACK verified"
+  ],
+  "snapshot_world_host_mutations": 0,
+  "discord_registration_mutations": 0
+}

@@ -1,6 +1,6 @@
-# D-099 Discordの実行者・主要経過表示（Accepted、適用前）
+# D-099 Discordの実行者・主要経過表示（Accepted、限定release Completed）
 
-2026-09-12。D-098限定release Completedを基準にした小さい利用者向け改善。ユーザーGOにより設計Accepted。production適用・実Discord検証は未完了。
+2026-09-12。D-098限定release Completedを基準にした小さい利用者向け改善。ユーザーGOにより設計Accepted。production適用・実Discord STATUS一回の限定検証は完了。
 DIS-004/006/009、OPR-002を具体化する。D-081/086/087/089のnonce/CAS/revision、ACK-before-Admission、認可を維持する。
 
 ## 契約差分と根拠
@@ -75,9 +75,9 @@ CANCELLED例はrenderer fixtureであり、scheduled Operationの新しい公開
 
 ## 検証と文書責務
 
-保存serializer → SDK Decimal round-trip →実loader →renderer →delivery/HTTP payloadをfixtureで確認。署名済みmember → ACK → Admission parser、旧NULL/属性なし、全公開種別・terminal分類、bounded milestones、既存revision/CAS/retryの回帰を含む。AWS/Discord実APIへの新表示の送信は未実施。
+保存serializer → SDK Decimal round-trip →実loader →renderer →delivery/HTTP payloadをfixtureで確認。署名済みmember → ACK → Admission parser、旧NULL/属性なし、全公開種別・terminal分類、bounded milestones、既存revision/CAS/retryの回帰を含む。準備時はAWS/Discord実送信未実施。releaseでは下記STATUS一回を実証した。
 
-利用案内は[一か所](../discord_user_guide.md)へ集約。README/human flowは入口、Data/interfaceは本Proposed差分への参照、Delivery Plan/Decisionは未適用の位置づけを記録する。認可/runtime/state/security/AGENTS/working agreementは契約変更がないため変更しない。D-095〜098 runbook/evidenceは履歴として不変。whitelist/Web/Reset拡張/Phase 9全体は対象外。
+利用案内は[一か所](../discord_user_guide.md)へ集約。README/human flowは入口、Data/interfaceは本契約への参照、Delivery Plan/Decisionは限定releaseの位置づけを記録する。認可/runtime/state/security/AGENTS/working agreementは契約変更がないため変更しない。D-095〜098 runbook/evidenceは履歴として不変。whitelist/Web/Reset拡張/Phase 9全体は対象外。
 
 ## 準備結果
 
@@ -85,8 +85,20 @@ CANCELLED例はrenderer fixtureであり、scheduled Operationの新しい公開
 
 文字数とmentionの外部仕様は[Discord公式Message API](https://docs.discord.com/developers/resources/message#create-message)のcontent上限・allowed_mentionsを参照。UTF-16換算2000以内は今回の保守的なローカル検査であり、Discordへの実送信結果とは分ける。
 
-実装commit `d25d00ecb91cd815f7f4eeb6ff2d53eb0900f19d` の[CI 34698073795](https://github.com/eash-misoni/wishicraft-server/actions/runs/34698073795)はquality・既存実Docker integrationとも成功。後続はBACKUP停止中専用の案内・guide assertionと検証記録だけで、deploy asset差分を増やさない。新表示の実Discord確認は承認後のSTATUS一回を予定する。
+実装commit `d25d00ecb91cd815f7f4eeb6ff2d53eb0900f19d` の[CI 34698073795](https://github.com/eash-misoni/wishicraft-server/actions/runs/34698073795)はquality・既存実Docker integrationとも成功。後続はBACKUP停止中専用の案内・guide assertionと検証記録だけで、deploy asset差分を増やさない。当時予定した実Discord STATUS一回の結果は下記へ記録する。
 
 ## Production release承認
 
 基準HEAD `9e217cdec7bb166de0271bffcaaac82d6e31d8d1` に対し、Command受付停止/drain、11 Lambda code限定deploy、元設定復元、人間の実STATUS一回、closeoutを承認。Admission設定・他の業務操作・登録・Host変更は対象外。表示由来の継続障害時だけ、同じdrain/diff確認とoptional属性互換性を条件に直前D-098 codeへの限定復帰を許可。設計Acceptedと適用完了は分ける。
+
+## Production closeout（2026-09-12 UTC）
+
+実適用HEAD `3df2b611b776fa64ff17233c061040eab1384df0`、CI `34699287419` 成功。実productionとの差分は11 Lambda Codeとasset metadataのみ。stack UPDATE_COMPLETE、全Lambda Active/Successful、配布zip内の全Python sourceと適用HEADを照合し、handler/runtime/role/environment等の不変を確認した。Host/Game/world/Snapshot、IAM/workflow、Discord登録は変更していない。
+
+Commandは14:30:17 UTCに0、150秒のtimeout horizonと呼出しログ・Operation/Lockからdrain確認。Admissionは終始UNSET。適用後の停止・整合確認を経て14:38:15 UTCにCommandをUNSETへ復元した。
+
+実Discord STATUS `op-5c7f82a9-987e-4b2b-b425-565affef83d3` は14:39:32.815870受付、`progress_reconciling_at=14:39:36.249977Z`、14:39:38.288229成功。Idempotencyの対応と新Operation一件を確認した。署名・認可済み経路から保存した実行者名は人間の表示報告と一致。ACK-before-Admissionは適用コードと実ACKを根拠とし、wire timingを採取した意味ではない。
+
+公開message `1548342334507327489` をGETし、実recordを実loader/rendererへ通した投影と全文一致した。393 UTF-16単位、mention 0、delivery attempt 1、DELIVERED、source/delivered revisionはともに2。履歴は受付と実在するRECONCILING到達だけで、到達と完了を分けている。STATUSは非Lock操作のまま。
+
+[production evidence](../evidence/2026-09-12-discord-progress-production.json)に最終read-backを集約する。全10種類の到達書込み、長時間操作の複数回編集、失敗/CANCELLED、特殊文字等は保存形式→loader→renderer→delivery境界testsの実証であり、今回の実AWS E2Eではない。追加業務操作、過去record backfill、過去message一括編集、手動配送replayは0。利用案内はrepository内のみで、Webやhelp commandを追加していない。

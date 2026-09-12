@@ -6,9 +6,9 @@
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-12
 
-## 次の限定slice（Proposed）
+## Discord表示の限定slice（Completed）
 
-[Discord進捗・実行者と利用案内](reviews/discord_progress.md)のrepository準備。D-098 Completedを維持し、productionは一括承認待ち。新Reset/BackupやPhase 9全体を実行しない。
+[Discord進捗・実行者と利用案内](reviews/discord_progress.md)はD-099 Accepted・限定release Completed。11 Lambda codeを適用し、実Discord STATUS一回の保存・公開配送を確認。D-098 Completedを維持し、他の操作E2EやPhase 9全体の完了を意味しない。
 
 ## 1. 開発原則
 
