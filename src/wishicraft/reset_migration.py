@@ -71,6 +71,29 @@ def prepare(root: Path, output: Path, policy: str) -> dict[str, Any]:
         games=catalog.game_ids,
         reset_policies=selected,
     )
+    # D-097 did not distribute the permanent probe. D-096's subsequent read-back is
+    # independent evidence of its installed bytes; reproduce those bytes from applied Git.
+    d096 = json.loads(
+        (root / "docs/evidence/2026-09-11-targeted-runtime-production.json").read_text()
+    )
+    proof = d096["limited_stop_forward_continuation"]["host_forward"]["preflight"]["proof"]
+    probe_path = "/usr/local/libexec/wishicraft/host-runtime-probe.py"
+    observed = next(item for item in proof["all_exact_predecessors"] if item["path"] == probe_path)
+    source_head = d096["conditional_continuation"]["applied_source_head"]
+    historical_probe = subprocess.run(
+        ["git", "show", source_head + ":src/wishicraft/artifacts/host_runtime_probe.py"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+    ).stdout
+    if (
+        observed["mode"] != 0o755
+        or hashlib.sha256(historical_probe).hexdigest() != observed["sha256"]
+    ):
+        raise ValueError("D-096 permanent probe does not reproduce applied read-back")
+    if probe_path in prior:
+        raise ValueError("probe predecessor history must be reviewed again")
+    prior[probe_path] = observed["sha256"]
     replacements = [
         ("/etc/wishicraft/host-runtime/compose.yaml", rendered.compose_yaml, 0o600),
         ("/etc/wishicraft/host-runtime/runtime.env", rendered.runtime_env, 0o600),
@@ -100,6 +123,9 @@ def prepare(root: Path, output: Path, policy: str) -> dict[str, Any]:
             0o644,
         ),
     ]
+    replacements.append(
+        (probe_path, (root / "src/wishicraft/artifacts/host_runtime_probe.py").read_text(), 0o755)
+    )
     output.mkdir(mode=0o700, exist_ok=False)
     entries = []
     for index, (destination, content, mode) in enumerate(replacements):
@@ -125,6 +151,7 @@ def prepare(root: Path, output: Path, policy: str) -> dict[str, Any]:
         (root / "src/wishicraft/artifacts/runtime_install.py")
         .read_text()
         .replace("/var/tmp/wishicraft-targeted-runtime-v1", "/var/tmp/wishicraft-reset-v1")
+        .replace('namespace != "two-game-v1"', 'namespace != "reset-v1"')
     )
     (output / "install.py").write_text(installer)
     (output / "reset-policies.json").write_text(json.dumps(selected, sort_keys=True))

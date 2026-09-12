@@ -296,7 +296,7 @@ def test_bundle_uses_deployed_predecessors_and_has_no_world_mutation(tmp_path: P
     result = bundle(ROOT, tmp_path / "bundle", "{}")
     assert result["baseline"] == "1267ed5912e027ca2e0b1e1a419df62865f6bfcd"
     entries = result["plan"]["files"]
-    assert len(entries) == 7
+    assert len(entries) == 8
     assert all(not entry["destination"].startswith("/srv/") for entry in entries)
     assert (
         next(e for e in entries if e["destination"].endswith("operation-v2"))["predecessor"]

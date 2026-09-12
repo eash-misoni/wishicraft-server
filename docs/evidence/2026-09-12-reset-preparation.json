@@ -66,6 +66,13 @@
             "mode": 420,
             "sha256": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
             "predecessor": null
+          },
+          {
+            "destination": "/usr/local/libexec/wishicraft/host-runtime-probe.py",
+            "source": "7.artifact",
+            "mode": 493,
+            "sha256": "83244ae3f0aaae95192e9df8eeb6e05392f0f04e22290ca4a15e42c7e3373ce0",
+            "predecessor": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46"
           }
         ],
         "receipt_predecessor": {
@@ -88,14 +95,15 @@
       },
       "hashes": {
         "6.artifact": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
+        "7.artifact": "83244ae3f0aaae95192e9df8eeb6e05392f0f04e22290ca4a15e42c7e3373ce0",
         "1.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
         "0.artifact": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
         "5.artifact": "5b1fbcd8e2e9109349b487cee63007abf27d707118c7f89449e129eef38b5cda",
         "4.artifact": "9010ae86535194a3a0d3c087f5526c7dbe29c35749cc0bcc3a8506d4635f509f",
         "reset-policies.json": "5d477224848d34693db12f2431c056d7c8fca92bd1dfc64e5acc89bb6f5286d1",
-        "install.py": "6f01b56d72bb0519ee6054c90eb9acb1375c34b510dd70d5cd7cbffac1a5ca23",
+        "install.py": "0bcbff054e8d34b848ac1a14a9d52303d3144d5f0d7a078f1beca717d60e3752",
         "2.artifact": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
-        "install.json": "287f991120d805b824a48a040ef9d0f7594cb4a5327351f585c46beef2d62e78",
+        "install.json": "90c11cc5e573daf98939e2017c4aee86e0b6fd71b6061269bdc64464c17f016f",
         "3.artifact": "0e384a72794ee0f466096984ba6fd99c9f4861026b8be64173625a96c3cbfd08"
       }
     },
@@ -140,10 +148,10 @@
     }
   },
   "validation": {
-    "pytest": "1001 passed in 50.31s",
+    "pytest": "1017 passed in 53.13s",
     "lint": "passed",
     "format": "passed",
-    "mypy": "passed;163 files",
+    "mypy": "passed;164 files",
     "synth": [
       "phase1",
       "target",
@@ -163,8 +171,8 @@
       "boto3": "1.43.91",
       "botocore": "1.43.91"
     },
-    "latest_changes": "known foreground preparation failure terminalizes via existing owned failure; cleanup exited failure reports pending; timeout/cancel/unknown retain ownership",
-    "final_commit_ci": "verify final HEAD at handoff; previous successful code/Docker run recorded above"
+    "latest_changes": "permanent probe distribution and real generated installer boundary; 16 focused tests passed",
+    "final_commit_ci": "Final remediation HEAD CI checked at handoff; prior Docker evidence below is historical until that run completes"
   },
   "aws_readonly": {
     "account": "385526546525",
@@ -221,5 +229,74 @@
     "estimate_usd_excluding_network_tax_snapshot": 0.4804,
     "retained_46_gib_month_usd": 4.416,
     "budget_changed": false
+  },
+  "host_probe_remediation": {
+    "baseline_head": "33b7781c30b77098212580bf4062347462b841d9",
+    "status": "Proposed; repository verified, production not applied",
+    "aws_calls_this_remediation": false,
+    "reproduction": "Missing bundle destination test failed before correction; installed old probe rejects managed world. 16 distribution boundary tests now pass.",
+    "probe": {
+      "destination": "/usr/local/libexec/wishicraft/host-runtime-probe.py",
+      "source": "7.artifact",
+      "mode": 493,
+      "sha256": "83244ae3f0aaae95192e9df8eeb6e05392f0f04e22290ca4a15e42c7e3373ce0",
+      "predecessor": "eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46"
+    },
+    "owner": "root:root",
+    "mode": "0755",
+    "type": "regular file; no symlink",
+    "predecessor_evidence": {
+      "source_head": "e503530985fcc3099cc21b12cf2a83e9db72ae1c",
+      "source_path": "src/wishicraft/artifacts/host_runtime_probe.py",
+      "evidence": "docs/evidence/2026-09-11-targeted-runtime-production.json",
+      "pointer": "limited_stop_forward_continuation.host_forward.preflight.proof.all_exact_predecessors",
+      "later_D097": "probe absent from applied bundle; no later redistribution recorded",
+      "current_host": "not re-observed; exact preflight still required before application"
+    },
+    "related_modules": {
+      "runtime_heartbeat": "0b80b8a851308b3a1a228ed9dfa8c6b974edc7d823aee9221d2a464ecbbfa79d",
+      "runtime_heartbeat_producer": "831645ac04e0f8f0affe44dc51e071ec77ca0a2bdb2ddb251796c64b4bce229a"
+    },
+    "related_modules_note": "Unchanged bytes relative to applied source; existing run/process continuity sufficient. No redistribution.",
+    "installer_correction": "Generated reset-specific installer accepts exact reset-v1 namespace matching its plan; generic installer unchanged. Actual generated installer exercised including partial resume.",
+    "boundary": "Actual generated bundle installer and installed permanent probe file; Docker/protocol and root ownership fixtures; installed historical producer observe/derive. CP stdin probe exact-byte match. No real AWS, Docker or root ownership claim for this fixture.",
+    "incremental_template_diff": {
+      "ReconcileFunction30829CB6": [
+        "Code"
+      ],
+      "StartTaskFunction8C564C4A": [
+        "Code"
+      ],
+      "StopTaskFunction11473A8C": [
+        "Code"
+      ],
+      "BackupTaskFunctionA44639DC": [
+        "Code"
+      ],
+      "RetentionTaskFunction9F285CE4": [
+        "Code"
+      ],
+      "AdmissionFunction23082B67": [
+        "Code"
+      ],
+      "DiscordCommandFunction7D25102A": [
+        "Code"
+      ],
+      "StatusExecutorFunction6E5C9869": [
+        "Code"
+      ],
+      "DiscordMessageFunction78FA388B": [
+        "Code"
+      ],
+      "AutoStopEvaluatorFunctionF85F8B50": [
+        "Code"
+      ],
+      "MonitoringObserverFunction584DA7C7": [
+        "Code"
+      ]
+    },
+    "incremental_iam_change": false,
+    "incremental_host": "7 to 8 entries, plus generated installer namespace correction; no heartbeat module/timer/protocol change",
+    "e2e_delta": "Both fixed/new Reset: independently verify permanent producer heartbeat table Game/run/process/boot, fresh zero empty_since and next heartbeat continuity; not inferred from Reconcile READY. No extra Reset or Snapshot; two isolated restore trials and operator-only gate retained."
   }
 }

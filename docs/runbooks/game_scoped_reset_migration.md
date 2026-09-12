@@ -6,7 +6,7 @@
 ## 一括承認で決める対象
 
 - 推奨policyはPlayer/Admin・明示確認・観測0人、外部BACKUPを毎回待たない、旧managed 3個＋永久legacy anchor、free ≥ max(4 GiB, source×2)。last-observed-emptyのraceとEBS喪失時の損失を承認対象にする。
-- Aは非対応を維持。試験Gameの第一候補はBだが、既存Bを破棄可能と扱わない。**Bの現在worldを永久anchorとして保持して新領域へResetする許可と、固定seedを明示承認する必要がある。** 不承認なら別Game追加を自動で行わず、対象を再決定する。
+- Aは非対応を維持。試験Gameの第一候補はBだが、既存Bを破棄可能と扱わない。**Bの現在worldを永久anchorとして保持して新領域へResetする許可と、固定seedの具体値 `0` を明示承認する必要がある。** 不承認なら別Game追加を自動で行わず、対象を再決定する。
 - `config/reset-dev.json`は空。承認した宣言だけを固定し、host manifest/CP RESET_POLICIES/Discord choicesへ同じ値を渡す。曖昧なdefault seedは使わない。
 - cleanupコードのproduction到達は、以下の復旧確認後に限る。未検証を隠してデータ削除へ進まない。
 
@@ -40,11 +40,22 @@
 current_id確定後に起動が失敗した場合、選択先は新領域のままである。実runtime/receipt/未終了命令を確認し、通常START/STOPで扱える既知の対象だけに収束させる。
 raw Games/receipt/Lock編集や未知領域の削除を復旧手順にしない。既存recovery条件で扱えない状態では保持して報告する。
 
+### 常設probeの配布是正（未適用）
+
+host更新対象は7から8 artifactへ増える。追加先は `/usr/local/libexec/wishicraft/host-runtime-probe.py`、root:root・0755・通常file・symlinkなし。旧hashは `eb85d2d9cc77c818c3d98fb1234e28f37a0f7ec0e239ccf3604708b54ea74c46`。
+D-096の適用source `e503530985fcc3099cc21b12cf2a83e9db72ae1c` の生成物を再現し、[適用証跡](../evidence/2026-09-11-targeted-runtime-production.json)の `limited_stop_forward_continuation.host_forward.preflight.proof.all_exact_predecessors` と照合した。D-097 bundleはprobeを変更していない。これは保存済み実測の根拠であり、適用直前の実host照合は省略しない。
+新hashと全bundle hashは[準備証跡](../evidence/2026-09-12-reset-preparation.json)のapproval_candidate.bundleを正本とする。欠損・未知hash・owner/mode/type不一致は全artifact置換開始前に拒否する。旧probeはreset-v1/predecessor-7.artifactへ保存し、atomic replace・同bundle再開を使う。
+生成installerの保存namespaceもplanの `reset-v1` と一致させる。既存汎用installerの許容namespaceは拡張しない。
+
+Reconcileは同梱probeをstdin実行するだけで常設fileを更新しない。配布後fileの全byte hashをCP artifactの `wishicraft/artifacts/host_runtime_probe.py` と照合する。heartbeat producerとruntime_heartbeat moduleは適用済みソースと現行ソースが同一で、既存のrun/processによる継続性判定が十分なため再配布しない。その他のReset常設helperは既存bundle対象であり、新しい配布経路は追加しない。
+
 ## 承認後E2Eとcleanup release
 
 Discord Commandを閉じたoperator限定窓で対象Bを通常STARTし、Game/run/bind/READY/heartbeatを確認する。選択A/別Game稼働・非対応AへのReset、confirmなし・positive/unknown人数の拒否は主にboundary testsを根拠とし、本番故障注入は不要。
 
 承認されたBで`fixed`と`new`を各一回。Operation固定source/target/seed、同じinstance/boot、保存・正常停止・removal、既存B anchor保持、新worldのREADY、新run/processとempty_since/予告非継承を照合する。所要時間はsource停止とdestination READYの実時刻で測る。Aは比較対象として配置/参照を保持し、本番scoreboardを追加しない。
+
+fixed/newの各Reset後に、Reconcile/READYとは別に、**常設producerから実heartbeat tableへの配送**を確認する。同一Game・同一bootのままOperation/receiptの新run/processとfresh heartbeatが一致し、known zeroから新empty_sinceが始まり、次heartbeatでその時刻が継続すること、旧runのAutoStopIntent/予告を採用しないことを確認する。producerの実行結果・時刻と実itemを証跡に残し、fake item・timestamp編集・Reconcile成功だけで代替しない。positive/unknown時は無人判定を成立させない。常設probeの不一致が残れば通常受付を開かず停止する。この確認のための追加ResetやSnapshotは不要。
 
 通常STOP/STARTで最後のnew worldを再利用できることを確認し、Aへの通常SWITCHと最終STOPで締める。
 停止後の新BACKUPを一回作成し、新current_id/owner recordを含む復旧情報とSnapshotを確認する。
