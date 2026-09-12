@@ -58,6 +58,7 @@ class InteractionKind(StrEnum):
     STOP = "STOP"
     BACKUP = "BACKUP"
     SWITCH = "SWITCH"
+    RESET = "RESET"
 
 
 @dataclass(frozen=True)
@@ -90,6 +91,7 @@ class AuthorizedInteraction:
     kind: InteractionKind
     target_game_id: str | None = None
     confirmed: bool = False
+    seed_mode: str | None = None
 
 
 def raw_body_from_event(event: object) -> tuple[bytes, dict[str, str]]:
@@ -191,6 +193,9 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
         interaction_token,
         kind,
         *_selection(cast(dict[str, Any], payload["data"])["options"][0]),
+        seed_mode=_reset_seed(cast(dict[str, Any], payload["data"])["options"][0])
+        if kind is InteractionKind.RESET
+        else None,
     )
 
 
@@ -291,7 +296,7 @@ def _parse_command(raw_data: object, *, expected_guild_id: str) -> InteractionKi
     name = option.get("name")
     if option.get("type") != SUB_COMMAND or not isinstance(name, str):
         raise MalformedInteraction("invalid command")
-    if name not in MVP_SUBCOMMANDS and not (name == "switch" and configured_catalog()):
+    if name not in MVP_SUBCOMMANDS and not (name in {"switch", "reset"} and configured_catalog()):
         raise MalformedInteraction("invalid command")
     _selection(option)
     return InteractionKind(name.upper())
@@ -300,29 +305,41 @@ def _parse_command(raw_data: object, *, expected_guild_id: str) -> InteractionKi
 def _selection(option: dict[str, object]) -> tuple[str | None, bool]:
     options = option.get("options", [])
     name = option.get("name")
-    if options == [] and name != "switch":
+    if options == [] and name not in {"switch", "reset"}:
         return None, False
     catalog = configured_catalog()
-    if catalog is None or name not in {"start", "switch"} or not isinstance(options, list):
+    if catalog is None or name not in {"start", "switch", "reset"} or not isinstance(options, list):
         raise MalformedInteraction("invalid Game selection")
     values: dict[str, object] = {}
     for item in options:
         if not isinstance(item, dict) or set(item) != {"name", "type", "value"}:
             raise MalformedInteraction("invalid Game option")
         key = item["name"]
-        if key not in {"game", "confirm"} or key in values:
+        if (
+            key not in ({"game", "confirm", "seed"} if name == "reset" else {"game", "confirm"})
+            or key in values
+        ):
             raise MalformedInteraction("invalid Game option")
-        if item["type"] != (3 if key == "game" else 5):
+        if item["type"] != (3 if key in {"game", "seed"} else 5):
             raise MalformedInteraction("invalid Game option type")
         values[key] = item["value"]
     game = values.get("game")
     if not isinstance(game, str) or game not in catalog.game_ids:
         raise MalformedInteraction("Game is not allowed")
-    if name == "switch" and values.get("confirm") is not True:
+    if name in {"switch", "reset"} and values.get("confirm") is not True:
         raise MalformedInteraction("SWITCH requires confirm:true")
     if name == "start" and "confirm" in values:
         raise MalformedInteraction("START does not accept confirmation")
-    return game, name == "switch"
+    if name == "reset":
+        from wishicraft.reset_policy import configured
+
+        if game not in configured() or values.get("seed") not in {"fixed", "new"}:
+            raise MalformedInteraction("RESET is not enabled or seed mode is invalid")
+    return game, name in {"switch", "reset"}
+
+
+def _reset_seed(option: dict[str, Any]) -> str:
+    return str(next(value["value"] for value in option["options"] if value["name"] == "seed"))
 
 
 def _snowflake(value: object) -> str:

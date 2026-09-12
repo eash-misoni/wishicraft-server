@@ -21,11 +21,14 @@ def build_app(
     action: str = "synth",
     deployment: str = "phase1",
     two_games: bool = False,
+    reset: bool = False,
 ) -> App:
     """Build an environment-agnostic CDK app after phase-specific validation."""
     configuration = load_configuration(repository_root, stage)
     validate_stage_for_action(configuration.stage, phase=phase, action=action)
 
+    if reset and (not two_games or deployment != "control-plane"):
+        raise ValueError("reset requires the two-game control plane")
     app = App()
     if deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
@@ -37,6 +40,7 @@ def build_app(
             secrets=configuration.secrets,
             phase=phase,
             games=_games(repository_root, stage) if two_games else None,
+            reset_policies=_reset_policies(repository_root, stage) if reset else None,
         )
     elif deployment == "phase1":
         MinecraftStack(
@@ -59,6 +63,10 @@ def main() -> None:
     phase_context = app.node.try_get_context("phase") or "0"
     validation_action = app.node.try_get_context("validation_action") or "synth"
     deployment = app.node.try_get_context("deployment") or "phase1"
+    if app.node.try_get_context("reset") == "true" and (
+        app.node.try_get_context("two_games") != "true" or deployment != "control-plane"
+    ):
+        raise ValueError("reset requires the two-game control plane")
     try:
         phase = int(phase_context)
     except (TypeError, ValueError) as error:
@@ -79,6 +87,9 @@ def main() -> None:
             games=_games(repository_root, stage)
             if app.node.try_get_context("two_games") == "true"
             else None,
+            reset_policies=_reset_policies(repository_root, stage)
+            if app.node.try_get_context("reset") == "true"
+            else None,
         )
     elif deployment == "phase1":
         MinecraftStack(
@@ -92,6 +103,14 @@ def main() -> None:
     else:
         raise ValueError("CDK context deployment must be phase1, target, or control-plane")
     app.synth()
+
+
+def _reset_policies(root: Path, stage: str) -> dict[str, dict[str, int]]:
+    from wishicraft.reset_policy import policies
+
+    return policies(
+        (root / "config" / f"reset-{stage}.json").read_text(), RuntimeCatalog(_games(root, stage))
+    )
 
 
 def _games(root: Path, stage: str) -> tuple[str, ...]:

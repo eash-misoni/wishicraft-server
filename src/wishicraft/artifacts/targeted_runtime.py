@@ -93,12 +93,17 @@ def authorize(
 ) -> dict[str, str]:
     if set(request) != {"schema_version", "operation_id", "lease_id", "action"}:
         raise ValueError("REQUEST_SCHEMA")
-    if request["schema_version"] != 2 or request["action"] not in {"START", "STOP"}:
+    if request["schema_version"] != 2 or request["action"] not in {
+        "START",
+        "STOP",
+        "RESET_PREPARE",
+        "RESET_CLEANUP",
+    }:
         raise ValueError("REQUEST_VERSION")
     if (
         operation["operation_id"] != request["operation_id"]
         or operation["lease_id"] != request["lease_id"]
-        or operation["operation_type"] not in {request["action"], "SWITCH"}
+        or operation["operation_type"] not in {request["action"], "SWITCH", "RESET"}
         or operation["status"] != "RUNNING"
         or datetime.fromisoformat(operation["timeout_at"].replace("Z", "+00:00")) <= now
         or lease["owner_operation_id"] != request["operation_id"]
@@ -107,7 +112,20 @@ def authorize(
         or lease["lease_expires_at"] <= int(now.timestamp())
     ):
         raise ValueError("STALE_OPERATION")
-    switching = operation["operation_type"] == "SWITCH"
+    resetting = operation["operation_type"] == "RESET"
+    if request["action"].startswith("RESET_") and not resetting:
+        raise ValueError("RESET_OPERATION_REQUIRED")
+    if resetting:
+        plan = json.loads(operation["reset_plan"])
+        if (
+            config.get("reset_policies", {}).get(operation["target_game_id"]) != plan["policy"]
+            or plan["source"] != operation["switch_source"]
+            or plan["target"] != operation["runtime_target"]
+            or plan["target"]["run_id"] != operation["operation_id"]
+            or plan["source"]["game_id"] != plan["target"]["game_id"]
+        ):
+            raise ValueError("RESET_PLAN_MISMATCH")
+    switching = operation["operation_type"] in {"SWITCH", "RESET"}
     if switching and "games" not in config:
         raise ValueError("SWITCH_NOT_CONFIGURED")
     target = (
@@ -121,7 +139,16 @@ def authorize(
     if "games" in config:
         if (
             target["game_id"] not in config["games"]
-            or target["data_source"] != "/srv/minecraft/games/" + target["game_id"] + "/server"
+            or re.fullmatch(
+                re.escape("/srv/minecraft/games/" + target["game_id"] + "/")
+                + (
+                    r"(?:worlds/op-[a-z0-9-]{1,100}/)?server"
+                    if "reset_policies" in config
+                    else "server"
+                ),
+                target["data_source"],
+            )
+            is None
         ):
             raise ValueError("TARGET_MISMATCH")
     elif target["game_id"] != config["game_id"] or target["data_source"] != config["data_source"]:
@@ -319,6 +346,9 @@ def apply(request: dict[str, Any]) -> None:
         ]:
             if hashlib.sha256((ARTIFACTS / name).read_bytes()).hexdigest() != manifest[field]:
                 raise ValueError("ARTIFACT_MISMATCH")
+        preflight_target = (
+            operation["switch_source"] if request["action"] == "RESET_PREPARE" else target
+        )
         execute(
             [
                 "bash",
@@ -328,9 +358,9 @@ def apply(request: dict[str, Any]) -> None:
                 'export WISHICRAFT_GAME_ID="$2" GAME_DIRECTORY="$3"; '
                 "/usr/local/lib/wishicraft-host-runtime/filesystem_preflight.sh",
                 "wishicraft-preflight",
-                target["run_id"],
-                target["game_id"],
-                target["data_source"],
+                preflight_target["run_id"],
+                preflight_target["game_id"],
+                preflight_target["data_source"],
             ]
         )
         unit_state = execute(
@@ -341,12 +371,42 @@ def apply(request: dict[str, Any]) -> None:
         receipt_path = ROOT / "receipt.json"
         receipt = json.loads(receipt_path.read_text()) if receipt_path.exists() else None
         containers = inspect()
+        if request["action"] == "RESET_PREPARE":
+            if containers:
+                raise ValueError("RESET_SOURCE_CONTAINER_REMAINS")
+            stopped_environment()
+            reset_module().prepare(
+                json.loads(operation["reset_plan"]), receipt=receipt or {}, atomic=atomic
+            )
+            return
         if containers:
             validate_container(containers[0], target)
             configured_container(containers[0], manifest)
+        if request["action"] == "RESET_CLEANUP":
+            if not containers or not containers[0]["State"]["Running"]:
+                raise ValueError("RESET_CLEANUP_RUNTIME_UNKNOWN")
+            # Readiness is independently checked by the CP before sending this action.
+            try:
+                removed = reset_module().cleanup(
+                    json.loads(operation["reset_plan"]), receipt=receipt or {}, atomic=atomic
+                )
+                result: dict[str, Any] = {"cleanup_pending": False, "removed_count": len(removed)}
+            except (ValueError, OSError):
+                # Successful runtime replacement is never undone to make cleanup look atomic.
+                result = {"cleanup_pending": True, "removed_count": None}
+            atomic(
+                ROOT / "reset-cleanup.json",
+                json.dumps({"operation_id": request["operation_id"], **result}),
+            )
+            print(json.dumps(result))
+            return
         if request["action"] == "START":
+            managed = "/worlds/" in target["data_source"]
+            if managed:
+                reset_module().initialized(target, atomic, require=False)
             if (
                 "games" in config
+                and not managed
                 and not (Path(target["data_source"]) / "world/level.dat").is_file()
             ):
                 initial_world_permission(target)
@@ -379,12 +439,14 @@ def apply(request: dict[str, Any]) -> None:
                 raise ValueError("START_RESULT_UNKNOWN")
             validate_container(current[0], target)
             configured_container(current[0], manifest)
+            if managed:
+                reset_module().initialized(target, atomic, require=False)
             atomic(receipt_path, json.dumps({"target": target, "phase": "running"}))
         else:
             if not receipt or receipt["target"] != target:
                 raise ValueError("STOP_TARGET_UNKNOWN")
             if containers and containers[0]["State"]["Running"]:
-                if operation["operation_type"] == "SWITCH":
+                if operation["operation_type"] in {"SWITCH", "RESET"}:
                     players = execute(["docker", "exec", containers[0]["Id"], "rcon-cli", "list"])
                     if (
                         re.fullmatch(
@@ -420,6 +482,16 @@ def apply(request: dict[str, Any]) -> None:
             elif receipt["phase"] not in {"stopping", "stopped"}:
                 raise ValueError("STOP_REQUIRES_RECOVERY_OBSERVATION")
             finish_stop(receipt_path, receipt, target, manifest)
+
+
+def reset_module() -> Any:
+    if __package__:
+        from wishicraft.artifacts import reset_worlds
+
+        return reset_worlds
+    import importlib
+
+    return importlib.import_module("reset_worlds")
 
 
 def main() -> int:

@@ -1,5 +1,8 @@
 # wishicraft-server
 
+> Reset準備（2026-09-12）: 次のrepository準備は対応Game限定Reset（D-098 Proposed）。現在のproduction契約はD-097までであり、Resetや旧world削除は未適用。設計・検証・承認対象は[Reset設計](docs/reviews/game_scoped_reset.md)を参照。
+
+
 Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジトリです。
 
 ## 現在地点

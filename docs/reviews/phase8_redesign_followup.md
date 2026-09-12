@@ -1,5 +1,8 @@
 # Phase 8後の再設計レビューと限定補足
 
+> Reset準備（2026-09-12）: Reset論点の次期具体案は[game_scoped_reset.md](game_scoped_reset.md)（D-098 Proposed）。本reviewの以前の保持例・認可例をAccepted値へ昇格させない。D-097は限定migration Completedのまま。
+
+
 - 状態: **Proposed / review record**。Accepted Decisionではない。
 - 基準: `751bcdbfaed2312cb3e09825e8643426cdc7acfa`、Phase 8 Completed / Phase 9未着手。
 - 今回の実装許可: 既存BACKUP契約の限定修正、boundary tests、隔離復元準備、文書、commit/CI。

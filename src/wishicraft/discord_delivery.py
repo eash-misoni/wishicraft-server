@@ -227,7 +227,12 @@ def render_status_projection(projection: object) -> str:
         "summary",
     }
     selection = {"selected_game_id", "observed_game_id", "current_operation_id"}
-    if not isinstance(projection, dict) or set(projection) not in (fields, fields | selection):
+    worlds = {"selected_world_id", "observed_world_id"}
+    if not isinstance(projection, dict) or set(projection) not in (
+        fields,
+        fields | selection,
+        fields | selection | worlds,
+    ):
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
     if projection.get("schema_version") != 1 or projection.get("kind") != "STATUS":
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
@@ -256,6 +261,18 @@ def render_status_projection(projection: object) -> str:
             ):
                 raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
             lines.append(f"{label}: {value or 'none'}")
+    if "selected_world_id" in projection:
+        for field, label in [
+            ("selected_world_id", "Selected world"),
+            ("observed_world_id", "Observed world"),
+        ]:
+            value = projection[field]
+            if value is not None and (
+                not isinstance(value, str)
+                or re.fullmatch(r"legacy|op-[a-z0-9-]{1,100}", value) is None
+            ):
+                raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
+            lines.append(f"{label}: {value or 'none'}")
     if endpoint is not None:
         lines.append(f"Endpoint: {endpoint}")
     lines.append(f"Health: {health}")
@@ -265,8 +282,21 @@ def render_status_projection(projection: object) -> str:
 def render_operation_projection(record: DeliveryRecord) -> str:
     if record.operation_type == "STATUS":
         return render_status_projection(record.projection)
-    if record.operation_type not in {"START", "STOP", "BACKUP", "SWITCH"}:
+    if record.operation_type not in {"START", "STOP", "BACKUP", "SWITCH", "RESET"}:
         raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
+    if record.operation_type == "RESET":
+        if record.operation_status == "SUCCEEDED":
+            return "Minecraft RESET: new world online and ready. " + (
+                "Cleanup is pending; older worlds are preserved."
+                if record.projection.get("cleanup_pending") is True
+                else "Older worlds remain subject to the retention policy."
+            )
+        if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
+            return (
+                "Minecraft RESET: did not complete. Keep the operation identity "
+                "and ask an administrator to observe recovery state."
+            )
+        return "Minecraft RESET: saving the old world and preparing the new world."
     if record.operation_type == "SWITCH":
         if record.operation_status == "SUCCEEDED":
             return "Minecraft SWITCH: online and ready. Use /mc status to see the Game."

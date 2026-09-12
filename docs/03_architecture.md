@@ -1,5 +1,8 @@
 # 03. Architecture
 
+> Reset準備（2026-09-12）: [D-098 Proposed](reviews/game_scoped_reset.md)は既存START/STOPを一つのReset実行へ構成し、Game選択と実runtime観測を維持する案。新table・常設cleanup serviceは追加しない。現在適用済みarchitectureはD-097まで。
+
+
 Phase 8.3の監視はAccepted D-094を参照する。既存read-only Monitoring Observerと独立した5分EventBridge scheduleがReconcileのObserved更新を行い、固定Host probe v1.4のData EBS usage/boot telemetryも同じ観測経路へ載せる。新しい常駐agent、Lambda、START/STOP経路は追加しない。dev production適用・検証の証跡は[monitoring runbook](runbooks/phase8_monitoring.md)を正本とする。
 
 - **文書状態:** Canonical

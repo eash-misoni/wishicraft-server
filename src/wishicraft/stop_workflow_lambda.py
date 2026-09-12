@@ -115,7 +115,7 @@ def handler(event: object, context: object) -> dict[str, object]:
     del context
     payload = _payload(event)
     runtime = _get_runtime()
-    if payload["action"] != "prepare_switch":
+    if payload["action"] not in {"prepare_switch", "prepare_reset"}:
         bind_operation(runtime, _string(payload, "operation_id"), action="STOP")
         if configured_catalog() is not None:
             runtime.status_factory = AwsStatusFactory(
@@ -129,6 +129,17 @@ def handler(event: object, context: object) -> dict[str, object]:
         runtime.system_id, _string(payload, "operation_id"), _string(payload, "lease_id"), 0
     )
     action = payload["action"]
+    if action in {
+        "prepare_reset",
+        "run_reset_prepare",
+        "check_reset_prepare",
+        "commit_reset",
+        "run_reset_cleanup",
+        "check_reset_cleanup",
+    }:
+        from wishicraft.reset_workflow import task
+
+        return task(runtime, proof, payload, now)
     if action == "prepare_switch":
         prepare_switch(runtime, proof, _mapping(payload, "state"), now)
         return {"prepared": True}

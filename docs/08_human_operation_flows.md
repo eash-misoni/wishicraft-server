@@ -1,5 +1,8 @@
 # 08. Human Operation Flows
 
+> 次期Resetは[D-098 Proposed](reviews/game_scoped_reset.md)。有効化と日常実行権限を分離し、policyとproduction操作を一括承認する。現在の利用可能操作へ未承認Resetを含めない。
+
+
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-12
 

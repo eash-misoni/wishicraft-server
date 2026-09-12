@@ -187,8 +187,17 @@ def handler(event: object, context: object) -> dict[str, object]:
         observation = StartObservation.from_item(_mapping(payload, "state"))
         if not observation.ready_for_success(runtime.game_id):
             raise StartWorkflowError(StartErrorCode.ENDPOINT_DISCREPANCY)
+        result = None
+        if os.environ.get("RESET_CONTRACT") == "1":
+            from wishicraft.reset_contract import operation
+
+            raw = operation(runtime, proof)
+            if raw["operation_type"] == {"S": "RESET"}:
+                if raw.get("reset_cleanup_complete") != {"BOOL": True}:
+                    raise ValueError("RESET cleanup observation is incomplete")
+                result = {"cleanup_pending": raw["reset_cleanup_pending"]["BOOL"]}
         runtime.operations.complete_owned(
-            proof=proof, status=OperationStatus.SUCCEEDED, completed_at=now
+            proof=proof, status=OperationStatus.SUCCEEDED, completed_at=now, result=result
         )
         return {"status": "SUCCEEDED"}
     if action == "fail":

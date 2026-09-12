@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import os
 from datetime import datetime
 from typing import Any
 
 from wishicraft.runtime_catalog import configured_catalog
 from wishicraft.runtime_contract import validate_target
+from wishicraft.world_reference import selected_source
 
 
 def prepare_switch(runtime: Any, proof: Any, state: dict[str, object], now: datetime) -> None:
@@ -46,12 +48,21 @@ def prepare_switch(runtime: Any, proof: Any, state: dict[str, object], now: date
         raise ValueError("SWITCH source unknown")
     source = validate_target(execution.get("target"))
     game_id = raw["target_game_id"]["S"]
-    if source["data_source"] != catalog.data_source(source["game_id"]):
+
+    def selected(game: str) -> str:
+        catalog.data_source(game)
+        return (
+            selected_source(runtime.targets.api, os.environ["GAMES_TABLE"], game)
+            if os.environ.get("RESET_CONTRACT") == "1"
+            else catalog.data_source(game)
+        )
+
+    if source["data_source"] != selected(source["game_id"]):
         raise ValueError("SWITCH source outside catalog")
     target = {
         "instance_id": runtime.resolver.resolve(),
         "game_id": game_id,
-        "data_source": catalog.data_source(game_id),
+        "data_source": selected(game_id),
         "config_digest": runtime.config_digest,
         "run_id": proof.owner_operation_id,
     }

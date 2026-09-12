@@ -1,5 +1,8 @@
 # 05. Data and Interface Contracts
 
+> Reset準備（2026-09-12）: [D-098 Proposed](reviews/game_scoped_reset.md)はworld.current_id、reset_plan、root所有記録、RESET入力の差分を定義する。v2共有BACKUPの復旧JSONはcurrent_idを任意追加しdigestへ含める案。既存v1/v2は変換しない。productionの現在契約をこの提案で上書きしない。
+
+
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-12
 

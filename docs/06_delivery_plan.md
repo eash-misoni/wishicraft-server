@@ -1,5 +1,8 @@
 # 06. Delivery Plan
 
+> Reset準備（2026-09-12）: 次の一利用機能は[D-098 Proposed](reviews/game_scoped_reset.md)の対応Game限定Reset。旧Phase番号・Package/Preset/Template・Restore UIは必須依存にしない。v2隔離復旧とworld参照の不足証拠を先行補完する[適用計画](runbooks/game_scoped_reset_migration.md)を一括承認対象とする。
+
+
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-12
 

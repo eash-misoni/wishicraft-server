@@ -10,6 +10,16 @@
 
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
+## Resetの次期提案
+
+### D-098 対応Game限定Resetと所有済み旧worldの限定整理
+
+- **状態: Proposed。repository実装・隔離testsまで。production未適用。**
+- RESET-001/002の従来案を見直し、一つの操作で同一Gameの保存・正常停止、新領域準備、選択参照確定、同じEC2上の起動を行う。
+- 利用者policy・設定境界・失敗時の契約案は[Reset設計](reviews/game_scoped_reset.md)、適用条件は[runbook](runbooks/game_scoped_reset_migration.md)へ集約する。旧world保持は外部BACKUPの代替ではない。
+- 対応Game、実行権限、接続player、seed、保持数・容量、毎回外部BACKUPを省く損失境界、隔離復旧後の削除releaseを一括production gateで判断する。A/Bの既存データを破棄可能とみなさない。
+- D-095/096/097のAccepted・限定Completedを維持する。Phase 9全体、Resetの採用・production変更をこの記録から推論しない。
+
 ## 2. 採用済み決定
 
 ### D-097 同一runtime構成の二つのGameの切替と共有保護

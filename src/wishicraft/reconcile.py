@@ -117,6 +117,7 @@ class ReconcileService:
     dns_observer: DnsObserver
     repository: StateRepository
     selected_snapshot: DesiredStateSnapshot | None = None
+    expected_data_source: str | None = None
 
     def reconcile(self, *, observed_at: datetime, persist: bool = True) -> SystemState:
         desired = (
@@ -132,6 +133,14 @@ class ReconcileService:
             target_id = self.target_resolver.resolve()
             status = self.status_factory.create(target_id).observe(observed_at=observed_at)
             errors.extend(_observation_errors(status))
+            if self.expected_data_source is not None and status.ready:
+                execution = status.execution
+                target = execution.get("target") if isinstance(execution, dict) else None
+                if (
+                    not isinstance(target, dict)
+                    or target.get("data_source") != self.expected_data_source
+                ):
+                    errors.append("SELECTED_WORLD_OBSERVATION_MISMATCH")
         except Exception:  # noqa: BLE001 - observation failure becomes a persisted UNKNOWN state.
             errors.append("TARGET_OBSERVATION_FAILED")
         if dns.state is DnsState.UNKNOWN:
@@ -147,6 +156,8 @@ class ReconcileService:
             errors=tuple(errors),
             observed_at=observed_at,
         )
+        if self.expected_data_source is not None:
+            state.observation["expected_data_source"] = self.expected_data_source
         if persist:
             if self.selected_snapshot is None:
                 self.repository.save(state)

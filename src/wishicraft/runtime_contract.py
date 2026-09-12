@@ -7,6 +7,8 @@ import json
 import re
 from typing import Any, cast
 
+from wishicraft.world_reference import validate_source
+
 FIELDS = {"instance_id", "game_id", "data_source", "config_digest", "run_id"}
 
 
@@ -18,20 +20,19 @@ def validate_target(value: object) -> dict[str, str]:
     patterns = {
         "instance_id": r"i-[0-9a-f]{17}",
         "game_id": r"game-[a-z0-9-]+",
-        "data_source": r"/srv/minecraft/games/[a-z0-9-]+/server",
+        "data_source": r"/srv/minecraft/games/[a-z0-9-]+/(?:worlds/op-[a-z0-9-]+/)?server",
         "config_digest": r"[0-9a-f]{64}",
         "run_id": r"op-[a-z0-9-]+",
     }
     for key, pattern in patterns.items():
         if re.fullmatch(pattern, value[key]) is None:
             raise ValueError("invalid runtime target " + key)
-    if value["data_source"] != "/srv/minecraft/games/" + value["game_id"] + "/server":
-        raise ValueError("runtime data binding mismatch")
+    validate_source(value["game_id"], value["data_source"])
     return dict(value)
 
 
 def command(*, operation_id: str, lease_id: str, action: str) -> str:
-    if action not in {"START", "STOP"}:
+    if action not in {"START", "STOP", "RESET_PREPARE", "RESET_CLEANUP"}:
         raise ValueError("invalid runtime action")
     for value in (operation_id, lease_id):
         if re.fullmatch(r"[a-z0-9-]{1,128}", value) is None:
@@ -147,10 +148,16 @@ def select_target(
             "config_digest": runtime.config_digest,
             "run_id": proof.owner_operation_id,
         }
+    stopped_prior_selection = (
+        action == "STOP"
+        and isinstance(execution, dict)
+        and execution.get("phase") == "stopped"
+        and observation.get("host_runtime_state") == "not-running"
+    )
     if (
         target["instance_id"] != runtime.resolver.resolve()
         or target["game_id"] != runtime.game_id
-        or target["data_source"] != runtime.data_source
+        or (target["data_source"] != runtime.data_source and not stopped_prior_selection)
         or target["config_digest"] != runtime.config_digest
     ):
         raise ValueError("selected target mismatch")

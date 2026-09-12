@@ -31,7 +31,7 @@ if [[ -e "$RUNTIME_DIR/runtime-run.env" ]]; then
   [[ "$(stat -c '%u:%g:%a' "$RUNTIME_DIR/runtime-run.env")" == '0:0:600' ]] || fail
   game_directory="$(sed -n 's/^GAME_DIRECTORY=//p' "$RUNTIME_DIR/runtime-run.env")"
 fi
-[[ "$game_directory" =~ ^/srv/minecraft/games/[a-z0-9-]+/server$ ]] || fail
+[[ "$game_directory" =~ ^/srv/minecraft/games/[a-z0-9-]+/(worlds/op-[a-z0-9-]+/)?server$ ]] || fail
 
 remove_data_placeholders() {
   local name path

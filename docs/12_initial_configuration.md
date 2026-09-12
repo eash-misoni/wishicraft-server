@@ -1,5 +1,8 @@
 # 12. Initial Configuration
 
+> Reset準備（2026-09-12）: Resetの候補設定は`config/reset-dev.json`。現在は空でA/Bとも有効化しない。[D-098 Proposed](reviews/game_scoped_reset.md)の対象Game・固定seed承認後に一度固定する。初期Game A/Bの既存設定はReset初期値として再生成しない。
+
+
 - **文書状態:** Canonical
 - **対象:** Phase 0開始時点の初期設定
 - **最終更新:** 2026-09-12

@@ -149,7 +149,13 @@ def _build_service() -> ReconcileService:
     if catalog and snapshot:
         game_id = snapshot.desired_game_id or game_id
         catalog.data_source(game_id)
+    expected_source = None
+    if os.environ.get("RESET_CONTRACT") == "1":
+        from wishicraft.world_reference import selected_source
+
+        expected_source = selected_source(dynamodb, _required_environment("GAMES_TABLE"), game_id)
     return ReconcileService(
+        expected_data_source=expected_source,
         system_id=_required_environment("SYSTEM_ID"),
         environment=_required_environment("STAGE"),
         game_id=game_id,

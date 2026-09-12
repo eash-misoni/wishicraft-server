@@ -25,7 +25,8 @@ IMAGE = (
 
 
 def main() -> None:
-    two_games = "--two-games" in sys.argv
+    reset = "--reset" in sys.argv
+    two_games = "--two-games" in sys.argv or reset
     root = Path(tempfile.mkdtemp(prefix="wishicraft-targeted-docker-"))
     print("fixture:", root, flush=True)
     data = root / "data"
@@ -60,6 +61,9 @@ def main() -> None:
             marker = directory.parent / ".wishicraft-initialization.json"
             marker.write_text(json.dumps({"game_id": game, "phase": "prepared"}))
             marker.chmod(0o600)
+        if reset:
+            for game in game_ids:
+                (Path("/srv/minecraft/games") / game).chmod(0o755)
         data = Path("/srv/minecraft/games") / game_ids[0] / "server"
     if not two_games:
         data.mkdir()
@@ -113,6 +117,10 @@ services:
     config: dict[str, Any] = {**target, "system_id": "ci-only", "lock_name": "ci-only"}
     if two_games:
         config["games"] = game_ids
+    if reset:
+        config["reset_policies"] = {
+            game_ids[0]: {"fixed_seed": 0, "retain_previous": 1, "minimum_free_bytes": 1073741824}
+        }
     host.ROOT = root
     host.CONFIG = root / "config.json"
     host.CONFIG.write_text(json.dumps(config))
@@ -156,11 +164,17 @@ services:
         if args[0] == "bash":
             # Exercise the real Compose parsing done by the host filesystem preflight.
             # Platform mount/ownership checks remain replaced by this synthetic boundary.
+            expected = (
+                operation["switch_source"]
+                if operation.get("operation_type") == "RESET"
+                and not Path(target["data_source"]).exists()
+                else target
+            )
             assert args[-4:] == [
                 "wishicraft-preflight",
-                target["run_id"],
-                target["game_id"],
-                target["data_source"],
+                expected["run_id"],
+                expected["game_id"],
+                expected["data_source"],
             ]
             assert 'export WISHICRAFT_RUN_ID="$1"' in args[2]
             env = dict(
@@ -258,7 +272,7 @@ services:
     assert not host.inspect(), "preexisting project: refuse to touch it"
     container_ids = []
     b_saved: dict[str, str] = {}
-    for index in range(3 if two_games else 2):
+    for index in range(1 if reset else (3 if two_games else 2)):
         if two_games:
             game_id = game_ids[index % 2]
             data = Path("/srv/minecraft/games") / game_id / "server"
@@ -325,7 +339,7 @@ services:
             )
             assert "42" in result, result
         operation["operation_type"] = request["action"] = "STOP"
-        if two_games and index < 2:
+        if two_games and index < 2 and not reset:
             operation["switch_source"] = dict(target)
             destination_game = game_ids[(index + 1) % 2]
             operation["runtime_target"] = {
@@ -357,17 +371,132 @@ services:
                 for p in (data / "world").rglob("*")
                 if p.is_file()
             }
-    if two_games:
+    if two_games and not reset:
         assert b_saved and all(
             hashlib.sha256(Path(p).read_bytes()).hexdigest() == digest
             for p, digest in b_saved.items()
         )
         print("B saved world unchanged during A restart", flush=True)
     assert len(set(container_ids)) == len(container_ids)
-    assert state["stop_observations"] == (3 if two_games else 2)
+    assert state["stop_observations"] == (1 if reset else (3 if two_games else 2))
     print(
         "PASS real v2 START/STOP/new-run START, saved scoreboard=42, rm reply loss, bind preserved"
     )
+    if reset:
+        # The existing adapter performs every real Docker save/stop/removal/start below.
+        anchor = data
+        target = {**target, "run_id": "op-reset-source"}
+        operation.update(
+            operation_id=target["run_id"], operation_type="START", runtime_target=target
+        )
+        lease["owner_operation_id"] = target["run_id"]
+        request.update(operation_id=target["run_id"], action="START")
+        host.apply(request)
+        for number in range(3):
+            source = dict(target)
+            destination = anchor.parent / "worlds" / f"op-reset-{number}" / "server"
+            target = {**source, "data_source": str(destination), "run_id": f"op-reset-{number}"}
+            plan = {
+                "schema_version": 1,
+                "source": source,
+                "target": target,
+                "seed": 100 + number,
+                "policy": config["reset_policies"][game_ids[0]],
+            }
+            operation.update(
+                operation_id=target["run_id"],
+                operation_type="RESET",
+                runtime_target=target,
+                switch_source=source,
+                reset_plan=json.dumps(plan),
+            )
+            lease["owner_operation_id"] = target["run_id"]
+            request.update(operation_id=target["run_id"], action="STOP")
+            # The preflight is source-bound during STOP, destination-bound during START.
+            target_for_start = target
+            target = source
+            host.apply(request)
+            target = target_for_start
+            request["action"] = "RESET_PREPARE"
+            host.apply(request)
+            assert not (destination / "world").exists()
+            request["action"] = "START"
+            host.apply(request)
+            current = host.inspect()[0]
+            assert current["Id"] not in container_ids
+            container_ids.append(current["Id"])
+            seed_observed = real_execute(["docker", "exec", current["Id"], "rcon-cli", "seed"])
+            assert str(100 + number) in seed_observed, seed_observed
+            absent = real_execute(
+                ["docker", "exec", current["Id"], "rcon-cli", "scoreboard", "objectives", "list"]
+            )
+            assert "restore_ci" not in absent
+            real_execute(
+                [
+                    "docker",
+                    "exec",
+                    current["Id"],
+                    "rcon-cli",
+                    "scoreboard",
+                    "objectives",
+                    "add",
+                    "reset_ci",
+                    "dummy",
+                ]
+            )
+            real_execute(
+                [
+                    "docker",
+                    "exec",
+                    current["Id"],
+                    "rcon-cli",
+                    "scoreboard",
+                    "players",
+                    "set",
+                    "sentinel",
+                    "reset_ci",
+                    str(100 + number),
+                ]
+            )
+            request["action"] = "RESET_CLEANUP"
+            host.apply(request)
+            print("REAL_RESET_READY", number, current["Id"], str(destination), flush=True)
+        assert (anchor / "world/level.dat").is_file()
+        assert not (anchor.parent / "worlds/op-reset-0/server").exists()
+        assert (anchor.parent / "worlds/op-reset-1/server/world/level.dat").is_file()
+        operation.update(operation_type="STOP")
+        request["action"] = "STOP"
+        host.apply(request)
+        target = {**target, "run_id": "op-reset-normal-start"}
+        operation.update(
+            operation_id=target["run_id"], operation_type="START", runtime_target=target
+        )
+        lease["owner_operation_id"] = target["run_id"]
+        request.update(operation_id=target["run_id"], action="START")
+        host.apply(request)
+        current = host.inspect()[0]
+        saved = real_execute(
+            [
+                "docker",
+                "exec",
+                current["Id"],
+                "rcon-cli",
+                "scoreboard",
+                "players",
+                "get",
+                "sentinel",
+                "reset_ci",
+            ]
+        )
+        assert "102" in saved
+        operation["operation_type"] = request["action"] = "STOP"
+        host.apply(request)
+        assert not host.inspect()
+        print(
+            "PASS real Reset generation/seed/config/old retention/exact cleanup/"
+            "normal restart saved=102",
+            flush=True,
+        )
     # Containers have already been removed by the real adapter. Keep runner-local evidence.
 
 

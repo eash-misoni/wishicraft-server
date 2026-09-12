@@ -47,8 +47,23 @@ def handler(event: object, context: object) -> dict[str, object]:
         event = dict(event)
         explicit_game = event.pop("target_game_id", None)
         confirmed = event.pop("confirmed", None)
+        reset_seed_mode = event.pop("seed_mode", None)
         kind = event.get("operation_type")
-        if kind == "SWITCH":
+        if kind == "RESET":
+            from wishicraft.reset_policy import configured
+
+            if (
+                confirmed is not True
+                or event.get("requested_by") not in {"ADMIN", "DISCORD"}
+                or explicit_game not in configured()
+                or reset_seed_mode not in {"new", "fixed"}
+                or not os.environ.get("RESET_STATE_MACHINE_ARN")
+            ):
+                raise ValueError("RESET requires enabled Game, confirmation and seed mode")
+            extra["reset_seed_mode"] = reset_seed_mode
+        elif reset_seed_mode is not None:
+            raise ValueError("seed mode is RESET-only")
+        elif kind == "SWITCH":
             if confirmed is not True or event.get("requested_by") not in {"ADMIN", "DISCORD"}:
                 raise ValueError("SWITCH requires an authorized explicit confirmation")
             if not isinstance(explicit_game, str) or not os.environ.get("SWITCH_STATE_MACHINE_ARN"):
@@ -122,14 +137,14 @@ def handler(event: object, context: object) -> dict[str, object]:
             lease_id=result.lease_id,
             started_at=datetime.now(UTC),
         )
-    if result.created and operation_type is OperationType.SWITCH:
+    if result.created and operation_type in {OperationType.SWITCH, OperationType.RESET}:
         if result.lease_id is None:
             raise RuntimeError("SWITCH admission did not create a lease")
         boto3 = importlib.import_module("boto3")
         WorkflowLauncher(
             boto3.client("stepfunctions"),
             boto3.client("dynamodb"),
-            state_machine_environment="SWITCH_STATE_MACHINE_ARN",
+            state_machine_environment=f"{operation_type.value}_STATE_MACHINE_ARN",
         ).start(
             operation_id=result.operation_id, lease_id=result.lease_id, started_at=datetime.now(UTC)
         )
@@ -427,6 +442,8 @@ def _build_service() -> OperationAdmissionService:
     }
     if configured_catalog() is not None:
         timeout_by_type[OperationType.SWITCH] = int(_required_environment("SWITCH_TIMEOUT_SECONDS"))
+    if os.environ.get("RESET_CONTRACT") == "1":
+        timeout_by_type[OperationType.RESET] = int(_required_environment("RESET_TIMEOUT_SECONDS"))
     return OperationAdmissionService(
         repository,
         game_id=_required_environment("GAME_ID"),

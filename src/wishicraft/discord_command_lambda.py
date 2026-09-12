@@ -41,12 +41,14 @@ class OperationAdmission(Protocol):
         channel_id: str,
         target_game_id: str | None = None,
         confirmed: bool = False,
+        seed_mode: str | None = None,
     ) -> str: ...
 
 
 class GameSelection(TypedDict, total=False):
     target_game_id: str
     confirmed: bool
+    seed_mode: str
 
 
 class InteractionCallback(Protocol):
@@ -70,8 +72,9 @@ class LambdaOperationAdmission:
         channel_id: str,
         target_game_id: str | None = None,
         confirmed: bool = False,
+        seed_mode: str | None = None,
     ) -> str:
-        if operation_type not in {"STATUS", "START", "STOP", "BACKUP", "SWITCH"}:
+        if operation_type not in {"STATUS", "START", "STOP", "BACKUP", "SWITCH", "RESET"}:
             raise ValueError("unsupported Discord admission type")
         response = self._api.invoke(
             FunctionName=self._function_name,
@@ -85,6 +88,7 @@ class LambdaOperationAdmission:
                     "requested_by": "DISCORD",
                     **({"target_game_id": target_game_id} if target_game_id is not None else {}),
                     **({"confirmed": True} if confirmed else {}),
+                    **({"seed_mode": seed_mode} if seed_mode is not None else {}),
                     "discord": {
                         "guild_id": guild_id,
                         "channel_id": channel_id,
@@ -133,6 +137,8 @@ def handler(event: object, context: object) -> dict[str, object]:
                 "target_game_id": interaction.target_game_id,
                 "confirmed": interaction.confirmed,
             }
+        if interaction.seed_mode is not None:
+            selection["seed_mode"] = interaction.seed_mode
         _get_operation_admission().admit(
             operation_type=interaction.kind.value,
             interaction_id=interaction.interaction_id,
@@ -196,7 +202,7 @@ def _parse_admission_response(response: object, *, operation_type: str) -> str:
     lease_id = value.get("lease_id")
     if operation_type == "STATUS" and lease_id is not None:
         raise RuntimeError("STATUS admission created a lease")
-    if operation_type in {"START", "STOP", "BACKUP"} and (
+    if operation_type in {"START", "STOP", "BACKUP", "SWITCH", "RESET"} and (
         not isinstance(lease_id, str) or not lease_id
     ):
         raise RuntimeError(f"{operation_type} admission did not return a lease")

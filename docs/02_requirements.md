@@ -1,5 +1,8 @@
 # 02. Requirements
 
+> Reset準備（2026-09-12）: RESET-001/002は従来のLATER案。毎Resetの外部BACKUP、世代モデル一式を必須にせず、[D-098 Proposed](reviews/game_scoped_reset.md)で再評価する。まだ採用済み要件へ置換しない。D-097の認可・共有保護はAccepted/限定適用済み。
+
+
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-12
 
@@ -410,7 +413,7 @@ D-097 Acceptedの移行後は、新形式shared-volume normalだけを共有volu
 
 ### GAME-001 管理単位 `LATER`
 
-以下のLATERモデルは見直し対象。[D-097 Accepted](reviews/two_game_switch.md)では、同一固定構成の二Game選択・EC2維持切替・共有BACKUP整合を一利用機能として準備する。認可、接続playerの扱い、共有保護/retention単位は未承認である。
+以下のLATERモデルは見直し対象。[D-097 Accepted](reviews/two_game_switch.md)では、同一固定構成の二Game選択・EC2維持切替・共有BACKUP整合を一利用機能として準備する。認可、接続playerの扱い、共有保護/retention単位はD-097の限定範囲で採用・適用済み。Reset等へ無条件に流用しない。
 
 複数ゲーム対応後は、ワールド単体ではなくGameを起動単位とする。
 

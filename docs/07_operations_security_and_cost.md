@@ -1,5 +1,8 @@
 # 07. Operations, Security, and Cost
 
+> Reset準備（2026-09-12）: [D-098 Proposed](reviews/game_scoped_reset.md)の旧world整理とSnapshot retentionは別の保護単位。production directory削除も未承認。容量不足では先に既存データを削らず停止する。隔離復旧・最小IAM・費用・受付制御は[適用runbook](runbooks/game_scoped_reset_migration.md)を参照。
+
+
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-12
 

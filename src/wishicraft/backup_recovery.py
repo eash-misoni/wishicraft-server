@@ -8,6 +8,7 @@ import re
 from typing import Any, cast
 
 from wishicraft.runtime_catalog import RuntimeCatalog
+from wishicraft.world_reference import data_source
 
 SHARED_TAG_KEYS = frozenset({"WishicraftBackupScope", "WishicraftRecoveryDigest"})
 
@@ -30,9 +31,15 @@ def recovery_digest(value: str) -> str:
         raise ValueError("invalid recovery Games")
     catalog = RuntimeCatalog.parse(json.dumps(list(games)))
     for game_id, record in games.items():
+        world = record.get("world", {}) if isinstance(record, dict) else {}
+        if not isinstance(world, dict) or (
+            "current_id" in world and not isinstance(world["current_id"], str)
+        ):
+            raise ValueError("invalid recovery world reference")
         if (
             not isinstance(record, dict)
-            or record.get("data_source") != catalog.data_source(game_id)
+            or record.get("data_source")
+            != data_source(game_id, record.get("world", {}).get("current_id"))
             or record.get("game_id") != game_id
         ):
             raise ValueError("recovery data binding mismatch")
@@ -130,7 +137,9 @@ class RecoveryRepository:
             if set(record) != allowed:
                 raise ValueError("unknown Game schema cannot be snapshotted as known configuration")
             records[game_id] = dict(record)
-            records[game_id]["data_source"] = catalog.data_source(game_id)
+            records[game_id]["data_source"] = data_source(
+                game_id, record["world"].get("current_id")
+            )
         from decimal import Decimal
 
         def number(value: Any) -> int:

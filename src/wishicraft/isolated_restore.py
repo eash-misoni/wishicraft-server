@@ -74,6 +74,17 @@ def verify_source(evidence: dict[str, Any], snapshot_id: str, root: Path) -> dic
     recorded_at = provenance.existing_recorded_at(snapshot_id, operation_id)
     if recorded_at is None or not isinstance(operation["result"], dict):
         raise ValueError("verified provenance and successful Operation are required")
+    recovery_json = None
+    game_id = config.project.initial_game_id
+    if snapshot.tags.get("WishicraftSchemaVersion") == "2":
+        from wishicraft.runtime_catalog import RuntimeCatalog
+
+        raw_operation = store.get_item(
+            TableName="operations", Key={"operation_id": {"S": operation_id}}, ConsistentRead=True
+        )["Item"]
+        recovery_json = raw_operation["backup_recovery_json"]["S"]
+        game_id = snapshot.tags["WishicraftGameId"]
+        RuntimeCatalog.parse((root / "config/two-game-dev.json").read_text()).data_source(game_id)
     record = build_verified_provenance(
         snapshot=snapshot,
         operation=BackupOperationEvidence(
@@ -85,7 +96,8 @@ def verify_source(evidence: dict[str, Any], snapshot_id: str, root: Path) -> dic
         ),
         project=config.project.project_slug,
         stage="dev",
-        game_id=config.project.initial_game_id,
+        game_id=game_id,
+        recovery_json=recovery_json,
         source_volume_id=str(
             config.stage.host_runtime_value("target_host.existing_data_volume_id")
         ),
@@ -106,6 +118,17 @@ def verify_source(evidence: dict[str, Any], snapshot_id: str, root: Path) -> dic
         "provenance_verified": True,
         "runtime_reconstruction": "repository configuration; not a Snapshot-time manifest",
         "restore_test_completed": False,
+        **(
+            {
+                "recovery_description": json.loads(recovery_json),
+                "runtime_reconstruction": (
+                    "Snapshot-time recovery description verified against Operation "
+                    "and provenance; secrets excluded"
+                ),
+            }
+            if recovery_json is not None
+            else {}
+        ),
     }
 
 

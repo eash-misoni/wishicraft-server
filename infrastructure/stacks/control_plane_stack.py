@@ -46,6 +46,7 @@ class ControlPlaneStack(Stack):
         secrets: SecretsExampleConfig,
         phase: int = 0,
         games: tuple[str, ...] | None = None,
+        reset_policies: dict[str, dict[str, int]] | None = None,
     ) -> None:
         super().__init__(
             scope,
@@ -948,6 +949,7 @@ class ControlPlaneStack(Stack):
                 rcon_parameter_name=secrets.rcon_password_parameter_name(stage.stage),
                 targeted=True,
                 games=games,
+                reset_policies=reset_policies,
             )
             switch_role = iam.Role(
                 self, "SwitchWorkflowRole", assumed_by=iam.ServicePrincipal("states.amazonaws.com")
@@ -1038,6 +1040,108 @@ class ControlPlaneStack(Stack):
             backup_task.add_to_role_policy(
                 iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[games_table.table_arn])
             )
+
+            if reset_policies is not None:
+                from infrastructure.reset_workflow import definition as reset_definition
+                from wishicraft.reset_policy import policies
+
+                policy_json = __import__("json").dumps(reset_policies, sort_keys=True)
+                policies(policy_json, catalog)
+                reset = sfn.CfnStateMachine(
+                    self,
+                    "ResetWorkflow",
+                    state_machine_name=resource_name(project.resource_prefix, stage.stage, "reset"),
+                    role_arn=switch_role.role_arn,
+                    definition=reset_definition(
+                        start=_start_definition(
+                            reconcile_arn=function.function_arn,
+                            start_task_arn=start_task.function_arn,
+                            lease_renew_seconds=stage.lock_renew_interval_seconds,
+                        ),
+                        stop=_stop_definition(
+                            reconcile_arn=function.function_arn,
+                            stop_task_arn=stop_task.function_arn,
+                            lease_renew_seconds=stage.lock_renew_interval_seconds,
+                        ),
+                        stop_task_arn=stop_task.function_arn,
+                    ),
+                )
+                admission.add_environment("RESET_STATE_MACHINE_ARN", reset.attr_arn)
+                admission.add_environment("RESET_TIMEOUT_SECONDS", "3000")
+                admission.add_to_role_policy(
+                    iam.PolicyStatement(
+                        actions=["states:StartExecution"], resources=[reset.attr_arn]
+                    )
+                )
+                admission.add_to_role_policy(
+                    iam.PolicyStatement(
+                        actions=["states:DescribeExecution"],
+                        resources=[
+                            self.format_arn(
+                                service="states",
+                                resource="execution",
+                                resource_name=resource_name(
+                                    project.resource_prefix, stage.stage, "reset"
+                                )
+                                + ":op-*",
+                            )
+                        ],
+                    )
+                )
+                for child in self.node.find_all():
+                    if isinstance(child, lambda_.Function):
+                        child.add_environment("RESET_CONTRACT", "1")
+                        child.add_environment("RESET_POLICIES", policy_json)
+                for task in (start_task, stop_task, function):
+                    task.add_environment("GAMES_TABLE", games_table.table_name)
+                    task.add_to_role_policy(
+                        iam.PolicyStatement(
+                            actions=["dynamodb:GetItem"], resources=[games_table.table_arn]
+                        )
+                    )
+                stop_task.add_to_role_policy(
+                    iam.PolicyStatement(
+                        actions=["dynamodb:UpdateItem"], resources=[games_table.table_arn]
+                    )
+                )
+                stop_task.add_to_role_policy(
+                    iam.PolicyStatement(
+                        actions=["dynamodb:ConditionCheckItem"],
+                        resources=[locks_table.table_arn, operations_table.table_arn],
+                    )
+                )
+                stop_task.add_to_role_policy(
+                    iam.PolicyStatement(actions=["ssm:ListCommands"], resources=["*"])
+                )
+                reset_alarm = cloudwatch.Alarm(
+                    self,
+                    "ResetWorkflowFailureAlarm",
+                    alarm_name=resource_name(
+                        project.resource_prefix, stage.stage, "resetworkflowfailurealarm"
+                    ),
+                    metric=cloudwatch.MathExpression(
+                        expression="failed + timedout + aborted",
+                        using_metrics={
+                            name: cloudwatch.Metric(
+                                namespace="AWS/States",
+                                metric_name=metric,
+                                dimensions_map={"StateMachineArn": reset.attr_arn},
+                                statistic="Sum",
+                                period=Duration.minutes(5),
+                            )
+                            for name, metric in (
+                                ("failed", "ExecutionsFailed"),
+                                ("timedout", "ExecutionsTimedOut"),
+                                ("aborted", "ExecutionsAborted"),
+                            )
+                        },
+                        period=Duration.minutes(5),
+                    ),
+                    threshold=1,
+                    evaluation_periods=1,
+                    treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
+                )
+                reset_alarm.add_alarm_action(cloudwatch_actions.SnsAction(topic))
 
 
 def _add_discord_ingress(
@@ -1261,7 +1365,7 @@ def _add_discord_ingress(
                                         "START",
                                         "STOP",
                                         "BACKUP",
-                                        *(["SWITCH"] if two_games else []),
+                                        *(["SWITCH", "RESET"] if two_games else []),
                                     ]
                                 },
                                 "requested_by": {"M": {"source": {"S": ["DISCORD"]}}},

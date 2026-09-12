@@ -84,6 +84,26 @@ def project_status(state: object) -> dict[str, object]:
                 "current_operation_id": operation,
             }
         )
+    if "expected_data_source" in observation:
+        from wishicraft.world_reference import data_source, validate_source
+
+        def world_id(game: object, path: object) -> str:
+            if not isinstance(game, str) or not isinstance(path, str):
+                raise ValueError("invalid projected world")
+            validate_source(game, path)
+            return "legacy" if path == data_source(game) else path.split("/")[-2]
+
+        result["selected_world_id"] = world_id(
+            state["selected_game_id"], observation["expected_data_source"]
+        )
+        execution = observation.get("execution")
+        observed_world = None
+        if isinstance(execution, dict) and execution.get("phase") == "running":
+            target = execution.get("target")
+            if not isinstance(target, dict):
+                raise ValueError("invalid observed world")
+            observed_world = world_id(target.get("game_id"), target.get("data_source"))
+        result["observed_world_id"] = observed_world
     return result
 
 

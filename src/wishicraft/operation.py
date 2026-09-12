@@ -68,6 +68,7 @@ class OperationRequest:
     requested_at: datetime
     timeout_at: datetime | None
     discord: DiscordOperationContext | None = None
+    reset_seed_mode: str | None = None
 
     def __post_init__(self) -> None:
         _validate_identifier(self.operation_id, "operation")
@@ -185,12 +186,15 @@ class OperationAdmissionRepository:
         return AdmissionResult(request.operation_id, True, lease_id)
 
     def existing(self, request: OperationRequest) -> AdmissionResult | None:
-        return self.existing_for(
+        result = self.existing_for(
             idempotency_key=request.idempotency_key,
             operation_type=request.operation_type,
             requested_by=request.requested_by,
             target_game_id=request.target_game_id,
         )
+        if result is not None and request.reset_seed_mode is not None:
+            self.verify_reset_mode(result.operation_id, request.reset_seed_mode)
+        return result
 
     def existing_for(
         self,
@@ -245,6 +249,17 @@ class OperationAdmissionRepository:
         except ValueError as error:
             raise ValueError("malformed idempotency item") from error
 
+    def verify_reset_mode(self, operation_id: str, mode: str) -> None:
+        response = self._api.get_item(
+            TableName=self._operations,
+            Key={"operation_id": {"S": operation_id}},
+            ConsistentRead=True,
+        )
+        if not isinstance(response, dict) or response.get("Item", {}).get("reset_seed_mode") != {
+            "S": mode
+        }:
+            raise ValueError("idempotent Reset seed mode differs")
+
     def _idempotency_put(self, request: OperationRequest) -> dict[str, object]:
         return {
             "Put": {
@@ -271,6 +286,11 @@ class OperationAdmissionRepository:
                 "Item": _attribute_map(
                     {
                         "operation_id": request.operation_id,
+                        **(
+                            {"reset_seed_mode": request.reset_seed_mode}
+                            if request.reset_seed_mode is not None
+                            else {}
+                        ),
                         "schema_version": 1,
                         "idempotency_key": request.idempotency_key,
                         "workflow_execution_name": None,
@@ -392,7 +412,12 @@ class OperationAdmissionService:
         requested_at: datetime,
         discord: DiscordOperationContext | None = None,
         target_game_id: str | None = None,
+        reset_seed_mode: str | None = None,
     ) -> AdmissionResult:
+        if (operation_type is OperationType.RESET and reset_seed_mode not in {"fixed", "new"}) or (
+            operation_type is not OperationType.RESET and reset_seed_mode is not None
+        ):
+            raise ValueError("invalid Reset seed request")
         game_id = self._game_id if target_game_id is None else target_game_id
         timeout_seconds = self._timeouts.get(operation_type)
         if timeout_seconds is None or timeout_seconds <= 0:
@@ -404,6 +429,8 @@ class OperationAdmissionService:
             target_game_id=game_id,
         )
         if existing is not None:
+            if reset_seed_mode is not None:
+                self._repository.verify_reset_mode(existing.operation_id, reset_seed_mode)
             return existing
         operation_id = self._operation_id_factory()
         request = OperationRequest(
@@ -415,6 +442,7 @@ class OperationAdmissionService:
             requested_at=requested_at,
             timeout_at=requested_at + timedelta(seconds=timeout_seconds),
             discord=discord,
+            reset_seed_mode=reset_seed_mode,
         )
         return self._repository.admit(request)
 

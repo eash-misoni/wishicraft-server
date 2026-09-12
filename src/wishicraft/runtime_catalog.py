@@ -68,7 +68,9 @@ def bind_operation(runtime: Any, operation_id: str, *, action: str) -> None:
         ConsistentRead=True,
     )["Item"]
     source = (
-        action == "STOP" and raw["operation_type"] == {"S": "SWITCH"} and "switch_source" in raw
+        action == "STOP"
+        and raw["operation_type"] in ({"S": "SWITCH"}, {"S": "RESET"})
+        and "switch_source" in raw
     )
     runtime.targets.field = "switch_source" if source else "runtime_target"
     if source:
@@ -76,4 +78,15 @@ def bind_operation(runtime: Any, operation_id: str, *, action: str) -> None:
     else:
         game_id = raw["target_game_id"]["S"]
     runtime.game_id = game_id
-    runtime.data_source = catalog.data_source(game_id)
+    catalog.data_source(game_id)
+    if os.environ.get("RESET_CONTRACT") == "1":
+        from wishicraft.world_reference import selected_source
+
+        if runtime.targets.field in raw:
+            runtime.data_source = runtime.targets.read(operation_id)["data_source"]
+        else:
+            runtime.data_source = selected_source(
+                runtime.targets.api, os.environ["GAMES_TABLE"], game_id
+            )
+    else:
+        runtime.data_source = catalog.data_source(game_id)

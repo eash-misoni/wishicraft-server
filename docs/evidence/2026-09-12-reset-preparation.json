@@ -1,0 +1,196 @@
+{
+  "status": "Proposed repository preparation; production not applied",
+  "baseline_head": "1267ed5912e027ca2e0b1e1a419df62865f6bfcd",
+  "production_write_performed": false,
+  "decision": "D-098 Proposed",
+  "active_policy": {},
+  "approval_candidate": {
+    "policy": {
+      "game-vanilla-secondary": {
+        "fixed_seed": 0,
+        "retain_previous": 3,
+        "minimum_free_bytes": 4294967296
+      }
+    },
+    "bundle": {
+      "baseline": "1267ed5912e027ca2e0b1e1a419df62865f6bfcd",
+      "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+      "plan": {
+        "instance_id": "i-04fc0629dc4ea466e",
+        "files": [
+          {
+            "destination": "/etc/wishicraft/host-runtime/compose.yaml",
+            "source": "0.artifact",
+            "mode": 384,
+            "sha256": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+            "predecessor": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0"
+          },
+          {
+            "destination": "/etc/wishicraft/host-runtime/runtime.env",
+            "source": "1.artifact",
+            "mode": 384,
+            "sha256": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+            "predecessor": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce"
+          },
+          {
+            "destination": "/etc/wishicraft/host-runtime/manifest.json",
+            "source": "2.artifact",
+            "mode": 384,
+            "sha256": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "predecessor": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4"
+          },
+          {
+            "destination": "/etc/wishicraft/runtime-contract.json",
+            "source": "3.artifact",
+            "mode": 384,
+            "sha256": "0e384a72794ee0f466096984ba6fd99c9f4861026b8be64173625a96c3cbfd08",
+            "predecessor": "dab6d1837a8efb497c90ba9dae62eb4743752aaa965dd6031d5afaf92433bdb2"
+          },
+          {
+            "destination": "/usr/local/libexec/wishicraft/operation-v2",
+            "source": "4.artifact",
+            "mode": 493,
+            "sha256": "9010ae86535194a3a0d3c087f5526c7dbe29c35749cc0bcc3a8506d4635f509f",
+            "predecessor": "84c257855962ca5a5a46547f21362d07062d5e3ccabc320256066c1af54a6729"
+          },
+          {
+            "destination": "/usr/local/libexec/wishicraft/rcon-secret-v2",
+            "source": "5.artifact",
+            "mode": 493,
+            "sha256": "5b1fbcd8e2e9109349b487cee63007abf27d707118c7f89449e129eef38b5cda",
+            "predecessor": "f840582aaa22a00b6acf70ff99b95adb22dac0c688d7e3678be32a362cb2681d"
+          },
+          {
+            "destination": "/usr/local/libexec/wishicraft/reset_worlds.py",
+            "source": "6.artifact",
+            "mode": 420,
+            "sha256": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
+            "predecessor": null
+          }
+        ],
+        "receipt_predecessor": {
+          "target": {
+            "config_digest": "cff4879df49fa23ef97d92175bbc19c5c80233b3522af056cfba6e2169d68af4",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-084d8509-d7d8-48ad-91d9-e3807cfda1d2",
+            "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+            "game_id": "game-vanilla-main"
+          },
+          "phase": "stopped",
+          "stop": {
+            "container_id": "a4bbb5de057b1771750399fedaa9be68a564a15fef33a8f25b4bebbef404e948",
+            "started_at": "2026-09-12T03:24:44.57245878Z",
+            "save_confirmed": true,
+            "removal_ready": true
+          }
+        },
+        "backup_namespace": "reset-v1"
+      },
+      "hashes": {
+        "6.artifact": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
+        "1.artifact": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+        "0.artifact": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+        "5.artifact": "5b1fbcd8e2e9109349b487cee63007abf27d707118c7f89449e129eef38b5cda",
+        "4.artifact": "9010ae86535194a3a0d3c087f5526c7dbe29c35749cc0bcc3a8506d4635f509f",
+        "reset-policies.json": "5d477224848d34693db12f2431c056d7c8fca92bd1dfc64e5acc89bb6f5286d1",
+        "install.py": "6f01b56d72bb0519ee6054c90eb9acb1375c34b510dd70d5cd7cbffac1a5ca23",
+        "2.artifact": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+        "install.json": "287f991120d805b824a48a040ef9d0f7594cb4a5327351f585c46beef2d62e78",
+        "3.artifact": "0e384a72794ee0f466096984ba6fd99c9f4861026b8be64173625a96c3cbfd08"
+      }
+    },
+    "template_diff": {
+      "added": {
+        "ResetWorkflow": "AWS::StepFunctions::StateMachine",
+        "ResetWorkflowFailureAlarmBA9D144E": "AWS::CloudWatch::Alarm"
+      },
+      "removed": {},
+      "changed": {
+        "DiscordCommandFunction7D25102A": "AWS::Lambda::Function",
+        "DiscordMessageFunctionDynamoDBEventSourceWishicraftControlPlaneStackdevOperationsTable67C69D40F4D37469": "AWS::Lambda::EventSourceMapping",
+        "AutoStopEvaluatorFunctionF85F8B50": "AWS::Lambda::Function",
+        "StartTaskFunction8C564C4A": "AWS::Lambda::Function",
+        "StopTaskFunctionServiceRoleDefaultPolicyA75E149A": "AWS::IAM::Policy",
+        "StatusExecutorFunction6E5C9869": "AWS::Lambda::Function",
+        "BackupTaskFunctionA44639DC": "AWS::Lambda::Function",
+        "RetentionTaskFunction9F285CE4": "AWS::Lambda::Function",
+        "StartTaskFunctionServiceRoleDefaultPolicy197CE916": "AWS::IAM::Policy",
+        "AdmissionFunction23082B67": "AWS::Lambda::Function",
+        "AdmissionFunctionServiceRoleDefaultPolicyA8CF483E": "AWS::IAM::Policy",
+        "ReconcileFunction30829CB6": "AWS::Lambda::Function",
+        "ReconcileFunctionServiceRoleDefaultPolicyD01F2C45": "AWS::IAM::Policy",
+        "DiscordMessageFunction78FA388B": "AWS::Lambda::Function",
+        "MonitoringObserverFunction584DA7C7": "AWS::Lambda::Function",
+        "StopTaskFunction11473A8C": "AWS::Lambda::Function"
+      },
+      "ignored_difference": "aws:cdk:path metadata absent in assertions.Template; resource properties compared unchanged"
+    },
+    "environment_size_upper_estimates": {
+      "wc-dev-reconcile": 522,
+      "wc-dev-start-task": 764,
+      "wc-dev-stop-task": 997,
+      "wc-dev-backup-task": 2747,
+      "wc-dev-retention-task": 622,
+      "wc-dev-admission": 1108,
+      "wc-dev-discord-command": 534,
+      "wc-dev-status-executor": 448,
+      "wc-dev-discord-message": 574,
+      "wc-dev-auto-stop-evaluator": 680,
+      "wc-dev-monitoring-observer": 845
+    }
+  },
+  "validation": {
+    "pytest": "995 passed in 48.96s",
+    "lint": "passed",
+    "format": "passed",
+    "mypy": "passed;163 files",
+    "synth": [
+      "phase1",
+      "target",
+      "control-plane",
+      "two-games",
+      "reset"
+    ],
+    "docker_local": "CLI unavailable; no daemon installed",
+    "docker_ci": "pending on implementation commit"
+  },
+  "aws_readonly": {
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "profile": "wishicraft-dev",
+    "target": "i-04fc0629dc4ea466e",
+    "state": "stopped; selected A; STOPPED/HEALTHY",
+    "admission_concurrency": "UNSET",
+    "discord_concurrency": "UNSET",
+    "locks": [],
+    "data_ebs": "vol-03ac9f534326c345c",
+    "snapshot_count": 7,
+    "existing_v2_source": "snap-021079b3e3843652f",
+    "v2_recovery_metadata_verified": true,
+    "v2_restore_executed": false,
+    "host_ssm_invoked": false
+  },
+  "not_verified": [
+    "Reset production E2E",
+    "v2 real multi-Game extraction/restore",
+    "post-Reset current-world Snapshot restore",
+    "managed Lambda SDK actual version",
+    "production old-world deletion"
+  ],
+  "safety_tests": [
+    "same request target/seed fixed",
+    "actual serializer/handler/host authorization",
+    "unknown Game/player/source rejection",
+    "reference CAS committed reply loss",
+    "stopped prior receipt / next selected-world START",
+    "filesystem retention and deletion reply-loss",
+    "v2 provenance/recovery reference roundtrip",
+    "SDK internal total attempts 1",
+    "SSM exact command observation; no search-absence resend"
+  ],
+  "references": {
+    "ssm": "https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_ListCommands.html",
+    "sdk": "https://docs.aws.amazon.com/botocore/latest/reference/config.html",
+    "redrive": "https://docs.aws.amazon.com/step-functions/latest/apireference/API_RedriveExecution.html"
+  }
+}

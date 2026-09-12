@@ -261,7 +261,16 @@ def observe_active_game(document: dict[str, Any]) -> dict[str, Any]:
             "game_id": game_id,
             "binding_consistency": (
                 "consistent"
-                if declared_source == expected_source and source == declared_source
+                if (
+                    declared_source == expected_source
+                    or re.fullmatch(
+                        re.escape(f"{MOUNT_PATH}/games/{game_id}/worlds/")
+                        + r"op-[a-z0-9-]{1,100}/server",
+                        declared_source,
+                    )
+                    is not None
+                )
+                and source == declared_source
                 else "mismatch"
             ),
         }

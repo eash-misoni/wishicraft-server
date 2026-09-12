@@ -152,12 +152,25 @@ def test_probe_artifact_contains_no_mutation_or_minecraft_file_access() -> None:
         "os.chmod",
         "os.chown",
         "server.properties",
-        "/world",
         "rcon",
         "get-parameter",
     )
 
     assert all(token not in source.lower() for token in forbidden)
+    # Reset adds world-directory label validation, not Minecraft file access.
+    reads = [
+        node.args[0].value
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "open"
+        and isinstance(node.args[0], ast.Constant)
+    ]
+    assert set(reads) == {
+        "/proc/sys/kernel/random/boot_id",
+        "/var/lib/wishicraft/runtime/receipt.json",
+        "/etc/wishicraft/host-runtime/manifest.json",
+    }
     assert '"docker",\n        "exec"' in source
     assert '"mc-monitor",\n        "status"' in source
     assert 'MINECRAFT_HOST = "localhost"' in source

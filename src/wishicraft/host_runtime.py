@@ -56,6 +56,7 @@ def render_boot_time_artifacts(
     rcon_parameter_name: str | None = None,
     targeted: bool = False,
     games: tuple[str, ...] | None = None,
+    reset_policies: dict[str, dict[str, int]] | None = None,
 ) -> RenderedHostRuntime:
     """Render one canonical boot-time configuration from validated sources of truth."""
     runtime = _runtime_mapping(stage.values)
@@ -172,6 +173,8 @@ def render_boot_time_artifacts(
         "secret_material_included": False,
         "rcon_enabled": enable_rcon,
     }
+    if reset_policies is not None:
+        manifest["reset_policies"] = reset_policies
     canonical_manifest = json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n"
     if games:
         manifest["games"] = list(games)
