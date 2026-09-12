@@ -60,6 +60,8 @@ Recorded progress (phase entry, not proof of completion):
 Check /mc status before retrying; contact an admin if the result is unclear.
 ```
 
+CANCELLED例はrenderer fixtureであり、scheduled Operationの新しい公開配送先を追加したものではない。
+
 ## 適用計画（全write未承認）
 
 1. 承認時HEAD/CI/callerとControl Planeの実diffを再照合。START/STOP等の実操作・進行中message workerがない窓を使い、Command Lambdaの元concurrencyを記録して0にしdrainする。Admissionは元設定のまま。concurrency 0だけでdrain完了とは判定しない。一般受付への短い影響を伴う。
@@ -82,3 +84,5 @@ Check /mc status before retrying; contact an admin if the result is unclear.
 [証跡](../evidence/2026-09-12-discord-progress-preparation.json): 1068 tests、Ruff、mypy、5構成synth成功。実production templateとの比較は11 LambdaのCodeと対応するasset metadataだけ。IAM/environment/workflow/Host/command schema・永続resource差分なし。read-only preflightはstack UPDATE_COMPLETE、両受付UNSET、43 alarms OK。EC2内部やworldの再検証は今回行わず、D-098実証を再実行していない。
 
 文字数とmentionの外部仕様は[Discord公式Message API](https://docs.discord.com/developers/resources/message#create-message)のcontent上限・allowed_mentionsを参照。UTF-16換算2000以内は今回の保守的なローカル検査であり、Discordへの実送信結果とは分ける。
+
+実装commit `d25d00ecb91cd815f7f4eeb6ff2d53eb0900f19d` の[CI 34698073795](https://github.com/eash-misoni/wishicraft-server/actions/runs/34698073795)はquality・既存実Docker integrationとも成功。後続はBACKUP停止中専用の案内・guide assertionと検証記録だけで、deploy asset差分を増やさない。新表示の実Discord確認は承認後のSTATUS一回を予定する。

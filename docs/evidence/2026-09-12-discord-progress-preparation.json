@@ -30,7 +30,14 @@
       "reset"
     ],
     "docker_local": "CLI unavailable; existing CI integration retained",
-    "ci": "pending for implementation commit"
+    "ci": {
+      "run_id": 34698073795,
+      "head": "d25d00ecb91cd815f7f4eeb6ff2d53eb0900f19d",
+      "quality": "success",
+      "host_runtime_integration": "success"
+    },
+    "guide_stopped_backup_followup": "18 focused tests passed; documentation and guide assertion only; no asset change",
+    "environment_note": "First sandbox full validation could not resolve fixed bundling dependencies; canonical network-enabled validation passed. No dependency upgrades."
   },
   "production_diff": {
     "changed_lambda_code_resources": [
@@ -72,5 +79,6 @@
     "new timestamp update in real DynamoDB",
     "all long-running operation display E2E; no backend operation executed for display testing"
   ],
-  "aws_writes": 0
+  "aws_writes": 0,
+  "implementation_head": "d25d00ecb91cd815f7f4eeb6ff2d53eb0900f19d"
 }

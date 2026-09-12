@@ -25,3 +25,5 @@ def test_guide_covers_generated_current_commands_and_required_reset_options() ->
     }
     assert "seed 0" in guide and "seed:new" in guide and "confirm:true" in guide
     assert "EBS喪失" in guide and "race" in guide and "直近3個" in guide
+
+    assert "正常停止中（STOPPED/HEALTHY）専用" in guide

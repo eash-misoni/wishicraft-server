@@ -12,7 +12,7 @@ PlayerまたはAdmin roleが必要です。Adminも操作チャンネルを使�
 | `/mc status` | Player / Admin | 状態を改めて観測します。選択Game、観測Game、進行中操作を確認します。停止中も使用できます |
 | `/mc start game:game-vanilla-main` | Player / Admin | 停止中に指定Gameを起動します。`game`省略は選択中Game。稼働中の別Gameを止めて切り替える操作ではありません |
 | `/mc stop` | Player / Admin | 現在対象を保存・正常停止し、EC2を停止、接続先を取り下げます。SWITCH/RESETとは違い、0人条件の操作ではないため同席者に知らせてください |
-| `/mc backup` | Admin | 共有Data EBS全体（A/B、保持worldを含む）をSnapshotで保護します。停止中または必要な正常稼働条件を満たす時に使用します。作成・完了・復旧情報の検証を待ちます |
+| `/mc backup` | Admin | 共有Data EBS全体（A/B、保持worldを含む）をSnapshotで保護します。**正常停止中（STOPPED/HEALTHY）専用**です。稼働中は受け付けられても実行条件で失敗するため、先に通常STOPの完了を確認してください。作成・完了・復旧情報の検証を待ちます |
 | `/mc switch game:game-vanilla-secondary confirm:true` | Admin | 稼働中のGameを保存・正常停止し、指定Gameへ切り替えます。`game`と`confirm:true`は必須。観測0人が必要。EC2は維持しますがMinecraftの保存・終了・起動時間は残ります |
 | `/mc reset game:game-vanilla-secondary confirm:true seed:fixed` | Player / Admin | Bの新worldへやり直します。三引数すべて必須。選択中・稼働中・観測0人のBだけ。Aや停止中は非対応。`seed:new`も選べます |
 
@@ -54,6 +54,7 @@ currentに加え、直近3個のmanaged旧worldを保持し、それ以前は成
 - 公開schema: [基本command](../config/discord/commands.v1.json)、[二Game拡張](../src/wishicraft/two_game_admin.py)、[Reset拡張](../src/wishicraft/reset_commands.py)。このガイドはcommand登録を変更しません。
 - 認可・引数: [署名済みInteraction parser](../src/wishicraft/discord_interactions.py)、[Data/interface §19](05_data_and_interface_contracts.md#19-discord-operation-metadata)。
 - 切替と共有保護: [D-097](reviews/two_game_switch.md)。Resetの範囲・保持・損失境界: [D-098](reviews/game_scoped_reset.md)、[B宣言](../config/reset-dev.json)。
+- BACKUPの停止中専用条件: [BackupObservation](../src/wishicraft/backup.py)。
 - 新表示の契約案・承認計画: [D-099](reviews/discord_progress.md)。
 
 whitelist管理、Web、汎用Restore、死亡自動検知等は、この利用可能コマンド一覧には含みません。
