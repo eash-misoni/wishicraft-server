@@ -92,6 +92,8 @@ class AuthorizedInteraction:
     target_game_id: str | None = None
     confirmed: bool = False
     seed_mode: str | None = None
+    user_id: str | None = None
+    display_name: str | None = None
 
 
 def raw_body_from_event(event: object) -> tuple[bytes, dict[str, str]]:
@@ -188,6 +190,7 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
     )
     if not (allowed_roles & set(roles)):
         raise UnauthorizedInteraction("request is not authorized")
+    actor = _actor(member)
     return AuthorizedInteraction(
         interaction_id,
         interaction_token,
@@ -196,7 +199,21 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
         seed_mode=_reset_seed(cast(dict[str, Any], payload["data"])["options"][0])
         if kind is InteractionKind.RESET
         else None,
+        user_id=actor.get("user_id"),
+        display_name=actor.get("display_name"),
     )
+
+
+def _actor(member: dict[str, Any]) -> dict[str, str]:
+    """Optional attribution from the already signed/authorized guild member only."""
+    user = member.get("user")
+    if not isinstance(user, dict):
+        return {}
+    user_id = _snowflake(user.get("id"))
+    for name in (member.get("nick"), user.get("global_name"), user.get("username")):
+        if isinstance(name, str) and name.strip():
+            return {"user_id": user_id, "display_name": name[:100]}
+    return {"user_id": user_id}
 
 
 def pong_response() -> dict[str, object]:

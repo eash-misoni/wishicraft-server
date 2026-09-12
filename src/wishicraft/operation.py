@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from enum import StrEnum
 from typing import Protocol
 
+from wishicraft.progress_display import MILESTONE_STEPS
 from wishicraft.system_state import utc_timestamp
 
 
@@ -51,8 +52,16 @@ class DiscordOperationContext:
     guild_id: str
     channel_id: str
     interaction_id: str
+    user_id: str | None = None
+    display_name: str | None = None
 
     def __post_init__(self) -> None:
+        if self.user_id is not None and re.fullmatch(r"[0-9]{1,20}", self.user_id) is None:
+            raise ValueError("invalid Discord actor identity")
+        if self.display_name is not None and (
+            self.user_id is None or not 1 <= len(self.display_name) <= 100
+        ):
+            raise ValueError("invalid Discord actor name")
         for value in (self.guild_id, self.channel_id, self.interaction_id):
             if re.fullmatch(r"[0-9]{1,20}", value) is None:
                 raise ValueError("invalid Discord operation identity")
@@ -299,8 +308,10 @@ class OperationAdmissionRepository:
                         "target_game_id": request.target_game_id,
                         "requested_by": {
                             "source": request.requested_by.value,
-                            "discord_user_id": None,
-                            "display_name": None,
+                            "discord_user_id": request.discord.user_id if request.discord else None,
+                            "display_name": request.discord.display_name
+                            if request.discord
+                            else None,
                         },
                         "requested_at": utc_timestamp(request.requested_at),
                         "started_at": None,
@@ -553,12 +564,18 @@ class OperationRepository:
             raise ValueError("step update requires non-terminal operation status")
         if not current_step:
             raise ValueError("operation step must be non-empty")
+        milestone = (
+            f", progress_{current_step.lower()}_at = "
+            f"if_not_exists(progress_{current_step.lower()}_at, :updated_at)"
+            if current_step in MILESTONE_STEPS
+            else ""
+        )
         self._api.update_item(
             TableName=self._operations,
             Key={"operation_id": {"S": operation_id}},
             UpdateExpression=(
                 "SET #status = :status, current_step = :step, updated_at = :updated_at, "
-                "progress_revision = if_not_exists(progress_revision, :zero) + :one"
+                "progress_revision = if_not_exists(progress_revision, :zero) + :one" + milestone
             ),
             ConditionExpression=(
                 "attribute_exists(operation_id) AND #status IN (:pending, :running)"

@@ -641,3 +641,139 @@ def test_parameter_token_fetches_exact_parameter_without_logging_value() -> None
             "WithDecryption": True,
         }
     ]
+
+
+@pytest.mark.parametrize("kind", ["STATUS", "START", "STOP", "BACKUP", "SWITCH", "RESET"])
+@pytest.mark.parametrize(
+    "state", ["PENDING", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED", "TIMED_OUT"]
+)
+def test_saved_progress_through_sdk_loader_and_delivery(kind: str, state: str) -> None:
+    from datetime import UTC, datetime
+    from decimal import Decimal
+
+    from boto3.dynamodb.types import (  # type: ignore[import-untyped]
+        TypeDeserializer,
+        TypeSerializer,
+    )
+
+    from wishicraft.discord_delivery import DiscordHttpClient, render_operation_projection
+    from wishicraft.operation import (
+        DiscordOperationContext,
+        OperationAdmissionRepository,
+        OperationRequest,
+        OperationType,
+        RequestSource,
+    )
+
+    if kind == "STATUS" and state not in {"SUCCEEDED", "FAILED"}:
+        api = Dynamo()
+        api.item["status"] = {"S": state}
+        with pytest.raises(ValueError, match="terminal"):
+            discord_message_lambda.DynamoDeliveryStore(api, table_name="operations").load(
+                "op-status-001"
+            )
+        return
+    api = Dynamo()
+    repo = OperationAdmissionRepository(
+        cast(discord_message_lambda.DynamoApi, api),  # type: ignore[arg-type]
+        operations_table="operations",
+        games_table="games",
+        idempotency_table="idempotency",
+        locks_table="locks",
+        system_state_table="states",
+        system_id="system",
+        lock_name="lock",
+        lease_seconds=900,
+        lease_id_factory=lambda: "lease-test",
+    )
+    request = OperationRequest(
+        "op-display",
+        "discord:123",
+        OperationType(kind),
+        "game-vanilla-secondary",
+        RequestSource.DISCORD,
+        datetime(2026, 9, 12, tzinfo=UTC),
+        None,
+        DiscordOperationContext("1", "2", "123", "99999", "@everyone <@123> **Name**\nline"),
+        reset_seed_mode="fixed" if kind == "RESET" else None,
+    )
+    item = cast(dict, repo._operation_put(request, None)["Put"])["Item"]  # type: ignore[type-arg]
+    decode, encode = TypeDeserializer().deserialize, TypeSerializer().serialize
+    plain = {key: decode(value) for key, value in item.items()}
+    assert isinstance(plain["progress_revision"], Decimal)
+    plain.update(
+        status=state,
+        progress_revision=Decimal(3),
+        current_step="HOST_RUNTIME_STARTING",
+        progress_host_runtime_stopping_at="2026-09-12T00:01:00Z",
+        progress_host_runtime_starting_at="2026-09-12T00:02:00Z",
+        switch_source={"game_id": "game-vanilla-main", "instance_id": "i-secret"},
+    )
+    if kind == "STATUS":
+        plain["result"] = decode(operation_item()["result"])
+    else:
+        plain["result"] = {"cleanup_pending": False, "raw_error": "SECRET", "volume": "vol-secret"}
+    api.item = {key: encode(value) for key, value in plain.items()}
+    store = discord_message_lambda.DynamoDeliveryStore(api, table_name="operations")
+    record = store.load("op-display")
+    rendered = render_operation_projection(record)
+    assert kind in rendered
+    assert "99999" not in rendered  # internal actor ID is not a public mention/profile lookup.
+    assert "@everyone" not in rendered.replace(r"\@everyone", "escaped")
+    assert "<@123>" not in rendered
+    assert "SECRET" not in rendered and "vol-secret" not in rendered and "i-secret" not in rendered
+    assert "Save and graceful stop processing entered" in rendered
+    assert "Minecraft start processing entered" in rendered
+    assert len(rendered.encode("utf-16-le")) // 2 <= 2000
+    if state == "CANCELLED":
+        assert "Cancelled" in rendered and "Failed" not in rendered
+    if state == "FAILED":
+        assert "Failed" in rendered and "online and ready" not in rendered
+    if kind == "SWITCH":
+        assert "game-vanilla-main → game-vanilla-secondary" in rendered
+    if kind == "RESET":
+        assert "fixed (0)" in rendered
+
+    bodies: list[dict[str, object]] = []
+
+    class Http(DiscordHttpClient):
+        def _request(self, method: str, path: str, payload: dict[str, object]) -> dict[str, object]:
+            bodies.append(payload)
+            return {"id": "444", "nonce": operation_nonce("op-display")}
+
+    class Queue:
+        def schedule(self, *, operation_id: str, source_revision: int, delay_seconds: int) -> None:
+            raise AssertionError("no retry expected")
+
+    DiscordDeliveryService(
+        store, Http(token="unused"), Queue(), clock=lambda: datetime(2026, 9, 12, tzinfo=UTC)
+    ).deliver(operation_id="op-display", source_revision=3, attempt_id="test")
+    assert bodies[0]["content"] == rendered
+    assert bodies[0]["allowed_mentions"] == {"parse": []}
+    assert api.item["status"] == {"S": state}  # delivery has no backend execution API.
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        (None, "Not recorded"),
+        ("DISCORD", "name not recorded"),
+        ("ADMIN", "Operator"),
+        ("CLI", "Operator"),
+        ("SCHEDULE", "Scheduled execution"),
+    ],
+)
+def test_legacy_actor_missing_null_and_history_fallback(source: str | None, expected: str) -> None:
+    from wishicraft.discord_delivery import render_operation_projection
+
+    api = Dynamo()
+    api.item["requested_by"] = attribute({"source": source, "display_name": None})
+    api.item["requested_at"] = attribute(None)
+    api.item["progress_host_runtime_starting_at"] = attribute(None)
+    record = discord_message_lambda.DynamoDeliveryStore(api, table_name="operations").load(
+        "op-status-001"
+    )
+    content = render_operation_projection(record)
+    assert expected in content
+    assert "Earlier progress not recorded" in content
+    assert "Minecraft start processing entered" not in content

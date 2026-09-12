@@ -550,3 +550,37 @@ def idempotency_item(
         "source": {"S": source.value},
         "target_game_id": {"S": "game-vanilla-main"},
     }
+
+
+def test_milestone_is_bounded_and_atomic_with_revision_on_old_record() -> None:
+    from wishicraft.progress_display import MILESTONE_STEPS
+
+    api = FakeDynamo()
+    repo = OperationRepository(
+        api,
+        operations_table="operations",
+        locks_table="locks",
+        system_state_table="states",
+        system_id="system",
+        lock_name="lock",
+    )
+    for step in (*MILESTONE_STEPS, "UNRECOGNIZED_STEP"):
+        repo.update_step(
+            operation_id="op-001",
+            current_step=step,
+            status=OperationStatus.RUNNING,
+            updated_at=datetime(2026, 9, 12, tzinfo=UTC),
+        )
+        update = api.updates[-1]
+        expression = str(update["UpdateExpression"])
+        assert "progress_revision = if_not_exists(progress_revision, :zero) + :one" in expression
+        if step in MILESTONE_STEPS:
+            field = f"progress_{step.lower()}_at"
+            assert f"{field} = if_not_exists({field}, :updated_at)" in expression
+        else:
+            assert "progress_unrecognized_step_at" not in expression
+        assert update["ConditionExpression"] == (
+            "attribute_exists(operation_id) AND #status IN (:pending, :running)"
+        )
+    assert len(api.updates) == len(MILESTONE_STEPS) + 1
+    assert len(MILESTONE_STEPS) == 10  # finite first-entry slots; retry never appends history.

@@ -315,13 +315,17 @@ def _parse_event(
         elif (
             source is RequestSource.DISCORD
             and isinstance(raw_discord, dict)
-            and set(raw_discord) == {"guild_id", "channel_id", "interaction_id"}
+            and {"guild_id", "channel_id", "interaction_id"} <= set(raw_discord)
+            and set(raw_discord)
+            <= {"guild_id", "channel_id", "interaction_id", "user_id", "display_name"}
             and all(isinstance(value, str) for value in raw_discord.values())
         ):
             discord = DiscordOperationContext(
                 guild_id=raw_discord["guild_id"],
                 channel_id=raw_discord["channel_id"],
                 interaction_id=raw_discord["interaction_id"],
+                user_id=raw_discord.get("user_id"),
+                display_name=raw_discord.get("display_name"),
             )
         else:
             raise ValueError("invalid Discord admission metadata")

@@ -1059,6 +1059,8 @@ capabilities:
 
 ## 19. Discord operation metadata
 
+D-099の実行者optional入力と固定数の到達記録は[表示契約案](reviews/discord_progress.md)を参照。repository実装済み・Proposedで、productionへ適用済みではない。以下の既存配送CAS/nonce/revisionは変更しない。
+
 Operationへ保存するDiscord情報:
 
 ```yaml

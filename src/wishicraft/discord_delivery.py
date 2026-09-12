@@ -14,6 +14,8 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Protocol
 
+from wishicraft.progress_display import MILESTONE_STEPS, game_text, safe_text, timestamp
+
 DISCORD_API_BASE = "https://discord.com/api/v10"
 MAX_DELIVERY_ATTEMPTS = 3
 AMBIGUOUS_CREATE_WINDOW_SECONDS = 30
@@ -49,6 +51,13 @@ class DeliveryRecord:
     delivery_source_revision: int | None = None
     delivered_revision: int | None = None
     resumed_pending: bool = False
+    actor_source: str | None = None
+    actor_name: str | None = None
+    target_game_id: str | None = None
+    source_game_id: str | None = None
+    seed_mode: str | None = None
+    requested_at: str | None = None
+    milestones: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -274,76 +283,94 @@ def render_status_projection(projection: object) -> str:
                 raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
             lines.append(f"{label}: {value or 'none'}")
     if endpoint is not None:
-        lines.append(f"Endpoint: {endpoint}")
+        lines.append(f"Endpoint: {safe_text(endpoint, 253)}")
     lines.append(f"Health: {health}")
     return "\n".join(lines)
 
 
 def render_operation_projection(record: DeliveryRecord) -> str:
-    if record.operation_type == "STATUS":
-        return render_status_projection(record.projection)
-    if record.operation_type not in {"START", "STOP", "BACKUP", "SWITCH", "RESET"}:
-        raise DiscordFailure("INVALID_SAFE_PROJECTION", False)
-    if record.operation_type == "RESET":
-        if record.operation_status == "SUCCEEDED":
-            return "Minecraft RESET: new world online and ready. " + (
-                "Cleanup is pending; older worlds are preserved."
-                if record.projection.get("cleanup_pending") is True
-                else "Older worlds remain subject to the retention policy."
-            )
-        if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
-            return (
-                "Minecraft RESET: did not complete. Keep the operation identity "
-                "and ask an administrator to observe recovery state."
-            )
-        return "Minecraft RESET: saving the old world and preparing the new world."
+    if record.operation_type not in {"STATUS", "START", "STOP", "BACKUP", "SWITCH", "RESET"}:
+        raise ValueError("unsupported public Operation")
+    state = {
+        "PENDING": "Accepted",
+        "RUNNING": "In progress",
+        "SUCCEEDED": "Completed",
+        "FAILED": "Failed — completion not confirmed",
+        "TIMED_OUT": "Timed out — check status",
+        "CANCELLED": "Cancelled — not completed",
+    }.get(record.operation_status)
+    if state is None:
+        raise ValueError("unsupported public status")
+    # Cancellation is not a claim that all possible side effects have been undone.
+    actor = {
+        "ADMIN": "Operator",
+        "CLI": "Operator",
+        "SCHEDULE": "Scheduled execution",
+        "WEB": "Web user (name not recorded)",
+    }.get(record.actor_source or "", "Not recorded")
+    if record.actor_source == "DISCORD":
+        actor = (
+            safe_text(record.actor_name) + " (Discord)"
+            if record.actor_name
+            else "Discord user (name not recorded)"
+        )
+    lines = [f"Minecraft {record.operation_type}: {state}", f"Requested by: {actor}"]
+    target = game_text(record.target_game_id)
     if record.operation_type == "SWITCH":
-        if record.operation_status == "SUCCEEDED":
-            return "Minecraft SWITCH: online and ready. Use /mc status to see the Game."
-        if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
-            return (
-                "Minecraft SWITCH: did not complete. "
-                "Check selected/observed Game and Operation before retrying."
+        lines.append(f"Game: {game_text(record.source_game_id)} → {target}")
+    elif record.operation_type == "BACKUP":
+        lines.append(
+            "Protection: shared data volume (all Games)"
+            if record.projection.get("scope") == "shared-volume"
+            else "Protection scope: not recorded here; selected Game is not the backup unit"
+        )
+        lines.append(f"Selected Game at request: {target}")
+    else:
+        lines.append(f"Game: {target}")
+    if record.operation_type == "RESET":
+        lines.append(
+            "Seed policy: "
+            + {"fixed": "fixed (0)", "new": "new, fixed for this operation"}.get(
+                record.seed_mode or "", "not recorded"
             )
-        return {
-            "HOST_RUNTIME_STOPPING": "Minecraft SWITCH: saving and stopping the source Game.",
-            "HOST_RUNTIME_STARTING": "Minecraft SWITCH: starting the destination Game.",
-        }.get(record.current_step, "Minecraft SWITCH: in progress; the host remains running.")
-    if record.operation_type == "BACKUP":
-        if record.operation_status == "SUCCEEDED":
-            return "Minecraft BACKUP: completed."
-        if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
-            return "Minecraft BACKUP: did not complete. Check with an administrator."
-        backup_steps = {
-            "ADMITTED": "Minecraft BACKUP: accepted.",
-            "SNAPSHOT_CREATING": "Minecraft BACKUP: creating and verifying the backup.",
-        }
-        return backup_steps.get(record.current_step, "Minecraft BACKUP: in progress.")
-    if record.operation_type == "START":
-        if record.operation_status == "SUCCEEDED":
-            return "Minecraft START: online and ready."
-        if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
-            return "Minecraft START: failed safely. Check the operation log with an administrator."
-        steps = {
-            "ADMITTED": "Minecraft START: accepted.",
-            "DESIRED_RUNNING": "Minecraft START: preparing the requested running state.",
-            "EC2_STARTING": "Minecraft START: starting the server host.",
-            "HOST_RUNTIME_STARTING": "Minecraft START: starting Minecraft.",
-            "ENDPOINT_CONVERGING": "Minecraft START: checking readiness and connection endpoint.",
-        }
-        return steps.get(record.current_step, "Minecraft START: in progress.")
-    if record.operation_status == "SUCCEEDED":
-        return "Minecraft STOP: server stopped; the connection endpoint is unavailable."
-    if record.operation_status in {"FAILED", "TIMED_OUT", "CANCELLED"}:
-        return "Minecraft STOP: failed safely. Check the operation log with an administrator."
-    stop_steps = {
-        "ADMITTED": "Minecraft STOP: accepted.",
-        "DESIRED_STOPPED": "Minecraft STOP: preparing the requested stopped state.",
-        "HOST_RUNTIME_STOPPING": "Minecraft STOP: saving and stopping Minecraft.",
-        "EC2_STOPPING": "Minecraft STOP: stopping the server host.",
-        "ENDPOINT_CLEANUP": "Minecraft STOP: removing the connection endpoint and checking state.",
-    }
-    return stop_steps.get(record.current_step, "Minecraft STOP: in progress.")
+        )
+    if record.operation_type == "STATUS" and record.operation_status == "SUCCEEDED":
+        lines.append(render_status_projection(record.projection))
+    facts = []
+    if record.requested_at is not None:
+        facts.append((timestamp(record.requested_at), "Request accepted"))
+    for step, at in record.milestones:
+        if step in MILESTONE_STEPS:
+            facts.append((timestamp(at), MILESTONE_STEPS[step]))
+    facts.sort(key=lambda fact: fact[0])
+    lines.append("Recorded progress (phase entry, not proof of completion):")
+    lines.extend("• " + label for _, label in facts[-4:])
+    if not facts:
+        lines.append("• Earlier progress not recorded")
+    if record.operation_status in {"PENDING", "RUNNING"}:
+        latest = MILESTONE_STEPS.get(
+            record.current_step, "Accepted" if record.current_step == "ADMITTED" else "Processing"
+        )
+        lines.append("Latest recorded phase: " + latest)
+    elif record.operation_status == "SUCCEEDED":
+        lines.append(
+            {
+                "START": "Online and ready.",
+                "STOP": "Stopped; connection unavailable.",
+                "SWITCH": "Destination online and ready.",
+                "RESET": "New world online and ready.",
+                "BACKUP": "Backup completed.",
+                "STATUS": "State observation completed.",
+            }[record.operation_type]
+        )
+        if record.operation_type == "RESET" and record.projection.get("cleanup_pending") is True:
+            lines.append("Old world cleanup pending; data retained.")
+    else:
+        lines.append("Check /mc status before retrying; contact an admin if the result is unclear.")
+    content = "\n".join(lines)
+    if len(content.encode("utf-16-le")) // 2 > 2000:
+        raise ValueError("public message exceeds Discord limit")
+    return content
 
 
 class DiscordHttpClient:

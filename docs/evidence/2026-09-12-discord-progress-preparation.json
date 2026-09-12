@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "PREPARED_NOT_DEPLOYED",
+  "decision": "D-099 Proposed",
+  "baseline_head": "413a187e046924ce67df648b2988920e86b7004b",
+  "recorded_at": "2026-09-12T14:01:26.473964+00:00",
+  "read_only_preflight": {
+    "stack_status": "UPDATE_COMPLETE",
+    "ingress": {
+      "wc-dev-discord-command": "UNSET",
+      "wc-dev-admission": "UNSET"
+    },
+    "alarms": {
+      "OK": 43,
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0
+    },
+    "aws_writes": 0
+  },
+  "validation": {
+    "pytest": "1068 passed",
+    "ruff_check": "passed",
+    "ruff_format": "207 files unchanged",
+    "mypy": "166 files passed",
+    "cdk_synth": [
+      "frozen",
+      "target",
+      "single",
+      "two",
+      "reset"
+    ],
+    "docker_local": "CLI unavailable; existing CI integration retained",
+    "ci": "pending for implementation commit"
+  },
+  "production_diff": {
+    "changed_lambda_code_resources": [
+      "AdmissionFunction23082B67",
+      "AutoStopEvaluatorFunctionF85F8B50",
+      "BackupTaskFunctionA44639DC",
+      "DiscordCommandFunction7D25102A",
+      "DiscordMessageFunction78FA388B",
+      "MonitoringObserverFunction584DA7C7",
+      "ReconcileFunction30829CB6",
+      "RetentionTaskFunction9F285CE4",
+      "StartTaskFunction8C564C4A",
+      "StatusExecutorFunction6E5C9869",
+      "StopTaskFunction11473A8C"
+    ],
+    "other_changes": "only corresponding aws:asset:path metadata",
+    "iam": 0,
+    "workflow": 0,
+    "host": 0,
+    "discord_registration": 0,
+    "resource_addition_deletion": 0,
+    "environment": 0
+  },
+  "artifacts": {
+    "production-template.json": "6b232f409f57d57cff9e0e789ba75e29dbb1094bb28c0a911dd724949be74f24",
+    "synth-reset/WishicraftControlPlaneStack-dev.template.json": "e42c1c68833721c404fd54bb9501d797567d9ba99bde291d9db061c5ef74b60f",
+    "full-final.log": "2a149cfd48216081db9225ed282f993c36b26c58552d4e22f8337fa2d89e0229"
+  },
+  "boundaries": [
+    "signed member -> ACK -> Admission payload/parser -> stored requested_by",
+    "Operation serializer -> SDK TypeDeserializer Decimal -> TypeSerializer -> real delivery loader -> projection -> service -> HTTP payload fixture",
+    "10 first-entry timestamp slots; conditional revision update unchanged",
+    "old NULL/missing actor/history fallback; all public kinds and status validation",
+    "existing delivery retry, duplicate/out-of-order revision, completion CAS regression",
+    "guide checked against generated current command schema"
+  ],
+  "unverified": [
+    "new display in real Discord",
+    "new timestamp update in real DynamoDB",
+    "all long-running operation display E2E; no backend operation executed for display testing"
+  ],
+  "aws_writes": 0
+}

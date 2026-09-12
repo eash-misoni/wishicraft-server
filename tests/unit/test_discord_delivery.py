@@ -352,7 +352,7 @@ def test_start_progress_updates_one_message_monotonically() -> None:
     assert len(messages.calls) == 3
     assert messages.calls[1]["message_id"] == message_id
     assert messages.calls[2]["message_id"] == message_id
-    assert "online" in messages.calls[2]["content"]
+    assert "Online" in messages.calls[2]["content"]
     delivery.deliver(operation_id="op-start-001", source_revision=1, attempt_id="ddb:stale")
     assert len(messages.calls) == 3
 
@@ -415,7 +415,7 @@ def test_stop_progress_updates_one_message_monotonically() -> None:
     assert len(messages.by_nonce) == 1
     assert len(messages.calls) == 6
     assert all(call.get("message_id") == message_id for call in messages.calls[1:])
-    assert "server stopped" in messages.calls[-1]["content"]
+    assert "Stopped; connection unavailable" in messages.calls[-1]["content"]
     delivery.deliver(operation_id="op-stop-001", source_revision=3, attempt_id="ddb:stale")
     assert len(messages.calls) == 6
 
@@ -444,10 +444,10 @@ def test_newer_stop_revision_can_recover_after_older_delivery_failed() -> None:
 @pytest.mark.parametrize(
     ("status", "step", "expected"),
     [
-        ("PENDING", "ADMITTED", "accepted"),
-        ("RUNNING", "SNAPSHOT_CREATING", "creating and verifying"),
+        ("PENDING", "ADMITTED", "Accepted"),
+        ("RUNNING", "SNAPSHOT_CREATING", "creation and verification"),
         ("SUCCEEDED", "SNAPSHOT_CREATING", "completed"),
-        ("FAILED", "SNAPSHOT_CREATING", "did not complete"),
+        ("FAILED", "SNAPSHOT_CREATING", "Failed — completion not confirmed"),
     ],
 )
 def test_backup_projection_is_safe(status: str, step: str, expected: str) -> None:
@@ -498,8 +498,8 @@ def test_backup_delivery_failure_does_not_change_operation_result() -> None:
 @pytest.mark.parametrize(
     ("status", "expected"),
     [
-        ("SUCCEEDED", "server stopped"),
-        ("FAILED", "failed safely"),
+        ("SUCCEEDED", "Stopped; connection unavailable"),
+        ("FAILED", "Failed — completion not confirmed"),
     ],
 )
 def test_stop_terminal_projection_uses_operation_result_only(status: str, expected: str) -> None:
@@ -641,3 +641,28 @@ def test_edit_404_is_permanent_and_does_not_imply_recreate(
         )
     assert error.value.code == "DISCORD_MESSAGE_OR_CHANNEL_NOT_FOUND"
     assert error.value.retryable is False
+
+
+def test_bounded_history_untrusted_names_and_unknown_step() -> None:
+    from wishicraft.progress_display import MILESTONE_STEPS
+
+    record = replace(
+        Store().record,
+        operation_type="RESET",
+        operation_status="FAILED",
+        actor_source="DISCORD",
+        actor_name="@everyone\n<@123>" + "😀" * 2000,
+        seed_mode="new",
+        target_game_id="game-vanilla-secondary",
+        current_step="SECRET:raw-error",
+        projection={"error": "SECRET"},
+        milestones=tuple(
+            (step, f"2026-09-12T00:{n:02}:00Z") for n, step in enumerate(MILESTONE_STEPS)
+        ),
+    )
+    content = render_operation_projection(record)
+    assert content.count("• ") == 4
+    assert "SECRET" not in content and "<@123>" not in content
+    assert "new, fixed for this operation" in content
+    assert len(content.encode("utf-16-le")) // 2 < 2000
+    assert "New world online" not in content

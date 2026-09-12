@@ -1,5 +1,7 @@
 # wishicraft-server
 
+利用者向けの現行コマンド・権限・Resetの注意点は[Discord利用案内](docs/discord_user_guide.md)を参照してください。進捗表示改善はD-099 Proposed（未deploy）です。
+
 > Reset release（2026-09-12）: [D-098のB限定Reset](docs/reviews/game_scoped_reset.md)はAccepted・限定release Completed。fixed/new、通常再起動、二回の隔離復旧を確認し、両受付を元UNSETへ復元した。本番旧world削除は0件、実Discord RESET Interactionは未実施。実証範囲は[production証跡](docs/evidence/2026-09-12-reset-production.json)を参照。Phase 9全体の完了ではない。
 
 

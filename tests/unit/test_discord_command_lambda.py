@@ -34,6 +34,8 @@ class Admission:
         target_game_id: str | None = None,
         confirmed: bool = False,
         seed_mode: str | None = None,
+        user_id: str | None = None,
+        display_name: str | None = None,
     ) -> str:
         self.calls.append((operation_type, interaction_id))
         assert guild_id == GUILD_ID
@@ -326,6 +328,8 @@ def test_signature_parse_authorization_ack_admission_order(signing_key: SigningK
             target_game_id: str | None = None,
             confirmed: bool = False,
             seed_mode: str | None = None,
+            user_id: str | None = None,
+            display_name: str | None = None,
         ) -> str:
             assert trace == ["ack"]
             trace.append("admission")
@@ -577,3 +581,51 @@ def test_phase7f_handler_only_connects_commands_to_shared_admission_lambda() -> 
     assert "callback.defer" in source
     assert source.index("callback.defer") < source.index("_get_operation_admission().admit")
     assert "StartExecution" not in source
+
+
+def test_signed_actor_passes_ack_adapter_and_actual_admission_parser(
+    signing_key: SigningKey,
+) -> None:
+    from wishicraft.admission_lambda import _parse_event
+
+    received: list[dict[str, object]] = []
+
+    class Lambda:
+        def invoke(self, **kwargs: object) -> object:
+            raw = kwargs["Payload"]
+            assert isinstance(raw, bytes)
+            body = json.loads(raw)
+            received.append(body)
+            _, _, _, discord, _ = _parse_event(body)
+            assert discord is not None
+            assert discord.user_id == "1234"
+            assert discord.display_name == "@everyone **Nick**"
+            return {
+                "StatusCode": 200,
+                "Payload": io.BytesIO(
+                    json.dumps(
+                        {
+                            "schema_version": 1,
+                            "operation_id": "op-status-001",
+                            "created": True,
+                            "lease_id": None,
+                        }
+                    ).encode()
+                ),
+            }
+
+    discord_command_lambda._operation_admission = discord_command_lambda.LambdaOperationAdmission(
+        Lambda(), function_name="admission"
+    )
+    value = payload()
+    value["member"] = {
+        "roles": [PLAYER_ROLE_ID],
+        "nick": "@everyone **Nick**",
+        "user": {"id": "1234", "username": "username", "global_name": "Global"},
+    }
+    response = discord_command_lambda.handler(event(value, signing_key), None)
+    assert response["statusCode"] == 202
+    assert len(received) == 1
+    callback = cast(Callback, discord_command_lambda._interaction_callback)
+    assert "accepted" in callback.calls[-1][1]
+    assert "non-production-test-token" not in json.dumps(received)

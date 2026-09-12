@@ -17,6 +17,7 @@ from wishicraft.discord_delivery import (
     DiscordHttpClient,
     operation_nonce,
 )
+from wishicraft.progress_display import MILESTONE_STEPS
 
 
 class DynamoApi(Protocol):
@@ -62,7 +63,20 @@ class DynamoDeliveryStore:
         discord = _map(item, "discord")
         result = _optional_map(item, "result") or {}
         delivery_status = _optional_string(discord, "delivery_status")
+        actor = _optional_map(item, "requested_by") or {}
+        source = _optional_map(item, "switch_source") or {}
         return DeliveryRecord(
+            actor_source=_optional_string(actor, "source"),
+            actor_name=_optional_string(actor, "display_name"),
+            target_game_id=_optional_string(item, "target_game_id"),
+            source_game_id=_optional_string(source, "game_id"),
+            seed_mode=_optional_string(item, "reset_seed_mode"),
+            requested_at=_optional_string(item, "requested_at"),
+            milestones=tuple(
+                (step, at)
+                for step in MILESTONE_STEPS
+                if (at := _optional_string(item, f"progress_{step.lower()}_at")) is not None
+            ),
             operation_id=operation_id,
             operation_status=operation_status,
             channel_id=_string(discord, "channel_id"),

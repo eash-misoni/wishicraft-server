@@ -6,6 +6,10 @@
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-12
 
+## 次の限定slice（Proposed）
+
+[Discord進捗・実行者と利用案内](reviews/discord_progress.md)のrepository準備。D-098 Completedを維持し、productionは一括承認待ち。新Reset/BackupやPhase 9全体を実行しない。
+
 ## 1. 開発原則
 
 - 横断的な基盤を一気に作らず、端から端まで動く小さい完成物を積み上げる。

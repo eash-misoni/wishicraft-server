@@ -1,5 +1,7 @@
 # 08. Human Operation Flows
 
+利用者向けの現行コマンド・権限・Resetの注意点は[Discord利用案内](discord_user_guide.md)を参照してください。進捗表示改善はD-099 Proposed（未deploy）です。
+
 > Resetは[D-098 Accepted](reviews/game_scoped_reset.md)。B限定policyの有効化とPlayer/Adminの日常実行を分離する。二回の隔離復旧後、一般受付を元設定へ復元済み。実行方法と損失境界は同契約、検証範囲は[closeout](runbooks/game_scoped_reset_migration.md#production-closeout)を参照する。
 
 

@@ -42,6 +42,8 @@ class OperationAdmission(Protocol):
         target_game_id: str | None = None,
         confirmed: bool = False,
         seed_mode: str | None = None,
+        user_id: str | None = None,
+        display_name: str | None = None,
     ) -> str: ...
 
 
@@ -49,6 +51,8 @@ class GameSelection(TypedDict, total=False):
     target_game_id: str
     confirmed: bool
     seed_mode: str
+    user_id: str
+    display_name: str
 
 
 class InteractionCallback(Protocol):
@@ -73,6 +77,8 @@ class LambdaOperationAdmission:
         target_game_id: str | None = None,
         confirmed: bool = False,
         seed_mode: str | None = None,
+        user_id: str | None = None,
+        display_name: str | None = None,
     ) -> str:
         if operation_type not in {"STATUS", "START", "STOP", "BACKUP", "SWITCH", "RESET"}:
             raise ValueError("unsupported Discord admission type")
@@ -93,6 +99,8 @@ class LambdaOperationAdmission:
                         "guild_id": guild_id,
                         "channel_id": channel_id,
                         "interaction_id": interaction_id,
+                        **({"user_id": user_id} if user_id is not None else {}),
+                        **({"display_name": display_name} if display_name is not None else {}),
                     },
                 },
                 separators=(",", ":"),
@@ -139,6 +147,10 @@ def handler(event: object, context: object) -> dict[str, object]:
             }
         if interaction.seed_mode is not None:
             selection["seed_mode"] = interaction.seed_mode
+        if interaction.user_id is not None:
+            selection["user_id"] = interaction.user_id
+        if interaction.display_name is not None:
+            selection["display_name"] = interaction.display_name
         _get_operation_admission().admit(
             operation_type=interaction.kind.value,
             interaction_id=interaction.interaction_id,
