@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "decision": "D-099 Accepted",
-  "release_status": "DEPLOY_IN_PROGRESS",
+  "release_status": "COMPLETED",
   "authorized_baseline": "9e217cdec7bb166de0271bffcaaac82d6e31d8d1",
   "deployment_head": "3df2b611b776fa64ff17233c061040eab1384df0",
   "deployment_ci": {
