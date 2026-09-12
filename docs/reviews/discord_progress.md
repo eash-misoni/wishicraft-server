@@ -1,6 +1,6 @@
-# D-099 Discordの実行者・主要経過表示（Proposed）
+# D-099 Discordの実行者・主要経過表示（Accepted、適用前）
 
-2026-09-12。D-098限定release Completedを基準にした小さい利用者向け改善。設計・repository準備のみで、production未適用。
+2026-09-12。D-098限定release Completedを基準にした小さい利用者向け改善。ユーザーGOにより設計Accepted。production適用・実Discord検証は未完了。
 DIS-004/006/009、OPR-002を具体化する。D-081/086/087/089のnonce/CAS/revision、ACK-before-Admission、認可を維持する。
 
 ## 契約差分と根拠
@@ -62,7 +62,7 @@ Check /mc status before retrying; contact an admin if the result is unclear.
 
 CANCELLED例はrenderer fixtureであり、scheduled Operationの新しい公開配送先を追加したものではない。
 
-## 適用計画（全write未承認）
+## 適用計画（2026-09-12ユーザーGOで限定承認）
 
 1. 承認時HEAD/CI/callerとControl Planeの実diffを再照合。START/STOP等の実操作・進行中message workerがない窓を使い、Command Lambdaの元concurrencyを記録して0にしdrainする。Admissionは元設定のまま。concurrency 0だけでdrain完了とは判定しない。一般受付への短い影響を伴う。
 2. `WishicraftControlPlaneStack-dev`だけ、現行`two_games=true/reset=true`でdeploy。想定は既存Lambda code assetsのみ。host、IAM、workflow、環境変数、Game/data、Discord command bodyは変更しない。追加resource/権限差分が出たら停止。
@@ -86,3 +86,7 @@ CANCELLED例はrenderer fixtureであり、scheduled Operationの新しい公開
 文字数とmentionの外部仕様は[Discord公式Message API](https://docs.discord.com/developers/resources/message#create-message)のcontent上限・allowed_mentionsを参照。UTF-16換算2000以内は今回の保守的なローカル検査であり、Discordへの実送信結果とは分ける。
 
 実装commit `d25d00ecb91cd815f7f4eeb6ff2d53eb0900f19d` の[CI 34698073795](https://github.com/eash-misoni/wishicraft-server/actions/runs/34698073795)はquality・既存実Docker integrationとも成功。後続はBACKUP停止中専用の案内・guide assertionと検証記録だけで、deploy asset差分を増やさない。新表示の実Discord確認は承認後のSTATUS一回を予定する。
+
+## Production release承認
+
+基準HEAD `9e217cdec7bb166de0271bffcaaac82d6e31d8d1` に対し、Command受付停止/drain、11 Lambda code限定deploy、元設定復元、人間の実STATUS一回、closeoutを承認。Admission設定・他の業務操作・登録・Host変更は対象外。表示由来の継続障害時だけ、同じdrain/diff確認とoptional属性互換性を条件に直前D-098 codeへの限定復帰を許可。設計Acceptedと適用完了は分ける。

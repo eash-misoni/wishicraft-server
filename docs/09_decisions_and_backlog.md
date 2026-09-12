@@ -10,9 +10,9 @@
 
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
-## D-099 Discord実行者・主要経過表示（Proposed）
+## D-099 Discord実行者・主要経過表示（Accepted、適用前）
 
-既存Operationに固定数の到達記録と署名済み実行者名を保存し、一メッセージへ投影する。[契約差分・表示例・適用計画](reviews/discord_progress.md)が正本。D-081/086/087/089と認可/runtime契約は不変。repository準備のみ、production未適用。
+既存Operationに固定数の到達記録と署名済み実行者名を保存し、一メッセージへ投影する。[契約差分・表示例・適用計画](reviews/discord_progress.md)が正本。D-081/086/087/089と認可/runtime契約は不変。2026-09-12ユーザーGOでAccepted。限定deployと実STATUS検証は未完了。
 
 ## 2. 採用済み決定
 
