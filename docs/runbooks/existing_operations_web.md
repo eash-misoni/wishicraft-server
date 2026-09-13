@@ -148,3 +148,11 @@ Signing-key rotation/session revocation is an incident action, not a routine rol
 - Real OAuth E2E is awaiting the user's login in the controlled headed browser. No production Web
   lifecycle Operation, RESET or BACKUP has been submitted. Do not mark this slice Completed or claim
   RUNNING/transition evidence until the approved START/SWITCH/SWITCH/STOP run is actually observed.
+- The user's real OAuth login then reached a 503 on manage/capabilities before any operation submit.
+  Production session persistence encoded `principal.roles` as a DynamoDB List, while the imported
+  Operation decoder did not support Lists. The Web session adapter now uses the existing Web decoder
+  that supports that same serializer output. No identity/role/session record or policy is rewritten.
+  The HTTP/Admission suite now uses the actual `DynamoSessions` codec for every role/CSRF/idempotency
+  case; only AWS transport is synthetic. A new authenticated manage/capabilities/status regression
+  reproduced 503 before the fix, then the focused 81 tests passed after it. Fresh full verification
+  and immutable assets are retained under `wishicraft-web-session-fix-v3-esjvzas2`.

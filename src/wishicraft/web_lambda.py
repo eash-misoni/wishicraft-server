@@ -8,11 +8,10 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlsplit
 
-from wishicraft.operation import _decode_attribute
 from wishicraft.system_state import _to_attribute
 from wishicraft.web_app import AuthApp, WebApp, response, utc_now
 from wishicraft.web_auth import DiscordOAuth, Policy, Sessions
-from wishicraft.web_status import StatusReader
+from wishicraft.web_status import StatusReader, decode
 
 
 class DynamoSessions:
@@ -21,7 +20,7 @@ class DynamoSessions:
 
     def _read(self, response: dict[str, Any], field: str) -> dict[str, Any] | None:
         item = response.get(field)
-        return {k: _decode_attribute(v) for k, v in item.items()} if item else None
+        return {k: decode(v) for k, v in item.items()} if item else None
 
     def get(self, key: str) -> dict[str, Any] | None:
         return self._read(

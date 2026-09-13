@@ -16,7 +16,7 @@ from aws_cdk.assertions import Template
 
 from infrastructure.app import build_app
 from web.foundation import build_foundation
-from web.local import MemoryStore, fixture
+from web.local import fixture
 from web.local_operations import LocalOperations
 from wishicraft import admission_lambda, web_lambda
 from wishicraft.web_app import WebApp
@@ -30,10 +30,37 @@ ORIGIN = "https://web.wishicraft.net"
 POLICY = Policy("1", "2", "3", "4")
 
 
+class SessionDynamo:
+    """AWS transport only; production session serialization is exercised unchanged."""
+
+    def __init__(self) -> None:
+        self.records: dict[str, dict[str, Any]] = {}
+
+    def put_item(self, **kwargs: Any) -> dict[str, Any]:
+        item = kwargs["Item"]
+        key = item["id"]["S"]
+        assert key not in self.records
+        self.records[key] = json.loads(json.dumps(item))
+        return {}
+
+    def get_item(self, **kwargs: Any) -> dict[str, Any]:
+        assert kwargs["ConsistentRead"] is True
+        return {"Item": self.records.get(kwargs["Key"]["id"]["S"], {})}
+
+    def delete_item(self, **kwargs: Any) -> dict[str, Any]:
+        assert kwargs["ReturnValues"] == "ALL_OLD"
+        return {"Attributes": self.records.pop(kwargs["Key"]["id"]["S"], {})}
+
+
 @pytest.fixture
 def boundary(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Any:
     backend = LocalOperations(POLICY, "stopped")
-    sessions = Sessions(MemoryStore(), secrets.token_bytes(32), POLICY, origin=ORIGIN)
+    sessions = Sessions(
+        web_lambda.DynamoSessions(SessionDynamo(), "sessions"),
+        secrets.token_bytes(32),
+        POLICY,
+        origin=ORIGIN,
+    )
     site = tmp_path / "site"
     build_foundation(ROOT, site)
     app = WebApp(
@@ -146,6 +173,20 @@ def post(boundary: Any, jar: str, value: object) -> dict[str, Any]:
     app, sessions, *_ = boundary
     token = sessions.csrf(jar.split("=", 1)[1])
     return dict(app.handle(event(jar, value, csrf=token), NOW))
+
+
+def test_authenticated_dynamo_session_reaches_manage_capabilities_and_status(boundary: Any) -> None:
+    app, sessions, *_ = boundary
+    jar = login(sessions)
+    for path in ["/manage/", "/api/capabilities", "/api/status"]:
+        result = app.handle(event(jar, path=path, method="GET"), NOW)
+        assert result["statusCode"] == 200
+        assert "discord_user_id" not in result["body"]
+    capabilities = json.loads(
+        app.handle(event(jar, path="/api/capabilities", method="GET"), NOW)["body"]
+    )
+    assert capabilities["allowed"] == list(OPERATIONS)
+    assert capabilities["csrf_token"] == sessions.csrf(jar.split("=", 1)[1])
 
 
 @pytest.mark.parametrize("kind", OPERATIONS)
