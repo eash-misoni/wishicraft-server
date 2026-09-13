@@ -13,15 +13,15 @@ import yaml
 from web.build import (
     BEGIN,
     END,
-    OUTPUTS,
     ROOT,
-    ROUTES,
     build,
     examples,
     load_pages,
     md_text,
+    outputs,
     public_markdown,
     render,
+    routes,
     sources,
 )
 from wishicraft.discord_interactions import (
@@ -49,7 +49,7 @@ def test_reproducible_closed_artifact_and_links(tmp_path: Path) -> None:
     first, second = tmp_path / "first", tmp_path / "second"
     build(ROOT, first)
     build(ROOT, second)
-    assert {str(p.relative_to(first)) for p in first.rglob("*") if p.is_file()} == OUTPUTS
+    assert {str(p.relative_to(first)) for p in first.rglob("*") if p.is_file()} == outputs(ROOT)
     assert {str(p.relative_to(first)): p.read_bytes() for p in first.rglob("*") if p.is_file()} == {
         str(p.relative_to(second)): p.read_bytes() for p in second.rglob("*") if p.is_file()
     }
@@ -85,8 +85,8 @@ def test_reproducible_closed_artifact_and_links(tmp_path: Path) -> None:
 
 def test_sources_are_explicit_and_complete() -> None:
     pages = load_pages(ROOT)
-    assert tuple(pages) == ROUTES
-    assert len(OUTPUTS) == 17
+    assert tuple(pages) == routes(ROOT)
+    assert len(outputs(ROOT)) == len(routes(ROOT)) + 4
     assert all("{{" not in page.body for page in pages.values())
     index = (ROOT / "docs/discord_user_guide.md").read_text()
     assert "user-guide/commands/reset.md" in index
@@ -246,3 +246,155 @@ def test_metadata_setting_injection_and_unlisted_sources(
     games[0]["name"] = "arn:aws:synthetic"
     with pytest.raises(ValueError, match="excluded data"):
         builder.load_pages(tmp_path)
+
+
+@pytest.fixture
+def third_game(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Web input only; never change the backend's two-Game catalog or real registration."""
+    from shutil import copytree
+
+    import web.build as builder
+
+    copytree(ROOT / "web", tmp_path / "web")
+    copytree(ROOT / "docs/user-guide", tmp_path / "docs/user-guide")
+    schema, games, facts = sources(ROOT)
+    games.append(
+        {
+            "id": "game-test-third",
+            "name": "Test third <Game>",
+            "edition": "Java Edition",
+            "version": "99.7",
+            "server": "TEST_LOADER",
+        }
+    )
+    for command in schema[0]["options"]:
+        if command["name"] in {"start", "switch"}:
+            command["options"][0]["choices"].append(
+                {"name": "Test third", "value": "game-test-third"}
+            )
+    monkeypatch.setattr(builder, "sources", lambda root: (schema, games, facts))
+    path = tmp_path / "web/games.yaml"
+    entries = yaml.safe_load(path.read_text())
+    entries.append(
+        {
+            "id": "game-test-third",
+            "slug": "third-game",
+            "client": {
+                "status": "required",
+                "loader": "Test Loader 7.1",
+                "pack": "Test Pack 8.2",
+                "preparation": "管理者からtest配布物を受け取り、専用profileを作成します。",
+            },
+        }
+    )
+    path.write_text(yaml.safe_dump(entries, allow_unicode=True))
+    (tmp_path / "docs/user-guide/games/third-game.md").write_text(
+        "---\nsummary: test-only-third-summary\nwarning: test専用\n---\n試験用の説明です。\n"
+    )
+    return tmp_path
+
+
+def test_third_game_is_independent_and_order_safe(third_game: Path) -> None:
+    import web.build as builder
+
+    pages = load_pages(third_game)
+    page = pages["games/third-game"]
+    assert "99\\.7" in page.body and "Test Loader 7\\.1" in page.body
+    assert "Test Pack 8\\.2" in page.body and "test配布物" in page.body
+    assert "Reset：非対応" in page.body
+    assert "seed 0" not in page.body and "26.2" not in page.body
+    assert "/mc start game:game-test-third" in page.body
+    assert "third-game.md" in pages["commands/start"].body
+    assert "third-game.md" not in pages["commands/reset"].body
+    site = third_game / "site"
+    build(third_game, site)
+    assert (site / "games/third-game/index.html").is_file()
+    assert 'href="third-game/"' in (site / "games/index.html").read_text()
+    for document in site.rglob("*.html"):
+        parser = Links()
+        parser.feed(document.read_text())
+        for url in parser.urls:
+            if url.startswith("#"):
+                assert url[1:] in parser.ids
+            else:
+                target = document.parent / url
+                assert (target / "index.html").is_file() if url.endswith("/") else target.is_file()
+    # Both canonical record ordering and publication ordering can change independently.
+    schema, records, facts = builder.sources(third_game)
+    records.reverse()
+    registration = third_game / "web/games.yaml"
+    registration.write_text(
+        yaml.safe_dump(list(reversed(yaml.safe_load(registration.read_text()))))
+    )
+    reordered = load_pages(third_game)
+    for route in pages:
+        if route.startswith("games/"):
+            assert reordered[route] == pages[route]
+    # Schema can contain a Game that has not been selected for publication.
+    entries = yaml.safe_load(registration.read_text())
+    registration.write_text(yaml.safe_dump([e for e in entries if e["id"] != "game-test-third"]))
+    build(third_game, third_game / "unlisted-site")
+    assert "game-test-third" not in "".join(
+        p.read_text() for p in (third_game / "unlisted-site").rglob("*.html")
+    )
+
+
+@pytest.mark.parametrize("field", ["edition", "version", "server", "name"])
+def test_missing_resolved_participation_field(third_game: Path, field: str) -> None:
+    import web.build as builder
+
+    _, records, _ = builder.sources(third_game)
+    records[-1][field] = ""
+    with pytest.raises(ValueError, match=f"game-test-third: missing {field}"):
+        load_pages(third_game)
+
+
+@pytest.mark.parametrize("field", ["status", "loader", "pack", "preparation"])
+def test_missing_client_information(third_game: Path, field: str) -> None:
+    path = third_game / "web/games.yaml"
+    entries = yaml.safe_load(path.read_text())
+    del entries[-1]["client"][field]
+    path.write_text(yaml.safe_dump(entries))
+    with pytest.raises(ValueError, match=f"game-test-third: missing.*client.{field}"):
+        load_pages(third_game)
+
+
+@pytest.mark.parametrize("slug", ["a", "../private", "A", "x/y", "<script>", "", "x?y", "x%2fy"])
+def test_unsafe_or_duplicate_game_slug(third_game: Path, slug: str) -> None:
+    path = third_game / "web/games.yaml"
+    entries = yaml.safe_load(path.read_text())
+    entries[-1]["slug"] = slug
+    path.write_text(yaml.safe_dump(entries))
+    with pytest.raises(ValueError, match="slug"):
+        load_pages(third_game)
+
+
+def test_explicit_unknown_and_client_insertion(third_game: Path) -> None:
+    path = third_game / "web/games.yaml"
+    entries = yaml.safe_load(path.read_text())
+    entries[-1]["client"] = {
+        "status": "unknown",
+        "loader": "未確認",
+        "pack": "未確認",
+        "preparation": '<img src=x onerror="alert(1)"> | [x](https://test.invalid)',
+    }
+    path.write_text(yaml.safe_dump(entries))
+    build(third_game, third_game / "unknown-site")
+    html = (third_game / "unknown-site/games/third-game/index.html").read_text()
+    assert "未確認：参加前に管理者へ確認" in html
+    assert "<img" not in html and 'href="https:' not in html
+    assert "追加MOD不要と確認済み" not in html
+
+
+def test_real_output_excludes_fixture_values(tmp_path: Path) -> None:
+    build(ROOT, tmp_path / "site")
+    html = "".join(p.read_text() for p in (tmp_path / "site").rglob("*.html"))
+    for marker in (
+        "game-test-third",
+        "99.7",
+        "Test Loader",
+        "Test Pack",
+        "test配布物",
+        "test.invalid",
+    ):
+        assert marker not in html

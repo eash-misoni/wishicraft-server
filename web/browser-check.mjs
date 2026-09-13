@@ -1,13 +1,13 @@
 // Real browser checks; every run preserves its own evidence, never inside the site.
 import { chromium, expect } from "@playwright/test";
 import { createServer } from "node:http";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve, extname } from "node:path";
 
-const routes = ["", "join", "games", "games/a", "games/b", "commands", "commands/status", "commands/start", "commands/stop", "commands/switch", "commands/backup", "commands/reset", "help"];
-const representative = new Set(["", "games", "games/b", "commands", "commands/reset"]);
 const site = resolve(process.argv[2]);
+const routes = (await readdir(site, { recursive: true })).filter(n => n === "index.html" || n.endsWith("/index.html")).map(n => n === "index.html" ? "" : n.slice(0, -"/index.html".length));
+const representative = new Set(routes);
 const evidence = await mkdtemp(join(tmpdir(), "wishicraft-web-browser-"));
 const types = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript" };
 const served = new Set([...routes.map(r => r ? `${r}/index.html` : "index.html"), "404.html", "guide.css", "guide.js"]);

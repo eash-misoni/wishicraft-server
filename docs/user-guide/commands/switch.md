@@ -8,7 +8,7 @@ warning: 最後の0人確認直後の接続raceが残り、無切断保証はあ
 
 ## 対象と実行条件
 
-sourceは現在稼働している切替元、targetは`game`で指定する切替先です。AからB、BからAへ移る操作です。
+sourceは現在稼働している切替元、targetは`game`で指定する切替先です。稼働中のGameから別のGameへ移る操作です。
 Playerだけでは実行できません。人数が正または不明なら進めず、明示確認だけでこの条件を省くことはできません。
 
 ## 基本構文と使用例
@@ -37,4 +37,8 @@ Playerだけでは実行できません。人数が正または不明なら進�
 
 ## 関連ページ
 
-[A詳細](../games/a.md) / [B詳細](../games/b.md) / [stop](stop.md) / [reset](reset.md)
+[stop](stop.md) / [reset](reset.md)
+
+## 現在の対応Game
+
+{{supported-games}}

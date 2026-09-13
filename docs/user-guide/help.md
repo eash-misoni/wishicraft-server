@@ -32,4 +32,4 @@ Discordの指定チャンネルと必要role、Gameの選択、実行条件を�
 
 [状態の読み方](commands/status.md) / [起動](commands/start.md) / [停止](commands/stop.md) / [切替](commands/switch.md) / [BACKUP](commands/backup.md) / [Reset](commands/reset.md)
 
-接続できない場合は [参加方法](join.md) と [Game一覧](games.md) も確認してください。復旧用のDiscord commandは実装されていません。過去worldやSnapshotの復元は管理者の別作業です。
+接続できない場合は [共通の準備](join.md) と [Game一覧](games.md) も確認してください。復旧用のDiscord commandは実装されていません。過去worldやSnapshotの復元は管理者の別作業です。

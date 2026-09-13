@@ -8,7 +8,7 @@ warning: 稼働中の別Gameを止めて切り替える操作ではありませ�
 
 ## 基本構文と使用例
 
-`game`を省略する例と、A・Bを指定する例です。Discordの候補から選択してください。
+`game`を省略する例と、現在の公開Gameを指定する例です。Discordの候補から選択してください。
 
 {{examples}}
 
@@ -31,4 +31,8 @@ warning: 稼働中の別Gameを止めて切り替える操作ではありませ�
 
 ## 関連Game・コマンド
 
-[A詳細](../games/a.md) / [B詳細](../games/b.md) / [参加方法](../join.md) / [stop](stop.md)
+[共通の準備](../join.md) / [stop](stop.md)
+
+## 現在の対応Game
+
+{{supported-games}}

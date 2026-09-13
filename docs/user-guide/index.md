@@ -1,11 +1,11 @@
 ---
 title: Wishicraft 利用ガイド
-summary: 参加方法、Game、Discordコマンドを確認するための案内です。
+summary: Gameを選び、そのGameの参加条件・手順と使える操作を確認します。
 roles: ''
 conditions: ''
 warning: ''
 ---
 
-初めて参加する場合は「参加方法」を確認してください。操作の条件や注意は、各コマンドの詳細にまとめています。
+[Game一覧](games.md)から参加したいGameを選んでください。共通の申請・権限の補足は[共通の準備](join.md)にあります。操作の条件や注意は、各コマンドの詳細にまとめています。
 
 このWebからサーバーを操作することはできません。現在の状態はDiscordの [status](commands/status.md) で確認します。

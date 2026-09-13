@@ -1,0 +1,1 @@
+管理者に参加を相談してDiscordへの招待を受け取り、使用するMinecraftアカウント名を個別に伝えてwhitelist登録を確認します。パスワードは伝えません。Minecraftへの参加権限とDiscordのPlayer / Admin roleは別なので、操作権限と指定チャンネルも確認してください。

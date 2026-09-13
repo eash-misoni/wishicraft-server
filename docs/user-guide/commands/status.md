@@ -33,3 +33,7 @@ STATUSは最新の観測を要求します。ただし現在のDiscord表示に�
 ## 関連ページ
 
 [Game一覧](../games.md) / [start](start.md) / [stop](stop.md) / [switch](switch.md)
+
+## 現在の対応Game
+
+{{supported-games}}

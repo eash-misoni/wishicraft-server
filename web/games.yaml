@@ -1,0 +1,15 @@
+# Explicit publication registration; runtime values and capabilities are resolved from canonical sources.
+- id: game-vanilla-main
+  slug: a
+  client:
+    status: confirmed_none
+    loader: 追加loader不要（標準Java client）
+    pack: 追加MODパック不要
+    preparation: このページに示すMinecraftの版をclientで選択してください。Bedrock EditionやMOD入りclientの互換性は未確認です。
+- id: game-vanilla-secondary
+  slug: b
+  client:
+    status: confirmed_none
+    loader: 追加loader不要（標準Java client）
+    pack: 追加MODパック不要
+    preparation: このページに示すMinecraftの版をclientで選択してください。Bedrock EditionやMOD入りclientの互換性は未確認です。

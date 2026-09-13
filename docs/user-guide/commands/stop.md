@@ -29,4 +29,8 @@ STOP完了は外部BACKUP更新を意味しません。外部保護が必要な�
 
 ## 関連ページ
 
-[A詳細](../games/a.md) / [B詳細](../games/b.md) / [switch](switch.md) / [backup](backup.md)
+[switch](switch.md) / [backup](backup.md)
+
+## 現在の対応Game
+
+{{supported-games}}

@@ -18,7 +18,7 @@ warning: 稼働中は先に通常STOPを完了してください。自動でSTOP
 
 ## 保護する範囲と完了
 
-共有Data EBS全体が保護単位です。A/Bのworld、保持している旧world、Gameのserver設定などをSnapshotへ含めます。一つのGameだけを指定する引数はありません。
+共有Data EBS全体が保護単位です。対象volume上の各Gameのworld、保持している旧world、Gameのserver設定などをSnapshotへ含めます。一つのGameだけを指定する引数はありません。
 Snapshotの作成・完了・復旧情報の検証を待ちます。受付や作成開始だけでBACKUP成功と判断しないでください。
 
 **取得成功と復元実行は別です。** このcommandは現在のworldを書き戻す操作ではありません。Game単独復元は隔離した復元copyから対象Gameを取り出す管理者の別作業で、共有EBS全体の巻き戻しとは区別します。
@@ -37,4 +37,8 @@ Discord Restoreコマンドはありません。旧world整理とSnapshot保持�
 
 ## 関連ページ
 
-[A詳細](../games/a.md) / [B詳細](../games/b.md) / [stop](stop.md) / [reset](reset.md)
+[stop](stop.md) / [reset](reset.md)
+
+## 現在の対応Game
+
+{{supported-games}}

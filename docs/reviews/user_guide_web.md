@@ -1,9 +1,9 @@
 # D-100 静的利用案内Webと公開準備
 
 **状態:** repository内の設計・実装・ローカル/CI検証を委任された独立slice。Web公開・hosting採用・閲覧範囲・URLは未承認。
-基準HEADは前回準備完了 `1bab86b6fab77c0c017d56609aa02f21d016c9cb`。originと一致・cleanを確認して継続した。
+基準HEADは前回準備完了 `940aa0337433ec7ca268c3a5d95f656d7091bc44`。originと一致・cleanを確認して継続した。
 D-099 Completed / release COMPLETED / PRODUCTION_VERIFIEDを維持し、完了E2Eは再実行しない。
-今回の追加委任は複数ページ化・文章整理・視覚表現・検証。終了点はユーザーによるローカルデザイン再確認である。
+今回の追加委任はGame中心の参加導線・公開Game一覧からの生成・検証。既存の外観とページ別URLを維持し、終了点はGame中心のローカル再確認である。
 
 ## 動くページとローカルレビュー
 
@@ -18,7 +18,7 @@ JavaScript無効でも本文・リンク・例は読める。現在状態の表�
 | ページ | 公開用相対URL |
 |---|---|
 | ホーム | `/` |
-| 参加方法 | `/join/` |
+| 共通の準備（補助） | `/join/` |
 | Game一覧・A・B | `/games/`・`/games/a/`・`/games/b/` |
 | コマンド一覧 | `/commands/` |
 | status・start・stop | `/commands/status/`・`/commands/start/`・`/commands/stop/` |
@@ -51,23 +51,37 @@ tools/dev-env run -- node web/browser-check.mjs "$GUIDE_ROOT/site" --chrome
 
 | 項目 | 正本・更新方法 |
 |---|---|
-| 説明・操作例・権限表示・注意 | `docs/user-guide/`の13原稿がページごとの編集元。旧`docs/discord_user_guide.md`は入口と正本参照を保持。HTMLへ再入力しない |
+| 説明・操作例・権限表示・注意 | `docs/user-guide/`のページ原稿、Game紹介原稿、共通原稿が各説明の編集元。旧`docs/discord_user_guide.md`は入口と正本参照を保持。HTMLへ再入力しない |
 | Game ID/名称・runtime版・Reset数値 | project/dev stage、two-game/reset宣言、既存のpure `two_game_admin.declaration`から必要fieldだけ投影 |
 | 引数の型・必須性・候補 | 基本schema＋既存D-097/D-098のcommand拡張をそのまま使用 |
 | 権限・例の整合 | testsが各例を合成Interactionとして現行`parse_and_authorize`へ渡し、Player/Admin/roleなし・別Guild/channel/applicationを検査。実Discord通信なし |
 | 現行の意味 | D-097/098/099、BackupObservation。古い管理者限定Reset表や毎回Snapshot/Reset後停止案を復活させない |
 | 管理手順・実証 | 既存runbook/evidenceをrepositoryに保持し、Webへ出さない |
 
-原稿のfrontmatterは名称・要約・権限・条件・短い注意、本文はMarkdownで編集する。`{{examples}}`と`{{arguments}}`はschemaから、版・名称・seed/保持/容量のtokenは設定からbuild時に展開する。
+原稿のfrontmatterとMarkdownを編集する。`{{examples}}`・`{{arguments}}`はschema、`{{supported-games}}`は公開Gameのcapabilityとpolicyから生成する。Game詳細は`game.md`の共通構成へ紹介原稿・参加要件・操作例を展開する。
 `--update-guide`による旧Markdown生成ブロック更新は廃止。buildとfocused testsを実行し、設定/schema変更では本文の意味もレビューする。未知token・commandページ不足を拒否する。未知runtime種別ではedition/client説明の見直しを要求し、勝手に対応を拡張しない。
 Game登録の宣言関数はローカル純粋処理だけを使用し、register/mainやAWS clientは呼ばない。宣言内のwhitelist等を一括serializeしない。
 新しい機械値と説明の意味の一致は生成だけで保証できないため、schema変更時も人間の内容レビューを残す。
+
+## Game中心の導線と公開登録
+
+ホームではGame一覧を最初の入口にする。一覧から対象Gameを選ぶと、edition/version・clientのloader/MODパック・準備、申請、status、対象指定START/管理者SWITCH、接続の順で確認できる。
+共通接続先なので、何かのGameがREADYではなく参加したいGameの選択/観測と稼働を確認する。共通申請と個別接続案内は`shared/access.md`・`shared/connection.md`をGame詳細と`/join/`で再利用する。FQDN・招待URLは出力しない。
+
+公開Gameを追加するWeb側の編集は`web/games.yaml`のID/slug/clientと`docs/user-guide/games/<slug>.md`の紹介・注意。共通テンプレート、navigation、route/出力allowlistのコードへGame別分岐を追加しない。
+名称・正式引数・edition/version/server・Reset capability/policyは`web/canonical.py`が既存正本から解決し、`web/build.py`はIDをkeyに公開登録と結合する。件数・配列位置・共通version・単一Reset policyへ依存しない。
+現行canonical adapterは既存のinitial/secondary宣言とdefault Vanilla runtimeを投影する。backendの2Game制約は維持する。将来backendの正本形式が変わる場合、そのadapterの対応は別途必要だが、公開rendererのGame別分岐は不要。
+
+client metadataは`confirmed_none`（追加MOD不要と確認済み）、`required`（必要構成を明示）、`unknown`（未確認）を区別し、loader・packの名称/版または不要/未確認の明示、準備文を必須にする。欠落はGame IDとfieldを示してbuild失敗、明示的な未確認は参加前の管理者確認として表示する。空欄や未知runtimeを標準clientへ補完しない。
+一般command説明は対象Gameという表現へ整理し、現在の対応Game・使用例・具体的fixed seed/保持/容量を生成する。現行のReset非対応/対応、fixed seed 0、直近3個、元の保護anchorを維持する。共有BACKUPと同時稼働一つは共通契約でありGame metadataで変更できない。
+
+テスト専用の3件目は異なるversionとloader/pack、Reset非対応を与え、追加生成、相互リンク、順序変更、必須情報欠落、未知client、slug/文字列挿入、未登録Gameの除外を検証する。fixtureはtemporary rootだけに展開し、実build・runtime・command登録へ追加しない。多runtime本番実行の証明ではない。
 
 ## 旧内容の移動と追加説明
 
 | 旧章 | 新しい編集元・配置 |
 |---|---|
-| 参加の準備 | `join.md`：版、client、whitelist、role、個別の接続案内 |
+| 参加の準備 | 版/clientは各Game詳細へ移動。`join.md`は共通申請・role・操作チャンネルの補足 |
 | Game詳細 | `games.md`と`games/a.md`・`games/b.md`：比較は一覧、版・操作例・対応操作は詳細 |
 | コマンド例と独立した引数章 | `commands.md`の短い比較と`commands/*.md`の各構文・引数・使用例へ分割 |
 | Resetで変わるもの・残るもの | `commands/reset.md`へ統合。B詳細・一覧は変更範囲の短い注意から誘導 |
@@ -143,6 +157,16 @@ repositoryの修正は前進commitで行い、D-099やGame/worldを過去状態�
 
 ## 検証結果と未実証範囲
 
+### 今回のGame中心導線
+
+ローカル1099 tests、focused 32 tests、Ruff/format、mypy 170 files、dev5構成synthが成功。初期実装のGame record参照field誤りと、adapter分離時のexport不足を修正して再検証した。
+仮3件目はversion 99.7、明示loader/pack、Reset非対応のWeb専用入力。canonical順と公開登録順の変更、欠落field、unknown、重複/不正slug、文字列挿入、未公開Game/fixture混入を検査した。backend多runtime対応の実証ではない。
+Chrome 153.0.8010.36、320×740・390×844・1440×1000で全13ページの遷移・直接URL/reload・深いURLのCSS/JS・anchor・Tab/focus・15コピー箇所・overflowを検証。ホーム、共通準備、Game一覧、A/B詳細、各command詳細の実表示を目視した。JavaScript無効・clipboard拒否・root/subpathも確認。外部request/browser errorは0。
+最終buildを新rootで再生成し、17ファイル・70,572 bytesのbyte一致を確認。[今回の証跡](../evidence/2026-09-13-user-guide-web-game-centered.json)に結果とartifact/PNG hashを記録。schema/認可と実コピー用例の合成parser検査はローカルtestであり、実Discord・Minecraft参加の検証ではない。
+CSS/JavaScript、backend、Game/runtime設定、command schema/認可、infra、CI workflowを変更していない。接続先/招待URLと内部情報は引き続き除外。通常pushで公開されない。
+
+### 前回（940aa03）の複数ページ化検証履歴
+
 今回のローカル検証は1080 tests、focused 13 tests、Ruff/format、mypy 169 files、devの5構成synthが成功。
 初回pytestとcontrol-plane系3 synthはsandboxのPyPI DNS制限で失敗し、新rootで依存取得可能な環境から再検証した。初回mypyのtest内Path/string変数衝突は修正後に成功。旧ログは上書きしない。
 Chrome 153.0.8010.36で全13ページ×390×844 / 320×740 / 1440×1000の39組合せを検査。全ページの直接アクセス/reload、全リンク遷移、親一覧/相互リンク、ページ内anchor、深いURLのCSS/JS、見出し順、skip linkとTab/focus、合計15コピー箇所/各viewport、横overflowなしを確認した。
@@ -162,7 +186,7 @@ backend/Discord/Hostのsource・infra・設定は変更対象外。通常の既�
 承認に必要なのは、(a) Cloudflare Pages採用と実account/所有者、(b)全員閲覧か許可者限定か・認証方式、(c)17ファイルの本文と除外方針、(d)pages.dev候補またはWeb専用subdomain、(e)費用上限、(f)初回project/upload/必要なAccess、任意のWeb DNS/TLS、公開検証、Webだけの差戻し・緊急遮断。
 独自domainを承認しなければAWS/DNS変更は不要。Discord送信・command登録、production deploy/IAM、Lambda invoke/Reconcile/SSM、START/STOP、Game/world/Snapshot/provenanceはこの公開承認にも含めない。
 
-**READY FOR USER GUIDE WEB / LOCAL DESIGN REVIEW** は修正版のローカルデザインレビュー準備完了を示す。Web公開済み、D-100のhosting採用済み、production変更済みという意味ではない。
+**READY FOR USER GUIDE WEB / GAME-CENTERED LOCAL REVIEW** は修正版のローカルデザインレビュー準備完了を示す。Web公開済み、D-100のhosting採用済み、production変更済みという意味ではない。
 
 ### CI初回の環境選択修正
 

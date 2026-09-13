@@ -1,12 +1,11 @@
 ---
 title: Game一覧
-summary: A・Bは同じ固定Vanilla構成を使い、別々のworldを保存します。
+summary: 参加したいGameを選び、必要なclientと参加手順を詳細で確認します。
 roles: ''
 conditions: ''
 warning: ''
 ---
 
-同時に遊べるGameは一つです。両方とも追加MODパックの指定はなく、統合版やMOD入りclientの互換性は未確認です。
-主な違いは保存領域とReset対応です。難易度・gamemode・Hardcoreの実設定はこの案内の根拠では未確認です。
-
-参加条件は [参加方法](join.md)、実際の稼働対象は [status](commands/status.md) で確認してください。
+同時に遊べるGameは一つです。必要なclient条件はGameごとに確認してください。
+共通接続先へ入る前に、参加したいGameが稼働していることを [status](commands/status.md) で確認します。
+申請や権限の補足は [共通の準備](join.md) を参照してください。
