@@ -366,7 +366,17 @@ def test_synth_exact_admission_permission_and_no_business_writes() -> None:
         for s in r["Properties"]["PolicyDocument"]["Statement"]
     ]
     invoke = [s for s in statements if s["Action"] == "lambda:InvokeFunction"]
-    assert len(invoke) == 1 and "wc-dev-admission" in json.dumps(invoke[0]["Resource"])
+    assert len(invoke) == 1
+    assert invoke[0]["Resource"] == {
+        "Fn::Join": [
+            "",
+            [
+                "arn:",
+                {"Ref": "AWS::Partition"},
+                ":lambda:ap-northeast-1:385526546525:function:wc-dev-admission",
+            ],
+        ]
+    }
     assert "*" not in json.dumps(invoke[0])
     assert not any(
         "dynamodb:UpdateItem" in str(s["Action"])

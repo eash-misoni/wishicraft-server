@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from aws_cdk import CfnOutput, Duration, Environment, RemovalPolicy, Stack
+from aws_cdk import ArnFormat, CfnOutput, Duration, Environment, RemovalPolicy, Stack
 from aws_cdk import aws_apigatewayv2 as apigw
 from aws_cdk import aws_apigatewayv2_integrations as integrations
 from aws_cdk import aws_certificatemanager as acm
@@ -236,6 +236,7 @@ class WebFoundationStack(Stack):
                         service="lambda",
                         resource="function",
                         resource_name=env["WEB_ADMISSION_FUNCTION"],
+                        arn_format=ArnFormat.COLON_RESOURCE_NAME,
                     )
                 ],
             )

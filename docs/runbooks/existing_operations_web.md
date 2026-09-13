@@ -1,6 +1,7 @@
 # Existing Operations via Web release / rollback
 
-D-104 repository preparation; production approval pending. Base `2d05437` remains the last completed
+D-104 production release approved at `bfc63c4` on 2026-09-13; execution in progress.
+Base `2d05437` remains the last completed
 Web URL stabilization release. [Review and contract](../reviews/existing_operations_web.md) owns design.
 
 ## Local verification
@@ -28,7 +29,7 @@ STOPPED, HEALTHY, Target stopped, current Operation absent and Lock absent. Both
 A uses original world, B retains D-098 managed current world. All 9 existing Data EBS Snapshots completed.
 Root: `wishicraft-web-operations-preflight-v1-qaa8zi_c`. No secret value was retrieved.
 
-## Proposed single approval scope
+## Approved release scope (2026-09-13)
 
 Approval covers only this finalized reviewed release, its bounded normal corrections and closeout:
 
@@ -37,7 +38,7 @@ Approval covers only this finalized reviewed release, its bounded normal correct
 2. Create fresh immutable Web and CP assemblies from finalized HEAD. Contexts are `stage=dev phase=8`,
    Web `deployment=web`, CP `deployment=control-plane two_games=true reset=true`.
    Run `cdk diff --change-set=false` with the canonical profile. No changeset creation in preflight.
-3. Deploy **only** `WishicraftControlPlaneStack-dev` first (reviewed code + Admission role config), then
+3. Deploy **only** `WishicraftControlPlaneStack-dev` first (reviewed code + Admission role config), verify Discord ingress/delivery/config read-back, then
    **only** `WishicraftWebStack-dev` (reviewed Web/Auth code, exact invoke/read IAM and configuration).
    Do not use `--all`, deploy Target/Frozen, register Discord commands, or modify Guild/OAuth/secrets.
 4. Read back deployed template, code/config, IAM, API routes, canonical guard and alarms. Unknown deploy
@@ -46,12 +47,14 @@ Approval covers only this finalized reviewed release, its bounded normal correct
    no session cookie/token/code is copied into chat, logs, fixtures or an evidence file. Keep browser
    credentials in its session; never fabricate a Web session/actor using AWS writes for E2E.
 6. Through the actual authenticated Web UI: START A; observe acceptance, progress, RUNNING/heartbeat,
-   player semantics and selected/observed Game. Retry the **same request** to prove one Operation.
-   If fresh healthy/zero-player safety conditions hold, SWITCH A→B, then SWITCH B→A; otherwise skip SWITCH
-   with exact reason and stop safely. Finally Web STOP A and verify terminal convergence.
+   player semantics and selected/observed Game. Do not manufacture duplicate submissions; natural
+   timeout/retry uses the same request identity and read-back. Recheck fresh healthy/zero-player
+   safety conditions before SWITCH A→B and B→A; stop if those conditions fail. Finally Web STOP A
+   and verify terminal convergence.
    A pending Operation must finish before the next request. This is normal existing lifecycle use;
    do not connect a real Minecraft player or run a separate long E2E.
-7. Safe RESET check uses A/non-supported capability rejection only (no world mutation). BACKUP has
+7. Safe RESET check uses A/non-supported capability rejection only (no world mutation). The current
+   Web adapter rejects this capability before shared Admission; do not claim downstream execution. BACKUP has
    repository integration and existing production backend proof; do not create a new Snapshot solely
    for route coverage. Real RESET, Snapshot/world deletion and recovery edits are not in this approval.
 8. Check public 13-page guide, unauthorized/API/old-host guard, auth/logout/session, private projection
@@ -111,3 +114,24 @@ Signing-key rotation/session revocation is an incident action, not a routine rol
   `DeleteOnTermination=false`; Admission and Discord ingress concurrency both UNSET.
 - Local Docker CLI is absent; actual Docker regression runs in CI. No local Docker test is claimed.
   CI must succeed on finalized repository HEAD before production approval readiness.
+
+### Approved production execution checkpoints
+
+- User GO at `bfc63c4` on 2026-09-13 accepts the 15-minute role snapshot tradeoff and exact
+  START A → SWITCH B → SWITCH A → STOP E2E. No real RESET or new Snapshot/BACKUP is authorized.
+- Fresh baseline at 09:58 UTC: correct caller/account/region; STOPPED/HEALTHY, no Lock/current,
+  6 workflows idle, 3 queues empty, 45 alarms OK, 9 completed Snapshots, 16 BACKUP records.
+  Game/world records and backup provenance retained in isolated evidence root
+  `wishicraft-web-release-v1-a_vis9ee`.
+- CP first deployment completed; deployed template exactly matches the approved assembly, all
+  11 Lambdas Active/Successful. Discord signature-free ingress returns 401; DISCORD-only progress
+  stream filter remains Enabled. Real slash-command invocation is not claimed by this smoke.
+- Web deployment completed; deployed template matches its assembly. Public/read-only/unauthenticated
+  and old-host security checks pass. No Game lifecycle request has been submitted at this checkpoint.
+- Direct IAM read-back caught an incorrect Lambda ARN separator (`function/` instead of `function:`).
+  The previous synth assertion checked the function name but missed ARN syntax. This is a denied
+  invoke configuration, not expanded authority. A bounded correction uses `COLON_RESOURCE_NAME`,
+  and the regression assertion now checks the complete synthesized ARN. The corrected deployment
+  remains restricted to the single existing Admission function. Full validation/CI and fresh diff
+  precede that correction. Evidence root `wishicraft-web-release-invoke-fix-v2-jtliy_13` preserves
+  the correction separately; initial failed verification is not relabelled as successful.

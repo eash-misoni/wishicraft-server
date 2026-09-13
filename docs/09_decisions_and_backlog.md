@@ -1,11 +1,11 @@
 # 09. Decisions and Backlog
 
-## D-104 Existing Operations via Web（repository implementation、production approval pending）
+## D-104 Existing Operations via Web（Accepted、production release in progress）
 
 2026-09-13、D-101第2実装単位として既存5操作をWeb adapterから既存Admissionへ接続する実装を委任。
 詳細は[release review](reviews/existing_operations_web.md)。共有認可はSTART/STOP/RESET=PlayerまたはAdmin、SWITCH/BACKUP=Admin。
 15分session内の確認済みrolesを毎write評価し、session-bound CSRF、actor-bound request deduplication、terminal read projectionを追加する。
-Discord deliveryやbackend safety/retentionは変更しない。通常設計・repository/CIは委任済みだが、production適用は最初のwrite直前の一括承認待ち。
+Discord deliveryやbackend safety/retentionは変更しない。2026-09-13、基準HEAD `bfc63c4`への明示GOによりproduction releaseを承認。CP先行→Discord read-back→Webの順序と、Web START A→SWITCH B→A→STOPの非破壊E2Eを適用する。role snapshotのfreshness上限15分を明示tradeoffとして受容。実RESET・Snapshot作成は範囲外。CompletedはE2E/closeout後に記録する。
 実RESET/new SnapshotはE2E計画に含めない。D-102/103 Completedを維持し、Minimal Game Creationへ進まない。
 
 

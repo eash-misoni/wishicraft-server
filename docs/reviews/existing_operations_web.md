@@ -1,6 +1,6 @@
 # D-104 Existing Operations via Web — release review
 
-Repository implementation under the 2026-09-13 delegation. Production approval pending;
+Repository implementation under the 2026-09-13 delegation. Production approved at `bfc63c4` on 2026-09-13; execution in progress;
 D-101/102/103 and D-096/097/098 remain Accepted. This document does not claim production completion.
 The release unit is the existing five operations, not Game Creation or a new Control Plane.
 
