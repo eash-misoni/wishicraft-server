@@ -1,5 +1,7 @@
 # 11. External Constraints and References
 
+> Web Foundation D-102（Proposed・production未適用）: [Web契約・公式仕様比較](reviews/web_foundation.md)、[local / release / rollback](runbooks/web_foundation.md)を参照。
+
 - **文書状態:** Canonical reference
 - **最終確認:** 2026-08-23
 

@@ -460,6 +460,12 @@ reset前に最終バックアップを作成・検証し、旧世代を保持す
 
 ## 11. 管理Webページ要件
 
+Web Foundation read-only部分の具体契約は[D-102 Proposed](reviews/web_foundation.md)。
+保存済みSystemState/heartbeat/Operationを読むだけでSTATUS Operationや観測/repairを起動しない。
+unknown/0/not_expected、鮮度/部分失敗と選択/実観測を分離する。public guideはログイン不要、
+manage/APIはcanonical Discord Guild/member/player・admin role条件を必要とする。Web write操作は次slice。
+
+
 ### WEB-004 静的利用案内 `MUST / D-100独立slice`
 
 既存のDiscord利用案内を入口に、Game/command別Markdownを各説明の唯一の編集元として、参加条件、Game差分、現行schemaの引数・例・認可、安全条件、失敗/結果不明時の行動を静的HTMLで提供する。Minecraft EC2停止中も読める配信計画とする。機械項目はGame/runtime/schemaから投影し、公開候補fieldと本文範囲を明示する。

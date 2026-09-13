@@ -1,5 +1,16 @@
 # 09. Decisions and Backlog
 
+## D-102 Web Foundation（Proposed、production未適用）
+
+public guide + authenticated read-only statusのrepository実装と一括release案。
+[architecture / OAuth / schema / 費用レビュー](reviews/web_foundation.md)、
+[local / release / rollback](runbooks/web_foundation.md)を参照。
+推奨は専用AWS HTTP API + Web/Auth Lambda + 短期session table。既存CPはGetItemのみ。
+D-101順序とwrite操作の次slice境界を維持する。
+今回のユーザー指示でpublic guideはログイン不要の一般公開可、FQDN/招待URL除外を確定。
+hosting account/service/URL/domain/費用・実公開は未承認。D-100 Pages案はhistorical candidate。
+
+
 ## D-101 今後のロードマップとscope優先順位
 
 - **状態:** Accepted（2026-09-13、ユーザー指示によるロードマップ整理のみ）
@@ -13,7 +24,7 @@
 
 ## D-100 静的利用案内Web（内容・ローカル構成承認済み／公開未承認）
 
-2026-09-13のユーザー指示により、各説明の編集元を一つにしたページ別Markdownによる小さな静的build、設定/schema投影、ローカル表示/CI検証を準備し、内容・ローカル構成を承認済み公開候補として固定した。[設計・公開計画](reviews/user_guide_web.md)へ集約。Cloudflare Pages Direct Uploadは推奨候補であり、service採用・認証・閲覧者・URL・費用・初回公開は未承認。D-099 Completedと将来の状態確認/管理Webを維持する。
+2026-09-13のユーザー指示により、各説明の編集元を一つにしたページ別Markdownによる小さな静的build、設定/schema投影、ローカル表示/CI検証を準備し、内容・ローカル構成を承認済み公開候補として固定した。[設計・公開計画](reviews/user_guide_web.md)へ集約。Cloudflare Pages Direct Uploadは当時のhistorical candidate。D-102ではAWS小規模Web案を推奨する。public guideはログイン不要で一般公開可（FQDN/招待URL除外）。service採用・URL・費用・初回公開は未承認。D-099 Completedと将来の状態確認/管理Webを維持する。
 
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-13

@@ -1,6 +1,14 @@
 # wishicraft-server
 
-静的な参加・コマンド案内Webをrepository実装しました。説明の正本は利用案内から辿るページ別Markdown、local build/previewと公開計画は [D-100 Web準備レビュー](docs/reviews/user_guide_web.md) を参照してください。Web公開・hosting・URL・閲覧範囲は未承認です。
+Web FoundationをD-102 Proposedとしてrepository実装しました。[設計・費用・承認対象](docs/reviews/web_foundation.md)、[ローカル表示とrelease計画](docs/runbooks/web_foundation.md)を参照してください。public guideはログイン不要で一般公開可（FQDN/招待URL除外）。hosting・OAuth設定・実公開は未承認です。
+
+```sh
+tools/dev-env run -- uv run python -m web.local --scenario players
+```
+
+localhost上でguide → 管理 → fake login → read-only statusを確認できます。実Discord認証・実運用状態ではありません。
+
+静的な参加・コマンド案内Webをrepository実装しました。説明の正本は利用案内から辿るページ別Markdown、local build/previewと公開計画は [D-100 Web準備レビュー](docs/reviews/user_guide_web.md) を参照してください。hosting・URL・実公開は未承認です。public guideの閲覧はログイン不要で一般公開可です。
 
 利用者向けの現行コマンド・権限・Resetの注意点は[Discord利用案内](docs/discord_user_guide.md)を参照してください。進捗表示改善D-099はAccepted・production適用済みです。実STATUS一回で実行者・到達記録・公開配送を確認しました。
 
@@ -13,7 +21,7 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 今後は[D-101のCurrent roadmap](docs/06_delivery_plan.md#current-roadmap)に従い、Web Foundation → Existing Operations via Web → Minimal Game Creation → Whitelist Management → 需要に応じたRuntime / Version / MOD Extensionへ進みます。read-only statusとwrite operationsは別release sliceです。旧Phase 9〜16はprevious planとして残し、連番消化や一般化を必須依存にしません。
 
-RETENTION実削除、Restore UI、chat、高度なPackage/Preset/Template管理等は条件・需要で開始するindependent trackです。D-100は内容・ローカル構成承認済みの公開候補として維持し、Web Foundationのpublic領域へつなぎます。hosting・閲覧者・認証・URL・費用・実公開は未承認です。
+RETENTION実削除、Restore UI、chat、高度なPackage/Preset/Template管理等は条件・需要で開始するindependent trackです。D-100は内容・ローカル構成承認済みの公開候補として維持し、Web Foundationのpublic領域へつなぎます。public guideはログイン不要で一般公開可です。hosting・管理認証・URL・費用・実公開は未承認です。
 
 
 現在の通常実行契約は[Data/Interface §0](docs/05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)を参照してください。runbookは移行手順・証跡を所有します。現在は[D-097 二Game切替・共有BACKUP](docs/reviews/two_game_switch.md)の設計と限定移行計画がAcceptedです。production適用・A→B→Aと共有BACKUP/RETENTION検証は2026-09-12 Completedで、[実行証跡](docs/evidence/2026-09-12-two-game-production.json)へ別途記録します。Phase 9全体の採用ではありません。

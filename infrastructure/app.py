@@ -9,6 +9,7 @@ from aws_cdk import App
 from infrastructure.stacks.control_plane_stack import ControlPlaneStack
 from infrastructure.stacks.minecraft_stack import MinecraftStack
 from infrastructure.stacks.minecraft_target_stack import MinecraftTargetStack
+from infrastructure.stacks.web_foundation_stack import WebFoundationStack
 from wishicraft.config import load_configuration, validate_stage_for_action
 from wishicraft.runtime_catalog import RuntimeCatalog
 
@@ -30,7 +31,15 @@ def build_app(
     if reset and (not two_games or deployment != "control-plane"):
         raise ValueError("reset requires the two-game control plane")
     app = App()
-    if deployment == "target":
+    if deployment == "web":
+        WebFoundationStack(
+            app,
+            stage=configuration.stage,
+            project=configuration.project,
+            secrets=configuration.secrets,
+            root=repository_root,
+        )
+    elif deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
     elif deployment == "control-plane":
         ControlPlaneStack(
@@ -52,7 +61,7 @@ def build_app(
             phase=phase,
         )
     else:
-        raise ValueError("deployment must be phase1, target, or control-plane")
+        raise ValueError("deployment must be phase1, target, control-plane, or web")
     return app
 
 
@@ -75,7 +84,15 @@ def main() -> None:
         raise ValueError("CDK context validation_action must be synth or deploy")
     configuration = load_configuration(repository_root, stage)
     validate_stage_for_action(configuration.stage, phase=phase, action=validation_action)
-    if deployment == "target":
+    if deployment == "web":
+        WebFoundationStack(
+            app,
+            stage=configuration.stage,
+            project=configuration.project,
+            secrets=configuration.secrets,
+            root=repository_root,
+        )
+    elif deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
     elif deployment == "control-plane":
         ControlPlaneStack(
@@ -101,7 +118,7 @@ def main() -> None:
             phase=phase,
         )
     else:
-        raise ValueError("CDK context deployment must be phase1, target, or control-plane")
+        raise ValueError("CDK context deployment must be phase1, target, control-plane, or web")
     app.synth()
 
 

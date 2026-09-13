@@ -1,5 +1,11 @@
 # 06. Delivery Plan
 
+## Web Foundation repository slice
+
+D-102 Proposedとして[Web Foundation](reviews/web_foundation.md)を実装。実公開・OAuth設定・production適用は未実行。
+public guideはFQDN/招待URLを除外したログイン不要の一般公開方針をユーザー承認済み。
+[release gate / 検証結果](runbooks/web_foundation.md)を参照。read-onlyとwriteのrelease境界は維持する。
+
 ## Current roadmap
 
 D-101 Accepted（2026-09-13、今後の順序とscope優先順位）。

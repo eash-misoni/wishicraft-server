@@ -183,12 +183,14 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
     if not isinstance(roles, list) or not all(isinstance(role, str) for role in roles):
         raise UnauthorizedInteraction("request is not authorized")
     kind = _parse_command(payload.get("data"), expected_guild_id=config.guild_id)
-    allowed_roles = (
-        {config.admin_role_id}
-        if kind in {InteractionKind.BACKUP, InteractionKind.SWITCH}
-        else {config.player_role_id, config.admin_role_id}
-    )
-    if not (allowed_roles & set(roles)):
+    from wishicraft.authorization import role_authorized
+
+    if not role_authorized(
+        roles,
+        player_role_id=config.player_role_id,
+        admin_role_id=config.admin_role_id,
+        admin_only=kind in {InteractionKind.BACKUP, InteractionKind.SWITCH},
+    ):
         raise UnauthorizedInteraction("request is not authorized")
     actor = _actor(member)
     return AuthorizedInteraction(
