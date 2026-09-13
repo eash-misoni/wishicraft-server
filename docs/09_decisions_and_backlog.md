@@ -1,6 +1,6 @@
 # 09. Decisions and Backlog
 
-## D-102 Web Foundation（Proposed、production未適用）
+## D-102 Web Foundation（Accepted、conditional release GO）
 
 public guide + authenticated read-only statusのrepository実装と一括release案。
 [architecture / OAuth / schema / 費用レビュー](reviews/web_foundation.md)、
@@ -8,7 +8,7 @@ public guide + authenticated read-only statusのrepository実装と一括release
 推奨は専用AWS HTTP API + Web/Auth Lambda + 短期session table。既存CPはGetItemのみ。
 D-101順序とwrite操作の次slice境界を維持する。
 今回のユーザー指示でpublic guideはログイン不要の一般公開可、FQDN/招待URL除外を確定。
-hosting account/service/URL/domain/費用・実公開は未承認。D-100 Pages案はhistorical candidate。
+2026-09-13ユーザーConditional GO（基準1636f18）。既存dev AWS/ap-northeast-1、専用Web stack、生成HTTPS URL、増分月$3目安を承認。token取得後の全経路revokeとWebSessionsだけDESTROYへ是正し、validation/CI/live diff条件成立後にreleaseする。custom domain/DNS/ACMは対象外。実適用結果はrunbookへ別記。D-100 Pages案はhistorical candidate。
 
 
 ## D-101 今後のロードマップとscope優先順位

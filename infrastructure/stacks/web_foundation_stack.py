@@ -64,7 +64,7 @@ class WebFoundationStack(Stack):
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             encryption=dynamodb.TableEncryption.AWS_MANAGED,
             time_to_live_attribute="expires_at",
-            removal_policy=RemovalPolicy.RETAIN,
+            removal_policy=RemovalPolicy.DESTROY,
         )
         future: Any = secrets.values["future_secure_parameters"]
         signing = str(future["web_session_signing_key"][f"{stage.stage}_parameter_name"])

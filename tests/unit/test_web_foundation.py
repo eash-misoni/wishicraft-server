@@ -343,6 +343,18 @@ def test_synthesized_environment_initializes_handler(monkeypatch: pytest.MonkeyP
         for v in resources.values()
     )
     assert len([v for v in resources.values() if v["Type"] == "AWS::DynamoDB::Table"]) == 1
+    ephemeral = next(v for v in resources.values() if v["Type"] == "AWS::DynamoDB::Table")
+    assert ephemeral["DeletionPolicy"] == "Delete"
+    assert ephemeral["UpdateReplacePolicy"] == "Delete"
+    assert ephemeral["Properties"]["TimeToLiveSpecification"] == {
+        "AttributeName": "expires_at",
+        "Enabled": True,
+    }
+    assert all(
+        v["DeletionPolicy"] == "Retain"
+        for v in resources.values()
+        if v["Type"] == "AWS::Logs::LogGroup"
+    )
 
 
 def test_deployed_handlers_use_real_cookie_store_and_packaged_assets(
@@ -506,3 +518,87 @@ def test_concurrent_saved_state_change_is_partial() -> None:
     result = reader.read(NOW)
     assert result["quality"] == "partial"
     assert result["players"]["state"] == "unknown"
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        "unexpected_scope",
+        "wrong_type",
+        "scope_not_text",
+        "type_not_text",
+        "member",
+        "role",
+        "revoke",
+        "player",
+        "admin",
+        "missing",
+        "empty",
+        "not_text",
+    ],
+)
+def test_callback_revokes_every_acquired_token_before_session(
+    case: str,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    calls: list[str] = []
+    token = secrets.token_urlsafe(32)
+
+    class Store(MemoryStore):
+        def put(self, key: str, value: dict[str, Any]) -> None:
+            if key.startswith("session-"):
+                calls.append("session")
+            super().put(key, value)
+
+    class OAuth(DiscordOAuth):
+        def request(self, path: str, **kwargs: Any) -> dict[str, Any]:
+            calls.append(path)
+            if path == "/oauth2/token":
+                return {
+                    "access_token": {"missing": None, "empty": "", "not_text": 1}.get(case, token),
+                    "token_type": {"wrong_type": "Basic", "type_not_text": None}.get(
+                        case, "Bearer"
+                    ),
+                    "scope": {"unexpected_scope": "identify email", "scope_not_text": []}.get(
+                        case, "identify guilds.members.read"
+                    ),
+                }
+            if path == "/oauth2/token/revoke":
+                assert kwargs["form"]["token"] == token
+                if case == "revoke":
+                    raise AuthRejected("revocation unavailable")
+                return {}
+            if path.endswith("/member"):
+                if case == "member":
+                    raise AuthRejected("membership denied")
+                return {
+                    "user": {"id": "9"},
+                    "roles": [] if case == "role" else ["4" if case == "admin" else "3"],
+                }
+            return {"id": "9"}
+
+    store = Store()
+    sessions = Sessions(store, secrets.token_bytes(32), POLICY)
+    app = AuthApp(
+        sessions, OAuth(POLICY, "", "https://web.example/auth/callback"), "https://web.example"
+    )
+    state, header = sessions.begin(int(NOW.timestamp()))
+    result = app.handle(
+        event(
+            "/auth/callback",
+            jar=header.split(";")[0],
+            query=urlencode({"state": state, "code": "code"}),
+        ),
+        NOW,
+    )
+    acquired = case not in {"missing", "empty", "not_text"}
+    assert calls.count("/oauth2/token/revoke") == int(acquired)
+    if case in {"player", "admin"}:
+        assert result["statusCode"] == 303
+        assert calls[-2:] == ["/oauth2/token/revoke", "session"]
+    else:
+        assert result["statusCode"] == 403
+        assert "session" not in calls
+        assert not store.records
+    assert token not in json.dumps(result) + json.dumps(store.records)
+    assert not capsys.readouterr().out

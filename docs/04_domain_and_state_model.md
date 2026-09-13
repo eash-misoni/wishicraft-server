@@ -1,6 +1,6 @@
 # 04. Domain and State Model
 
-> Web Foundation D-102（Proposed・production未適用）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。
+> Web Foundation D-102（Accepted・production適用前）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。
 
 > Reset契約（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)ではGames.world.current_idが選択world、Operationの固定targetが実行意図、receipt/containerが実状態。起動成功前の参照確定を正常稼働の証明としない。詳細はリンク先を正本とする。
 

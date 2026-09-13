@@ -460,7 +460,7 @@ reset前に最終バックアップを作成・検証し、旧世代を保持す
 
 ## 11. 管理Webページ要件
 
-Web Foundation read-only部分の具体契約は[D-102 Proposed](reviews/web_foundation.md)。
+Web Foundation read-only部分の具体契約は[D-102 Accepted](reviews/web_foundation.md)。
 保存済みSystemState/heartbeat/Operationを読むだけでSTATUS Operationや観測/repairを起動しない。
 unknown/0/not_expected、鮮度/部分失敗と選択/実観測を分離する。public guideはログイン不要、
 manage/APIはcanonical Discord Guild/member/player・admin role条件を必要とする。Web write操作は次slice。
@@ -478,7 +478,7 @@ Discord MVPと運用保護の完成を踏まえ、D-101の次の優先sliceをWe
 
 ### WEB-002 初期方式 `LATER`
 
-最初はDiscord OAuth2、HTTP API、数秒間隔のポーリングを使用する。WebSocketは必要性を確認してから追加する。
+D-102ではDiscord OAuth2、HTTP API、約1分間隔のポーリングを使用する。WebSocketは必要性を確認してから追加する。
 
 Web全体のhosting / URL / Discord OAuth / authorizationはWeb Foundationで決め、security boundaryで人間承認を受ける。browserへAWS権限を直接持たせない。write operationsはDiscordと同じAdmission / Operation / workflowを使い、Web専用制御を作らない。UI非表示だけでなくAPI側で既存role/policyに基づき認可する。
 

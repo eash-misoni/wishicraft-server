@@ -1,13 +1,14 @@
 # D-102 Web Foundation — production approval package
 
-状態: **Proposed / repository実装、production未適用**。2026-09-13。
+状態: **Accepted / Conditional GO、production適用前**。2026-09-13。
+承認基準1636f18。token取得後のgrant validationをrevokeのfinally内へ移し、WebSessionsだけDESTROYへ限定是正する。full validation/CI成功・live diffが承認範囲内なら追加gateなくreleaseする。
 基準HEADはD-101 `89fb8ec`。Web Foundationだけを扱い、current sequenceを維持する。
 
 ## 推奨構成と比較
 
 **既存dev AWS account/regionを候補とする専用HTTP API + Web Lambda + Auth Lambda + 短期session table**を推奨する。
 小さいguideの生成物はLambda assetに同梱し、同一originで配信する。最初は生成されたexecute-api HTTPS URLを使用する案。
-hosting account/service/URL/費用・初回公開は未承認。stage名devでも実利用resourceへの変更はproduction gate対象。
+既存dev AWS/ap-northeast-1、専用Web stack、生成HTTPS URL、月$3増分目安をユーザー承認済み。custom domain/DNS/ACMと既存Budget変更は対象外。
 
 | 案 | component / state接続 | secret / trust / 開発とrollback | 判断 |
 |---|---|---|---|
@@ -60,7 +61,7 @@ Origin/callbackを変更する際は固定登録URI・Lambda設定・既存sessi
   server側DynamoDB `DeleteItem ReturnValues=ALL_OLD`で一回だけ消費してからcode交換する。replayは拒否。
 - redirect URIはdeploy outputのorigin + `/auth/callback`をauthorize/token交換とも使用。
   request Host、returnTo、任意redirectを採用しない。upstream redirect自体も追従しない。
-- callback取得token/refresh tokenは保存しない。identity/member確認後、token revokeを要求し、失敗時はsessionを発行しない。
+- callback取得token/refresh tokenは保存しない。non-empty access token取得後はgrant validation/identity/member/認可の成否によらずbounded revokeを一回試みる。tokenなしはrevokeしない。validation/revoke失敗時はsessionを発行しない。
   外部呼出しはbounded timeout、raw upstream errorは表示/logしない。
 - sessionは256 bit opaque handle + HMAC-SHA256署名。`Secure; HttpOnly; SameSite=Lax; Path=/`、Domainなし、15分固定期限。
   DynamoDB consistent GetItemで毎回期限/policy fingerprint確認。TTL削除を失効判定に使わない。
@@ -120,7 +121,7 @@ SystemStateが途中で変わればpartial/人数unknown。これはtransaction 
 
 独立`WishicraftWebStack-dev`。既存Control Plane/Target/Frozen stackはdeploy対象にしない。共有role helperを含むsource asset hashは既存Control Planeのsynthでも変わるが、既存stackのdeployは今回の計画に含めない。
 新規: HTTP API 1、default stage、3 routes/integrations、Lambda 2、IAM roles/policies、14日log groups 2、
-session table 1（on-demand/encrypted/TTL/Retain）、Lambda Errors alarms 2。既存secret名参照2（secret作成なし）。
+session table 1（on-demand/encrypted/TTL/DESTROY）、Lambda Errors alarms 2。既存secret名参照2（secret作成なし）。
 CDK asset bucketは既存bootstrapを利用する。Web公開用S3 bucket/CloudFront/NAT/VPC/Route53/ACMなし。
 
 Web role: CPの4 tableへGetItemだけ。SystemState/heartbeatはLeadingKeys=canonical system。
@@ -152,5 +153,7 @@ CloudFrontはFree/$15/$200等のflat-rate planもあるが、配信を無料と�
 ## Local / validation / release
 
 [release runbook](../runbooks/web_foundation.md)を参照。ローカルfixtureは実認証の保証ではない。
-実OAuth/production E2E、live stack diff、AWS preflightは今回未実行。secret/redirect/publication未承認のため実行しない。
+実OAuth/production E2E、live stack diff、AWS preflightの適用状況はrunbookへ記録する。条件成立後に承認済みrelease順序で実行し、secret非echo入力とPortal登録だけ人間へ依頼する。
 repository test・実ブラウザ・CI結果は同runbookのcloseoutへ記載する。
+
+WebSessionsは15分の認証補助記録で業務/監査正本ではない。stack削除/置換でDeleteし、再作成後は全員再loginとする。TTLはcleanup専用。Backup provenance等のdurable tableとlogのRetainは変更しない。

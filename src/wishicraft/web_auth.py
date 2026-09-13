@@ -196,14 +196,17 @@ class DiscordOAuth:
             },
         )
         token = token_response.get("access_token")
-        if (
-            not isinstance(token, str)
-            or not token
-            or token_response.get("token_type", "").lower() != "bearer"
-            or set(token_response.get("scope", "").split()) != set(SCOPES.split())
-        ):
+        if not isinstance(token, str) or not token:
             raise AuthRejected("invalid OAuth grant")
         try:
+            token_type, scope = token_response.get("token_type"), token_response.get("scope")
+            if (
+                not isinstance(token_type, str)
+                or token_type.lower() != "bearer"
+                or not isinstance(scope, str)
+                or set(scope.split()) != set(SCOPES.split())
+            ):
+                raise AuthRejected("invalid OAuth grant")
             identity = self.request("/users/@me", token=token)
             member = self.request(f"/users/@me/guilds/{self.policy.guild_id}/member", token=token)
             self.policy.authorize(identity, member)

@@ -2,8 +2,8 @@
 
 ## Web Foundation repository slice
 
-D-102 Proposedとして[Web Foundation](reviews/web_foundation.md)を実装。実公開・OAuth設定・production適用は未実行。
-public guideはFQDN/招待URLを除外したログイン不要の一般公開方針をユーザー承認済み。
+D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)を実装。実公開・OAuth設定・production適用は未実行。
+public guideはFQDN/招待URL除外・ログイン不要。2026-09-13に限定是正後のread-only production releaseをConditional GO。条件・手順はD-102 runbookを正本とする。
 [release gate / 検証結果](runbooks/web_foundation.md)を参照。read-onlyとwriteのrelease境界は維持する。
 
 ## Current roadmap

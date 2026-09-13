@@ -1,6 +1,6 @@
 # Web Foundation release / rollback runbook
 
-D-102 Proposed。通常repository作業とproduction承認を分離する。
+D-102 Accepted。2026-09-13ユーザーConditional GO（基準1636f18）。revoke境界・WebSessionsだけDESTROYへ是正後、full validation/CI成功とlive diff条件に基づき、下記read-only releaseを追加確認なしで進める。実適用完了とは区別する。
 設計・schema・費用・trust boundaryは[review](../reviews/web_foundation.md)。
 
 ## ローカル表示
@@ -17,9 +17,9 @@ loopbackだけbind。毎回新しいtemporary root、fake session/keyはprocess 
 実ブラウザ検証: `tools/dev-env run -- node web/foundation-browser.mjs --chrome`。
 CIは同scriptをbundled Chromiumで実行。画像/result.jsonを各invocationのtemporary rootへ保存する。
 
-## 承認対象となる一括release計画（まだ実行禁止）
+## 承認済みの一括release計画
 
-1. 人間がhosting account=既存dev AWS、service=専用HTTP API/Lambda、生成HTTPS URL、費用目安を承認する。
+1. hosting account=既存dev AWS/ap-northeast-1、専用HTTP API/Lambda、生成HTTPS URL、増分月$3目安は承認済み。
    新account/projectの作成は不要という案。Minecraft Target、既存Control Plane、Discord command設定はdeploy対象外。
 2. operatorがcanonical `wishicraft-dev` sessionへlogin。STS Account/Regionをstage YAMLと照合。
    mismatch/期限切れは停止。IAM追加で迂回しない。
@@ -28,7 +28,7 @@ CIは同scriptをbundled Chromiumで実行。画像/result.jsonを各invocation�
    `$WEB_RELEASE_ROOT`は毎回mktempで作る。既存assemblyを上書きしない。
 4. `cdk diff --change-set=false`（同context/profile/output）で新Web stackだけをreview。
    existing CP/Target/Frozen resource置換、未知IAM/secret/DNS/SG差分は停止。
-   session table Retain、CP GetItem only、secret path 2件、実handler environmentとの一致を照合する。
+   session table DeletionPolicy/UpdateReplacePolicy=Delete、CP GetItem only、secret path 2件、実handler environmentとの一致を照合する。
 5. 人間がDiscord Developer Portalで既存stage ApplicationのOAuth client secretを安全なoperator経路から確認する。
    値をチャット/引数/env/logに入れず、SecureString `/wishicraft/dev/secret/discord-oauth-client-secret`へ非echo入力で登録。
    cryptographic random 32 bytes以上のsigning secretも `/wishicraft/dev/secret/web-session-signing-key`へ同様に登録。
@@ -36,11 +36,10 @@ CIは同scriptをbundled Chromiumで実行。画像/result.jsonを各invocation�
 6. 承認済みWeb stackだけdeploy（`--all`禁止）。**この時点でpublic guideが公開される**。
    Authはredirect未登録の間fail closed。公開とOAuth登録を不可分に見せない。
 7. output `OAuthRedirectUri`をPortalへ完全一致登録。URL/secretを手入力の第二role policyにしない。
-   選択案ではDNS/TLS変更なし。custom domainを選ぶ場合は追加diff/費用を具体化してから同承認範囲へ含める。
+   今回はDNS/TLS/ACM変更なし。custom domainは安定後の別slice。
 8. 下記E2E後、人間がrole/session 15分失効境界を確認してrelease closeout。
 
-まだ実行しない操作: AWS resource作成/deploy、secret取得/保存、Portal変更、URL登録、DNS/TLS、
-Lambda直接invoke・productionテスト、Discord/Guild変更。repository commit/push/CIは許可済み。
+承認済み: 専用Web stack deploy、exact secret 2件の初回登録（overwrite禁止）、generated URLのOAuth登録、read-only E2E。Portal操作とsecret入力は人間が行う。禁止: custom domain/DNS/ACM、既存CP/Target/Frozen変更、Minecraft起動、Guild/role変更、bot token変更・複製、Web write操作。
 
 ## production E2E計画
 
@@ -59,7 +58,7 @@ Lambda直接invoke・productionテスト、Discord/Guild変更。repository comm
 既存Minecraft操作・Data EBS・Control Plane recordには戻し操作をしない。
 Web更新時は直前成功commitの同Web stackへ戻す。assetとhandlerは同stack releaseで揃える。
 初回release障害なら公開を止めるためWeb API/Lambdaだけを無効化する承認済みoperator手順を選び、
-残すsession table/logはRetain。初回に「以前のWeb stack」があるとは扱わない。
+session tableはDESTROY、logはRetain。初回に「以前のWeb stack」があるとは扱わない。
 secret漏洩/認可不整合なら公開停止、signing key rotationでsession/state全失効、OAuth grant revokeを人間経路で行う。
 結果不明deployはstack events/read-only statusを確認し、再作成/削除を推測実行しない。
 
@@ -81,3 +80,25 @@ operation毎のcanonical認可、actor attribution、CSRF、confirmation/idempot
   test追加途中のimport不足、Dynamo list decode、Chrome logout Origin問題は修正して新規rootで再検証済み。
 - 実OAuth・AWS deploy・live diff・production E2Eは未実行。Docker CLIはlocal未導入、実Docker回帰はCIで確認する。
 - CI runはpush後、final handoffでcommitとともに報告する。
+
+## 人間端末でのsecret初回登録
+
+CI/live diff/caller照合後だけ、repository rootで次を実行する。
+
+```sh
+tools/dev-env run -- uv run python -m web.register_secrets
+```
+
+stage正本Application IDのDeveloper Portal → OAuth2のClient Secretを、上の非echo promptへ直接入力する。
+chat、shell引数、環境変数、履歴、ファイルに値を置かない。非TTYは拒否、既存Parameterは値を読まず保持する。
+signing keyはprocess内で48 random bytesから生成して直接SecureStringへ登録し、表示しない。
+PutParameterはOverwrite=false、SDK自動retryなし。結果不明なら再実行せずmetadata調査で停止する。
+既存client secretをPortalで取得できずReset Secret/Regenerateが必要なら、それは人間操作として明示し、Codexは実行しない。Bot TokenのResetは行わない。
+
+## 今回の適用checkpoint
+
+- revoke境界とWebSessionsのみDESTROYの限定是正を実装。focused 45件、full 1,144件成功（51.24秒）。Ruff lint/format、mypy 181 source、Web synth成功。
+- DeletionPolicy/UpdateReplacePolicyはWebSessions=Delete、log=Retainをsynthで固定。既存durable tableの保持回帰もfull testで成功。
+- 初回full検証の3 failures/47 setup errorsはPyPI DNS制限による既存Discord bundling失敗。正規bundling-cache準備後、新rootでfull再検証成功。
+- validation root: `wishicraft-web-release-tests-v2-ma8ok70o`、synth root: `wishicraft-web-release-synth-j66r084h`（local temporary directory）。
+- AWS/secret/Portalはまだ操作していない。次はcommit/push/CIの成功確認、その後canonical caller/live diff。
