@@ -1,9 +1,12 @@
 # D-100 静的利用案内Webと公開準備
 
-**状態:** repository内の設計・実装・ローカル/CI検証を委任された独立slice。Web公開・hosting採用・閲覧範囲・URLは未承認。
+**状態:** 内容・ローカル構成は承認済み、公開条件は未決。D-100全体の完了やhosting採用の承認ではない。
+2026-09-13のユーザーレビュー承認により、公開候補のページ・生成処理を `81f181d90412fe6d440d9866f0106a7b0ef77c8a` に固定する。追加のUI再設計・文章拡充・ページ構成変更は行わず、新たに判明した不具合だけ必要最小限で対応する。
+同HEADのCI run `34737820030` は承認記録時点でQueued、成功未確認。直前commitの成功で代替しない。以下の実装・ローカル検証記録を保持し、公開候補と承認記録だけを更新した文書HEADを区別する。
+Web公開・hosting project作成・DNS/TLS/Access変更・自動公開の有効化・AWS/Discord/Hostへのproduction操作は未実施・未承認。閲覧者・認証・最終URL・費用上限も未決。
 基準HEADは前回準備完了 `940aa0337433ec7ca268c3a5d95f656d7091bc44`。originと一致・cleanを確認して継続した。
 D-099 Completed / release COMPLETED / PRODUCTION_VERIFIEDを維持し、完了E2Eは再実行しない。
-今回の追加委任はGame中心の参加導線・公開Game一覧からの生成・検証。既存の外観とページ別URLを維持し、終了点はGame中心のローカル再確認である。
+前回の追加委任はGame中心の参加導線・公開Game一覧からの生成・検証。既存の外観とページ別URLを維持し、Game中心のローカル再確認を経て上記の内容承認に至った。
 
 ## 動くページとローカルレビュー
 
@@ -183,7 +186,7 @@ backend/Discord/Hostのsource・infra・設定は変更対象外。通常の既�
 
 ## 公開承認の具体的な範囲
 
-承認に必要なのは、(a) Cloudflare Pages採用と実account/所有者、(b)全員閲覧か許可者限定か・認証方式、(c)17ファイルの本文と除外方針、(d)pages.dev候補またはWeb専用subdomain、(e)費用上限、(f)初回project/upload/必要なAccess、任意のWeb DNS/TLS、公開検証、Webだけの差戻し・緊急遮断。
+公開の別承認に必要なのは、(a) Cloudflare Pages採用と実account/所有者、(b)全員閲覧か許可者限定か・認証方式、(c)内容承認済み17ファイルをその閲覧範囲へ公開する可否と除外方針、(d)pages.dev候補またはWeb専用subdomain、(e)費用上限、(f)初回project/upload/必要なAccess、任意のWeb DNS/TLS、公開検証、Webだけの差戻し・緊急遮断。
 独自domainを承認しなければAWS/DNS変更は不要。Discord送信・command登録、production deploy/IAM、Lambda invoke/Reconcile/SSM、START/STOP、Game/world/Snapshot/provenanceはこの公開承認にも含めない。
 
 **READY FOR USER GUIDE WEB / GAME-CENTERED LOCAL REVIEW** は修正版のローカルデザインレビュー準備完了を示す。Web公開済み、D-100のhosting採用済み、production変更済みという意味ではない。
