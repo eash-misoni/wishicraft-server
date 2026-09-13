@@ -45,7 +45,7 @@ jobs:
       - run: >-
           tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
-          --context two_games=true --context reset=true
+          --context two_games=true --context reset=true --context game_creation=true
       - run: >-
           tools/dev-env run -- npx --no-install cdk synth WishicraftWebStack-dev
           --context stage=dev --context phase=8 --context deployment=web
@@ -99,3 +99,6 @@ jobs:
 
       - name: Verify game-scoped Reset and limited world cleanup with real Docker
         run: sudo --preserve-env=CI python3 tests/integration/targeted_runtime_docker.py --reset
+
+      - name: Verify metadata creation and first START/SWITCH with real Docker
+        run: sudo --preserve-env=CI python3 tests/integration/targeted_runtime_docker.py --creation

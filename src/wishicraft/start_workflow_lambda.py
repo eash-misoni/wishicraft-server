@@ -187,6 +187,10 @@ def handler(event: object, context: object) -> dict[str, object]:
         observation = StartObservation.from_item(_mapping(payload, "state"))
         if not observation.ready_for_success(runtime.game_id):
             raise StartWorkflowError(StartErrorCode.ENDPOINT_DISCREPANCY)
+        if os.environ.get("GAME_CREATION") == "1":
+            from wishicraft.game_creation import complete_materialization
+
+            complete_materialization(runtime, proof, now)
         result = None
         if os.environ.get("RESET_CONTRACT") == "1":
             from wishicraft.reset_contract import operation

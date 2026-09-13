@@ -1,5 +1,8 @@
 # 05. Data and Interface Contracts
 
+> Minimal Game Creation: D-105 repository実装・production未適用。[登録／初回起動／RESET／recoveryの差分契約](reviews/minimal_game_creation.md)、[production gate](runbooks/minimal_game_creation.md)。適用済みD-096〜104契約とA/Bは維持する。
+
+
 > Existing Operations via Web: D-104 Accepted / production Completed (2026-09-13). [共有Admission・認可・CSRF・request/Operation契約](reviews/existing_operations_web.md)、[release/E2E/rollback](runbooks/existing_operations_web.md)。既存backend safety contractを維持する。
 
 > Web Foundation D-102（Accepted・production適用済み、実証範囲はrunbook）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。

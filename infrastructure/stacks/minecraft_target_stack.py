@@ -106,7 +106,7 @@ class MinecraftTargetStack(Stack):
                 resources=[
                     f"arn:aws:dynamodb:{stage.aws_region}:{stage.aws_account_id}:table/"
                     + resource_name(project.resource_prefix, stage.stage, suffix)
-                    for suffix in ("operations", "locks")
+                    for suffix in ("operations", "locks", "games")
                 ],
             )
         )

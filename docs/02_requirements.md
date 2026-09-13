@@ -446,9 +446,11 @@ Gameは具体的なPackage version、Minecraft version、Java runtimeへ固定�
 
 MODとPaper系プラグインを同一Gameで混在させるハイブリッド構成は初期対象外とする。
 
-### CREATE-001 作成と起動分離 `LATER`
+### CREATE-001 作成と起動分離 `MUST / D-105 repository slice`
 
-Game作成は起動と分離し、Game metadataの登録だけでEC2を起動しない。現在はWebから対応済み実行構成を選び、display name等の必要項目を指定する最小作成を優先する。`/mc create`と初回start時materializeは従来の拡張要求として保持し、汎用wizard・Package/Preset/Template独立管理を先行しない。
+Admin限定Webからdisplay name・numeric initial seed（blankは一度固定）・RESET capability（default off）を指定し、shared Admissionのatomic transactionでGame metadataとterminal Operationを登録する。CREATEはEC2/Docker/world/Snapshot/DNS/SSMを起動・作成しない。後日の既存START/SWITCH共通target pathで、同じGame/seed/pathを初回materializeする。
+
+actor-bound idempotency、unmaterialized表示、途中準備のowner照合、dynamic RESET capability、shared-v2 recoveryへの全登録Game収録を必須とする。既存A/Bのidentity/world/path/seed/policyは変更しない。詳細と失敗・loss boundaryは[D-105](reviews/minimal_game_creation.md)。productionは未適用。`/mc create`、削除、汎用wizard、Package/Preset/Template/runtime一般化は今回対象外。
 
 作成Gameをpublic guideへ自動掲載しない。掲載は説明とclient要件を揃えた明示的公開登録とする。作成時に必要な初期whitelistと、後から編集するWhitelist Managementは別scopeとする。
 

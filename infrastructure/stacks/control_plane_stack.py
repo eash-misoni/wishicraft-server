@@ -47,6 +47,7 @@ class ControlPlaneStack(Stack):
         phase: int = 0,
         games: tuple[str, ...] | None = None,
         reset_policies: dict[str, dict[str, int]] | None = None,
+        game_creation: bool = False,
     ) -> None:
         super().__init__(
             scope,
@@ -55,6 +56,8 @@ class ControlPlaneStack(Stack):
             description="Wishicraft Reconcile, current state, and Operation admission",
             analytics_reporting=False,
         )
+        if game_creation and (not games or reset_policies is None):
+            raise ValueError("Game creation requires the current shared runtime and Reset contract")
         raw_tags = project.values["resource_tags"]
         assert isinstance(raw_tags, dict)
         tags = resource_tags(
@@ -1029,6 +1032,57 @@ class ControlPlaneStack(Stack):
             for task in (start_task, stop_task):
                 task.add_environment("RUNTIME_CONFIG_DIGEST", rendered.digest)
             assert backup_task is not None
+            creation_defaults = {
+                "package": {"package_id": "vanilla", "package_version": "initial-fixed-version"},
+                "runtime": {
+                    "class": "default",
+                    "idle_shutdown_minutes": stage.idle_shutdown_minutes,
+                },
+                "config_digest": rendered.digest,
+                "initial_whitelist": [
+                    {
+                        "uuid": project.initial_minecraft_profile_uuid_hyphenated,
+                        "name": project.initial_minecraft_profile_name,
+                    }
+                ],
+            }
+            if game_creation:
+                if self.node.try_get_context("create_disabled") == "true":
+                    admission.add_environment("CREATE_DISABLED", "1")
+                registry_readers = {
+                    "ReconcileFunction",
+                    "StartTaskFunction",
+                    "StopTaskFunction",
+                    "BackupTaskFunction",
+                    "RetentionTaskFunction",
+                    "AdmissionFunction",
+                    "DiscordCommandFunction",
+                    "AutoStopEvaluatorFunction",
+                }
+                for child in self.node.find_all():
+                    if isinstance(child, lambda_.Function) and child.node.id in registry_readers:
+                        child.add_environment("GAME_CREATION", "1")
+                        child.add_environment("GAMES_TABLE", games_table.table_name)
+                        if child.node.id in {"RetentionTaskFunction", "DiscordCommandFunction"}:
+                            child.add_to_role_policy(
+                                iam.PolicyStatement(
+                                    actions=["dynamodb:GetItem"], resources=[games_table.table_arn]
+                                )
+                            )
+                admission.add_environment(
+                    "GAME_CREATION_DEFAULTS",
+                    __import__("json").dumps(creation_defaults, separators=(",", ":")),
+                )
+                start_task.add_to_role_policy(
+                    iam.PolicyStatement(
+                        actions=["dynamodb:UpdateItem"], resources=[games_table.table_arn]
+                    )
+                )
+                start_task.add_to_role_policy(
+                    iam.PolicyStatement(
+                        actions=["dynamodb:ConditionCheckItem"], resources=[locks_table.table_arn]
+                    )
+                )
             backup_task.add_environment("GAMES_TABLE", games_table.table_name)
             backup_task.add_environment(
                 "RECOVERY_RUNTIME_JSON",
@@ -1037,6 +1091,7 @@ class ControlPlaneStack(Stack):
                         "manifest_json": rendered.manifest_json,
                         "runtime_env": rendered.runtime_env,
                         "compose_yaml": rendered.compose_yaml,
+                        **({"creation_config": creation_defaults} if game_creation else {}),
                     },
                     separators=(",", ":"),
                 ),

@@ -103,6 +103,30 @@ def _handle(event: object, context: object) -> dict[str, object]:
                 "created": False,
                 "lease_id": None,
             }
+    if isinstance(event, dict) and event.get("operation_type") == "CREATE":
+        from wishicraft.game_creation import create
+        from wishicraft.web_operations import WebRejected
+
+        if (
+            web is None
+            or os.environ.get("GAME_CREATION") != "1"
+            or os.environ.get("CREATE_DISABLED") == "1"
+        ):
+            raise WebRejected("forbidden", 403)
+        event = dict(event)
+        value = event.pop("creation", None)
+        _parse_event(event)
+        try:
+            return create(
+                _get_service()._repository,
+                value=value,
+                key=event["idempotency_key"],
+                actor=web,
+                now=datetime.now(UTC),
+                defaults=json.loads(_required_environment("GAME_CREATION_DEFAULTS")),
+            )
+        except ValueError as error:
+            raise WebRejected("invalid_input") from error
     extra: AdmissionExtra = {}
     if web is not None:
         extra["web"] = web

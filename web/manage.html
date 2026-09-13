@@ -12,6 +12,7 @@
 <p id="notice" role="status" aria-live="polite">読み込み中です。</p>
 <button id="refresh" type="button">表示を更新</button>
 <div id="status" class="listing"></div>
+<section class="card"><h2>登録済みGame</h2><div id="registered-games"></div></section>
 <section class="card" aria-labelledby="operations-title"><h2 id="operations-title">操作</h2>
 <p>受付後に実行結果を確認してください。表示された人数は安全判定の代わりにはなりません。</p>
 <p id="operations-notice" role="status" aria-live="polite">操作情報を読み込み中です。</p>
@@ -20,6 +21,12 @@
 <h3 id="operation-title"></h3><p id="operation-help"></p>
 <label id="game-label">対象Game <select id="operation-game"></select></label>
 <label id="seed-label" hidden>seed <select id="operation-seed"><option value="fixed">宣言済み固定seed</option><option value="new">新しいseed</option></select></label>
+<div id="creation-fields" hidden>
+<label>Display name <input id="creation-name" maxlength="80" autocomplete="off"></label>
+<label>Initial seed <input id="creation-seed" inputmode="numeric" placeholder="空欄はrandom（登録時に固定）"></label>
+<label><input type="checkbox" id="creation-reset"> RESETを有効にする</label>
+<p>Runtime: 現在の固定Vanilla構成。作成後の削除機能はありません。</p>
+</div>
 <p id="game-capability"></p><button id="review-operation" type="submit">内容を確認</button>
 <button id="cancel-operation" type="button">キャンセル</button>
 </form>

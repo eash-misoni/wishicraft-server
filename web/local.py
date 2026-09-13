@@ -118,6 +118,7 @@ def main() -> None:
         "--scenario",
         choices=[
             "stopped",
+            "creation",
             "running",
             "players",
             "stale",
@@ -131,6 +132,10 @@ def main() -> None:
         default="stopped",
     )
     args = cli.parse_args()
+    if args.scenario == "creation":
+        import os
+
+        os.environ["GAME_CREATION"] = "1"
     root = Path(tempfile.mkdtemp(prefix="wishicraft-foundation-local-"))
     site = root / "site"
     build_foundation(Path(__file__).resolve().parents[1], site)

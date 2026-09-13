@@ -134,7 +134,15 @@ def test_retention_shares_the_same_global_lock_conflict_boundary(
     retention_lock = cast(dict[str, object], transaction_items(retention_api)[3]["Put"])
     conflicting_lock = cast(dict[str, object], transaction_items(conflicting_api)[3]["Put"])
     assert retention_lock["TableName"] == conflicting_lock["TableName"] == "locks"
-    assert retention_lock["Item"] == conflicting_lock["Item"]
+    assert {
+        k: v
+        for k, v in cast(dict[str, object], retention_lock["Item"]).items()
+        if k != "operation_type"
+    } == {
+        k: v
+        for k, v in cast(dict[str, object], conflicting_lock["Item"]).items()
+        if k != "operation_type"
+    }
     assert (
         retention_lock["ConditionExpression"]
         == conflicting_lock["ConditionExpression"]

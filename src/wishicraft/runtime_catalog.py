@@ -18,11 +18,11 @@ class RuntimeCatalog:
         raw = json.loads(value)
         if (
             not isinstance(raw, list)
-            or len(raw) != 2
+            or not raw
             or not all(isinstance(x, str) and re.fullmatch(r"game-[a-z0-9-]+", x) for x in raw)
-            or len(set(raw)) != 2
+            or len(set(raw)) != len(raw)
         ):
-            raise ValueError("invalid two-Game catalog")
+            raise ValueError("invalid Game catalog")
         return cls(tuple(raw))
 
     def data_source(self, game_id: str) -> str:
@@ -36,7 +36,17 @@ class RuntimeCatalog:
 
 def configured_catalog() -> RuntimeCatalog | None:
     value = os.environ.get("RUNTIME_GAMES")
-    return RuntimeCatalog.parse(value) if value else None
+    if not value:
+        return None
+    catalog = RuntimeCatalog.parse(value)
+    if os.environ.get("GAME_CREATION") == "1":
+        import importlib
+
+        from wishicraft.game_creation import registry_ids
+
+        api = importlib.import_module("boto3").client("dynamodb")
+        return RuntimeCatalog(registry_ids(api, os.environ["GAMES_TABLE"], catalog.game_ids))
+    return catalog
 
 
 def selected_game(api: Any, table: str, system_id: str, default_game: str) -> str:

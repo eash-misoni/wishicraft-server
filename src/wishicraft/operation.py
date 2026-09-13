@@ -27,7 +27,7 @@ class OperationType(StrEnum):
 
     @property
     def requires_lock(self) -> bool:
-        return self is not OperationType.STATUS
+        return self not in {OperationType.STATUS, OperationType.CREATE}
 
 
 class OperationStatus(StrEnum):
@@ -413,6 +413,7 @@ class OperationAdmissionRepository:
                             "lock_name": self._lock_name,
                             "resource_id": self._system_id,
                             "owner_operation_id": request.operation_id,
+                            "operation_type": request.operation_type.value,
                             "lease_id": lease_id,
                             "acquired_at": utc_timestamp(request.requested_at),
                             "lease_expires_at": requested_epoch + self._lease_seconds,

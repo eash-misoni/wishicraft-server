@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from wishicraft.artifacts import targeted_runtime as host  # noqa: E402
 
 IMAGE = (
@@ -25,8 +26,9 @@ IMAGE = (
 
 
 def main() -> None:
+    creation = "--creation" in sys.argv
     reset = "--reset" in sys.argv
-    two_games = "--two-games" in sys.argv or reset
+    two_games = "--two-games" in sys.argv or reset or creation
     root = Path(tempfile.mkdtemp(prefix="wishicraft-targeted-docker-"))
     print("fixture:", root, flush=True)
     data = root / "data"
@@ -161,6 +163,13 @@ services:
         )
 
     def execute(args: list[str], *, timeout: int = 30) -> str:
+        if creation and args == [
+            "bash",
+            "-c",
+            'set -aeu; source /etc/wishicraft/host-runtime.env; "$MOUNT_GUARD" --verify',
+        ]:
+            assert Path("/srv/minecraft/games").is_dir()
+            return ""
         if args[0] == "bash":
             # Exercise the real Compose parsing done by the host filesystem preflight.
             # Platform mount/ownership checks remain replaced by this synthetic boundary.
@@ -382,6 +391,101 @@ services:
     print(
         "PASS real v2 START/STOP/new-run START, saved scoreboard=42, rm reply loss, bind preserved"
     )
+    if creation:
+        from datetime import UTC, datetime
+
+        from web.local_operations import MemoryDynamo, service
+        from wishicraft.game_creation import create
+        from wishicraft.operation import WebOperationContext
+        from wishicraft.web_status import decode
+
+        db = MemoryDynamo()
+        domain = service(db)
+        config.update(
+            game_creation=True, games_table="games", reset_policies={}, initial_whitelist=[]
+        )
+        host.CONFIG.write_text(json.dumps(config))
+        host.item = lambda config, table, key, identity: (
+            {k: decode(v) for k, v in db.records["games", identity].items()}
+            if table == "games_table"
+            else operation
+            if table == "operations_table"
+            else lease
+        )
+        for number in range(2):
+            created_result = create(
+                domain._repository,
+                value={
+                    "display_name": "CI persistent synthetic fixture",
+                    "seed": "42",
+                    "reset": True,
+                },
+                key="web:" + hashlib.sha256((root.name + str(number)).encode()).hexdigest(),
+                actor=WebOperationContext("9", "CI", "a" * 64, "b" * 64),
+                now=datetime.now(UTC),
+                defaults={
+                    "package": {
+                        "package_id": "vanilla",
+                        "package_version": "initial-fixed-version",
+                    },
+                    "runtime": {"class": "default", "idle_shutdown_minutes": 30},
+                    "config_digest": target["config_digest"],
+                },
+            )
+            game_id = db.records["operation", str(created_result["operation_id"])][
+                "target_game_id"
+            ]["S"]
+            destination = Path("/srv/minecraft/games") / game_id / "server"
+            assert not destination.exists(), "CREATE must not materialize"
+            source = dict(target)
+            target = {
+                **target,
+                "game_id": game_id,
+                "data_source": str(destination),
+                "run_id": f"op-create-start-{number}",
+            }
+            operation.update(
+                operation_id=target["run_id"],
+                operation_type="SWITCH" if number else "START",
+                target_game_id=game_id,
+                runtime_target=target,
+            )
+            lease["owner_operation_id"] = target["run_id"]
+            request.update(operation_id=target["run_id"], action="START")
+            if number:
+                operation["switch_source"] = source
+                destination_target = target
+                target = source
+                request["action"] = "STOP"
+                host.apply(request)
+                target = destination_target
+                request["action"] = "START"
+            host.apply(request)
+            host.apply(request)  # Same target/run and same initial owner, no second directory.
+            current = host.inspect()[0]
+            assert "42" in real_execute(["docker", "exec", current["Id"], "rcon-cli", "seed"])
+            assert destination.joinpath("world/level.dat").is_file()
+            print("CREATE_FIRST_MATERIALIZED", number, game_id, flush=True)
+        operation["operation_type"] = request["action"] = "STOP"
+        host.apply(request)
+        target = {**target, "run_id": "op-created-restart"}
+        operation.update(
+            operation_id=target["run_id"], operation_type="START", runtime_target=target
+        )
+        lease["owner_operation_id"] = target["run_id"]
+        request.update(operation_id=target["run_id"], action="START")
+        host.apply(request)
+        operation["operation_type"] = request["action"] = "STOP"
+        host.apply(request)
+        assert b_saved and all(
+            hashlib.sha256(Path(p).read_bytes()).hexdigest() == digest
+            for p, digest in b_saved.items()
+        )
+        print(
+            "PASS metadata CREATE / first START / first SWITCH / retry / STOP / restart / "
+            "A-B noninterference",
+            flush=True,
+        )
     if reset:
         # The existing adapter performs every real Docker save/stop/removal/start below.
         anchor = data

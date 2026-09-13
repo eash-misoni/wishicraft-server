@@ -80,12 +80,14 @@ const newButton = document.querySelector('#new-operation');
 const storageKey = 'wishicraft-pending-operation-v1'; // Request only: no session, identity or CSRF token.
 let capabilities, chosen, draft, pending, opBusy = false, opTimer, terminal = false;
 try { pending = JSON.parse(localStorage.getItem(storageKey) || 'null'); } catch { pending = null; }
-const opNames = {START:'起動', STOP:'停止', SWITCH:'Game切替', BACKUP:'バックアップ', RESET:'ワールドリセット'};
+const opNames = {CREATE:'Gameを作成', START:'起動', STOP:'停止', SWITCH:'Game切替', BACKUP:'バックアップ', RESET:'ワールドリセット'};
 const help = {
+  CREATE:'persistent metadataとして登録します。EC2・Minecraftの起動、world生成は行いません。後からSTARTまたはSWITCHしてください。公開ガイドへは掲載されません。',
+
   START:'登録済みGameを起動します。別Gameの稼働中は切り替えません。',
   STOP:'backendが実runtimeを確認し、保存・正常停止します。選択Gameから停止対象を推測しません。',
   SWITCH:'現在のGameを保存・正常停止して対象Gameへ切り替えます。正常稼働・観測人数0が必要で、backendと停止直前のhostで再確認します。',
-  BACKUP:'停止中・正常な共有Data EBS全体のSnapshotを作成します。両Gameを含む保護で、単一Gameだけの保存ではありません。',
+  BACKUP:'停止中・正常な共有Data EBS全体のSnapshotを作成します。登録済みGameを含む保護で、単一Gameだけの保存ではありません。',
   RESET:'選択中かつ稼働中の対応Game、観測人数0が必要です。地形・持ち物・位置・進捗を新しくします。旧worldの同じEBS上での保持は外部バックアップとは別で、EBS喪失時には最後の外部BACKUP以降を失い得ます。毎回Snapshotは作りません。'
 };
 const errors = {forbidden:'この操作の権限がありません。', invalid_input:'入力を確認してください。',
@@ -104,9 +106,9 @@ async function opFetch(path, options = {}) {
 function capabilityDetail() {
   const g = capabilities.games.find(g => g.key === gameSelect.value);
   document.querySelector('#game-capability').textContent = !g ? '' :
-    `Reset ${g.reset ? '対応' : '非対応'} / 選択world: ${g.world === 'managed' ? 'Resetで作成された保存領域' : '初期保存領域'} / 登録更新: ${time(g.world_updated_at)}` +
+    `Reset ${g.reset ? '対応' : '非対応'} / 選択world: ${g.world === 'never_started' ? '未起動（Registered）' : g.world === 'managed' ? 'Resetで作成された保存領域' : '初期保存領域'} / 登録更新: ${time(g.world_updated_at)}` +
     (g.reset ? ` / 旧worldは直近${g.retain_previous}個と初期anchorを保持。それ以前は成功後に整理します。` : '');
-  document.querySelector('#review-operation').disabled = chosen === 'RESET' && !g?.reset;
+  document.querySelector('#review-operation').disabled = chosen === 'RESET' && (!g?.reset || g?.materialized === false);
 }
 function choose(kind) {
   if (pending || opBusy) return;
@@ -115,6 +117,7 @@ function choose(kind) {
   document.querySelector('#operation-help').textContent = help[kind];
   document.querySelector('#game-label').hidden = !['START','SWITCH','RESET'].includes(kind);
   document.querySelector('#seed-label').hidden = kind !== 'RESET';
+  document.querySelector('#creation-fields').hidden = kind !== 'CREATE';
   capabilityDetail(); gameSelect.focus();
 }
 function renderOperation(op) {
@@ -139,6 +142,12 @@ async function track() {
     const r = await opFetch(pending ? '/api/operations/request/' + encodeURIComponent(pending.request_id) : '/api/operations/current');
     if (!r.ok) throw new Error('read');
     renderOperation(r.body.operation);
+    if (r.body.operation?.type === 'CREATE' && r.body.operation.status === 'SUCCEEDED') {
+      const caps = await opFetch('/api/capabilities');
+      if (caps.ok) { capabilities = caps.body; renderGames(); gameSelect.replaceChildren();
+        for (const g of capabilities.games) { const o = document.createElement('option'); o.value = g.key; o.textContent = gameLabel(g); gameSelect.append(o); }
+      }
+    }
     if (pending) {
       checkButton.hidden = false;
       retryButton.hidden = r.body.outcome !== 'not_recorded';
@@ -163,7 +172,8 @@ async function initOperations() {
   try {
     const r = await opFetch('/api/capabilities'); if (!r.ok) throw new Error('capabilities');
     capabilities = r.body;
-    for (const g of capabilities.games) { const o = document.createElement('option'); o.value = g.key; o.textContent = g.name; gameSelect.append(o); }
+    renderGames();
+    for (const g of capabilities.games) { const o = document.createElement('option'); o.value = g.key; o.textContent = gameLabel(g); gameSelect.append(o); }
     for (const kind of capabilities.allowed) {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = opNames[kind]; b.dataset.operation = kind; b.disabled = Boolean(pending);
       b.addEventListener('click', () => choose(kind)); opButtons.append(b);
@@ -174,6 +184,13 @@ async function initOperations() {
 }
 opForm.addEventListener('submit', e => {
   e.preventDefault(); if (pending || opBusy) return;
+  if (chosen === 'CREATE') {
+    draft = {type:'CREATE', confirm:true, creation:{display_name:document.querySelector('#creation-name').value,
+      seed:document.querySelector('#creation-seed').value || null, reset:document.querySelector('#creation-reset').checked}};
+    document.querySelector('#confirmation-detail').textContent = `${draft.creation.display_name} / seed: ${draft.creation.seed ?? 'random（登録時に一度固定）'} / RESET: ${draft.creation.reset ? '有効。fixed seedはinitial seedと同じ。旧world直近3個とinitial anchorを保持。EBS喪失時は最後のBACKUP以降を失い得ます。' : '無効'}。${help.CREATE}`;
+    confirmation.hidden = false; opForm.hidden = true; document.querySelector('#submit-operation').disabled = false;
+    document.querySelector('#submit-operation').focus(); return;
+  }
   draft = {type:chosen, game:['START','SWITCH','RESET'].includes(chosen) ? gameSelect.value : null, confirm:['SWITCH','RESET'].includes(chosen), seed:chosen === 'RESET' ? seedSelect.value : null};
   const g = capabilities.games.find(g => g.key === gameSelect.value);
   document.querySelector('#confirmation-detail').textContent = `${opNames[chosen]} / 観測Game: ${latestStatus?.observed_game.name ?? '不明'} → ${draft.game ? g.name : chosen === 'STOP' ? '実runtimeの正常停止' : '共有volumeのSnapshot'}。${help[chosen]} ` + (chosen === 'RESET' ? `seed: ${draft.seed}。旧worldは直近${g.retain_previous}個を保持し、それ以前は整理します。初期anchorは保持します。` : '');
@@ -193,3 +210,28 @@ checkButton.addEventListener('click', track); retryButton.addEventListener('clic
 newButton.addEventListener('click', () => { if(opBusy) return; localStorage.removeItem(storageKey); pending = null; terminal = false; opButtons.querySelectorAll('button').forEach(b => {b.disabled = false;}); newButton.hidden = true; checkButton.hidden = true; retryButton.hidden = true; opNotice.textContent = '実行したい操作を選択してください。'; });
 document.addEventListener('visibilitychange', () => {if (!document.hidden && capabilities) track();});
 initOperations();
+
+function gameLabel(g) {
+  return g.name + (capabilities.games.filter(other => other.name === g.name).length > 1 ? ' · ' + g.key.slice(0, 8) : '');
+}
+function renderGames() {
+  const list = document.querySelector('#registered-games'); list.replaceChildren();
+  const counts = new Map();
+  for (const g of capabilities.games) counts.set(g.name, (counts.get(g.name) || 0) + 1);
+  for (const g of capabilities.games) {
+    const detail = document.createElement('details');
+    const title = document.createElement('summary');
+    title.textContent = g.name + (counts.get(g.name) > 1 ? ' · ' + g.key.slice(0, 8) : '') +
+      (g.materialized === false ? ' — Registered / Never started' : ' — 起動済み');
+    detail.append(title);
+    const p = document.createElement('p');
+    p.textContent = `RESET: ${g.reset ? '有効' : '無効'} / Initial seed: ${g.seed ?? '既存設定'} / 保存領域: ${g.world} / ${g.selected ? '選択中' : '未選択'} / ${g.observed_running ? '最終観測で稼働中' : '稼働の観測なし'} (${time(g.observed_at)})`;
+    detail.append(p);
+    for (const kind of ['START', 'SWITCH']) {
+      if (!capabilities.allowed.includes(kind)) continue;
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = opNames[kind];
+      b.addEventListener('click', () => {if (pending || opBusy) return; gameSelect.value = g.key; choose(kind);}); detail.append(b);
+    }
+    list.append(detail);
+  }
+}

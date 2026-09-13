@@ -44,7 +44,7 @@ class MemoryDynamo:
                     item = put["Item"]
                     key = next(
                         item[k]["S"]
-                        for k in ("idempotency_key", "operation_id", "lock_name")
+                        for k in ("idempotency_key", "operation_id", "lock_name", "game_id")
                         if k in item
                         and (k != "idempotency_key" or put["TableName"] == "idempotency")
                     )
@@ -55,6 +55,19 @@ class MemoryDynamo:
                         raise TransactionCancelled()
                 elif "ConditionCheck" in action:
                     check = action["ConditionCheck"]
+                    if "lock_name" in check["Key"]:
+                        lock = self.records.get(
+                            (check["TableName"], check["Key"]["lock_name"]["S"]), {}
+                        )
+                        if lock and lock.get("operation_type", {}).get("S") not in {
+                            "START",
+                            "STOP",
+                            "SWITCH",
+                            "RESET",
+                            "RETENTION",
+                        }:
+                            raise TransactionCancelled()
+                        continue
                     key = check["Key"]["game_id"]["S"]
                     if self.records.get((check["TableName"], key), {}).get("lifecycle_state") != {
                         "S": "ACTIVE"
@@ -62,6 +75,8 @@ class MemoryDynamo:
                         raise TransactionCancelled()
                 elif "Update" in action:
                     update = action["Update"]
+                    if update["UpdateExpression"] == "ADD registered_ids :game":
+                        continue
                     key = update["Key"]["system_id"]["S"]
                     state = self.records.get((update["TableName"], key))
                     if state is None or state.get("current_operation_id", {"NULL": True}) != {
@@ -76,10 +91,22 @@ class MemoryDynamo:
                         "operation": "operation_id",
                         "idempotency": "idempotency_key",
                         "locks": "lock_name",
+                        "games": "game_id",
                     }[put["TableName"]]
                     self.records[put["TableName"], item[field]["S"]] = json.loads(json.dumps(item))
                 elif "Update" in action:
                     update = action["Update"]
+                    if update["UpdateExpression"] == "ADD registered_ids :game":
+                        key = update["Key"]["game_id"]["S"]
+                        registry = self.records.setdefault(
+                            (update["TableName"], key),
+                            {"game_id": {"S": key}, "registered_ids": {"SS": []}},
+                        )
+                        registry["registered_ids"]["SS"] = sorted(
+                            set(registry["registered_ids"]["SS"])
+                            | set(update["ExpressionAttributeValues"][":game"]["SS"])
+                        )
+                        continue
                     state = self.records[update["TableName"], update["Key"]["system_id"]["S"]]
                     state["current_operation_id"] = update["ExpressionAttributeValues"][
                         ":operation_id"
@@ -129,6 +156,7 @@ class LocalOperations(Operations):
                     "game_id": game,
                     "display_name": f"Local Game {i + 1}",
                     "lifecycle_state": "ACTIVE",
+                    "materialization_state": "MATERIALIZED",
                     "world": {},
                     "updated_at": datetime.now(UTC).isoformat(),
                 }.items()
@@ -162,6 +190,25 @@ class LocalOperations(Operations):
         if self.scenario == "players" and event["operation_type"] in {"SWITCH", "RESET"}:
             return {"StatusCode": 200, "Payload": io.BytesIO(b'{"error":"conflict"}')}
         web = admission_actor(event["web"], event["operation_type"], self.policy)
+        if event["operation_type"] == "CREATE":
+            from wishicraft.game_creation import create
+
+            result_document = create(
+                self.domain._repository,
+                value=event["creation"],
+                key=event["idempotency_key"],
+                actor=web,
+                now=datetime.now(UTC),
+                defaults={
+                    "package": {
+                        "package_id": "vanilla",
+                        "package_version": "initial-fixed-version",
+                    },
+                    "runtime": {"class": "default", "idle_shutdown_minutes": 30},
+                    "config_digest": "a" * 64,
+                },
+            )
+            return {"StatusCode": 200, "Payload": io.BytesIO(json.dumps(result_document).encode())}
         result = self.domain.admit(
             operation_type=OperationType(event["operation_type"]),
             idempotency_key=event["idempotency_key"],

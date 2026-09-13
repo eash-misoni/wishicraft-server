@@ -1,5 +1,11 @@
 # 09. Decisions and Backlog
 
+## D-105 Minimal Game Creation（repository実装委任・production未適用）
+
+2026-09-13、D-101第3単位としてAdmin限定Web CREATEと既存START/SWITCHによる初回materializationを実装。通常設計・repository/tests/docs/CIは委任、production writeは未承認。
+[登録・seed・dynamic registry・RESET・shared-v2 recovery契約](reviews/minimal_game_creation.md)と[release/rollback/positive E2E方針](runbooks/minimal_game_creation.md)を参照する。
+CREATEはmetadata-onlyのterminal transaction。既存A/B変更・public guide自動掲載・DELETE・Whitelist管理・Package/Preset/Template一般化・RETENTION実削除は含めない。D-104 Completedを維持する。
+
 ## D-104 Existing Operations via Web（Accepted、production Completed）
 
 2026-09-13、D-101第2実装単位として既存5操作をWeb adapterから既存Admissionへ接続する実装を委任。

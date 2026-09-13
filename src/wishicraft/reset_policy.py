@@ -33,7 +33,31 @@ def policies(value: str, catalog: RuntimeCatalog) -> dict[str, dict[str, int]]:
 
 def configured() -> dict[str, dict[str, int]]:
     catalog = RuntimeCatalog.parse(os.environ["RUNTIME_GAMES"])
-    return policies(os.environ.get("RESET_POLICIES", "{}"), catalog)
+    result = policies(os.environ.get("RESET_POLICIES", "{}"), catalog)
+    if os.environ.get("GAME_CREATION") == "1":
+        import importlib
+
+        from wishicraft.runtime_catalog import configured_catalog
+        from wishicraft.web_status import decode
+
+        api = importlib.import_module("boto3").client("dynamodb")
+        dynamic = configured_catalog()
+        assert dynamic is not None
+        for game in dynamic.game_ids:
+            if game in catalog.game_ids:
+                continue
+            raw = api.get_item(
+                TableName=os.environ["GAMES_TABLE"],
+                Key={"game_id": {"S": game}},
+                ConsistentRead=True,
+            )["Item"]
+            if raw.get("materialization_state") != {"S": "MATERIALIZED"}:
+                continue
+            creation = decode(raw["creation"])
+            policy = creation.get("reset_policy")
+            if policy is not None:
+                result.update(policies(json.dumps({game: policy}), dynamic))
+    return result
 
 
 def seed(operation_id: str, mode: str, policy: dict[str, int]) -> int:

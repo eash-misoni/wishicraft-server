@@ -139,17 +139,19 @@ def authorize(
     if "games" in config:
         if (
             target["game_id"] not in config["games"]
-            or re.fullmatch(
-                re.escape("/srv/minecraft/games/" + target["game_id"] + "/")
-                + (
-                    r"(?:worlds/op-[a-z0-9-]{1,100}/)?server"
-                    if "reset_policies" in config
-                    else "server"
-                ),
-                target["data_source"],
+            and not (
+                config.get("game_creation") is True
+                and re.fullmatch(r"game-[0-9a-f]{64}", target["game_id"])
             )
-            is None
-        ):
+        ) or re.fullmatch(
+            re.escape("/srv/minecraft/games/" + target["game_id"] + "/")
+            + (
+                r"(?:worlds/op-[a-z0-9-]{1,100}/)?server"
+                if "reset_policies" in config
+                else "server"
+            ),
+            target["data_source"],
+        ) is None:
             raise ValueError("TARGET_MISMATCH")
     elif target["game_id"] != config["game_id"] or target["data_source"] != config["data_source"]:
         raise ValueError("TARGET_MISMATCH")
@@ -280,6 +282,11 @@ def finish_stop(
         ):
             raise ValueError("STOP_PROOF_MISMATCH")
         validate_persistence(container, target)
+        initial_owner = Path(target["data_source"]).parent.parent / (
+            target["game_id"] + ".initial-owner.json"
+        )
+        if "/worlds/" not in target["data_source"] and initial_owner.exists():
+            initial_module().initialized(target, atomic)
         initialization = Path(target["data_source"]).parent / ".wishicraft-initialization.json"
         if "games" in manifest and initialization.exists():
             initial_world_permission(target, stopped=True)
@@ -335,6 +342,23 @@ def apply(request: dict[str, Any]) -> None:
             raise ValueError("HOST_IDENTITY_MISMATCH")
         operation = item(config, "operations_table", "operation_id", request["operation_id"])
         lease = item(config, "locks_table", "lock_name", config["lock_name"])
+        game = None
+        if config.get("game_creation") is True:
+            game = item(config, "games_table", "game_id", operation["target_game_id"])
+            if game.get("lifecycle_state") != "ACTIVE":
+                raise ValueError("GAME_NOT_REGISTERED")
+            if operation["target_game_id"] not in config["games"]:
+                creation = game["creation"]
+                if creation["config_digest"] != config["config_digest"]:
+                    raise ValueError("GAME_CONFIG_MISMATCH")
+                config = {**config, "reset_policies": {**config["reset_policies"]}}
+                if creation["reset_policy"] is not None:
+                    if (
+                        game["materialization_state"] != "MATERIALIZED"
+                        and operation["operation_type"] == "RESET"
+                    ):
+                        raise ValueError("RESET_UNMATERIALIZED")
+                    config["reset_policies"][game["game_id"]] = creation["reset_policy"]
         target = authorize(request, operation, lease, config, datetime.now(timezone.utc))
         manifest_bytes = (ARTIFACTS / "manifest.json").read_bytes()
         if hashlib.sha256(manifest_bytes).hexdigest() != target["config_digest"]:
@@ -346,6 +370,36 @@ def apply(request: dict[str, Any]) -> None:
         ]:
             if hashlib.sha256((ARTIFACTS / name).read_bytes()).hexdigest() != manifest[field]:
                 raise ValueError("ARTIFACT_MISMATCH")
+        if (
+            request["action"] == "START"
+            and game
+            and "creation" in game
+            and "/worlds/" not in target["data_source"]
+        ):
+            # Mount verification precedes all first-data writes; full filesystem preflight follows.
+            execute(
+                [
+                    "bash",
+                    "-c",
+                    'set -aeu; source /etc/wishicraft/host-runtime.env; "$MOUNT_GUARD" --verify',
+                ]
+            )
+            existing_receipt = ROOT / "receipt.json"
+            receipt_before = (
+                json.loads(existing_receipt.read_text()) if existing_receipt.exists() else None
+            )
+            containers_before = inspect()
+            if containers_before:
+                validate_container(containers_before[0], target)
+            elif (
+                receipt_before
+                and receipt_before["phase"] != "stopped"
+                and receipt_before["target"] != target
+            ):
+                raise ValueError("UNRESOLVED_RUNTIME")
+            if not containers_before:
+                stopped_environment()
+            initial_module().prepare(game, config, target, atomic)
         preflight_target = (
             operation["switch_source"] if request["action"] == "RESET_PREPARE" else target
         )
@@ -409,7 +463,11 @@ def apply(request: dict[str, Any]) -> None:
                 and not managed
                 and not (Path(target["data_source"]) / "world/level.dat").is_file()
             ):
-                initial_world_permission(target)
+                if not (
+                    config.get("game_creation") is True
+                    and initial_module().initialized(target, atomic)
+                ):
+                    initial_world_permission(target)
             if receipt and receipt["phase"] == "stopping":
                 raise ValueError("UNRESOLVED_RUNTIME")
             if receipt and receipt["target"] != target and receipt["phase"] != "stopped":
@@ -441,6 +499,8 @@ def apply(request: dict[str, Any]) -> None:
             configured_container(current[0], manifest)
             if managed:
                 reset_module().initialized(target, atomic, require=False)
+            if config.get("game_creation") is True and not managed:
+                initial_module().initialized(target, atomic)
             atomic(receipt_path, json.dumps({"target": target, "phase": "running"}))
         else:
             if not receipt or receipt["target"] != target:
@@ -482,6 +542,17 @@ def apply(request: dict[str, Any]) -> None:
             elif receipt["phase"] not in {"stopping", "stopped"}:
                 raise ValueError("STOP_REQUIRES_RECOVERY_OBSERVATION")
             finish_stop(receipt_path, receipt, target, manifest)
+
+
+def initial_module() -> Any:
+    try:
+        from wishicraft.artifacts import initial_game
+
+        return initial_game
+    except ImportError:
+        import importlib
+
+        return importlib.import_module("initial_game")
 
 
 def reset_module() -> Any:

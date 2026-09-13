@@ -8,7 +8,7 @@ const evidence = await mkdtemp(join(tmpdir(), 'wishicraft-operations-browser-'))
 const browser = await chromium.launch(process.argv.includes('--chrome') ? {channel:'chrome'} : {});
 const report = {evidence, browser:browser.version(), cases:[]};
 try {
-  for (const [scenario, kind] of [['stopped','START'],['stopped','STOP'],['stopped','SWITCH'],['stopped','BACKUP'],['stopped','RESET'],['conflict','START'],['rejection','START'],['failure','START'],['players','SWITCH'],['player-role','START']]) {
+  for (const [scenario, kind] of [['creation','CREATE'],['stopped','START'],['stopped','STOP'],['stopped','SWITCH'],['stopped','BACKUP'],['stopped','RESET'],['conflict','START'],['rejection','START'],['failure','START'],['players','SWITCH'],['player-role','START']]) {
     const child = spawn('tools/dev-env',['run','--','uv','run','python','-m','web.local','--port','0','--scenario',scenario]);
     try {
       const origin = await new Promise((resolve,reject) => {
@@ -28,6 +28,7 @@ try {
         await expect(page.locator('#review-operation')).toBeDisabled();
       }
       if(['SWITCH','RESET'].includes(kind)) await page.locator('#operation-game').selectOption({label:'Local Game 2'});
+      if(kind === 'CREATE') { await page.locator('#creation-name').fill('Third Game'); await page.locator('#creation-seed').fill('9223372036854775807'); }
       await page.locator('#review-operation').click();
       await expect(page.locator('#operation-confirmation')).toBeVisible();
       if(kind === 'RESET') await expect(page.locator('#confirmation-detail')).toContainText('最後の外部BACKUP以降');
@@ -41,6 +42,7 @@ try {
         await expect(page.locator('#operation-result')).toContainText(scenario === 'failure' ? '失敗' : '完了',{timeout:20000});
         await expect(page.locator('#new-operation')).toBeVisible();
       }
+      if(kind === 'CREATE') { await expect(page.locator('#registered-games details')).toHaveCount(3); await expect(page.locator('#registered-games')).toContainText('Never started'); const guide = await page.request.get(origin+'/games/'); expect(await guide.text()).not.toContain('Third Game'); }
       expect(posts).toBe(1); expect(errors).toEqual([]);
       expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
       await page.screenshot({path:join(evidence,scenario+'-'+kind+'.png'),fullPage:true});

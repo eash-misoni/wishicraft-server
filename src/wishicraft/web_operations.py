@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from datetime import datetime
 from typing import Any
@@ -15,6 +16,7 @@ from wishicraft.web_auth import AuthRejected, Policy
 from wishicraft.web_status import decode, display_name, mapping, stamp
 
 OPERATIONS = ("START", "STOP", "SWITCH", "BACKUP", "RESET")
+CREATION_OPERATIONS = (*OPERATIONS, "CREATE")
 
 
 class WebRejected(ValueError):
@@ -58,6 +60,20 @@ def game_key(game_id: str) -> str:
 
 
 def parse_request(value: object) -> dict[str, Any]:
+    if isinstance(value, dict) and value.get("type") == "CREATE":
+        from wishicraft.game_creation import validate
+
+        if (
+            set(value) != {"request_id", "type", "creation", "confirm"}
+            or value["confirm"] is not True
+        ):
+            raise WebRejected("invalid_input")
+        request_key("0", value["request_id"])
+        try:
+            validate(value["creation"])
+        except ValueError as error:
+            raise WebRejected("invalid_input") from error
+        return dict(value)
     if not isinstance(value, dict) or set(value) != {
         "request_id",
         "type",
@@ -118,28 +134,64 @@ class Operations:
         ).get("Item", {})
         return {k: decode(v) for k, v in raw.items()}
 
+    def game_ids(self) -> tuple[str, ...]:
+
+        if os.environ.get("GAME_CREATION") != "1":
+            return self.catalog
+        from wishicraft.game_creation import registry_ids
+
+        return registry_ids(self.api, self.tables["games"], self.catalog)
+
+    def reset_policy(self, game: str, item: dict[str, Any]) -> dict[str, Any] | None:
+        if "creation" in item:
+            return mapping(item["creation"]).get("reset_policy")
+        return self.reset.get(game)
+
     def capabilities(self, actor: dict[str, Any]) -> dict[str, Any]:
         games = []
-        for game in self.catalog:
+        state = self.get("system", "system_id", self.system_id)
+        observed = mapping(state.get("observation"))
+        for game in self.game_ids():
             item = self.get("games", "game_id", game)
             if item.get("lifecycle_state") != "ACTIVE":
                 continue
             world = mapping(item.get("world"))
+            reset = self.reset_policy(game, item)
+            materialized = item.get("materialization_state") == "MATERIALIZED"
             # Legacy generation is not a Reset count. No world path/Operation identity leaks.
             games.append(
                 {
                     "key": game_key(game),
+                    "selected": (state.get("desired_game_id") or state.get("game_id")) == game,
+                    "observed_running": observed.get("observed_active_game_id") == game
+                    and observed.get("runtime_ready") is True,
+                    "observed_at": stamp(state.get("observed_at")),
                     "name": display_name(item.get("display_name")) or "Registered Game",
-                    "reset": game in self.reset,
-                    "seed_modes": ["fixed", "new"] if game in self.reset else [],
-                    "retain_previous": self.reset.get(game, {}).get("retain_previous"),
-                    "world": "managed" if world.get("current_id") else "original",
+                    "reset": reset is not None,
+                    "materialized": materialized,
+                    "seed": str(world["seed"]) if world.get("seed") is not None else None,
+                    "seed_modes": ["fixed", "new"] if reset else [],
+                    "retain_previous": (reset or {}).get("retain_previous"),
+                    "world": "never_started"
+                    if not materialized
+                    else "managed"
+                    if world.get("current_id")
+                    else "original",
                     "world_updated_at": stamp(item.get("updated_at")),
                 }
             )
         return {
             "games": games,
-            "allowed": [kind for kind in OPERATIONS if allowed(kind, actor, self.policy)],
+            "allowed": [
+                kind
+                for kind in (
+                    CREATION_OPERATIONS
+                    if os.environ.get("GAME_CREATION") == "1"
+                    and os.environ.get("CREATE_DISABLED") != "1"
+                    else OPERATIONS
+                )
+                if allowed(kind, actor, self.policy)
+            ],
         }
 
     def project(self, item: dict[str, Any]) -> dict[str, Any] | None:
@@ -172,7 +224,9 @@ class Operations:
             "requested_at": stamp(item.get("requested_at")),
             "updated_at": stamp(item.get("updated_at")),
             "completed_at": stamp(item.get("completed_at")),
-            "progress": MILESTONE_STEPS.get(str(item.get("current_step")), "受付済み・進捗待ち"),
+            "progress": "Gameを登録しました。まだ起動していません。"
+            if item["operation_type"] == "CREATE"
+            else MILESTONE_STEPS.get(str(item.get("current_step")), "受付済み・進捗待ち"),
             "milestones": [
                 {"label": label, "at": stamp(item.get(f"progress_{step.lower()}_at"))}
                 for step, label in MILESTONE_STEPS.items()
@@ -227,11 +281,16 @@ class Operations:
             if existing.get("web_request_digest") != digest:
                 raise WebRejected("request_conflict", 409)
             return 200, {"outcome": "recorded", "operation": self.project(existing)}
-        game = next((g for g in self.catalog if game_key(g) == request["game"]), None)
-        if request["game"] is not None and game is None:
+        game = next((g for g in self.game_ids() if game_key(g) == request.get("game")), None)
+        if request.get("game") is not None and game is None:
             raise WebRejected("invalid_input")
-        if request["type"] == "RESET" and game not in self.reset:
-            raise WebRejected("unsupported_capability", 422)
+        if request["type"] == "RESET":
+            item = self.get("games", "game_id", str(game))
+            if (
+                not self.reset_policy(str(game), item)
+                or item.get("materialization_state") != "MATERIALIZED"
+            ):
+                raise WebRejected("unsupported_capability", 422)
         payload = {
             "schema_version": 1,
             "operation": "admit",
@@ -244,6 +303,7 @@ class Operations:
                 "session_fingerprint": hashlib.sha256(session_id.encode()).hexdigest(),
             },
             **({"target_game_id": game} if game else {}),
+            **({"creation": request["creation"]} if request["type"] == "CREATE" else {}),
             **({"confirmed": True} if request["type"] in {"SWITCH", "RESET"} else {}),
             **({"seed_mode": request["seed"]} if request["type"] == "RESET" else {}),
         }

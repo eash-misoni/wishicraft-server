@@ -18,7 +18,7 @@ def recovery_digest(value: str) -> str:
     if (
         not isinstance(document, dict)
         or set(document) != {"schema_version", "source_volume_id", "games", "runtime"}
-        or document["schema_version"] != 1
+        or document["schema_version"] not in (1, 2)
     ):
         raise ValueError("invalid recovery description")
     if (
@@ -44,21 +44,37 @@ def recovery_digest(value: str) -> str:
         ):
             raise ValueError("recovery data binding mismatch")
     runtime = document["runtime"]
-    if not isinstance(runtime, dict) or set(runtime) != {
-        "manifest_json",
-        "runtime_env",
-        "compose_yaml",
-    }:
+    required = {"manifest_json", "runtime_env", "compose_yaml"}
+    if document["schema_version"] == 2:
+        required.add("creation_config")
+    if not isinstance(runtime, dict) or set(runtime) != required:
         raise ValueError("invalid recovery runtime")
     manifest = json.loads(runtime["manifest_json"])
     if (
-        set(manifest["games"]) != set(catalog.game_ids)
+        (
+            set(manifest["games"]) != set(catalog.game_ids)
+            if document["schema_version"] == 1
+            else not set(manifest["games"]).issubset(catalog.game_ids)
+        )
         or manifest["compose_sha256"]
         != hashlib.sha256(runtime["compose_yaml"].encode()).hexdigest()
         or manifest["runtime_env_sha256"]
         != hashlib.sha256(runtime["runtime_env"].encode()).hexdigest()
     ):
         raise ValueError("recovery runtime mismatch")
+    if document["schema_version"] == 2:
+        digest = hashlib.sha256(runtime["manifest_json"].encode()).hexdigest()
+        for game_id, record in games.items():
+            if game_id in manifest["games"]:
+                continue
+            creation = record.get("creation", {})
+            if (
+                creation.get("config_digest") != digest
+                or creation.get("operation_id") != "op-" + game_id[5:]
+                or record.get("materialization_state") not in {"UNMATERIALIZED", "MATERIALIZED"}
+                or type(record.get("world", {}).get("seed")) is not int
+            ):
+                raise ValueError("invalid dynamic Game recovery")
     return hashlib.sha256(value.encode()).hexdigest()
 
 
@@ -114,7 +130,13 @@ class RecoveryRepository:
             if (
                 record.get("game_id") != game_id
                 or record.get("lifecycle_state") != "ACTIVE"
-                or record.get("materialization_state") != "MATERIALIZED"
+                or (
+                    record.get("materialization_state") != "MATERIALIZED"
+                    and not (
+                        "creation" in record
+                        and record.get("materialization_state") == "UNMATERIALIZED"
+                    )
+                )
             ):
                 raise ValueError("backup Game is not materialized")
             allowed = {
@@ -134,6 +156,8 @@ class RecoveryRepository:
                 "last_started_at",
                 "last_backup_at",
             }
+            if "creation" in record:
+                allowed.add("creation")
             if set(record) != allowed:
                 raise ValueError("unknown Game schema cannot be snapshotted as known configuration")
             records[game_id] = dict(record)
@@ -149,7 +173,7 @@ class RecoveryRepository:
 
         value = json.dumps(
             {
-                "schema_version": 1,
+                "schema_version": 2 if "creation_config" in json.loads(runtime_json) else 1,
                 "source_volume_id": volume,
                 "games": records,
                 "runtime": json.loads(runtime_json),

@@ -35,7 +35,12 @@ def selected_source(api: Any, table: str, game_id: str) -> str:
     if (
         record["game_id"] != {"S": game_id}
         or record["lifecycle_state"] != {"S": "ACTIVE"}
-        or record["materialization_state"] != {"S": "MATERIALIZED"}
+        or (
+            record["materialization_state"] != {"S": "MATERIALIZED"}
+            and not (
+                "creation" in record and record["materialization_state"] == {"S": "UNMATERIALIZED"}
+            )
+        )
     ):
         raise ValueError("world Game is not active and materialized")
     world = record["world"]["M"]

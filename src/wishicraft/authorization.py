@@ -16,6 +16,7 @@ def operation_authorized(
     """Canonical daily-operation policy, independent of the ingress channel."""
     return operation in {
         "STATUS",
+        "CREATE",
         "START",
         "STOP",
         "SWITCH",
@@ -25,5 +26,5 @@ def operation_authorized(
         roles,
         player_role_id=player_role_id,
         admin_role_id=admin_role_id,
-        admin_only=operation in {"BACKUP", "SWITCH"},
+        admin_only=operation in {"BACKUP", "SWITCH", "CREATE"},
     )

@@ -46,6 +46,7 @@ class WebFoundationStack(Stack):
         secrets: SecretsExampleConfig,
         root: Path,
         domain_phase: str = "canonical",
+        game_creation: bool = False,
     ) -> None:
         super().__init__(
             scope,
@@ -227,6 +228,10 @@ class WebFoundationStack(Stack):
             env["WEB_" + key.upper() + "_TABLE"] = resource_name(
                 project.resource_prefix, stage.stage, suffix
             )
+        if game_creation:
+            env["GAME_CREATION"] = "1"
+            if self.node.try_get_context("create_disabled") == "true":
+                env["CREATE_DISABLED"] = "1"
         web = function("Web", "handler", env)
         web.add_to_role_policy(
             iam.PolicyStatement(

@@ -23,6 +23,7 @@ def build_app(
     deployment: str = "phase1",
     two_games: bool = False,
     reset: bool = False,
+    game_creation: bool = False,
     web_domain_phase: str = "canonical",
 ) -> App:
     """Build an environment-agnostic CDK app after phase-specific validation."""
@@ -40,6 +41,7 @@ def build_app(
             secrets=configuration.secrets,
             root=repository_root,
             domain_phase=web_domain_phase,
+            game_creation=game_creation,
         )
     elif deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
@@ -52,6 +54,7 @@ def build_app(
             phase=phase,
             games=_games(repository_root, stage) if two_games else None,
             reset_policies=_reset_policies(repository_root, stage) if reset else None,
+            game_creation=game_creation,
         )
     elif deployment == "phase1":
         MinecraftStack(
@@ -94,6 +97,7 @@ def main() -> None:
             secrets=configuration.secrets,
             root=repository_root,
             domain_phase=app.node.try_get_context("web_domain_phase") or "canonical",
+            game_creation=app.node.try_get_context("game_creation") == "true",
         )
     elif deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
@@ -107,6 +111,7 @@ def main() -> None:
             games=_games(repository_root, stage)
             if app.node.try_get_context("two_games") == "true"
             else None,
+            game_creation=app.node.try_get_context("game_creation") == "true",
             reset_policies=_reset_policies(repository_root, stage)
             if app.node.try_get_context("reset") == "true"
             else None,
