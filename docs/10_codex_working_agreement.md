@@ -1,7 +1,7 @@
 # 10. Codex Working Agreement
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-14
+- **最終更新:** 2026-09-13
 
 ## 1. 目的
 
@@ -45,6 +45,10 @@ Phase 0最初のrepository bootstrapだけはREADMEが未作成であるため�
 ユーザーが一つの利用機能について横断実装を委任した場合は、その機能を完了単位とする。内部では検証可能な変更へ分けるが、部品ごとの承認待ちは増やさない。以下の例は通常のscope設定の目安であり、明示的な委任を縮小する規則ではない。
 
 1回の依頼では、原則1つの明確な機能または契約だけを変更する。
+
+D-101以後は成果のまとまりごとにsliceを作り、通常の内部実装・test修正をCodexへ委任する。module分割、parser、serializer、tests、docs修正ごとの承認往復を作らない。下記の小さい作業例は内部の検証単位にも使えるが、それぞれを人間承認gateにはしない。
+
+主な人間承認境界はproduction write、IAM/公開範囲/認証境界の変更、destructive data operation、既存の安全・保存contract変更、利用者policyや許容損失等の価値判断である。具体的な対象・操作・安全条件を含む一括承認はその範囲で再利用し、read-only許可をwrite承認へ読み替えない。Web Foundationは認証/認可のsecurity boundaryを持つため、read-only statusとwrite operationsを別release sliceにする。
 
 適切な例:
 

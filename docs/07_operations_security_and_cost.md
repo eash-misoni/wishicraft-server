@@ -4,7 +4,7 @@
 
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-09-12
+- **最終更新:** 2026-09-13
 
 ## 1. 運用原則
 
@@ -348,7 +348,7 @@ scheduled/RUNNING backup、自動STOP、archive、pre-reset/pre-upgrade/pre-dele
 
 ### 復元テスト
 
-Restore UI・汎用workflowはPhase 16で扱う。D-095のoperator隔離復元確認だけを先行し、RETENTION releaseの成立条件とは混同しない。
+Restore UIはD-101のindependent trackとして必要時の管理Web拡張とする（旧Phase 16計画）。D-095/098のoperator隔離復元確認は別sliceでCompletedであり、各closeoutの実証範囲を維持する。RETENTION releaseの成立条件とは混同しない。
 
 ## 10. 自動停止
 

@@ -1,16 +1,27 @@
 # 09. Decisions and Backlog
 
-## D-100 静的利用案内Web（repository準備委任済み／公開未承認）
+## D-101 今後のロードマップとscope優先順位
 
-2026-09-13のユーザー指示により、各説明の編集元を一つにしたページ別Markdownによる小さな静的build、設定/schema投影、ローカル表示/CI検証を準備する。[設計・公開計画](reviews/user_guide_web.md)へ集約。Cloudflare Pages Direct Uploadは推奨候補であり、service採用・認証・閲覧者・URL・費用・初回公開は未承認。D-099 Completedと将来の状態確認/管理Webを維持する。
+- **状態:** Accepted（2026-09-13、ユーザー指示によるロードマップ整理のみ）
+- **背景:** 旧Phase 9〜16の一般化順序と、D-095〜100の限定成果・現在の利用価値が一致しなくなった。
+- **決定:** [Current roadmap](06_delivery_plan.md#current-roadmap)を採用する。Web Foundation → Existing Operations via Web → Minimal Game Creation → Whitelist Management → 具体的需要に応じたRuntime / Version / MOD Extensionの順とする。read-only statusとwrite operationsは別release sliceとする。
+- **優先しない範囲:** Package/Preset/Template独立管理、汎用wizard、upload、全server種別一般化を前提にしない。CREATE-001とWEB-001〜003、OP/Whitelist、chat等の要求は削除しない。Game登録とpublic guide掲載は分離し、説明/client要件を揃えた明示的な公開登録を維持する。
+- **Independent tracks:** RETENTION実削除はshared-volume v2の保持群・復旧条件が自然に成立した時の独立destructive gateで、Snapshot総数では開始しない。Restore UIは需要時の管理Web拡張、chatは需要とruntime/plugin確定時、高度なPackage/Preset/Template管理・自動upgrade・archive・汎用hooks等は具体的要求時に開始する。
+- **委任:** 成果slice内の通常実装・test修正はCodexへ委任し、module/parser/serializer/tests/docsごとの承認往復は作らない。production write、IAM/公開範囲/認証境界、破壊的データ操作、安全・保存契約、利用者policy/許容損失の変更は人間承認境界とする。
+- **承認の限界:** D-100の内容・ローカル構成承認を維持し、Web Foundationのpublic部分へつなぐ。public guideの公開はWeb全体の配信構成と合わせるのを第一候補とするが、hosting・閲覧者・認証・URL・費用・実公開は未承認。個別機能の詳細contractやProposed再設計をAcceptedへ先回りさせない。既存role/policy、Admission/Operation/workflow、安全・保存contractは維持する。
+- **履歴:** 旧Phase 9〜16の順序・Backlog優先順位はSuperseded by D-101。旧案と完了記録は削除せず、採用済み詳細契約の変更とは区別する。
+
+## D-100 静的利用案内Web（内容・ローカル構成承認済み／公開未承認）
+
+2026-09-13のユーザー指示により、各説明の編集元を一つにしたページ別Markdownによる小さな静的build、設定/schema投影、ローカル表示/CI検証を準備し、内容・ローカル構成を承認済み公開候補として固定した。[設計・公開計画](reviews/user_guide_web.md)へ集約。Cloudflare Pages Direct Uploadは推奨候補であり、service採用・認証・閲覧者・URL・費用・初回公開は未承認。D-099 Completedと将来の状態確認/管理Webを維持する。
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-09-12
+- **最終更新:** 2026-09-13
 - **追記:** 2026-08-15 Minecraft初回起動のExecStartPre再開契約
 
 ## 1. Decision logの使い方
 
-時刻付き失敗・当時の未承認記録は履歴として保持する。現在契約は[Data/Interface](05_data_and_interface_contracts.md)、適用実績は各closeoutへ集約し、過去entryの保留を現在の保留と混同しない。Phase 9以降の計画はD-097等による見直し対象であり、Proposed実装をAcceptedへ自動昇格させない。
+時刻付き失敗・当時の未承認記録は履歴として保持する。現在契約は[Data/Interface](05_data_and_interface_contracts.md)、適用実績は各closeoutへ集約し、過去entryの保留を現在の保留と混同しない。Phase 9以降の旧計画はD-101のcurrent roadmapへ優先順位を置き換え、Proposed実装をAcceptedへ自動昇格させない。
 
 設計判断を変更する場合、既存決定を削除せず、`Superseded by D-xxx`として履歴を残す。
 
@@ -103,6 +114,8 @@
 - **関連:** D-031、D-032、NFR-004、NFR-007、Phase 8.2。
 
 ### D-091 RETENTIONはdurable provenanceを持つ独立した破壊的Operationとする
+
+以下のv1件数・Phase 16参照は当時の履歴。現行共有保護はD-097、今後の優先順位はD-101を優先し、総Snapshot数だけで実削除をreleaseしない。
 
 - **状態:** Accepted（repository model validated、dev provenance persistence/backfill/dry-run completed）
 - **日付:** 2026-09-07
@@ -1036,7 +1049,7 @@ Phase 7は2026-09-01にCompletedとなった。completion CAS fixをCI成功済�
 
 real STARTは一Operation/一State MachineでREADY、DNS UPSERT/INSYNC、public TCP 25565とMinecraft 26.2 protocol 776へ到達し、real STOPはexplicit save、RCON fail-closed、graceful runtime stop、EC2 stop、DNS DELETE/INSYNC、fresh stopped/HEALTHY Reconcileを完了した。START/STOPはいずれも一公開messageをrevision 5まで単調更新し、duplicate/rollbackはなかった。STOP completion raceはControl Planeとfinal displayを変更せず、monitoring alarm emailが通知pathを実証した。final AWS stateはTarget stopped/public IPv4・DNSなし、Desired revision 9 STOPPED、Observed stopped/HEALTHY、Lock/Current Operation/running executionなし、Phase 1 Frozen、Data EBS/snapshot/SG safety不変である。Budgetは15 USD通知がactiveでactual 22.273 USD / forecast 23.005 USDとguardrail超過中であり、Phase 8 backup完成までは試験運用を維持する。新しいDecision Neededはない。
 
-Phase別に決める事項:
+決める事項（旧Phase連番を期限にせず、現在のsliceで判断）:
 
 | 項目 | 決定期限 |
 |---|---|
@@ -1045,13 +1058,20 @@ Phase別に決める事項:
 | dev Discord公開IDの実環境照合とBot Token SecureString存在確認 | Phase 7G-1で完了（2026-08-31） |
 | Git正本`/mc` schemaのdev Guild registration | Phase 7G-2で完了（2026-08-31） |
 | prod Discord Guild/channel/role/Application ID/Public Key/Bot Token | 最初のprod deploy前 |
-| backup整合方式 | Phase 8開始前 |
-| Package manifest最終schema | Phase 9開始前 |
-| 最初のPaper Package | Phase 12開始前 |
-| 最初のMOD loader/package | Phase 12開始前 |
-| Web frontend技術 | Phase 13開始前 |
+| backup整合方式 | D-090/097で採用済み。実削除は独立gate |
+| Package manifest最終schema | 独立管理の具体的要求が出たsliceで判断 |
+| 最初のPaper Package | 具体的Game/runtime需要が出たsliceで判断 |
+| 最初のMOD loader/package | 具体的Game/runtime需要が出たsliceで判断 |
+| Web frontend技術・hosting/URL/OAuth/authorization | Web Foundationの設計・security boundary承認前 |
 
 ## 6. Backlog
+
+現在の優先順位は[D-101 / Current roadmap](06_delivery_plan.md#current-roadmap)を正本とする。実装済みBACKUP・無人自動停止・監視・限定RESETを未着手へ戻さない。Package/Preset/Template、create、Web、Whitelist等の要求自体は維持する。
+
+### Previous backlog（優先順位はSuperseded by D-101）
+
+以下は旧計画の履歴であり、現在の高・中・低優先を示さない。
+
 
 ### 高優先
 
@@ -1102,6 +1122,8 @@ Phase別に決める事項:
 ```
 
 ## Phase 8後の限定レビュー（Proposed、2026-09-11）
+
+当時の状態を保持する。後続のD-097/098で採用した限定範囲は各Decisionを優先し、現在の順序はD-101を参照。
 
 [再設計レビューと限定補足](reviews/phase8_redesign_followup.md)へ集約する。
 復元試験の前倒しだけはD-095でAccepted。共有backup/metadata、Reset cleanup/認可、whitelist、

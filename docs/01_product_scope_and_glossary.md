@@ -1,9 +1,9 @@
 # 01. Product Scope and Glossary
 
-静的案内の独立slice（D-100）: 参加条件・Game詳細・現行DiscordコマンドをEC2に依存せず閲覧できるWebを準備する。実装委任済み、公開とhosting採用は未承認。[公開計画](reviews/user_guide_web.md)。将来の状態確認・管理Webの希望は維持し、今回の必須依存にしない。
+静的案内の独立slice（D-100）: 参加条件・Game詳細・現行DiscordコマンドをEC2に依存せず閲覧できるWebを準備する。内容・ローカル構成承認済みの公開候補。公開とhosting採用は未承認。[公開計画](reviews/user_guide_web.md)。将来の状態確認・管理Webの希望は維持し、今回の必須依存にしない。
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-08-22
+- **最終更新:** 2026-09-13
 
 ## 1. プロジェクト目的
 
@@ -95,6 +95,18 @@ AWS上でMinecraftサーバーを必要なときだけ起動し、少人数の�
 - 完全削除
 
 ## 5. 機能拡張の方向
+
+現在の優先順位は[D-101 / Current roadmap](06_delivery_plan.md#current-roadmap)を正本とする。
+
+1. Web Foundation（public guide維持とauthenticated read-only status）
+2. Existing Operations via Web（別write release slice）
+3. Minimal Game Creation（作成と起動・公開登録を分離）
+4. Whitelist Management（初期設定と後からの管理を分離）
+5. Runtime / Version / MOD Extension（具体的需要ごと）
+
+RETENTION実削除、Restore UI、chat、高度なPackage/Preset/Template管理・自動upgrade・archive・汎用hooks等は条件・需要で開始するindependent track。用語と要求を残し、一般化を先行しない。D-100は内容・ローカル構成承認済みの独立完成物で、実公開はWeb配信構成と合わせるのを第一候補とする。hostingや管理Webの承認には広げない。
+
+### Previous plan（順序はSuperseded by D-101）
 
 初回実用版の後、次の順で広げる。
 

@@ -1,5 +1,36 @@
 # 06. Delivery Plan
 
+## Current roadmap
+
+D-101 Accepted（2026-09-13、今後の順序とscope優先順位）。
+
+現在の利用価値と依存関係に基づく順序を以下に固定する。旧Phase 9〜16の連番消化は行わない。Phase 0〜8とD-095〜099の限定Completed、D-100の内容・ローカル構成承認を維持する。D-100はWeb Foundationのpublic部分へつながる独立完成物（公開候補）であり、実公開や管理Webの完成ではない。
+
+| 順序 | 成果のまとまり | 範囲・依存関係 |
+|---|---|---|
+| 1 | **Web Foundation** | D-100静的guideを公開可能なpublic領域として維持する。Web全体のhosting / URL / Discord OAuth / authorizationを決め、authenticated管理領域に最初はread-onlyのstatus相当表示を設ける。既存Control PlaneからDesired/Observed、選択Game/観測Game、player count、観測時刻、current Operation、主要進捗等を読む。public guideの実公開はこのWeb配信構成と合わせるのを第一候補とする。 |
+| 2 | **Existing Operations via Web** | START / STOP / SWITCH / BACKUP / RESETをDiscordと同じAdmission / Operation / workflowへ接続する。Web専用の制御処理を作らず、browserにAWS権限を直接持たせない。UI非表示だけでなくAPI側で既存role/policyによる認可を行う。 |
+| 3 | **Minimal Game Creation** | 対応済み実行構成から選び、display name等の必要項目を指定してGame metadataを登録する。CREATE-001の作成と起動の分離を維持する。Package / Preset / Templateの独立管理、汎用wizard、upload基盤を先行しない。作成Gameをpublic guideへ自動公開せず、説明とclient要件を揃えた明示的な公開登録を維持する。 |
+| 4 | **Whitelist Management** | Game作成と実運用を踏まえ、共通 / Game固有 / Minecraft内変更の責務を改めて決める。複雑な双方向同期を既定にしない。Game作成時に必要な初期whitelistと後から編集する管理機能を分ける。OP要求も維持し、詳細契約を先に確定しない。 |
+| 5 | **Runtime / Version / MOD Extension** | 実際に必要なGame/runtime構成が出た時に具体例を端から端まで通して追加する。旧Phase 12の全server種別一般化や固定順序を必須にしない。 |
+
+### Release sliceと承認境界
+
+Web Foundationは認証/認可のsecurity boundaryを持つ。**read-only statusのreleaseとwrite operationsのreleaseを分離する**。順序の採用はhosting選定、閲覧者、認証/認可の詳細、URL、費用、OAuth app作成、実公開・production writeの承認ではない。各releaseの対象と安全条件を具体化して境界で承認を受ける。D-100の内容承認をこれらへ拡張しない。
+
+成果のまとまりごとにsliceを作り、承認されたscope内の通常の内部実装・test修正はCodexへ委任する。module分割、parser、serializer、tests、docs修正ごとの承認往復を作らない。production write、IAM/公開範囲/認証境界の変更、destructive data operation、既存の安全・保存contract変更、利用者policy/許容損失等の価値判断を主な人間承認境界とする。具体的に一括承認された対象・操作・安全条件は同じ範囲で再利用する。詳細は[作業規約](10_codex_working_agreement.md)。
+
+### Independent tracks — 条件・需要で開始
+
+以下は上記の直列依存から外す。必要条件を満たした時に独立sliceとして扱い、他trackの完了をWebやGame作成の前提にしない。
+
+- **RETENTION実削除release:** D-097 shared-volume v2の保持群と復旧条件が自然にrelease条件を満たした時のdestructive-operation gate。Snapshot総数だけで開始しない。dry-run-onlyを維持し、既存の保護・provenance・復旧・独立承認条件を緩和しない。
+- **Restore UI:** operator隔離復元能力はD-095とD-098の別sliceで確認済み。実証範囲は各closeoutを参照し、UIは実際に必要になった時の管理Web拡張とする。
+- **Discord↔Minecraft chat:** 具体的需要と対応runtime/pluginが決まった時に開始する。管理WebやGame作成の前提にしない。
+- **高度なPackage/Preset/Template管理、自動upgrade、archive、汎用hooks等:** 要求は維持し、具体的要求が出るまで先行実装しない。upload、汎用wizard、delete等も個別scopeと安全条件を決める。
+
+以下の旧Phase表・詳細はhistorical / previous planであり、現在の順序や必須依存を示さない。個別の適用済み契約は各Decision・closeoutを優先する。D-101がAcceptedとするのは今後のロードマップとscope優先順位だけで、Proposedな詳細契約の一括採用ではない。
+
 ## 独立slice D-100 — 静的参加・コマンド案内Web
 
 D-099 release/証跡整理Completedを維持。独立委任単位は[静的Web準備](reviews/user_guide_web.md)。Markdown再利用、schema/runtime投影、local build/preview、実ブラウザとCI検証、公開計画を扱う。13ページ化とGame中心の参加導線・公開Game登録からの生成を経て、内容・ローカル構成はユーザー承認済み。公開候補HEADとCI確認状況はレビュー文書に固定する。公開条件は未決で、hosting・閲覧者・認証・URL・費用上限と実公開は別承認。D-100全体、Phase 9全体やPhase 13管理Webの完了を意味しない。
@@ -8,7 +39,7 @@ D-099 release/証跡整理Completedを維持。独立委任単位は[静的Web�
 
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-09-12
+- **最終更新:** 2026-09-13
 
 ## Discord表示の限定slice（Completed）
 
@@ -21,9 +52,11 @@ D-099 release/証跡整理Completedを維持。独立委任単位は[静的Web�
 - 状態確認を起動・停止より先に作る。
 - backupを複数ゲーム、reset、MODより先に作る。
 - WebページをDiscord MVPより先に作らない。
-- 各フェーズは人間が実行結果を確認してから次へ進む。
+- 成果sliceの完了を検証し、上記の人間承認境界で確認する。内部手順ごとの再承認は要求しない。
 
 ## 2. フェーズ一覧
+
+Historical / previous plan。Phase 9〜16の順序・優先順位はD-101に置き換える。
 
 | Phase | 目的 | 主な完成物 |
 |---:|---|---|
@@ -46,6 +79,8 @@ D-099 release/証跡整理Completedを維持。独立委任単位は[静的Web�
 | 16 | 高度機能 | restore、upgrade、archive、delete |
 
 ## 2.1 Phaseと主要要件の対応
+
+旧計画の対応表として保持する。
 
 | Phase | 主要要件 |
 |---:|---|
@@ -804,7 +839,9 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 - 初回Discord deliveryは`DynamoDeliveryStore.load()`のBACKUP許可漏れで失敗したが、backend結果には影響せず、revision 0/1/2のstream failureはDLQへ隔離された。loader境界のSTART/STOP/BACKUP受理とunsupported拒否を回帰test化して修正deployし、元stream eventをrevision順にcontrolled replayした。stale revision 0/1はCASでno-op、terminal revision 2だけが固定nonceでsafe success message一件を作成し、delivery `DELIVERED`、DLQ 0、関連alarm OKへ収束した。新しいBACKUP、Snapshot、Operation status rewrite、raw DynamoDB repairは行っていない。
 - final stateはDesired/Observed/Actual STOPPED、HEALTHY、discrepancy/observation errorなし、DNS absent、Lock 0、Current Operationなし、unfinished Operation 0である。normal backupはPhase 8B/8Cの2件、migration rollback anchorはcompletedのまま不変である。
 
-#### 後続slice
+#### 後続slice（当時の記録）
+
+以下のnatural 8件・Phase 16等は当時の計画。現在のrelease条件はD-097、実装優先順位はD-101を参照。
 
 1. **Completed（2026-09-08）:** D-091の非TTL durable provenance、safe backfill、Snapshot Lock/storage tierを含むread-only dry-run、未接続IAM policyをrepository実装した。`wc-dev-backups`はon-demand、SSE、TTL/stream/indexなし、CloudFormation Retainでdeployし、Backup taskにはtable限定GetItem/PutItemだけを追加した。
 2. Phase 8B/8Cの2 SnapshotをAWS/Operation evidenceから直前再検証し、それぞれSnapshot/Operation uniqueness pairをcreate-only conditional transactionで登録した。backfill前はnormal 2件がprovenance不足ANOMALY、登録後の実inventory dry-runはKEEP 2、EXCLUDED migration anchor 1、ANOMALY/CANDIDATE/planned delete 0だった。Recycle Bin ruleとactive Snapshot Lockは0、3 Snapshotはいずれもstandard tierである。
@@ -834,6 +871,8 @@ Phase 8の検証済みbackupが完成するまでは試験運用とし、初回�
 
 #### Repository / production slice（2026-09-10 UTC、Completed）
 
+当時の完了記録を保持する。以下のnatural 8件・Phase 9/16参照は旧計画で、現在の共有保護条件はD-097、優先順位はD-101を参照。
+
 - D-094 AcceptedとしてRuntimeHeartbeat missing/stale、runtime unknown、identity mismatch、SystemState stale、Data filesystem unknown/highの監視を追加した。
 - SystemState freshnessは既存10分を維持し、5分scheduled Reconcileの実観測で整合させる。Operation/Lock中はskip、保存はDesired revision/Current Operation CAS付き。
 - Host probe v1.4は正本Data EBSのmount/sourceを検証してfilesystem bytesを採取する。既存heartbeat producer/timer、30分idle/5分warning/final gateは維持する。
@@ -858,7 +897,7 @@ Control Planeだけをdeployし、6 alarmと5分Reconcile scheduleを追加、11
 
 ## 12. Phase 9 — 複数ゲーム抽象
 
-**計画見直し中:** 以降のPhase 9〜16の一般化・table・archive・workflow順序は、以前の計画を残した検討材料であり、次の作業の必須依存ではない。現在の委任単位は[D-097 二Game切替・BACKUP整合](reviews/two_game_switch.md)の限定production移行（2026-09-12 JSTユーザーGO、設計Accepted、限定移行・E2E Completed）。実行状態は[production evidence](evidence/2026-09-12-two-game-production.json)を参照。Package/Preset/Template、Reset、Web、異なるruntime classは今回含めない。D-095/D-096のCompletedは維持する。
+**Historical / previous plan（順序・優先順位はSuperseded by D-101）:** 以下のPhase 9〜16は検討履歴として保持する。現在の順序は冒頭のCurrent roadmapを参照。D-096/097/098の限定実装・適用はCompletedであり、旧Phase 9全体やPackage/Preset/Template一般化の完了を意味しない。
 
 **独立slice Completed:** D-096 Acceptedの既存Game targeted runtime移行を2026-09-11 UTCに完了した。限定STOP復旧、host/CP前進修正、通常START/STOP二巡、world保持・新run分離を実証し、最終STOPPED/HEALTHY・両受付UNSET・41 alarm OKへ収束した。途中FAILED STARTは履歴として保持する。以下のPhase 9全体は未着手で、Package/Preset/Templateや他のProposed再設計をまとめて採用したものではない。[closeout](runbooks/targeted_runtime_migration.md#production-closeout--limited-stop--forward-migration)参照。
 
@@ -920,6 +959,8 @@ Package download
 - list/info/templatesで必要な情報を表示する。
 
 ## 14. Phase 11 — reset
+
+現行の対応Game限定RESETは[D-098](reviews/game_scoped_reset.md)が正本。以下の停止終端・毎回事前backup等は旧案の履歴であり、現行契約ではない。
 
 ### 前提
 
@@ -1010,21 +1051,9 @@ AdmitOperation
 
 ## 17. 1回のCodex作業サイズ
 
-良い単位:
+成果のまとまりを一つのsliceにし、内部は検証可能な変更へ分ける。例はWeb Foundationのread-only status、後続の既存操作Web接続、対応済み構成の最小Game作成。各sliceの対象要件・対象外・release境界を先に示す。
 
-- domain enumとtestだけ
-- SystemState repositoryだけ
-- EC2 state取得adapterだけ
-- `probe_game.py`だけ
-- lock acquire/renew/releaseだけ
-- State Machineの`StartEc2`まで
-- Discord署名検証だけ
-
-避ける依頼:
-
-- 「Phase 5を全部実装」
-- 「AWS構成を全部作る」
-- 「MOD対応まで一気に作る」
+module、parser、serializer、tests等は委任scope内の内部作業であり、それぞれを人間承認gateにしない。Phase全体や全runtime一般化を一括実装せず、認証/認可とwrite releaseの分離、既存契約の保護を維持する。
 
 ## 18. Definition of Done
 
@@ -1047,6 +1076,8 @@ repository実装としてpublic/private IPv4、Route 53 A record、endpoint disc
 repository validationだけではAWS完了としない。上記のcredential付きdiff、Control Plane-only deploy、stopped Target observationのcurrent SystemState保存を実測してPhase 3をcloseoutした。periodic reconcile、start/stop workflow、Discord/API、operation admission/lock、backupは後続Phaseのままとする。
 
 ## Phase 8後の独立復元確認slice（2026-09-11、Completed）
+
+以下は当時の完了記録。後続のD-097/098採用・完了とD-101の順序を巻き戻さない。
 
 D-095の限定順序変更をAcceptedとし、BACKUP安全性修正のControl Plane deploy/read-backと、
 既存Snapshotの隔離復元・保存・正常停止・再起動・Game抽出・cleanupを完了した。

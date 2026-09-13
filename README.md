@@ -11,13 +11,18 @@ Wishicraft（ゐしクラくん）のMinecraft制御面を構築するリポジ�
 
 ## 現在地点
 
+今後は[D-101のCurrent roadmap](docs/06_delivery_plan.md#current-roadmap)に従い、Web Foundation → Existing Operations via Web → Minimal Game Creation → Whitelist Management → 需要に応じたRuntime / Version / MOD Extensionへ進みます。read-only statusとwrite operationsは別release sliceです。旧Phase 9〜16はprevious planとして残し、連番消化や一般化を必須依存にしません。
+
+RETENTION実削除、Restore UI、chat、高度なPackage/Preset/Template管理等は条件・需要で開始するindependent trackです。D-100は内容・ローカル構成承認済みの公開候補として維持し、Web Foundationのpublic領域へつなぎます。hosting・閲覧者・認証・URL・費用・実公開は未承認です。
+
+
 現在の通常実行契約は[Data/Interface §0](docs/05_data_and_interface_contracts.md#0-production適用済みruntime契約d-096)を参照してください。runbookは移行手順・証跡を所有します。現在は[D-097 二Game切替・共有BACKUP](docs/reviews/two_game_switch.md)の設計と限定移行計画がAcceptedです。production適用・A→B→Aと共有BACKUP/RETENTION検証は2026-09-12 Completedで、[実行証跡](docs/evidence/2026-09-12-two-game-production.json)へ別途記録します。Phase 9全体の採用ではありません。
 
 D-097の二Game切替sliceは2026-09-12にCompleted。A→B→Aは同一EC2 boot、両受付UNSET、最終A/STOPPED/HEALTHY、42 alarm OK、Snapshot計7件（v1 normal 5・anchor 1・shared v2 normal 1）を確認しました。RETENTIONはdry-run-only、実multi-Game単独復元とPhase 9全体は未完了です。[今回のcloseout](docs/runbooks/two_game_switch_migration.md#production-closeout2026-09-12)を参照してください。
 
 Phase 0〜8は完了しています。停止中Data EBSのBACKUP、durable provenance、retention dry-run、Runtime heartbeat、warning付き無人自動停止、監視・コスト整備をdevで検証済みです。Phase 7ではDiscord signed Interaction Endpointとdev Guild限定`/mc status|start|stop`を既存Control Planeへ接続し、real DiscordからSTOPPED STATUS、START→READY、RUNNING STATUS、public Minecraft protocol、STOP、final STOPPED STATUSまでdev E2Eを完了しました。
 
-Phase 8.3は2026-09-10 UTCにControl Plane限定deployと通常START/STOP監視E2Eを完了しました。D-094 Accepted、READY後15分以上のfreshness維持、正しいData EBS使用率1.4389%、停止後SSM/容量値発行なし、41 alarm OK、最終STOPPED/HEALTHYを確認済みです。初期欠測による5件の実メール通知と自然復帰も[監視runbook](docs/runbooks/phase8_monitoring.md)へ記録しています。次のPhase 9は未着手です。RETENTION実削除はnormal backup自然8件以降の独立gate、Restore UI・汎用workflowはPhase 16です。D-095の独立sliceとして、2026-09-11にBACKUP安全性deployと既存Snapshotの隔離復元・保存・再起動・抽出・cleanupを完了しました。[実証範囲と限界](docs/runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照してください。この独立復元slice時点では新BACKUP経路の実AWS E2Eは未実施でした。
+Phase 8.3は2026-09-10 UTCにControl Plane限定deployと通常START/STOP監視E2Eを完了しました。D-094 Accepted、READY後15分以上のfreshness維持、正しいData EBS使用率1.4389%、停止後SSM/容量値発行なし、41 alarm OK、最終STOPPED/HEALTHYを確認済みです。初期欠測による5件の実メール通知と自然復帰も[監視runbook](docs/runbooks/phase8_monitoring.md)へ記録しています。旧Phase 9全体は未完了です。RETENTION実削除はD-097 shared-volume v2の保持群と復旧条件に基づく独立gateで、Snapshot総数だけでは開始しません。Restore UIは必要時の管理Web拡張です。D-095の独立sliceとして、2026-09-11にBACKUP安全性deployと既存Snapshotの隔離復元・保存・再起動・抽出・cleanupを完了しました。[実証範囲と限界](docs/runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照してください。この独立復元slice時点では新BACKUP経路の実AWS E2Eは未実施でした。
 
 D-096の既存Game対象付きruntime移行は2026-09-11にCompleted。限定canonical STOPで前の失敗状態を復旧し、host/Control Plane修正後の通常START/STOP二巡、既存world保持、停止container限定削除、新run heartbeatを実証しました。最終STOPPED/HEALTHY、両受付UNSET、41 alarm OK、元EBSと5 Snapshot/provenance保持を確認済みです。[closeout](docs/runbooks/targeted_runtime_migration.md#production-closeout--limited-stop--forward-migration)を参照してください。Phase 9全体は未着手、その他再設計はProposedです。
 

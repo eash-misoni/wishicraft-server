@@ -4,7 +4,7 @@
 
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-09-12
+- **最終更新:** 2026-09-13
 
 ## 0. Production適用済みruntime契約（D-096）
 
@@ -872,7 +872,7 @@ READY待機はStep Functions/reconcile側が行う。
 
 ### Backup runtime
 
-現行Phase 8のbackupはD-090の停止中Data EBS Snapshotであり、host-side `backup_game.py`やS3 archiveを使用しない。S3 archiveはPhase 16のarchive/restore検討までDeferredとする。
+現行Phase 8のbackupはD-090の停止中Data EBS Snapshotであり、host-side `backup_game.py`やS3 archiveを使用しない。S3 archiveはD-101のindependent trackとして具体的要求までDeferredとする（旧Phase 16計画）。
 
 ## 15. Runtime State File
 

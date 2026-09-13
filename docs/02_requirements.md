@@ -4,7 +4,7 @@
 
 
 - **文書状態:** Canonical
-- **最終更新:** 2026-09-12
+- **最終更新:** 2026-09-13
 
 ## 1. 要件の読み方
 
@@ -411,6 +411,9 @@ D-097 Acceptedの移行後は、新形式shared-volume normalだけを共有volu
 
 ## 10. 複数ゲーム・Package要件
 
+現在の優先順位は[D-101 / Current roadmap](06_delivery_plan.md#current-roadmap)を参照。LATERは要求の保留区分であり、旧Phase番号順の実装義務ではない。Package/Preset/Templateの要求とversion固定方針を維持し、独立管理や汎用wizard/uploadを最小Game作成の前提にしない。現行の対応済み実行構成の正本はD-096/097、詳細な新規作成契約は今後のsliceで決める。
+
+
 ### GAME-001 管理単位 `LATER`
 
 以下のLATERモデルは見直し対象。[D-097 Accepted](reviews/two_game_switch.md)では、同一固定構成の二Game選択・EC2維持切替・共有BACKUP整合を一利用機能として準備する。認可、接続playerの扱い、共有保護/retention単位はD-097の限定範囲で採用・適用済み。Reset等へ無条件に流用しない。
@@ -443,7 +446,9 @@ MODとPaper系プラグインを同一Gameで混在させるハイブリッド�
 
 ### CREATE-001 作成と起動分離 `LATER`
 
-`/mc create`はGameメタデータを作成し、原則としてEC2を起動しない。初回start時にmaterializeする。
+Game作成は起動と分離し、Game metadataの登録だけでEC2を起動しない。現在はWebから対応済み実行構成を選び、display name等の必要項目を指定する最小作成を優先する。`/mc create`と初回start時materializeは従来の拡張要求として保持し、汎用wizard・Package/Preset/Template独立管理を先行しない。
+
+作成Gameをpublic guideへ自動掲載しない。掲載は説明とclient要件を揃えた明示的公開登録とする。作成時に必要な初期whitelistと、後から編集するWhitelist Managementは別scopeとする。
 
 ### RESET-001 世代交換 `LATER`
 
@@ -459,31 +464,38 @@ reset前に最終バックアップを作成・検証し、旧世代を保持す
 
 既存のDiscord利用案内を入口に、Game/command別Markdownを各説明の唯一の編集元として、参加条件、Game差分、現行schemaの引数・例・認可、安全条件、失敗/結果不明時の行動を静的HTMLで提供する。Minecraft EC2停止中も読める配信計画とする。機械項目はGame/runtime/schemaから投影し、公開候補fieldと本文範囲を明示する。
 
-公開buildへ内部設定・個人/実行証跡・秘密値・未承認の接続先/招待URLを混ぜない。ローカル実装/CIとhosting作成・インターネット公開を分離し、後者は別承認。実表示・コピー・keyboard・安全な文字列挿入・再現性を検証する。[D-100計画](reviews/user_guide_web.md)を参照。WEB-001〜003の状態確認/管理機能は後続判断として維持する。
+公開buildへ内部設定・個人/実行証跡・秘密値・未承認の接続先/招待URLを混ぜない。ローカル実装/CIとhosting作成・インターネット公開を分離し、後者は別承認。実表示・コピー・keyboard・安全な文字列挿入・再現性を検証する。[D-100計画](reviews/user_guide_web.md)を参照。WEB-001〜003は管理Web要求として維持する。D-100の内容・ローカル構成は承認済み公開候補という独立完成物で、Web Foundationのpublic部分へつながる。実公開はWeb全体の配信構成と合わせるのを第一候補とするが、内容承認はhosting・閲覧者・認証・URL・費用・管理Web承認を含まない。
 
 ### WEB-001 実装時期 `LATER`
 
-Discord MVPと運用保護が完成した後に実装する。
+Discord MVPと運用保護の完成を踏まえ、D-101の次の優先sliceをWeb Foundationとする。authenticated管理領域のread-only statusを先にreleaseし、START / STOP / SWITCH / BACKUP / RESETのwrite operationsは別release sliceとする。
 
 ### WEB-002 初期方式 `LATER`
 
 最初はDiscord OAuth2、HTTP API、数秒間隔のポーリングを使用する。WebSocketは必要性を確認してから追加する。
 
+Web全体のhosting / URL / Discord OAuth / authorizationはWeb Foundationで決め、security boundaryで人間承認を受ける。browserへAWS権限を直接持たせない。write operationsはDiscordと同じAdmission / Operation / workflowを使い、Web専用制御を作らない。UI非表示だけでなくAPI側で既存role/policyに基づき認可する。
+
 ### WEB-003 表示 `LATER`
 
-最低限次を表示する。
+既存Control Planeから次を読む。最初のreleaseはstatus相当（状態・選択/観測・人数・観測時刻・current Operation・主要進捗等）までとし、一覧/詳細・履歴の拡張は後続sliceで扱う。
 
 - Desired State
 - 各Observed State
-- active game
+- 選択Gameと観測Game（active gameを選択から推測しない）
 - player count
 - 最終実測時刻
-- current operation
+- current Operationと主要進捗
 - 直近エラー
 - Game一覧と詳細
 - operation履歴
 
 ## 12. OP・チャット要件
+
+Whitelist Managementは最小Game作成と実運用の後に、共通 / Game固有 / Minecraft内変更の責務を改めて決める。複雑な双方向同期を既定にせず、作成時の初期whitelistと後からの編集管理を分ける。OP-001/002は維持し、未確定のwhitelist詳細contractをここで採用しない。
+
+CHAT-001〜003は具体的需要と対応runtime/pluginが決まった時のindependent trackとする。以下のchat内部順序は、管理WebやGame作成の前提を意味しない。
+
 
 ### OP-001 Game単位 `LATER`
 

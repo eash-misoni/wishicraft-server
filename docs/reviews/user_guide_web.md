@@ -2,11 +2,17 @@
 
 **状態:** 内容・ローカル構成は承認済み、公開条件は未決。D-100全体の完了やhosting採用の承認ではない。
 2026-09-13のユーザーレビュー承認により、公開候補のページ・生成処理を `81f181d90412fe6d440d9866f0106a7b0ef77c8a` に固定する。追加のUI再設計・文章拡充・ページ構成変更は行わず、新たに判明した不具合だけ必要最小限で対応する。
-同HEADのCI run `34737820030` は承認記録時点でQueued、成功未確認。直前commitの成功で代替しない。以下の実装・ローカル検証記録を保持し、公開候補と承認記録だけを更新した文書HEADを区別する。
+同HEADのCI run `34737820030` は承認記録時点でQueued、成功未確認だった。最新の承認記録HEAD `39bae168813892edc6556b502ca8d7687e9135c2` のCI run `34738758175` はsuccess（2026-09-13確認）。以下の実装・ローカル検証記録を保持し、公開候補と承認記録だけを更新した文書HEADを区別する。
 Web公開・hosting project作成・DNS/TLS/Access変更・自動公開の有効化・AWS/Discord/Hostへのproduction操作は未実施・未承認。閲覧者・認証・最終URL・費用上限も未決。
 基準HEADは前回準備完了 `940aa0337433ec7ca268c3a5d95f656d7091bc44`。originと一致・cleanを確認して継続した。
 D-099 Completed / release COMPLETED / PRODUCTION_VERIFIEDを維持し、完了E2Eは再実行しない。
 前回の追加委任はGame中心の参加導線・公開Game一覧からの生成・検証。既存の外観とページ別URLを維持し、Game中心のローカル再確認を経て上記の内容承認に至った。
+
+## Current roadmapとの関係（D-101）
+
+内容・ローカル構成を承認済み公開候補として維持し、Web Foundationのpublic部分へつながる独立完成物とする。実公開はWeb全体のhosting / URL / Discord OAuth / authorizationと合わせて配信構成を決めるのを第一候補とする。以下のCloudflare推奨はD-100準備時の候補で、採用決定ではない。内容承認をhostingや管理Webの承認へ拡張しない。
+
+authenticated read-only statusとwrite operationsは別release slice。WebからGameを作成してもguideへ自動掲載せず、説明/client要件を揃えた明示的公開登録を維持する。順序と承認境界は[Current roadmap](../06_delivery_plan.md#current-roadmap)を参照。
 
 ## 動くページとローカルレビュー
 
