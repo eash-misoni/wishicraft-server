@@ -77,14 +77,16 @@ def verify_source(evidence: dict[str, Any], snapshot_id: str, root: Path) -> dic
     recovery_json = None
     game_id = config.project.initial_game_id
     if snapshot.tags.get("WishicraftSchemaVersion") == "2":
-        from wishicraft.runtime_catalog import RuntimeCatalog
+        from wishicraft.backup_recovery import recovery_digest
 
         raw_operation = store.get_item(
             TableName="operations", Key={"operation_id": {"S": operation_id}}, ConsistentRead=True
         )["Item"]
         recovery_json = raw_operation["backup_recovery_json"]["S"]
         game_id = snapshot.tags["WishicraftGameId"]
-        RuntimeCatalog.parse((root / "config/two-game-dev.json").read_text()).data_source(game_id)
+        recovery_digest(recovery_json)
+        if game_id not in json.loads(recovery_json)["games"]:
+            raise ValueError("snapshot Game is absent from captured recovery description")
     record = build_verified_provenance(
         snapshot=snapshot,
         operation=BackupOperationEvidence(

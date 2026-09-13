@@ -1,6 +1,6 @@
 # 09. Decisions and Backlog
 
-## D-105 Minimal Game Creation（repository実装委任・production未適用）
+## D-105 Minimal Game Creation（repository検証済み・production承認待ち）
 
 2026-09-13、D-101第3単位としてAdmin限定Web CREATEと既存START/SWITCHによる初回materializationを実装。通常設計・repository/tests/docs/CIは委任、production writeは未承認。
 [登録・seed・dynamic registry・RESET・shared-v2 recovery契約](reviews/minimal_game_creation.md)と[release/rollback/positive E2E方針](runbooks/minimal_game_creation.md)を参照する。
@@ -11,8 +11,8 @@ CREATEはmetadata-onlyのterminal transaction。既存A/B変更・public guide�
 2026-09-13、D-101第2実装単位として既存5操作をWeb adapterから既存Admissionへ接続する実装を委任。
 詳細は[release review](reviews/existing_operations_web.md)。共有認可はSTART/STOP/RESET=PlayerまたはAdmin、SWITCH/BACKUP=Admin。
 15分session内の確認済みrolesを毎write評価し、session-bound CSRF、actor-bound request deduplication、terminal read projectionを追加する。
-Discord deliveryやbackend safety/retentionは変更しない。2026-09-13、基準HEAD `bfc63c4`への明示GOによりproduction releaseを承認。CP先行→Discord read-back→Webの順序と、Web START A→SWITCH B→A→STOPの非破壊E2Eを適用する。role snapshotのfreshness上限15分を明示tradeoffとして受容。実RESET・Snapshot作成は範囲外。2026-09-13、Web START A→SWITCH B→A→STOPの全4 Operation/workflow成功、自然なresponse timeoutの単一要求照合、15分失効後の同一要求terminal read-backを確認してCompleted。最終STOPPED/HEALTHY、Lock/currentなし、6 workflow停止、3 queue空、45 alarm OK、Game/world/generation・9 Snapshot・16 BACKUP記録/provenance不変。実RESET/BACKUPは実行していない。[実証・検証範囲](runbooks/existing_operations_web.md#production-closeout-2026-09-13)を参照。Minimal Game Creationは未着手。
-実RESET/new SnapshotはE2E計画に含めない。D-102/103 Completedを維持し、Minimal Game Creationへ進まない。
+Discord deliveryやbackend safety/retentionは変更しない。2026-09-13、基準HEAD `bfc63c4`への明示GOによりproduction releaseを承認。CP先行→Discord read-back→Webの順序と、Web START A→SWITCH B→A→STOPの非破壊E2Eを適用する。role snapshotのfreshness上限15分を明示tradeoffとして受容。実RESET・Snapshot作成は範囲外。2026-09-13、Web START A→SWITCH B→A→STOPの全4 Operation/workflow成功、自然なresponse timeoutの単一要求照合、15分失効後の同一要求terminal read-backを確認してCompleted。最終STOPPED/HEALTHY、Lock/currentなし、6 workflow停止、3 queue空、45 alarm OK、Game/world/generation・9 Snapshot・16 BACKUP記録/provenance不変。実RESET/BACKUPは実行していない。[実証・検証範囲](runbooks/existing_operations_web.md#production-closeout-2026-09-13)を参照。このD-104 closeout時点ではMinimal Game Creationは未着手だった。現在の実装はD-105を参照。
+実RESET/new SnapshotはE2E計画に含めない。D-104当時のscopeはD-102/103 Completedを維持し、Minimal Game Creationを含めなかった。
 
 
 ## D-103 Web URL Stabilization / Custom Domain（Accepted、production Completed）

@@ -86,3 +86,27 @@ game_creation=true. New CREATE stops; dynamic listing/start/recovery remains ava
 metadata/owners/worlds and apply a forward fix. A/B-only rollback would omit dynamic Games from
 future backups, so it is not an acceptable post-CREATE rollback. Existing snapshots remain protected.
 No DeleteSnapshot, Game delete, unknown data cleanup or rollback of another Game is authorized.
+
+## Repository preparation validation (2026-09-13)
+
+Implementation CI [34755576680](https://github.com/eash-misoni/wishicraft-server/actions/runs/34755576680)
+on `5d9d850` passed all three jobs: 1,230 tests, lint/type checks, public Web checks and real Docker.
+Docker logs contain both CREATE_FIRST_MATERIALIZED checkpoints and the terminal metadata CREATE /
+first START / first SWITCH / retry / STOP / restart / A-B noninterference PASS. The offline restore
+source audit additionally removed an A/B-only lookup: historical shared Snapshot recovery now checks
+its captured descriptor, including dynamic triggering Games, through real provenance verification.
+Final handoff reports the final commit's CI separately; preceding evidence is not relabeled as a
+successful run of a later HEAD.
+
+Local Chromium validation passed 11 operations scenarios including CREATE confirmation, duplicate
+submit and reload, plus 13 public pages at 3 widths (39 checks) and Foundation browser regression.
+Local Docker and shellcheck are unavailable; Docker validation is the Linux CI run, not a local pass.
+CP/Web/Target synth and read-only live diffs pass. Changes are 11 CP Lambda functions, 2 Web Lambda
+functions and 4 narrow IAM policies; no added/replaced resource. Web has no new Games write grant.
+Start gains Games UpdateItem / Locks ConditionCheckItem, two existing readers gain Games GetItem,
+and Target gains Games GetItem. Host upgrade is the separate three-file reviewed bundle above.
+Existing schema-1 recovery JSON in all three saved shared-v2 Snapshot descriptors still validates.
+
+[Preparation evidence](../evidence/minimal_game_creation_2026-09-13.json) records evidence roots and
+limits. No production deployment, Game CREATE, runtime command, filesystem change or Snapshot write
+was performed. First production positive CREATE should wait for a real Game the user wants to retain.

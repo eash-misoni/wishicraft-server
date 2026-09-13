@@ -7,15 +7,15 @@ from typing import Any
 import pytest
 
 from tests.unit.test_backup_provenance import Dynamo, record
-from wishicraft.backup_provenance import BackupProvenanceRepository
+from wishicraft.backup_provenance import BackupProvenanceRecord, BackupProvenanceRepository
 from wishicraft.isolated_restore import isolated_template, verify_source
 from wishicraft.operation import _attribute_map
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def source_evidence() -> dict[str, Any]:
-    p = record(verified_owner_id="385526546525")
+def source_evidence(p: BackupProvenanceRecord | None = None) -> dict[str, Any]:
+    p = p or record(verified_owner_id="385526546525")
     db = Dynamo()
     BackupProvenanceRepository(db, table_name="backups").register(p)
     return {

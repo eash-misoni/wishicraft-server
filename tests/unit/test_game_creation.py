@@ -187,7 +187,7 @@ def test_shared_recovery_includes_dynamic_game(creation: Any, materialized: bool
         operation_id="op-backup",
         lease_id="lease-backup",
         catalog=RuntimeCatalog(backend.game_ids()),
-        volume="vol-0123456789abcdef0",
+        volume="vol-03ac9f534326c345c",
         runtime_json=json.dumps(
             {
                 "manifest_json": rendered.manifest_json,
@@ -206,6 +206,28 @@ def test_shared_recovery_includes_dynamic_game(creation: Any, materialized: bool
     assert saved["data_source"] == f"/srv/minecraft/games/{game}/" + (
         "worlds/op-reset-current/server" if materialized else "server"
     )
+    # Offline recovery uses the Snapshot-time registry, including a dynamic triggering Game.
+    from tests.unit.test_backup_provenance import record
+    from tests.unit.test_isolated_restore import source_evidence
+    from wishicraft.backup_recovery import shared_tags
+    from wishicraft.isolated_restore import verify_source
+
+    previous = record()
+    metadata = shared_tags({**previous.metadata, "WishicraftGameId": game}, value)
+    captured = record(
+        verified_owner_id="385526546525",
+        game_id=game,
+        metadata=metadata,
+        schema_version=2,
+        recovery_json=value,
+    )
+    evidence = source_evidence(captured)
+    operation = evidence["operations"][0]
+    operation["backup_recovery_json"] = {"S": value}
+    operation["result"]["M"].update(
+        _attribute_map({"scope": "shared-volume", "recovery_digest": recovery_digest(value)})
+    )
+    assert verify_source(evidence, captured.snapshot_id, root)["game_id"] == game
 
 
 def test_backup_fence_and_lost_response(creation: Any) -> None:

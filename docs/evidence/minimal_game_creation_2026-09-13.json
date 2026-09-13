@@ -1,0 +1,95 @@
+{
+  "decision": "D-105",
+  "status": "repository prepared; production approval pending",
+  "production_write_performed": false,
+  "baseline_head": "c124525e3baeaaa9e4e3e4dfc7b90f297bfb27a6",
+  "implementation_ci": {
+    "head": "5d9d850cf3b615c58db5981497c0c6d1d16c037b",
+    "run_id": 34755576680,
+    "conclusion": "success",
+    "tests_passed": 1230,
+    "docker": [
+      "metadata-only CREATE",
+      "first START",
+      "first SWITCH",
+      "same-run retry",
+      "STOP",
+      "restart",
+      "A/B noninterference"
+    ],
+    "log_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-creation-ci-v1-n8srmluy"
+  },
+  "final_head_validation": "Final handoff reports final HEAD and its CI; this earlier CI is not evidence of a later HEAD.",
+  "browser": {
+    "operations_cases": 11,
+    "operations_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-operations-browser-STEdC9",
+    "public_pages": 13,
+    "widths": [
+      390,
+      320,
+      1440
+    ],
+    "public_checks": 39,
+    "public_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-web-browser-V9aS3u",
+    "foundation_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-foundation-browser-Lqc78n"
+  },
+  "preflight": {
+    "root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-creation-final-preflight-v1-imwc_49p",
+    "at": "2026-09-13T12:05:00.860581+00:00",
+    "stage": "dev",
+    "instance_state": "stopped",
+    "games": 2,
+    "locks": 0,
+    "running_workflows": 0,
+    "active_ssm": 0,
+    "empty_queues": 3,
+    "alarms_ok": 45,
+    "snapshots": 9,
+    "provenance_items": 16,
+    "a_b_unchanged": true,
+    "game_hash_serialization": "json.dumps(raw_dynamodb_item, sort_keys=True)",
+    "hashes": {
+      "game-vanilla-main": "d9630bf74e8e1e1aba8cc4abcc0e369407e673357c547d97861331e673a586c6",
+      "game-vanilla-secondary": "08cf25cddd61a9381cd114f99da2ccf86df67901c6a4cb98e83f0096fce70c88"
+    },
+    "fresh_filesystem_capacity": "unavailable while stopped; approved maintenance gate required",
+    "schema_1_shared_recovery_descriptors_verified": 3
+  },
+  "reviewed_live_diff": {
+    "root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-creation-final-diff-v1-b8ewz0bs",
+    "cp_lambda_changes": 11,
+    "web_lambda_changes": 2,
+    "iam_policy_changes": 4,
+    "new_resources": 0,
+    "replacement_resources": 0,
+    "web_new_iam_permissions": false,
+    "host_upgrade_destinations": [
+      "/etc/wishicraft/runtime-contract.json",
+      "/usr/local/libexec/wishicraft/operation-v2",
+      "/usr/local/libexec/wishicraft/initial_game.py"
+    ]
+  },
+  "limits": [
+    "No production CREATE or materialization E2E",
+    "No production write",
+    "Local Docker CLI unavailable; actual Docker exercised on CI",
+    "AWS/SSM/systemd/mount simulated in Docker harness",
+    "Local shellcheck unavailable",
+    "No game deletion or retention deletion released",
+    "Snapshot count is observation, not release condition"
+  ],
+  "positive_production_e2e": "Prefer first real user Game; do not create throwaway Game. Separate explicit START/SWITCH approval.",
+  "environment_failures": [
+    "Final CP synth v1 and sandbox full suite failed while fetching locked CDK bundle dependencies due DNS/network restrictions; rerun without changing implementation."
+  ],
+  "final_local_validation": {
+    "pytest_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-creation-final-tests-v2-n64pbn0r",
+    "ruff_check": "passed",
+    "ruff_format": "254 files passed",
+    "mypy": "189 source files passed",
+    "cp_synth": "/private/tmp/wishicraft-creation-final-cp-v2",
+    "web_synth": "/private/tmp/wishicraft-creation-final-web-v1",
+    "target_synth": "/private/tmp/wishicraft-creation-target-synth-v1",
+    "pytest": "1230 passed in 77.53s"
+  }
+}
