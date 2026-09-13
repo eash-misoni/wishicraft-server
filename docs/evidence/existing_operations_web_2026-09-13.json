@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "decision": "D-104",
+  "status": "production Completed",
+  "approval_head": "bfc63c412f6cd5cd5e4ed4d2a57a1dc52f5d421a",
+  "implementation_head": "5dfbf32949c3e166cd9acd5845351dd76723f0e7",
+  "implementation_ci": 34752735303,
+  "tests_passed": 1201,
+  "canonical_origin": "https://web.wishicraft.net",
+  "final_checked_at": "2026-09-13T10:55:59.649190+00:00",
+  "operations": [
+    {
+      "type": "START",
+      "request_id": "94860d59-cd43-4761-b8ad-e12878632909",
+      "operation_id": "op-697ab4c0-a4df-410c-b7e9-46c67345f436",
+      "operation_status": "SUCCEEDED",
+      "workflow_status": "SUCCEEDED",
+      "actor_source": "WEB",
+      "actor_display": "ゐしーん",
+      "actor_identity_present": true,
+      "actor_bound_key_match": true,
+      "normalized_digest_match": true,
+      "one_operation": true,
+      "idempotency_readback_match": true,
+      "discord_metadata_absent": true
+    },
+    {
+      "type": "SWITCH",
+      "request_id": "2c40c6d3-a4d0-489e-afe5-95d792b8699e",
+      "operation_id": "op-edb982ea-b8c2-4334-811c-9cdec84df385",
+      "operation_status": "SUCCEEDED",
+      "workflow_status": "SUCCEEDED",
+      "actor_source": "WEB",
+      "actor_display": "ゐしーん",
+      "actor_identity_present": true,
+      "actor_bound_key_match": true,
+      "normalized_digest_match": true,
+      "one_operation": true,
+      "idempotency_readback_match": true,
+      "discord_metadata_absent": true
+    },
+    {
+      "type": "SWITCH",
+      "request_id": "5d8ed573-5dc6-4429-b0a7-8d48d75638ca",
+      "operation_id": "op-2e384559-1ade-4b3e-aae9-95c14a6fed0e",
+      "operation_status": "SUCCEEDED",
+      "workflow_status": "SUCCEEDED",
+      "actor_source": "WEB",
+      "actor_display": "ゐしーん",
+      "actor_identity_present": true,
+      "actor_bound_key_match": true,
+      "normalized_digest_match": true,
+      "one_operation": true,
+      "idempotency_readback_match": true,
+      "discord_metadata_absent": true
+    },
+    {
+      "type": "STOP",
+      "request_id": "ab5ec96d-a91a-420e-8c5e-7c7b8b6a1565",
+      "operation_id": "op-8c9f3c3a-76bc-44b2-bf0f-37bbfdace8c4",
+      "operation_status": "SUCCEEDED",
+      "workflow_status": "SUCCEEDED",
+      "actor_source": "WEB",
+      "actor_display": "ゐしーん",
+      "actor_identity_present": true,
+      "actor_bound_key_match": true,
+      "normalized_digest_match": true,
+      "one_operation": true,
+      "idempotency_readback_match": true,
+      "discord_metadata_absent": true
+    }
+  ],
+  "data_safety": {
+    "game_records_world_generation_unchanged": true,
+    "data_volume_identity_attachment_unchanged": true,
+    "snapshots_unchanged": 9,
+    "backup_provenance_unchanged": 16,
+    "target_frozen_templates_unchanged": true,
+    "dns_absent": true,
+    "final": "STOPPED/HEALTHY",
+    "running_workflows": 0,
+    "non_ok_alarms": 0,
+    "empty_queues": 3
+  },
+  "game_record_sha256": {
+    "game_a": "d9630bf74e8e1e1aba8cc4abcc0e369407e673357c547d97861331e673a586c6",
+    "game_b": "08cf25cddd61a9381cd114f99da2ccf86df67901c6a4cb98e83f0096fce70c88"
+  },
+  "security": {
+    "unauthenticated_write": 401,
+    "invalid_session_write": 401,
+    "expired_session_write": 401,
+    "logout_session_write": 401,
+    "csrf_missing": 403,
+    "csrf_mismatch": 403,
+    "foreign_origin": 403,
+    "foreign_form": 403,
+    "forged_actor_field": 400,
+    "forged_role_field": 400,
+    "unsupported_reset": 422,
+    "old_origin_write": 421,
+    "old_origin_capabilities": 421,
+    "old_origin_callback": 421,
+    "cors_enabled": false
+  },
+  "limits": [
+    "Unsupported RESET is rejected by the Web adapter before shared Admission; no production RESET execution is claimed.",
+    "No BACKUP/Snapshot creation solely for route testing; shared backend production evidence and integration wiring cover it.",
+    "Role permutations and Discord slash-command behavior are repository/CI evidence; real Guild roles were not changed.",
+    "The final timeout-only correction was deployed after the four lifecycle operations; fresh lifecycle writes were not repeated solely for timeout tuning."
+  ],
+  "evidence_roots": [
+    "wishicraft-web-edge-e2e-v4-8pa8tlxt",
+    "wishicraft-web-final-preflight-famd7nr9",
+    "wishicraft-web-admission-timeout-v5-vklm37ij"
+  ]
+}

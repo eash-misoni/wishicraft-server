@@ -1,8 +1,7 @@
 # Existing Operations via Web release / rollback
 
-D-104 production release approved at `bfc63c4` on 2026-09-13; execution in progress.
-Base `2d05437` remains the last completed
-Web URL stabilization release. [Review and contract](../reviews/existing_operations_web.md) owns design.
+D-104 production Completed on 2026-09-13. Approval baseline `bfc63c4`, final implementation `5dfbf32`.
+Base `2d05437` is the preceding read-only Web URL stabilization release. [Review and contract](../reviews/existing_operations_web.md) owns design.
 
 ## Local verification
 
@@ -181,3 +180,68 @@ Signing-key rotation/session revocation is an incident action, not a routine rol
   completion. Other AWS reads retain their prior timeouts. Same-request reconciliation is unchanged.
   Focused 41 tests and full **1,201 tests** passed; lint/format/mypy passed after removing an unused
   test-only type-ignore. Production application waits until the approved lifecycle E2E converges.
+
+
+## Production closeout (2026-09-13)
+
+The approved Existing Operations via Web slice is **Completed**. Minimal Game Creation remains
+unstarted. [Sanitized evidence](../evidence/existing_operations_web_2026-09-13.json) records the
+four request/Operation/workflow mappings without Discord user IDs, cookies, tokens or raw exceptions.
+
+| Web action | HTTP admission | Terminal result (UTC) |
+|---|---|---|
+| START A | Unknown → same-request read-back | SUCCEEDED 10:39:46 |
+| SWITCH A → B | Unknown → same-request read-back | SUCCEEDED 10:44:42 |
+| SWITCH B → A | 202 accepted | SUCCEEDED 10:48:46 |
+| STOP A | 202 accepted | SUCCEEDED 10:50:56 |
+
+All four requests mapped to exactly four successful Operations and four successful workflows.
+Actor/source, actor-bound idempotency key and normalized payload digest matched; Discord interaction,
+channel and message metadata stayed NULL. No client resubmission was needed. Both SWITCH safety
+checks observed HEALTHY, READY, fresh heartbeat, known zero players, matching selected/observed Game,
+no current Operation and no Lock. B saved normally and A returned through its original data identity.
+The browser showed confirmation, acceptance/running/result, progress milestones and terminal success.
+
+RUNNING/transition evidence outstanding from the read-only slice is now recovered: selected vs observed
+Game, fresh/stale heartbeat, identity matching, unknown player counts during transitions, known zero
+when stable and not-expected after STOP. The server-side session naturally expired during STOP tracking;
+an explicit old-cookie write and read returned 401. After the user's fresh OAuth login, the same saved
+request read back STOP SUCCEEDED without creating another Operation. Logout/revoked-cookie rejection
+was also observed separately before expiry. CSRF/Origin/spoof/capability negatives passed again after
+the final code deployment. The E2E browser was logged out and closed at completion.
+
+No real RESET or BACKUP was performed solely for Web route testing. Unsupported RESET A safely
+returned 422 at the Web adapter, before shared Admission; downstream production RESET execution is
+not claimed. Actual HTTP/session/Admission serializer integration, capability/seed/confirmation/role
+cases and existing D-098 backend production evidence cover RESET. BACKUP uses the same tested Admission
+wiring and existing backend production evidence; no new Snapshot was justified. Other-session CSRF,
+role permutations and command/delivery failure cases use synthetic integration/regression evidence;
+no real Discord Guild role or extra identity was created. Discord production smoke was signature-free
+request rejection (401) plus deployed code/config and DISCORD-only stream filter read-back; real
+slash-command invocations are not claimed. The full command/progress/CAS/retry suites passed in CI.
+
+Final preflight at 10:55 UTC (`wishicraft-web-final-preflight-famd7nr9`): STOPPED/HEALTHY, A selected,
+DNS absent, no Lock/current, all 6 workflows idle, all 3 queue depths zero, all 45 alarms OK. Both
+complete Game records/world/generation pointers, the Data EBS identity/attachment, all **9 Snapshots**
+and **16 BACKUP records/provenance** matched the pre-release baseline. Target/Frozen templates were
+unchanged. Expected lifecycle saves and SystemState revisions are the only runtime changes.
+
+Final implementation `5dfbf32` passed **1,201 tests**, lint/format, mypy **185 files**, Web/CP synth,
+code-only live diff and CI **34752735303** (all three jobs, including actual Docker and Web browsers).
+The final timeout-only correction was applied CP→Discord read-back→Web after all four lifecycle
+Operations converged. Templates and Lambda states matched immutable assemblies; no CP IAM, workflow,
+schema, Target/Frozen or additional Web privilege change occurred. Final Web IAM read-back confirms
+exact Admission invoke and `web:*` conditional GetItem. A new lifecycle run was not added solely to
+retest the timeout value: measured Admission latency, configured deadline regression, successful
+202 evidence and post-deploy authenticated read/rejection tests define that validation boundary.
+
+No standing resources were added in this slice, no new secret boundary or recurring service cost was
+introduced, and Snapshot storage count did not increase. E2E used transient existing EC2/public IPv4
+runtime and normal on-demand API requests. Rollback remains Web→prior read-only first, accepted work
+converges, then optional CP asset/config rollback; no raw Operation/Lock/Game/world editing or data
+migration is required. Rollback was reviewed, not production-executed. No unresolved product decision
+remains; role freshness of at most 15 minutes is the explicitly accepted security tradeoff.
+
+Final closeout documentation is committed separately; its GitHub commit checks identify final CI.
+Learning Wiki synchronization runs from that finalized HEAD in the primary checkout, without publishing
+or committing Wiki output.

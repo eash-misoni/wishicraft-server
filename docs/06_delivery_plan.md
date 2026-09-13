@@ -2,13 +2,13 @@
 
 ## Web Foundation repository slice
 
-D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)をproduction適用。public公開・実OAuth・read-only status・15分失効・logoutの確認を完了。read-only slice Completed、次はExisting Operations via Web（D-104 Accepted、production deploy済み・実OAuth E2E待ち）。
+D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)をproduction適用。public公開・実OAuth・read-only status・15分失効・logoutの確認を完了。read-only slice Completed。Existing Operations via WebもD-104 Acceptedとしてproduction Completed（2026-09-13）。
 public guideはFQDN/招待URL除外・ログイン不要。2026-09-13に限定是正後のread-only production releaseをConditional GO。条件・手順はD-102 runbookを正本とする。
 [release gate / 検証結果](runbooks/web_foundation.md)を参照。read-onlyとwriteのrelease境界は維持する。
 
 ## URL固定の独立release slice
 
-D-103 Web URL StabilizationはAccepted・production Completed（2026-09-13）。canonical originは`https://web.wishicraft.net`。DNS/TLSと新OAuth/session E2E、旧redirect削除後reloginを確認した。[移行・証跡runbook](runbooks/web_custom_domain.md)を正本とする。D-101の順序は維持し、Existing Operations via WebはD-104 Accepted、production deploy済み・実OAuth E2E待ち。
+D-103 Web URL StabilizationはAccepted・production Completed（2026-09-13）。canonical originは`https://web.wishicraft.net`。DNS/TLSと新OAuth/session E2E、旧redirect削除後reloginを確認した。[移行・証跡runbook](runbooks/web_custom_domain.md)を正本とする。D-101の順序は維持し、Existing Operations via WebはD-104 Accepted・production Completed。次のMinimal Game Creationは未着手。
 
 ## Current roadmap
 
@@ -19,7 +19,7 @@ D-101 Accepted（2026-09-13、今後の順序とscope優先順位）。
 | 順序 | 成果のまとまり | 範囲・依存関係 |
 |---|---|---|
 | 1 | **Web Foundation** | D-100静的guideを公開可能なpublic領域として維持する。Web全体のhosting / URL / Discord OAuth / authorizationを決め、authenticated管理領域に最初はread-onlyのstatus相当表示を設ける。既存Control PlaneからDesired/Observed、選択Game/観測Game、player count、観測時刻、current Operation、主要進捗等を読む。public guideの実公開はこのWeb配信構成と合わせるのを第一候補とする。 |
-| 2 | **Existing Operations via Web** | START / STOP / SWITCH / BACKUP / RESETをDiscordと同じAdmission / Operation / workflowへ接続する。Web専用の制御処理を作らず、browserにAWS権限を直接持たせない。UI非表示だけでなくAPI側で既存role/policyによる認可を行う。 |
+| 2 | **Existing Operations via Web — Completed** | START / STOP / SWITCH / BACKUP / RESETをDiscordと同じAdmission / Operation / workflowへ接続する。Web専用の制御処理を作らず、browserにAWS権限を直接持たせない。UI非表示だけでなくAPI側で既存role/policyによる認可を行う。 |
 | 3 | **Minimal Game Creation** | 対応済み実行構成から選び、display name等の必要項目を指定してGame metadataを登録する。CREATE-001の作成と起動の分離を維持する。Package / Preset / Templateの独立管理、汎用wizard、upload基盤を先行しない。作成Gameをpublic guideへ自動公開せず、説明とclient要件を揃えた明示的な公開登録を維持する。 |
 | 4 | **Whitelist Management** | Game作成と実運用を踏まえ、共通 / Game固有 / Minecraft内変更の責務を改めて決める。複雑な双方向同期を既定にしない。Game作成時に必要な初期whitelistと後から編集する管理機能を分ける。OP要求も維持し、詳細契約を先に確定しない。 |
 | 5 | **Runtime / Version / MOD Extension** | 実際に必要なGame/runtime構成が出た時に具体例を端から端まで通して追加する。旧Phase 12の全server種別一般化や固定順序を必須にしない。 |

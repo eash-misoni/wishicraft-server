@@ -1,6 +1,6 @@
 # 08. Human Operation Flows
 
-> Existing Operations via Web: D-104 repository implementation / production approval pending. [共有Admission・認可・CSRF・request/Operation契約](reviews/existing_operations_web.md)、[release/E2E/rollback](runbooks/existing_operations_web.md)。既存backend safety contractを維持する。
+> Existing Operations via Web: D-104 Accepted / production Completed (2026-09-13). [共有Admission・認可・CSRF・request/Operation契約](reviews/existing_operations_web.md)、[release/E2E/rollback](runbooks/existing_operations_web.md)。既存backend safety contractを維持する。
 
 > Web Foundation D-102（Accepted・production適用済み、実証範囲はrunbook）: [Web契約・公式仕様比較](reviews/web_foundation.md)、[local / release / rollback](runbooks/web_foundation.md)を参照。
 

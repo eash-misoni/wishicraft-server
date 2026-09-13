@@ -1,7 +1,7 @@
 # D-104 Existing Operations via Web — release review
 
-Repository implementation under the 2026-09-13 delegation. Production approved at `bfc63c4` on 2026-09-13; execution in progress;
-D-101/102/103 and D-096/097/098 remain Accepted. This document does not claim production completion.
+Production Completed on 2026-09-13 after approval at `bfc63c4`; final implementation `5dfbf32`.
+D-101/102/103 and D-096/097/098 remain Accepted. [Production evidence](../runbooks/existing_operations_web.md#production-closeout-2026-09-13) records success and validation limits.
 The release unit is the existing five operations, not Game Creation or a new Control Plane.
 
 ## Architecture and trust
@@ -137,3 +137,8 @@ backend regression + real boundary serializer tests + safe unsupported-capabilit
 No new Snapshot is proposed; 9 existing completed Snapshots include the D-098 recovery evidence.
 No Minimal Game Creation, Whitelist, Restore UI, RETENTION deletion, runtime generalization, public
 status, WebSocket, arbitrary command or generic workflow work is included.
+
+Admission transport uses a 10-second read timeout and 2-second connect timeout with no automatic SDK
+retry; other AWS reads keep their previous limits. This waits only for Admission acceptance, never
+workflow completion. Natural unknown responses in E2E reconciled to single Operations. The session
+codec now round-trips persisted role Lists through the actual DynamoDB adapter in the HTTP suite.
