@@ -1,6 +1,10 @@
 # Minimal Game Creation release gate
 
-Repository preparation only. No production write or positive CREATE has been performed.
+**Minimal Game Creation: production deployed, positive CREATE/materialization deferred.**
+
+Explicit GO on `3afa803` authorized the deployment sequence below. No positive CREATE has been
+performed; fully production Completed remains pending the first real Game. Preparation notes below
+retain their original evidence scope. See the production closeout section for applied results.
 [D-105 contract](../reviews/minimal_game_creation.md) owns semantics. D-104 production remains Completed.
 
 ## Validation and preflight
@@ -110,3 +114,73 @@ Existing schema-1 recovery JSON in all three saved shared-v2 Snapshot descriptor
 [Preparation evidence](../evidence/minimal_game_creation_2026-09-13.json) records evidence roots and
 limits. No production deployment, Game CREATE, runtime command, filesystem change or Snapshot write
 was performed. First production positive CREATE should wait for a real Game the user wants to retain.
+
+## Production deployment closeout (2026-09-13)
+
+The user's GO on `3afa803` accepted D-105 and explicitly deferred valid production CREATE. Target,
+Control Plane and Web stacks reached UPDATE_COMPLETE with the reviewed resources. Target changed
+only its Games GetItem policy; CP/Web Lambda code and narrow IAM match the approved assemblies.
+Live CP workflow definitions are unchanged. Downloaded code from Admission, START, BACKUP, RETENTION
+and Web matches eight relevant source modules byte-for-byte, including dynamic registry, initial
+materialization, RESET policy and recovery readers. BACKUP creation configuration parses correctly
+and matches the unchanged runtime manifest digest.
+
+Bounded maintenance captured and set Web/Discord/Admission concurrency to zero, verified drain,
+applied Target IAM and started only existing EC2. Host mount `/srv/minecraft`, XFS UUID and physical
+EBS serial matched. Free capacity was 31,289,032,704 bytes. No Minecraft container/listener/runtime
+job existed, and service start/exit timestamps were empty. This measurement is maintenance evidence,
+not capacity reservation: the future first START/SWITCH must execute its fresh capacity gate.
+
+The exact stopped receipt matched the previous successful SWITCH target and STOP Operation. All
+eight predecessor artifacts matched bytes/hash/root ownership/mode. The reviewed generator produced
+and the inactive-only installer applied exactly three changes (SHA-256):
+
+| Destination | Applied hash |
+|---|---|
+| `/etc/wishicraft/runtime-contract.json` | `536d153ab39a449e86f1805542eb5138c37f7c780d8469db42108ed9b556682e` |
+| `/usr/local/libexec/wishicraft/operation-v2` | `afa1ba874bd2ca96979524ddf7929894a28db6d4d0025400b193f565db26cd9b` |
+| `/usr/local/libexec/wishicraft/initial_game.py` | `4ca7fc75dd1d47b6063c078284ad41d60dd4d9fbfba66db9f7a9ef7401defb54` |
+
+Transport digest, final owner/mode/hash and stopped receipt read-back passed. The successful
+installer preserved verified predecessor bytes under its dedicated backup namespace. The complete 920-entry Game tree retained digest
+`f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c`.
+Only A/B directories exist. Compose/runtime.env/manifest, A/B metadata/path/world/generation/seed/
+policy, Snapshot and durable provenance were not changed. No Game was created or world materialized.
+The instance was normally stopped before CP/Web deployment; DNS remained absent.
+
+DesiredStoppedEc2Running entered ALARM at 12:26:53 UTC during approved maintenance and naturally
+returned OK at 12:31:53. The user received its existing notification. Neither alarm policy nor raw
+SystemState was changed to hide it. Final read-only postflight at 12:41:14 UTC confirmed STOPPED /
+HEALTHY, selected A, revision 45, no current/Lock/running workflow/active SSM, three empty queues,
+45 alarms OK, nine identical Snapshots, 16 identical provenance items and exact A/B records.
+SystemState's normal observation and observed_at refreshed; all desired/selection/request fields
+were unchanged. All three admission concurrency settings returned to their captured UNSET values.
+
+Real Edge OAuth login showed the two Games and Admin CREATE UI. Safe invalid requests verified
+CSRF missing/invalid and foreign Origin 403, empty display name/invalid seed/forged actor 400,
+unauthenticated 401 and old execute-api 421 with no-store. Every POST payload was intrinsically
+invalid; no valid CREATE was sent. Public 13 pages exactly match the integrated Foundation build.
+Player denial remains synthetic boundary/CI evidence; Discord roles were not changed for testing.
+No cookie, token, OAuth code or browser session was saved to evidence.
+
+The first HTTP comparison used the static guide builder without Foundation's existing manage link;
+it was diagnosed and rerun with build_foundation in a new v4 root. A postflight comparator initially
+mixed SDK datetime and captured JSON strings; serialized attachment records were identical, and a
+new v2 postflight passed. These were evidence-harness corrections, not production code changes.
+
+[Production evidence](../evidence/minimal_game_creation_production_2026-09-13.json) records host
+proofs, exact code read-back, negative results and local roots. Baseline CI 34756279204 passed 1,230
+tests, lint/type/synth/browser and actual Docker first START/SWITCH, retry, STOP/restart and A/B
+noninterference. Docker's AWS/SSM/systemd/mount are stand-ins; production wiring/read-back is separate
+from those positive integration results. Final handoff identifies the documentation closeout HEAD
+and its CI. Local Docker/shellcheck remain unavailable; CI executes both.
+
+### Future positive E2E and final completion
+
+Ask only display name, numeric seed or random, and RESET on/off when a real Game is needed. Phase A
+approves CREATE alone, checks metadata/Operation/stable ID/resolved seed/UNMATERIALIZED/manage list
+and A/B/EC2/runtime/filesystem noninterference, then stops. Phase B separately approves START/SWITCH
+after exact target, player zero, no Lock, current runtime and fresh capacity checks. Verify first
+READY/MATERIALIZED, owner/path/seed, selected/observed identity, heartbeat, STOP/restart and other-Game
+noninterference. Only then record fully production Completed. No throwaway Game, raw delete,
+retention deletion or Whitelist Management is part of this closeout.

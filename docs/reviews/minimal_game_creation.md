@@ -1,6 +1,9 @@
 # D-105 Minimal Game Creation
 
-Repository implementation delegated 2026-09-13. Production **not applied**; approval is a separate gate.
+Accepted 2026-09-13. **Production deployed, positive CREATE/materialization deferred.**
+Explicit GO on `3afa803` approved the reviewed deployment and safe negative/read-only E2E. No valid
+production CREATE was submitted. Fully production Completed requires the future real-Game positive
+CREATE and separately approved first START/SWITCH evidence.
 This is D-101's third implementation unit. D-096/097/098/102/103/104 remain applicable.
 
 ## Registration and identity

@@ -1,0 +1,593 @@
+{
+  "decision": "D-105",
+  "status": "production deployed, positive CREATE/materialization deferred",
+  "fully_production_completed": false,
+  "approval_head": "3afa803461a92a6ea9f98a2b90639a0ad6254727",
+  "approval": "GO FOR MINIMAL GAME CREATION / PRODUCTION DEPLOYMENT; no positive CREATE payload",
+  "approved_ci": 34756279204,
+  "approved_tests_passed": 1230,
+  "stage": "dev",
+  "account": "385526546525",
+  "region": "ap-northeast-1",
+  "evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-creation-deploy-v1-mkrd71xx",
+  "final_postflight_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-creation-final-postflight-v2-stlwr8fd",
+  "final_checked_at": "2026-09-13T12:41:14.552625+00:00",
+  "stacks": {
+    "MinecraftTargetStack-dev": "UPDATE_COMPLETE",
+    "WishicraftControlPlaneStack-dev": "UPDATE_COMPLETE",
+    "WishicraftWebStack-dev": "UPDATE_COMPLETE"
+  },
+  "host_upgrade": {
+    "plan": {
+      "backup_namespace": "game-creation-v1",
+      "files": [
+        {
+          "destination": "/etc/wishicraft/runtime-contract.json",
+          "mode": 384,
+          "predecessor": "0e384a72794ee0f466096984ba6fd99c9f4861026b8be64173625a96c3cbfd08",
+          "sha256": "536d153ab39a449e86f1805542eb5138c37f7c780d8469db42108ed9b556682e",
+          "source": "0.artifact"
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/operation-v2",
+          "mode": 493,
+          "predecessor": "9010ae86535194a3a0d3c087f5526c7dbe29c35749cc0bcc3a8506d4635f509f",
+          "sha256": "afa1ba874bd2ca96979524ddf7929894a28db6d4d0025400b193f565db26cd9b",
+          "source": "1.artifact"
+        },
+        {
+          "destination": "/usr/local/libexec/wishicraft/initial_game.py",
+          "mode": 420,
+          "predecessor": null,
+          "sha256": "4ca7fc75dd1d47b6063c078284ad41d60dd4d9fbfba66db9f7a9ef7401defb54",
+          "source": "2.artifact"
+        }
+      ],
+      "instance_id": "i-04fc0629dc4ea466e",
+      "receipt_predecessor": {
+        "phase": "stopped",
+        "stop": {
+          "container_id": "bb8c9c6f5f9945d78ad0577789b0b40d9bc85ba5b9eba6b8021a9e2bcfab0ef9",
+          "removal_ready": true,
+          "save_confirmed": true,
+          "started_at": "2026-09-13T10:46:02.368697726Z"
+        },
+        "target": {
+          "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+          "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "game_id": "game-vanilla-main",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-2e384559-1ade-4b3e-aae9-95c14a6fed0e"
+        }
+      }
+    },
+    "transport_sha256": "ddfd61be6143cfc16db25a6cefc9a65bba20e73ec140faa86582802a5233d840",
+    "before": {
+      "/etc/wishicraft/host-runtime/compose.yaml": {
+        "sha256": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+        "uid": 0,
+        "gid": 0,
+        "mode": 384
+      },
+      "/etc/wishicraft/host-runtime/runtime.env": {
+        "sha256": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+        "uid": 0,
+        "gid": 0,
+        "mode": 384
+      },
+      "/etc/wishicraft/host-runtime/manifest.json": {
+        "sha256": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+        "uid": 0,
+        "gid": 0,
+        "mode": 384
+      },
+      "/etc/wishicraft/runtime-contract.json": {
+        "sha256": "0e384a72794ee0f466096984ba6fd99c9f4861026b8be64173625a96c3cbfd08",
+        "uid": 0,
+        "gid": 0,
+        "mode": 384
+      },
+      "/usr/local/libexec/wishicraft/operation-v2": {
+        "sha256": "9010ae86535194a3a0d3c087f5526c7dbe29c35749cc0bcc3a8506d4635f509f",
+        "uid": 0,
+        "gid": 0,
+        "mode": 493
+      },
+      "/usr/local/libexec/wishicraft/rcon-secret-v2": {
+        "sha256": "5b1fbcd8e2e9109349b487cee63007abf27d707118c7f89449e129eef38b5cda",
+        "uid": 0,
+        "gid": 0,
+        "mode": 493
+      },
+      "/usr/local/libexec/wishicraft/reset_worlds.py": {
+        "sha256": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
+        "uid": 0,
+        "gid": 0,
+        "mode": 420
+      },
+      "/usr/local/libexec/wishicraft/host-runtime-probe.py": {
+        "sha256": "83244ae3f0aaae95192e9df8eeb6e05392f0f04e22290ca4a15e42c7e3373ce0",
+        "uid": 0,
+        "gid": 0,
+        "mode": 493
+      }
+    },
+    "after": {
+      "/etc/wishicraft/host-runtime/compose.yaml": {
+        "sha256": "24036ccb4681609c2e2ed0bf1fc581911136c983910bf0f6e25b2292113b3bc0",
+        "uid": 0,
+        "gid": 0,
+        "mode": 384
+      },
+      "/etc/wishicraft/host-runtime/runtime.env": {
+        "sha256": "62c9bda48163ed1089e88f2d0bb52692372b003e225145a36512589ec6230dce",
+        "uid": 0,
+        "gid": 0,
+        "mode": 384
+      },
+      "/etc/wishicraft/host-runtime/manifest.json": {
+        "sha256": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+        "uid": 0,
+        "gid": 0,
+        "mode": 384
+      },
+      "/etc/wishicraft/runtime-contract.json": {
+        "sha256": "536d153ab39a449e86f1805542eb5138c37f7c780d8469db42108ed9b556682e",
+        "uid": 0,
+        "gid": 0,
+        "mode": 384
+      },
+      "/usr/local/libexec/wishicraft/operation-v2": {
+        "sha256": "afa1ba874bd2ca96979524ddf7929894a28db6d4d0025400b193f565db26cd9b",
+        "uid": 0,
+        "gid": 0,
+        "mode": 493
+      },
+      "/usr/local/libexec/wishicraft/rcon-secret-v2": {
+        "sha256": "5b1fbcd8e2e9109349b487cee63007abf27d707118c7f89449e129eef38b5cda",
+        "uid": 0,
+        "gid": 0,
+        "mode": 493
+      },
+      "/usr/local/libexec/wishicraft/reset_worlds.py": {
+        "sha256": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
+        "uid": 0,
+        "gid": 0,
+        "mode": 420
+      },
+      "/usr/local/libexec/wishicraft/host-runtime-probe.py": {
+        "sha256": "83244ae3f0aaae95192e9df8eeb6e05392f0f04e22290ca4a15e42c7e3373ce0",
+        "uid": 0,
+        "gid": 0,
+        "mode": 493
+      },
+      "/usr/local/libexec/wishicraft/initial_game.py": {
+        "sha256": "4ca7fc75dd1d47b6063c078284ad41d60dd4d9fbfba66db9f7a9ef7401defb54",
+        "uid": 0,
+        "gid": 0,
+        "mode": 420
+      }
+    },
+    "ssm_preflight": "6956c827-fb0d-4a82-9b2f-c9b2f6c6d442",
+    "ssm_install": "39ba9c17-1cc3-4e9b-b489-8916c471c885",
+    "ssm_postflight": "da08da47-e769-4e87-b257-ab123c564750",
+    "install_result": "Success / TARGETED_RUNTIME_INSTALLED_INACTIVE",
+    "receipt_unchanged": true,
+    "receipt_sha256": "2cb79b2157b6514d58799176c458500679bb3258094e94e1e0fcf5e1c64f9133",
+    "mount": [
+      "/srv/minecraft",
+      "/dev/nvme1n1",
+      "xfs",
+      "420cea6d-0520-4436-bb5a-db1191f1e63b"
+    ],
+    "volume_serial": "vol03ac9f534326c345c",
+    "free_bytes": 31289032704,
+    "capacity_reserved_for_future_start": false,
+    "game_tree_entries": 920,
+    "game_tree_sha256_before": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+    "game_tree_sha256_after": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+    "game_directories": [
+      "game-vanilla-main",
+      "game-vanilla-secondary"
+    ],
+    "runtime_service": "ExecMainStartTimestamp=\nExecMainExitTimestamp=\nExecMainStatus=0\nActiveState=inactive\nSubState=dead",
+    "containers": 0,
+    "listeners": 0
+  },
+  "lambda_code_readback": {
+    "wc-dev-admission": {
+      "code_sha256": "Xi3XGCWsgC0WWbtwK2FouLocCem+GBIolfmHNv+D5Xw=",
+      "source_files_exact": [
+        "game_creation.py",
+        "runtime_catalog.py",
+        "world_reference.py",
+        "reset_policy.py",
+        "backup_recovery.py",
+        "start_workflow_lambda.py",
+        "web_operations.py",
+        "web_app.py"
+      ],
+      "game_creation": true,
+      "create_disabled": false,
+      "state": "Active",
+      "last_update_status": "Successful"
+    },
+    "wc-dev-backup-task": {
+      "code_sha256": "Xi3XGCWsgC0WWbtwK2FouLocCem+GBIolfmHNv+D5Xw=",
+      "source_files_exact": [
+        "game_creation.py",
+        "runtime_catalog.py",
+        "world_reference.py",
+        "reset_policy.py",
+        "backup_recovery.py",
+        "start_workflow_lambda.py",
+        "web_operations.py",
+        "web_app.py"
+      ],
+      "game_creation": true,
+      "create_disabled": false,
+      "state": "Active",
+      "last_update_status": "Successful"
+    },
+    "wc-dev-start-task": {
+      "code_sha256": "Xi3XGCWsgC0WWbtwK2FouLocCem+GBIolfmHNv+D5Xw=",
+      "source_files_exact": [
+        "game_creation.py",
+        "runtime_catalog.py",
+        "world_reference.py",
+        "reset_policy.py",
+        "backup_recovery.py",
+        "start_workflow_lambda.py",
+        "web_operations.py",
+        "web_app.py"
+      ],
+      "game_creation": true,
+      "create_disabled": false,
+      "state": "Active",
+      "last_update_status": "Successful"
+    },
+    "wc-dev-retention-task": {
+      "code_sha256": "Xi3XGCWsgC0WWbtwK2FouLocCem+GBIolfmHNv+D5Xw=",
+      "source_files_exact": [
+        "game_creation.py",
+        "runtime_catalog.py",
+        "world_reference.py",
+        "reset_policy.py",
+        "backup_recovery.py",
+        "start_workflow_lambda.py",
+        "web_operations.py",
+        "web_app.py"
+      ],
+      "game_creation": true,
+      "create_disabled": false,
+      "state": "Active",
+      "last_update_status": "Successful"
+    },
+    "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": {
+      "code_sha256": "StbC1RsXekbzyQej3+a4v12EDNbehdoGknYmtfskIQE=",
+      "source_files_exact": [
+        "game_creation.py",
+        "runtime_catalog.py",
+        "world_reference.py",
+        "reset_policy.py",
+        "backup_recovery.py",
+        "start_workflow_lambda.py",
+        "web_operations.py",
+        "web_app.py"
+      ],
+      "game_creation": true,
+      "create_disabled": false,
+      "state": "Active",
+      "last_update_status": "Successful"
+    }
+  },
+  "cp_wiring": {
+    "template_resources_exact": true,
+    "workflow_definitions_unchanged": true,
+    "game_creation": "1",
+    "recovery_manifest_valid": true,
+    "creation_digest_matches": true,
+    "creation_default_whitelist_count": 1
+  },
+  "web_wiring": {
+    "template_resources_exact": true,
+    "status": "UPDATE_COMPLETE"
+  },
+  "no_game_created": true,
+  "no_world_materialized": true,
+  "no_minecraft_start": true,
+  "game_metadata_exact_unchanged": true,
+  "snapshots_exact_unchanged": 9,
+  "durable_provenance_exact_unchanged": 16,
+  "game_hashes": {
+    "game-vanilla-main": "d9630bf74e8e1e1aba8cc4abcc0e369407e673357c547d97861331e673a586c6",
+    "game-vanilla-secondary": "08cf25cddd61a9381cd114f99da2ccf86df67901c6a4cb98e83f0096fce70c88"
+  },
+  "final_state": {
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "desired_revision": 45,
+    "selected_game": "game-vanilla-main",
+    "current_operation": null,
+    "locks": 0,
+    "running_workflows": 0,
+    "active_ssm": 0,
+    "empty_queues": 3,
+    "alarms_ok": 45,
+    "instance": "stopped",
+    "dns_absent": true,
+    "concurrency": {
+      "wc-dev-admission": null,
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null
+    },
+    "system_state_changed_fields": [
+      "observation",
+      "observed_at"
+    ]
+  },
+  "maintenance_alarm": {
+    "name": "wc-dev-desiredstoppedec2runningalarm",
+    "alarm_at": "2026-09-13T12:26:53Z",
+    "natural_ok_at": "2026-09-13T12:31:53.499Z",
+    "alarm_policy_changed": false,
+    "manual_system_state_write": false
+  },
+  "http_evidence": {
+    "public": [
+      {
+        "path": "/commands/backup/",
+        "status": 200,
+        "sha256": "5e6ebdbdfe3744dc18df9c4936c8ba05d8fe7a2408fa2a875f6edb1c7f33ae94",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/commands/",
+        "status": 200,
+        "sha256": "47e0d432ddedc554082ecd13536edbf79388b1d246f8cf32fe65a8ab6fbe4aa2",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/commands/reset/",
+        "status": 200,
+        "sha256": "0dd17b6cf36970fe8f7d3a0f995f68e6c6a13bbada3d5d222a80a3c43a3900c5",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/commands/start/",
+        "status": 200,
+        "sha256": "c93e1e0abfbe5446e11301949fb96d9b0ac7ca127fba1827f23265a4f3f7e9ad",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/commands/status/",
+        "status": 200,
+        "sha256": "09133335e1a14bb14f4a59646c93a82651edbf298adfd3aa5adc7f7dce09062c",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/commands/stop/",
+        "status": 200,
+        "sha256": "cc61eeb907f1db25e6503a569f75ffd031242104bd5df7a81dec4ca0c547c11d",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/commands/switch/",
+        "status": 200,
+        "sha256": "5d848ab82212842718a8c71dfe096157e955a6daaf3f788bc294a713c4a8842a",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/games/a/",
+        "status": 200,
+        "sha256": "3ec51de6bf0398be6f3e7199f8212cbe53f5ec1ba10b845d024891970c5bcdfd",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/games/b/",
+        "status": 200,
+        "sha256": "e8ad0ced15a4d7ec0d4655b356f727024fe580b253eb51a2090f545fed173c2a",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/games/",
+        "status": 200,
+        "sha256": "f32a04e756bc2c01174369900770ad75cce2f9a022443bc068a434bc601b97a2",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/help/",
+        "status": 200,
+        "sha256": "179b2387744aafd0ce135b3ed1e6efdfd7744b5822ee8f179dd9c1dd17710780",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/",
+        "status": 200,
+        "sha256": "fbc5fe82da8d3fb5c83b413b8c88823c1d952ff8bedfa60d62f747cd105fbf71",
+        "matches_reviewed_foundation_build": true
+      },
+      {
+        "path": "/join/",
+        "status": 200,
+        "sha256": "0f5f8b0756a7f7fe33f6221488d985432397076837ca8513361077e9a2e047e9",
+        "matches_reviewed_foundation_build": true
+      }
+    ],
+    "negative": [
+      {
+        "case": "unauthenticated",
+        "status": 401,
+        "error": "authentication_required",
+        "cache_control": "no-store"
+      },
+      {
+        "case": "old-execute-api",
+        "status": 421,
+        "error": "canonical_origin_required",
+        "cache_control": "no-store"
+      }
+    ]
+  },
+  "browser_evidence": [
+    {
+      "at": "2026-09-13T12:36:02.848Z",
+      "label": "capabilities",
+      "data": {
+        "status": 200,
+        "capabilities": {
+          "schema_version": 1,
+          "games": [
+            {
+              "key": "047a6ce69dcd2a91bb6999e5",
+              "selected": true,
+              "observed_running": false,
+              "observed_at": "2026-09-13T12:33:08.910138Z",
+              "name": "Wishicraft Vanilla",
+              "reset": false,
+              "materialized": true,
+              "seed": null,
+              "seed_modes": [],
+              "retain_previous": null,
+              "world": "original",
+              "world_updated_at": "2026-08-28T15:41:54.346726Z"
+            },
+            {
+              "key": "836d2399b72d255f89be6052",
+              "selected": false,
+              "observed_running": false,
+              "observed_at": "2026-09-13T12:33:08.910138Z",
+              "name": "Wishicraft Vanilla B",
+              "reset": true,
+              "materialized": true,
+              "seed": null,
+              "seed_modes": [
+                "fixed",
+                "new"
+              ],
+              "retain_previous": 3,
+              "world": "managed",
+              "world_updated_at": "2026-09-12T02:28:57.440753Z"
+            }
+          ],
+          "allowed": [
+            "START",
+            "STOP",
+            "SWITCH",
+            "BACKUP",
+            "RESET",
+            "CREATE"
+          ]
+        }
+      }
+    },
+    {
+      "at": "2026-09-13T12:36:13.979Z",
+      "label": "csrf-missing",
+      "data": {
+        "status": 403,
+        "body": {
+          "schema_version": 1,
+          "error": "csrf_rejected"
+        },
+        "expected": 403
+      }
+    },
+    {
+      "at": "2026-09-13T12:36:14.071Z",
+      "label": "csrf-invalid",
+      "data": {
+        "status": 403,
+        "body": {
+          "schema_version": 1,
+          "error": "csrf_rejected"
+        },
+        "expected": 403
+      }
+    },
+    {
+      "at": "2026-09-13T12:36:14.167Z",
+      "label": "foreign-origin",
+      "data": {
+        "status": 403,
+        "body": {
+          "schema_version": 1,
+          "error": "csrf_rejected"
+        },
+        "expected": 403
+      }
+    },
+    {
+      "at": "2026-09-13T12:36:14.265Z",
+      "label": "empty-display",
+      "data": {
+        "status": 400,
+        "body": {
+          "schema_version": 1,
+          "error": "invalid_input",
+          "outcome": "rejected"
+        },
+        "expected": 400
+      }
+    },
+    {
+      "at": "2026-09-13T12:36:14.377Z",
+      "label": "invalid-seed",
+      "data": {
+        "status": 400,
+        "body": {
+          "schema_version": 1,
+          "error": "invalid_input",
+          "outcome": "rejected"
+        },
+        "expected": 400
+      }
+    },
+    {
+      "at": "2026-09-13T12:36:14.476Z",
+      "label": "forged-actor",
+      "data": {
+        "status": 400,
+        "body": {
+          "schema_version": 1,
+          "error": "invalid_input",
+          "outcome": "rejected"
+        },
+        "expected": 400
+      }
+    },
+    {
+      "at": "2026-09-13T12:36:14.977Z",
+      "label": "admin-ui",
+      "data": {
+        "game_count": 2,
+        "create_visible": true,
+        "public_guide_separate": true
+      }
+    }
+  ],
+  "synthetic_only": [
+    "Player CREATE denial without modifying real Discord roles",
+    "N-Game CREATE and first START/SWITCH",
+    "Retry, partial preparation and owner failures",
+    "Dynamic RESET and schema-2 BACKUP/old schema-1 recovery compatibility"
+  ],
+  "unchanged_boundaries": [
+    "No A/B migration",
+    "No new infrastructure resource or replacement",
+    "No new workflow definition",
+    "No public guide publication",
+    "RETENTION dry-run only; no DeleteSnapshot release",
+    "No Game DELETE",
+    "No Whitelist Management"
+  ],
+  "validation_diagnostics": [
+    "Public HTTP expectation initially used static build without existing manage navigation; diagnosed and rerun via build_foundation in v4, 13 exact matches. No production code change.",
+    "First postflight compared SDK datetime against captured JSON string. Serialized attachment records are exact; new v2 postflight passed. No resource change."
+  ],
+  "future_positive_e2e": {
+    "phase_a": "Separate real Game CREATE approval; metadata/Operation/stable ID/resolved seed/UNMATERIALIZED/read-back/noninterference, then stop",
+    "phase_b": "Separate START/SWITCH approval; exact target, player 0, no Lock, fresh capacity; READY/MATERIALIZED/owner/path/seed/heartbeat/STOP/restart/noninterference",
+    "fully_completed_only_after_positive_evidence": true
+  }
+}
