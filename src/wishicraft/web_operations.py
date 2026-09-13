@@ -60,6 +60,25 @@ def game_key(game_id: str) -> str:
 
 
 def parse_request(value: object) -> dict[str, Any]:
+    if isinstance(value, dict) and value.get("type") == "WHITELIST":
+        from wishicraft.whitelist import validate
+
+        if (
+            set(value) != {"request_id", "type", "game", "whitelist", "confirm"}
+            or value["confirm"] is not True
+        ):
+            raise WebRejected("invalid_input")
+        request_key("0", value["request_id"])
+        if value["game"] is not None and (
+            not isinstance(value["game"], str)
+            or re.fullmatch(r"[0-9a-f]{24}", value["game"]) is None
+        ):
+            raise WebRejected("invalid_input")
+        try:
+            validate(value["whitelist"])
+        except ValueError as error:
+            raise WebRejected("invalid_input") from error
+        return dict(value)
     if isinstance(value, dict) and value.get("type") == "CREATE":
         from wishicraft.game_creation import validate
 
@@ -181,6 +200,11 @@ class Operations:
                 }
             )
         return {
+            **(
+                {"whitelist": self.whitelist_view(actor)}
+                if os.environ.get("WHITELIST_MANAGEMENT") == "1"
+                else {}
+            ),
             "games": games,
             "allowed": [
                 kind
@@ -192,6 +216,38 @@ class Operations:
                 )
                 if allowed(kind, actor, self.policy)
             ],
+        }
+
+    def whitelist_view(self, actor: dict[str, Any]) -> dict[str, Any]:
+        from wishicraft.artifacts import whitelist_policy as model
+
+        common = model.read(self.api, self.tables["games"], None)
+        games = {}
+        for game in self.game_ids():
+            specific = model.read(self.api, self.tables["games"], game)
+            games[game_key(game)] = {
+                "revision": specific["revision"],
+                "members": [
+                    {
+                        "key": model.player_key(identity),
+                        "name": name,
+                        "common": identity in common["members"],
+                        "specific": identity in specific["members"],
+                    }
+                    for identity, name in model.effective(common, specific).items()
+                ],
+            }
+        return {
+            "editable": allowed("WHITELIST", actor, self.policy),
+            "common": {
+                "revision": common["revision"],
+                "members": [
+                    {"key": model.player_key(identity), "name": name}
+                    for identity, name in common["members"].items()
+                ],
+            },
+            "games": games,
+            "application": "NEXT_START",
         }
 
     def project(self, item: dict[str, Any]) -> dict[str, Any] | None:
@@ -207,7 +263,11 @@ class Operations:
             "CANCELLED",
         } or item.get("operation_type") not in {kind.value for kind in OperationType}:
             raise ValueError("invalid operation projection")
-        game = self.get("games", "game_id", item["target_game_id"])
+        game = (
+            self.get("games", "game_id", item["target_game_id"])
+            if item.get("target_game_id")
+            else {"display_name": "Common"}
+        )
         actor = mapping(item.get("requested_by"))
         error = mapping(item.get("error")).get("code")
         return {
@@ -226,6 +286,8 @@ class Operations:
             "completed_at": stamp(item.get("completed_at")),
             "progress": "Gameを登録しました。まだ起動していません。"
             if item["operation_type"] == "CREATE"
+            else "Whitelistを保存しました。次の起動時に適用します。"
+            if item["operation_type"] == "WHITELIST"
             else MILESTONE_STEPS.get(str(item.get("current_step")), "受付済み・進捗待ち"),
             "milestones": [
                 {"label": label, "at": stamp(item.get(f"progress_{step.lower()}_at"))}
@@ -303,6 +365,7 @@ class Operations:
                 "session_fingerprint": hashlib.sha256(session_id.encode()).hexdigest(),
             },
             **({"target_game_id": game} if game else {}),
+            **({"whitelist": request["whitelist"]} if request["type"] == "WHITELIST" else {}),
             **({"creation": request["creation"]} if request["type"] == "CREATE" else {}),
             **({"confirmed": True} if request["type"] in {"SWITCH", "RESET"} else {}),
             **({"seed_mode": request["seed"]} if request["type"] == "RESET" else {}),

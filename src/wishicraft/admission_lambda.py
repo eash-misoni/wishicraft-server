@@ -103,6 +103,27 @@ def _handle(event: object, context: object) -> dict[str, object]:
                 "created": False,
                 "lease_id": None,
             }
+    if isinstance(event, dict) and event.get("operation_type") == "WHITELIST":
+        from wishicraft.web_operations import WebRejected
+        from wishicraft.whitelist import mutate
+
+        if web is None or os.environ.get("WHITELIST_MANAGEMENT") != "1":
+            raise WebRejected("forbidden", 403)
+        event = dict(event)
+        value = event.pop("whitelist", None)
+        game = event.pop("target_game_id", None)
+        _parse_event(event)
+        try:
+            return mutate(
+                _get_service()._repository,
+                value=value,
+                game=game,
+                key=event["idempotency_key"],
+                actor=web,
+                now=datetime.now(UTC),
+            )
+        except ValueError as error:
+            raise WebRejected("invalid_input") from error
     if isinstance(event, dict) and event.get("operation_type") == "CREATE":
         from wishicraft.game_creation import create
         from wishicraft.web_operations import WebRejected

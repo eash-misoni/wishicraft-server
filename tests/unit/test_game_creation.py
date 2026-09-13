@@ -140,7 +140,10 @@ def test_dynamic_reset_requires_materialization_and_reuses_policy(creation: Any)
 
 
 @pytest.mark.parametrize("materialized", [False, True])
-def test_shared_recovery_includes_dynamic_game(creation: Any, materialized: bool) -> None:
+@pytest.mark.parametrize("whitelist_enabled", [False, True])
+def test_shared_recovery_includes_dynamic_game(
+    creation: Any, materialized: bool, whitelist_enabled: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
     import hashlib
     from dataclasses import replace
 
@@ -182,6 +185,21 @@ def test_shared_recovery_includes_dynamic_game(creation: Any, materialized: bool
         ][":recovery"]
 
     backend.db.update_item = update
+    if whitelist_enabled:
+        from wishicraft.artifacts import whitelist_policy as policy
+
+        monkeypatch.setenv("WHITELIST_MANAGEMENT", "1")
+        backend.db.records["games", policy.COMMON] = {
+            "game_id": {"S": policy.COMMON},
+            "policy_json": {
+                "S": policy.encoded(
+                    {
+                        "revision": 1,
+                        "members": {"11111111-1111-4111-8111-111111111111": "FixtureOne"},
+                    }
+                )
+            },
+        }
     repository = RecoveryRepository(backend.db, "operation", "games")
     value = repository.freeze(
         operation_id="op-backup",
@@ -200,6 +218,14 @@ def test_shared_recovery_includes_dynamic_game(creation: Any, materialized: bool
     assert recovery_digest(value) == hashlib.sha256(value.encode()).hexdigest()
     document = json.loads(value)
     assert len(document["games"]) == 3
+    if whitelist_enabled:
+        access = document["runtime"]["whitelist_policy"]
+        assert set(access["games"]) == set(document["games"])
+        assert access["games"][game] == {"revision": 0, "members": {}}
+        assert len(access["common"]["members"]) == 1
+        assert access["common"]["revision"] == 1
+    else:
+        assert "whitelist_policy" not in document["runtime"]
     saved = document["games"][game]
     assert saved["materialization_state"] == ("MATERIALIZED" if materialized else "UNMATERIALIZED")
     assert saved["creation"]["reset_policy"]["fixed_seed"] == 42

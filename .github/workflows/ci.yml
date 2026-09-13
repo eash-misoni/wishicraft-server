@@ -50,6 +50,14 @@ jobs:
           tools/dev-env run -- npx --no-install cdk synth WishicraftWebStack-dev
           --context stage=dev --context phase=8 --context deployment=web
       - run: >-
+          tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev
+          --context stage=dev --context phase=8 --context deployment=control-plane
+          --context two_games=true --context reset=true --context game_creation=true --context whitelist_management=true
+      - run: >-
+          tools/dev-env run -- npx --no-install cdk synth WishicraftWebStack-dev
+          --context stage=dev --context phase=8 --context deployment=web
+          --context game_creation=true --context whitelist_management=true
+      - run: >-
           shellcheck infrastructure/host_runtime/docker_compose_install.sh
           infrastructure/host_runtime/target_host_validation.sh
           tools/dev-env tools/setup-dev-tools
@@ -79,6 +87,7 @@ jobs:
           tools/dev-env run -- node web/browser-check.mjs "$GUIDE_ROOT/site"
           tools/dev-env run -- node web/foundation-browser.mjs
           tools/dev-env run -- node web/operations-browser.mjs
+          tools/dev-env run -- node web/whitelist-browser.mjs
 
   host-runtime-integration:
     runs-on: ubuntu-latest
@@ -102,3 +111,6 @@ jobs:
 
       - name: Verify metadata creation and first START/SWITCH with real Docker
         run: sudo --preserve-env=CI python3 tests/integration/targeted_runtime_docker.py --creation
+
+      - name: Verify authoritative Whitelist and Minecraft command convergence
+        run: sudo --preserve-env=CI python3 tests/integration/targeted_runtime_docker.py --whitelist

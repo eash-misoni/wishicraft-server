@@ -119,6 +119,7 @@ def main() -> None:
         choices=[
             "stopped",
             "creation",
+            "whitelist",
             "running",
             "players",
             "stale",
@@ -132,10 +133,12 @@ def main() -> None:
         default="stopped",
     )
     args = cli.parse_args()
-    if args.scenario == "creation":
+    if args.scenario in {"creation", "whitelist"}:
         import os
 
         os.environ["GAME_CREATION"] = "1"
+        if args.scenario == "whitelist":
+            os.environ["WHITELIST_MANAGEMENT"] = "1"
     root = Path(tempfile.mkdtemp(prefix="wishicraft-foundation-local-"))
     site = root / "site"
     build_foundation(Path(__file__).resolve().parents[1], site)

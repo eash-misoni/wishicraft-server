@@ -1,10 +1,21 @@
 # 09. Decisions and Backlog
 
+## D-106 Whitelist Management（Proposed release / production承認待ち）
+
+2026-09-14、D-101第4単位。通常repository実装・tests・docs・CIとread-only調査を委任。
+[正本・Common/追加許可・ゲーム内変更・起動適用・recovery契約](reviews/whitelist_management.md)、
+[移行・release・rollback・safe E2E](runbooks/whitelist_management.md)を参照する。
+Webを正本とし、Common ∪ Game-specific、UUID identity、Admin限定短期Admission transaction、
+次回共通START経路でのprojectionを採用案とする。deny、双方向同期、即時反映workflowは切る。
+既存Games tableの専用policy itemを使いA/B recordは変更しない。移行は実ファイル取得後の
+完全一致証明が必須で、現在停止中hostの未取得内容を推測しない。production writeは未承認。
+D-105 positive CREATE/materialization deferredを維持する。OP/ban/chat/runtime一般化は対象外。
+
 ## D-105 Minimal Game Creation（Accepted / production deployed, positive CREATE/materialization deferred）
 
 2026-09-13、D-101第3単位としてAdmin限定Web CREATEと既存START/SWITCHによる初回materializationを実装。通常設計・repository/tests/docs/CIを委任。基準HEAD `3afa803` に対する明示GOで、positive CREATEを含めない限定production deploymentを承認。
 [登録・seed・dynamic registry・RESET・shared-v2 recovery契約](reviews/minimal_game_creation.md)と[release/rollback/positive E2E方針](runbooks/minimal_game_creation.md)を参照する。
-2026-09-13、Target IAM→Minecraftを起動しないmaintenance host更新→EC2再停止→CP→Webを適用。safe negative/read-only E2E成功、A/B metadata・920-entry data tree・9 Snapshot・16 provenance不変。新Game登録・world実体化なし。最終STOPPED/HEALTHY、Lock/workflow/SSMなし、3 queue空、45 alarm OK。maintenanceによるDesiredStoppedEc2Running通知は12:31:53 UTCに自然復帰。今回の31,289,032,704 bytesの空きは将来の予約ではなく、初回起動時に再検証する。実用GameのCREATEと別承認START/SWITCHを実証するまでfully production Completedとはしない。Whitelist Managementは未着手。
+2026-09-13、Target IAM→Minecraftを起動しないmaintenance host更新→EC2再停止→CP→Webを適用。safe negative/read-only E2E成功、A/B metadata・920-entry data tree・9 Snapshot・16 provenance不変。新Game登録・world実体化なし。最終STOPPED/HEALTHY、Lock/workflow/SSMなし、3 queue空、45 alarm OK。maintenanceによるDesiredStoppedEc2Running通知は12:31:53 UTCに自然復帰。今回の31,289,032,704 bytesの空きは将来の予約ではなく、初回起動時に再検証する。実用GameのCREATEと別承認START/SWITCHを実証するまでfully production Completedとはしない。このcloseout時点ではWhitelist Managementは未着手。現在の準備はD-106を参照。
 
 CREATEはmetadata-onlyのterminal transaction。既存A/B変更・public guide自動掲載・DELETE・Whitelist管理・Package/Preset/Template一般化・RETENTION実削除は含めない。D-104 Completedを維持する。
 

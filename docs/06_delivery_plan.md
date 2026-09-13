@@ -1,5 +1,7 @@
 # 06. Delivery Plan
 
+> D-106 Whitelist Management: repository実装・production承認待ち。[現在のrelease contract](reviews/whitelist_management.md)と[移行gate](runbooks/whitelist_management.md)。D-105のpositive CREATE/materialization deferredは維持。
+
 ## Web Foundation repository slice
 
 D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)をproduction適用。public公開・実OAuth・read-only status・15分失効・logoutの確認を完了。read-only slice Completed。Existing Operations via WebもD-104 Acceptedとしてproduction Completed（2026-09-13）。

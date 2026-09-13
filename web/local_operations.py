@@ -51,7 +51,15 @@ class MemoryDynamo:
                     # Operations use operation_id as the table key.
                     if put["TableName"] == "operation":
                         key = item["operation_id"]["S"]
-                    if (put["TableName"], key) in self.records:
+                    existing = self.records.get((put["TableName"], key))
+                    if "policy_json" in item:
+                        before = put["ExpressionAttributeValues"][":before"]
+                        if existing:
+                            if existing.get("policy_json") != before:
+                                raise TransactionCancelled()
+                        elif "attribute_not_exists(game_id)" not in put["ConditionExpression"]:
+                            raise TransactionCancelled()
+                    elif existing:
                         raise TransactionCancelled()
                 elif "ConditionCheck" in action:
                     check = action["ConditionCheck"]
@@ -59,6 +67,11 @@ class MemoryDynamo:
                         lock = self.records.get(
                             (check["TableName"], check["Key"]["lock_name"]["S"]), {}
                         )
+                        if (
+                            lock
+                            and check["ConditionExpression"] == "attribute_not_exists(lock_name)"
+                        ):
+                            raise TransactionCancelled()
                         if lock and lock.get("operation_type", {}).get("S") not in {
                             "START",
                             "STOP",
@@ -146,9 +159,19 @@ class LocalOperations(Operations):
     def __init__(self, policy: Policy, scenario: str) -> None:
         self.db = MemoryDynamo()
         self.scenario = scenario
+        if scenario == "whitelist":
+            from wishicraft.artifacts import whitelist_policy as model
+
+            self.db.records["games", model.COMMON] = {
+                "game_id": {"S": model.COMMON},
+                "policy_json": {"S": model.encoded(model.empty())},
+            }
+
         self.started: dict[str, float] = {}
         self.domain = service(self.db)
-        catalog = ("game-demo-one", "game-demo-two")
+        catalog: tuple[str, ...] = ("game-demo-one", "game-demo-two")
+        if scenario == "whitelist":
+            catalog = (*catalog, "game-demo-three")
         for i, game in enumerate(catalog):
             self.db.records["games", game] = {
                 k: _to_attribute(v)
@@ -190,6 +213,19 @@ class LocalOperations(Operations):
         if self.scenario == "players" and event["operation_type"] in {"SWITCH", "RESET"}:
             return {"StatusCode": 200, "Payload": io.BytesIO(b'{"error":"conflict"}')}
         web = admission_actor(event["web"], event["operation_type"], self.policy)
+        if event["operation_type"] == "WHITELIST":
+            from wishicraft import whitelist
+
+            whitelist.resolve = lambda name: ("11111111-1111-4111-8111-111111111111", name)
+            result_document = whitelist.mutate(
+                self.domain._repository,
+                value=event["whitelist"],
+                game=event.get("target_game_id"),
+                key=event["idempotency_key"],
+                actor=web,
+                now=datetime.now(UTC),
+            )
+            return {"StatusCode": 200, "Payload": io.BytesIO(json.dumps(result_document).encode())}
         if event["operation_type"] == "CREATE":
             from wishicraft.game_creation import create
 

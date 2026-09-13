@@ -17,6 +17,7 @@ def operation_authorized(
     return operation in {
         "STATUS",
         "CREATE",
+        "WHITELIST",
         "START",
         "STOP",
         "SWITCH",
@@ -26,5 +27,5 @@ def operation_authorized(
         roles,
         player_role_id=player_role_id,
         admin_role_id=admin_role_id,
-        admin_only=operation in {"BACKUP", "SWITCH", "CREATE"},
+        admin_only=operation in {"BACKUP", "SWITCH", "CREATE", "WHITELIST"},
     )

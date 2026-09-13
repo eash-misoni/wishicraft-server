@@ -47,6 +47,13 @@ def recovery_digest(value: str) -> str:
     required = {"manifest_json", "runtime_env", "compose_yaml"}
     if document["schema_version"] == 2:
         required.add("creation_config")
+    if isinstance(runtime, dict) and "whitelist_policy" in runtime:
+        from wishicraft.artifacts.whitelist_policy import recovery
+
+        if document["schema_version"] != 2:
+            raise ValueError("whitelist recovery requires schema 2")
+        recovery(runtime["whitelist_policy"], set(games))
+        required.add("whitelist_policy")
     if not isinstance(runtime, dict) or set(runtime) != required:
         raise ValueError("invalid recovery runtime")
     manifest = json.loads(runtime["manifest_json"])
@@ -171,12 +178,22 @@ class RecoveryRepository:
                 raise ValueError("invalid Game configuration number")
             return int(value)
 
+        runtime = json.loads(runtime_json)
+        import os
+
+        if os.environ.get("WHITELIST_MANAGEMENT") == "1":
+            from wishicraft.artifacts.whitelist_policy import read
+
+            runtime["whitelist_policy"] = {
+                "common": read(self.api, self.games, None),
+                "games": {game: read(self.api, self.games, game) for game in catalog.game_ids},
+            }
         value = json.dumps(
             {
                 "schema_version": 2 if "creation_config" in json.loads(runtime_json) else 1,
                 "source_volume_id": volume,
                 "games": records,
-                "runtime": json.loads(runtime_json),
+                "runtime": runtime,
             },
             sort_keys=True,
             separators=(",", ":"),

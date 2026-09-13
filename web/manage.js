@@ -142,7 +142,7 @@ async function track() {
     const r = await opFetch(pending ? '/api/operations/request/' + encodeURIComponent(pending.request_id) : '/api/operations/current');
     if (!r.ok) throw new Error('read');
     renderOperation(r.body.operation);
-    if (r.body.operation?.type === 'CREATE' && r.body.operation.status === 'SUCCEEDED') {
+    if (['CREATE','WHITELIST'].includes(r.body.operation?.type) && r.body.operation.status === 'SUCCEEDED') {
       const caps = await opFetch('/api/capabilities');
       if (caps.ok) { capabilities = caps.body; renderGames(); gameSelect.replaceChildren();
         for (const g of capabilities.games) { const o = document.createElement('option'); o.value = g.key; o.textContent = gameLabel(g); gameSelect.append(o); }
@@ -205,7 +205,7 @@ document.querySelector('#submit-operation').addEventListener('click', () => {
 });
 gameSelect.addEventListener('change', capabilityDetail);
 document.querySelector('#cancel-operation').addEventListener('click', () => {opForm.hidden = true;});
-document.querySelector('#back-operation').addEventListener('click', () => {confirmation.hidden = true; opForm.hidden = false;});
+document.querySelector('#back-operation').addEventListener('click', () => {confirmation.hidden = true; opForm.hidden = draft?.type === 'WHITELIST';});
 checkButton.addEventListener('click', track); retryButton.addEventListener('click', submit);
 newButton.addEventListener('click', () => { if(opBusy) return; localStorage.removeItem(storageKey); pending = null; terminal = false; opButtons.querySelectorAll('button').forEach(b => {b.disabled = false;}); newButton.hidden = true; checkButton.hidden = true; retryButton.hidden = true; opNotice.textContent = '実行したい操作を選択してください。'; });
 document.addEventListener('visibilitychange', () => {if (!document.hidden && capabilities) track();});
@@ -215,6 +215,12 @@ function gameLabel(g) {
   return g.name + (capabilities.games.filter(other => other.name === g.name).length > 1 ? ' · ' + g.key.slice(0, 8) : '');
 }
 function renderGames() {
+  const common = document.querySelector('#common-whitelist');
+  common.hidden = !capabilities.whitelist;
+  if (capabilities.whitelist) {
+    const players = document.querySelector('#common-players'); players.replaceChildren();
+    whitelistPanel(players, null, capabilities.whitelist.common);
+  }
   const list = document.querySelector('#registered-games'); list.replaceChildren();
   const counts = new Map();
   for (const g of capabilities.games) counts.set(g.name, (counts.get(g.name) || 0) + 1);
@@ -232,6 +238,37 @@ function renderGames() {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = opNames[kind];
       b.addEventListener('click', () => {if (pending || opBusy) return; gameSelect.value = g.key; choose(kind);}); detail.append(b);
     }
+    if (capabilities.whitelist) whitelistPanel(detail, g.key, capabilities.whitelist.games[g.key]);
     list.append(detail);
   }
+}
+
+function whitelistPanel(parent, game, policy) {
+  const title = document.createElement('h3'); title.textContent = game ? '参加できる人（Common ＋ Game固有）' : '全Gameへの参加許可'; parent.append(title);
+  const p = document.createElement('p'); p.textContent = '保存済みpolicy。稼働中の反映状態は未確認です。次の起動で適用します。'; parent.append(p);
+  if (!policy.members.length) {const empty = document.createElement('p'); empty.textContent = '許可された人はいません。'; parent.append(empty);}
+  const action = (kind, player, label) => {
+    if (pending || opBusy) {opNotice.textContent = '追跡中の操作の結果を確認してから編集してください。'; return;}
+    draft = {type:'WHITELIST', game, confirm:true,
+      whitelist:{action:kind, player, revision:policy.revision}};
+    opForm.hidden = true; confirmation.hidden = false;
+    document.querySelector('#confirmation-detail').textContent = `${game ? gameLabel(capabilities.games.find(g => g.key === game)) : 'Common（全Game）'}: ${label}。設定を保存し、次の起動で適用します。`;
+    document.querySelector('#submit-operation').disabled = false;
+    confirmation.scrollIntoView({block:'center'});
+  };
+  for (const player of policy.members) {
+    const row = document.createElement('p');
+    row.textContent = player.name + (game ? ` — ${player.common ? 'Common' : ''}${player.common && player.specific ? ' ＋ ' : ''}${player.specific ? 'Game固有' : ''}` : '');
+    if (capabilities.whitelist.editable && (!game || player.specific)) {
+      const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = game ? 'Game固有から削除' : 'Commonから削除';
+      remove.addEventListener('click', () => action('remove', player.key, `${player.name}を削除${game && player.common ? '（Common由来の参加許可は残ります）' : ''}`)); row.append(remove);
+    }
+    parent.append(row);
+  }
+  if (!capabilities.whitelist.editable) return;
+  const form = document.createElement('form'), label = document.createElement('label'), input = document.createElement('input'), add = document.createElement('button');
+  label.textContent = 'Minecraft Java player name '; input.required = true; input.pattern = '[A-Za-z0-9_]{3,16}'; input.maxLength = 16; input.autocomplete = 'off'; label.append(input);
+  add.textContent = game ? 'Game固有へ追加' : 'Commonへ追加'; add.type = 'submit'; form.append(label, add);
+  form.addEventListener('submit', event => {event.preventDefault(); action('add', input.value, `${input.value}を追加`);}); parent.append(form);
+  const save = document.createElement('button'); save.type = 'button'; save.textContent = '現在の設定を再保存'; save.addEventListener('click', () => action('save', null, '参加許可を変えずに再保存')); parent.append(save);
 }

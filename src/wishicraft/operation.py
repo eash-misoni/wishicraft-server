@@ -20,6 +20,7 @@ class OperationType(StrEnum):
     BACKUP = "BACKUP"
     RETENTION = "RETENTION"
     CREATE = "CREATE"
+    WHITELIST = "WHITELIST"
     RESET = "RESET"
     SWITCH = "SWITCH"
     OP_ADD = "OP_ADD"
@@ -27,7 +28,7 @@ class OperationType(StrEnum):
 
     @property
     def requires_lock(self) -> bool:
-        return self not in {OperationType.STATUS, OperationType.CREATE}
+        return self not in {OperationType.STATUS, OperationType.CREATE, OperationType.WHITELIST}
 
 
 class OperationStatus(StrEnum):

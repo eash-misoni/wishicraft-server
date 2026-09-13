@@ -1,5 +1,7 @@
 # Phase 8後の再設計レビューと限定補足
 
+> Whitelistの旧Proposed案はD-106の候補として再評価済み。現在の実装・release契約は[Whitelist Management](whitelist_management.md)を参照し、下記の過去案をAcceptedとして読まない。
+
 > Reset準備（2026-09-12）: Reset論点の次期具体案は[game_scoped_reset.md](game_scoped_reset.md)（D-098 Proposed）。本reviewの以前の保持例・認可例をAccepted値へ昇格させない。D-097は限定migration Completedのまま。
 
 

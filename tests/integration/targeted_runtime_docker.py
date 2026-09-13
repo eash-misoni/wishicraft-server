@@ -26,7 +26,8 @@ IMAGE = (
 
 
 def main() -> None:
-    creation = "--creation" in sys.argv
+    whitelist = "--whitelist" in sys.argv
+    creation = "--creation" in sys.argv or whitelist
     reset = "--reset" in sys.argv
     two_games = "--two-games" in sys.argv or reset or creation
     root = Path(tempfile.mkdtemp(prefix="wishicraft-targeted-docker-"))
@@ -404,9 +405,24 @@ services:
         config.update(
             game_creation=True, games_table="games", reset_policies={}, initial_whitelist=[]
         )
+        if whitelist:
+            from wishicraft.artifacts import whitelist_policy as access
+
+            config["whitelist_management"] = True
+            db.records["games", access.COMMON] = {
+                "game_id": {"S": access.COMMON},
+                "policy_json": {
+                    "S": access.encoded(
+                        {
+                            "revision": 1,
+                            "members": {"11111111-1111-4111-8111-111111111111": "FixtureOne"},
+                        }
+                    )
+                },
+            }
         host.CONFIG.write_text(json.dumps(config))
         host.item = lambda config, table, key, identity: (
-            {k: decode(v) for k, v in db.records["games", identity].items()}
+            {k: decode(v) for k, v in db.records.get(("games", identity), {}).items()}
             if table == "games_table"
             else operation
             if table == "operations_table"
@@ -460,11 +476,42 @@ services:
                 host.apply(request)
                 target = destination_target
                 request["action"] = "START"
+            if whitelist:
+                from wishicraft.artifacts import initial_game
+
+                initial_game.prepare(
+                    {k: decode(v) for k, v in db.records["games", game_id].items()},
+                    config,
+                    target,
+                    host.atomic,
+                )
+                # Synthetic cached online profiles let real Minecraft commands run without a
+                # public profile service dependency; no production identity or player is used.
+                cache = [
+                    {"uuid": identity, "name": name, "expiresOn": "2099-01-01 00:00:00 +0000"}
+                    for identity, name in [
+                        ("11111111-1111-4111-8111-111111111111", "FixtureOne"),
+                        ("22222222-2222-4222-8222-222222222222", "FixtureTwo"),
+                    ]
+                ]
+                destination.joinpath("usercache.json").write_text(json.dumps(cache))
+                os.chown(destination / "usercache.json", 993, 993)
             host.apply(request)
             host.apply(request)  # Same target/run and same initial owner, no second directory.
             current = host.inspect()[0]
             assert "42" in real_execute(["docker", "exec", current["Id"], "rcon-cli", "seed"])
             assert destination.joinpath("world/level.dat").is_file()
+            if whitelist:
+                entries = json.loads(destination.joinpath("whitelist.json").read_text())
+                assert [entry["name"] for entry in entries] == ["FixtureOne"]
+                for command in (
+                    ["whitelist", "remove", "FixtureOne"],
+                    ["whitelist", "add", "FixtureTwo"],
+                ):
+                    real_execute(["docker", "exec", current["Id"], "rcon-cli", *command])
+                entries = json.loads(destination.joinpath("whitelist.json").read_text())
+                assert [entry["name"] for entry in entries] == ["FixtureTwo"], entries
+                assert len(access.read(db, "games", None)["members"]) == 1
             print("CREATE_FIRST_MATERIALIZED", number, game_id, flush=True)
         operation["operation_type"] = request["action"] = "STOP"
         host.apply(request)
@@ -475,6 +522,18 @@ services:
         lease["owner_operation_id"] = target["run_id"]
         request.update(operation_id=target["run_id"], action="START")
         host.apply(request)
+        if whitelist:
+            assert [
+                entry["name"]
+                for entry in json.loads(
+                    Path(target["data_source"]).joinpath("whitelist.json").read_text()
+                )
+            ] == ["FixtureOne"]
+            print(
+                "PASS Whitelist effective projection / first START-SWITCH / "
+                "in-game add-remove / STOP-restart convergence",
+                flush=True,
+            )
         operation["operation_type"] = request["action"] = "STOP"
         host.apply(request)
         assert b_saved and all(

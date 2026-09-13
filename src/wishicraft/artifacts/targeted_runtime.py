@@ -68,7 +68,7 @@ def item(config: dict[str, Any], table: str, key: str, identity: str) -> dict[st
                 "json",
             ]
         )
-    )["Item"]
+    ).get("Item", {})
 
     def decode(value: dict[str, Any]) -> Any:
         if "S" in value:
@@ -474,6 +474,31 @@ def apply(request: dict[str, Any]) -> None:
                 raise ValueError("UNRESOLVED_RUNTIME")
             if receipt and receipt["target"] == target and receipt["phase"] == "stopped":
                 raise ValueError("STOPPED_RUN_CANNOT_RESTART")
+            if config.get("whitelist_management") is True and not containers:
+                stopped_environment()
+                try:
+                    from wishicraft.artifacts import whitelist_policy
+                except ImportError:
+                    import importlib
+
+                    whitelist_policy = importlib.import_module("whitelist_policy")
+                common = item(config, "games_table", "game_id", whitelist_policy.COMMON)
+                specific = item(
+                    config, "games_table", "game_id", whitelist_policy.policy_key(target["game_id"])
+                )
+                authorize(
+                    request,
+                    operation,
+                    item(config, "locks_table", "lock_name", config["lock_name"]),
+                    config,
+                    datetime.now(timezone.utc),
+                )
+                whitelist_policy.project(
+                    target,
+                    json.loads(common["policy_json"]),
+                    json.loads(specific["policy_json"]) if specific else whitelist_policy.empty(),
+                    atomic,
+                )
             atomic(receipt_path, json.dumps({"target": target, "phase": "starting"}))
             RUN_ENV.parent.mkdir(mode=0o700, exist_ok=True)
             atomic(

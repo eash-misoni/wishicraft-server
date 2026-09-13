@@ -228,6 +228,10 @@ class WebFoundationStack(Stack):
             env["WEB_" + key.upper() + "_TABLE"] = resource_name(
                 project.resource_prefix, stage.stage, suffix
             )
+        if self.node.try_get_context("whitelist_management") == "true":
+            if not game_creation:
+                raise ValueError("Whitelist requires the dynamic Game contract")
+            env["WHITELIST_MANAGEMENT"] = "1"
         if game_creation:
             env["GAME_CREATION"] = "1"
             if self.node.try_get_context("create_disabled") == "true":
