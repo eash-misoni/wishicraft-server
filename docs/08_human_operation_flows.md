@@ -1,5 +1,7 @@
 # 08. Human Operation Flows
 
+静的参加案内（D-100）: ブラウザで版・Game・権限・注意を確認し、接続先/招待は管理者から個別に受け取る。状態確認と操作はDiscordの指定チャンネルを使用する。[利用案内](discord_user_guide.md)が説明の唯一の編集元、[Web準備レビュー](reviews/user_guide_web.md)が公開手順・承認境界を所有する。
+
 利用者向けの現行コマンド・権限・Resetの注意点は[Discord利用案内](discord_user_guide.md)を参照してください。進捗表示改善D-099はAccepted・production適用済みです。実STATUS一回で実行者・到達記録・公開配送を確認しました。
 
 > Resetは[D-098 Accepted](reviews/game_scoped_reset.md)。B限定policyの有効化とPlayer/Adminの日常実行を分離する。二回の隔離復旧後、一般受付を元設定へ復元済み。実行方法と損失境界は同契約、検証範囲は[closeout](runbooks/game_scoped_reset_migration.md#production-closeout)を参照する。

@@ -1,6 +1,7 @@
 {
   "private": true,
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "aws-cdk": "^2.0.0"
   }
 }

@@ -1,0 +1,117 @@
+{
+  "status": "LOCAL_VALIDATED_PUBLICATION_NOT_APPROVED",
+  "baseline_head": "62d914e79adc580d844a16fe5c46deba68bedf4d",
+  "date": "2026-09-13",
+  "tests": {
+    "full_pytest": 1079,
+    "guide_focused": 12,
+    "ruff": "passed",
+    "format": "passed",
+    "mypy": "169 source files passed",
+    "synth_contexts": [
+      "phase1",
+      "target",
+      "control-plane",
+      "two-games",
+      "reset"
+    ],
+    "npm_audit_vulnerabilities": 0
+  },
+  "browser": {
+    "checks": [
+      {
+        "label": "mobile",
+        "width": 390,
+        "height": 844,
+        "links": "pass",
+        "clipboard": "pass",
+        "keyboard": "pass",
+        "overflow": false,
+        "externalRequests": 0
+      },
+      {
+        "label": "narrow",
+        "width": 320,
+        "height": 740,
+        "links": "pass",
+        "clipboard": "pass",
+        "keyboard": "pass",
+        "overflow": false,
+        "externalRequests": 0
+      },
+      {
+        "label": "desktop",
+        "width": 1440,
+        "height": 1000,
+        "links": "pass",
+        "clipboard": "pass",
+        "keyboard": "pass",
+        "overflow": false,
+        "externalRequests": 0
+      }
+    ],
+    "errors": [],
+    "browser": "153.0.8010.36",
+    "status": "passed"
+  },
+  "artifacts": {
+    "404.html": {
+      "bytes": 279,
+      "sha256": "1ece393b867956dba77aad70c9504c04f510aa441d14967c72cdb7802cc892fa"
+    },
+    "_headers": {
+      "bytes": 341,
+      "sha256": "1dc428b1c1994b480a0546a133266281ec6ab3844c7e307882a490af5cab55f4"
+    },
+    "guide.css": {
+      "bytes": 4520,
+      "sha256": "60c2c4406197fb5a015340cf2a07134b55911f78e73a121a3190d1558b7efa8f"
+    },
+    "guide.js": {
+      "bytes": 986,
+      "sha256": "51299c17db757549a649b63b1aad52408ddd3b72bd36b3f69e02c8239ecc128d"
+    },
+    "index.html": {
+      "bytes": 10614,
+      "sha256": "fbbf12f934565817fea30a019a5505408d0885aa0dc2d5f68d313c30f1eb5cf8"
+    }
+  },
+  "screenshots": {
+    "desktop-commands.png": "7139f5bc94ff7b6c12507df5556fa69dcee2a8ba855f57aacbc96c912e8dfbe9",
+    "desktop-reset.png": "e09d29e5283b079f1b1026e4bfe52de85efbc0ccdc23dafd1e1aeb8dd3eb25e1",
+    "desktop-top.png": "8757aea89404884f0010897846f73c3cf937e48abfb7ef298b6eb860a117601a",
+    "desktop.png": "f7e53d9c6384fb209ae05164725463834f7419e8107927e898e7847e906e00ef",
+    "mobile-commands.png": "43a9708fb7884b82c34b74dfbb01ec6bfbbf0dc68d8b8bed9b31573bac60d8e6",
+    "mobile-reset.png": "e553246c8857b4a68cc2e9b13c84de7effc25b2bcd13a046597d3edf36a5afca",
+    "mobile-top.png": "7ff629d3c61953df78f14aaf6a171fb2eaa245cea4ae039b30c93e9bfefbdc07",
+    "mobile.png": "613d9f5c2f4316e680f7e019255f78427069cd2c0e70608216d9203338d405a7",
+    "narrow-commands.png": "6fa39416d17be5323174ac828d94116b9a5a5c554bd4e3104022820c9e635cfd",
+    "narrow-reset.png": "a30e2fe4ef38de673f771663a6fd9a53d12d112b5efc5b733b3c40d69b00d820",
+    "narrow-top.png": "60019f2c399c6dea1911e6eb4dfcb2d34286c0aadf8159c85eb85046972950a2",
+    "narrow.png": "0bac2169f9c4993e924f5387218858a4d41beb47f294ca22fb53106cd38d5854"
+  },
+  "visual_inspection": [
+    "mobile-top",
+    "desktop-top",
+    "narrow-top",
+    "mobile-reset",
+    "mobile-commands",
+    "desktop-commands"
+  ],
+  "historical_validation_failures": [
+    "sandbox blocked dependency DNS; resolved in authorized network context",
+    "sandbox blocked localhost listener; resolved with authorized loopback-only execution",
+    "skip link incorrectly included in pointer click loop; harness corrected, keyboard check preserved",
+    "duplicate status button labels incorrectly deduplicated in Tab audit; harness corrected to use DOM position"
+  ],
+  "not_performed": [
+    "Web publication",
+    "hosting resource creation",
+    "AWS or Discord or Host operation",
+    "live Minecraft participation",
+    "physical mobile device",
+    "Safari/Firefox/screen reader",
+    "hosted TLS/DNS/Access/cache/rollback"
+  ],
+  "production_change": false
+}

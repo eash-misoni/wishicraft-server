@@ -28,7 +28,7 @@ jobs:
       - run: tools/dev-env run uv run pytest
       - run: tools/dev-env run uv run ruff check .
       - run: tools/dev-env run uv run ruff format --check .
-      - run: tools/dev-env run uv run mypy src infrastructure tests
+      - run: tools/dev-env run uv run mypy src infrastructure tests web
       - run: >-
           tools/dev-env run npx --no-install cdk synth MinecraftStack-dev
           --context stage=dev --context phase=1 --context deployment=phase1
@@ -50,6 +50,30 @@ jobs:
           shellcheck infrastructure/host_runtime/docker_compose_install.sh
           infrastructure/host_runtime/target_host_validation.sh
           tools/dev-env tools/setup-dev-tools
+
+  user-guide-web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: tools/dev-env run -- uv sync --frozen --all-groups
+      - run: tools/dev-env run -- npm ci
+      - run: tools/dev-env check
+      - run: tools/dev-env run -- npx --no-install playwright --version
+      - run: tools/dev-env run -- npx --no-install playwright install --with-deps chromium
+      - name: Build reviewed files and verify in Chromium (no publication)
+        run: |
+          GUIDE_ROOT=$(mktemp -d)
+          tools/dev-env run -- python -m web.build --output "$GUIDE_ROOT/site"
+          tools/dev-env run -- node web/browser-check.mjs "$GUIDE_ROOT/site"
 
   host-runtime-integration:
     runs-on: ubuntu-latest

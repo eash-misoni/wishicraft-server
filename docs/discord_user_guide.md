@@ -1,7 +1,44 @@
-# DiscordでのMinecraft操作
+# DiscordでのMinecraft操作・参加案内
 
-対象はdevの操作チャンネルです。ここは利用案内で、権限・保存・復旧契約の正本は末尾の参照先です。
-Aは`game-vanilla-main`、B（Wishicraft Vanilla B）は`game-vanilla-secondary`です。同時に遊べるGameは一つです。
+<!-- public-guide:begin -->
+
+## 参加の準備
+
+この案内は現在のdev環境の参加者向けです。Minecraftが停止していても読むことができます。
+現在の状態はDiscordで `/mc status` を使って確認してください。
+
+1. 下のGame詳細にあるバージョンの **Minecraft Java Edition** を用意します。
+2. 管理者に参加を相談し、Minecraftのwhitelist登録とDiscordのPlayer / Admin roleを確認します。Webを閲覧できることと、ゲームへの参加・コマンドの権限は別です。
+3. 接続先とDiscordへの招待は管理者から個別に受け取ってください。このページには掲載しません。
+4. 指定の操作チャンネルで状態を確認し、停止中ならGameを選んでSTART。起動完了を確認してからMinecraftの「マルチプレイ」で参加します。
+
+A・Bは同じ固定Vanilla構成です。追加のMODパック指定はありません。Bedrock Edition（統合版）接続やMOD入りclientの互換性は確認していません。まず同じ版の標準Java clientを使ってください。
+難易度・gamemode・Hardcoreの実設定はこの案内の根拠では未確認です。BをHardcoreとして紹介するものではありません。
+
+<!-- generated:games:begin -->
+
+## Game一覧と詳細
+
+同時に遊べるGameは一つです。
+
+[Aの詳細](#section-fe48d7cf1a41)
+[Bの詳細](#section-8195b7b4dec7)
+
+### A · Wishicraft Vanilla
+
+- コマンドで選ぶ名前：`game-vanilla-main`
+- Minecraft Java Edition **26.2** / Vanilla（A・B共通）
+- A専用の保存領域。現在Resetには対応していません。
+
+### B · Wishicraft Vanilla B
+
+- コマンドで選ぶ名前：`game-vanilla-secondary`
+- Minecraft Java Edition **26.2** / Vanilla（A・B共通）
+- B専用の保存領域。対応条件を満たす場合にResetできます。
+- Reset：`fixed`はseed **0**。current＋直近 **3** managed旧worldを保持。
+- 元Bのanchorは別枠で自動削除対象外です。
+
+<!-- generated:games:end -->
 
 ## 使えるコマンド
 
@@ -19,6 +56,44 @@ PlayerまたはAdmin roleが必要です。Adminも操作チャンネルを使�
 STATUS以外は他の所有操作が進行している場合などに受け付けられないことがあります。
 拒否された時に連打せず、まず状態を確認してください。人数不明は0人とは扱いません。
 SWITCH/RESETの最後の0人確認直後に誰かが接続するraceは残ります。無切断保証や全員の合意確認ではありません。
+
+<!-- generated:arguments:begin -->
+
+## 引数の一覧
+
+Discordの候補から選択してください。
+
+### /mc status
+
+引数なし。
+
+
+### /mc start
+
+- `game`：省略可。`game-vanilla-main` / `game-vanilla-secondary`
+
+### /mc stop
+
+引数なし。
+
+
+### /mc backup
+
+引数なし。
+
+
+### /mc switch
+
+- `game`：必須。`game-vanilla-main` / `game-vanilla-secondary`
+- `confirm`：必須。`true`（明示確認。`false`は拒否）
+
+### /mc reset
+
+- `game`：必須。`game-vanilla-secondary`
+- `confirm`：必須。`true`（明示確認。`false`は拒否）
+- `seed`：必須。`fixed` / `new`
+
+<!-- generated:arguments:end -->
 
 ## Resetで変わるもの・残るもの
 
@@ -40,7 +115,7 @@ currentに加え、直近3個のmanaged旧worldを保持し、それ以前は成
 本人だけに見える受付応答と、操作チャンネルの公開進捗は別です。
 公開進捗は一操作につき一メッセージを編集します。通知失敗はMinecraft操作失敗と同じ意味ではありません。
 
-**現在の表示（D-099 Accepted、適用済み）:** 操作・Game・実行者、最新状態、記録された主要経過を数行表示します。
+**進捗メッセージの表示:** 操作・Game・実行者、最新状態、記録された主要経過を数行表示します。
 経過の「processing entered」はその処理への到達であり、保存や起動の成功証明ではありません。
 `Completed`、`Failed`、`Cancelled`は別の結果です。`Cancelled`もあらゆる副作用を取り消したという意味ではありません。
 名前・経過が古い記録にない場合は「not recorded」と表示し、後から推測で埋めません。
@@ -48,6 +123,8 @@ currentに加え、直近3個のmanaged旧worldを保持し、それ以前は成
 応答が途切れた、失敗と出た、公開通知が来ない場合は、まず`/mc status`で確認してください。
 特にReset/切替/Backupの結果不明時は、同じコマンドを送り直して新しい操作で補わず、管理者にチャンネルのメッセージと状況を伝えてください。
 配送failureを直すためにbackend操作をやり直す必要はありません。
+
+<!-- public-guide:end -->
 
 ## 正本との対応
 
@@ -58,3 +135,5 @@ currentに加え、直近3個のmanaged旧worldを保持し、それ以前は成
 - 新表示の契約・適用記録: [D-099](reviews/discord_progress.md)。
 
 whitelist管理、Web、汎用Restore、死亡自動検知等は、この利用可能コマンド一覧には含みません。
+
+静的Webは明示したpublic-guide範囲だけを使用します。生成ブロックは `tools/dev-env run -- python -m web.build --update-guide` で更新し、説明文は本ファイルだけを編集します。公開計画は [Web準備レビュー](reviews/user_guide_web.md) を参照してください。

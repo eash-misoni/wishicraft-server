@@ -1,5 +1,7 @@
 # 01. Product Scope and Glossary
 
+静的案内の独立slice（D-100）: 参加条件・Game詳細・現行DiscordコマンドをEC2に依存せず閲覧できるWebを準備する。実装委任済み、公開とhosting採用は未承認。[公開計画](reviews/user_guide_web.md)。将来の状態確認・管理Webの希望は維持し、今回の必須依存にしない。
+
 - **文書状態:** Canonical
 - **最終更新:** 2026-08-22
 
