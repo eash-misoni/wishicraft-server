@@ -78,6 +78,7 @@ jobs:
           tools/dev-env run -- uv run python -m web.build --output "$GUIDE_ROOT/site"
           tools/dev-env run -- node web/browser-check.mjs "$GUIDE_ROOT/site"
           tools/dev-env run -- node web/foundation-browser.mjs
+          tools/dev-env run -- node web/operations-browser.mjs
 
   host-runtime-integration:
     runs-on: ubuntu-latest

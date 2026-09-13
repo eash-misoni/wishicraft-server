@@ -1,5 +1,7 @@
 # 02. Requirements
 
+> Existing Operations via Web: D-104 repository implementation / production approval pending. [共有Admission・認可・CSRF・request/Operation契約](reviews/existing_operations_web.md)、[release/E2E/rollback](runbooks/existing_operations_web.md)。既存backend safety contractを維持する。
+
 > Reset要件（2026-09-12）: RESET-001/002の従来LATER案を[D-098 Accepted](reviews/game_scoped_reset.md)の契約で置換する。毎回の外部BACKUPや連番generationは必須ではない。B限定の適用・復旧・一般公開は[実行証跡](evidence/2026-09-12-reset-production.json)で区別する。
 
 

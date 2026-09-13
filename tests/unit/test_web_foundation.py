@@ -336,7 +336,6 @@ def test_synthesized_environment_initializes_handler(monkeypatch: pytest.MonkeyP
         {
             "dynamodb:Scan",
             "dynamodb:UpdateItem",
-            "lambda:InvokeFunction",
             "ssm:SendCommand",
             "states:StartExecution",
         }

@@ -1,5 +1,7 @@
 # 05. Data and Interface Contracts
 
+> Existing Operations via Web: D-104 repository implementation / production approval pending. [共有Admission・認可・CSRF・request/Operation契約](reviews/existing_operations_web.md)、[release/E2E/rollback](runbooks/existing_operations_web.md)。既存backend safety contractを維持する。
+
 > Web Foundation D-102（Accepted・production適用済み、実証範囲はrunbook）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。
 
 > Reset契約（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)がworld.current_id、reset_plan、root所有記録、RESET入力の差分を定義する。共有v2復旧JSONはcurrent_idを任意追加しdigestへ含める。既存v1/v2は変換しない。一般公開は二回の隔離復旧成功後に限る。

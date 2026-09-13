@@ -7,9 +7,10 @@ import json
 import os
 import uuid
 from datetime import UTC, datetime
-from typing import Protocol, cast
+from typing import Protocol, TypedDict, cast
 
 from wishicraft.operation import (
+    AdmissionConflict,
     DiscordOperationContext,
     DynamoApi,
     LeaseProof,
@@ -19,8 +20,15 @@ from wishicraft.operation import (
     OperationStatus,
     OperationType,
     RequestSource,
+    WebOperationContext,
 )
 from wishicraft.runtime_catalog import configured_catalog, selected_game
+
+
+class AdmissionExtra(TypedDict, total=False):
+    target_game_id: str
+    reset_seed_mode: str
+    web: WebOperationContext
 
 
 class AwsSession(Protocol):
@@ -40,8 +48,64 @@ _retention_launcher: WorkflowLauncher | None = None
 
 
 def handler(event: object, context: object) -> dict[str, object]:
+    if isinstance(event, dict) and event.get("requested_by") == "WEB":
+        from wishicraft.web_auth import AuthRejected
+        from wishicraft.web_operations import WebRejected
+
+        try:
+            return _handle(event, context)
+        except WebRejected as error:
+            return {"error": error.code}
+        except AuthRejected:
+            return {"error": "forbidden"}
+        except AdmissionConflict:
+            return {"error": "conflict"}
+        except ValueError:
+            return {"error": "result_unknown"}
+    return _handle(event, context)
+
+
+def _handle(event: object, context: object) -> dict[str, object]:
     del context
-    extra: dict[str, str] = {}
+    web: WebOperationContext | None = None
+    if isinstance(event, dict) and event.get("requested_by") == "WEB":
+        from wishicraft.web_auth import Policy
+        from wishicraft.web_operations import admission_actor
+
+        event = dict(event)
+        web = admission_actor(
+            event.pop("web", None),
+            str(event.get("operation_type")),
+            Policy(
+                *(
+                    _required_environment("ADMISSION_" + name)
+                    for name in ("APPLICATION_ID", "GUILD_ID", "PLAYER_ROLE_ID", "ADMIN_ROLE_ID")
+                )
+            ),
+        )
+        # Resolve duplicate requests before mutable Game selection. Transport retries cannot
+        # acquire a new target after a completed SWITCH/STOP changed the selected Game.
+        key = event.get("idempotency_key")
+        if not isinstance(key, str) or not key.startswith("web:"):
+            raise ValueError("invalid Web request identity")
+        repository = _get_service()._repository
+        prior = repository._existing_record(key)
+        if prior is not None:
+            if (
+                prior.requested_by is not RequestSource.WEB
+                or prior.operation_type.value != event.get("operation_type")
+            ):
+                raise AdmissionConflict("request conflict")
+            repository.verify_web(prior.operation_id, web)
+            return {
+                "schema_version": 1,
+                "operation_id": prior.operation_id,
+                "created": False,
+                "lease_id": None,
+            }
+    extra: AdmissionExtra = {}
+    if web is not None:
+        extra["web"] = web
     catalog = configured_catalog()
     if catalog is not None and isinstance(event, dict):
         event = dict(event)
@@ -54,7 +118,7 @@ def handler(event: object, context: object) -> dict[str, object]:
 
             if (
                 confirmed is not True
-                or event.get("requested_by") not in {"ADMIN", "DISCORD"}
+                or event.get("requested_by") not in {"ADMIN", "DISCORD", "WEB"}
                 or explicit_game not in configured()
                 or reset_seed_mode not in {"new", "fixed"}
                 or not os.environ.get("RESET_STATE_MACHINE_ARN")
@@ -64,7 +128,11 @@ def handler(event: object, context: object) -> dict[str, object]:
         elif reset_seed_mode is not None:
             raise ValueError("seed mode is RESET-only")
         elif kind == "SWITCH":
-            if confirmed is not True or event.get("requested_by") not in {"ADMIN", "DISCORD"}:
+            if confirmed is not True or event.get("requested_by") not in {
+                "ADMIN",
+                "DISCORD",
+                "WEB",
+            }:
                 raise ValueError("SWITCH requires an authorized explicit confirmation")
             if not isinstance(explicit_game, str) or not os.environ.get("SWITCH_STATE_MACHINE_ARN"):
                 raise ValueError("SWITCH requires a configured destination")

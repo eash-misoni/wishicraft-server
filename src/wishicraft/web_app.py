@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hmac
 import json
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -66,20 +67,30 @@ class WebApp:
         assets: Path,
         sessions: Callable[[], Sessions],
         status: Callable[[datetime], dict[str, Any]],
+        operations: Callable[[], Any] | None = None,
+        origin: str = "",
     ) -> None:
         self.assets, self.sessions, self.status = assets, sessions, status
+        self.operations, self.origin = operations, origin
         self.allowlist = set(json.loads((assets / "routes.json").read_text()))
 
     def handle(self, event: dict[str, Any], now: datetime) -> dict[str, Any]:
         path = event.get("rawPath", "")
         method = event.get("requestContext", {}).get("http", {}).get("method")
+        if path.startswith("/api/operations") or path == "/api/capabilities":
+            return self.operation_request(event, now)
         if method != "GET":
             return response(405)
         if path in {"/manage", "/manage/", "/manage/index.html", "/api/status"}:
             try:
-                self.sessions().authenticate(
+                auth = self.sessions()
+                record = auth.authenticate(
                     cookies(event).get(SESSION_COOKIE, ""), int(now.timestamp())
                 )
+                if self.operations is not None and path != "/api/status":
+                    from wishicraft.web_operations import principal
+
+                    principal(record, auth.policy)
             except AuthRejected:
                 return (
                     response(
@@ -120,6 +131,71 @@ class WebApp:
             result["headers"]["referrer-policy"] = "same-origin"
         return result
 
+    def operation_request(self, event: dict[str, Any], now: datetime) -> dict[str, Any]:
+        from wishicraft.web_operations import WebRejected, principal
+
+        def reply(status: int, body: dict[str, Any]) -> dict[str, Any]:
+            return response(
+                status, json.dumps({"schema_version": 1, **body}), content_type="application/json"
+            )
+
+        path = event.get("rawPath", "")
+        method = event.get("requestContext", {}).get("http", {}).get("method")
+        if self.operations is None:
+            return reply(404, {"error": "not_found"})
+        try:
+            sessions = self.sessions()
+            signed = cookies(event).get(SESSION_COOKIE, "")
+            record = sessions.authenticate(signed, int(now.timestamp()))
+            actor = principal(record, sessions.policy)
+            if method == "POST":
+                headers = {k.lower(): v for k, v in event.get("headers", {}).items()}
+                token = headers.get("x-csrf-token", "")
+                if (
+                    headers.get("origin") != self.origin
+                    or not isinstance(token, str)
+                    or not hmac.compare_digest(token, sessions.csrf(signed))
+                ):
+                    return reply(403, {"error": "csrf_rejected"})
+                if (
+                    path != "/api/operations"
+                    or headers.get("content-type", "").split(";")[0] != "application/json"
+                    or event.get("isBase64Encoded")
+                ):
+                    return reply(400, {"error": "invalid_input"})
+                body = event.get("body", "")
+                if not isinstance(body, str) or len(body) > 2048:
+                    return reply(400, {"error": "invalid_input"})
+                try:
+                    value = json.loads(body)
+                except ValueError:
+                    return reply(400, {"error": "invalid_input"})
+                status, result = self.operations().submit(
+                    actor, value, sessions.verify(signed, "session-"), now
+                )
+                return reply(status, result)
+            if method != "GET":
+                return reply(405, {"error": "method_not_allowed"})
+            if path == "/api/capabilities":
+                return reply(
+                    200,
+                    {**self.operations().capabilities(actor), "csrf_token": sessions.csrf(signed)},
+                )
+            if path == "/api/operations/current":
+                return reply(200, self.operations().read(actor, None))
+            prefix = "/api/operations/request/"
+            if path.startswith(prefix):
+                return reply(200, self.operations().read(actor, path[len(prefix) :]))
+            return reply(404, {"error": "not_found"})
+        except AuthRejected:
+            return reply(401, {"error": "authentication_required"})
+        except WebRejected as error:
+            return reply(error.status, {"error": error.code, "outcome": "rejected"})
+        except Exception:
+            return reply(
+                503, {"error": "result_unknown" if method == "POST" else "temporarily_unavailable"}
+            )
+
 
 class AuthApp:
     def __init__(self, sessions: Sessions, oauth: DiscordOAuth, origin: str) -> None:
@@ -144,9 +220,9 @@ class AuthApp:
                 ):
                     raise AuthRejected("invalid callback")
                 self.sessions.consume(query["state"][0], jar.get(STATE_COOKIE, ""), timestamp)
-                self.oauth.exchange(query["code"][0])
+                principal = self.oauth.exchange(query["code"][0])
                 self.sessions.logout(jar.get(SESSION_COOKIE, ""))
-                session_cookie = self.sessions.create(timestamp)
+                session_cookie = self.sessions.create(timestamp, principal)
                 return response(
                     303,
                     location="/manage/",

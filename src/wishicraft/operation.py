@@ -68,6 +68,23 @@ class DiscordOperationContext:
 
 
 @dataclass(frozen=True)
+class WebOperationContext:
+    user_id: str
+    display_name: str
+    request_digest: str
+    session_fingerprint: str
+
+    def __post_init__(self) -> None:
+        if not re.fullmatch(r"[0-9]{1,20}", self.user_id) or not 1 <= len(self.display_name) <= 100:
+            raise ValueError("invalid Web actor")
+        if any(
+            not re.fullmatch(r"[0-9a-f]{64}", v)
+            for v in (self.request_digest, self.session_fingerprint)
+        ):
+            raise ValueError("invalid Web request identity")
+
+
+@dataclass(frozen=True)
 class OperationRequest:
     operation_id: str
     idempotency_key: str
@@ -78,8 +95,11 @@ class OperationRequest:
     timeout_at: datetime | None
     discord: DiscordOperationContext | None = None
     reset_seed_mode: str | None = None
+    web: WebOperationContext | None = None
 
     def __post_init__(self) -> None:
+        if (self.web is not None) != (self.requested_by is RequestSource.WEB):
+            raise ValueError("Web actor required exclusively for Web operations")
         _validate_identifier(self.operation_id, "operation")
         _validate_identifier(self.idempotency_key, "idempotency")
         if (
@@ -201,6 +221,8 @@ class OperationAdmissionRepository:
             requested_by=request.requested_by,
             target_game_id=request.target_game_id,
         )
+        if result is not None and request.web is not None:
+            self.verify_web(result.operation_id, request.web)
         if result is not None and request.reset_seed_mode is not None:
             self.verify_reset_mode(result.operation_id, request.reset_seed_mode)
         return result
@@ -258,6 +280,21 @@ class OperationAdmissionRepository:
         except ValueError as error:
             raise ValueError("malformed idempotency item") from error
 
+    def verify_web(self, operation_id: str, web: WebOperationContext) -> None:
+        response = self._api.get_item(
+            TableName=self._operations,
+            Key={"operation_id": {"S": operation_id}},
+            ConsistentRead=True,
+        )
+        item = response.get("Item", {}) if isinstance(response, dict) else {}
+        actor = _decode_attribute(item.get("requested_by"))
+        if (
+            not isinstance(actor, dict)
+            or actor.get("discord_user_id") != web.user_id
+            or item.get("web_request_digest") != {"S": web.request_digest}
+        ):
+            raise AdmissionConflict("idempotency key payload conflict")
+
     def verify_reset_mode(self, operation_id: str, mode: str) -> None:
         response = self._api.get_item(
             TableName=self._operations,
@@ -300,6 +337,14 @@ class OperationAdmissionRepository:
                             if request.reset_seed_mode is not None
                             else {}
                         ),
+                        **(
+                            {
+                                "web_request_digest": request.web.request_digest,
+                                "web_session_fingerprint": request.web.session_fingerprint,
+                            }
+                            if request.web
+                            else {}
+                        ),
                         "schema_version": 1,
                         "idempotency_key": request.idempotency_key,
                         "workflow_execution_name": None,
@@ -308,8 +353,14 @@ class OperationAdmissionRepository:
                         "target_game_id": request.target_game_id,
                         "requested_by": {
                             "source": request.requested_by.value,
-                            "discord_user_id": request.discord.user_id if request.discord else None,
-                            "display_name": request.discord.display_name
+                            "discord_user_id": request.web.user_id
+                            if request.web
+                            else request.discord.user_id
+                            if request.discord
+                            else None,
+                            "display_name": request.web.display_name
+                            if request.web
+                            else request.discord.display_name
                             if request.discord
                             else None,
                         },
@@ -375,7 +426,10 @@ class OperationAdmissionRepository:
                 "Update": {
                     "TableName": self._system_state,
                     "Key": {"system_id": {"S": self._system_id}},
-                    "UpdateExpression": "SET current_operation_id = :operation_id",
+                    "UpdateExpression": (
+                        "SET current_operation_id = :operation_id, "
+                        "last_operation_id = :operation_id"
+                    ),
                     "ConditionExpression": (
                         "attribute_exists(system_id) AND "
                         "(attribute_not_exists(current_operation_id) OR "
@@ -424,6 +478,7 @@ class OperationAdmissionService:
         discord: DiscordOperationContext | None = None,
         target_game_id: str | None = None,
         reset_seed_mode: str | None = None,
+        web: WebOperationContext | None = None,
     ) -> AdmissionResult:
         if (operation_type is OperationType.RESET and reset_seed_mode not in {"fixed", "new"}) or (
             operation_type is not OperationType.RESET and reset_seed_mode is not None
@@ -440,6 +495,8 @@ class OperationAdmissionService:
             target_game_id=game_id,
         )
         if existing is not None:
+            if web is not None:
+                self._repository.verify_web(existing.operation_id, web)
             if reset_seed_mode is not None:
                 self._repository.verify_reset_mode(existing.operation_id, reset_seed_mode)
             return existing
@@ -454,6 +511,7 @@ class OperationAdmissionService:
             timeout_at=requested_at + timedelta(seconds=timeout_seconds),
             discord=discord,
             reset_seed_mode=reset_seed_mode,
+            web=web,
         )
         return self._repository.admit(request)
 

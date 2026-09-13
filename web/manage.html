@@ -12,5 +12,22 @@
 <p id="notice" role="status" aria-live="polite">読み込み中です。</p>
 <button id="refresh" type="button">表示を更新</button>
 <div id="status" class="listing"></div>
+<section class="card" aria-labelledby="operations-title"><h2 id="operations-title">操作</h2>
+<p>受付後に実行結果を確認してください。表示された人数は安全判定の代わりにはなりません。</p>
+<p id="operations-notice" role="status" aria-live="polite">操作情報を読み込み中です。</p>
+<div id="operation-buttons"></div>
+<form id="operation-form" hidden>
+<h3 id="operation-title"></h3><p id="operation-help"></p>
+<label id="game-label">対象Game <select id="operation-game"></select></label>
+<label id="seed-label" hidden>seed <select id="operation-seed"><option value="fixed">宣言済み固定seed</option><option value="new">新しいseed</option></select></label>
+<p id="game-capability"></p><button id="review-operation" type="submit">内容を確認</button>
+<button id="cancel-operation" type="button">キャンセル</button>
+</form>
+<div id="operation-confirmation" hidden><h3>実行前の確認</h3><p id="confirmation-detail"></p>
+<button id="submit-operation" type="button">確認して受付を依頼</button><button id="back-operation" type="button">戻る</button></div>
+<button id="check-operation" type="button" hidden>同じ要求の結果を照合</button>
+<button id="retry-operation" type="button" hidden>同じ要求を再送</button>
+<button id="new-operation" type="button" hidden>結果を確認して次の操作へ</button>
+</section><section class="card"><h2>追跡中・直近の操作</h2><div id="operation-result" aria-live="polite"></div></section>
 <form action="/auth/logout" method="post"><button type="submit">ログアウト</button></form>
-</main><footer>Wishicraft · 読み取り専用</footer></body></html>
+</main><footer>Wishicraft · 管理</footer></body></html>

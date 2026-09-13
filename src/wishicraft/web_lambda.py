@@ -99,12 +99,32 @@ def status_reader() -> StatusReader:
     )
 
 
+def operations() -> Any:
+    from wishicraft.reset_policy import policies
+    from wishicraft.runtime_catalog import RuntimeCatalog
+    from wishicraft.web_operations import Operations
+
+    catalog = RuntimeCatalog.parse(os.environ["WEB_RUNTIME_GAMES"])
+    return Operations(
+        client("dynamodb"),
+        client("lambda"),
+        {**status_reader().tables, "idempotency": os.environ["WEB_IDEMPOTENCY_TABLE"]},
+        os.environ["WEB_SYSTEM_ID"],
+        policy(),
+        catalog.game_ids,
+        policies(os.environ["WEB_RESET_POLICIES"], catalog),
+        os.environ["WEB_ADMISSION_FUNCTION"],
+    )
+
+
 @lru_cache
 def web_app() -> WebApp:
     return WebApp(
         assets=Path(__file__).resolve().parents[1] / "site",
         sessions=sessions,
         status=lambda now: status_reader().read(now),
+        operations=operations,
+        origin=os.environ.get("WEB_CANONICAL_ORIGIN", ""),
     )
 
 

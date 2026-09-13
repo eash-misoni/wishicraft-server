@@ -36,9 +36,17 @@ class FakeOAuth(DiscordOAuth):
     def authorization_url(self, state: str) -> str:
         return "/auth/callback?code=local-only&state=" + state
 
-    def exchange(self, code: str) -> None:
+    def exchange(self, code: str) -> dict[str, Any]:
         if code != "local-only":
             raise ValueError("local code rejected")
+        return {
+            "user_id": "9",
+            "display_name": "Local operator",
+            "roles": getattr(
+                self, "roles", [self.policy.player_role_id, self.policy.admin_role_id]
+            ),
+            "guild_id": self.policy.guild_id,
+        }
 
 
 def fixture(now: datetime, scenario: str) -> dict[str, Any]:
@@ -108,7 +116,18 @@ def main() -> None:
     cli.add_argument("--port", type=int, default=8765)
     cli.add_argument(
         "--scenario",
-        choices=["stopped", "running", "players", "stale", "unknown", "transition"],
+        choices=[
+            "stopped",
+            "running",
+            "players",
+            "stale",
+            "unknown",
+            "transition",
+            "rejection",
+            "conflict",
+            "failure",
+            "player-role",
+        ],
         default="stopped",
     )
     args = cli.parse_args()
@@ -118,9 +137,19 @@ def main() -> None:
     policy = Policy("1", "2", "3", "4")
     sessions = Sessions(MemoryStore(), secrets.token_bytes(32), policy)
     origin = f"http://127.0.0.1:{args.port}"
-    auth = AuthApp(sessions, FakeOAuth(policy, "", origin + "/auth/callback"), origin)
+    oauth = FakeOAuth(policy, "", origin + "/auth/callback")
+    if args.scenario == "player-role":
+        oauth.roles = [policy.player_role_id]  # type: ignore[attr-defined]
+    auth = AuthApp(sessions, oauth, origin)
+    from web.local_operations import LocalOperations
+
+    operations = LocalOperations(policy, args.scenario)
     app = WebApp(
-        assets=site, sessions=lambda: sessions, status=lambda now: fixture(now, args.scenario)
+        assets=site,
+        sessions=lambda: sessions,
+        status=lambda now: fixture(now, args.scenario),
+        operations=lambda: operations,
+        origin=origin,
     )
 
     class Handler(BaseHTTPRequestHandler):
@@ -142,6 +171,9 @@ def main() -> None:
                 "headers": dict(self.headers),
                 "requestContext": {"http": {"method": self.command}},
             }
+            event["body"] = self.rfile.read(
+                min(int(self.headers.get("Content-Length", "0")), 2049)
+            ).decode()
             result = (auth if url.path.startswith("/auth/") else app).handle(
                 event, datetime.now(UTC)
             )
@@ -176,6 +208,7 @@ def main() -> None:
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     origin = f"http://127.0.0.1:{server.server_port}"
     auth.origin = origin
+    app.origin = origin
     (root / "local.json").write_text(
         json.dumps({"origin": origin, "scenario": args.scenario, "fake_auth": True})
     )

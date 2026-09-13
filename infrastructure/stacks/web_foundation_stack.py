@@ -200,6 +200,23 @@ class WebFoundationStack(Stack):
                 stage.monitoring_int("observation_freshness_warning_minutes") * 60
             ),
         }
+        env.update(
+            {
+                "WEB_RUNTIME_GAMES": (root / "config" / f"two-game-{stage.stage}.json")
+                .read_text()
+                .strip(),
+                "WEB_RESET_POLICIES": json.dumps(
+                    json.loads((root / "config" / f"reset-{stage.stage}.json").read_text()),
+                    separators=(",", ":"),
+                ),
+                "WEB_ADMISSION_FUNCTION": resource_name(
+                    project.resource_prefix, stage.stage, "admission"
+                ),
+                "WEB_IDEMPOTENCY_TABLE": resource_name(
+                    project.resource_prefix, stage.stage, "idempotency"
+                ),
+            }
+        )
         names = {
             "system": "system-state",
             "heartbeat": "runtime-heartbeats",
@@ -211,6 +228,31 @@ class WebFoundationStack(Stack):
                 project.resource_prefix, stage.stage, suffix
             )
         web = function("Web", "handler", env)
+        web.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"],
+                resources=[
+                    self.format_arn(
+                        service="lambda",
+                        resource="function",
+                        resource_name=env["WEB_ADMISSION_FUNCTION"],
+                    )
+                ],
+            )
+        )
+        web.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["dynamodb:GetItem"],
+                resources=[
+                    self.format_arn(
+                        service="dynamodb",
+                        resource="table",
+                        resource_name=env["WEB_IDEMPOTENCY_TABLE"],
+                    )
+                ],
+                conditions={"ForAllValues:StringLike": {"dynamodb:LeadingKeys": ["web:*"]}},
+            )
+        )
         auth = function(
             "Auth",
             "auth_handler",

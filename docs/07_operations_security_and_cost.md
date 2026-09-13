@@ -1,5 +1,7 @@
 # 07. Operations, Security, and Cost
 
+> Existing Operations via Web: D-104 repository implementation / production approval pending. [共有Admission・認可・CSRF・request/Operation契約](reviews/existing_operations_web.md)、[release/E2E/rollback](runbooks/existing_operations_web.md)。既存backend safety contractを維持する。
+
 > Web Foundation D-102（Accepted・production適用済み、実証範囲はrunbook）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。
 
 > Reset保護契約（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)のB managed旧world整理は、二回の隔離復旧条件を満たして公開済み。本番削除実績は0件。Snapshot削除は別で未承認。容量不足では先に既存データを削らず停止する。手順・費用は[runbook](runbooks/game_scoped_reset_migration.md)へ集約する。

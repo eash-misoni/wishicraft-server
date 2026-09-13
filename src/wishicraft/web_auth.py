@@ -122,14 +122,30 @@ class Sessions:
         ):
             raise AuthRejected("expired or invalid session")
 
-    def create(self, now: int) -> str:
+    def create(self, now: int, principal: dict[str, Any] | None = None) -> str:
         value = "session-" + secrets.token_urlsafe(32)
-        self.store.put(value, {"expires_at": now + SESSION_SECONDS, "policy": self.fingerprint})
+        self.store.put(
+            value,
+            {
+                "expires_at": now + SESSION_SECONDS,
+                "policy": self.fingerprint,
+                "principal": principal,
+            },
+        )
         return cookie(SESSION_COOKIE, self.sign(value), SESSION_SECONDS)
 
-    def authenticate(self, signed: str, now: int) -> None:
+    def authenticate(self, signed: str, now: int) -> dict[str, Any]:
         value = self.verify(signed, "session-")
-        self._valid(self.store.get(value), now)
+        record = self.store.get(value)
+        self._valid(record, now)
+        assert record is not None
+        return record
+
+    def csrf(self, signed: str) -> str:
+        value = self.verify(signed, "session-")
+        return hmac.new(
+            self.key, ("web-csrf-v1|" + self.fingerprint + "|" + value).encode(), hashlib.sha256
+        ).hexdigest()
 
     def logout(self, signed: str) -> None:
         try:
@@ -188,7 +204,7 @@ class DiscordOAuth:
         except Exception:
             raise AuthRejected("Discord authentication unavailable") from None
 
-    def exchange(self, code: str) -> None:
+    def exchange(self, code: str) -> dict[str, Any]:
         token_response = self.request(
             "/oauth2/token",
             form={
@@ -225,3 +241,21 @@ class DiscordOAuth:
                     "client_secret": self.secret,
                 },
             )
+
+        return {
+            "user_id": identity["id"],
+            "display_name": next(
+                (
+                    name[:100]
+                    for name in (
+                        member.get("nick"),
+                        identity.get("global_name"),
+                        identity.get("username"),
+                    )
+                    if isinstance(name, str) and name.strip()
+                ),
+                "Discord user",
+            ),
+            "roles": member["roles"],
+            "guild_id": self.policy.guild_id,
+        }

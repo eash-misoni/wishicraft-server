@@ -1,5 +1,7 @@
 # 08. Human Operation Flows
 
+> Existing Operations via Web: D-104 repository implementation / production approval pending. [共有Admission・認可・CSRF・request/Operation契約](reviews/existing_operations_web.md)、[release/E2E/rollback](runbooks/existing_operations_web.md)。既存backend safety contractを維持する。
+
 > Web Foundation D-102（Accepted・production適用済み、実証範囲はrunbook）: [Web契約・公式仕様比較](reviews/web_foundation.md)、[local / release / rollback](runbooks/web_foundation.md)を参照。
 
 静的参加案内（D-100）: ブラウザで版・Game・権限・注意を確認し、接続先/招待は管理者から個別に受け取る。状態確認と操作はDiscordの指定チャンネルを使用する。[利用案内](discord_user_guide.md)がページ別の説明原稿への入口、[Web準備レビュー](reviews/user_guide_web.md)が公開手順・承認境界を所有する。

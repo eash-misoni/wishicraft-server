@@ -809,6 +809,10 @@ class ControlPlaneStack(Stack):
                 "GAME_ID": project.initial_game_id,
                 "GLOBAL_LOCK_NAME": stage.global_lock_name,
                 "LOCK_LEASE_SECONDS": str(stage.lock_lease_seconds),
+                **{
+                    "ADMISSION_" + key.upper(): stage.discord_public_id(key)
+                    for key in ("application_id", "guild_id", "player_role_id", "admin_role_id")
+                },
                 "STATUS_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("STATUS")),
                 "START_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("START")),
                 "STOP_TIMEOUT_SECONDS": str(stage.operation_timeout_seconds("STOP")),

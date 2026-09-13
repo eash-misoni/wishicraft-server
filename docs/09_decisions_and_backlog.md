@@ -1,5 +1,14 @@
 # 09. Decisions and Backlog
 
+## D-104 Existing Operations via Web（repository implementation、production approval pending）
+
+2026-09-13、D-101第2実装単位として既存5操作をWeb adapterから既存Admissionへ接続する実装を委任。
+詳細は[release review](reviews/existing_operations_web.md)。共有認可はSTART/STOP/RESET=PlayerまたはAdmin、SWITCH/BACKUP=Admin。
+15分session内の確認済みrolesを毎write評価し、session-bound CSRF、actor-bound request deduplication、terminal read projectionを追加する。
+Discord deliveryやbackend safety/retentionは変更しない。通常設計・repository/CIは委任済みだが、production適用は最初のwrite直前の一括承認待ち。
+実RESET/new SnapshotはE2E計画に含めない。D-102/103 Completedを維持し、Minimal Game Creationへ進まない。
+
+
 ## D-103 Web URL Stabilization / Custom Domain（Accepted、production Completed）
 
 D-102 read-only production Completedを維持し、Existing Operations via Webの前にcanonical originを`https://web.wishicraft.net`へ固定した独立slice。同Web stackのRegional custom domain・同region ACM DNS validation・既存Route53 Aliasを使用。2026-09-13、基準HEAD `9548398`とlive diffへの明示GO後に段階deployを完了した。実OAuth/status・15分失効・logout、旧redirect削除後のnew login成功を確認。[実装・移行・production証跡](runbooks/web_custom_domain.md)を参照。D-101の成果順序を入れ替えず、write操作は未着手。
