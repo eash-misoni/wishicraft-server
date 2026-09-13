@@ -101,4 +101,11 @@ PutParameterはOverwrite=false、SDK自動retryなし。結果不明なら再実
 - DeletionPolicy/UpdateReplacePolicyはWebSessions=Delete、log=Retainをsynthで固定。既存durable tableの保持回帰もfull testで成功。
 - 初回full検証の3 failures/47 setup errorsはPyPI DNS制限による既存Discord bundling失敗。正規bundling-cache準備後、新rootでfull再検証成功。
 - validation root: `wishicraft-web-release-tests-v2-ma8ok70o`、synth root: `wishicraft-web-release-synth-j66r084h`（local temporary directory）。
-- AWS/secret/Portalはまだ操作していない。次はcommit/push/CIの成功確認、その後canonical caller/live diff。
+- 限定是正commit `cacb772`、CI run `34742615971`は全job成功。
+- canonical caller/account/regionとdeployed Discord Application/Guild/role設定の一致を確認。secret 2件は人間端末からSecureString Version 1で初回登録済み（値は読まずmetadata確認）。
+- `WishicraftWebStack-dev`初回deployはCREATE_COMPLETE。実template/IAM/Lambda environment/routes/throttle/TTLはreview済みassemblyと一致。WebSessionsはDelete/Delete。
+- public 13ページ、未認証manage login/API401、invalid callback、canonical cookie tamper、no-store/CSP、公開allowlistをproduction HTTPで確認。
+- deploy evidence: `wishicraft-web-deploy-46ouvzd5`、read-back: `wishicraft-web-readback-mupniy14`、public: `wishicraft-web-public-e2e-89pv6vij`、cookie: `wishicraft-web-cookie-e2e-v2-qfj5x12u`（いずれもlocal temporary root）。最初のpublic検証のcookieはunknown nameだったため、正規cookie名の改ざんを別rootで追加検証。
+- 人間がexact redirectを登録した後、real OAuthでgeneric拒否を報告。release E2Eは未完了。
+- HTTP adapterがPython既定User-Agentを使用していた。秘密値なしの同じDiscord `/users/@me` GETで既定UA=403、公式形式UA=401を再現。全OAuth requestへ[公式形式User-Agent](https://docs.discord.com/developers/reference#user-agent)を明示する限定修正。権限・scope・state・revoke・timeout・NoRedirectを維持。実ログイン失敗の原因確定は修正deploy後の再試行で行う。
+- User-Agent修正: focused 45件、full 1,144件（52.15秒）、Ruff lint/format、mypy 181 source、Web synth成功。full初回は既存Discord bundleのPyPI DNS制限で5 failures/47 errors、正規cache準備後に新root `wishicraft-web-oauth-ua-validation-v2-1ulxnr8p`で成功。template比較の初回harnessはCDK asset metadata pathの正規化漏れで失敗し、別root `wishicraft-web-ua-template-compare-v2-srq3_45n`でLambda Code/asset metadata以外の差分なしを確認した。

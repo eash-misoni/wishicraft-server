@@ -161,7 +161,10 @@ class DiscordOAuth:
     def request(
         self, path: str, *, form: dict[str, str] | None = None, token: str | None = None
     ) -> dict[str, Any]:
-        headers = {"Accept": "application/json"}
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": "DiscordBot (https://github.com/eash-misoni/wishicraft-server, 0.1.0)",
+        }
         data = None
         if form is not None:
             headers["Content-Type"] = "application/x-www-form-urlencoded"

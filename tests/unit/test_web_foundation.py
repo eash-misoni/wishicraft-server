@@ -117,6 +117,10 @@ def test_oauth_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
     class Opener:
         def open(self, request: Any, **kwargs: Any) -> Reply:
             calls.append(request)
+            assert request.get_header("User-agent") == (
+                "DiscordBot (https://github.com/eash-misoni/wishicraft-server, 0.1.0)"
+            )
+            assert kwargs["timeout"] == 5
             if request.full_url.endswith("/token"):
                 form = parse_qs(request.data.decode())
                 assert form["redirect_uri"] == [oauth.redirect_uri]
