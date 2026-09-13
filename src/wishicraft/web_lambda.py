@@ -49,9 +49,15 @@ def client(service: str) -> Any:
     import boto3  # type: ignore[import-untyped]
     from botocore.config import Config  # type: ignore[import-untyped]
 
-    return boto3.client(
-        service, config=Config(connect_timeout=2, read_timeout=3, retries={"max_attempts": 1})
+    # Admission replies after its durable transaction and workflow launch (production >3s).
+    # Keep it within the browser's 15s budget, without an implicit second invoke. Unknown
+    # outcomes still use the same request's read-back; this never waits for the workflow.
+    config = (
+        Config(connect_timeout=2, read_timeout=10, retries={"max_attempts": 0})
+        if service == "lambda"
+        else Config(connect_timeout=2, read_timeout=3, retries={"max_attempts": 1})
     )
+    return boto3.client(service, config=config)
 
 
 def secret(parameter: str) -> str:

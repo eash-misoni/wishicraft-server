@@ -156,3 +156,28 @@ Signing-key rotation/session revocation is an incident action, not a routine rol
   case; only AWS transport is synthetic. A new authenticated manage/capabilities/status regression
   reproduced 503 before the fix, then the focused 81 tests passed after it. Fresh full verification
   and immutable assets are retained under `wishicraft-web-session-fix-v3-esjvzas2`.
+- Session decoder fix `5baae3a`: **1,200 tests**, lint/format/mypy, both synth/live diff and CI
+  **34751723035** all passed. CP→Discord read-back→Web deployment completed; only Code assets changed.
+  The existing real OAuth session then successfully read capabilities. CSRF missing/mismatch,
+  foreign Origin/form returned 403; forged actor/role fields returned 400; unsupported RESET A
+  returned 422 in the Web adapter. Logout returned 303 and replaying that deleted session cookie
+  with its old CSRF token returned 401. No RESET Operation or Snapshot was created.
+- After a local Chrome problem reported by the user, production browser evidence continued in
+  installed Microsoft Edge with a fresh real OAuth login. No cookie/profile was copied. Root
+  `wishicraft-web-edge-e2e-v4-8pa8tlxt` preserves UI screenshots and allowlisted responses.
+- Web START A succeeded (`op-697ab4c0-a4df-410c-b7e9-46c67345f436`, completed 10:39:46 UTC).
+  Initial HTTP result was unknown; the same request read back the sole existing Operation and
+  tracked it through terminal success. Actor display was the verified Web user, source WEB,
+  actor-bound key and normalized digest matched, Discord interaction/message fields stayed NULL.
+  RUNNING/READY, HEALTHY, fresh heartbeat, identity match and known zero players were observed.
+- Web SWITCH A→B succeeded at 10:44:42 UTC, then a fresh authoritative zero-player/healthy/no-lock
+  check permitted B→A. That second SWITCH returned **202 accepted** before its running progress.
+  All transition observations keep player counts unknown until terminal convergence.
+- Admission REPORT metadata showed successful calls taking 3.126–3.834 seconds, exceeding Web's
+  shared 3-second read timeout during the first two requests. Both unknown outcomes reconciled to
+  single Operations without client resubmission. A limited transport correction gives only the
+  Admission Lambda client a 10-second read timeout, 2-second connect timeout and no automatic SDK
+  retry. It remains below the browser's 15-second request budget and never waits for workflow
+  completion. Other AWS reads retain their prior timeouts. Same-request reconciliation is unchanged.
+  Focused 41 tests and full **1,201 tests** passed; lint/format/mypy passed after removing an unused
+  test-only type-ignore. Production application waits until the approved lifecycle E2E converges.

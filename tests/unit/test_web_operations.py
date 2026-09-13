@@ -189,6 +189,29 @@ def test_authenticated_dynamo_session_reaches_manage_capabilities_and_status(bou
     assert capabilities["csrf_token"] == sessions.csrf(jar.split("=", 1)[1])
 
 
+def test_admission_transport_has_bounded_single_attempt(monkeypatch: pytest.MonkeyPatch) -> None:
+    import boto3
+
+    configs: dict[str, Any] = {}
+
+    def client(service: str, **kwargs: Any) -> object:
+        configs[service] = kwargs["config"]
+        return object()
+
+    monkeypatch.setattr(boto3, "client", client)
+    web_lambda.client.cache_clear()
+    try:
+        web_lambda.client("lambda")
+        web_lambda.client("dynamodb")
+        assert configs["lambda"].connect_timeout == 2
+        assert configs["lambda"].read_timeout == 10
+        assert configs["lambda"].retries == {"max_attempts": 0}
+        assert configs["dynamodb"].read_timeout == 3
+        assert configs["dynamodb"].retries == {"max_attempts": 1}
+    finally:
+        web_lambda.client.cache_clear()
+
+
 @pytest.mark.parametrize("kind", OPERATIONS)
 @pytest.mark.parametrize("roles", [["3"], ["4"], ["5"]])
 def test_policy_enforced_at_http_and_admission(boundary: Any, kind: str, roles: list[str]) -> None:
