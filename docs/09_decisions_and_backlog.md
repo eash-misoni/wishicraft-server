@@ -1,8 +1,8 @@
 # 09. Decisions and Backlog
 
-## D-103 Web URL Stabilization / Custom Domain（Proposed、production write前）
+## D-103 Web URL Stabilization / Custom Domain（Accepted、production Completed）
 
-D-102 read-only production Completedを維持し、Existing Operations via Webの前にcanonical originを固定する独立slice。第一候補は`https://web.wishicraft.net`。同Web stackのRegional custom domain・同region ACM DNS validation・既存Route53 Aliasを使用する。[実装・移行・production review](runbooks/web_custom_domain.md)を参照。production writeは未承認・未実行。D-101の成果順序を入れ替えず、write操作には着手しない。
+D-102 read-only production Completedを維持し、Existing Operations via Webの前にcanonical originを`https://web.wishicraft.net`へ固定した独立slice。同Web stackのRegional custom domain・同region ACM DNS validation・既存Route53 Aliasを使用。2026-09-13、基準HEAD `9548398`とlive diffへの明示GO後に段階deployを完了した。実OAuth/status・15分失効・logout、旧redirect削除後のnew login成功を確認。[実装・移行・production証跡](runbooks/web_custom_domain.md)を参照。D-101の成果順序を入れ替えず、write操作は未着手。
 
 ## D-102 Web Foundation（Accepted、read-only production release Completed）
 

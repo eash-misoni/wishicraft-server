@@ -1,6 +1,6 @@
 # D-103 Web URL Stabilization — production review
 
-状態: **repository implementation / Proposed、最初のproduction write前**。
+状態: **Accepted・production Completed（2026-09-13）**。
 D-102 read-only release Completed、基準HEAD `b51935d`を継承。D-101順序2のWeb write操作には着手しない。
 
 ## canonical URLと実preflight
@@ -60,7 +60,7 @@ public/internal links、polling `/api/status`、logout formはroot-relativeな�
 
 `domain`段階で新hostから本格loginしない。state cookieは新host、まだ旧callbackという組合せはfail closedになるため、ここではpublic/manage/API未認証境界だけを確認する。
 
-## 承認後のrelease順序（現在は未実行）
+## release順序
 
 1. finalized HEAD/CI、canonical caller/account/region、Web record衝突なしを再確認。下記phaseごとに新temporary rootへsynthし、`cdk diff --change-set=false`でWebだけをreviewする。
 2. `web_domain_phase=certificate`をWeb stackだけdeploy。ACM request / validation CNAME / ISSUED / stack completionをread-back。
@@ -99,7 +99,7 @@ API Gatewayは既存HTTP APIのrequest/data transfer課金を維持。Regional c
 ## Validation / production gate
 
 focused testsは旧Web Foundationとcanonical handler/各migration synthを含む61件成功。最初の追加test1件はJavaScriptのquote形式を取り違えたfixture assertionで失敗し修正した。型検査の初回union narrowing/optional result errorsも修正済み。full validation/CI/live diffはこのsliceのhandoffで確定する。
-production ACM request、DNS変更、domain作成、OAuth変更はまだ0件。最初のproduction write前にこのrelease planを一度reviewする。
+以下のrepository検証はproduction承認前の記録。実適用結果は末尾に記録する。
 
 full初回は1157 passed / 3 failed。既存migrationがstage YAML全文をpredecessor前提として固定していたため、Web domain設定を専用configへ分離した。既存stage YAML/migration契約は変更せず、新rootで再検証する。
 
@@ -114,4 +114,35 @@ full初回は1157 passed / 3 failed。既存migrationがstage YAML全文をprede
 
 追加logical resources: `WebCertificate`、`WebDomain`、`WebMapping`、`WebAlias`。CNAMEはnative certificate DNS validationが管理するため、別の推測値RecordSetを作らない。
 local evidence: `wishicraft-web-domain-validation-v2-a9kct92n`、`wishicraft-web-domain-synth-v2-clzdn8j_`、`wishicraft-web-domain-live-review-nap33y0z`。
-CIはfinalized commitのpush後に確認し、handoffでrun/HEADを報告する。**production writeは未実行のまま停止する。**
+CIはfinalized commitのpush後に確認し、handoffでrun/HEADを報告する。承認前handoffではproduction writeを行わず停止した。その後、同HEAD・live diffに対する明示GOを受領した。
+
+
+## Production release evidence（2026-09-13、Completed）
+
+承認・deploy基準HEAD: `954839813e7b33f72e3af3788e3ff5d1297b67e0`、CI `34746215304` success。
+固定assemblyを順に適用し、各live templateの完全一致を確認した。Web stackだけをdeployし、CP/Target/Frozen・Minecraft DNS・secret・Budgetを変更していない。
+
+- certificate: 17:02:19 JST UPDATE_COMPLETE。ACM `ISSUED`、SANはexact domainだけ、export DISABLED。
+- domain: 17:03:58 JST UPDATE_COMPLETE。REGIONAL / AVAILABLE / TLS_1_2、root mappingとA Alias一致。HTTPS接続のTLSv1.2・hostname検証成功。
+- canonical: 新redirect追加・旧redirect維持・secret不変を人間が確認後、17:10:43 JST UPDATE_COMPLETE。両Lambda canonical originとAuth redirect、新WebOrigin output一致。
+- certificate ARN: `arn:aws:acm:ap-northeast-1:385526546525:certificate/1852ab6e-32e7-424e-a366-25113b8e8647`。
+- validation CNAME: `_d896e56e5f62302d70151cbd8a02081b.web.wishicraft.net.` → `_fc5827cad5525ffbc95e02d2200e3e2d.wzccmgtwzk.acm-validations.aws.`。renewalのため保持。
+- public 13ページ・16 assetsはdeploy assetとbytes一致。新manageは未認証login表示、新APIは401。
+- 旧host public/Game/command/manage/loginは308、queryを落としてcanonical同pathへ転送。API/callback/logoutは421、cookie/Locationなし。X-Forwarded-Hostで迂回できない。
+- OAuth開始のredirectは新exact URI、scopeはidentify + guilds.members.read。state cookieのSecure/HttpOnly/SameSite=Lax/Path=/・Domainなし・300秒を実測。invalid stateは403。
+- 人間による新domainの実Discord OAuth・status表示・15分失効を確認。既存identityはPlayer/Admin両role。再login・logout後manage login表示/API authentication_required、旧redirect削除・削除後new loginも人間が確認した。
+- 実Web/Auth inline + managed IAMは承認template一致。最初の検証器は既存AWSLambdaBasicExecutionRoleを「なし」と誤って想定し失敗したため、templateとの比較へ修正して新versionで成功。production IAM変更なし。
+- 08:15:54 UTCの保存state projectionはSTOPPED / stopped / not-running、heartbeat staleかつexpected=false、players not_expected/count=null、current operationなし。連続GetItemの3 record完全一致。これは保存state readの比較であり、ブラウザsessionを使った全期間snapshotの証明ではない。CP mutation不能のIAM・handler testsと併せて評価する。
+- 同時点の直近25分logs 261件は全てLambda platform events。raw message・cookie・tokenは証跡へ保存しない。
+- WebSessions Delete、certificate Retainのread-back一致。
+
+local evidence roots: `wishicraft-web-certificate-deploy-3tgs_o41`、`wishicraft-web-domain-deploy-cdr945c2`、`wishicraft-web-custom-basic-e2e-bwazo4tz`、`wishicraft-web-canonical-deploy-x6gh5zms`、`wishicraft-web-canonical-basic-e2e-r365_0d6`、`wishicraft-web-canonical-readonly-evidence-v2-ds3_j25p`。
+
+closeout full validation初回は1104 passed / 9 failed / 47 errors。sandboxのPyPI DNS制限によるCDK dependency bundling失敗を確認。実装成功として扱わず、依存取得可能な環境の新rootで全件再実行し、1,160 passed（58.70秒）、Ruff lint/format 243 files、mypy 182 source全成功。証跡 `wishicraft-web-domain-release-validation-v2-sez384_0`。
+
+
+最終確認では旧callbackへ架空code/stateでアクセスし421拒否・転送/Set-Cookieなしを確認した。証跡 `wishicraft-web-domain-final-readback-5glhpbjh`。同時に新public 200/API 401、ACM ISSUED、domain AVAILABLE、TLSv1.2、既存zoneの4 recordとAlias一致、stack UPDATE_COMPLETEを再確認した。実code/tokenを再利用しない。Portal旧redirect削除自体は人間確認を根拠とし、新redirectだけでの実login成功と組み合わせる。
+
+実ブラウザでのsession cookie値は収集しない。host-only等のsession cookie生成contractは既存実装・境界testと失効/logoutの実E2E、state cookieは実HTTP属性で確認した。Player-only/Admin-only、role不足identity、署名改ざん・state replay・origin fingerprintの詳細はsynthetic testsを根拠とする。RUNNING/transitionは次回正規Operation時のread-only観測に残し、Minecraft起動やOperation作成は今回0件。
+
+費用・rollbackは上記のとおり。旧redirect削除済みなので、旧originへrollbackする場合は先に人間が旧exact callbackを再登録する。ACM CNAMEは維持する。次sliceのwriteはcanonical originでのCSRF/Origin検査と既存Admission接続を設計するが、本sliceでは実装していない。

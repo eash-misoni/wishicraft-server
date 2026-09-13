@@ -1,6 +1,6 @@
 # wishicraft-server
 
-D-103の独立sliceとしてWeb canonical originを`https://web.wishicraft.net`へ固定する実装を準備しています。[custom domain release review](docs/runbooks/web_custom_domain.md)を参照。production DNS/TLS/OAuth切替は未実行です。D-102の現行generated URLは移行前の稼働先であり、切替後はdefault endpointとしてだけ記録します。
+D-103 Web URL Stabilizationはproduction Completedです。canonical URLは[public guide](https://web.wishicraft.net/)と[管理画面](https://web.wishicraft.net/manage/)。DNS/TLS、新domainの実OAuth/status・15分失効・logout、旧redirect削除後の再loginを確認しました。[release証跡・rollback](docs/runbooks/web_custom_domain.md)を参照してください。生成execute-api URLは運用上のunderlying endpointです。
 
 Web Foundation（D-102 Accepted）を既存dev AWSへproduction適用しました。[設計・費用・承認対象](docs/reviews/web_foundation.md)、[ローカル表示とrelease計画](docs/runbooks/web_foundation.md)を参照してください。public guideはログイン不要で一般公開可（FQDN/招待URL除外）。実Discord OAuth・read-only status・15分失効・logoutを確認し、read-only releaseをCompletedとしました。実証範囲・残る観測項目はrunbookを参照してください。
 
@@ -10,7 +10,7 @@ tools/dev-env run -- uv run python -m web.local --scenario players
 
 localhost上でguide → 管理 → fake login → read-only statusを確認できます。実Discord認証・実運用状態ではありません。
 
-静的な参加・コマンド案内Webをrepository実装しました。説明の正本は利用案内から辿るページ別Markdown、local build/previewと公開計画は [D-100 Web準備レビュー](docs/reviews/user_guide_web.md) を参照してください。生成HTTPS URLで公開済みです。public guideの閲覧はログイン不要で一般公開可です。
+静的な参加・コマンド案内Webをrepository実装しました。説明の正本は利用案内から辿るページ別Markdown、local build/previewと公開計画は [D-100 Web準備レビュー](docs/reviews/user_guide_web.md) を参照してください。canonical Web URLで公開済みです。public guideの閲覧はログイン不要で一般公開可です。
 
 利用者向けの現行コマンド・権限・Resetの注意点は[Discord利用案内](docs/discord_user_guide.md)を参照してください。進捗表示改善D-099はAccepted・production適用済みです。実STATUS一回で実行者・到達記録・公開配送を確認しました。
 

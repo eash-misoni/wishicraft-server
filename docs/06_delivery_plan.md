@@ -8,7 +8,7 @@ public guideはFQDN/招待URL除外・ログイン不要。2026-09-13に限定�
 
 ## URL固定の独立release slice
 
-D-102 Completed後、順序2のwrite実装に入る前にD-103 Web URL Stabilizationを準備する。canonical origin候補は`https://web.wishicraft.net`。production write前review待ちで、[移行runbook](runbooks/web_custom_domain.md)を正本とする。
+D-103 Web URL StabilizationはAccepted・production Completed（2026-09-13）。canonical originは`https://web.wishicraft.net`。DNS/TLSと新OAuth/session E2E、旧redirect削除後reloginを確認した。[移行・証跡runbook](runbooks/web_custom_domain.md)を正本とする。D-101の順序は維持し、Existing Operations via Webは未着手。
 
 ## Current roadmap
 

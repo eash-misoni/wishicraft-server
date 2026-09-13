@@ -1,3 +1,5 @@
+> 現在のcanonical URLは https://web.wishicraft.net/ と https://web.wishicraft.net/manage/ 。D-103で移行済み。以下のgenerated URLと旧callback登録はD-102初回releaseの履歴で、旧callbackは削除済み。[現在のrelease証跡](web_custom_domain.md)を参照。
+
 # Web Foundation release / rollback runbook
 
 D-102 Accepted。2026-09-13ユーザーConditional GO（基準1636f18）。revoke境界・WebSessionsだけDESTROYへ是正後、full validation/CI成功とlive diff条件に基づき、下記read-only releaseを追加確認なしで進める。実適用完了とは区別する。
