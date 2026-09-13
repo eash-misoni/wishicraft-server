@@ -58,7 +58,7 @@ tools/dev-env run -- node web/browser-check.mjs "$GUIDE_ROOT/site" --chrome
 | 現行の意味 | D-097/098/099、BackupObservation。古い管理者限定Reset表や毎回Snapshot/Reset後停止案を復活させない |
 | 管理手順・実証 | 既存runbook/evidenceをrepositoryに保持し、Webへ出さない |
 
-原稿のfrontmatterとMarkdownを編集する。`{{examples}}`・`{{arguments}}`はschema、`{{supported-games}}`は公開Gameのcapabilityとpolicyから生成する。Game詳細は`game.md`の共通構成へ紹介原稿・参加要件・操作例を展開する。
+原稿のfrontmatterとMarkdownを編集する。`{{examples}}`・`{{arguments}}`はschema、`{{supported-games}}`は公開Gameのcapabilityとpolicyから生成する。Game詳細は`games/_page.md`の共通構成へ紹介原稿・参加要件・操作例を展開する。
 `--update-guide`による旧Markdown生成ブロック更新は廃止。buildとfocused testsを実行し、設定/schema変更では本文の意味もレビューする。未知token・commandページ不足を拒否する。未知runtime種別ではedition/client説明の見直しを要求し、勝手に対応を拡張しない。
 Game登録の宣言関数はローカル純粋処理だけを使用し、register/mainやAWS clientは呼ばない。宣言内のwhitelist等を一括serializeしない。
 新しい機械値と説明の意味の一致は生成だけで保証できないため、schema変更時も人間の内容レビューを残す。

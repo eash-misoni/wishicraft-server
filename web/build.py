@@ -245,7 +245,7 @@ def load_pages(root: Path) -> dict[str, GuidePage]:
     result = {}
     for route in routes(root):
         game = games.get(route)
-        path = CONTENT / "game.md" if game else source_path(route)
+        path = CONTENT / "games/_page.md" if game else source_path(route)
         raw = (root / path).read_text()
         _, header, body = raw.split("---", 2)
         meta = yaml.safe_load(header)
