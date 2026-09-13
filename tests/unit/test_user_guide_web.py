@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import re
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
@@ -14,15 +13,16 @@ import yaml
 from web.build import (
     BEGIN,
     END,
-    GUIDE,
     OUTPUTS,
     ROOT,
+    ROUTES,
     build,
+    examples,
+    load_pages,
     md_text,
     public_markdown,
     render,
     sources,
-    update_generated,
 )
 from wishicraft.discord_interactions import (
     DiscordIngressConfig,
@@ -49,18 +49,23 @@ def test_reproducible_closed_artifact_and_links(tmp_path: Path) -> None:
     first, second = tmp_path / "first", tmp_path / "second"
     build(ROOT, first)
     build(ROOT, second)
-    assert {p.name for p in first.iterdir()} == OUTPUTS
-    assert {p.name: p.read_bytes() for p in first.iterdir()} == {
-        p.name: p.read_bytes() for p in second.iterdir()
+    assert {str(p.relative_to(first)) for p in first.rglob("*") if p.is_file()} == OUTPUTS
+    assert {str(p.relative_to(first)): p.read_bytes() for p in first.rglob("*") if p.is_file()} == {
+        str(p.relative_to(second)): p.read_bytes() for p in second.rglob("*") if p.is_file()
     }
     with pytest.raises(FileExistsError):
         build(ROOT, first)
-    parser = Links()
-    parser.feed((first / "index.html").read_text())
-    assert len(parser.ids) == len(set(parser.ids))
-    for url in parser.urls:
-        assert url[1:] in parser.ids if url.startswith("#") else (first / url).is_file()
-    output = "\n".join(p.read_text() for p in first.iterdir())
+    for document in first.rglob("*.html"):
+        parser = Links()
+        parser.feed(document.read_text())
+        assert len(parser.ids) == len(set(parser.ids))
+        for url in parser.urls:
+            if url.startswith("#"):
+                assert url[1:] in parser.ids
+            else:
+                target = document.parent / url
+                assert (target / "index.html").is_file() if url.endswith("/") else target.is_file()
+    output = "\n".join(p.read_text() for p in first.rglob("*") if p.is_file())
     stage = yaml.safe_load((ROOT / "config/stages/dev.yaml").read_text())
     project = yaml.safe_load((ROOT / "config/project.yaml").read_text())
     excluded = [
@@ -78,9 +83,13 @@ def test_reproducible_closed_artifact_and_links(tmp_path: Path) -> None:
     assert "fetch(" not in output and "XMLHttpRequest" not in output
 
 
-def test_generated_markdown_is_current() -> None:
-    text = (ROOT / GUIDE).read_text()
-    assert update_generated(text, ROOT) == text
+def test_sources_are_explicit_and_complete() -> None:
+    pages = load_pages(ROOT)
+    assert tuple(pages) == ROUTES
+    assert len(OUTPUTS) == 17
+    assert all("{{" not in page.body for page in pages.values())
+    index = (ROOT / "docs/discord_user_guide.md").read_text()
+    assert "user-guide/commands/reset.md" in index
 
 
 def payload(example: str, roles: list[str], schema: list[dict[str, Any]]) -> bytes:
@@ -120,7 +129,12 @@ def test_all_documented_examples_and_roles_match_actual_parser(
     monkeypatch.setenv("RESET_POLICIES", (ROOT / "config/reset-dev.json").read_text())
     schema, _, _ = sources(ROOT)
     config = DiscordIngressConfig("1", "2", "3", "4", "5", "a" * 64)
-    rows = re.findall(r"^\| `(/mc [^`]+)` \| ([^|]+) \|", (ROOT / GUIDE).read_text(), re.M)
+    pages = load_pages(ROOT)
+    rows = [
+        (example, pages[f"commands/{name}"].roles)
+        for name, commands in examples(ROOT).items()
+        for example in commands
+    ]
     assert {example.split()[1] for example, _ in rows} == {c["name"] for c in schema[0]["options"]}
     for example, allowed in rows:
         for label, roles in (("Player", ["4"]), ("Admin", ["5"]), ("Nobody", [])):
@@ -179,7 +193,8 @@ def test_insertion_safety_and_local_links() -> None:
 
 
 def test_current_safety_contract_remains_in_public_text() -> None:
-    body = public_markdown((ROOT / GUIDE).read_text())
+    pages = load_pages(ROOT)
+    body = "\n".join(page.body + page.conditions + page.warning for page in pages.values())
     for requirement in (
         "STOPPED/HEALTHY",
         "共有Data EBS全体",
@@ -197,3 +212,37 @@ def test_current_safety_contract_remains_in_public_text() -> None:
         "新しい操作で補わず",
     ):
         assert requirement in body
+
+
+def test_metadata_setting_injection_and_unlisted_sources(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from dataclasses import replace
+    from shutil import copytree
+
+    import web.build as builder
+
+    copytree(ROOT / "docs/user-guide", tmp_path / "docs/user-guide")
+    copytree(ROOT / "web", tmp_path / "web")
+    schema, games, facts = sources(ROOT)
+    attack = '<img src=x onerror="alert(1)"> | [x](https://example.test)'
+    games[0]["name"] = attack
+    monkeypatch.setattr(builder, "sources", lambda root: (schema, games, facts))
+    # Files outside the source allowlist must never be copied or rendered.
+    (tmp_path / "docs/user-guide/private.md").write_text("private-synthetic-marker")
+    build(tmp_path, tmp_path / "site")
+    for document in (tmp_path / "site").rglob("*.html"):
+        text = document.read_text()
+        assert "<img" not in text and 'href="https:' not in text
+        assert "private-synthetic-marker" not in text
+    pages = builder.load_pages(tmp_path)
+    reset = pages["commands/reset"]
+    html = builder.page_html(reset, pages, tmp_path)
+    assert html.index('class="warning"') < html.index("/mc reset game:")
+    assert "遊ぶ前に、ここから" not in html
+    # Metadata HTML is escaped too, not treated as a template or Markdown.
+    html = builder.page_html(replace(reset, title=attack), pages, tmp_path)
+    assert "<img" not in html
+    games[0]["name"] = "arn:aws:synthetic"
+    with pytest.raises(ValueError, match="excluded data"):
+        builder.load_pages(tmp_path)

@@ -1,0 +1,508 @@
+{
+  "scope": "D-100 local multipage design review; publication unapproved",
+  "base_head": "1bab86b6fab77c0c017d56609aa02f21d016c9cb",
+  "validation": {
+    "pytest_passed": 1080,
+    "focused_passed": 13,
+    "ruff": "passed",
+    "format": "passed",
+    "mypy_files": 169,
+    "synth_passed": [
+      "phase1",
+      "target",
+      "control-plane",
+      "two-games",
+      "reset"
+    ]
+  },
+  "failed_attempts": [
+    {
+      "kind": "environment",
+      "checks": "initial pytest and 3 control-plane synth cases",
+      "reason": "sandbox PyPI DNS denial during locked bundling; fresh-root revalidation passed"
+    },
+    {
+      "kind": "implementation",
+      "checks": "initial mypy",
+      "reason": "test Path/string variable collision; corrected and passed"
+    }
+  ],
+  "browser": {
+    "checks": [
+      {
+        "route": "/",
+        "width": 390,
+        "height": 844,
+        "links": 6,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "join",
+        "width": 390,
+        "height": 844,
+        "links": 8,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games",
+        "width": 390,
+        "height": 844,
+        "links": 8,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games/a",
+        "width": 390,
+        "height": 844,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games/b",
+        "width": 390,
+        "height": 844,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands",
+        "width": 390,
+        "height": 844,
+        "links": 11,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/status",
+        "width": 390,
+        "height": 844,
+        "links": 9,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/start",
+        "width": 390,
+        "height": 844,
+        "links": 10,
+        "copies": 3,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/stop",
+        "width": 390,
+        "height": 844,
+        "links": 11,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/switch",
+        "width": 390,
+        "height": 844,
+        "links": 11,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/backup",
+        "width": 390,
+        "height": 844,
+        "links": 10,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/reset",
+        "width": 390,
+        "height": 844,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "help",
+        "width": 390,
+        "height": 844,
+        "links": 11,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "/",
+        "width": 320,
+        "height": 740,
+        "links": 6,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "join",
+        "width": 320,
+        "height": 740,
+        "links": 8,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games",
+        "width": 320,
+        "height": 740,
+        "links": 8,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games/a",
+        "width": 320,
+        "height": 740,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games/b",
+        "width": 320,
+        "height": 740,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands",
+        "width": 320,
+        "height": 740,
+        "links": 11,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/status",
+        "width": 320,
+        "height": 740,
+        "links": 9,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/start",
+        "width": 320,
+        "height": 740,
+        "links": 10,
+        "copies": 3,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/stop",
+        "width": 320,
+        "height": 740,
+        "links": 11,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/switch",
+        "width": 320,
+        "height": 740,
+        "links": 11,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/backup",
+        "width": 320,
+        "height": 740,
+        "links": 10,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/reset",
+        "width": 320,
+        "height": 740,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "help",
+        "width": 320,
+        "height": 740,
+        "links": 11,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "/",
+        "width": 1440,
+        "height": 1000,
+        "links": 6,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "join",
+        "width": 1440,
+        "height": 1000,
+        "links": 8,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games",
+        "width": 1440,
+        "height": 1000,
+        "links": 8,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games/a",
+        "width": 1440,
+        "height": 1000,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "games/b",
+        "width": 1440,
+        "height": 1000,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands",
+        "width": 1440,
+        "height": 1000,
+        "links": 11,
+        "copies": 0,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/status",
+        "width": 1440,
+        "height": 1000,
+        "links": 9,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/start",
+        "width": 1440,
+        "height": 1000,
+        "links": 10,
+        "copies": 3,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/stop",
+        "width": 1440,
+        "height": 1000,
+        "links": 11,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/switch",
+        "width": 1440,
+        "height": 1000,
+        "links": 11,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/backup",
+        "width": 1440,
+        "height": 1000,
+        "links": 10,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "commands/reset",
+        "width": 1440,
+        "height": 1000,
+        "links": 12,
+        "copies": 2,
+        "reload": true,
+        "overflow": false
+      },
+      {
+        "route": "help",
+        "width": 1440,
+        "height": 1000,
+        "links": 11,
+        "copies": 1,
+        "reload": true,
+        "overflow": false
+      }
+    ],
+    "errors": [],
+    "browser": "153.0.8010.36",
+    "status": "passed"
+  },
+  "manual_visual_review": [
+    "home",
+    "games",
+    "games/b",
+    "commands",
+    "commands/reset"
+  ],
+  "reproducible": true,
+  "outputs": {
+    "404.html": {
+      "bytes": 309,
+      "sha256": "13f52ca556b7d02447e7a2b7df2ebeced97f61d34c436b8d399e7065443b9e33"
+    },
+    "_headers": {
+      "bytes": 341,
+      "sha256": "1dc428b1c1994b480a0546a133266281ec6ab3844c7e307882a490af5cab55f4"
+    },
+    "commands/backup/index.html": {
+      "bytes": 4758,
+      "sha256": "6fb1c115df7c73b637673029f8dbaeee152973552ccac23488ce2a2d02dfbacb"
+    },
+    "commands/index.html": {
+      "bytes": 5101,
+      "sha256": "709355fb2cb85cc78c7bad77e792a8dbf146f729f1f55c86dd1fac99e86e0b1f"
+    },
+    "commands/reset/index.html": {
+      "bytes": 7917,
+      "sha256": "180cc3a7a306427ec2a3c07bba25311195216a0a73ce59176cb18572dbcecb14"
+    },
+    "commands/start/index.html": {
+      "bytes": 4660,
+      "sha256": "9acb39b47d358015eb522238b4ab00fbdeab4707065e67a080e6149777109997"
+    },
+    "commands/status/index.html": {
+      "bytes": 4156,
+      "sha256": "b44e56563b8d5488709e3cb41750694e0b5c5d30ac43973d15d874deb5d2b2ce"
+    },
+    "commands/stop/index.html": {
+      "bytes": 4003,
+      "sha256": "0f61c9fa5bec65d56d73b0e96e4bee4ed520131c5750d78c38ff760c8853d052"
+    },
+    "commands/switch/index.html": {
+      "bytes": 5212,
+      "sha256": "38f58e7ede6006722c291923927c07feeedd87ff6bd5500428a81eb175cd329f"
+    },
+    "games/a/index.html": {
+      "bytes": 3718,
+      "sha256": "3049c892806dab4bed4951b4826b287c5c1f2208b2917e1520abedf3910cc10a"
+    },
+    "games/b/index.html": {
+      "bytes": 4452,
+      "sha256": "d3417f805eec9d242483d08e1c6f94d2676b47ecee62aa9d565dd575571d47e7"
+    },
+    "games/index.html": {
+      "bytes": 2862,
+      "sha256": "d6259bf9540651a9d8d38776a28e862506177567782283d0f77ea23093992683"
+    },
+    "guide.css": {
+      "bytes": 6193,
+      "sha256": "0de3738d5d48c2031d4d1e4c1317d7baef1ff0f62eb1b406c127c14f0f68c871"
+    },
+    "guide.js": {
+      "bytes": 1038,
+      "sha256": "5658cf5b2712097ee1898d53df8413687fc14084fffcf6f6bc9bf1fd51d9abac"
+    },
+    "help/index.html": {
+      "bytes": 4553,
+      "sha256": "8d4d4fd1188df21f7c29e2a98e9482a80e1e30c8a5fcaf3d02578a29934f01c3"
+    },
+    "index.html": {
+      "bytes": 3005,
+      "sha256": "61c9a5513cd476e38bd8d0b575b99ccead87b520731a642a612dcedf2ac65da5"
+    },
+    "join/index.html": {
+      "bytes": 3689,
+      "sha256": "cc779d45ccc4f122b6f908e8c9e7c6312500c700b6ee547c71ba485a8f5a18f6"
+    }
+  },
+  "screenshots": {
+    "desktop-commands-reset-top.png": "16e0e9339f32ba1903c8c24b7f1d2a300ad550f1a1e68815862becf04ada54fc",
+    "desktop-commands-reset.png": "022a2f03e5081ecceb8b74484398068e02b8b0baf0019d8efdfcf5f7eaa739d1",
+    "desktop-commands-top.png": "8d96468aaf7f586c68e2797d5794c463e4a980e2613d24c4cc4efe2ef79eb379",
+    "desktop-commands.png": "802d6f2d9dce1b045f66301f0bf81638f2c52e053adc4139352bd20a8b716ccf",
+    "desktop-games-b-top.png": "7d8576b1c13b4523e10428cbcdad35eea4ef46fb8ba8cffd022769b6ec3fbfdc",
+    "desktop-games-b.png": "3c3cbd422b8ad5c36a0c001907fc85b508feda55c211df12b2c4a746cd49796b",
+    "desktop-games-top.png": "90dc8a2fed41236d92aef84abd6e80992c953a9ffffb93324a42f9269352f732",
+    "desktop-games.png": "b0bc4527899665b30e3ec4c614ab46b049528f49c2816134540f427ff975ec27",
+    "desktop-home-top.png": "c45e572fc14780ff482be7a5265f78b01e849dcbe29f686de4cbda98835511c1",
+    "desktop-home.png": "c45e572fc14780ff482be7a5265f78b01e849dcbe29f686de4cbda98835511c1",
+    "mobile-commands-reset-top.png": "21688289edf9cb3b96a027ca72947cb22f58736a593e205b56c7389b8f1a9904",
+    "mobile-commands-reset.png": "9357d2435769d7508d33285f5a014106b7cee8e0eaefe391ad66564f5efcda33",
+    "mobile-commands-top.png": "20126c1236f5b3474eca3becbc05667abfa7931f47286428d5c350d25cdc8323",
+    "mobile-commands.png": "7c943c7454cb71b5b97ea0e5be55e55ba2cdfa83dafdb0138229b4a09e17bab5",
+    "mobile-games-b-top.png": "08a9e1417101d9fd655d1a35d5b0c626ecd21778fb7a5dad992f451d48163b6f",
+    "mobile-games-b.png": "52fc34453dbc1cce5dd46cc927629aab8be423a4144ec67eb5de2708aabb2562",
+    "mobile-games-top.png": "0e816a37b974b31a54296bd6b0bba23476fc9564d7a4ffa28601920e0eb86888",
+    "mobile-games.png": "6bbbebf5f0bd7607ed7e250ae4a578bb7a70cfa6794cea67ac5844e7e0a3f738",
+    "mobile-home-top.png": "c1f8193ea232fe37fa2ec4b5195bba87d51bc06e4fec2973bbc21a62349abbba",
+    "mobile-home.png": "78f10d777302d6ae45e6998d6bd19069019a94319ac614af72d7430cfa8598dd",
+    "narrow-commands-reset-top.png": "82e9bd282009773579ab60340a4bb6340ab7f15be542d4cab330b8439a19a225",
+    "narrow-commands-reset.png": "9af755c5103faa12e0f2136738bfe134aa025dc853f6d3e940d569fe2eaee6bd",
+    "narrow-commands-top.png": "9bbabb8559c3830922e72d6c04f2b08e262cc2d608ec62c8a5e8373754bfe7a0",
+    "narrow-commands.png": "a028d9eea36c4e194bd953a013c428c1271cb7672b050220144f7e79f0ad5765",
+    "narrow-games-b-top.png": "b0d4e393b381e9104a5107832f246bd9db1e3fd0ecc11e7243a96760216df53b",
+    "narrow-games-b.png": "c1312a39eb3f500a591eeb753f17ec54527e50f91579e0ea3ee386438f669717",
+    "narrow-games-top.png": "a9a81668c0b3992d7ddd58975e8668732b203a8ea3efd42f09dd47d236303f33",
+    "narrow-games.png": "823aab69072624e59913ecc048161907efcd2bff3008d15e94e0309db59b2003",
+    "narrow-home-top.png": "f1081cc504fe63c66d7834ee8cceb81aef2989edb1ab502954d0379d8f134ba2",
+    "narrow-home.png": "9fa3c347b197ab0130f591daf8a23a408fce88bd4066bd17292a28eb4610abfd"
+  },
+  "not_verified": [
+    "Safari",
+    "Firefox",
+    "physical mobile devices",
+    "screen reader",
+    "hosted HTTPS/Access/DNS/TLS/cache/rollback",
+    "Minecraft participation"
+  ],
+  "production_writes": false,
+  "publication": false
+}

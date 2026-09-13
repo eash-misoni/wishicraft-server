@@ -457,7 +457,7 @@ reset前に最終バックアップを作成・検証し、旧世代を保持す
 
 ### WEB-004 静的利用案内 `MUST / D-100独立slice`
 
-既存のDiscord利用案内を説明の唯一の編集元として、参加条件、Game差分、現行schemaの引数・例・認可、安全条件、失敗/結果不明時の行動を静的HTMLで提供する。Minecraft EC2停止中も読める配信計画とする。機械項目はGame/runtime/schemaから投影し、公開候補fieldと本文範囲を明示する。
+既存のDiscord利用案内を入口に、Game/command別Markdownを各説明の唯一の編集元として、参加条件、Game差分、現行schemaの引数・例・認可、安全条件、失敗/結果不明時の行動を静的HTMLで提供する。Minecraft EC2停止中も読める配信計画とする。機械項目はGame/runtime/schemaから投影し、公開候補fieldと本文範囲を明示する。
 
 公開buildへ内部設定・個人/実行証跡・秘密値・未承認の接続先/招待URLを混ぜない。ローカル実装/CIとhosting作成・インターネット公開を分離し、後者は別承認。実表示・コピー・keyboard・安全な文字列挿入・再現性を検証する。[D-100計画](reviews/user_guide_web.md)を参照。WEB-001〜003の状態確認/管理機能は後続判断として維持する。
 

@@ -1,6 +1,6 @@
 # wishicraft-server
 
-静的な参加・コマンド案内Webをrepository実装しました。説明の正本は上の利用案内、local build/previewと公開計画は [D-100 Web準備レビュー](docs/reviews/user_guide_web.md) を参照してください。Web公開・hosting・URL・閲覧範囲は未承認です。
+静的な参加・コマンド案内Webをrepository実装しました。説明の正本は利用案内から辿るページ別Markdown、local build/previewと公開計画は [D-100 Web準備レビュー](docs/reviews/user_guide_web.md) を参照してください。Web公開・hosting・URL・閲覧範囲は未承認です。
 
 利用者向けの現行コマンド・権限・Resetの注意点は[Discord利用案内](docs/discord_user_guide.md)を参照してください。進捗表示改善D-099はAccepted・production適用済みです。実STATUS一回で実行者・到達記録・公開配送を確認しました。
 

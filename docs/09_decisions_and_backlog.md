@@ -2,7 +2,7 @@
 
 ## D-100 静的利用案内Web（repository準備委任済み／公開未承認）
 
-2026-09-13のユーザー指示により、既存Markdownを一つの説明元にした小さな静的build、設定/schema投影、ローカル表示/CI検証を準備する。[設計・公開計画](reviews/user_guide_web.md)へ集約。Cloudflare Pages Direct Uploadは推奨候補であり、service採用・認証・閲覧者・URL・費用・初回公開は未承認。D-099 Completedと将来の状態確認/管理Webを維持する。
+2026-09-13のユーザー指示により、各説明の編集元を一つにしたページ別Markdownによる小さな静的build、設定/schema投影、ローカル表示/CI検証を準備する。[設計・公開計画](reviews/user_guide_web.md)へ集約。Cloudflare Pages Direct Uploadは推奨候補であり、service採用・認証・閲覧者・URL・費用・初回公開は未承認。D-099 Completedと将来の状態確認/管理Webを維持する。
 
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-12

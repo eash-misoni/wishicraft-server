@@ -2,7 +2,8 @@
 
 for (const code of document.querySelectorAll("article code")) {
   if (!code.textContent.startsWith("/mc ")) continue;
-  const command = code.textContent;
+  const command = code.textContent.replace(/\r?\n$/, "");
+  code.textContent = command;
   const group = document.createElement("span");
   group.className = "command";
   code.replaceWith(group);

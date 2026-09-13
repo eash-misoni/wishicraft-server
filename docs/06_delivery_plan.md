@@ -2,7 +2,7 @@
 
 ## 独立slice D-100 — 静的参加・コマンド案内Web
 
-D-099 release/証跡整理Completedを維持。次の委任単位は[静的Web準備](reviews/user_guide_web.md)。Markdown再利用、schema/runtime投影、local build/preview、実ブラウザとCI検証、公開計画を一つの完了単位とする。hosting・閲覧者・認証・URLの確定と実公開は別承認。Phase 9全体やPhase 13管理Webの完了を意味しない。
+D-099 release/証跡整理Completedを維持。次の委任単位は[静的Web準備](reviews/user_guide_web.md)。Markdown再利用、schema/runtime投影、local build/preview、実ブラウザとCI検証、公開計画を一つの完了単位とする。準備完了HEAD `1bab86b`から13ページ化・実用的な外観へ修正し、再度ローカルデザインレビューへ戻す。hosting・閲覧者・認証・URLの確定と実公開は別承認。Phase 9全体やPhase 13管理Webの完了を意味しない。
 
 > Reset release（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)のB限定Resetは限定release Completed。二回の隔離復旧条件を満たし、一般受付を元設定へ復元した。[closeout](runbooks/game_scoped_reset_migration.md#production-closeout)を参照。旧Phase番号・Package/Preset/Template・Restore UIは必須依存ではなく、Phase 9全体の完了ではない。
 
