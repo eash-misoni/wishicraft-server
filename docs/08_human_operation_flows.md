@@ -1,6 +1,6 @@
 # 08. Human Operation Flows
 
-> Web Foundation D-102（Accepted・production適用前）: [Web契約・公式仕様比較](reviews/web_foundation.md)、[local / release / rollback](runbooks/web_foundation.md)を参照。
+> Web Foundation D-102（Accepted・production適用済み、実証範囲はrunbook）: [Web契約・公式仕様比較](reviews/web_foundation.md)、[local / release / rollback](runbooks/web_foundation.md)を参照。
 
 静的参加案内（D-100）: ブラウザで版・Game・権限・注意を確認し、接続先/招待は管理者から個別に受け取る。状態確認と操作はDiscordの指定チャンネルを使用する。[利用案内](discord_user_guide.md)がページ別の説明原稿への入口、[Web準備レビュー](reviews/user_guide_web.md)が公開手順・承認境界を所有する。
 

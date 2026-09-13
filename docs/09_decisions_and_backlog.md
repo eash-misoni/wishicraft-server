@@ -1,8 +1,8 @@
 # 09. Decisions and Backlog
 
-## D-102 Web Foundation（Accepted、conditional release GO）
+## D-102 Web Foundation（Accepted、read-only production release Completed）
 
-public guide + authenticated read-only statusのrepository実装と一括release案。
+public guide + authenticated read-only statusを2026-09-13にproduction適用。両roleを持つ実ユーザーのOAuth/status、15分失効、再login/logoutを確認。synthetic-onlyと次回通常Operation時の観測項目をrunbookへ分離して記録し、今回のread-only releaseをCompletedとする。
 [architecture / OAuth / schema / 費用レビュー](reviews/web_foundation.md)、
 [local / release / rollback](runbooks/web_foundation.md)を参照。
 推奨は専用AWS HTTP API + Web/Auth Lambda + 短期session table。既存CPはGetItemのみ。
@@ -19,12 +19,12 @@ D-101順序とwrite操作の次slice境界を維持する。
 - **優先しない範囲:** Package/Preset/Template独立管理、汎用wizard、upload、全server種別一般化を前提にしない。CREATE-001とWEB-001〜003、OP/Whitelist、chat等の要求は削除しない。Game登録とpublic guide掲載は分離し、説明/client要件を揃えた明示的な公開登録を維持する。
 - **Independent tracks:** RETENTION実削除はshared-volume v2の保持群・復旧条件が自然に成立した時の独立destructive gateで、Snapshot総数では開始しない。Restore UIは需要時の管理Web拡張、chatは需要とruntime/plugin確定時、高度なPackage/Preset/Template管理・自動upgrade・archive・汎用hooks等は具体的要求時に開始する。
 - **委任:** 成果slice内の通常実装・test修正はCodexへ委任し、module/parser/serializer/tests/docsごとの承認往復は作らない。production write、IAM/公開範囲/認証境界、破壊的データ操作、安全・保存契約、利用者policy/許容損失の変更は人間承認境界とする。
-- **承認の限界:** D-100の内容・ローカル構成承認を維持し、Web Foundationのpublic部分へつなぐ。public guideの公開はWeb全体の配信構成と合わせるのを第一候補とするが、hosting・閲覧者・認証・URL・費用・実公開は未承認。個別機能の詳細contractやProposed再設計をAcceptedへ先回りさせない。既存role/policy、Admission/Operation/workflow、安全・保存contractは維持する。
+- **承認の限界:** D-100の内容・ローカル構成承認を維持し、Web Foundationのpublic部分へつなぐ。public guideの公開はWeb全体の配信構成と合わせるのを第一候補とするが、このD-101整理時点ではhosting・閲覧者・認証・URL・費用・実公開は未承認だった。後続D-102のConditional GOでread-only releaseを承認・適用した。個別機能の詳細contractやProposed再設計をAcceptedへ先回りさせない。既存role/policy、Admission/Operation/workflow、安全・保存contractは維持する。
 - **履歴:** 旧Phase 9〜16の順序・Backlog優先順位はSuperseded by D-101。旧案と完了記録は削除せず、採用済み詳細契約の変更とは区別する。
 
-## D-100 静的利用案内Web（内容・ローカル構成承認済み／公開未承認）
+## D-100 静的利用案内Web（内容・ローカル構成承認済み／D-102で公開済み）
 
-2026-09-13のユーザー指示により、各説明の編集元を一つにしたページ別Markdownによる小さな静的build、設定/schema投影、ローカル表示/CI検証を準備し、内容・ローカル構成を承認済み公開候補として固定した。[設計・公開計画](reviews/user_guide_web.md)へ集約。Cloudflare Pages Direct Uploadは当時のhistorical candidate。D-102ではAWS小規模Web案を推奨する。public guideはログイン不要で一般公開可（FQDN/招待URL除外）。service採用・URL・費用・初回公開は未承認。D-099 Completedと将来の状態確認/管理Webを維持する。
+2026-09-13のユーザー指示により、各説明の編集元を一つにしたページ別Markdownによる小さな静的build、設定/schema投影、ローカル表示/CI検証を準備し、内容・ローカル構成を承認済み公開候補として固定した。[設計・公開計画](reviews/user_guide_web.md)へ集約。Cloudflare Pages Direct Uploadは当時のhistorical candidate。D-102ではAWS小規模Web案を推奨する。public guideはログイン不要で一般公開可（FQDN/招待URL除外）。service採用・URL・費用・初回公開はD-100時点では未承認だった。D-102でAWS generated URLによる公開を承認・適用済み。D-099 Completedと将来の状態確認/管理Webを維持する。
 
 - **文書状態:** Canonical
 - **最終更新:** 2026-09-13

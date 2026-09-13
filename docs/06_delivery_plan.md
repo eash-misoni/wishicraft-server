@@ -2,7 +2,7 @@
 
 ## Web Foundation repository slice
 
-D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)を実装。実公開・OAuth設定・production適用は未実行。
+D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)をproduction適用。public公開・実OAuth・read-only status・15分失効・logoutの確認を完了。read-only slice Completed、次はExisting Operations via Web（未着手）。
 public guideはFQDN/招待URL除外・ログイン不要。2026-09-13に限定是正後のread-only production releaseをConditional GO。条件・手順はD-102 runbookを正本とする。
 [release gate / 検証結果](runbooks/web_foundation.md)を参照。read-onlyとwriteのrelease境界は維持する。
 
@@ -10,7 +10,7 @@ public guideはFQDN/招待URL除外・ログイン不要。2026-09-13に限定�
 
 D-101 Accepted（2026-09-13、今後の順序とscope優先順位）。
 
-現在の利用価値と依存関係に基づく順序を以下に固定する。旧Phase 9〜16の連番消化は行わない。Phase 0〜8とD-095〜099の限定Completed、D-100の内容・ローカル構成承認を維持する。D-100はWeb Foundationのpublic部分へつながる独立完成物（公開候補）であり、実公開や管理Webの完成ではない。
+現在の利用価値と依存関係に基づく順序を以下に固定する。旧Phase 9〜16の連番消化は行わない。Phase 0〜8とD-095〜099の限定Completed、D-100の内容・ローカル構成承認を維持する。D-100単独では公開候補だったが、D-102の承認後にWeb Foundationのpublic領域で公開した。Web Foundationはproduction適用・実OAuth/status成功を確認済み。実証範囲はWeb runbookを正本とする。
 
 | 順序 | 成果のまとまり | 範囲・依存関係 |
 |---|---|---|

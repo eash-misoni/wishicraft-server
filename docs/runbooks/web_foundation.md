@@ -109,3 +109,39 @@ PutParameterはOverwrite=false、SDK自動retryなし。結果不明なら再実
 - 人間がexact redirectを登録した後、real OAuthでgeneric拒否を報告。release E2Eは未完了。
 - HTTP adapterがPython既定User-Agentを使用していた。秘密値なしの同じDiscord `/users/@me` GETで既定UA=403、公式形式UA=401を再現。全OAuth requestへ[公式形式User-Agent](https://docs.discord.com/developers/reference#user-agent)を明示する限定修正。権限・scope・state・revoke・timeout・NoRedirectを維持。実ログイン失敗の原因確定は修正deploy後の再試行で行う。
 - User-Agent修正: focused 45件、full 1,144件（52.15秒）、Ruff lint/format、mypy 181 source、Web synth成功。full初回は既存Discord bundleのPyPI DNS制限で5 failures/47 errors、正規cache準備後に新root `wishicraft-web-oauth-ua-validation-v2-1ulxnr8p`で成功。template比較の初回harnessはCDK asset metadata pathの正規化漏れで失敗し、別root `wishicraft-web-ua-template-compare-v2-srq3_45n`でLambda Code/asset metadata以外の差分なしを確認した。
+
+## Production closeout — 2026-09-13（read-only release Completed）
+
+Code deploy HEAD: `21c609ab370f52b09703e865e6a6152eef2451b6`。
+[CI 34744062163](https://github.com/eash-misoni/wishicraft-server/actions/runs/34744062163)はquality / user-guide-web / host-runtime-integrationすべてsuccess。
+Web stack更新はUPDATE_COMPLETE。更新diffはWeb/Authの共通Code assetだけ。templateのread-backは固定assemblyと完全一致し、IAM/route/secret reference/table/URLに変更なし。
+
+- 公開: <https://m5r69d2qm5.execute-api.ap-northeast-1.amazonaws.com/>
+- 管理: `/manage/`、read API: `/api/status`。
+- 登録済みexact callback: `https://m5r69d2qm5.execute-api.ap-northeast-1.amazonaws.com/auth/callback`。
+- custom domain/DNS/ACM、bot token、Guild role、既存CP/Target/Frozen、Budgetは変更していない。
+- secret 2件は初回SecureString Version 1をmetadataで確認。値をCodexが取得・表示・保存することなく人間terminalで登録した。
+
+### 実証と限界
+
+| 項目 | 証拠・結果 |
+|---|---|
+| real OAuth / status | User-Agent修正後、Player/Admin両roleを持つ実ユーザーがログインとread-only status表示成功を報告。Player-only/Admin-onlyを別々に実証したとは扱わない。 |
+| public / private境界 | public 13ページ＋CSS/JS計16 assetsはdeployed bundleとbyte一致。未認証manageはlogin表示、API401、正規cookie名のtamperも401。 |
+| state / grant | 実HTTP loginで署名state cookieのSecure/HttpOnly/SameSite=Lax/Path=/・300秒を確認。正規state＋意図的invalid codeは403、state recordは原子的に消費済み・session未発行、同callback replayとinvalid stateも403。code/cookie値は証跡へ保存しない。 |
+| STOPPED semantics | 保存済みCPの正規StatusReader投影はSTOPPED/stopped、fresh observation、HEALTHY、quality complete、heartbeat stale/expected false、protocolとplayersはnot_expected、人数null、current Operationなし。古いheartbeatを現在人数にしない。これは保存済みrecordからの直接投影証拠で、実ブラウザのAPI本文採取ではない。 |
+| CP read-only | 上記HTTP検証を挟んだSystemState/RuntimeHeartbeat/選択Gameの3 exact recordはbyte相当一致。status readerと実Web IAMはGetItemのみ。認証済みbrowser requestとの厳密な前後snapshotを取得したとは扱わず、user表示確認・実IAM・境界testsを合わせて保証する。Scan/repair/STATUS/Reconcile/SSM実行なし。 |
+| logout / expiry | wrong-Origin logout403、未認証same-origin logout303とcookie失効属性を実HTTPで確認。実ユーザーsessionは15分経過後に再ログイン要求となることを人間確認済み。再ログイン成功後のlogoutで管理画面がlogin表示、同一browserのAPIがauthentication_requiredになることも人間確認済み。server expiry/tamper/logoutはrepository境界tests成功。TTLはcleanupだけ。 |
+| 非露出 | 投影に内部AWS/Discord IDs・raw errorなし。Auth 50/Web 168 log eventsの検査時点ではplatform eventだけで、token/cookie/callback query/raw exception記録0。log本文やsecret値を証跡へ保存していない。 |
+| 監視 | Web/Auth両alarm OK。検査時点の収集済みdatapointsでは両Lambda Errors/Throttles 0。CloudWatch反映遅延を含む時点観測であり、将来の無障害保証ではない。 |
+| negative identity / failure | nonmember/他user/role不足、Player-only/Admin-only、scope/type不正、revoke failure、expiry、partial read failure、duplicate pollingはsynthetic test。安全な別identityを指定されておらず、production Guild role変更はしていない。 |
+| RUNNING / transition | syntheticで検証。Minecraftは起動せず、実環境のRUNNING/transition表示は次回の通常Operation時にread-only観測する。 |
+| 未実装write route | GET以外の405はrepository境界testと実配置コード一致で確認。`/api/start`等へのproduction POST拒否検証案は自動承認レビューがslice対象外として却下し、request未実行。迂回・追加承認依頼はせず、synthetic証拠に限定。 |
+
+local temporary evidence roots: `wishicraft-web-ua-live-diff-xrbystle`、`wishicraft-web-ua-deploy-1haey5cf`、`wishicraft-web-ua-readback-q6puycw1`、`wishicraft-web-final-e2e-2f9oo0a2`、`wishicraft-web-security-evidence-v_iumm8n`、`wishicraft-web-public-exact-igmu13yk`。秘密値・cookie・OAuth codeを含まない結果だけを記録。
+監視root: `wishicraft-web-monitoring-closeout-husos8pi`。人間の実login成功は、revoke成功後にだけsessionを発行する実装境界と合わせて確認する。Discord tokenそのものを再取得して確認しない。
+
+増分月$3は低利用量での計画目安でhard capではない。実請求の確定値ではなく、[費用モデル](../reviews/web_foundation.md)を維持する。generated URLを初回release URLとし、固定domainは安定後の別判断。
+次はD-101順序2のExisting Operations via Web。今回は未着手。既存Admissionへ接続し、write CSRF・operation別認可・confirmation/idempotency・actor attributionを次sliceで設計する。
+
+最終人間確認: Player/Admin両roleのOAuth/status成功、15分後の再login要求、再login成功、logout後manage login/API authentication_requiredを確認。今回のread-only releaseはこの実証範囲でCompleted。残るsynthetic-only項目・次回通常Operation時の観測は上表どおり。

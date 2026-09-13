@@ -1,6 +1,6 @@
 # 03. Architecture
 
-> Web Foundation D-102（Accepted・production適用前）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。
+> Web Foundation D-102（Accepted・production適用済み、実証範囲はrunbook）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。
 
 > Reset契約（2026-09-12）: [D-098 Accepted](reviews/game_scoped_reset.md)は既存START/STOPを一つのReset実行へ構成する。新table・常設cleanup serviceは追加しない。production適用と一般公開は実行証跡で確定する。
 

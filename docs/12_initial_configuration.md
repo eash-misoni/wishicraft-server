@@ -1,6 +1,6 @@
 # 12. Initial Configuration
 
-> Web Foundation D-102（Accepted・production適用前）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。
+> Web Foundation D-102（Accepted・production適用済み、実証範囲はrunbook）: [Web契約・architecture・security・費用](reviews/web_foundation.md)と[release runbook](runbooks/web_foundation.md)を参照。既存Control Plane/runtime契約は維持し、Webは保存済み状態のread projectionだけを追加する。
 
 > Reset設定（2026-09-12）: `config/reset-dev.json`に承認済みB限定policy（fixed_seed=0、retain_previous=3、minimum_free_bytes=4294967296）を固定。[D-098 Accepted](reviews/game_scoped_reset.md)。Aは非対応。Gitの宣言とproduction適用・一般公開は別々に確認する。
 

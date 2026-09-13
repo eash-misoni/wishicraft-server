@@ -1,6 +1,6 @@
 # D-102 Web Foundation — production approval package
 
-状態: **Accepted / Conditional GO、production適用前**。2026-09-13。
+状態: **Accepted / read-only production release Completed**。2026-09-13。失効/logoutを含む実証範囲は[runbook](../runbooks/web_foundation.md)を参照。
 承認基準1636f18。token取得後のgrant validationをrevokeのfinally内へ移し、WebSessionsだけDESTROYへ限定是正する。full validation/CI成功・live diffが承認範囲内なら追加gateなくreleaseする。
 基準HEADはD-101 `89fb8ec`。Web Foundationだけを扱い、current sequenceを維持する。
 

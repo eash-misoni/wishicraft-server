@@ -1,6 +1,6 @@
 # D-100 静的利用案内Webと公開準備
 
-> D-102 release追記: 2026-09-13 Conditional GOにより既存dev AWS・generated HTTPS URLでの初回read-only公開を承認。custom domainは対象外。限定是正/CI/live diff条件と適用状況は[Web runbook](../runbooks/web_foundation.md)を参照。
+> D-102 release追記: 2026-09-13 Conditional GOにより既存dev AWS・generated HTTPS URLでの初回read-only公開を承認・適用済み。custom domainは対象外。限定是正/CI/live diff条件と適用状況は[Web runbook](../runbooks/web_foundation.md)を参照。
 
 
 > 2026-09-13 Web Foundation追記: public guideはログイン不要で一般公開可、FQDN/招待URL除外をユーザー承認済み。以下のPages案・閲覧範囲未決はhistorical candidate/当時の記録。現推奨は[D-102 AWS小規模Web](web_foundation.md)。本文・13ページ・ローカル構成承認を維持し、hosting/URL/費用/実公開は未承認。
