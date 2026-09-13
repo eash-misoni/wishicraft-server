@@ -1,5 +1,7 @@
 # wishicraft-server
 
+D-103の独立sliceとしてWeb canonical originを`https://web.wishicraft.net`へ固定する実装を準備しています。[custom domain release review](docs/runbooks/web_custom_domain.md)を参照。production DNS/TLS/OAuth切替は未実行です。D-102の現行generated URLは移行前の稼働先であり、切替後はdefault endpointとしてだけ記録します。
+
 Web Foundation（D-102 Accepted）を既存dev AWSへproduction適用しました。[設計・費用・承認対象](docs/reviews/web_foundation.md)、[ローカル表示とrelease計画](docs/runbooks/web_foundation.md)を参照してください。public guideはログイン不要で一般公開可（FQDN/招待URL除外）。実Discord OAuth・read-only status・15分失効・logoutを確認し、read-only releaseをCompletedとしました。実証範囲・残る観測項目はrunbookを参照してください。
 
 ```sh

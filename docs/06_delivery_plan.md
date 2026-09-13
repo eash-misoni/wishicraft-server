@@ -6,6 +6,10 @@ D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)をproduction�
 public guideはFQDN/招待URL除外・ログイン不要。2026-09-13に限定是正後のread-only production releaseをConditional GO。条件・手順はD-102 runbookを正本とする。
 [release gate / 検証結果](runbooks/web_foundation.md)を参照。read-onlyとwriteのrelease境界は維持する。
 
+## URL固定の独立release slice
+
+D-102 Completed後、順序2のwrite実装に入る前にD-103 Web URL Stabilizationを準備する。canonical origin候補は`https://web.wishicraft.net`。production write前review待ちで、[移行runbook](runbooks/web_custom_domain.md)を正本とする。
+
 ## Current roadmap
 
 D-101 Accepted（2026-09-13、今後の順序とscope優先順位）。

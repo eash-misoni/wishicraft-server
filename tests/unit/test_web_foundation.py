@@ -300,7 +300,7 @@ def test_dynamo_session_atomic_delete() -> None:
 
 
 def test_synthesized_environment_initializes_handler(monkeypatch: pytest.MonkeyPatch) -> None:
-    app = build_app(ROOT, "dev", phase=8, deployment="web")
+    app = build_app(ROOT, "dev", phase=8, deployment="web", web_domain_phase="legacy")
     stack = app.node.find_child("WishicraftWebStack-dev")
     template = Template.from_stack(stack)  # type: ignore[arg-type]
     document = template.to_json()
@@ -398,7 +398,7 @@ def test_deployed_handlers_use_real_cookie_store_and_packaged_assets(
     monkeypatch.setattr(web_lambda, "client", lambda name: api)
     monkeypatch.setattr(web_lambda, "__file__", str(output / "wishicraft/web_lambda.py"))
     monkeypatch.setattr(web_lambda, "utc_now", lambda: NOW)
-    app = build_app(ROOT, "dev", phase=8, deployment="web")
+    app = build_app(ROOT, "dev", phase=8, deployment="web", web_domain_phase="legacy")
     template = Template.from_stack(app.node.find_child("WishicraftWebStack-dev"))  # type: ignore[arg-type]
     env: dict[str, str] = {}
     for resource in template.to_json()["Resources"].values():

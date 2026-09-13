@@ -23,6 +23,7 @@ def build_app(
     deployment: str = "phase1",
     two_games: bool = False,
     reset: bool = False,
+    web_domain_phase: str = "canonical",
 ) -> App:
     """Build an environment-agnostic CDK app after phase-specific validation."""
     configuration = load_configuration(repository_root, stage)
@@ -38,6 +39,7 @@ def build_app(
             project=configuration.project,
             secrets=configuration.secrets,
             root=repository_root,
+            domain_phase=web_domain_phase,
         )
     elif deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)
@@ -91,6 +93,7 @@ def main() -> None:
             project=configuration.project,
             secrets=configuration.secrets,
             root=repository_root,
+            domain_phase=app.node.try_get_context("web_domain_phase") or "canonical",
         )
     elif deployment == "target":
         MinecraftTargetStack(app, stage=configuration.stage, project=configuration.project)

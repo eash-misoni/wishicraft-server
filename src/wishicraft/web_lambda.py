@@ -6,6 +6,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote, urlsplit
 
 from wishicraft.operation import _decode_attribute
 from wishicraft.system_state import _to_attribute
@@ -82,6 +83,7 @@ def sessions() -> Sessions:
         DynamoSessions(client("dynamodb"), os.environ["WEB_SESSIONS_TABLE"]),
         secret(os.environ["WEB_SIGNING_PARAMETER"]).encode(),
         policy(),
+        origin=os.environ.get("WEB_CANONICAL_ORIGIN", ""),
     )
 
 
@@ -109,6 +111,9 @@ def web_app() -> WebApp:
 def handler(event: dict[str, Any], context: object) -> dict[str, Any]:
     del context
     try:
+        guard = canonical_guard(event)
+        if guard is not None:
+            return guard
         return web_app().handle(event, utc_now())
     except Exception:
         return response(503, "一時的に利用できません。")
@@ -117,7 +122,12 @@ def handler(event: dict[str, Any], context: object) -> dict[str, Any]:
 def auth_handler(event: dict[str, Any], context: object) -> dict[str, Any]:
     del context
     try:
+        guard = canonical_guard(event)
+        if guard is not None:
+            return guard
         origin = os.environ["WEB_ORIGIN"]
+        if os.environ.get("WEB_CANONICAL_ORIGIN", origin) != origin:
+            raise ValueError("canonical OAuth origin mismatch")
         app = AuthApp(
             sessions(),
             DiscordOAuth(
@@ -128,3 +138,37 @@ def auth_handler(event: dict[str, Any], context: object) -> dict[str, Any]:
         return app.handle(event, utc_now())
     except Exception:
         return response(503, "認証サービスを一時的に利用できません。")
+
+
+def canonical_guard(event: dict[str, Any]) -> dict[str, Any] | None:
+    """Use API Gateway's domain, never a forwarded/Host header or callback query."""
+    origin = os.environ.get("WEB_CANONICAL_ORIGIN")
+    if not origin:
+        return None  # Explicit pre-cutover phase; local harness never uses this handler.
+    parsed = urlsplit(origin)
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.netloc != parsed.hostname
+        or parsed.path
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("invalid canonical origin")
+    context = event.get("requestContext", {})
+    if context.get("domainName") == parsed.hostname:
+        return None
+    path = event.get("rawPath", "")
+    method = context.get("http", {}).get("method")
+    if (
+        method != "GET"
+        or path.startswith("/api/")
+        or path.startswith("/auth/")
+        and path != "/auth/login"
+    ):
+        return response(
+            421, '{"error":"canonical_origin_required"}', content_type="application/json"
+        )
+    if not isinstance(path, str) or not path.startswith("/") or path.startswith("//"):
+        return response(400)
+    return response(308, location=origin + quote(path, safe="/-._~"))

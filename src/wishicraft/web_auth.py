@@ -79,10 +79,15 @@ def cookies(event: dict[str, Any]) -> dict[str, str]:
 
 
 class Sessions:
-    def __init__(self, store: Store, key: bytes, policy: Policy) -> None:
+    def __init__(self, store: Store, key: bytes, policy: Policy, *, origin: str = "") -> None:
         if len(key) < 32:
             raise ValueError("session key must contain at least 32 bytes")
         self.store, self.key, self.policy = store, key, policy
+        self.fingerprint = (
+            hashlib.sha256((policy.fingerprint + "|" + origin).encode()).hexdigest()
+            if origin
+            else policy.fingerprint
+        )
 
     def sign(self, value: str) -> str:
         return value + "." + hmac.new(self.key, value.encode(), hashlib.sha256).hexdigest()
@@ -97,9 +102,7 @@ class Sessions:
 
     def begin(self, now: int) -> tuple[str, str]:
         state = "state-" + secrets.token_urlsafe(32)
-        self.store.put(
-            state, {"expires_at": now + STATE_SECONDS, "policy": self.policy.fingerprint}
-        )
+        self.store.put(state, {"expires_at": now + STATE_SECONDS, "policy": self.fingerprint})
         return state, cookie(STATE_COOKIE, self.sign(state), STATE_SECONDS)
 
     def consume(self, state: str, signed: str, now: int) -> None:
@@ -115,15 +118,13 @@ class Sessions:
             record is None
             or type(record.get("expires_at")) is not int
             or record["expires_at"] <= now
-            or record.get("policy") != self.policy.fingerprint
+            or record.get("policy") != self.fingerprint
         ):
             raise AuthRejected("expired or invalid session")
 
     def create(self, now: int) -> str:
         value = "session-" + secrets.token_urlsafe(32)
-        self.store.put(
-            value, {"expires_at": now + SESSION_SECONDS, "policy": self.policy.fingerprint}
-        )
+        self.store.put(value, {"expires_at": now + SESSION_SECONDS, "policy": self.fingerprint})
         return cookie(SESSION_COOKIE, self.sign(value), SESSION_SECONDS)
 
     def authenticate(self, signed: str, now: int) -> None:

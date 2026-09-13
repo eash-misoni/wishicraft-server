@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 import tempfile
 from pathlib import Path
@@ -10,11 +11,13 @@ from typing import Any
 from aws_cdk import CfnOutput, Duration, Environment, RemovalPolicy, Stack
 from aws_cdk import aws_apigatewayv2 as apigw
 from aws_cdk import aws_apigatewayv2_integrations as integrations
+from aws_cdk import aws_certificatemanager as acm
 from aws_cdk import aws_cloudwatch as cloudwatch
 from aws_cdk import aws_dynamodb as dynamodb
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as lambda_
 from aws_cdk import aws_logs as logs
+from aws_cdk import aws_route53 as route53
 from constructs import Construct
 
 from web.foundation import build_foundation
@@ -42,6 +45,7 @@ class WebFoundationStack(Stack):
         stage: StageConfig,
         secrets: SecretsExampleConfig,
         root: Path,
+        domain_phase: str = "canonical",
     ) -> None:
         super().__init__(
             scope,
@@ -50,7 +54,77 @@ class WebFoundationStack(Stack):
             description="Proposed Wishicraft public guide and authenticated read-only status",
             analytics_reporting=False,
         )
+        if domain_phase not in {"legacy", "certificate", "domain", "canonical"}:
+            raise ValueError("invalid Web domain migration phase")
+        canonical_origin = None
+        domain_name = None
+        certificate = None
+        if domain_phase != "legacy":
+            web_config = json.loads((root / "config" / f"web-{stage.stage}.json").read_text())
+            if (
+                not isinstance(web_config, dict)
+                or set(web_config) != {"schema_version", "domain_name"}
+                or type(web_config["schema_version"]) is not int
+                or web_config["schema_version"] != 1
+            ):
+                raise ValueError("explicit Web domain configuration required")
+            domain_name = web_config.get("domain_name")
+            if domain_name != "web.wishicraft.net" or stage.aws_region != "ap-northeast-1":
+                raise ValueError("unapproved Web domain or region")
+            certificate = acm.CfnCertificate(
+                self,
+                "WebCertificate",
+                domain_name=domain_name,
+                certificate_export="DISABLED",
+                validation_method="DNS",
+                domain_validation_options=[
+                    acm.CfnCertificate.DomainValidationOptionProperty(
+                        domain_name=domain_name,
+                        hosted_zone_id=stage.route53_hosted_zone_id,
+                    )
+                ],
+            )
+            certificate.apply_removal_policy(RemovalPolicy.RETAIN)
+            CfnOutput(self, "WebCertificateArn", value=certificate.ref)
+            if domain_phase == "canonical":
+                canonical_origin = "https://" + domain_name
         api = apigw.HttpApi(self, "WebApi", create_default_stage=True)
+        if domain_phase in {"domain", "canonical"}:
+            assert certificate is not None and isinstance(domain_name, str)
+            domain = apigw.CfnDomainName(
+                self,
+                "WebDomain",
+                domain_name=domain_name,
+                domain_name_configurations=[
+                    apigw.CfnDomainName.DomainNameConfigurationProperty(
+                        certificate_arn=certificate.ref,
+                        endpoint_type="REGIONAL",
+                        security_policy="TLS_1_2",
+                    )
+                ],
+            )
+            assert api.default_stage is not None
+            mapping = apigw.CfnApiMapping(
+                self,
+                "WebMapping",
+                api_id=api.api_id,
+                domain_name=domain.ref,
+                stage=api.default_stage.stage_name,
+            )
+            mapping.node.add_dependency(api.default_stage)
+            route53.CfnRecordSet(
+                self,
+                "WebAlias",
+                hosted_zone_id=stage.route53_hosted_zone_id,
+                name=domain_name,
+                type="A",
+                alias_target=route53.CfnRecordSet.AliasTargetProperty(
+                    dns_name=domain.attr_regional_domain_name,
+                    hosted_zone_id=domain.attr_regional_hosted_zone_id,
+                    evaluate_target_health=False,
+                ),
+            )
+            CfnOutput(self, "WebCandidateOrigin", value="https://" + domain_name)
         assert api.default_stage is not None
         cfn_stage = api.default_stage.node.default_child
         assert isinstance(cfn_stage, apigw.CfnStage)
@@ -77,6 +151,8 @@ class WebFoundationStack(Stack):
                 for key in ("application_id", "guild_id", "player_role_id", "admin_role_id")
             },
         }
+        if canonical_origin:
+            common["WEB_CANONICAL_ORIGIN"] = canonical_origin
         code = lambda_.Code.from_asset(str(bundle(root)))
 
         def function(name: str, handler: str, environment: dict[str, str]) -> lambda_.Function:
@@ -138,7 +214,11 @@ class WebFoundationStack(Stack):
         auth = function(
             "Auth",
             "auth_handler",
-            {**common, "WEB_OAUTH_PARAMETER": oauth, "WEB_ORIGIN": api.api_endpoint},
+            {
+                **common,
+                "WEB_OAUTH_PARAMETER": oauth,
+                "WEB_ORIGIN": canonical_origin or api.api_endpoint,
+            },
         )
         auth.add_to_role_policy(
             iam.PolicyStatement(
@@ -191,5 +271,10 @@ class WebFoundationStack(Stack):
             methods=[apigw.HttpMethod.ANY],
             integration=integrations.HttpLambdaIntegration("AuthIntegration", auth),
         )
-        CfnOutput(self, "WebOrigin", value=api.api_endpoint)
-        CfnOutput(self, "OAuthRedirectUri", value=api.api_endpoint + "/auth/callback")
+        CfnOutput(self, "WebOrigin", value=canonical_origin or api.api_endpoint)
+        CfnOutput(self, "DefaultWebOrigin", value=api.api_endpoint)
+        CfnOutput(
+            self,
+            "OAuthRedirectUri",
+            value=(canonical_origin or api.api_endpoint) + "/auth/callback",
+        )
