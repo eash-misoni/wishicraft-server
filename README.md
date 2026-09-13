@@ -1,6 +1,6 @@
 # wishicraft-server
 
-Existing Operations via Webをrepository実装中です。既存5操作・共有Admission・CSRF・terminal追跡の[release review](docs/reviews/existing_operations_web.md)と[一括E2E/rollback計画](docs/runbooks/existing_operations_web.md)を確認してください。production writeはまだ未実行です。
+Existing Operations via Webは承認済みproduction deployを完了し、実OAuthによるE2Eを準備中です。既存5操作・共有Admission・CSRF・terminal追跡の[release review](docs/reviews/existing_operations_web.md)と[一括E2E/rollback計画](docs/runbooks/existing_operations_web.md)を確認してください。CP/Web deployと限定IAM修正は完了。実Game操作・closeoutは未完了です。
 
 D-103 Web URL Stabilizationはproduction Completedです。canonical URLは[public guide](https://web.wishicraft.net/)と[管理画面](https://web.wishicraft.net/manage/)。DNS/TLS、新domainの実OAuth/status・15分失効・logout、旧redirect削除後の再loginを確認しました。[release証跡・rollback](docs/runbooks/web_custom_domain.md)を参照してください。生成execute-api URLは運用上のunderlying endpointです。
 

@@ -2,13 +2,13 @@
 
 ## Web Foundation repository slice
 
-D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)をproduction適用。public公開・実OAuth・read-only status・15分失効・logoutの確認を完了。read-only slice Completed、次はExisting Operations via Web（D-104 repository implementation、production approval pending）。
+D-102 Acceptedとして[Web Foundation](reviews/web_foundation.md)をproduction適用。public公開・実OAuth・read-only status・15分失効・logoutの確認を完了。read-only slice Completed、次はExisting Operations via Web（D-104 Accepted、production deploy済み・実OAuth E2E待ち）。
 public guideはFQDN/招待URL除外・ログイン不要。2026-09-13に限定是正後のread-only production releaseをConditional GO。条件・手順はD-102 runbookを正本とする。
 [release gate / 検証結果](runbooks/web_foundation.md)を参照。read-onlyとwriteのrelease境界は維持する。
 
 ## URL固定の独立release slice
 
-D-103 Web URL StabilizationはAccepted・production Completed（2026-09-13）。canonical originは`https://web.wishicraft.net`。DNS/TLSと新OAuth/session E2E、旧redirect削除後reloginを確認した。[移行・証跡runbook](runbooks/web_custom_domain.md)を正本とする。D-101の順序は維持し、Existing Operations via WebはD-104 repository implementation中、production approval pending。
+D-103 Web URL StabilizationはAccepted・production Completed（2026-09-13）。canonical originは`https://web.wishicraft.net`。DNS/TLSと新OAuth/session E2E、旧redirect削除後reloginを確認した。[移行・証跡runbook](runbooks/web_custom_domain.md)を正本とする。D-101の順序は維持し、Existing Operations via WebはD-104 Accepted、production deploy済み・実OAuth E2E待ち。
 
 ## Current roadmap
 

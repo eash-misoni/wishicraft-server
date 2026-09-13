@@ -135,3 +135,16 @@ Signing-key rotation/session revocation is an incident action, not a routine rol
   remains restricted to the single existing Admission function. Full validation/CI and fresh diff
   precede that correction. Evidence root `wishicraft-web-release-invoke-fix-v2-jtliy_13` preserves
   the correction separately; initial failed verification is not relabelled as successful.
+
+- ARN correction committed as `0e70cf9`; full **1,199 tests** passed (71.02 seconds), Ruff lint/format,
+  mypy **185 files**, Web synth and single-policy live diff passed. CI **34751123815** succeeded in
+  all three jobs, including actual Docker and Web browser scenarios.
+- Corrected Web deployment completed around 10:14 UTC. Deployed template exactly matches the corrected
+  assembly; IAM GetRolePolicy confirms `arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-admission`
+  and only the existing `web:*` conditional Idempotency GetItem. Web/Auth code was unchanged by this fix.
+- Canonical public guide **13 routes** returned 200 with no raw internal identity markers. An initial
+  test used the standalone fixture `/guide/` prefix and correctly received 404; the corrected v2
+  check uses production root routes. No public routing change was needed.
+- Real OAuth E2E is awaiting the user's login in the controlled headed browser. No production Web
+  lifecycle Operation, RESET or BACKUP has been submitted. Do not mark this slice Completed or claim
+  RUNNING/transition evidence until the approved START/SWITCH/SWITCH/STOP run is actually observed.
