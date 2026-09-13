@@ -72,7 +72,7 @@ jobs:
       - name: Build reviewed files and verify in Chromium (no publication)
         run: |
           GUIDE_ROOT=$(mktemp -d)
-          tools/dev-env run -- python -m web.build --output "$GUIDE_ROOT/site"
+          tools/dev-env run -- uv run python -m web.build --output "$GUIDE_ROOT/site"
           tools/dev-env run -- node web/browser-check.mjs "$GUIDE_ROOT/site"
 
   host-runtime-integration:

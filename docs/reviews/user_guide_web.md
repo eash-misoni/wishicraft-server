@@ -18,8 +18,8 @@ tools/dev-env check
 tools/dev-env run -- uv sync --frozen --all-groups
 tools/dev-env run -- npm ci
 GUIDE_ROOT=$(mktemp -d)
-tools/dev-env run -- python -m web.build --output "$GUIDE_ROOT/site"
-tools/dev-env run -- python -m http.server 8765 --bind 127.0.0.1 --directory "$GUIDE_ROOT/site"
+tools/dev-env run -- uv run python -m web.build --output "$GUIDE_ROOT/site"
+tools/dev-env run -- uv run python -m http.server 8765 --bind 127.0.0.1 --directory "$GUIDE_ROOT/site"
 ```
 
 ブラウザで`http://127.0.0.1:8765/`を開く。repository rootを配信しない。
@@ -44,7 +44,7 @@ tools/dev-env run -- node web/browser-check.mjs "$GUIDE_ROOT/site" --chrome
 | 現行の意味 | D-097/098/099、BackupObservation。古い管理者限定Reset表や毎回Snapshot/Reset後停止案を復活させない |
 | 管理手順・実証 | 既存runbook/evidenceをrepositoryに保持し、Webへ出さない |
 
-設定やschemaを変えたら`tools/dev-env run -- python -m web.build --update-guide`で生成ブロックを更新し、diffと説明文の意味をレビューする。
+設定やschemaを変えたら`tools/dev-env run -- uv run python -m web.build --update-guide`で生成ブロックを更新し、diffと説明文の意味をレビューする。
 通常buildとpytestは生成ブロックの古さを拒否する。未知runtime種別ではedition/client説明の見直しを要求し、勝手に対応を拡張しない。
 Game登録の宣言関数はローカル純粋処理だけを使用し、register/mainやAWS clientは呼ばない。宣言内のwhitelist等を一括serializeしない。
 新しい機械値と説明の意味の一致は生成だけで保証できないため、schema変更時も人間の内容レビューを残す。
@@ -128,3 +128,7 @@ backend/Discord/Hostのsource・infra・設定は変更対象外。通常の既�
 独自domainを承認しなければAWS/DNS変更は不要。Discord送信・command登録、production deploy/IAM、Lambda invoke/Reconcile/SSM、START/STOP、Game/world/Snapshot/provenanceはこの公開承認にも含めない。
 
 **READY FOR USER GUIDE WEB / PUBLICATION APPROVAL** は準備検証の完了を示す。Web公開済み、D-100のhosting採用済み、production変更済みという意味ではない。
+
+### CI初回の環境選択修正
+
+CI 34734192540のWeb jobはsystem Pythonを選び`wishicraft` importで失敗した。build/preview/生成更新の実行例をcanonical entrypoint内の`uv run python`へ統一した。backend/package設定は変更せず、失敗runを保持して次commitのCIで再検証する。

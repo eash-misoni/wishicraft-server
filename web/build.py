@@ -212,7 +212,7 @@ def page(content: str, nav: str) -> str:
 def build(root: Path, output: Path) -> None:
     text = (root / GUIDE).read_text()
     if update_generated(text, root) != text:
-        raise ValueError("generated guide is stale: run python -m web.build --update-guide")
+        raise ValueError("generated guide is stale: run uv run python -m web.build --update-guide")
     content, nav = render(public_markdown(text))
     files = {"index.html": page(content, nav)}
     files["404.html"] = """<!doctype html><html lang="ja"><meta charset="utf-8">

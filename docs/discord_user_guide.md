@@ -136,4 +136,4 @@ currentに加え、直近3個のmanaged旧worldを保持し、それ以前は成
 
 whitelist管理、Web、汎用Restore、死亡自動検知等は、この利用可能コマンド一覧には含みません。
 
-静的Webは明示したpublic-guide範囲だけを使用します。生成ブロックは `tools/dev-env run -- python -m web.build --update-guide` で更新し、説明文は本ファイルだけを編集します。公開計画は [Web準備レビュー](reviews/user_guide_web.md) を参照してください。
+静的Webは明示したpublic-guide範囲だけを使用します。生成ブロックは `tools/dev-env run -- uv run python -m web.build --update-guide` で更新し、説明文は本ファイルだけを編集します。公開計画は [Web準備レビュー](reviews/user_guide_web.md) を参照してください。
