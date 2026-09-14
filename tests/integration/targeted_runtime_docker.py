@@ -342,11 +342,20 @@ services:
             actual_env = dict(entry.split("=", 1) for entry in container["Config"]["Env"])
             assert actual_env["INIT_MEMORY"] == inputs["INIT_MEMORY"]
             assert actual_env["MAX_MEMORY"] == inputs["MAX_MEMORY"]
-            processes = real_execute(["docker", "top", container["Id"], "-eo", "args"])
+            # Docker identifies container processes using ps's PID column.
+            top = subprocess.run(
+                ["docker", "top", container["Id"], "-eo", "pid,args"],
+                capture_output=True,
+                text=True,
+            )
+            assert top.returncode == 0, top.stderr
             heaps = [
-                parts
-                for line in processes.splitlines()
-                if (parts := shlex.split(line)) and Path(parts[0]).name == "java"
+                parts[1:]
+                for line in top.stdout.splitlines()
+                if (parts := shlex.split(line))
+                and len(parts) > 1
+                and parts[0].isdigit()
+                and Path(parts[1]).name == "java"
             ]
             assert len(heaps) == 1, "one real Minecraft JVM required"
             assert "-Xms" + inputs["INIT_MEMORY"] in heaps[0]

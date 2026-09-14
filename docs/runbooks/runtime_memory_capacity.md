@@ -198,3 +198,8 @@ exact old artifact checks. A subsequent /private/tmp fixture inherited macOS gro
 than the user's group 20; the new default user-temporary-root run passed without weakening
 owner checks. Four interruption points in the real installer converge on retry while keeping
 canonical file mtimes, old backups, stopped receipt and synthetic world bytes unchanged.
+
+First Docker CI `34804568267` failed after container memory/env inspect checks, at `docker top`
+with an args-only ps format. The test now retains the PID column required for process identity
+and preserves command stderr on failure. This is a test-harness correction; production code and
+runtime digest are unchanged. The replacement CI must pass before maintenance begins.
