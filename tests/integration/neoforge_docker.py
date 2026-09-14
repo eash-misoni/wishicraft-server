@@ -26,7 +26,9 @@ def main() -> None:
     root = Path(tempfile.mkdtemp(prefix="wishicraft-neoforge-docker-"))
     print("FIXTURE", root, flush=True)
     root.chmod(0o755)
-    package = json.loads((repo / "config/game-packages.json").read_text())["packages"][1]
+    package = json.loads((repo / "src/wishicraft/artifacts/game-packages.json").read_text())[
+        "packages"
+    ][1]
     stage = yaml.safe_load((repo / "config/stages/dev.yaml").read_text())["host_runtime"]
     image = stage["image"]["reference"]
     command("docker", "pull", image, timeout=300)
@@ -103,7 +105,11 @@ def main() -> None:
                 raise AssertionError("candidate not READY")
             assert "0 of a max" in command("docker", "exec", name, "rcon-cli", "list")
             top = command("docker", "top", name, "-eo", "pid,args")
-            assert "-Xmx4G" in top and "-Xms1G" in top
+            print("JAVA_PROCESS", top, flush=True)
+            assert "@user_jvm_args.txt" in top
+            jvm_args = (data / "user_jvm_args.txt").read_text().split()
+            assert "-Xmx4G" in jvm_args and "-Xms1G" in jvm_args
+            print("JAVA_ARGFILE", jvm_args, flush=True)
             assert info["HostConfig"]["Memory"] == 6442450944
             logs = command("docker", "logs", name)
             (root / f"cycle-{cycle}.log").write_text(logs)
@@ -113,6 +119,24 @@ def main() -> None:
                     hashlib.sha256((mods / mod["filename"]).read_bytes()).hexdigest()
                     == mod["sha256"]
                 )
+            for x, block in [(0, "create:andesite_casing"), (1, "farmersdelight:stove")]:
+                result = command(
+                    "docker",
+                    "exec",
+                    name,
+                    "rcon-cli",
+                    "execute",
+                    "in",
+                    "minecraft:overworld",
+                    "run",
+                    "setblock",
+                    str(x),
+                    "80",
+                    "0",
+                    block,
+                )
+                assert "Changed the block" in result or "Could not set the block" in result
+                print("REGISTERED_BLOCK", block, result.strip(), flush=True)
             print("NEOFORGE_READY", cycle, package["loader"]["version"], flush=True)
             print(command("docker", "exec", name, "rcon-cli", "save-all", "flush"), flush=True)
             command("docker", "stop", "--time", "150", name, timeout=180)

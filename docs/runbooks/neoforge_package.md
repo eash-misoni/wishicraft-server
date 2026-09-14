@@ -7,7 +7,7 @@ Both downloaded mod jars declare NeoForge >=21.1.219 and exactly Minecraft 1.21.
 shared minimum avoids resolving a moving latest version. The existing pinned itzg Java25 image
 and host-wide 1G/4G/6GiB memory are retained for the initial qualification.
 
-`config/game-packages.json` fixes exact Modrinth project/version/file IDs, filenames, sizes,
+`src/wishicraft/artifacts/game-packages.json` fixes exact Modrinth project/version/file IDs, filenames, sizes,
 URLs and SHA-256. During review, mod bytes matched Modrinth's SHA-512 before deriving SHA-256.
 The NeoForge installer matches its official Maven SHA-256. No jar is committed or published by
 Wishicraft. The integration test downloads directly from upstream into an isolated temporary root.
