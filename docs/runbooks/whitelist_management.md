@@ -33,7 +33,10 @@ Preserve exact original file bytes as private evidence as well as normalized mem
 3. Start only existing Target EC2 for inspection. Verify mount UUID/device/Data EBS, no Minecraft
    container/listener/runtime job, and exact stopped receipt. Read canonical A/B current paths from
    Game records; capture whitelist files privately with exact owner/mode/hash and full Game tree
-   digest. Unexpected runtime or Game identity/path/generation changes stop the release.
+   digest. Both server.properties and whitelist.json must be regular/single-link UID/GID 993,
+   not group/world-writable, with online-mode/white-list/enforce-whitelist exactly true. Do not
+   silently repair unexpected attributes. Unexpected runtime or Game identity/path/generation
+   changes stop the release.
 4. Run offline migration planner on these exact files. Require complete A/B effective equality,
    no unsupported identity/duplicate/ambiguity, and counts within bounds. Recheck the source bytes
    and Game records before any policy write. New dynamic Games are not expected; stop if registry
@@ -95,3 +98,23 @@ Preparation evidence, final CI and live diff are recorded at the production gate
 is unavailable; actual pinned-image integration runs on the existing disposable Linux CI runner.
 AWS/SSM/systemd/mount transports there are synthetic, while Minecraft, files, RCON and Docker are
 real. Do not report a queued or failed CI run as passed or preparation as production Completed.
+
+
+Preparation inventory at 2026-09-13 23:56 UTC: STOPPED/HEALTHY, selected A, A/B exact metadata
+hashes unchanged, no Lock/active workflow/SSM, 3 empty queues, 45 alarms OK, 9 Snapshots and
+16 provenance items byte-equivalent under canonical inventory comparison to D-105 closeout.
+Three old schema-1 recovery descriptions validate unchanged with the new reader. DNS is absent
+and the original Data EBS remains attached to the original stopped instance. Host whitelist contents
+remain unobserved until approved maintenance; no membership values are included in tracked evidence.
+
+[Preparation evidence](../evidence/whitelist_management_preparation_2026-09-14.json) records the
+review bundle hashes, exact live diff and validation scopes. New source code changes only existing
+Lambda code plus the three feature environments; IAM, resources and workflow definitions compare
+unchanged. First CI 34791083220 passed all jobs and 1,262 tests, including real pinned-image
+Whitelist START/SWITCH/in-game add/remove/restart convergence. Follow-up CI 34791463982 stopped in
+the additional RESET fixture's file identity check: its legacy fixture had not preseeded A/B's
+canonical settings file attributes. The corrected fixture seeds UID/GID 993, mode 0640 before the
+first boot and explicitly verifies those attributes after stopping. The pinned image's default
+umask is 0002; this does not authorize relaxing the production file identity guard. Failed evidence
+is retained. Finalized gate HEAD must pass the full CI, including corrected RESET generations;
+the exact final run is reported in the handoff rather than predicting an uncompleted result.

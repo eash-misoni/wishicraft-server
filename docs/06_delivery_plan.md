@@ -23,7 +23,7 @@ D-101 Accepted（2026-09-13、今後の順序とscope優先順位）。
 | 1 | **Web Foundation** | D-100静的guideを公開可能なpublic領域として維持する。Web全体のhosting / URL / Discord OAuth / authorizationを決め、authenticated管理領域に最初はread-onlyのstatus相当表示を設ける。既存Control PlaneからDesired/Observed、選択Game/観測Game、player count、観測時刻、current Operation、主要進捗等を読む。public guideの実公開はこのWeb配信構成と合わせるのを第一候補とする。 |
 | 2 | **Existing Operations via Web — Completed** | START / STOP / SWITCH / BACKUP / RESETをDiscordと同じAdmission / Operation / workflowへ接続する。Web専用の制御処理を作らず、browserにAWS権限を直接持たせない。UI非表示だけでなくAPI側で既存role/policyによる認可を行う。 |
 | 3 | **Minimal Game Creation — deployed / positive E2E pending** | [D-105契約](reviews/minimal_game_creation.md)と[production gate](runbooks/minimal_game_creation.md)。 現在の固定runtimeを使用し、display name・numeric seed/random・RESET capabilityだけを指定してGame metadataを登録する。CREATE-001の作成と起動の分離を維持する。Package / Preset / Templateの独立管理、汎用wizard、upload基盤を先行しない。作成Gameをpublic guideへ自動公開せず、説明とclient要件を揃えた明示的な公開登録を維持する。 |
-| 4 | **Whitelist Management** | Game作成と実運用を踏まえ、共通 / Game固有 / Minecraft内変更の責務を改めて決める。複雑な双方向同期を既定にしない。Game作成時に必要な初期whitelistと後から編集する管理機能を分ける。OP要求も維持し、詳細契約を先に確定しない。 |
+| 4 | **Whitelist Management — production承認待ち** | [D-106契約](reviews/whitelist_management.md)と[移行gate](runbooks/whitelist_management.md)。Common ∪ Game-specific追加許可、Web authoritative、Admin限定短期Admission、次回START/SWITCH/RESET起動時のprojection。実A/B移行は完全一致確認後。D-105 positive E2E deferredを維持し、OP/chat/runtime一般化は含めない。 |
 | 5 | **Runtime / Version / MOD Extension** | 実際に必要なGame/runtime構成が出た時に具体例を端から端まで通して追加する。旧Phase 12の全server種別一般化や固定順序を必須にしない。 |
 
 ### Release sliceと承認境界

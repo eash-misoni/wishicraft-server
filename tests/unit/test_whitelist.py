@@ -10,6 +10,7 @@ from typing import Any
 
 import pytest
 
+from tests.unit.test_game_creation import creation  # noqa: F401
 from tests.unit.test_web_operations import NOW, boundary, event, login, post  # noqa: F401
 from wishicraft import whitelist
 from wishicraft.artifacts import whitelist_policy as model
@@ -134,7 +135,11 @@ def test_authorization_csrf_origin_spoof_and_lost_reply(access: Any) -> None:
     assert post(access, login(sessions, roles=["3"]), payload())["statusCode"] == 403
     assert app.handle(event(value=payload()), NOW)["statusCode"] == 401
     jar = login(sessions)
-    for kwargs in ({}, {"csrf": "invalid"}, {"origin": "https://foreign.invalid"}):
+    for kwargs in (
+        {},
+        {"csrf": "invalid"},
+        {"csrf": sessions.csrf(jar.split("=", 1)[1]), "origin": "https://foreign.invalid"},
+    ):
         assert app.handle(event(jar, payload(), **kwargs), NOW)["statusCode"] == 403
     forged = payload()
     forged["roles"] = ["4"]
@@ -290,3 +295,39 @@ def test_host_upgrade_exact_predecessor_and_migration_transaction(tmp_path: Any)
         for action in result["TransactItems"]
         if "Put" in action
     )
+
+
+def test_unmaterialized_dynamic_game_inherits_and_edits(
+    access: Any,
+    creation: Any,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tests.unit.test_game_creation import payload as create_payload
+    from wishicraft.game_creation import REGISTRY_KEY
+
+    app, sessions, backend, launches, _ = access
+    jar = login(sessions)
+    assert post(access, jar, payload())["statusCode"] == 202
+    assert post(creation, jar, create_payload())["statusCode"] == 202
+    game = backend.db.records["games", REGISTRY_KEY]["registered_ids"]["SS"][0]
+    before = copy.deepcopy(backend.db.records["games", game])
+    assert before["materialization_state"] == {"S": "UNMATERIALIZED"}
+    assert model.effective(
+        model.read(backend.db, "games", None), model.read(backend.db, "games", game)
+    ) == {PLAYER: "FixtureOne"}
+    monkeypatch.setattr(whitelist, "resolve", lambda name: (SECOND, "FixtureTwo"))
+    assert post(access, jar, payload(player="FixtureTwo", game=game_key(game)))["statusCode"] == 202
+    assert backend.db.records["games", game] == before and not launches
+    caps = json.loads(app.handle(event(jar, path="/api/capabilities", method="GET"), NOW)["body"])
+    assert len(caps["games"]) == 3
+    assert len(caps["whitelist"]["games"][game_key(game)]["members"]) == 2
+
+
+def test_concurrent_duplicate_has_one_policy_transaction(access: Any) -> None:
+    from concurrent.futures import ThreadPoolExecutor
+
+    jar, request = login(access[1]), payload()
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        replies = list(pool.map(lambda _: post(access, jar, request), range(2)))
+    assert {reply["statusCode"] for reply in replies} <= {200, 202}
+    assert access[2].db.transactions == 1

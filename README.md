@@ -1,5 +1,7 @@
 # wishicraft-server
 
+Whitelist Management（D-106）はrelease準備・production承認待ちです。[正本と適用契約](docs/reviews/whitelist_management.md)、[移行とproduction gate](docs/runbooks/whitelist_management.md)。CommonとGame固有の追加許可をWebで管理し、次回起動で反映する方式です。productionへの適用はまだ行っていません。
+
 Existing Operations via Webはproduction Completedです（D-104、2026-09-13）。[管理画面](https://web.wishicraft.net/manage/)から既存5操作を共有Admissionへ接続し、Web START A→SWITCH B→A→STOPの成功、CSRF・15分失効・logout・重複防止・terminal追跡を確認しました。[契約](docs/reviews/existing_operations_web.md)と[release証跡・rollback](docs/runbooks/existing_operations_web.md)を参照してください。最終状態はSTOPPED/HEALTHY。Minimal Game Creationは **production deployed, positive CREATE/materialization deferred**（D-105）です。[契約](docs/reviews/minimal_game_creation.md)と[適用証跡・将来のpositive E2E](docs/runbooks/minimal_game_creation.md)を参照してください。実用GameでCREATEと別承認の初回起動を実証するまでfully production Completedとはしません。
 
 D-103 Web URL Stabilizationはproduction Completedです。canonical URLは[public guide](https://web.wishicraft.net/)と[管理画面](https://web.wishicraft.net/manage/)。DNS/TLS、新domainの実OAuth/status・15分失効・logout、旧redirect削除後の再loginを確認しました。[release証跡・rollback](docs/runbooks/web_custom_domain.md)を参照してください。生成execute-api URLは運用上のunderlying endpointです。

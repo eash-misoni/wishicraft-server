@@ -73,6 +73,17 @@ def main() -> None:
         data.mkdir()
     data.chmod(0o777)
     (data / "sentinel").write_text("existing data outside the container layer")
+    if whitelist_reset:
+        # A/B were provisioned with 0640 settings; do not model them as a brand-new image's
+        # unseeded 0002-umask defaults. Each CI attempt uses a fresh root and retains old logs.
+        for name, content in {
+            "server.properties": "online-mode=true\nwhite-list=true\nenforce-whitelist=true\n",
+            "whitelist.json": "[]\n",
+        }.items():
+            path = data / name
+            path.write_text(content)
+            os.chown(path, 993, 993)
+            path.chmod(0o640)
     artifacts = root / "artifacts"
     artifacts.mkdir()
     environment = (
@@ -550,6 +561,17 @@ services:
         # The existing adapter performs every real Docker save/stop/removal/start below.
         anchor = data
         if whitelist_reset:
+            metadata = {
+                name: [
+                    ((anchor / name).stat().st_uid),
+                    ((anchor / name).stat().st_gid),
+                    oct((anchor / name).stat().st_mode & 0o777),
+                ]
+                for name in ("server.properties", "whitelist.json")
+            }
+            print("WHITELIST_CANONICAL_FIXTURE_METADATA", json.dumps(metadata), flush=True)
+            assert all(value == [993, 993, "0o640"] for value in metadata.values())
+
             from wishicraft.artifacts import whitelist_policy as access
 
             config.update(whitelist_management=True, games_table="games")

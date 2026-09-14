@@ -1,0 +1,179 @@
+{
+  "decision": "D-106",
+  "status": "repository release candidate; production approval required",
+  "production_write_performed": false,
+  "production_deployed": false,
+  "code_basis": "fb0840251c9a7b64e6b877abe4b22944a80d36eb",
+  "preflight": {
+    "at": "2026-09-13T23:56:14.316528+00:00",
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "instance": "stopped",
+    "game_count": 2,
+    "game_hashes": {
+      "game-vanilla-main": "d9630bf74e8e1e1aba8cc4abcc0e369407e673357c547d97861331e673a586c6",
+      "game-vanilla-secondary": "08cf25cddd61a9381cd114f99da2ccf86df67901c6a4cb98e83f0096fce70c88"
+    },
+    "state": {
+      "desired_state": {
+        "S": "STOPPED"
+      },
+      "health": {
+        "S": "HEALTHY"
+      },
+      "desired_game_id": {
+        "S": "game-vanilla-main"
+      },
+      "current_operation_id": null
+    },
+    "locks": 0,
+    "active_workflows": 0,
+    "queues": [
+      {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      }
+    ],
+    "alarms": {
+      "OK": 45,
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0
+    },
+    "snapshots": 9,
+    "provenance": 16,
+    "active_ssm": 0
+  },
+  "preflight_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-whitelist-preflight-v5-cvkmftvv",
+  "a_b_metadata_exact_previous_closeout": true,
+  "snapshot_inventory_exact_previous_closeout": true,
+  "provenance_exact_previous_closeout": true,
+  "legacy_recovery_descriptors_verified": {
+    "count": 3,
+    "schema_versions": [
+      1
+    ]
+  },
+  "live_filesystem_whitelist": {
+    "state": "not_observed_while_ec2_stopped",
+    "required_gate": "approved maintenance capture, strict file identity and exact membership comparison before migration"
+  },
+  "host_bundle_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-whitelist-review-artifacts-v1-98wbz1ud/host",
+  "host_files": [
+    {
+      "destination": "/etc/wishicraft/runtime-contract.json",
+      "mode": 384,
+      "predecessor": "536d153ab39a449e86f1805542eb5138c37f7c780d8469db42108ed9b556682e",
+      "sha256": "80d18f5613e150bc47f93cf2435406a8aa12f274475eb605ba0c3a49b14a4ff2",
+      "source": "0.artifact"
+    },
+    {
+      "destination": "/usr/local/libexec/wishicraft/operation-v2",
+      "mode": 493,
+      "predecessor": "afa1ba874bd2ca96979524ddf7929894a28db6d4d0025400b193f565db26cd9b",
+      "sha256": "fa56d5a106649e81af3ae98f4a458ae606b18b920da204ec4add5a938798efb8",
+      "source": "1.artifact"
+    },
+    {
+      "destination": "/usr/local/libexec/wishicraft/whitelist_policy.py",
+      "mode": 420,
+      "predecessor": null,
+      "sha256": "3fc79d32c4f5e48ad556994382e5ab462180b3e6edf083905eccc9477589d6d5",
+      "source": "2.artifact"
+    }
+  ],
+  "host_receipt_basis": "D-105 last verified stopped receipt; exact live match required at approved maintenance",
+  "live_diff_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-whitelist-review-artifacts-v1-98wbz1ud",
+  "live_diff": {
+    "WishicraftControlPlaneStack-dev": {
+      "ReconcileFunction30829CB6": [
+        "Code"
+      ],
+      "StartTaskFunction8C564C4A": [
+        "Code"
+      ],
+      "StopTaskFunction11473A8C": [
+        "Code"
+      ],
+      "BackupTaskFunctionA44639DC": [
+        "Code",
+        "Environment"
+      ],
+      "RetentionTaskFunction9F285CE4": [
+        "Code"
+      ],
+      "AdmissionFunction23082B67": [
+        "Code",
+        "Environment"
+      ],
+      "DiscordCommandFunction7D25102A": [
+        "Code"
+      ],
+      "StatusExecutorFunction6E5C9869": [
+        "Code"
+      ],
+      "DiscordMessageFunction78FA388B": [
+        "Code"
+      ],
+      "AutoStopEvaluatorFunctionF85F8B50": [
+        "Code"
+      ],
+      "MonitoringObserverFunction584DA7C7": [
+        "Code"
+      ]
+    },
+    "WishicraftWebStack-dev": {
+      "Web3C8945DB": [
+        "Code",
+        "Environment"
+      ],
+      "AuthC256A5EC": [
+        "Code"
+      ]
+    }
+  },
+  "iam_unchanged": true,
+  "resource_membership_unchanged": true,
+  "workflow_definitions_unchanged": true,
+  "minecraft_runtime_identity_unchanged": true,
+  "new_services": [],
+  "validation": {
+    "local_full_tests": 1261,
+    "local_additional_whitelist_tests": 32,
+    "ruff": "passed",
+    "mypy": "193 files passed",
+    "cp_web_synth": "passed",
+    "browser": "Common/add/remove/dedup/confirmation/reload/private boundary passed",
+    "first_ci": {
+      "run": 34791083220,
+      "conclusion": "success",
+      "tests": 1262,
+      "docker": "first START/SWITCH, in-game add/remove, STOP/restart convergence"
+    },
+    "diagnostic_ci": {
+      "run": 34791463982,
+      "conclusion": "failure",
+      "scope": "new RESET fixture file identity gate; quality and Web passed; canonical preseeded 0640 fixture correction included"
+    },
+    "final_ci": "finalized gate HEAD must pass .github/workflows/ci.yml; exact run is reported in handoff"
+  },
+  "migration": {
+    "algorithm": "Common intersection; specific difference",
+    "approval_includes_future_game_common_semantics": true,
+    "live_membership_count_digest": "pending approved capture",
+    "no_game_record_rewrite": true
+  },
+  "safe_production_e2e": "migration equality + authenticated reads + same-state no-op/idempotent save; no test player or Minecraft start",
+  "d105": "production deployed, positive CREATE/materialization deferred",
+  "retention": "unchanged dry-run only; no DeleteSnapshot path added"
+}
