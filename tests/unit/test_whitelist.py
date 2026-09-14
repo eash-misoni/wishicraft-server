@@ -27,7 +27,7 @@ def access(boundary: Any, monkeypatch: pytest.MonkeyPatch) -> Any:  # noqa: F811
     db = boundary[2].db
     db.records["games", model.COMMON] = {
         "game_id": {"S": model.COMMON},
-        "policy_json": {"S": model.encoded(model.empty())},
+        "policy_json": {"S": model.encoded({"revision": 0, "members": {}})},
     }
     return boundary
 
@@ -205,7 +205,7 @@ def test_official_profile_resolution(monkeypatch: pytest.MonkeyPatch, mode: str)
             whitelist.resolve("fixtureone")
 
 
-def test_migration_exact_union_and_ambiguity() -> None:
+def test_migration_empty_common_preserves_specific_access_and_rejects_ambiguity() -> None:
     from wishicraft.whitelist_migration import plan
 
     source = {
@@ -213,9 +213,11 @@ def test_migration_exact_union_and_ambiguity() -> None:
         "game-b": [{"uuid": PLAYER, "name": "FixtureOne"}, {"uuid": SECOND, "name": "FixtureTwo"}],
     }
     result = plan(source)
-    assert result["common_count"] == 1
-    assert result["proof"]["game-a"]["specific_count"] == 0
-    assert result["proof"]["game-b"]["specific_count"] == 1
+    assert result["common_count"] == 0
+    assert result["policy"]["common"] == {"revision": 1, "members": {}}
+    assert model.effective(result["policy"]["common"], {"revision": 0, "members": {}}) == {}
+    assert result["proof"]["game-a"]["specific_count"] == 1
+    assert result["proof"]["game-b"]["specific_count"] == 2
     for game, entries in source.items():
         assert model.effective(result["policy"]["common"], result["policy"]["games"][game]) == {
             entry["uuid"]: entry["name"] for entry in entries
@@ -243,19 +245,19 @@ def test_projection_replaces_ingame_changes_and_rejects_redirection(
     target = {"data_source": str(source)}
     common = {"revision": 1, "members": {PLAYER: "FixtureOne"}}
     expected = [{"uuid": PLAYER, "name": "FixtureOne"}]
-    model.project(target, common, model.empty(), None)
+    model.project(target, common, {"revision": 0, "members": {}}, None)
     assert json.loads(path.read_text()) == expected
     # Graceful stop and crash leave the file; next inactive convergence ignores local changes.
     for changed in ([], [{"uuid": SECOND, "name": "FixtureTwo"}]):
         path.write_text(json.dumps(changed))
-        model.project(target, common, model.empty(), None)
+        model.project(target, common, {"revision": 0, "members": {}}, None)
         assert json.loads(path.read_text()) == expected
     other = tmp_path / "other"
     other.write_text("unchanged")
     path.unlink()
     path.symlink_to(other)
     with pytest.raises(ValueError, match="WHITELIST_FILE_IDENTITY"):
-        model.project(target, common, model.empty(), None)
+        model.project(target, common, {"revision": 0, "members": {}}, None)
     assert other.read_text() == "unchanged"
 
 

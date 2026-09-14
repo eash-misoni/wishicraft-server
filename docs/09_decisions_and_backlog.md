@@ -1,14 +1,14 @@
 # 09. Decisions and Backlog
 
-## D-106 Whitelist Management（Proposed release / production承認待ち）
+## D-106 Whitelist Management（Accepted / production release承認済み・実行前）
 
 2026-09-14、D-101第4単位。通常repository実装・tests・docs・CIとread-only調査を委任。
 [正本・Common/追加許可・ゲーム内変更・起動適用・recovery契約](reviews/whitelist_management.md)、
 [移行・release・rollback・safe E2E](runbooks/whitelist_management.md)を参照する。
 Webを正本とし、Common ∪ Game-specific、UUID identity、Admin限定短期Admission transaction、
-次回共通START経路でのprojectionを採用案とする。deny、双方向同期、即時反映workflowは切る。
+次回共通START経路でのprojectionを採用する。deny、双方向同期、即時反映workflowは切る。
 既存Games tableの専用policy itemを使いA/B recordは変更しない。移行は実ファイル取得後の
-完全一致証明が必須で、現在停止中hostの未取得内容を推測しない。production writeは未承認。
+完全一致証明が必須で、現在停止中hostの未取得内容を推測しない。基準ade0d89への明示GOで限定production releaseを承認。初期Commonは空、A/Bの現在参加者を各Game-specificへ保存する。intersection案は不採用とし、将来Gameへの許可を推測しない。
 D-105 positive CREATE/materialization deferredを維持する。OP/ban/chat/runtime一般化は対象外。
 
 ## D-105 Minimal Game Creation（Accepted / production deployed, positive CREATE/materialization deferred）

@@ -1,9 +1,9 @@
 # D-106 Whitelist Management
 
-**Proposed release contract; repository implementation, production approval pending.**
+**Accepted release contract; production execution pending.**
 D-101 slice 4. D-105 remains production deployed, positive CREATE/materialization deferred.
 This document owns the Whitelist semantics; the [runbook](../runbooks/whitelist_management.md)
-owns migration, release evidence and rollback. No production whitelist mutation is authorized yet.
+owns migration, release evidence and rollback. Production release is authorized against ade0d89 with an empty-Common migration amendment.
 
 ## Current implementation audit
 
@@ -37,6 +37,10 @@ They are policy records, not registry Games, and are never enumerated as Games. 
 Game records are untouched. Each policy contains canonical JSON with revision and a bounded map
 of UUID to last-known Java name. Maximum 256 entries per policy, at most 512 effective entries.
 There is no new table, index, directory service, profile hierarchy or always-running worker.
+
+Initial migration sets Common empty and stores each current Game's complete membership as its
+Game-specific policy. Shared A/B membership does not imply future-Game permission; Admins must
+explicitly add Common membership after release. The intersection migration candidate is superseded.
 
 **Effective = Common ∪ Game-specific.** Common grants access to every registered Game, including
 future registrations. Game-specific is additional access for that Game. There is no deny layer.

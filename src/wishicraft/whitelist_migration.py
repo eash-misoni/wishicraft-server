@@ -31,21 +31,20 @@ def plan(values: Mapping[str, object]) -> dict[str, Any]:
     lists = {game: persisted(value) for game, value in values.items()}
     for game in lists:
         model.policy_key(game)
-    common_ids = set.intersection(*(set(players) for players in lists.values()))
-    common = {}
-    for identity in common_ids:
-        names = {players[identity] for players in lists.values()}
-        if len(names) != 1:
-            raise ValueError("inconsistent last-known name requires review")
-        common[identity] = names.pop()
+    # Shared legacy membership does not establish access to future Games.
+    names_by_identity: dict[str, str] = {}
+    for players in lists.values():
+        for identity, name in players.items():
+            if identity in names_by_identity and names_by_identity[identity] != name:
+                raise ValueError("inconsistent last-known name requires review")
+            names_by_identity[identity] = name
+    common: dict[str, str] = {}
     policies: dict[str, Any] = {
         "common": {"revision": 1, "members": model.members(common)},
         "games": {
             game: {
                 "revision": 1,
-                "members": {
-                    identity: name for identity, name in players.items() if identity not in common
-                },
+                "members": dict(players),
             }
             for game, players in lists.items()
         },

@@ -245,7 +245,7 @@ function renderGames() {
 
 function whitelistPanel(parent, game, policy) {
   const title = document.createElement('h3'); title.textContent = game ? '参加できる人（Common ＋ Game固有）' : '全Gameへの参加許可'; parent.append(title);
-  const p = document.createElement('p'); p.textContent = '保存済みpolicy。稼働中の反映状態は未確認です。次の起動で適用します。'; parent.append(p);
+  const p = document.createElement('p'); p.textContent = '保存済みpolicy。稼働中の反映状態は未確認です。次の起動で適用します。削除しても稼働中の参加許可は直ちには取り消されません。'; parent.append(p);
   if (!policy.members.length) {const empty = document.createElement('p'); empty.textContent = '許可された人はいません。'; parent.append(empty);}
   const action = (kind, player, label) => {
     if (pending || opBusy) {opNotice.textContent = '追跡中の操作の結果を確認してから編集してください。'; return;}

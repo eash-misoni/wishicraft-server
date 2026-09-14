@@ -1,6 +1,6 @@
 # Whitelist Management production gate
 
-**Preparation only: no production write authorized or performed for D-106.**
+**Production release authorized against ade0d89, with empty-Common migration amendment; execution pending.**
 [D-106](../reviews/whitelist_management.md) owns the policy contract.
 
 ## Migration and approval boundary
@@ -10,19 +10,19 @@ obtained through AWS read-only APIs. Do not start EC2 or send SSM for this prepa
 release approval must explicitly include the bounded maintenance capture below. Config defaults
 and prior tree digests do not prove current effective membership.
 
-The candidate mapping is Common=intersection of all existing materialized Game memberships,
-Game-specific=each membership minus Common. This preserves each current Game's access and grants
-the intersection to future Games. That future-Game meaning is a release approval decision, not a
-property proved by set arithmetic. If the observed files/history do not support it, stop before
-policy migration and report only counts/digests and the ambiguity. Do not reveal member values in
-chat, public documentation, CI or tracked evidence.
+Initial Common is empty. Each existing Game-specific policy preserves that Game's complete current
+effective membership. The earlier intersection candidate is superseded by explicit release approval:
+being present in A and B does not establish permission for future Games. Common membership must be
+set explicitly by an Admin after release. Require exact current effective membership preservation.
+If observed files/history contain ambiguity, stop before policy migration and report only counts and
+digests. Do not reveal member values in chat, public documentation, CI or tracked evidence.
 
 `wishicraft.whitelist_migration.plan` is offline-only. It validates strict UUID/name entries,
 rejects duplicate UUIDs or conflicting names, builds bounded policies and proves exact per-Game
 effective equality (count and canonical digest). It does not read AWS, write tables or touch worlds.
 Preserve exact original file bytes as private evidence as well as normalized membership digests.
 
-## Reviewed release sequence (requires GO)
+## Approved release sequence
 
 1. Recheck canonical wishicraft-dev STS Account against config/stages/dev.yaml, Tokyo region,
    Game records, SystemState, selected/observed Game, world/generation/path, EBS, DNS, locks,
@@ -60,7 +60,7 @@ Preserve exact original file bytes as private evidence as well as normalized mem
    system state, no Lock/workflow/SSM, empty queues, normal alarms and absent DNS.
 
 The policy transaction in step 7 must be generated from the captured private plan, never copied
-from chat. This gate authorizes no mutation now. Live diff uses `--change-set=false`; synth/diff
+from chat. The user approved this bounded sequence with the empty-Common amendment. Live diff uses `--change-set=false`; synth/diff
 does not create or execute a CloudFormation changeset. No Target IAM/resource deployment is needed:
 its existing Games:GetItem already reads dedicated policy records.
 
