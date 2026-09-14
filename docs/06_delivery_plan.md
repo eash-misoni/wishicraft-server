@@ -1,6 +1,6 @@
 # 06. Delivery Plan
 
-> D-107 Host capacity（repository support / production未適用）: [恒久replacement guardとrelease契約](runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。devはt3a.mediumを維持し、m8a.largeへのresize・policy設定・memory増量は別release。Game/UI/lifecycleは変更しない。
+> D-107 Host capacity（m8a.large単独release準備 / production適用待ち）: [恒久replacement guardとrelease契約](runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。dev Targetはm8a.largeへの単独release設定。policy設定・resize結果はrunbookで別記し、memory増量は別slice。Game/UI/lifecycleは変更しない。
 
 > D-106 Whitelist Management: Accepted / production Completed（2026-09-14）。[正本・適用contract](reviews/whitelist_management.md)と[移行・production証跡](runbooks/whitelist_management.md)。初期Commonは空、A/B既存accessはGame-specificへ完全一致で保存。D-105 positive CREATE/materialization deferredは維持。
 

@@ -1,16 +1,19 @@
 # 09. Decisions and Backlog
 
-## D-107 Host capacity / permanent replacement guard（Accepted / production deferred）
+## D-107 Host capacity / permanent replacement guard（Accepted / resize release準備）
 
 2026-09-14、demand-drivenのgeneric repository slice。Game-level compute profileとruntime
 ownership移管を採用せず、既存stage instance_typeへ4候補のallowlistを追加する。
-devはt3a.medium、memoryはXmx 2G/container 2816MiBを維持。resize値は独立release commit。
+generic commit 3a5a018はdev t3a.mediumを維持。今回の独立releaseはTarget設定だけをm8a.largeへ変更し、
+memoryはXmx 2G/container 2816MiBを維持する。production結果はrunbookへ追記する。
 [policy・compatibility・Conditional詳細・preflight/closeout](runbooks/host_capacity.md)を正本とする。
 Target Instanceとattachment、別ownerのretained Data EBSを恒久stack policyのReplace/Delete
 拒否で保護する。Modifyだけを許可し、replacementが必要ならupdate失敗を受け入れる。
 policyはGit JSONをoperatorが明示設定・read-backする。IaC ownership、既存IAM、Gameと
 START/STOP/SWITCH/RESET等の契約は維持。readonly API/未実行previewを検証し削除済み。
-production policy未設定、resize/実deny試験/EC2起動なし。Conditionalを消すための権限緩和は禁止。
+generic sliceではproduction policy未設定、resize/実deny試験/EC2起動なし。後続単独releaseの
+ユーザー承認は恒久policy設定、guarded in-place resizeとSTOPPED/HEALTHYへのcloseoutに限定。
+Conditionalを消すための権限緩和は禁止。
 D-105 positive CREATEとmemory artifact移行、modpack実装は別slice。D-106 Completedを維持する。
 
 

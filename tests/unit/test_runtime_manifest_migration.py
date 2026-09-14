@@ -36,7 +36,21 @@ LEGACY = {
 LEGACY_BYTES = (json.dumps(LEGACY, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def test_historical_renderer_and_new_manifest(tmp_path: Path) -> None:
+def test_historical_migration_rejects_resized_configuration(
+    tmp_path: Path, historical_migration_root: Path
+) -> None:
+    stage = historical_migration_root / "config/stages/dev.yaml"
+    stage.write_text(
+        stage.read_text().replace("    instance_type: t3a.medium", "    instance_type: m8a.large")
+    )
+    with pytest.raises(ValueError, match="configuration changed; predecessor review required"):
+        prepare(historical_migration_root, tmp_path / "bundle", INSTANCE)
+    assert not (tmp_path / "bundle").exists()
+
+
+def test_historical_renderer_and_new_manifest(
+    tmp_path: Path, historical_migration_root: Path
+) -> None:
     import runpy
 
     old = tmp_path / "renderer.py"
@@ -59,7 +73,7 @@ def test_historical_renderer_and_new_manifest(tmp_path: Path) -> None:
     )
     assert rendered.manifest_json.encode() == LEGACY_BYTES
     bundle = tmp_path / "bundle"
-    prepare(ROOT, bundle, INSTANCE)
+    prepare(historical_migration_root, bundle, INSTANCE)
     entries = json.loads((bundle / "install.json").read_text())["files"]
     manifest = next(e for e in entries if e["destination"].endswith("/manifest.json"))
     assert manifest["predecessor"] == hashlib.sha256(LEGACY_BYTES).hexdigest()

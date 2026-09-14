@@ -25,6 +25,7 @@ def inputs(tmp_path: Path) -> dict[str, Any]:
         App(outdir=str(tmp_path / "cdk")), stage=config.stage, project=config.project
     )
     live = dict(Template.from_stack(stack).to_json())
+    live["Resources"]["TargetInstance"]["Properties"]["InstanceType"] = "t3a.medium"
     candidate = deepcopy(live)
     candidate["Resources"]["TargetInstance"]["Properties"]["InstanceType"] = "m8a.large"
     evidence = json.loads(

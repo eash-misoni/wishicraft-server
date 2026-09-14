@@ -1273,7 +1273,7 @@ def test_target_stack_owns_only_the_imported_existing_data_attachment() -> None:
 
     instance = next(iter(template.find_resources("AWS::EC2::Instance").values()))["Properties"]
     assert instance["ImageId"] == "ami-0b4d2909a55ed2c78"
-    assert instance["InstanceType"] == "t3a.medium"
+    assert instance["InstanceType"] == "m8a.large"
     assert "UserData" not in instance
     assert instance["NetworkInterfaces"][0]["SubnetId"] == "subnet-0a70e5682ea8d0bd3"
     assert instance["NetworkInterfaces"][0]["AssociatePublicIpAddress"] is True

@@ -86,7 +86,7 @@ host_runtime:
     stack_name: MinecraftTargetStack-dev
     vpc_id: vpc-0c3cca1e65696ed8e
     subnet_id: subnet-0a70e5682ea8d0bd3
-    instance_type: t3a.medium
+    instance_type: m8a.large
     root_volume_type: gp3
     root_volume_size_gib: 16
     root_volume_encrypted: true

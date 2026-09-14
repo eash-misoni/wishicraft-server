@@ -407,14 +407,14 @@ def test_real_probe_parser_carries_target_and_rejects_different_observation() ->
         )
 
 
-def test_bundle_preserves_world_paths_and_disables_v1_first(tmp_path: Any) -> None:
-    from pathlib import Path
+def test_bundle_preserves_world_paths_and_disables_v1_first(
+    tmp_path: Any, historical_migration_root: Any
+) -> None:
 
     from wishicraft.runtime_migration import prepare
 
-    root = Path(__file__).resolve().parents[2]
     output = tmp_path / "bundle"
-    prepare(root, output, TARGET["instance_id"])
+    prepare(historical_migration_root, output, TARGET["instance_id"])
     files = json.loads((output / "install.json").read_text())["files"]
     assert files[0]["destination"] == "/usr/local/libexec/wishicraft/operation-v1"
     assert "exit 64" in (output / files[0]["source"]).read_text()
@@ -564,13 +564,14 @@ def test_installer_rejects_legacy_stopped_container_until_separate_cleanup(
     installer.require_no_container()
 
 
-def test_migration_predecessors_are_installed_artifacts_not_regenerated(tmp_path: Any) -> None:
-    from pathlib import Path
+def test_migration_predecessors_are_installed_artifacts_not_regenerated(
+    tmp_path: Any, historical_migration_root: Any
+) -> None:
 
     from wishicraft.runtime_migration import prepare
 
     output = tmp_path / "bundle"
-    prepare(Path(__file__).resolve().parents[2], output, TARGET["instance_id"])
+    prepare(historical_migration_root, output, TARGET["instance_id"])
     entries = {
         entry["destination"]: entry
         for entry in json.loads((output / "install.json").read_text())["files"]

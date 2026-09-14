@@ -1,7 +1,9 @@
 # D-107 Host capacity: guarded CloudFormation resize
 
-**Accepted repository contract, 2026-09-14. Production policy installation and resize are deferred.**
-The main branch keeps dev `t3a.medium`. This document does not authorize production writes.
+**Accepted repository contract, 2026-09-14. Isolated resize release candidate.**
+Generic support commit `3a5a018` kept dev `t3a.medium`. The subsequent release changes only the
+Target selector to `m8a.large`, under explicit user approval for guarded production resize.
+Approval and candidate configuration are not evidence of application; record the result below.
 
 ## Capacity and ownership
 
@@ -14,8 +16,10 @@ application CloudFormation call, or runtime ModifyInstanceAttribute permission.
 `StageConfig.target_instance_type` validates the allowlist; the Target stack explicitly renders
 `AWS::EC2::Instance.InstanceType`. Null, unsupported values and profile labels fail closed.
 Phase 1 `compute.instance_type` is frozen history. prod placeholders are not resolved.
-The generic commit changes neither deployed nor requested capacity. A future release commit
+The generic commit changes neither deployed nor requested capacity. The isolated release commit
 changes only the dev Target type to `m8a.large`; review that commit and its CI before deployment.
+Historical migration tests use isolated baseline configuration fixtures; the production migration
+predecessor-byte guard remains unchanged and rejects this new stage configuration.
 
 Memory remains Xms 1G / Xmx 2G / container 2816MiB for all four types. itzg receives INIT_MEMORY
 and MAX_MEMORY, and Compose supplies mem_limit. Increasing EC2 RAM alone does not increase heap.
@@ -126,7 +130,7 @@ canonical policy. Renamed protected logical IDs require a policy review before d
 
 ## Policy installation, preview and execution
 
-Only after explicit production approval (NOT performed by this repository slice):
+Only after explicit production approval (not performed by the generic support slice):
 
 ```sh
 tools/dev-env run -- aws cloudformation set-stack-policy --profile wishicraft-dev --region ap-northeast-1 --stack-name MinecraftTargetStack-dev --stack-policy-body file://config/stack-policies/target.json
@@ -211,3 +215,17 @@ host lifecycle; there is no live reboot or replacement-denial integration in thi
 - [ExecuteChangeSet API parameters](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_ExecuteChangeSet.html)
 - [CPU option compatibility rules](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-cpu-options-rules.html)
 - [itzg JVM inputs](https://docker-minecraft-server.readthedocs.io/en/latest/configuration/jvm-options/)
+
+## Isolated production release preparation (2026-09-14)
+
+The user approved only Target `t3a.medium -> m8a.large`, permanent policy installation/read-back,
+exact reviewed ChangeSet execution with normal rollback and replacement denied, and stopped-state
+closeout. The user separately included one inspection-only maintenance EC2 start/stop before resize.
+No Minecraft START, CREATE, memory/runtime/IAM/AMI/network/volume configuration changes are included.
+
+Local release gates: 1,305 tests passed, followed by the additional regression proving the historical
+migration still rejects resized configuration (9 migration tests passed). Ruff lint/format and mypy
+197 files passed. Target synth succeeded; CDK template diff and full semantic equality after replacing
+only InstanceType both confirmed the single `t3a.medium -> m8a.large` property change. CI runs only
+on pushed main/PR commits; the release commit must therefore be pushed to obtain its CI result,
+which is a mandatory gate before any production policy or resize operation.
