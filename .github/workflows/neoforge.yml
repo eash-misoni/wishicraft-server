@@ -6,7 +6,7 @@ on:
 jobs:
   pinned-neoforge:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
@@ -16,6 +16,7 @@ jobs:
           python-version: "3.12"
       - run: tools/dev-env run -- uv sync --frozen --all-groups
       - run: sudo --preserve-env=CI .venv/bin/python tests/integration/neoforge_docker.py
+      - run: sudo --preserve-env=CI .venv/bin/python tests/integration/neoforge_host_docker.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

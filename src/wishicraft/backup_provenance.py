@@ -385,6 +385,8 @@ def _decode(value: object) -> object:
         return value["BOOL"]
     if isinstance(value.get("M"), dict):
         return _decode_map(value["M"])
+    if isinstance(value.get("L"), list):
+        return [_decode(item) for item in value["L"]]
     raise ValueError("unsupported DynamoDB attribute")
 
 

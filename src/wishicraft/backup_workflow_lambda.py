@@ -122,7 +122,7 @@ def handler(event: object, context: object) -> dict[str, object]:
                 lease_id=proof.lease_id,
                 catalog=catalog,
                 volume=runtime.coordinator.expected_volume_id,
-                runtime_json=_env("RECOVERY_RUNTIME_JSON"),
+                runtime_json=recovery_runtime_config(),
             )
         runtime.operations.update_step(
             operation_id=proof.owner_operation_id,
@@ -295,6 +295,17 @@ def _string(value: dict[str, object], name: str) -> str:
     if not isinstance(result, str) or not result:
         raise ValueError(f"invalid {name}")
     return result
+
+
+def recovery_runtime_config() -> str:
+    """Lossless transport for the complete integrity-checked snapshot runtime description."""
+    if os.environ.get("GAME_PACKAGES") == "1":
+        import base64
+        import zlib
+
+        encoded = _env("RECOVERY_RUNTIME_ZLIB_BASE64")
+        return zlib.decompress(base64.b64decode(encoded, validate=True)).decode()
+    return _env("RECOVERY_RUNTIME_JSON")
 
 
 def _env(name: str) -> str:

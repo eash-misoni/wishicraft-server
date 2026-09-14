@@ -77,6 +77,10 @@ def item(config: dict[str, Any], table: str, key: str, identity: str) -> dict[st
             return int(value["N"])
         if "M" in value:
             return {k: decode(v) for k, v in value["M"].items()}
+        if "L" in value:
+            return [decode(v) for v in value["L"]]
+        if "BOOL" in value:
+            return value["BOOL"]
         if value.get("NULL"):
             return None
         return value
@@ -331,6 +335,9 @@ def configured_container(container: dict[str, Any], manifest: dict[str, Any]) ->
     )
     if any(actual.get(key) != value for key, value in expected.items()):
         raise ValueError("CONTAINER_ENV_MISMATCH")
+    if "packages" in manifest:
+        receipt = json.loads((ROOT / "receipt.json").read_text())
+        package_module().observed(container, manifest, receipt["target"])
 
 
 def apply(request: dict[str, Any]) -> None:
@@ -344,10 +351,16 @@ def apply(request: dict[str, Any]) -> None:
         lease = item(config, "locks_table", "lock_name", config["lock_name"])
         game = None
         if config.get("game_creation") is True:
-            game = item(config, "games_table", "game_id", operation["target_game_id"])
+            game_id = (
+                operation["switch_source"]["game_id"]
+                if request["action"] == "STOP"
+                and operation["operation_type"] in {"SWITCH", "RESET"}
+                else operation["target_game_id"]
+            )
+            game = item(config, "games_table", "game_id", game_id)
             if game.get("lifecycle_state") != "ACTIVE":
                 raise ValueError("GAME_NOT_REGISTERED")
-            if operation["target_game_id"] not in config["games"]:
+            if game_id not in config["games"]:
                 creation = game["creation"]
                 if creation["config_digest"] != config["config_digest"]:
                     raise ValueError("GAME_CONFIG_MISMATCH")
@@ -370,6 +383,11 @@ def apply(request: dict[str, Any]) -> None:
         ]:
             if hashlib.sha256((ARTIFACTS / name).read_bytes()).hexdigest() != manifest[field]:
                 raise ValueError("ARTIFACT_MISMATCH")
+        package = None
+        if "packages" in manifest:
+            if game is None:
+                raise ValueError("PACKAGE_REGISTRATION_REQUIRED")
+            package = package_module().registered(game, manifest, target["config_digest"])
         if (
             request["action"] == "START"
             and game
@@ -404,7 +422,18 @@ def apply(request: dict[str, Any]) -> None:
             operation["switch_source"] if request["action"] == "RESET_PREPARE" else target
         )
         execute(
-            [
+            (
+                [
+                    "env",
+                    *(
+                        k + "=" + v
+                        for k, v in package_module().projection(target["game_id"], package).items()
+                    ),
+                ]
+                if package
+                else []
+            )
+            + [
                 "bash",
                 "-c",
                 'set -aeu; export WISHICRAFT_RUN_ID="$1"; '
@@ -430,7 +459,10 @@ def apply(request: dict[str, Any]) -> None:
                 raise ValueError("RESET_SOURCE_CONTAINER_REMAINS")
             stopped_environment()
             reset_module().prepare(
-                json.loads(operation["reset_plan"]), receipt=receipt or {}, atomic=atomic
+                json.loads(operation["reset_plan"]),
+                receipt=receipt or {},
+                atomic=atomic,
+                **({"modded": package["loader"]["type"] == "neoforge"} if package else {}),
             )
             return
         if containers:
@@ -474,6 +506,17 @@ def apply(request: dict[str, Any]) -> None:
                 raise ValueError("UNRESOLVED_RUNTIME")
             if receipt and receipt["target"] == target and receipt["phase"] == "stopped":
                 raise ValueError("STOPPED_RUN_CANNOT_RESTART")
+            if package is not None and not containers:
+                stopped_environment()
+                package_module().materialize_mods(target, package, atomic)
+                # Network acquisition may consume time; renew authorization before projection/start.
+                authorize(
+                    request,
+                    operation,
+                    item(config, "locks_table", "lock_name", config["lock_name"]),
+                    config,
+                    datetime.now(timezone.utc),
+                )
             if config.get("whitelist_management") is True and not containers:
                 stopped_environment()
                 try:
@@ -511,7 +554,15 @@ def apply(request: dict[str, Any]) -> None:
                 + "\n"
                 + "GAME_DIRECTORY="
                 + target["data_source"]
-                + "\n",
+                + "\n"
+                + (
+                    "".join(
+                        k + "=" + v + "\n"
+                        for k, v in package_module().projection(target["game_id"], package).items()
+                    )
+                    if package
+                    else ""
+                ),
             )
             if not containers:
                 secret_helper = "rcon-secret-v2" if "games" in config else "rcon-secret-v1"
@@ -588,6 +639,16 @@ def reset_module() -> Any:
     import importlib
 
     return importlib.import_module("reset_worlds")
+
+
+def package_module() -> Any:
+    if __package__:
+        from wishicraft.artifacts import game_package
+
+        return game_package
+    import importlib
+
+    return importlib.import_module("game_package")
 
 
 def main() -> int:

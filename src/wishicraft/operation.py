@@ -985,6 +985,8 @@ def _attribute(value: object) -> dict[str, object]:
         return {"N": str(value)}
     if isinstance(value, dict):
         return {"M": _attribute_map(value)}
+    if isinstance(value, list):
+        return {"L": [_attribute(item) for item in value]}
     raise TypeError("unsupported operation value")
 
 
@@ -1003,6 +1005,8 @@ def _decode_attribute(value: object) -> object:
         return int(value["N"])
     if value.get("NULL") is True:
         return None
+    if isinstance(value.get("L"), list):
+        return [_decode_attribute(item) for item in value["L"]]
     raw_map = value.get("M")
     if isinstance(raw_map, dict):
         return {key: _decode_attribute(item) for key, item in raw_map.items()}

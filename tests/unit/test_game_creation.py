@@ -339,3 +339,44 @@ def test_host_bundle_reproduces_predecessors_and_never_moves_worlds(tmp_path: Pa
     assert plan["backup_namespace"] == "game-creation-v1"
     with pytest.raises(FileExistsError):
         prepare(root, tmp_path / "bundle", receipt)
+
+
+def test_pinned_neoforge_create_is_immutable_metadata_only(
+    creation: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from wishicraft.artifacts import game_package
+
+    monkeypatch.setenv("GAME_PACKAGES", "1")
+    _, sessions, backend, launches, _ = creation
+    before = copy.deepcopy(backend.db.records)
+    request = payload(package_id="create-survival")
+    jar = login(sessions)
+    assert post(creation, jar, request)["statusCode"] == 202
+    assert post(creation, jar, request)["statusCode"] == 200
+    assert launches == [] and backend.db.transactions == 1
+    for key, value in before.items():
+        assert backend.db.records[key] == value
+    game_id = backend.db.records["games", REGISTRY_KEY]["registered_ids"]["SS"][0]
+    game = {k: decode(v) for k, v in backend.db.records["games", game_id].items()}
+    package = game_package.load()[1]
+    assert game["package"]["definition"] == package
+    assert game["creation"]["package_digest"] == game_package.digest(package)
+    assert game["materialization_state"] == "UNMATERIALIZED"
+    assert game["world"]["generation"] == 1
+    request["creation"]["package_id"] = "vanilla"
+    assert post(creation, jar, request)["statusCode"] == 409
+
+
+def test_package_selection_disabled_or_unknown(
+    creation: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert (
+        post(creation, login(creation[1]), payload(package_id="create-survival"))["statusCode"]
+        == 400
+    )
+    monkeypatch.setenv("GAME_PACKAGES", "1")
+    assert (
+        post(creation, login(creation[1]), payload(package_id="latest-modpack"))["statusCode"]
+        == 400
+    )
+    assert creation[2].db.transactions == 0

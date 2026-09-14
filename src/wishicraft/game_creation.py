@@ -77,7 +77,10 @@ def complete_materialization(runtime: Any, proof: Any, now: datetime) -> None:
 
 
 def validate(value: object) -> dict[str, Any]:
-    if not isinstance(value, dict) or set(value) != {"display_name", "seed", "reset"}:
+    if not isinstance(value, dict) or set(value) not in (
+        {"display_name", "seed", "reset"},
+        {"display_name", "seed", "reset", "package_id"},
+    ):
         raise ValueError("invalid creation fields")
     name, seed, reset = value["display_name"], value["seed"], value["reset"]
     if (
@@ -97,6 +100,11 @@ def validate(value: object) -> dict[str, Any]:
         raise ValueError("invalid numeric seed")
     if type(reset) is not bool:
         raise ValueError("invalid reset capability")
+    if "package_id" in value and (
+        not isinstance(value["package_id"], str)
+        or re.fullmatch(r"[a-z][a-z0-9-]{1,63}", value["package_id"]) is None
+    ):
+        raise ValueError("invalid package selection")
     return dict(value)
 
 
@@ -128,6 +136,21 @@ def create(
     defaults: dict[str, Any],
 ) -> dict[str, object]:
     payload = validate(value)
+    package = None
+    if "package_catalog" in defaults:
+        from wishicraft.artifacts import game_package
+
+        matches = [
+            p
+            for p in game_package.catalog(defaults["package_catalog"])
+            if p["package_id"] == payload.get("package_id", defaults["package"]["package_id"])
+        ]
+        if len(matches) != 1:
+            raise ValueError("package selection is not deployed")
+        package = matches[0]
+        defaults = {**defaults, "package": package}
+    elif "package_id" in payload:
+        raise ValueError("package selection is not deployed")
     identity = hashlib.sha256(("wishicraft-create-v1|" + key).encode()).hexdigest()
     game_id, operation_id = "game-" + identity, "op-" + identity
     request = OperationRequest(
@@ -180,6 +203,13 @@ def create(
         if payload["reset"]
         else None,
     }
+    if package is not None:
+        game["package"] = {
+            "package_id": package["package_id"],
+            "package_version": package["package_version"],
+            "definition": package,
+        }
+        game["creation"]["package_digest"] = game_package.digest(package)  # type: ignore[index]
     op = repository._operation_put(request, None)
     put = op["Put"]
     assert isinstance(put, dict) and isinstance(put["Item"], dict)

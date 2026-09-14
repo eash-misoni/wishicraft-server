@@ -58,6 +58,7 @@ def render_boot_time_artifacts(
     targeted: bool = False,
     games: tuple[str, ...] | None = None,
     reset_policies: dict[str, dict[str, int]] | None = None,
+    packages: list[dict[str, object]] | None = None,
 ) -> RenderedHostRuntime:
     """Render one canonical boot-time configuration from validated sources of truth."""
     runtime = _runtime_mapping(stage.values)
@@ -130,6 +131,44 @@ def render_boot_time_artifacts(
         service["labels"]["com.wishicraft.run-id"] = "${WISHICRAFT_RUN_ID:?targeted START required}"  # type: ignore[index]
     if games:
         volumes[0]["bind"] = {"create_host_path": False}
+    if packages is not None:
+        from wishicraft.artifacts.game_package import catalog
+        from wishicraft.artifacts.game_package import environment as package_environment
+
+        packages = catalog(packages)
+        if not games or not targeted:
+            raise ValueError("packages require targeted multi-Game runtime")
+        legacy = [
+            p
+            for p in packages
+            if p["package_id"] == "vanilla" and p["package_version"] == "initial-fixed-version"
+        ]
+        if (
+            len(legacy) != 1
+            or legacy[0]["minecraft_version"] != version
+            or server_type != "VANILLA"
+        ):
+            raise ValueError("legacy Vanilla package must match the stage lock")
+        del environment["TYPE"], environment["VERSION"]
+        service["environment"] = {
+            key: "${WISHICRAFT_PACKAGE_" + key + "?verified package required}"
+            for key in package_environment(legacy[0])
+        }
+        labels = service["labels"]
+        assert isinstance(labels, dict)
+        labels["com.wishicraft.package-digest"] = (
+            "${WISHICRAFT_PACKAGE_DIGEST:?verified package required}"
+        )
+        for suffix, destination in [("", "/wishicraft-package")]:
+            volumes.append(
+                {
+                    "type": "bind",
+                    "source": "${GAME_PACKAGE_DIRECTORY:?verified package required}" + suffix,
+                    "target": destination,
+                    "read_only": True,
+                    "bind": {"create_host_path": False},
+                }
+            )
     compose = {
         "name": "wishicraft-host-runtime",
         "services": {"minecraft": service},
@@ -177,6 +216,8 @@ def render_boot_time_artifacts(
     }
     if reset_policies is not None:
         manifest["reset_policies"] = reset_policies
+    if packages is not None:
+        manifest["packages"] = packages
     canonical_manifest = json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n"
     if games:
         manifest["games"] = list(games)

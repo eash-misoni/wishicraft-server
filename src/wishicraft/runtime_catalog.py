@@ -89,6 +89,23 @@ def bind_operation(runtime: Any, operation_id: str, *, action: str) -> None:
         game_id = raw["target_game_id"]["S"]
     runtime.game_id = game_id
     catalog.data_source(game_id)
+    if os.environ.get("GAME_PACKAGES") == "1":
+        from wishicraft.artifacts.game_package import load, registered
+        from wishicraft.backup_provenance import _decode_map
+
+        game = runtime.targets.api.get_item(
+            TableName=os.environ["GAMES_TABLE"],
+            Key={"game_id": {"S": game_id}},
+            ConsistentRead=True,
+        )["Item"]
+        registered(
+            _decode_map(game),
+            {
+                "packages": load(),
+                "games": RuntimeCatalog.parse(os.environ["RUNTIME_GAMES"]).game_ids,
+            },
+            runtime.config_digest,
+        )
     if os.environ.get("RESET_CONTRACT") == "1":
         from wishicraft.world_reference import selected_source
 

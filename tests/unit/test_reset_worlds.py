@@ -268,3 +268,51 @@ def test_start_return_before_world_generation_is_not_ready(layout: Path) -> None
     (new / "world/level.dat").unlink()
     with pytest.raises(ValueError, match="EXISTING_WORLD_MISSING"):
         worlds.initialized(document["target"], atomic, require=False)
+
+
+def test_modded_reset_preserves_game_configs_excludes_world_serverconfig(layout: Path) -> None:
+    for name in (
+        "config/nested/create.toml",
+        "defaultconfigs/farmersdelight-server.toml",
+        "world/serverconfig/create-server.toml",
+        "mods/old.jar",
+        "libraries/loader.jar",
+    ):
+        path = layout / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("synthetic = true\n")
+    document = plan(layout, 1)
+    receipt = {
+        "phase": "stopped",
+        "target": document["source"],
+        "stop": {"save_confirmed": True, "removal_ready": True},
+    }
+    calls = 0
+
+    def interrupted(path: Path, value: str) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 3:
+            raise OSError("interrupted config preparation")
+        atomic(path, value)
+
+    with pytest.raises(OSError):
+        worlds.prepare(
+            document,
+            receipt=receipt,
+            atomic=interrupted,
+            uid=os.getuid(),
+            gid=os.getgid(),
+            modded=True,
+        )
+    for _ in range(2):
+        worlds.prepare(
+            document, receipt=receipt, atomic=atomic, uid=os.getuid(), gid=os.getgid(), modded=True
+        )
+    new = Path(document["target"]["data_source"])
+    for name in ("config/nested/create.toml", "defaultconfigs/farmersdelight-server.toml"):
+        assert (new / name).read_bytes() == (layout / name).read_bytes()
+    assert not (new / "world").exists()
+    assert not (new / "mods").exists() and not (new / "libraries").exists()
+    assert (layout / "world/serverconfig/create-server.toml").is_file()
+    assert (layout / "world/players/data/player.dat").read_bytes() == b"old inventory"

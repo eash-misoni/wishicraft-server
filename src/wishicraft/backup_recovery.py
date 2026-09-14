@@ -57,6 +57,13 @@ def recovery_digest(value: str) -> str:
     if not isinstance(runtime, dict) or set(runtime) != required:
         raise ValueError("invalid recovery runtime")
     manifest = json.loads(runtime["manifest_json"])
+    if "packages" in manifest:
+        from wishicraft.artifacts.game_package import registered
+
+        for record in games.values():
+            registered(
+                record, manifest, hashlib.sha256(runtime["manifest_json"].encode()).hexdigest()
+            )
     if (
         (
             set(manifest["games"]) != set(catalog.game_ids)

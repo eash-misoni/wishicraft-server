@@ -138,13 +138,18 @@ def _handle(event: object, context: object) -> dict[str, object]:
         value = event.pop("creation", None)
         _parse_event(event)
         try:
+            defaults = json.loads(_required_environment("GAME_CREATION_DEFAULTS"))
+            if os.environ.get("GAME_PACKAGES") == "1":
+                from wishicraft.artifacts.game_package import load
+
+                defaults["package_catalog"] = load()
             return create(
                 _get_service()._repository,
                 value=value,
                 key=event["idempotency_key"],
                 actor=web,
                 now=datetime.now(UTC),
-                defaults=json.loads(_required_environment("GAME_CREATION_DEFAULTS")),
+                defaults=defaults,
             )
         except ValueError as error:
             raise WebRejected("invalid_input") from error

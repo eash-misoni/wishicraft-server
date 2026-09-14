@@ -86,7 +86,7 @@ def tree(path: Path, *, device: int) -> int:
     return sum(tree(child, device=device) for child in path.iterdir())
 
 
-def files(source: Path, seed: int) -> dict[str, bytes]:
+def files(source: Path, seed: int, *, modded: bool = False) -> dict[str, bytes]:
     if not (source / "world/level.dat").is_file():
         raise ValueError("RESET_SOURCE_WORLD_MISSING")
     result = {}
@@ -115,6 +115,19 @@ def files(source: Path, seed: int) -> dict[str, bytes]:
         raise ValueError("RESET_CUSTOM_PROPERTIES_UNSUPPORTED")
     lines = [line for line in lines if not line.startswith("level-seed=")]
     result["server.properties"] = ("\n".join([*lines, "level-seed=" + str(seed)]) + "\n").encode()
+    if modded:
+        for name in ("config", "defaultconfigs"):
+            root = source / name
+            if not root.exists() and not root.is_symlink():
+                continue
+            if not stat.S_ISDIR(root.lstat().st_mode):
+                raise ValueError("RESET_MOD_CONFIG_IDENTITY")
+            tree(root, device=source.stat().st_dev)
+            for path in sorted(root.rglob("*")):
+                if path.is_file():
+                    value = path.read_bytes()
+                    value.decode("utf-8")
+                    result[str(path.relative_to(source))] = value
     return result
 
 
@@ -125,6 +138,7 @@ def prepare(
     atomic: Callable[[Path, str], None],
     uid: int = 993,
     gid: int = 993,
+    modded: bool = False,
 ) -> None:
     game, world = plan["target"]["game_id"], plan["target"]["run_id"]
     target = parent(game, world)
@@ -158,7 +172,7 @@ def prepare(
     used = tree(source, device=GAMES.stat().st_dev)
     if shutil.disk_usage(GAMES).free < max(plan["policy"]["minimum_free_bytes"], 2 * used):
         raise ValueError("RESET_INSUFFICIENT_CAPACITY")
-    content = files(source, plan["seed"])
+    content = files(source, plan["seed"], modded=modded)
     hashes = {k: hashlib.sha256(v).hexdigest() for k, v in content.items()}
     if not owner_path(target).exists():
         if target.exists():
@@ -173,8 +187,19 @@ def prepare(
         raise ValueError("RESET_SOURCE_CHANGED_DURING_PREPARATION")
     server = target / "server"
     server.mkdir(mode=0o750, exist_ok=True)
-    if server.is_symlink() or any(p.name not in content for p in server.iterdir()):
+    allowed = {Path(name) for name in content}
+    allowed |= {p for name in content for p in Path(name).parents if str(p) != "."}
+    if server.is_symlink() or any(p.relative_to(server) not in allowed for p in server.rglob("*")):
         raise ValueError("RESET_UNKNOWN_PREPARATION_DATA")
+    tree(server, device=GAMES.stat().st_dev)
+    for relative in sorted(
+        (p for p in allowed if str(p) not in content), key=lambda p: len(p.parts)
+    ):
+        path = server / relative
+        path.mkdir(mode=0o750, exist_ok=True)
+        if not stat.S_ISDIR(path.lstat().st_mode):
+            raise ValueError("RESET_MOD_CONFIG_IDENTITY")
+        os.chown(path, uid, gid)
     for name, value in content.items():
         path = server / name
         if path.exists() or path.is_symlink():
@@ -186,6 +211,10 @@ def prepare(
         os.chown(path, uid, gid)
         path.chmod(0o640)
     os.chown(server, uid, gid)
+    for relative in sorted(
+        (p for p in allowed if str(p) not in content), key=lambda p: -len(p.parts)
+    ):
+        sync_directory(server / relative)
     sync_directory(target)
     atomic(owner_path(target), json.dumps({**existing, "phase": "prepared"}))
 

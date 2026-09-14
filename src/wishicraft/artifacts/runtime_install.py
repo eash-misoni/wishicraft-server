@@ -105,7 +105,12 @@ def install() -> None:
         [] if context is None else [context["run_id"], context["game_id"], context["data_source"]]
     )
     run(
-        [
+        (
+            ["env", *(key + "=" + value for key, value in manifest["package_environment"].items())]
+            if "package_environment" in manifest
+            else []
+        )
+        + [
             "bash",
             "-c",
             "set -aeu; source /etc/wishicraft/host-runtime.env; "

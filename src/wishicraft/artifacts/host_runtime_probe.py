@@ -400,9 +400,40 @@ def protocol_not_applicable() -> dict[str, Any]:
     }
 
 
-def version_matches_expected(reported_version: str) -> bool:
-    pattern = rf"(?:^|[^0-9.]){re.escape(EXPECTED_MINECRAFT_VERSION)}(?:$|[^0-9.])"
+def version_matches_expected(
+    reported_version: str, expected: str = EXPECTED_MINECRAFT_VERSION
+) -> bool:
+    pattern = rf"(?:^|[^0-9.]){re.escape(expected)}(?:$|[^0-9.])"
     return re.search(pattern, reported_version) is not None
+
+
+def package_version(container_id: str) -> str:
+    path = "/etc/wishicraft/host-runtime/manifest.json"
+    if not os.path.exists(path):
+        return EXPECTED_MINECRAFT_VERSION
+    with open(path, "rb") as stream:
+        manifest_bytes = stream.read()
+    manifest = json.loads(manifest_bytes)
+    if "packages" not in manifest:
+        return EXPECTED_MINECRAFT_VERSION
+    with open("/var/lib/wishicraft/runtime/receipt.json", encoding="utf-8") as stream:
+        target = json.load(stream)["target"]
+    if hashlib.sha256(manifest_bytes).hexdigest() != target["config_digest"]:
+        raise ValueError("PACKAGE_MANIFEST_MISMATCH")
+    for name, field in (("compose.yaml", "compose_sha256"), ("runtime.env", "runtime_env_sha256")):
+        with open("/etc/wishicraft/host-runtime/" + name, "rb") as stream:
+            if hashlib.sha256(stream.read()).hexdigest() != manifest[field]:
+                raise ValueError("PACKAGE_ARTIFACT_MISMATCH")
+    actual = json.loads(run("docker", "inspect", container_id).stdout)[0]
+    if actual["Config"]["Labels"].get("com.wishicraft.run-id") != target["run_id"]:
+        raise ValueError("PACKAGE_RUN_MISMATCH")
+    try:
+        from wishicraft.artifacts.game_package import observed
+    except ImportError:
+        import importlib
+
+        observed = importlib.import_module("game_package").observed
+    return str(observed(actual, manifest, target)["minecraft_version"])
 
 
 def observe_protocol(container_id: str) -> tuple[dict[str, Any], str, bool]:
@@ -473,7 +504,10 @@ def observe_protocol(container_id: str) -> tuple[dict[str, Any], str, bool]:
             raise ValueError
     except (ValueError, json.JSONDecodeError):
         return observation, "unknown", False
-    version_match = version_matches_expected(reported_version)
+    try:
+        version_match = version_matches_expected(reported_version, package_version(container_id))
+    except (OSError, KeyError, ValueError, TypeError):
+        return observation, "unknown", False
     observation.update(
         {
             "result": "success",

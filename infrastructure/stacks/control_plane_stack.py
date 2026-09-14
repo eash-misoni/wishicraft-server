@@ -58,6 +58,9 @@ class ControlPlaneStack(Stack):
         )
         if game_creation and (not games or reset_policies is None):
             raise ValueError("Game creation requires the current shared runtime and Reset contract")
+        package_support = self.node.try_get_context("game_packages") == "true"
+        if package_support and not game_creation:
+            raise ValueError("Game packages require CREATE and the shared runtime contract")
         raw_tags = project.values["resource_tags"]
         assert isinstance(raw_tags, dict)
         tags = resource_tags(
@@ -947,6 +950,8 @@ class ControlPlaneStack(Stack):
 
             catalog = RuntimeCatalog.parse(__import__("json").dumps(games))
             catalog.data_source(project.initial_game_id)
+            from wishicraft.artifacts.game_package import load as load_packages
+
             rendered = render_boot_time_artifacts(
                 project,
                 stage,
@@ -957,6 +962,7 @@ class ControlPlaneStack(Stack):
                 targeted=True,
                 games=games,
                 reset_policies=reset_policies,
+                packages=load_packages() if package_support else None,
             )
             switch_role = iam.Role(
                 self, "SwitchWorkflowRole", assumed_by=iam.ServicePrincipal("states.amazonaws.com")
@@ -1068,6 +1074,8 @@ class ControlPlaneStack(Stack):
                     if isinstance(child, lambda_.Function) and child.node.id in registry_readers:
                         child.add_environment("GAME_CREATION", "1")
                         child.add_environment("GAMES_TABLE", games_table.table_name)
+                        if package_support:
+                            child.add_environment("GAME_PACKAGES", "1")
                         if child.node.id in {"RetentionTaskFunction", "DiscordCommandFunction"}:
                             child.add_to_role_policy(
                                 iam.PolicyStatement(
@@ -1089,18 +1097,25 @@ class ControlPlaneStack(Stack):
                     )
                 )
             backup_task.add_environment("GAMES_TABLE", games_table.table_name)
-            backup_task.add_environment(
-                "RECOVERY_RUNTIME_JSON",
-                __import__("json").dumps(
-                    {
-                        "manifest_json": rendered.manifest_json,
-                        "runtime_env": rendered.runtime_env,
-                        "compose_yaml": rendered.compose_yaml,
-                        **({"creation_config": creation_defaults} if game_creation else {}),
-                    },
-                    separators=(",", ":"),
-                ),
+            recovery_runtime = __import__("json").dumps(
+                {
+                    "manifest_json": rendered.manifest_json,
+                    "runtime_env": rendered.runtime_env,
+                    "compose_yaml": rendered.compose_yaml,
+                    **({"creation_config": creation_defaults} if game_creation else {}),
+                },
+                separators=(",", ":"),
             )
+            if package_support:
+                import base64
+                import zlib
+
+                backup_task.add_environment(
+                    "RECOVERY_RUNTIME_ZLIB_BASE64",
+                    base64.b64encode(zlib.compress(recovery_runtime.encode(), 9)).decode(),
+                )
+            else:
+                backup_task.add_environment("RECOVERY_RUNTIME_JSON", recovery_runtime)
             backup_task.add_to_role_policy(
                 iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[games_table.table_arn])
             )

@@ -97,8 +97,10 @@ def main() -> None:
             for _ in range(120):
                 info = json.loads(command("docker", "inspect", name))[0]
                 assert info["State"]["Running"], "candidate container exited"
-                result = subprocess.run(["docker", "exec", name, "mc-health"], capture_output=True)
-                if result.returncode == 0:
+                health_result = subprocess.run(
+                    ["docker", "exec", name, "mc-health"], capture_output=True
+                )
+                if health_result.returncode == 0:
                     break
                 time.sleep(5)
             else:
@@ -120,7 +122,7 @@ def main() -> None:
                     == mod["sha256"]
                 )
             for x, block in [(0, "create:andesite_casing"), (1, "farmersdelight:stove")]:
-                result = command(
+                block_result = command(
                     "docker",
                     "exec",
                     name,
@@ -135,8 +137,10 @@ def main() -> None:
                     "0",
                     block,
                 )
-                assert "Changed the block" in result or "Could not set the block" in result
-                print("REGISTERED_BLOCK", block, result.strip(), flush=True)
+                assert (
+                    "Changed the block" in block_result or "Could not set the block" in block_result
+                )
+                print("REGISTERED_BLOCK", block, block_result.strip(), flush=True)
             print("NEOFORGE_READY", cycle, package["loader"]["version"], flush=True)
             print(command("docker", "exec", name, "rcon-cli", "save-all", "flush"), flush=True)
             command("docker", "stop", "--time", "150", name, timeout=180)
