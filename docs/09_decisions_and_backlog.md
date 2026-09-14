@@ -1,6 +1,6 @@
 # 09. Decisions and Backlog
 
-## D-106 Whitelist Management（Accepted / production release承認済み・実行前）
+## D-106 Whitelist Management（Accepted / production Completed）
 
 2026-09-14、D-101第4単位。通常repository実装・tests・docs・CIとread-only調査を委任。
 [正本・Common/追加許可・ゲーム内変更・起動適用・recovery契約](reviews/whitelist_management.md)、
@@ -10,6 +10,8 @@ Webを正本とし、Common ∪ Game-specific、UUID identity、Admin限定短�
 既存Games tableの専用policy itemを使いA/B recordは変更しない。移行は実ファイル取得後の
 完全一致証明が必須で、現在停止中hostの未取得内容を推測しない。基準ade0d89への明示GOで限定production releaseを承認。初期Commonは空、A/Bの現在参加者を各Game-specificへ保存する。intersection案は不採用とし、将来Gameへの許可を推測しない。
 D-105 positive CREATE/materialization deferredを維持する。OP/ban/chat/runtime一般化は対象外。
+
+2026-09-14、修正HEAD 8b80a11（CI 34793907654、1,264 tests成功）を限定release。停止receipt・predecessor完全一致後の3-file host更新、EC2再停止、CP→policy atomic insert→Webを適用。初期Common 0件、A/B-specific各1件、移行前後effective count/digest完全一致。実Admin login・no-op再保存・同一request照合とsecurity拒否を確認。A/Bの920-entry tree・metadata、9 Snapshot・16 provenance不変。Minecraft起動・Game作成・実membership変更なし。最終STOPPED/HEALTHY、Lock/workflow/SSMなし、3 queue空、45 alarms OK。maintenance alarmは01:11:53 UTCに自然復帰。runtime投影のproduction観測は次回正規起動時、Docker/integration実証とは区別する。[closeout](runbooks/whitelist_management.md#production-closeout-2026-09-14)参照。
 
 ## D-105 Minimal Game Creation（Accepted / production deployed, positive CREATE/materialization deferred）
 

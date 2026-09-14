@@ -1,6 +1,6 @@
 # 05. Data and Interface Contracts
 
-> D-106 Whitelist Management: repository実装・production承認待ち。[現在のrelease contract](reviews/whitelist_management.md)と[移行gate](runbooks/whitelist_management.md)。D-105のpositive CREATE/materialization deferredは維持。
+> D-106 Whitelist Management: Accepted / production Completed（2026-09-14）。[正本・適用contract](reviews/whitelist_management.md)と[移行・production証跡](runbooks/whitelist_management.md)。初期Commonは空、A/B既存accessはGame-specificへ完全一致で保存。D-105 positive CREATE/materialization deferredは維持。
 
 > Minimal Game Creation: D-105 Accepted / production deployed, positive CREATE/materialization deferred（2026-09-13）。[登録／初回起動／RESET／recoveryの差分契約](reviews/minimal_game_creation.md)、[production gate](runbooks/minimal_game_creation.md)。適用済みD-096〜104契約とA/Bは維持する。
 

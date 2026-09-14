@@ -1,11 +1,11 @@
 # Whitelist Management production gate
 
-**Production release authorized against ade0d89, with empty-Common migration amendment; execution pending.**
+**Production Completed (2026-09-14), under ade0d89 approval with the empty-Common amendment.**
 [D-106](../reviews/whitelist_management.md) owns the policy contract.
 
 ## Migration and approval boundary
 
-The current EC2 is stopped. Fresh A/B whitelist contents, owner/mode and file digests cannot be
+At preparation the EC2 was stopped. Fresh A/B whitelist contents, owner/mode and file digests cannot be
 obtained through AWS read-only APIs. Do not start EC2 or send SSM for this preparation. A single
 release approval must explicitly include the bounded maintenance capture below. Config defaults
 and prior tree digests do not prove current effective membership.
@@ -118,3 +118,74 @@ first boot and explicitly verifies those attributes after stopping. The pinned i
 umask is 0002; this does not authorize relaxing the production file identity guard. Failed evidence
 is retained. Finalized gate HEAD must pass the full CI, including corrected RESET generations;
 the exact final run is reported in the handoff rather than predicting an uncompleted result.
+
+
+## Production closeout 2026-09-14
+
+The approved amendment was implemented and deployed at `8b80a11620b54b22317545c28d431b01ebd0a340`.
+[CI 34793907654](https://github.com/eash-misoni/wishicraft-server/actions/runs/34793907654) passed
+all three jobs, 1,264 tests, lint/format/type checks, synth, real browser and pinned-image Docker
+Whitelist command convergence plus RESET generations. Local Docker CLI remains unavailable.
+The final documentation commit's CI is reported separately in the handoff.
+
+**Initial Common = empty.** Each A/B Game-specific policy stores the complete current membership
+captured from its exact current whitelist file. Both have one entry, revision 1; Common has zero
+entries, revision 1. Both effective lists match their pre-migration count and canonical SHA-256:
+`6225ef4efa55aa0fe9331067f3ac1feac2e224b3e9cee8b5e0def2c0e127f5af`.
+No member name/UUID/source bytes are included in tracked evidence. Common is populated only by a
+future explicit Admin choice, not inferred from shared membership.
+
+Execution and read-back:
+
+- Captured Web/Discord/Admission concurrency was UNSET; all three were temporarily zero.
+- Inspection-only EC2 startup verified the existing Data EBS device/UUID, stopped receipt,
+  no container/listener/runtime job, UID/GID 993, safe file mode/single-link, and all three whitelist
+  security properties true. Free bytes were 31,289,032,704; this is not future capacity reservation.
+- On the user's resume request, fresh read-back established known predecessor artifacts, no policy
+  items, unchanged CP/Web and maintenance concurrency zero. No completed write was repeated.
+- Inactive-only host update changed the contract/wrapper and added the helper. Exact target hashes,
+  owner/mode and unchanged stopped receipt were verified. A/B's 920-entry tree retained digest
+  `f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c`.
+  The actual whitelist file bytes were unchanged; migration did not project runtime files.
+- EC2 was stopped again with DNS absent. CP reached UPDATE_COMPLETE; all 11 Lambdas and the exact
+  template were read back. The policy transaction inserted exactly three absent records, with
+  unchanged Game and no-Lock/registry conditions. No raw overwrite or cleanup occurred.
+- Effective equality was re-proved, Web reached UPDATE_COMPLETE, both Lambda codes were verified,
+  and all three concurrency settings returned to their exact captured UNSET values.
+
+Real Admin Edge login verified empty Common, A/B effective lists, Game-specific source labels,
+edit visibility and the explicit next-start/removal notice. One **現在の設定を再保存** performed a
+Common no-op; its single WHITELIST Operation succeeded, actor/request binding and same-request
+replay/read-back matched, and all policy revisions/memberships stayed identical. No runtime Lock
+or workflow was created. Authenticated missing/invalid CSRF and foreign Origin returned 403;
+malformed player name returned 400. Unauthenticated requests returned 401 and old execute-api
+writes returned 421. Player rejection remains synthetic boundary/CI evidence; no role was changed.
+All 13 public pages were hash-identical and contained no captured member values.
+
+The initial negative harness expected a different rejection status. Diagnostic runs were retained;
+authentication precedes foreign-Origin checks for anonymous requests, while old-origin rejection
+uses 421. Corrected independent evidence and real authenticated Origin/CSRF tests passed; no
+production implementation was changed. Initial resource read-back used a 100-item bounded API;
+final paginated read-back verified all 11 CP Lambdas and all six workflow definitions.
+
+Final read-only inventory at 01:21:11 UTC: STOPPED/HEALTHY, selected A, no Lock/active workflow/SSM,
+three empty queues, 45 alarms OK. Exact A/B records, Desired state fields, nine Snapshot inventory
+and sixteen provenance records were unchanged. Observation timestamps naturally advanced;
+maintenance temporarily produced DEGRADED while EC2 ran. DesiredStoppedEc2Running entered ALARM
+at 01:06:53 UTC and naturally returned OK at 01:11:53 UTC. No SystemState repair or alarm suppression
+was used. IAM, resources and workflow definitions were unchanged.
+
+No actual membership was added/removed for E2E, no Minecraft started, no Game was created, and no
+Snapshot was made. Minecraft `/whitelist` changes remain temporary, including graceful STOP and
+crash; Web RUNNING changes apply only at the next safe startup preparation. Actual production
+runtime projection is observed at the next normal authorized START/SWITCH; its current evidence
+is Docker/integration plus production wiring, not a claimed live runtime test. D-105 remains
+**production deployed, positive CREATE/materialization deferred**. RETENTION delete and
+Runtime / Version / MOD Extension were not started. Policy loss since the last successful BACKUP
+remains the documented boundary; no continuous policy backup was added.
+
+[Sanitized production evidence](../evidence/whitelist_management_production_2026-09-14.json)
+contains migration proofs, installed artifact hashes, deployment read-back, no-op evidence and
+final state. Exact source bytes, member-bearing screenshots and detailed actor records are private
+local evidence only. The rollback boundary above remains valid: do not revert to file authority
+after genuine policy changes without an explicit access-preserving plan.

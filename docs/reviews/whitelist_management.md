@@ -1,11 +1,11 @@
 # D-106 Whitelist Management
 
-**Accepted release contract; production execution pending.**
+**Accepted / production Completed (2026-09-14).**
 D-101 slice 4. D-105 remains production deployed, positive CREATE/materialization deferred.
 This document owns the Whitelist semantics; the [runbook](../runbooks/whitelist_management.md)
 owns migration, release evidence and rollback. Production release is authorized against ade0d89 with an empty-Common migration amendment.
 
-## Current implementation audit
+## Pre-release implementation audit
 
 The production-supported runtime is the pinned itzg 2026.7.2 Java25 image, Minecraft Vanilla 26.2,
 online-mode=true, white-list=true, enforce-whitelist=true, UID/GID 993. Existing runtime.env has
@@ -23,7 +23,8 @@ there. Existing START/SWITCH reuse that file; D-098 RESET copies it among Game s
 Snapshot protects the files across the whole Data EBS, including retained old generations. The
 initial configured player was resolved from Mojang in the original setup; configuration is an
 initial value, not evidence that the current A/B files still contain exactly that membership.
-Current file contents/owner/mode require maintenance inspection while the stopped EC2 is online.
+The approved maintenance inspection verified exact current file identity and enforcement settings;
+private source bytes and the unchanged effective membership proofs are recorded in the runbook.
 
 The historical phase8 redesign follow-up proposed file-authoritative per-Game settings. It was
 never an Accepted Whitelist contract. It does not meet this slice's stopped editing and live

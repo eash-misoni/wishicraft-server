@@ -1,6 +1,6 @@
 # wishicraft-server
 
-Whitelist Management（D-106）はrelease承認済み・production実行前です。[正本と適用契約](docs/reviews/whitelist_management.md)、[移行とproduction gate](docs/runbooks/whitelist_management.md)。CommonとGame固有の追加許可をWebで管理し、次回起動で反映する方式です。productionへの適用はまだ行っていません。
+Whitelist Management（D-106）はproduction Completedです。[正本と適用契約](docs/reviews/whitelist_management.md)、[移行・実証結果](docs/runbooks/whitelist_management.md#production-closeout-2026-09-14)。初期Commonは空、A/Bの既存参加許可を各Game-specificへ完全一致で移行しました。実Admin Webのno-op再保存・retryを確認済み。ゲーム内変更は一時的、Web変更は次回起動で適用します。
 
 Existing Operations via Webはproduction Completedです（D-104、2026-09-13）。[管理画面](https://web.wishicraft.net/manage/)から既存5操作を共有Admissionへ接続し、Web START A→SWITCH B→A→STOPの成功、CSRF・15分失効・logout・重複防止・terminal追跡を確認しました。[契約](docs/reviews/existing_operations_web.md)と[release証跡・rollback](docs/runbooks/existing_operations_web.md)を参照してください。最終状態はSTOPPED/HEALTHY。Minimal Game Creationは **production deployed, positive CREATE/materialization deferred**（D-105）です。[契約](docs/reviews/minimal_game_creation.md)と[適用証跡・将来のpositive E2E](docs/runbooks/minimal_game_creation.md)を参照してください。実用GameでCREATEと別承認の初回起動を実証するまでfully production Completedとはしません。
 

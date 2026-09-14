@@ -1,0 +1,407 @@
+{
+  "decision": "D-106",
+  "status": "production Completed",
+  "approval_basis": "ade0d89",
+  "deployed_code_head": "8b80a11620b54b22317545c28d431b01ebd0a340",
+  "initial_common": "empty; future membership requires explicit Admin choice",
+  "migration": {
+    "common_count": 0,
+    "common_revision": 1,
+    "games": {
+      "game-vanilla-main": {
+        "count": 1,
+        "digest": "6225ef4efa55aa0fe9331067f3ac1feac2e224b3e9cee8b5e0def2c0e127f5af",
+        "revision": 1,
+        "exact": true
+      },
+      "game-vanilla-secondary": {
+        "count": 1,
+        "digest": "6225ef4efa55aa0fe9331067f3ac1feac2e224b3e9cee8b5e0def2c0e127f5af",
+        "revision": 1,
+        "exact": true
+      }
+    }
+  },
+  "migration_source": "exact persisted A/B current whitelist bytes, privately captured before migration; no member identities included here",
+  "host": {
+    "install_command": "bffce013-cd66-4b59-b2ba-6fac815d20c7",
+    "readback_command": "24d22da4-1179-4238-9813-041053df6eb0",
+    "files": [
+      {
+        "destination": "/etc/wishicraft/runtime-contract.json",
+        "mode": 384,
+        "predecessor": "536d153ab39a449e86f1805542eb5138c37f7c780d8469db42108ed9b556682e",
+        "sha256": "80d18f5613e150bc47f93cf2435406a8aa12f274475eb605ba0c3a49b14a4ff2",
+        "source": "0.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/operation-v2",
+        "mode": 493,
+        "predecessor": "afa1ba874bd2ca96979524ddf7929894a28db6d4d0025400b193f565db26cd9b",
+        "sha256": "fa56d5a106649e81af3ae98f4a458ae606b18b920da204ec4add5a938798efb8",
+        "source": "1.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/whitelist_policy.py",
+        "mode": 420,
+        "predecessor": null,
+        "sha256": "3fc79d32c4f5e48ad556994382e5ab462180b3e6edf083905eccc9477589d6d5",
+        "source": "2.artifact"
+      }
+    ],
+    "receipt_exact_unchanged": true,
+    "game_tree": {
+      "game_tree_entries": 920,
+      "game_tree_sha256": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+      "free_bytes": 31289032704
+    },
+    "whitelist_bytes_unchanged": true,
+    "minecraft_started": false
+  },
+  "deployment": {
+    "cp": {
+      "stack_status": "UPDATE_COMPLETE",
+      "template_resources_exact": true,
+      "functions": {
+        "wc-dev-admission": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:31.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-auto-stop-evaluator": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:44.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-backup-task": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:12.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-discord-command": {
+          "code_sha256": "WhaviH34eZTGlp1PmOh4dUU7Eiae9DlKuUgIEAYIIQ4=",
+          "last_update": "2026-09-14T01:13:42.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-discord-message": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:06.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-monitoring-observer": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:07.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-reconcile": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:06.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-retention-task": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:05.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-start-task": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:05.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-status-executor": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:18.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "wc-dev-stop-task": {
+          "code_sha256": "hNoCSEGOJ3JC7NyYQngfZuCPAnP2cydzu7HpTkHQl0k=",
+          "last_update": "2026-09-14T01:13:05.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        }
+      }
+    },
+    "web": {
+      "stack_status": "UPDATE_COMPLETE",
+      "template_resources_exact": true,
+      "functions": {
+        "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd": {
+          "code_sha256": "cw3p9fP4E8hCuLReiRPydSpFd9ihyzG1hGuZ6rf4l2k=",
+          "last_update": "2026-09-14T01:16:33.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        },
+        "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": {
+          "code_sha256": "cw3p9fP4E8hCuLReiRPydSpFd9ihyzG1hGuZ6rf4l2k=",
+          "last_update": "2026-09-14T01:16:39.000+0000",
+          "source_files_verified": [
+            "wishicraft/whitelist.py",
+            "wishicraft/artifacts/whitelist_policy.py"
+          ]
+        }
+      }
+    }
+  },
+  "final_state": {
+    "at": "2026-09-14T01:21:11.173299+00:00",
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "instance": "stopped",
+    "game_count": 2,
+    "game_hashes": {
+      "game-vanilla-main": "d9630bf74e8e1e1aba8cc4abcc0e369407e673357c547d97861331e673a586c6",
+      "game-vanilla-secondary": "08cf25cddd61a9381cd114f99da2ccf86df67901c6a4cb98e83f0096fce70c88"
+    },
+    "state": {
+      "desired_state": {
+        "S": "STOPPED"
+      },
+      "health": {
+        "S": "HEALTHY"
+      },
+      "desired_game_id": {
+        "S": "game-vanilla-main"
+      },
+      "current_operation_id": null
+    },
+    "locks": 0,
+    "active_workflows": 0,
+    "queues": [
+      {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      }
+    ],
+    "alarms": {
+      "OK": 45,
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0
+    },
+    "snapshots": 9,
+    "provenance": 16,
+    "active_ssm": 0
+  },
+  "all_workflows": {
+    "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup": 0,
+    "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset": 0,
+    "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention": 0,
+    "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start": 0,
+    "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop": 0,
+    "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch": 0
+  },
+  "a_b_records_exact_unchanged": true,
+  "snapshot_inventory_exact_unchanged": true,
+  "provenance_exact_unchanged": true,
+  "system_state_desired_unchanged": true,
+  "observation_note": "maintenance EC2 running caused DEGRADED; normal observer converged STOPPED/HEALTHY without manual SystemState mutation",
+  "concurrency": "all three restored to captured UNSET",
+  "alarm": {
+    "name": "wc-dev-desiredstoppedec2runningalarm",
+    "entered_alarm_utc": "2026-09-14T01:06:53Z",
+    "returned_ok_utc": "2026-09-14T01:11:53Z",
+    "reason": "approved maintenance EC2 running while Desired STOPPED"
+  },
+  "e2e": {
+    "authenticated": true,
+    "admin_editable": true,
+    "game_count": 2,
+    "common_count": 0,
+    "no_op_request_id": "f1f142c7-b55e-4f38-a0e1-a17830b39551",
+    "terminal": "SUCCEEDED",
+    "retry_equal": true,
+    "policy_unchanged": true,
+    "negative": {
+      "missing": 403,
+      "invalid": 403,
+      "malformed": 400
+    },
+    "player_live": false,
+    "operation_id": "op-e405da0a1b5f883361b8519df72abc44b23ec66980095ba51cc1148101851d5d",
+    "actor_request_binding_verified": true,
+    "operation_workflow_absent": true,
+    "operation_lock_absent": true,
+    "public_and_negative": {
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "sha256": "fbc5fe82da8d3fb5c83b413b8c88823c1d952ff8bedfa60d62f747cd105fbf71",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/commands/",
+          "status": 200,
+          "sha256": "47e0d432ddedc554082ecd13536edbf79388b1d246f8cf32fe65a8ab6fbe4aa2",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/commands/backup/",
+          "status": 200,
+          "sha256": "5e6ebdbdfe3744dc18df9c4936c8ba05d8fe7a2408fa2a875f6edb1c7f33ae94",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/commands/reset/",
+          "status": 200,
+          "sha256": "0dd17b6cf36970fe8f7d3a0f995f68e6c6a13bbada3d5d222a80a3c43a3900c5",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/commands/start/",
+          "status": 200,
+          "sha256": "c93e1e0abfbe5446e11301949fb96d9b0ac7ca127fba1827f23265a4f3f7e9ad",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/commands/status/",
+          "status": 200,
+          "sha256": "09133335e1a14bb14f4a59646c93a82651edbf298adfd3aa5adc7f7dce09062c",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/commands/stop/",
+          "status": 200,
+          "sha256": "cc61eeb907f1db25e6503a569f75ffd031242104bd5df7a81dec4ca0c547c11d",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/commands/switch/",
+          "status": 200,
+          "sha256": "5d848ab82212842718a8c71dfe096157e955a6daaf3f788bc294a713c4a8842a",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/games/",
+          "status": 200,
+          "sha256": "f32a04e756bc2c01174369900770ad75cce2f9a022443bc068a434bc601b97a2",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/games/a/",
+          "status": 200,
+          "sha256": "3ec51de6bf0398be6f3e7199f8212cbe53f5ec1ba10b845d024891970c5bcdfd",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/games/b/",
+          "status": 200,
+          "sha256": "e8ad0ced15a4d7ec0d4655b356f727024fe580b253eb51a2090f545fed173c2a",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/help/",
+          "status": 200,
+          "sha256": "179b2387744aafd0ce135b3ed1e6efdfd7744b5822ee8f179dd9c1dd17710780",
+          "unchanged": true,
+          "no_member_values": true
+        },
+        {
+          "path": "/join/",
+          "status": 200,
+          "sha256": "0f5f8b0756a7f7fe33f6221488d985432397076837ca8513361077e9a2e047e9",
+          "unchanged": true,
+          "no_member_values": true
+        }
+      ],
+      "negative": [
+        {
+          "test": "unauthenticated",
+          "status": 401,
+          "safe_rejection": true
+        },
+        {
+          "test": "foreign_origin",
+          "status": 401,
+          "safe_rejection": true
+        },
+        {
+          "test": "old_origin",
+          "status": 421,
+          "safe_rejection": true
+        }
+      ]
+    },
+    "authenticated_foreign_origin": 403,
+    "real_membership_changed": false
+  },
+  "iam_resources_workflow_definitions": "unchanged; existing Lambda code and feature env only",
+  "runtime_identity": "unchanged pinned image/Compose/env/manifest",
+  "runtime_projection_production": "deferred to next normal authorized START/SWITCH; real Docker CI proven",
+  "new_game_created": false,
+  "new_snapshot_created": false,
+  "retention": "unchanged dry-run only; DeleteSnapshot unreleased",
+  "d105": "production deployed, positive CREATE/materialization deferred",
+  "validation": {
+    "tests": 1264,
+    "ruff": "passed",
+    "mypy": "193 files passed",
+    "synth": "passed",
+    "ci_run": 34793907654,
+    "ci_conclusion": "success",
+    "docker": "real pinned-image whitelist command convergence and RESET generations passed; AWS/SSM/mount/systemd transports synthetic",
+    "local_docker": "CLI unavailable; actual Docker validated on CI",
+    "final_documentation_head_ci": "reported in final handoff"
+  },
+  "private_evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-whitelist-production-v1-mpzx7f2u",
+  "diagnostic_notes": [
+    "resume read-back confirmed no previous host/policy/CP/Web write before continuing",
+    "initial describe_stack_resources read-back was bounded at 100 resources; final paginator verified all 11 CP Lambdas and 6 workflows",
+    "negative harness expected status mismatch only: anonymous foreign Origin is 401 (auth first), old origin is 421; new v3 evidence and real authenticated foreign Origin 403 verified"
+  ]
+}

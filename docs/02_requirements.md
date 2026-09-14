@@ -507,7 +507,7 @@ D-106ではD-105のpositive CREATE/materialization deferredを維持したまま
 Admin-only短期Admission、次回START/SWITCH/RESET起動時の適用とする。停止中・未実体化Gameも編集可能とし、
 ゲーム内変更は次回起動で正本へ戻す。UUIDは公式profile lookupから確定し、publicにmember情報を出さない。
 実A/Bファイルからの移行でeffective access完全一致を検証し、schema-2 durable recoveryにCommonと各Game policyを保持する。
-productionは移行gateの承認待ち。OP-001/002、chat、runtime一般化はこのsliceへ含めない。
+productionは2026-09-14にCompleted。初期Common空、A/B-specificへ既存accessを完全一致で保存した。OP-001/002、chat、runtime一般化はこのsliceへ含めない。
 
 CHAT-001〜003は具体的需要と対応runtime/pluginが決まった時のindependent trackとする。以下のchat内部順序は、管理WebやGame作成の前提を意味しない。
 
