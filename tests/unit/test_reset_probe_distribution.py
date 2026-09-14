@@ -17,6 +17,7 @@ from typing import Any
 
 import pytest
 
+from tests.unit.conftest import configuration_at
 from wishicraft.reset_migration import prepare
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -54,7 +55,9 @@ def load(path: Path, name: str, monkeypatch: pytest.MonkeyPatch) -> Any:
 class Installed:
     def __init__(self, tmp: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         self.tmp, self.bundle = tmp, tmp / "bundle"
-        self.result = prepare(ROOT, self.bundle, "{}")
+        source = configuration_at(tmp, BASE)
+        (source / "config/two-game-dev.json").write_bytes(history("config/two-game-dev.json"))
+        self.result = prepare(source, self.bundle, "{}")
         self.plan = self.result["plan"]
         self.paths: dict[str, Path] = {}
         self.bad_owner: Path | None = None

@@ -1,5 +1,15 @@
 # 09. Decisions and Backlog
 
+## D-108 Host-wide runtime memory capacity（Accepted / repository implementation）
+
+2026-09-14、D-101の需要起点slice。既存host_runtime.memoryでXms 1G / Xmx 4G / container
+6144MiBを候補とし、nominal 8GiB hostから2GiB、container内heap外へ2GiBを残す。
+[設定・integrity・限定移行・retry/rollback・release gate](runbooks/runtime_memory_capacity.md)を正本とする。
+D-107のinstance/volume/ownership/policyを維持。memoryは従来どおりmanifest digestへ含める。
+現在のA/Bだけを既存inactive installerで移行し、Game/Operation/receipt/provenanceは更新しない。
+D-105登録済みGameはimmutable initial-ownerとの整合が必要なので、この限定移行では拒否する。
+新規profile、modloader、mod、Game作成、world copyは対象外。production適用と実host余裕は別途検証する。
+
 ## D-107 Host capacity / permanent replacement guard（Accepted / production resize Completed）
 
 2026-09-14、demand-drivenのgeneric repository slice。Game-level compute profileとruntime

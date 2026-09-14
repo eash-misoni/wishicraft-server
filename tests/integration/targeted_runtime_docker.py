@@ -26,6 +26,7 @@ IMAGE = (
 
 
 def main() -> None:
+    memory = "--memory" in sys.argv
     whitelist = "--whitelist" in sys.argv
     creation = "--creation" in sys.argv or whitelist
     whitelist_reset = "--whitelist-reset" in sys.argv
@@ -91,6 +92,22 @@ def main() -> None:
         "INIT_MEMORY=1G\nMAX_MEMORY=2G\nENABLE_RCON=true\n"
         "RCON_PASSWORD=synthetic-ci-only\nSTOP_DURATION=120\n"
     )
+    memory_limit = ""
+    if memory:
+        from wishicraft.config import load_configuration
+        from wishicraft.host_runtime import render_boot_time_artifacts
+        from wishicraft.runtime_memory import validate_memory
+
+        cfg = load_configuration(Path(__file__).resolve().parents[2], "dev")
+        budget = validate_memory(cfg.stage)
+        rendered = render_boot_time_artifacts(
+            cfg.project, cfg.stage, observed_uid=993, observed_gid=993
+        )
+        inputs = dict(line.split("=", 1) for line in rendered.runtime_env.splitlines())
+        environment = environment.replace(
+            "INIT_MEMORY=1G", "INIT_MEMORY=" + inputs["INIT_MEMORY"]
+        ).replace("MAX_MEMORY=2G", "MAX_MEMORY=" + inputs["MAX_MEMORY"])
+        memory_limit = f"    mem_limit: {budget.container_mib}MiB\n"
     (artifacts / "runtime.env").write_text(environment)
     compose = f"""name: wishicraft-host-runtime
 services:
@@ -98,6 +115,7 @@ services:
     image: {IMAGE}
     pull_policy: never
     restart: "no"
+{memory_limit}\
     env_file: [runtime.env]
     stop_grace_period: 150s
     volumes:
@@ -317,6 +335,38 @@ services:
         assert container["Id"] not in container_ids
         container_ids.append(container["Id"])
         host.validate_container(container, target)
+        if memory:
+            import shlex
+
+            assert container["HostConfig"]["Memory"] == budget.container_mib * 1024 * 1024
+            actual_env = dict(entry.split("=", 1) for entry in container["Config"]["Env"])
+            assert actual_env["INIT_MEMORY"] == inputs["INIT_MEMORY"]
+            assert actual_env["MAX_MEMORY"] == inputs["MAX_MEMORY"]
+            processes = real_execute(["docker", "top", container["Id"], "-eo", "args"])
+            heaps = [
+                parts
+                for line in processes.splitlines()
+                if (parts := shlex.split(line)) and Path(parts[0]).name == "java"
+            ]
+            assert len(heaps) == 1, "one real Minecraft JVM required"
+            assert "-Xms" + inputs["INIT_MEMORY"] in heaps[0]
+            assert "-Xmx" + inputs["MAX_MEMORY"] in heaps[0]
+            assert not container["State"]["OOMKilled"]
+            java = subprocess.run(
+                ["docker", "exec", container["Id"], "java", "-version"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            assert 'version "25' in java.stderr
+            print("REAL_JAVA", java.stderr.splitlines()[0], flush=True)
+            print(
+                "REAL_MEMORY",
+                budget.initial_mib,
+                budget.maximum_mib,
+                budget.container_mib,
+                flush=True,
+            )
         if index == 0 or (two_games and index == 1):
             real_execute(
                 [

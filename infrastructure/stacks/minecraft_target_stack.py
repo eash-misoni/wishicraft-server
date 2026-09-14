@@ -9,6 +9,7 @@ from constructs import Construct
 
 from wishicraft.config import ConfigValidationError, ProjectConfig, StageConfig
 from wishicraft.naming import resource_name, resource_tags
+from wishicraft.runtime_memory import validate_memory
 
 
 class MinecraftTargetStack(Stack):
@@ -61,6 +62,7 @@ class MinecraftTargetStack(Stack):
                 errors.append(f"host_runtime.{key} must be a non-empty explicit ID")
         if errors:
             raise ConfigValidationError(errors)
+        validate_memory(stage)
 
         super().__init__(
             scope,

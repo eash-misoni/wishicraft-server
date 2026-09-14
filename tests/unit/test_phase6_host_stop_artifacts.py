@@ -51,8 +51,10 @@ def test_secret_artifact_uses_ephemeral_file_and_fixed_parameter_allowlist() -> 
     assert 'rm -f -- "$SECRET_PATH" "$CLI_ENV_PATH" "$CLI_YAML_PATH"' in script
 
 
-def test_phase6_fixed_compose_and_runtime_env_match_canonical_renderer() -> None:
-    configuration = load_configuration(ROOT, "dev")
+def test_phase6_fixed_compose_and_runtime_env_match_canonical_renderer(
+    historical_migration_root: Path,
+) -> None:
+    configuration = load_configuration(historical_migration_root, "dev")
     rendered = render_boot_time_artifacts(
         configuration.project,
         configuration.stage,

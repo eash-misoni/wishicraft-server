@@ -1,5 +1,7 @@
 # 12. Initial Configuration
 
+> D-108 共通runtime memory: repository検証済み・production適用待ち。Xms 1G / Xmx 4G / container 6144MiBの設定と、digestを維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。
+
 > D-107 Host capacity（production in-place resize Completed）: [恒久replacement guardとrelease契約](runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。dev Targetはm8a.large。永久replacement-deny policy下でInstance/root/Data EBSを維持し、STOPPED/HEALTHYへcloseout済み。memory増量は別slice。Game/UI/lifecycleは変更しない。
 
 > Minimal Game Creation: D-105 Accepted / production deployed, positive CREATE/materialization deferred（2026-09-13）。[登録／初回起動／RESET／recoveryの差分契約](reviews/minimal_game_creation.md)、[production gate](runbooks/minimal_game_creation.md)。適用済みD-096〜104契約とA/Bは維持する。

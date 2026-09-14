@@ -73,7 +73,7 @@ def test_rendered_compose_has_only_the_minecraft_public_port_and_safe_lifecycle(
     assert service["image"].startswith("ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:")
     assert service["pull_policy"] == "never"
     assert service["restart"] == "no"
-    assert service["mem_limit"] == "2816MiB"
+    assert service["mem_limit"] == "6144MiB"
     assert service["stop_grace_period"] == "150s"
     assert service["ports"] == ["25565:25565/tcp"]
     assert service["volumes"] == [
@@ -92,7 +92,7 @@ def test_rendered_compose_has_only_the_minecraft_public_port_and_safe_lifecycle(
         "VERSION=26.2",
         "TYPE=VANILLA",
         "INIT_MEMORY=1G",
-        "MAX_MEMORY=2G",
+        "MAX_MEMORY=4G",
         "SKIP_CHOWN_DATA=true",
         "STOP_DURATION=120",
         "ENABLE_RCON=false",

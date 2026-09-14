@@ -46,6 +46,10 @@ Phase 2以降はWishicraftをControl Plane、EC2上のDocker/Compose/systemd等�
 
 Phase 1の実装と検証記録はas-builtとして維持し、target architectureへの移行を理由に履歴を書き換えない。
 
+### SYS-007 共通runtime memory capacity `MUST`
+
+共通Minecraft runtimeのXms/Xmx/container上限はhost-wide deploy-time設定とし、hostとheap外の余裕を検証する。memoryはartifact integrity hashへ含め続ける。既存Game/world/generation・historical Operation・backup provenanceを変更せず、停止中に整合したartifactへ移行する。Game-level profileやautomatic tuningは導入しない。[D-108の具体契約と移行制限](runbooks/runtime_memory_capacity.md)を参照。
+
 ## 3. 状態確認要件
 
 ### STA-001 段階的実測 `MUST / MVP`

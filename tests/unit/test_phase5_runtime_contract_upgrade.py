@@ -26,8 +26,10 @@ def _constant(name: str) -> str:
     return match.group(1)
 
 
-def test_fixed_upgrade_embeds_the_canonical_secret_free_compose() -> None:
-    configuration = load_configuration(ROOT, "dev")
+def test_fixed_upgrade_embeds_the_canonical_secret_free_compose(
+    historical_migration_root: Path,
+) -> None:
+    configuration = load_configuration(historical_migration_root, "dev")
     rendered = render_boot_time_artifacts(
         configuration.project,
         configuration.stage,

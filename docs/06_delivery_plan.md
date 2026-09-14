@@ -1,5 +1,7 @@
 # 06. Delivery Plan
 
+> D-108 共通runtime memory: repository検証済み・production適用待ち。Xms 1G / Xmx 4G / container 6144MiBの設定と、digestを維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。
+
 > D-107 Host capacity（production in-place resize Completed）: [恒久replacement guardとrelease契約](runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。dev Targetはm8a.large。永久replacement-deny policy下でInstance/root/Data EBSを維持し、STOPPED/HEALTHYへcloseout済み。memory増量は別slice。Game/UI/lifecycleは変更しない。
 
 > D-106 Whitelist Management: Accepted / production Completed（2026-09-14）。[正本・適用contract](reviews/whitelist_management.md)と[移行・production証跡](runbooks/whitelist_management.md)。初期Commonは空、A/B既存accessはGame-specificへ完全一致で保存。D-105 positive CREATE/materialization deferredは維持。

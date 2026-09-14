@@ -118,9 +118,9 @@ host_runtime:
     gid: 993
     skip_chown_data: true
   memory:
-    container_limit: 2816MiB
+    container_limit: 6144MiB
     jvm_initial: 1G
-    jvm_maximum: 2G
+    jvm_maximum: 4G
   timeouts:
     explicit_save: 60
     itzg_stop_duration: 120

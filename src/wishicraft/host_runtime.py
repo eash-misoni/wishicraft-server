@@ -12,6 +12,7 @@ from typing import Final
 import yaml
 
 from wishicraft.config import ConfigMapping, ConfigValidationError, ProjectConfig, StageConfig
+from wishicraft.runtime_memory import validate_memory
 
 _IMAGE_PATTERN: Final = re.compile(
     r"^(?P<repository>[a-z0-9./_-]+):"
@@ -61,6 +62,7 @@ def render_boot_time_artifacts(
     """Render one canonical boot-time configuration from validated sources of truth."""
     runtime = _runtime_mapping(stage.values)
     _validate_runtime_lock(runtime, observed_uid=observed_uid, observed_gid=observed_gid)
+    validate_memory(stage)
 
     image = _string(runtime, "image.reference")
     version = _string(runtime, "minecraft.version")

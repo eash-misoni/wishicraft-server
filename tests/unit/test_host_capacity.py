@@ -26,6 +26,8 @@ def stage_with(value: object) -> StageConfig:
     assert isinstance(host, dict)
     # Exercise malformed YAML values as well as supported strings.
     host["instance_type"] = value  # type: ignore[assignment]
+    # D-107's type-only invariance uses the original budget, safe on every candidate.
+    runtime["memory"] = {"jvm_initial": "1G", "jvm_maximum": "2G", "container_limit": "2816MiB"}
     return StageConfig("dev", values)
 
 

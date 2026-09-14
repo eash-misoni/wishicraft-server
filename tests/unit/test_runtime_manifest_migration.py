@@ -81,7 +81,7 @@ def test_historical_renderer_and_new_manifest(
     for field, name in (("compose_sha256", "compose.yaml"), ("runtime_env_sha256", "runtime.env")):
         entry = next(e for e in entries if e["destination"].endswith("/" + name))
         assert new[field] == hashlib.sha256((bundle / entry["source"]).read_bytes()).hexdigest()
-    config = load_configuration(ROOT, "dev")
+    config = load_configuration(historical_migration_root, "dev")
     assert new == json.loads(
         render_boot_time_artifacts(
             config.project,
