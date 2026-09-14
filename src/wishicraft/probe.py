@@ -162,7 +162,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     if _integer(document, "schema_version") != 1:
         raise ProbeContractError("unsupported probe schema version")
     version = _string(document, "probe_version")
-    if version not in {"1.3.0", "1.4.0"}:
+    if version not in {"1.3.0", "1.4.0", "1.5.0"}:
         raise ProbeContractError("unsupported probe version")
     observed_at = _timestamp(document, "observed_at")
 
@@ -260,7 +260,7 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
         execution=execution,
         telemetry=(
             _parse_telemetry(_mapping(document.get("telemetry"), "telemetry"))
-            if version == "1.4.0"
+            if version in {"1.4.0", "1.5.0"}
             else None
         ),
         observed_at=observed_at,

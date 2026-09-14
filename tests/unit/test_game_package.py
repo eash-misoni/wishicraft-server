@@ -292,3 +292,97 @@ def test_cdk_package_digest_recovery_compression_and_no_new_resources(
                     hashlib.sha256(runtime["compose_yaml"].encode()).hexdigest()
                     == json.loads(runtime["manifest_json"])["compose_sha256"]
                 )
+
+
+@pytest.mark.parametrize("damage", ["version", "loader", "digest", "mount", "missing", "symlink"])
+def test_observation_rejects_wrong_runtime_or_missing_mods(filesystem: Any, damage: str) -> None:
+    games, package = filesystem
+    materialize(games, package)
+    target = {"game_id": "game-a", "data_source": str(games / "game-a/server")}
+    actual: dict[str, Any] = {
+        "Config": {
+            "Env": [k + "=" + v for k, v in packages.environment(package).items()],
+            "Labels": {"com.wishicraft.package-digest": packages.digest(package)},
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": str(packages.location("game-a")),
+                "Destination": "/wishicraft-package",
+                "RW": False,
+            }
+        ],
+    }
+    manifest = {"packages": [packages.load()[0], package]}
+    assert packages.observed(actual, manifest, target) == package
+    if damage in {"version", "loader"}:
+        key = "VERSION" if damage == "version" else "TYPE"
+        actual["Config"]["Env"] = [
+            v if not v.startswith(key + "=") else key + "=VANILLA" for v in actual["Config"]["Env"]
+        ]
+    elif damage == "digest":
+        actual["Config"]["Labels"]["com.wishicraft.package-digest"] = "0" * 64
+    elif damage == "mount":
+        actual["Mounts"][0]["RW"] = True
+    elif damage == "missing":
+        (games / "game-a/server/mods" / package["mods"][0]["filename"]).unlink()
+    else:
+        directory = games / "game-a/server/mods"
+        directory.rename(directory.with_name("saved-mods"))
+        directory.symlink_to(directory.with_name("saved-mods"), target_is_directory=True)
+    with pytest.raises(ValueError):
+        packages.observed(actual, manifest, target)
+
+
+def test_protocol_version_comes_from_integrity_checked_package(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import builtins
+    import subprocess
+
+    from wishicraft.artifacts import host_runtime_probe as probe
+
+    package = packages.load()[1]
+    manifest = {
+        "packages": packages.load(),
+        "compose_sha256": hashlib.sha256(b"compose").hexdigest(),
+        "runtime_env_sha256": hashlib.sha256(b"env").hexdigest(),
+    }
+    body = packages.canonical(manifest)
+    target = {"config_digest": hashlib.sha256(body.encode()).hexdigest(), "run_id": "op-test"}
+    documents = {
+        "/etc/wishicraft/host-runtime/manifest.json": body,
+        "/etc/wishicraft/host-runtime/compose.yaml": "compose",
+        "/etc/wishicraft/host-runtime/runtime.env": "env",
+        "/var/lib/wishicraft/runtime/receipt.json": json.dumps({"target": target}),
+    }
+    paths = {}
+    for index, (name, value) in enumerate(documents.items()):
+        paths[name] = tmp_path / str(index)
+        paths[name].write_text(value)
+    original_open, original_exists = builtins.open, os.path.exists
+
+    def mapped_open(name: Any, *args: Any, **kw: Any) -> Any:
+        return original_open(paths.get(name, name), *args, **kw)
+
+    monkeypatch.setattr(builtins, "open", mapped_open)
+    monkeypatch.setattr(os.path, "exists", lambda name: name in paths or original_exists(name))
+    monkeypatch.setattr(
+        probe,
+        "run",
+        lambda *args: subprocess.CompletedProcess(
+            args, 0, json.dumps([{"Config": {"Labels": {"com.wishicraft.run-id": "op-test"}}}]), ""
+        ),
+    )
+
+    def verified(actual: Any, observed_manifest: Any, observed_target: Any) -> Any:
+        assert observed_manifest == manifest and observed_target == target
+        return package
+
+    monkeypatch.setattr(packages, "observed", verified)
+    assert probe.package_version("container") == "1.21.1"
+    assert probe.version_matches_expected("1.21.1", "1.21.1")
+    assert not probe.version_matches_expected("26.2", "1.21.1")
+    paths["/etc/wishicraft/host-runtime/runtime.env"].write_text("changed")
+    with pytest.raises(ValueError, match="ARTIFACT_MISMATCH"):
+        probe.package_version("container")

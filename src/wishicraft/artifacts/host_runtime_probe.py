@@ -21,7 +21,7 @@ from typing import Any, Optional
 # compatible with that interpreter even though the control-plane package targets 3.12.
 
 SCHEMA_VERSION = 1
-PROBE_VERSION = "1.4.0"
+PROBE_VERSION = "1.5.0"
 MOUNT_PATH = "/srv/minecraft"
 EXPECTED_FILESYSTEM_TYPE = "xfs"
 EXPECTED_FILESYSTEM_UUID = "420cea6d-0520-4436-bb5a-db1191f1e63b"

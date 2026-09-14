@@ -54,13 +54,14 @@ def main() -> None:
     secret.write_text("synthetic-ci-only")
     secret.chmod(0o444)
     root.chmod(0o755)
+    cli_root = Path("/run/wishicraft")
+    assert not cli_root.exists(), "refuse existing ephemeral secret directory"
+    cli_root.mkdir(mode=0o700)
     # The only rendered fixture adjustment is the synthetic secret source (no public ports).
     compose = yaml.safe_load(rendered.compose_yaml)
     for mount in compose["services"]["minecraft"]["volumes"]:
         if mount["target"] == "/run/secrets/rcon-password":
             mount["source"] = str(secret)
-        elif mount["target"] in {"/data/.rcon-cli.env", "/data/.rcon-cli.yaml"}:
-            mount["source"] = str(root / Path(mount["target"]).name[1:])
     text = yaml.safe_dump(compose, sort_keys=True)
     (artifacts / "compose.yaml").write_text(text)
     manifest = json.loads(rendered.manifest_json)
@@ -176,7 +177,7 @@ def main() -> None:
                 if placeholder.exists():
                     assert placeholder.is_file() and placeholder.stat().st_size == 0
                     placeholder.unlink()
-                path = root / name
+                path = cli_root / name
                 if args[1] == "prepare":
                     path.write_bytes(b"")
                     os.chown(path, 993, 993)

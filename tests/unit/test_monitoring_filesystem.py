@@ -103,12 +103,14 @@ def test_mount_changes_during_sampling_invalidates_result(monkeypatch: pytest.Mo
     assert probe.observe_telemetry()["state"] == "unknown"
 
 
+@pytest.mark.parametrize("version", ["1.4.0", "1.5.0"])
 def test_v14_probe_parser_preserves_capacity_without_changing_runtime(
     monkeypatch: pytest.MonkeyPatch,
+    version: str,
 ) -> None:
     setup_filesystem(monkeypatch)
     document = runtime_stopped_document()
-    document["probe_version"] = "1.4.0"
+    document["probe_version"] = version
     document["telemetry"] = probe.observe_telemetry()
     identity = document["identity"]
     assert isinstance(identity, dict)
