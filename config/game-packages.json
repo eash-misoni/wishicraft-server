@@ -1,0 +1,57 @@
+{
+  "packages": [
+    {
+      "loader": {
+        "type": "vanilla"
+      },
+      "minecraft_version": "26.2",
+      "mods": [],
+      "package_id": "vanilla",
+      "package_version": "initial-fixed-version"
+    },
+    {
+      "loader": {
+        "installer": {
+          "filename": "neoforge-21.1.219-installer.jar",
+          "sha256": "140df0fa17fd438848051ecfa3d091081515ad12bfe34fa126405037ba01de44",
+          "size": 6961236,
+          "url": "https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.219/neoforge-21.1.219-installer.jar"
+        },
+        "type": "neoforge",
+        "version": "21.1.219"
+      },
+      "minecraft_version": "1.21.1",
+      "mods": [
+        {
+          "client_required": true,
+          "file_id": "V876RuGl",
+          "filename": "create-1.21.1-6.0.10.jar",
+          "mod_id": "create",
+          "project_id": "LNytGWDc",
+          "sha256": "ef87fe5709f1ba1f5b8bb20a2925b5afb4669e178fd6d8bf10c167759eefe37a",
+          "size": 19123767,
+          "source": "modrinth",
+          "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/UjX6dr61/create-1.21.1-6.0.10.jar",
+          "version": "6.0.10",
+          "version_id": "UjX6dr61"
+        },
+        {
+          "client_required": true,
+          "file_id": "xb3oJkla",
+          "filename": "FarmersDelight-1.21.1-1.3.4.jar",
+          "mod_id": "farmersdelight",
+          "project_id": "R2OftAxM",
+          "sha256": "139ad7696462c89c03eea463f805abffa552526c5dadaadae221dd9624cb197c",
+          "size": 3160490,
+          "source": "modrinth",
+          "url": "https://cdn.modrinth.com/data/R2OftAxM/versions/XTVZDOol/FarmersDelight-1.21.1-1.3.4.jar",
+          "version": "1.3.4",
+          "version_id": "XTVZDOol"
+        }
+      ],
+      "package_id": "create-survival",
+      "package_version": "1"
+    }
+  ],
+  "schema_version": 1
+}

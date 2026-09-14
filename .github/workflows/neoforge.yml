@@ -1,0 +1,24 @@
+name: NeoForge runtime integration
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  pinned-neoforge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: tools/dev-env run -- uv sync --frozen --all-groups
+      - run: sudo --preserve-env=CI .venv/bin/python tests/integration/neoforge_docker.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: neoforge-runtime-evidence
+          path: /tmp/wishicraft-neoforge-docker-*/*.log
+          retention-days: 14
