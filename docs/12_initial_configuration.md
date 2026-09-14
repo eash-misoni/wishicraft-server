@@ -29,6 +29,11 @@ D-096適用済みのGame/run/container契約は[05 §0](05_data_and_interface_co
 `config/two-game-dev.json`とCDK context `two_games=true`は[D-097 Accepted・適用済み](reviews/two_game_switch.md)
 の明示的な配布選択。2026-09-12にBの固定宣言・初期配置・登録とcatalogを適用済み。設定fileだけの変更がproduction登録を自動実行するわけではない。Aの設定やwhitelistは再生成しない。
 
+D-109のrepository-only追加では、`src/wishicraft/artifacts/game-packages.json`を固定package定義の正本とする。
+`game_packages=true`を明示したreleaseのみ、catalog全体を共通manifestへ含め、CREATE時にexact definitionを
+Gameへ固定する。既存stageのVanilla 26.2・image・1G/4G/6GiBは変更しない。Game runtime入力はその定義から生成し、
+GitとGame recordの不一致は拒否する。[配布・停止中移行・rollback](runbooks/neoforge_package.md)。productionは未適用。
+
 ## 2. 確定済み設定
 
 ```yaml

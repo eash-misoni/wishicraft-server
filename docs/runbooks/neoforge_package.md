@@ -107,6 +107,9 @@ No MODRINTH_PROJECTS/latest resolver is configured. Missing/tampered jars, misma
 variables, package label or mounts are rejected by container verification and protocol observation.
 The protocol version expectation comes from that verified package (legacy remains 26.2).
 
+SWITCH/RESET require an exact zero-player RCON list response. Qualified NeoForge adds one trailing
+ANSI reset (`ESC[0m`); only a verified NeoForge package accepts that observed suffix. Positive
+counts, player names, extra lines and unknown controls remain rejected. Vanilla parsing is unchanged.
 SWITCH saves, stops and removes the source container before destination projection. STOP reads
 source Game registration when its Operation targets another Game. The destination gets its own
 mods and generated libraries/configs; nothing from the source is copied or cleaned globally.

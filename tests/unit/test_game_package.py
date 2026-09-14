@@ -386,3 +386,30 @@ def test_protocol_version_comes_from_integrity_checked_package(
     paths["/etc/wishicraft/host-runtime/runtime.env"].write_text("changed")
     with pytest.raises(ValueError, match="ARTIFACT_MISMATCH"):
         probe.package_version("container")
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        "There are 1 of a max of 20 players online: Player\n\x1b[0m\n",
+        "There are 0 of a max of 20 players online: Player\n\x1b[0m\n",
+        "There are 0 of a max of 20 players online: \n\x1b[2J\n",
+        "There are 0 of a max of 20 players online: \n\x1b[0m\nextra",
+        "There are 0 of a max of 20 players online: \n\x1b[0m\x1b[0m\n",
+        "unknown",
+    ],
+)
+def test_neoforge_zero_player_gate_stays_fail_closed(response: str) -> None:
+    from wishicraft.artifacts.targeted_runtime import confirmed_empty_players
+
+    assert not confirmed_empty_players(response, neoforge=True)
+
+
+def test_only_qualified_neoforge_accepts_observed_trailing_color_reset() -> None:
+    from wishicraft.artifacts.targeted_runtime import confirmed_empty_players
+
+    response = "There are 0 of a max of 20 players online: \n"
+    assert confirmed_empty_players(response) and confirmed_empty_players(response, neoforge=True)
+    response += "\x1b[0m\n"
+    assert confirmed_empty_players(response, neoforge=True)
+    assert not confirmed_empty_players(response)

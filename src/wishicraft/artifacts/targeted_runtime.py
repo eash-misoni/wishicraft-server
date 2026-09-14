@@ -340,6 +340,15 @@ def configured_container(container: dict[str, Any], manifest: dict[str, Any]) ->
         package_module().observed(container, manifest, receipt["target"])
 
 
+def confirmed_empty_players(response: str, *, neoforge: bool = False) -> bool:
+    # Qualified NeoForge 21.1.219 adds one trailing ANSI reset via the pinned rcon-cli.
+    # Do not strip arbitrary terminal controls or accept extra player/output lines.
+    pattern = r"There are 0 of a max of [0-9]+ players online: ?\s*"
+    if neoforge:
+        pattern += r"(?:\x1b\[0m\s*)?"
+    return re.fullmatch(pattern, response) is not None
+
+
 def apply(request: dict[str, Any]) -> None:
     # Installer creates this root-owned directory. No fallback or initial migration here.
     with (ROOT / "lock").open("a") as lock:
@@ -584,11 +593,9 @@ def apply(request: dict[str, Any]) -> None:
             if containers and containers[0]["State"]["Running"]:
                 if operation["operation_type"] in {"SWITCH", "RESET"}:
                     players = execute(["docker", "exec", containers[0]["Id"], "rcon-cli", "list"])
-                    if (
-                        re.fullmatch(
-                            r"There are 0 of a max of [0-9]+ players online: ?\s*", players
-                        )
-                        is None
+                    if not confirmed_empty_players(
+                        players,
+                        neoforge=package is not None and package["loader"]["type"] == "neoforge",
                     ):
                         raise ValueError("SWITCH_PLAYERS_NOT_CONFIRMED_EMPTY")
                 if receipt["phase"] == "stopped" or (
