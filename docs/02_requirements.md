@@ -502,7 +502,12 @@ Web全体のhosting / URL / Discord OAuth / authorizationはWeb Foundationで決
 
 ## 12. OP・チャット要件
 
-Whitelist Managementは最小Game作成と実運用の後に、共通 / Game固有 / Minecraft内変更の責務を改めて決める。複雑な双方向同期を既定にせず、作成時の初期whitelistと後からの編集管理を分ける。OP-001/002は維持し、未確定のwhitelist詳細contractをここで採用しない。
+D-106ではD-105のpositive CREATE/materialization deferredを維持したままWhitelist Managementを進める。
+[現在のrelease contract](reviews/whitelist_management.md)はWeb authoritative、Common ∪ Game-specific追加許可、
+Admin-only短期Admission、次回START/SWITCH/RESET起動時の適用とする。停止中・未実体化Gameも編集可能とし、
+ゲーム内変更は次回起動で正本へ戻す。UUIDは公式profile lookupから確定し、publicにmember情報を出さない。
+実A/Bファイルからの移行でeffective access完全一致を検証し、schema-2 durable recoveryにCommonと各Game policyを保持する。
+productionは移行gateの承認待ち。OP-001/002、chat、runtime一般化はこのsliceへ含めない。
 
 CHAT-001〜003は具体的需要と対応runtime/pluginが決まった時のindependent trackとする。以下のchat内部順序は、管理WebやGame作成の前提を意味しない。
 

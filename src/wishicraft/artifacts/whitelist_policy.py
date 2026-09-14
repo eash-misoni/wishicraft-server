@@ -110,21 +110,22 @@ def project(target: dict[str, str], common: object, specific: object, atomic: An
 
     players = effective(common, specific)
     source = Path(target["data_source"])
+    for name in ("server.properties", "whitelist.json"):
+        info = (source / name).lstat()
+        if (
+            not stat.S_ISREG(info.st_mode)
+            or info.st_nlink != 1
+            or info.st_uid != UID
+            or info.st_gid != GID
+            or info.st_dev != source.stat().st_dev
+            or stat.S_IMODE(info.st_mode) & 0o022
+        ):
+            raise ValueError("WHITELIST_FILE_IDENTITY")
     properties = (source / "server.properties").read_text().splitlines()
     for key in ("online-mode", "white-list", "enforce-whitelist"):
         if [line for line in properties if line.startswith(key + "=")] != [key + "=true"]:
             raise ValueError("WHITELIST_ENFORCEMENT_REQUIRED")
     path = source / "whitelist.json"
-    info = path.lstat()
-    if (
-        not stat.S_ISREG(info.st_mode)
-        or info.st_nlink != 1
-        or info.st_uid != UID
-        or info.st_gid != GID
-        or info.st_dev != source.stat().st_dev
-        or stat.S_IMODE(info.st_mode) & 0o022
-    ):
-        raise ValueError("WHITELIST_FILE_IDENTITY")
     # Existing manual-file mode: no WHITELIST/WHITELIST_FILE/OPS env is introduced.
     value = encoded([{"uuid": identity, "name": name} for identity, name in players.items()]) + "\n"
     descriptor, temporary = tempfile.mkstemp(prefix=".whitelist-", dir=source)

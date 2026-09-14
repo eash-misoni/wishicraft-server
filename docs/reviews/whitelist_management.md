@@ -73,7 +73,8 @@ Game-specific policy under the lifecycle lease/host flock. After mount/path/owne
 confirmation that no runtime container exists, it atomically replaces only target whitelist.json.
 The existing file must be regular, single-link, UID/GID 993, non-world/group-writable, same device.
 The replacement has ownership/mode before rename and is fsynced, including its directory. Unknown
-redirection/ownership fails closed. Same-run retries with an existing exact container do not rewrite
+redirection/ownership fails closed. Disabled or ambiguous online-mode/whitelist/enforcement properties
+also fail closed; the helper does not silently run an unprotected server. Same-run retries with an existing exact container do not rewrite
 a running file. A failed prepare keeps policy, registration, seed, generation and planned path.
 
 D-105 initial owner and D-098 RESET preparation remain unchanged. RESET may copy the old settings

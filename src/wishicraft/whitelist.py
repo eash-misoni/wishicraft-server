@@ -100,13 +100,16 @@ def mutate(
     if before["revision"] != payload["revision"]:
         raise AdmissionConflict("policy changed")
     players = dict(before["members"])
+    changed_player = None
     if payload["action"] == "add":
         identity, name = resolve(payload["player"])
         players[identity] = name
+        changed_player = {"uuid": identity, "name": name}
     elif payload["action"] == "remove":
         selected = next((p for p in players if model.player_key(p) == payload["player"]), None)
         if selected is None:
             raise ValueError("unknown player")
+        changed_player = {"uuid": selected, "name": players[selected]}
         del players[selected]
     after = model.policy(
         {
@@ -125,6 +128,12 @@ def mutate(
                 "started_at": utc_timestamp(now),
                 "completed_at": utc_timestamp(now),
                 "result": {"revision": after["revision"], "application": "NEXT_START"},
+                "whitelist_change": {
+                    "action": payload["action"],
+                    "player": changed_player,
+                    "before_digest": model.digest(before),
+                    "after_digest": model.digest(after),
+                },
             }
         )
     )

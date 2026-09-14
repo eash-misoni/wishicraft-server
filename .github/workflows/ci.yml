@@ -114,3 +114,6 @@ jobs:
 
       - name: Verify authoritative Whitelist and Minecraft command convergence
         run: sudo --preserve-env=CI python3 tests/integration/targeted_runtime_docker.py --whitelist
+
+      - name: Verify Common and Game policy through real Reset generations
+        run: sudo --preserve-env=CI python3 tests/integration/targeted_runtime_docker.py --whitelist-reset

@@ -28,7 +28,8 @@ IMAGE = (
 def main() -> None:
     whitelist = "--whitelist" in sys.argv
     creation = "--creation" in sys.argv or whitelist
-    reset = "--reset" in sys.argv
+    whitelist_reset = "--whitelist-reset" in sys.argv
+    reset = "--reset" in sys.argv or whitelist_reset
     two_games = "--two-games" in sys.argv or reset or creation
     root = Path(tempfile.mkdtemp(prefix="wishicraft-targeted-docker-"))
     print("fixture:", root, flush=True)
@@ -548,6 +549,37 @@ services:
     if reset:
         # The existing adapter performs every real Docker save/stop/removal/start below.
         anchor = data
+        if whitelist_reset:
+            from wishicraft.artifacts import whitelist_policy as access
+
+            config.update(whitelist_management=True, games_table="games")
+            host.CONFIG.write_text(json.dumps(config))
+            saved_reader = host.item
+            common = {
+                "revision": 1,
+                "members": {"11111111-1111-4111-8111-111111111111": "FixtureOne"},
+            }
+            specific = {
+                "revision": 1,
+                "members": {"22222222-2222-4222-8222-222222222222": "FixtureTwo"},
+            }
+            host.item = lambda config, table, key, identity: (
+                {"policy_json": access.encoded(common if identity == access.COMMON else specific)}
+                if table == "games_table"
+                else saved_reader(config, table, key, identity)
+            )
+            properties = anchor / "server.properties"
+            values = dict(
+                line.split("=", 1)
+                for line in properties.read_text().splitlines()
+                if "=" in line and not line.startswith("#")
+            )
+            values.update(
+                {"online-mode": "true", "white-list": "true", "enforce-whitelist": "true"}
+            )
+            properties.write_text(
+                "\n".join(key + "=" + value for key, value in values.items()) + "\n"
+            )
         target = {**target, "run_id": "op-reset-source"}
         operation.update(
             operation_id=target["run_id"], operation_type="START", runtime_target=target
@@ -585,6 +617,11 @@ services:
             assert not (destination / "world").exists()
             request["action"] = "START"
             host.apply(request)
+            if whitelist_reset:
+                assert {
+                    entry["name"]
+                    for entry in json.loads((destination / "whitelist.json").read_text())
+                } == {"FixtureOne", "FixtureTwo"}
             current = host.inspect()[0]
             assert current["Id"] not in container_ids
             container_ids.append(current["Id"])
