@@ -1,0 +1,234 @@
+{
+  "account_id": "385526546525",
+  "after_at": "2026-09-14T04:34:15.364923+00:00",
+  "before_at": "2026-09-14T03:52:31.007840+00:00",
+  "config_digest_after": "373dfb9c768b8d4b0b318793551212e0de5d5fe07b8ae4dc31791226e9ba5048",
+  "config_digest_before": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+  "control_plane": {
+    "admission_closed": true,
+    "at": "2026-09-14T04:32:07.879258+00:00",
+    "functions": {
+      "AdmissionFunction23082B67": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": [
+          "GAME_CREATION_DEFAULTS"
+        ]
+      },
+      "AutoStopEvaluatorFunctionF85F8B50": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": []
+      },
+      "BackupTaskFunctionA44639DC": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": [
+          "RECOVERY_RUNTIME_JSON"
+        ]
+      },
+      "DiscordCommandFunction7D25102A": {
+        "code_sha256": "tKfdxNTFKaIo9k6i4mPod6ivPkrULCrNET4910MpLUk=",
+        "verified_environment_keys": []
+      },
+      "DiscordMessageFunction78FA388B": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": []
+      },
+      "MonitoringObserverFunction584DA7C7": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": []
+      },
+      "ReconcileFunction30829CB6": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": []
+      },
+      "RetentionTaskFunction9F285CE4": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": []
+      },
+      "StartTaskFunction8C564C4A": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": [
+          "RUNTIME_CONFIG_DIGEST"
+        ]
+      },
+      "StatusExecutorFunction6E5C9869": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": []
+      },
+      "StopTaskFunction11473A8C": {
+        "code_sha256": "B+WomlQouAjn9MXHy3JxY+DUsweYcfsOSU2EPZY797E=",
+        "verified_environment_keys": [
+          "RUNTIME_CONFIG_DIGEST"
+        ]
+      }
+    },
+    "physical_resources_unchanged": true,
+    "stack": "UPDATE_COMPLETE"
+  },
+  "data_ebs_status": "ok",
+  "decision": "D-108",
+  "desired": "STOPPED",
+  "docker": {
+    "cgroup": "2",
+    "image_memory_defaults": {},
+    "version": "25.0.16"
+  },
+  "final": {
+    "active_ssm": 0,
+    "alarms": {
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0,
+      "OK": 45
+    },
+    "at": "2026-09-14T04:34:15.364923+00:00",
+    "dns": [],
+    "instance": "stopped",
+    "locks": 0,
+    "queues": {
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      }
+    },
+    "sessions": 0,
+    "type": "m8a.large",
+    "workflows": 0
+  },
+  "game_or_provenance_writes": false,
+  "health": "HEALTHY",
+  "host_installer": {
+    "bundle_sha256": "693cd32d8a7b57a7ecb0bbaf200da88ca2db8fcf417d8788a54e536008b665a4",
+    "file_count": 4,
+    "installed": true,
+    "installer_result": "TARGETED_RUNTIME_INSTALLED_INACTIVE"
+  },
+  "identity": {
+    "BlockDeviceMappings": [
+      {
+        "DeviceName": "/dev/xvda",
+        "Ebs": {
+          "AttachTime": "2026-08-23 07:59:28+00:00",
+          "DeleteOnTermination": true,
+          "EbsCardIndex": 0,
+          "Status": "attached",
+          "VolumeId": "vol-092c04a633ffc6010"
+        }
+      },
+      {
+        "DeviceName": "/dev/sdf",
+        "Ebs": {
+          "AttachTime": "2026-08-23 08:29:36.506000+00:00",
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "Status": "attached",
+          "VolumeId": "vol-03ac9f534326c345c"
+        }
+      }
+    ],
+    "CpuOptions": {
+      "CoreCount": 2,
+      "ThreadsPerCore": 1
+    },
+    "ImageId": "ami-0b4d2909a55ed2c78",
+    "InstanceId": "i-04fc0629dc4ea466e",
+    "InstanceType": "m8a.large",
+    "Placement": {
+      "AvailabilityZone": "ap-northeast-1a",
+      "AvailabilityZoneId": "apne1-az4",
+      "GroupName": "",
+      "Tenancy": "default"
+    },
+    "RootDeviceName": "/dev/xvda",
+    "SubnetId": "subnet-0a70e5682ea8d0bd3",
+    "VpcId": "vpc-0c3cca1e65696ed8e"
+  },
+  "identity_unchanged": true,
+  "limitations": [
+    "Legacy A/B-only migration; registered D-105 Game inventory rejected",
+    "No normal production Minecraft start or modded workload test",
+    "Historical artifacts retained without automatic deletion deadline"
+  ],
+  "maintenance_alarm_recovery": [
+    {
+      "at": "2026-09-14 13:31:53.499000+09:00",
+      "name": "wc-dev-desiredstoppedec2runningalarm",
+      "state": "OK"
+    },
+    {
+      "at": "2026-09-14 13:31:59.387000+09:00",
+      "name": "wc-dev-runtimeobservationunknownalarm",
+      "state": "OK"
+    }
+  ],
+  "measured_memory_mib": {
+    "container_minus_heap": 2048,
+    "guest_total": 7757.96875,
+    "guest_total_minus_container": 1613.96875,
+    "idle_available": 7118.01953125,
+    "idle_available_minus_container": 974.01953125,
+    "nominal_host_minus_container": 2048,
+    "summed_process_rss": 422.9375
+  },
+  "memory_after": {
+    "container_mib": 6144,
+    "xms": "1G",
+    "xmx": "4G"
+  },
+  "memory_before": {
+    "container_mib": 2816,
+    "xms": "1G",
+    "xmx": "2G"
+  },
+  "preserved": {
+    "backup_provenance_count": 16,
+    "data_hashes": {
+      "wc-dev-backups": "10adec345eeca9a1609a8c4c04bef94b1ff8ac1fccc01c8735c1cba2d7dfec8d",
+      "wc-dev-games": "2f019f04bf048c904e8e1498b42e8fba8e2642418540e89a83db72ba135af6ff"
+    },
+    "game_entries": 920,
+    "game_tree_sha256": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+    "historical_operation_count": 73,
+    "historical_operations_equal": true,
+    "snapshot_count": 9,
+    "stack_policies_equal": true,
+    "stopped_receipt": {
+      "gid": 0,
+      "mode": 384,
+      "sha256": "2cb79b2157b6514d58799176c458500679bb3258094e94e1e0fcf5e1c64f9133",
+      "uid": 0
+    },
+    "target_frozen_web_templates_equal": true
+  },
+  "prior_admission_concurrency_restored": true,
+  "private_evidence_roots": [
+    "/private/tmp/wishicraft-memory-release-v1-_v9geisi",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-memory-postflight-v2-m6r_x0bt",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-memory-gates-v4-96kcc0o1"
+  ],
+  "production_minecraft_started": false,
+  "region": "ap-northeast-1",
+  "release_ci": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34804883136",
+  "release_commit": "03d19f2f0793d47c6339360d105bd2367a5a8a70",
+  "stage": "dev",
+  "status": "production completed; normal Minecraft START deferred",
+  "swap_kib": 0,
+  "validation": {
+    "canonical_synth_contexts_passed": 8,
+    "docker_integration": "CI passed: real JVM Xms1G/Xmx4G, inspect 6442450944 bytes, Java25.0.3, save/STOP/restart/world retention",
+    "local_docker": "CLI unavailable",
+    "mypy_files_passed": 200,
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "unit_tests_passed": 1336
+  }
+}

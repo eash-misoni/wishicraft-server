@@ -1,6 +1,6 @@
 # 05. Data and Interface Contracts
 
-> D-108 共通runtime memory: repository検証済み・production適用待ち。Xms 1G / Xmx 4G / container 6144MiBの設定と、digestを維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。
+> D-108 共通runtime memory: production移行完了（2026-09-14）、最終STOPPED / HEALTHY。Xms 1G / Xmx 4G / container 6144MiBの設定と、digest検証を維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。
 
 > D-106 Whitelist Management: Accepted / production Completed（2026-09-14）。[正本・適用contract](reviews/whitelist_management.md)と[移行・production証跡](runbooks/whitelist_management.md)。初期Commonは空、A/B既存accessはGame-specificへ完全一致で保存。D-105 positive CREATE/materialization deferredは維持。
 

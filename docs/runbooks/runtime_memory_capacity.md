@@ -1,6 +1,6 @@
 # Shared runtime memory capacity (D-108)
 
-Repository implementation validated; production release pending. This is one D-101 demand-driven slice,
+Repository implementation and production migration completed on 2026-09-14. This is one D-101 demand-driven slice,
 before the first modded Game. Requirements: SYS-002/006/007, START-001/002; preserve D-096/097/098/105/106.
 The production deployment uses stage **dev**, account/region from its canonical configuration.
 The prod YAML remains an unresolved placeholder. No new persistent resource, IAM, Game profile,
@@ -10,7 +10,7 @@ loader, mod, Game creation, world copy, or lifecycle/state-machine change is inc
 
 Reuse `config/stages/dev.yaml:host_runtime.memory`, a host-wide deploy-time setting:
 
-| Setting | Previous | Candidate |
+| Setting | Previous | Deployed |
 |---|---|---|
 | jvm_initial → INIT_MEMORY → Xms | 1G | 1G |
 | jvm_maximum → MAX_MEMORY → Xmx | 2G | 4G |
@@ -64,6 +64,7 @@ The same execution path serves START, SWITCH and RESET; Reconcile does not mutat
 | START/STOP CP environment, CREATE/recovery defaults | Redeploy the existing complete CP context |
 | Existing A/B Game records and Whitelist policy | No writes; compare full private before/after inventory |
 | Historical Operation runtime_target, switch_source, reset_plan | Preserve old digest and historical result |
+| RESET world owner plan source/target on Data EBS | Preserve historical digest/plan; initialized/ancestry checks identify the Game and path |
 | Stopped execution receipt on root EBS | Preserve exact bytes/hash, run, saved/removal-ready proof |
 | Historical heartbeat / AutoStopIntent | Preserve; next normal run starts a new identity/continuity |
 | SystemState observed execution | Reconcile refreshes observations; no fabricated receipt/target |
@@ -162,11 +163,78 @@ historical provenance to make a rollback pass. Retain old manifest/Compose/env/c
 assemblies and migration evidence while any retained Operation, receipt or Snapshot/provenance
 references them. Since provenance has no TTL, no automatic deletion deadline is introduced.
 
+## Production closeout — 2026-09-14
+
+Release `03d19f2f0793d47c6339360d105bd2367a5a8a70`,
+[CI 34804883136](https://github.com/eash-misoni/wishicraft-server/actions/runs/34804883136),
+completed all three jobs, including the real pinned-image memory/lifecycle tests. Java was
+OpenJDK 25.0.3; actual JVM arguments were -Xms1G/-Xmx4G and Docker HostConfig.Memory was
+6442450944 bytes. Both initial start and restart passed, with saved synthetic world retained.
+The earlier CI attempt failed because `docker top -eo args` omitted PID; the corrected test uses
+`-eo pid,args`. This was a verification-command defect, not a production JVM change.
+
+Production guest measurements during Minecraft-free maintenance boot:
+
+| Measurement | MiB |
+|---|---:|
+| Nominal EC2 RAM | 8192 |
+| Guest MemTotal | 7757.97 |
+| Idle MemAvailable | 7118.02 |
+| Guest total minus container limit | 1613.97 |
+| Idle available minus container limit | 974.02 |
+| Summed process RSS | 422.94 |
+| Container allowance above maximum heap | 2048 |
+
+Both guest release gates passed. The actual guest host allowance is about 1.58GiB, not the
+nominal 2GiB; approximately 0.95GiB remains above the container limit after the measured idle
+host load. RSS includes inspection/SSM and may count shared pages more than once. Docker 25.0.16
+uses cgroup v2, swap is zero, and the image had no optional JVM/memory flag overrides. These are
+idle measurements, not modded peak-load evidence.
+
+With Admission/Discord/Web concurrency held at zero, the reused inactive installer updated
+exactly four files. Read-back verified the complete new hash chain and Compose configuration,
+and the exact old receipt, canonical unit and 920-entry Game tree. The first postflight check
+expected an integer but Compose returned the exact decimal string `"6442450944"`; its failed
+evidence was retained. A new read-only diagnostic and v2 verification checked the observed
+string type, decimal syntax and exact byte count, then repeated all original integrity/data
+checks successfully. No artifact was reinstalled to fix this test representation issue.
+
+EC2 was normally stopped before the CP-only deployment. The reviewed assembly deployed with
+UPDATE_COMPLETE; all 11 Lambda code hashes, four runtime environment values and complete live
+template were verified against it. Physical resource identities remained unchanged. Target,
+Frozen Data and Web templates and update timestamps stayed unchanged, as did both permanent
+stack policies. No normal Minecraft START, Game registration/materialization or snapshot action
+was performed. Admission concurrency was restored exactly after the safety gate passed.
+
+Maintenance generated the two existing alarms reported by the user. DesiredStoppedEc2Running
+detects Desired STOPPED while maintenance EC2 is running; RuntimeObservationUnknown requires a
+fresh current-boot runtime heartbeat while EC2 runs outside an owned lifecycle transition.
+The maintenance boot did not start Minecraft. After normal EC2 stop and canonical Reconcile,
+the alarms naturally returned OK at **04:31:53 UTC** and **04:31:59 UTC**, respectively
+(13:31:53 / 13:31:59 JST). No alarm thresholds, actions or states were overridden.
+
+Final inventory at **04:34:15 UTC** after admission restoration: Desired/EC2 STOPPED, HEALTHY,
+45 alarms OK, all three queues empty, no current Operation/Lock/workflow/SSM command/session/DNS.
+Instance `i-04fc0629dc4ea466e` remains m8a.large; root `vol-092c04a633ffc6010` and retained Data
+`vol-03ac9f534326c345c` retain their attachments and ownership. Data EBS status is OK.
+All 73 historical Operations compare equal; A/B records, generation/path/Game metadata,
+three Whitelist policies, nine Snapshots and 16 provenance items compare equal. Historical
+RESET owner plans and stopped receipt still refer to their original runtime. Full data-tree
+fingerprint equality covers world, metadata and whitelist bytes.
+
+[Sanitized production evidence](../evidence/runtime_memory_capacity_production_2026-09-14.json)
+records exact hashes, measured margins, release and preservation proofs. Private raw inventory,
+old/new bundles, inverse-plan preview, release assembly and failed/successful diagnostics remain
+in separate temporary evidence roots. Keep durable copies with the retained provenance; temporary
+directories are not a retention mechanism. Old artifact bytes are additionally backed up by the
+installer on the host and remain reproducible from the pinned Git history. Rollback was planned
+and the same installer's retry paths tested; production rollback was not executed.
+
 ## Evidence and remaining work
 
 Initial read-only production inventory, 2026-09-14 03:52 UTC: m8a.large, STOPPED/HEALTHY,
 no Lock/workflow/SSM/session/DNS, three empty queues, 45 alarms OK, 9 Snapshots and 16 provenance
-items. A/B plus three policies; no dynamic registry. This is not a completed migration.
+items. A/B plus three policies; no dynamic registry. The completed migration is recorded above.
 Local Docker CLI is unavailable. CI's pinned-image test checks inspect.HostConfig.Memory,
 INIT_MEMORY/MAX_MEMORY and the actual JVM -Xms/-Xmx arguments, then normal save/STOP/restart
 and retained synthetic world. AWS/SSM/systemd are substituted there; it is not production E2E.

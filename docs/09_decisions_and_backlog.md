@@ -1,14 +1,22 @@
 # 09. Decisions and Backlog
 
-## D-108 Host-wide runtime memory capacity（Accepted / repository implementation）
+## D-108 Host-wide runtime memory capacity（Accepted / production Completed）
 
 2026-09-14、D-101の需要起点slice。既存host_runtime.memoryでXms 1G / Xmx 4G / container
-6144MiBを候補とし、nominal 8GiB hostから2GiB、container内heap外へ2GiBを残す。
+6144MiBを採用し、nominal 8GiB hostから2GiB、container内heap外へ2GiBを残す。
 [設定・integrity・限定移行・retry/rollback・release gate](runbooks/runtime_memory_capacity.md)を正本とする。
 D-107のinstance/volume/ownership/policyを維持。memoryは従来どおりmanifest digestへ含める。
 現在のA/Bだけを既存inactive installerで移行し、Game/Operation/receipt/provenanceは更新しない。
 D-105登録済みGameはimmutable initial-ownerとの整合が必要なので、この限定移行では拒否する。
-新規profile、modloader、mod、Game作成、world copyは対象外。production適用と実host余裕は別途検証する。
+新規profile、modloader、mod、Game作成、world copyは対象外。
+
+2026-09-14、release `03d19f2` / CI `34804883136`（全3 job・1,336 tests成功）をproduction適用。
+実hostのguest-total-minus-containerは1613.97MiB、idle-available-minus-containerは974.02MiBでgate成立。
+停止中4-file更新→EC2正常停止→CP単独deploy/read-back→Reconcile→受付復帰を完了。
+920-entry Game tree・停止receipt・73 historical Operation・9 Snapshot・16 provenance・instance/volume不変。
+最終STOPPED/HEALTHY、45 alarms OK、3 queue空、Lock/workflow/SSM/DNSなし。
+maintenanceの2アラームは04:31:53 / 04:31:59 UTCに自然復帰。通常Minecraft STARTは次sliceへ延期。
+[production closeout](runbooks/runtime_memory_capacity.md#production-closeout--2026-09-14)を参照。
 
 ## D-107 Host capacity / permanent replacement guard（Accepted / production resize Completed）
 
