@@ -373,7 +373,7 @@
     "failure": "NULL attributes rejected by backup_provenance._decode through runtime_catalog.bind_operation",
     "same_failure_in_record_failure": true,
     "workflow": "FAILED",
-    "operation_cleanup_pending": true,
+    "operation_cleanup_pending": false,
     "runtime_rollback_performed": false,
     "data_deleted": false,
     "null_fields": [
@@ -419,7 +419,8 @@
         "game_id": "game-vanilla-secondary",
         "decoder_result": "unsupported DynamoDB attribute"
       }
-    ]
+    ],
+    "operation_status": "FAILED"
   },
   "production_runtime_evidence": {
     "materialization": false,
@@ -450,7 +451,7 @@
     "since": "2026-09-14T12:45:21.928467+00:00",
     "runtime_rollback": false,
     "forward_fix_deployed": false,
-    "stale_recovery": "PENDING_ACTUAL_DEADLINE"
+    "stale_recovery": "COMPLETED_EXISTING_D074"
   },
   "validation": {
     "pytest_passed": 1387,
@@ -465,8 +466,91 @@
       "https://github.com/eash-misoni/wishicraft-server/actions/runs/34839846207",
       "https://github.com/eash-misoni/wishicraft-server/actions/runs/34839846249"
     ],
-    "coverage_gap": "Existing tests validated package fragment without nullable full Game; synthetic host Docker did not exercise deployed CP bind_operation."
+    "coverage_gap": "Existing tests validated package fragment without nullable full Game; synthetic host Docker did not exercise deployed CP bind_operation.",
+    "independent_full_game_reproduction": {
+      "result": "3 failed",
+      "purpose": "Known production defect reproduced; not a passing regression",
+      "log_sha256": "2f2bb2f5689d1b1056a32cb162912e40ae1ab53f405a5be6142668b4b23a95b3",
+      "existing_generic_decoder_handles_all_three_records": true
+    },
+    "incident_docs_neoforge_ci": {
+      "run": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34845856136",
+      "conclusion": "failure",
+      "failed_assertion": "tests/integration/neoforge_docker.py:141 block placement response",
+      "observed_before_failure": [
+        "exact artifact hashes",
+        "server Done",
+        "RCON list",
+        "Xms1G/Xmx4G"
+      ],
+      "cause": "not established; response was not logged",
+      "log_sha256": "b24d04f73fbe190c93048d9947d087f5b80cf4286434e46eb1191a70b372663f"
+    },
+    "incident_docs_standard_ci": {
+      "run": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34845856127",
+      "conclusion": "success"
+    }
   },
   "private_evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-neoforge-production-v1-afav2_5u",
-  "workflow_history_sha256": "1716a034f4043fbe6c8e5b18c8086d2d17f9eec005bee4aed802792bf8fe1e34"
+  "workflow_history_sha256": "1716a034f4043fbe6c8e5b18c8086d2d17f9eec005bee4aed802792bf8fe1e34",
+  "recovery": {
+    "at": "2026-09-14T13:13:11.345713+00:00",
+    "method": "OperationRepository.recover_stale",
+    "actual_deadline_preserved": true,
+    "fresh_observed_at": "2026-09-14T13:13:09.981952Z",
+    "operation_status": "FAILED",
+    "error_code": "START_PRECONDITION_FAILED",
+    "lock_absent": true,
+    "current_operation_absent": true,
+    "desired_unchanged": true
+  },
+  "final": {
+    "at": "2026-09-14T13:17:26.441291+00:00",
+    "desired": "STOPPED",
+    "observed_ec2": "stopped",
+    "observed_at": "2026-09-14T13:13:09.981952Z",
+    "health": "HEALTHY",
+    "selected_game_id": "game-vanilla-main",
+    "ec2": "stopped",
+    "current_operation": false,
+    "locks": 0,
+    "active_workflows": 0,
+    "active_ssm": 0,
+    "active_sessions": 0,
+    "empty_queues": 3,
+    "dns": false,
+    "alarms_ok": 45,
+    "alarm_overrides": false,
+    "alarm_recovery": {
+      "wc-dev-desiredstoppedec2runningalarm": {
+        "state": "OK",
+        "state_updated_at": "2026-09-14 21:36:53.500000+09:00"
+      },
+      "wc-dev-expiredoperationlockalarm": {
+        "state": "OK",
+        "state_updated_at": "2026-09-14 22:16:16.249000+09:00"
+      },
+      "wc-dev-starttaskfunctionerrorsalarm": {
+        "state": "OK",
+        "state_updated_at": "2026-09-14 21:58:43.682000+09:00"
+      },
+      "wc-dev-startworkflowfailurealarm": {
+        "state": "OK",
+        "state_updated_at": "2026-09-14 21:58:37.542000+09:00"
+      }
+    },
+    "data_volume_status": "ok",
+    "root_volume_status": "ok",
+    "snapshots": 9,
+    "provenance_records": 16,
+    "previous_games_and_policies_unchanged": true,
+    "all_73_prior_operations_unchanged": true,
+    "new_game_unchanged_since_create": true,
+    "operation_items": 75,
+    "game_table_items": 7,
+    "admission_remains_closed": true,
+    "qualification_complete": false,
+    "post_start_filesystem_read": false,
+    "filesystem_evidence_basis": "Exact pre/post inactive migration tree plus execution history with no subsequent EC2 start or host action"
+  }
 }

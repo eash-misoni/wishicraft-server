@@ -119,16 +119,26 @@ It atomically records this Operation FAILED and removes only its owned Lock/Curr
 with the exact stored deadline and observation timestamp conditions. Preserve Game and all prior
 Operation/provenance records. Do not substitute guessed timestamps or raw delete operations.
 
-Recovery completion and the final inventory are recorded in the production evidence after actual
-execution; this paragraph is a procedure, not a claim that pending cleanup has already succeeded.
+Recovery succeeded at 2026-09-14T13:13:11.345713+00:00. The existing conditional transaction recorded the
+failed START as FAILED with START_PRECONDITION_FAILED, removed its owned Lock/Current Operation,
+and preserved Desired STOPPED. No deadline, lease identity, Game or prior historical record was
+manually changed. Final inventory at 13:17:26 UTC confirmed STOPPED/HEALTHY, EC2 STOPPED,
+no Current Operation/Lock/workflow/SSM/session/DNS, three empty queues and all 45 alarms OK.
+ExpiredOperationLock naturally returned OK; no alarm override was used. All five prior Game/policy
+items, all 73 prior Operations, the nine snapshots and 16 provenance items matched initial inventory.
+The new Game exactly matched its pre-START registration. No post-failure filesystem read is claimed:
+EC2 never started again after the verified migration tree baseline.
 Keep admission closed after cleanup until a separately reviewed forward fix is deployed. The hold
-means normal Discord operations and authenticated management routes are temporarily unavailable;
+means normal Discord operations and Web-Lambda routes (including the public guide and authenticated
+management pages) are temporarily unavailable;
 it does not change persistent IAM, networking, alarms or world data.
 
 ## Required next slice
 
 Fix complete-Game NULL decoding at the actual runtime binding boundary and add regressions using
-full legacy and newly registered DynamoDB records, not only a package fragment. Cover failure
+full legacy and newly registered DynamoDB records, not only a package fragment. The existing generic `operation._decode_attribute` and host decoder already handle NULL; prefer
+reusing the appropriate Game decoder rather than broadening provenance validation or editing records.
+Cover failure
 recording/cleanup as well as START/STOP/SWITCH/RESET binding. Existing 1,387 tests and the D-109
 Docker qualification passed while missing this boundary: their success does not qualify production
 materialization. Keep full manifest/package verification; do not remove NULL metadata to make it
@@ -146,4 +156,27 @@ connection, the user must choose real membership through the existing whitelist 
 is inferred. Actual connection/player load, backup of the newly generated world and practical
 capacity assessment remain future user operations. This slice creates no additional snapshot.
 
-[Sanitized machine-readable deployment/CREATE/failure evidence](../evidence/neoforge_package_production_2026-09-14.json) records observed facts separately from pending recovery and unexecuted runtime checks.
+[Sanitized machine-readable deployment/CREATE/failure evidence](../evidence/neoforge_package_production_2026-09-14.json) records observed facts separately from completed conditional recovery and unexecuted runtime checks.
+
+The first incident-docs NeoForge CI [34845856136](https://github.com/eash-misoni/wishicraft-server/actions/runs/34845856136) failed at the synthetic block-placement response assertion after server Done/RCON/heap checks. The response was not logged, so its cause is unconfirmed. This is separate from the production NULL boundary and is not counted as a passing run. Retain the failed logs and investigate fixture placement/readiness during the next regression slice.
+
+## Client preparation while the release is held
+
+These steps prepare only the user's client; they do not authorize another production START.
+Following the [official NeoForge client instructions](https://docs.neoforged.net/user/docs/client/):
+
+1. Close Minecraft Launcher. Run the fixed [21.1.219 installer](https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.219/neoforge-21.1.219-installer.jar), choose `Install client`, then `Proceed`.
+2. In Launcher, create a separate installation using Minecraft 1.21.1 / NeoForge 21.1.219 and a
+   separate game directory. Boot it once and close the game to initialize that directory.
+3. Put only the reviewed [Create file](https://cdn.modrinth.com/data/LNytGWDc/versions/UjX6dr61/create-1.21.1-6.0.10.jar)
+   and [Farmer's Delight file](https://cdn.modrinth.com/data/R2OftAxM/versions/XTVZDOol/FarmersDelight-1.21.1-1.3.4.jar)
+   into its `mods/` folder. Verify SHA-256 against the immutable package catalog / recorded
+   authenticated client requirements. Do not select a floating recommended/latest release.
+4. After the forward fix and successful server START/STOP qualification, explicitly add the real
+   player through the existing whitelist UI. Keep Common versus Game-specific scope intentional.
+5. Once maintenance is lifted, select/start `create-survival` through the existing formal controls.
+   Only when READY and DNS are present, connect to `mc-dev.wishicraft.net`. The failed first START
+   did not change the selected Game from A, so an unqualified `/mc start` currently does not mean
+   this new Game. The future successful targeted START must establish that selection first.
+
+No actual client installation or connection was performed by Codex in this slice.
