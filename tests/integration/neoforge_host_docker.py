@@ -93,7 +93,7 @@ def main() -> None:
                 "package_catalog": packages,
             },
         )
-        game_id = db.records["operation", result["operation_id"]]["target_game_id"]["S"]
+        game_id = db.records["operation", str(result["operation_id"])]["target_game_id"]["S"]
         records.append({k: decode(v) for k, v in db.records["games", game_id].items()})
         assert not game_package.GAMES.joinpath(game_id).exists()
     config = {

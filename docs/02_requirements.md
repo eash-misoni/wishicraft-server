@@ -439,17 +439,18 @@ D-097 Acceptedの移行後は、新形式shared-volume normalだけを共有volu
 
 Gameはシステム生成の不変`game_id`を持つ。表示名は日本語と空白を許可し、初期版では重複を禁止する。
 
-### GAME-003 Version pinning `LATER`
+### GAME-003 Version pinning `MUST / D-109 repository slice`
 
 Gameは具体的なPackage version、Minecraft version、Java runtimeへ固定する。既存Gameに`latest`参照を残さない。
 
-### PKG-001 不変Package `LATER`
+### PKG-001 不変Package `MUST / D-109 repository slice`
 
 同一package ID/versionの中身を上書きしない。
 
-### PKG-002 サーバー種別 `LATER`
+### PKG-002 サーバー種別 `D-109 Vanilla/NeoForge; others LATER`
 
-将来対応候補は次とする。
+D-109の最小実装はVanillaとMinecraft 1.21.1の固定NeoForge packageのみ。残りは将来候補であり未実装。
+[package定義・hash検証・client requirement・失敗回復](runbooks/neoforge_package.md)を必須契約とする。
 
 - vanilla
 - paper

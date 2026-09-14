@@ -285,3 +285,11 @@ AL2023 release/kernel/AMI、itzg image tag/digest、Docker/Compose、UID/GID 993
 - https://github.com/itzg/docker-mc-backup
 
 - https://docs.docker.com/engine/
+
+## D-109 pinned NeoForgeの具体的な責務
+
+Wishicraftはimmutable Game package/catalog・mod/installerのexact sourceとSHA-256・Game専用cache・
+世代への配置・digest照合・client requirementを管理する。itzgの固定imageは明示installerによる
+NeoForge導入、Java起動、health/RCON/正常停止を担当する。起動時の最新版解決は使わない。
+mods/config/loader librariesはGame間で共有せず、world生成とserverconfigはMinecraft/mod側が行う。
+一般的なModpack platformや独自NeoForge installerは作らない。[正本](../runbooks/neoforge_package.md)。
