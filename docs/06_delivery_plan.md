@@ -1,6 +1,6 @@
 # 06. Delivery Plan
 
-> D-109 production実証: runtime/CP/Web配布とpositive CREATE成功、first STARTはEC2起動前のNULL decode不具合で停止。Gameは保持・UNMATERIALIZED。受付閉鎖中、materialization/NeoForge起動は未実証。[障害・復旧・再開条件](runbooks/neoforge_production.md)。
+> D-109 production実証: NULL decoderとfailure確定の修正をCPへ配布済み。再STARTはartifact取得後、未作成whitelist policyのhost読取で停止。復旧STOP成功、STOPPED/HEALTHY・受付閉鎖継続。Game/cacheは保持、NeoForge起動は未実証。[障害・復旧・再開条件](runbooks/neoforge_production.md)。
 
 > D-109 pinned NeoForge package: repository/runtime実装・検証完了、production未適用。共通manifestにpackage catalogを含め、Gameのimmutable definitionと照合する。詳細は[正本runbook](runbooks/neoforge_package.md)。
 

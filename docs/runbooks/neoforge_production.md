@@ -1,10 +1,13 @@
 # D-109 production qualification — interrupted before materialization
 
-**Runtime/Control Plane/Web deployment and positive CREATE succeeded. First START failed before
-EC2 start. Production qualification is NOT complete.** The package-enabled release remains
-installed; the Game is retained UNMATERIALIZED. Admission, Discord command and management Web
-are held at reserved concurrency zero to prevent further affected operations. Do not attempt
-another START or roll back to the A/B-only predecessor. [Package contract](neoforge_package.md).
+**CP NULL decoder/failure-finalization fix is deployed. A second START reached EC2 and pinned
+artifact materialization, then failed at the host's absent Game-whitelist record read. NeoForge
+qualification is NOT complete.** The existing Game is retained ACTIVE/UNMATERIALIZED, generation 1,
+with partial owned files/cache preserved. Recovery STOP succeeded; Desired/EC2 are STOPPED and
+HEALTHY. Admission, Discord command and management Web remain at reserved concurrency zero.
+Do not retry START, create a policy record as a workaround, or roll back to the A/B-only runtime.
+The current outcome is in [NULL fix production follow-up](#null-fix-production-follow-up--second-host-failure).
+The initial incident sections below remain historical. [Package contract](neoforge_package.md).
 
 ## Approved scope and initial state
 
@@ -184,7 +187,7 @@ without this Control Plane boundary. The new tests run in ordinary CI.
 Repository validation: 1,399 full tests passed, lint/format/type passed; package-enabled CP synth
 passed. Initial live diff has 22 changed paths: only Code/S3Key and asset-path metadata for the
 11 existing CP Lambdas. Runtime digest, environment, IAM, resources and workflow definitions are
-identical. CI and production execution results must be recorded separately after they occur.
+identical. Both fix CI runs succeeded; the observed production follow-up below reached a separate host failure.
 
 Formal maintenance START/STOP uses the existing Admission handler/service and WorkflowLauncher
 with canonical live configuration and a fresh explicit CLI idempotency key while public ingress
@@ -232,8 +235,106 @@ Following the [official NeoForge client instructions](https://docs.neoforged.net
 4. After the forward fix and successful server START/STOP qualification, explicitly add the real
    player through the existing whitelist UI. Keep Common versus Game-specific scope intentional.
 5. Once maintenance is lifted, select/start `create-survival` through the existing formal controls.
-   Only when READY and DNS are present, connect to `mc-dev.wishicraft.net`. The failed first START
-   did not change the selected Game from A, so an unqualified `/mc start` currently does not mean
-   this new Game. The future successful targeted START must establish that selection first.
+   Only when READY and DNS are present, connect to `mc-dev.wishicraft.net`. The second START
+   selected `create-survival`, and recovery STOP preserved that selection. Public admission remains
+   closed; selection does not mean materialization or connection has succeeded.
 
 No actual client installation or connection was performed by Codex in this slice.
+
+## NULL fix production follow-up — second host failure
+
+Fix commit `0f3f7d7e7dc4b95a31983e99636d995ac1f58ff2` passed standard
+[CI 34851093571](https://github.com/eash-misoni/wishicraft-server/actions/runs/34851093571)
+and [NeoForge Docker CI 34851093621](https://github.com/eash-misoni/wishicraft-server/actions/runs/34851093621).
+The earlier synthetic block-placement failure did not recur; its test was not changed or bypassed.
+Local Docker was unavailable; these are CI Docker results, not a claimed local server run.
+
+Fresh production at 13:37:59 UTC was STOPPED/HEALTHY, 45 alarms OK, with no Current Operation,
+Lock, active workflow/SSM/session, queued messages or DNS. Repeated predeploy and pre-START checks
+matched. The three public ingress functions stayed at zero throughout this follow-up.
+
+Only `WishicraftControlPlaneStack-dev` was deployed. The 22 live-template differences were the
+11 existing Lambda Code/S3Key and corresponding asset-path metadata changes. At 13:59:06 UTC,
+postdeploy template matched the candidate exactly, all physical resource identities matched and
+all 11 deployed code SHA values matched their assets. No IAM, environment, state-machine,
+Target/Data/Web, resource or host artifact change occurred. Runtime digest remained
+`64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c`.
+
+At 14:00 UTC, the fixed canonical binding function read all three complete live Games through a
+read-only SDK proxy using their existing historical Operation context. Before/after reads matched.
+This was local execution of the verified deployed code path against actual AWS records, not a
+new Lambda dry-run endpoint. No A/B START or durable binding write was performed.
+The actual nullable fields were `created_from.template_id/template_version`, `last_backup_at`,
+`last_started_at`, `world.difficulty/hardcore`, plus `world.seed` on A/B and
+`creation.reset_policy` on the NeoForge Game. None were rewritten.
+
+### START result and bounded diagnosis
+
+New formally admitted START `op-961a0756-5b60-4cf6-b828-9c619e905dd6` selected the existing
+Game and started EC2. Replaying the same admission request returned the same Operation with
+`created=false`. It reached SSM `RunStartScript`, then FAILED with `HOST_RUNTIME_FAILED`;
+host command `87cb16c4-fbe0-4ce6-80de-f724328681f5` returned `TARGETED_RUNTIME_FAILED`.
+Unlike the first incident, `ReconcileAfterFailure → RecordFailure → StartFailed` succeeded:
+the ordinary owned transaction finalized FAILED and removed Lock/Current immediately, without
+D-074 deadline recovery. The task/workflow failure alarms reflect this real START failure.
+
+Read-only host inspection at 14:05 and 14:10 UTC confirmed:
+
+- No container, Java process, gameplay/RCON listener or systemd runtime start timestamp.
+- Initial owner phase `prepared`; server properties and initial whitelist baseline written.
+- NeoForge installer and both mods cached, both mods projected; all five jar copies matched the
+  pinned filename, size and SHA-256. No partial artifact was deleted or reacquired manually.
+- Package owner/projection files exist. No `world/level.dat`, loader installation, generated
+  config/defaultconfigs, runtime READY, DNS or actual JVM memory measurement was reached.
+- Common policy read succeeds with revision 1 and zero members. The Game-specific policy record
+  is legitimately absent; calling the deployed host `item()` reader for that key reproduces
+  `JSONDecodeError: Expecting value: line 1 column 1 (char 0)`.
+
+The host reader applies `json.loads` directly to successful AWS CLI `get-item` stdout. An absent
+item can produce empty stdout, so the caller never reaches its existing `if specific else empty()`
+policy behavior. This is a distinct absent-record transport boundary, not the CP AttributeValue
+NULL bug. Production command output has only the generic failure code; the bounded read-only
+reproduction and materialization checkpoint identify the corresponding next host read. Do not
+claim a captured exception stack from the original START. Common=0, specific=0, effective=0 remain
+unchanged. The initial on-disk whitelist is a preparation baseline, **not a completed empty-policy
+projection**; no server consumed it and no membership was added.
+
+Changing this reader would change the protected D-109 runtime artifact. The user's additional-bug
+stop boundary was honored: no host patch/migration, forced retry, policy workaround, Game deletion,
+Vanilla fallback or old-runtime rollback was performed. Future work must distinguish an absent
+item from malformed nonempty output and CLI/API failure, retain fail-closed checks, and cover the
+real AWS CLI empty-response boundary as well as first materialization with no specific policy.
+It needs separately reviewed artifact migration and CP digest alignment before another START.
+
+### Safe containment and data outcome
+
+The stopped receipt still identifies the previous saved A run; it was not rewritten to claim
+that the new Game ran. A running-host formal STOP cannot adopt a mismatched prior receipt.
+Following the existing D-096 maintenance containment pattern, fresh checks found no workload,
+Lock/workflow/SSM/session, DNS or queued request. Normal, non-forced EC2 stop was requested after
+save/removal proof and no-container/listener checks; EC2 STOPPED was confirmed at 14:12:41 UTC.
+
+Then new formally admitted STOP `op-4cba0b3b-5ba0-46ce-9b10-308bd0b2d1c5` succeeded via
+`SetDesiredStopped → AlreadyEc2Stopped → ... → MarkSucceeded`. It did not execute RunHostStop
+or StopEc2. Admission-request replay returned the same Operation. This proves recovery STOP,
+**not** graceful stopping of a running NeoForge JVM. At 14:13:20 UTC Desired/EC2 were STOPPED,
+HEALTHY, with Current Operation absent. `create-survival` stays selected.
+
+All seven Game/registry/policy records, 75 prior Operations, nine snapshots and 16 provenance
+records equal the initial baseline. Instance type/ID, both EBS identities and attachment remain
+unchanged; volume status is OK. A/B tree inventory (920 entries, including content, ownership,
+mode and file mtime) remains SHA-256
+`f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c`.
+No snapshot was created. The new Game's only data additions are its initial owner/baseline,
+package owner/projection, cache and projected jars. Its record is still generation 1,
+ACTIVE/UNMATERIALIZED with the same immutable package digest
+`720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b`.
+
+The 14:14 UTC inventory confirmed no DNS, Lock, Current, active workflow/SSM/session or queue
+messages. Three alarms still reflected pre-stop observations/failure events at that checkpoint;
+all 45 alarms naturally returned to OK at 14:21:06 UTC, recorded in the [follow-up evidence](../evidence/neoforge_null_fix_production_2026-09-14.json).
+No alarm threshold, notification, metric or state was manually changed. Ingress remains closed
+regardless of alarm recovery because first NeoForge READY is unproven. JVM Xms/Xmx/container
+configuration remains 1G/4G/6GiB, but no process memory/CPU/GC/tick baseline was measurable.
+The user cannot connect yet; client preparation is possible separately, and intentional real
+whitelist membership plus a successful forward-fix qualification remain required.

@@ -1,6 +1,6 @@
 # wishicraft-server
 
-> D-109 production実証: runtime/CP/Web配布とpositive CREATE成功、first STARTはEC2起動前のNULL decode不具合で停止。Gameは保持・UNMATERIALIZED。受付閉鎖中、materialization/NeoForge起動は未実証。[障害・復旧・再開条件](docs/runbooks/neoforge_production.md)。
+> D-109 production実証: NULL decoderとfailure確定の修正をCPへ配布済み。再STARTはartifact取得後、未作成whitelist policyのhost読取で停止。復旧STOP成功、STOPPED/HEALTHY・受付閉鎖継続。Game/cacheは保持、NeoForge起動は未実証。[障害・復旧・再開条件](docs/runbooks/neoforge_production.md)。
 
 > D-109 pinned NeoForge Game package: repository/runtime検証完了、production未適用。Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4。[package・隔離・release契約](docs/runbooks/neoforge_package.md)。
 
