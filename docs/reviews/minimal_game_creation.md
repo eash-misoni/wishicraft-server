@@ -1,5 +1,7 @@
 # D-105 Minimal Game Creation
 
+> Current production status (2026-09-14): D-109 deployed and real CREATE succeeded; first START failed before EC2 start on full-Game NULL decoding. Game retained UNMATERIALIZED, admission closed. [Evidence and recovery boundary](../runbooks/neoforge_production.md). Earlier deferred/repository-only statements below retain their historical scope.
+
 Accepted 2026-09-13. **Production deployed, positive CREATE/materialization deferred.**
 Explicit GO on `3afa803` approved the reviewed deployment and safe negative/read-only E2E. No valid
 production CREATE was submitted. Fully production Completed requires the future real-Game positive

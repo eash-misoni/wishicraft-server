@@ -1,6 +1,12 @@
 # 09. Decisions and Backlog
 
-## D-109 Pinned NeoForge Game package（Accepted / repository Completed; production Deferred）
+## D-109 Pinned NeoForge Game package（Accepted / deployed; first START blocked）
+
+2026-09-14、`f12eb03`の停止中host更新とCP/Web配布、正式positive CREATEを実施。
+first STARTは完全Game metadataのNULL decoder欠落でEC2起動前に失敗し、failure記録も同じ境界で失敗した。
+新Gameと既存A/Bを保持し、受付を閉鎖。期限後のD-074条件付き復旧とforward fixを分離する。
+**production materialization/NeoForge READYは未完了**。[実証・失敗・復旧の正本](runbooks/neoforge_production.md)。
+以下はrepository slice完了時の決定で、production未適用の記述は当時の範囲。
 
 Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4を固定する。
 NeoForgeは両modの最低要求versionを現行Java25 imageで実Docker検証して選定した。

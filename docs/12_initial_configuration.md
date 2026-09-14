@@ -1,5 +1,7 @@
 # 12. Initial Configuration
 
+> D-109 production実証: runtime/CP/Web配布とpositive CREATE成功、first STARTはEC2起動前のNULL decode不具合で停止。Gameは保持・UNMATERIALIZED。受付閉鎖中、materialization/NeoForge起動は未実証。[障害・復旧・再開条件](runbooks/neoforge_production.md)。
+
 > D-108 共通runtime memory: production移行完了（2026-09-14）、最終STOPPED / HEALTHY。Xms 1G / Xmx 4G / container 6144MiBの設定と、digest検証を維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。
 
 > D-107 Host capacity（production in-place resize Completed）: [恒久replacement guardとrelease契約](runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。dev Targetはm8a.large。永久replacement-deny policy下でInstance/root/Data EBSを維持し、STOPPED/HEALTHYへcloseout済み。memory増量は別slice。Game/UI/lifecycleは変更しない。

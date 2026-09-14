@@ -1,0 +1,472 @@
+{
+  "decision": "D-109",
+  "status": "DEPLOYED_CREATE_SUCCEEDED_FIRST_START_BLOCKED",
+  "release_commit": "f12eb03693b755b90d7a5fa00a441c985f8a6b36",
+  "stage": "dev",
+  "account_id": "385526546525",
+  "region": "ap-northeast-1",
+  "initial_at": "2026-09-14T12:25:36.674071+00:00",
+  "initial": {
+    "desired": "STOPPED",
+    "ec2": "stopped",
+    "health": "HEALTHY",
+    "alarms_ok": 45,
+    "locks": 0,
+    "current_operation": false,
+    "active_workflows": 0,
+    "active_ssm": 0,
+    "active_sessions": 0,
+    "dns": false,
+    "empty_queues": 3,
+    "snapshots": 9,
+    "provenance_items": 16
+  },
+  "identity": {
+    "instance_id": "i-04fc0629dc4ea466e",
+    "instance_type": "m8a.large",
+    "root_volume": "vol-092c04a633ffc6010",
+    "data_volume": "vol-03ac9f534326c345c"
+  },
+  "migration": {
+    "before_digest": "373dfb9c768b8d4b0b318793551212e0de5d5fe07b8ae4dc31791226e9ba5048",
+    "after_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+    "file_count": 8,
+    "installer": {
+      "bundle_sha256": "9d56293be852d4432297a7aa6ba26bc1d29a143f21e636b6da90cdaae930cb46",
+      "file_count": 8,
+      "installed": true,
+      "installer_result": "TARGETED_RUNTIME_INSTALLED_INACTIVE"
+    },
+    "same_stopped_receipt": true,
+    "same_game_tree": true,
+    "tree_sha256": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+    "tree_entries": 920,
+    "free_data_bytes": 31289032704,
+    "maintenance_memory_kib": {
+      "Buffers": 2168,
+      "Cached": 998568,
+      "MemAvailable": 7326912,
+      "MemFree": 6535080,
+      "MemTotal": 7944160,
+      "Slab": 64868,
+      "SwapFree": 0,
+      "SwapTotal": 0
+    },
+    "files": [
+      {
+        "destination": "/etc/wishicraft/host-runtime/compose.yaml",
+        "mode": 384,
+        "predecessor": "aba1f4dc28db7a252a311f03778735de79de0210f7fe13b9be2ac72e4cea254f",
+        "sha256": "fadc6aee7d75896a53de4ae8b741b075af7185c8a32ce24aaf388a223775c02c",
+        "source": "0.artifact"
+      },
+      {
+        "destination": "/etc/wishicraft/host-runtime/runtime.env",
+        "mode": 384,
+        "predecessor": "caae4c2b54a289c749adeda7b0fbe555cdec72bed9a72ce58923f101c833dcc0",
+        "sha256": "e7ef9c400ccde318685c2115a9521b059f8579eaed1621dcebf41a2791239753",
+        "source": "1.artifact"
+      },
+      {
+        "destination": "/etc/wishicraft/host-runtime/manifest.json",
+        "mode": 384,
+        "predecessor": "373dfb9c768b8d4b0b318793551212e0de5d5fe07b8ae4dc31791226e9ba5048",
+        "sha256": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+        "source": "2.artifact"
+      },
+      {
+        "destination": "/etc/wishicraft/runtime-contract.json",
+        "mode": 384,
+        "predecessor": "7bb186d08275c41dcca8ff6f74428a82f46f00a00de7ff4cb7c664f41261716b",
+        "sha256": "180834225203f51c651809b636911a0b2e5658fcca82136021e45b53be7ef7a0",
+        "source": "3.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/operation-v2",
+        "mode": 493,
+        "predecessor": "fa56d5a106649e81af3ae98f4a458ae606b18b920da204ec4add5a938798efb8",
+        "sha256": "724c5a2a7c9eea473531fad6bc4601412a1e622d8cb6baca3d0120c923d18a8d",
+        "source": "4.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/reset_worlds.py",
+        "mode": 420,
+        "predecessor": "040d794347af14c668819673bb1156f00c95b4a51cfff316e0ea41201ccb9dff",
+        "sha256": "7dc80ce2469c454a32cb5c2dd6ab673ef1e216544c99acf057bb693d81f61b41",
+        "source": "5.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/host-runtime-probe.py",
+        "mode": 493,
+        "predecessor": "83244ae3f0aaae95192e9df8eeb6e05392f0f04e22290ca4a15e42c7e3373ce0",
+        "sha256": "1696773c651a2f02f2970d40e49166287125ba05d41cca57822ba7389b04f302",
+        "source": "6.artifact"
+      },
+      {
+        "destination": "/usr/local/libexec/wishicraft/game_package.py",
+        "mode": 420,
+        "predecessor": null,
+        "sha256": "e9adf507de958ea74d76c1b69438e85dc3b84377c041953098fea21b5b23668a",
+        "source": "7.artifact"
+      }
+    ]
+  },
+  "deployment": {
+    "control_plane": {
+      "admission_closed": true,
+      "at": "2026-09-14T12:35:18.138344+00:00",
+      "functions": {
+        "AdmissionFunction23082B67": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES",
+            "GAME_CREATION_DEFAULTS"
+          ]
+        },
+        "AutoStopEvaluatorFunctionF85F8B50": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES"
+          ]
+        },
+        "BackupTaskFunctionA44639DC": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES",
+            "RECOVERY_RUNTIME_ZLIB_BASE64"
+          ]
+        },
+        "DiscordCommandFunction7D25102A": {
+          "code_sha256": "VgHPYNo7WNQnek0bQhKpu56EBHgTh93ZIpf3YEpa4IA=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES"
+          ]
+        },
+        "DiscordMessageFunction78FA388B": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": []
+        },
+        "MonitoringObserverFunction584DA7C7": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": []
+        },
+        "ReconcileFunction30829CB6": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES"
+          ]
+        },
+        "RetentionTaskFunction9F285CE4": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES"
+          ]
+        },
+        "StartTaskFunction8C564C4A": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": [
+            "RUNTIME_CONFIG_DIGEST",
+            "GAME_PACKAGES"
+          ]
+        },
+        "StatusExecutorFunction6E5C9869": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": []
+        },
+        "StopTaskFunction11473A8C": {
+          "code_sha256": "gxErF57yycqlebpF2IQm5c8d8N7laMNkeKklSo5LicI=",
+          "verified_environment_keys": [
+            "RUNTIME_CONFIG_DIGEST",
+            "GAME_PACKAGES"
+          ]
+        }
+      },
+      "physical_resources_unchanged": true,
+      "stack": "UPDATE_COMPLETE"
+    },
+    "web": {
+      "admission_closed": true,
+      "at": "2026-09-14T12:36:49.550541+00:00",
+      "functions": {
+        "AuthC256A5EC": {
+          "code_sha256": "skf+ZDu4A6VFIVY2JwXGQUr2xr5x26T9Jy5ouJk01G4=",
+          "verified_environment_keys": []
+        },
+        "Web3C8945DB": {
+          "code_sha256": "skf+ZDu4A6VFIVY2JwXGQUr2xr5x26T9Jy5ouJk01G4=",
+          "verified_environment_keys": []
+        }
+      },
+      "physical_resources_unchanged": true,
+      "stack": "UPDATE_COMPLETE"
+    },
+    "changed_property_paths": {
+      "control_plane": [
+        "/Resources/DiscordCommandFunction7D25102A/Metadata/aws:asset:path",
+        "/Resources/DiscordCommandFunction7D25102A/Properties/Code/S3Key",
+        "/Resources/DiscordCommandFunction7D25102A/Properties/Environment/Variables/GAME_PACKAGES",
+        "/Resources/ReconcileFunction30829CB6/Metadata/aws:asset:path",
+        "/Resources/ReconcileFunction30829CB6/Properties/Code/S3Key",
+        "/Resources/ReconcileFunction30829CB6/Properties/Environment/Variables/GAME_PACKAGES",
+        "/Resources/AdmissionFunction23082B67/Metadata/aws:asset:path",
+        "/Resources/AdmissionFunction23082B67/Properties/Code/S3Key",
+        "/Resources/AdmissionFunction23082B67/Properties/Environment/Variables/GAME_PACKAGES",
+        "/Resources/AdmissionFunction23082B67/Properties/Environment/Variables/GAME_CREATION_DEFAULTS",
+        "/Resources/RetentionTaskFunction9F285CE4/Metadata/aws:asset:path",
+        "/Resources/RetentionTaskFunction9F285CE4/Properties/Code/S3Key",
+        "/Resources/RetentionTaskFunction9F285CE4/Properties/Environment/Variables/GAME_PACKAGES",
+        "/Resources/MonitoringObserverFunction584DA7C7/Metadata/aws:asset:path",
+        "/Resources/MonitoringObserverFunction584DA7C7/Properties/Code/S3Key",
+        "/Resources/DiscordMessageFunction78FA388B/Metadata/aws:asset:path",
+        "/Resources/DiscordMessageFunction78FA388B/Properties/Code/S3Key",
+        "/Resources/StartTaskFunction8C564C4A/Metadata/aws:asset:path",
+        "/Resources/StartTaskFunction8C564C4A/Properties/Code/S3Key",
+        "/Resources/StartTaskFunction8C564C4A/Properties/Environment/Variables/GAME_PACKAGES",
+        "/Resources/StartTaskFunction8C564C4A/Properties/Environment/Variables/RUNTIME_CONFIG_DIGEST",
+        "/Resources/StatusExecutorFunction6E5C9869/Metadata/aws:asset:path",
+        "/Resources/StatusExecutorFunction6E5C9869/Properties/Code/S3Key",
+        "/Resources/BackupTaskFunctionA44639DC/Metadata/aws:asset:path",
+        "/Resources/BackupTaskFunctionA44639DC/Properties/Code/S3Key",
+        "/Resources/BackupTaskFunctionA44639DC/Properties/Environment/Variables/RECOVERY_RUNTIME_JSON",
+        "/Resources/BackupTaskFunctionA44639DC/Properties/Environment/Variables/GAME_PACKAGES",
+        "/Resources/BackupTaskFunctionA44639DC/Properties/Environment/Variables/RECOVERY_RUNTIME_ZLIB_BASE64",
+        "/Resources/StopTaskFunction11473A8C/Metadata/aws:asset:path",
+        "/Resources/StopTaskFunction11473A8C/Properties/Code/S3Key",
+        "/Resources/StopTaskFunction11473A8C/Properties/Environment/Variables/GAME_PACKAGES",
+        "/Resources/StopTaskFunction11473A8C/Properties/Environment/Variables/RUNTIME_CONFIG_DIGEST",
+        "/Resources/AutoStopEvaluatorFunctionF85F8B50/Metadata/aws:asset:path",
+        "/Resources/AutoStopEvaluatorFunctionF85F8B50/Properties/Code/S3Key",
+        "/Resources/AutoStopEvaluatorFunctionF85F8B50/Properties/Environment/Variables/GAME_PACKAGES"
+      ],
+      "web": [
+        "/Resources/Web3C8945DB/Metadata/aws:asset:path",
+        "/Resources/Web3C8945DB/Properties/Code/S3Key",
+        "/Resources/AuthC256A5EC/Metadata/aws:asset:path",
+        "/Resources/AuthC256A5EC/Properties/Code/S3Key"
+      ]
+    },
+    "new_resources": false,
+    "iam_changes": false,
+    "workflow_definition_changes": false,
+    "target_or_data_stack_deploy": false
+  },
+  "create": {
+    "request_id": "2cf97f27-f04e-4cf6-86ab-6a0951bc61c1",
+    "operation_id": "op-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+    "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+    "display_name": "create-survival",
+    "schema_version": 1,
+    "world": {
+      "difficulty": null,
+      "generation": 1,
+      "hardcore": null,
+      "seed": 5198826396941673327
+    },
+    "runtime": {
+      "class": "default",
+      "idle_shutdown_minutes": 30
+    },
+    "package": {
+      "definition": {
+        "loader": {
+          "installer": {
+            "filename": "neoforge-21.1.219-installer.jar",
+            "sha256": "140df0fa17fd438848051ecfa3d091081515ad12bfe34fa126405037ba01de44",
+            "size": 6961236,
+            "url": "https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.219/neoforge-21.1.219-installer.jar"
+          },
+          "type": "neoforge",
+          "version": "21.1.219"
+        },
+        "minecraft_version": "1.21.1",
+        "mods": [
+          {
+            "client_required": true,
+            "file_id": "V876RuGl",
+            "filename": "create-1.21.1-6.0.10.jar",
+            "mod_id": "create",
+            "project_id": "LNytGWDc",
+            "sha256": "ef87fe5709f1ba1f5b8bb20a2925b5afb4669e178fd6d8bf10c167759eefe37a",
+            "size": 19123767,
+            "source": "modrinth",
+            "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/UjX6dr61/create-1.21.1-6.0.10.jar",
+            "version": "6.0.10",
+            "version_id": "UjX6dr61"
+          },
+          {
+            "client_required": true,
+            "file_id": "xb3oJkla",
+            "filename": "FarmersDelight-1.21.1-1.3.4.jar",
+            "mod_id": "farmersdelight",
+            "project_id": "R2OftAxM",
+            "sha256": "139ad7696462c89c03eea463f805abffa552526c5dadaadae221dd9624cb197c",
+            "size": 3160490,
+            "source": "modrinth",
+            "url": "https://cdn.modrinth.com/data/R2OftAxM/versions/XTVZDOol/FarmersDelight-1.21.1-1.3.4.jar",
+            "version": "1.3.4",
+            "version_id": "XTVZDOol"
+          }
+        ],
+        "package_id": "create-survival",
+        "package_version": "1"
+      },
+      "package_id": "create-survival",
+      "package_version": "1"
+    },
+    "config_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+    "package_digest": "720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b",
+    "reset_enabled": false,
+    "materialization_state": "UNMATERIALIZED",
+    "status": "SUCCEEDED",
+    "retry_http_status": 200,
+    "same_request_same_result": true
+  },
+  "authenticated_client_requirements": {
+    "minecraft_version": "1.21.1",
+    "loader": {
+      "type": "neoforge",
+      "version": "21.1.219"
+    },
+    "mods": [
+      {
+        "mod_id": "create",
+        "version": "6.0.10",
+        "filename": "create-1.21.1-6.0.10.jar",
+        "sha256": "ef87fe5709f1ba1f5b8bb20a2925b5afb4669e178fd6d8bf10c167759eefe37a",
+        "client_required": true,
+        "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/UjX6dr61/create-1.21.1-6.0.10.jar"
+      },
+      {
+        "mod_id": "farmersdelight",
+        "version": "1.3.4",
+        "filename": "FarmersDelight-1.21.1-1.3.4.jar",
+        "sha256": "139ad7696462c89c03eea463f805abffa552526c5dadaadae221dd9624cb197c",
+        "client_required": true,
+        "url": "https://cdn.modrinth.com/data/R2OftAxM/versions/XTVZDOol/FarmersDelight-1.21.1-1.3.4.jar"
+      }
+    ]
+  },
+  "whitelist": {
+    "common_count": 0,
+    "specific_count": 0,
+    "effective_count": 0,
+    "membership_changed": false,
+    "runtime_projection_executed": false
+  },
+  "first_start": {
+    "request_id": "3cd0c9cb-70e1-4567-833f-93519b079924",
+    "operation_id": "op-4fd5ae02-8c8f-4356-921b-20f2c5af470f",
+    "workflow_status": "FAILED",
+    "workflow_error": "START_CLEANUP_FAILED",
+    "deadline": "2026-09-14T13:12:32.426965Z",
+    "states_entered": [
+      "InitializeWorkflow",
+      "ReconcileBeforeStart",
+      "SetDesiredRunning",
+      "SetPreconditionFailure",
+      "ReconcileAfterFailure",
+      "RecordFailure",
+      "UnrecoverableFailure"
+    ],
+    "ec2_start_state_entered": false,
+    "ssm_materialization_state_entered": false,
+    "failure": "NULL attributes rejected by backup_provenance._decode through runtime_catalog.bind_operation",
+    "same_failure_in_record_failure": true,
+    "workflow": "FAILED",
+    "operation_cleanup_pending": true,
+    "runtime_rollback_performed": false,
+    "data_deleted": false,
+    "null_fields": [
+      {
+        "path": "Game/created_from/M/template_id",
+        "error": "unsupported DynamoDB attribute"
+      },
+      {
+        "path": "Game/created_from/M/template_version",
+        "error": "unsupported DynamoDB attribute"
+      },
+      {
+        "path": "Game/creation/M/reset_policy",
+        "error": "unsupported DynamoDB attribute"
+      },
+      {
+        "path": "Game/last_backup_at",
+        "error": "unsupported DynamoDB attribute"
+      },
+      {
+        "path": "Game/last_started_at",
+        "error": "unsupported DynamoDB attribute"
+      },
+      {
+        "path": "Game/world/M/difficulty",
+        "error": "unsupported DynamoDB attribute"
+      },
+      {
+        "path": "Game/world/M/hardcore",
+        "error": "unsupported DynamoDB attribute"
+      }
+    ],
+    "actual_records_reproduction": [
+      {
+        "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+        "decoder_result": "unsupported DynamoDB attribute"
+      },
+      {
+        "game_id": "game-vanilla-main",
+        "decoder_result": "unsupported DynamoDB attribute"
+      },
+      {
+        "game_id": "game-vanilla-secondary",
+        "decoder_result": "unsupported DynamoDB attribute"
+      }
+    ]
+  },
+  "production_runtime_evidence": {
+    "materialization": false,
+    "artifact_download": false,
+    "installer": false,
+    "container": false,
+    "loaded_mods": false,
+    "ready": false,
+    "memory_cpu_tick_gc_baseline": false,
+    "normal_stop_operation": false
+  },
+  "preserved": {
+    "legacy_games_and_whitelist": true,
+    "all_73_prior_operations": true,
+    "nine_snapshots": true,
+    "sixteen_provenance_records": true,
+    "new_game_after_create": true,
+    "instance_and_volume_identity": true,
+    "no_data_deletion": true
+  },
+  "containment": {
+    "admission_closed": true,
+    "functions": [
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp",
+      "wc-dev-admission",
+      "wc-dev-discord-command"
+    ],
+    "since": "2026-09-14T12:45:21.928467+00:00",
+    "runtime_rollback": false,
+    "forward_fix_deployed": false,
+    "stale_recovery": "PENDING_ACTUAL_DEADLINE"
+  },
+  "validation": {
+    "pytest_passed": 1387,
+    "ruff_check": "passed",
+    "ruff_format": "275 files passed",
+    "mypy": "198 source and test files passed",
+    "synth": [
+      "package-enabled control-plane",
+      "web"
+    ],
+    "deployed_release_ci": [
+      "https://github.com/eash-misoni/wishicraft-server/actions/runs/34839846207",
+      "https://github.com/eash-misoni/wishicraft-server/actions/runs/34839846249"
+    ],
+    "coverage_gap": "Existing tests validated package fragment without nullable full Game; synthetic host Docker did not exercise deployed CP bind_operation."
+  },
+  "private_evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-neoforge-production-v1-afav2_5u",
+  "workflow_history_sha256": "1716a034f4043fbe6c8e5b18c8086d2d17f9eec005bee4aed802792bf8fe1e34"
+}

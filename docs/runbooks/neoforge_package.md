@@ -1,5 +1,7 @@
 # Pinned NeoForge Game package (D-109)
 
+> Current production status (2026-09-14): D-109 deployed and real CREATE succeeded; first START failed before EC2 start on full-Game NULL decoding. Game retained UNMATERIALIZED, admission closed. [Evidence and recovery boundary](neoforge_production.md). Earlier deferred/repository-only statements below retain their historical scope.
+
 Repository/runtime support only. **No production deploy, CREATE, materialization or Minecraft START**
 is authorized by this slice. Production remains D-108; A/B records, worlds, whitelist, snapshots,
 instance, volumes, DNS and memory configuration are unchanged. Qualification evidence is recorded
