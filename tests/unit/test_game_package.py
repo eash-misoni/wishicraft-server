@@ -413,3 +413,26 @@ def test_only_qualified_neoforge_accepts_observed_trailing_color_reset() -> None
     response += "\x1b[0m\n"
     assert confirmed_empty_players(response, neoforge=True)
     assert not confirmed_empty_players(response)
+
+
+def test_real_dynamo_serializers_preserve_package_list_and_booleans(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wishicraft.artifacts import targeted_runtime as host
+    from wishicraft.backup_provenance import _decode_map
+    from wishicraft.operation import _attribute_map
+
+    package = packages.load()[1]
+    document: dict[str, object] = {"game_id": "game-test", "package": {"definition": package}}
+    attributes = _attribute_map(document)
+    monkeypatch.setattr(host, "execute", lambda *args, **kwargs: json.dumps({"Item": attributes}))
+    assert (
+        host.item(
+            {"games_table": "synthetic", "region": "synthetic"},
+            "games_table",
+            "game_id",
+            "game-test",
+        )
+        == document
+    )
+    assert _decode_map(attributes) == document

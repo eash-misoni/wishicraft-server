@@ -1,6 +1,6 @@
 # 09. Decisions and Backlog
 
-## D-109 Pinned NeoForge Game package（Accepted / repository validation in progress）
+## D-109 Pinned NeoForge Game package（Accepted / repository Completed; production Deferred）
 
 Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4を固定する。
 NeoForgeは両modの最低要求versionを現行Java25 imageで実Docker検証して選定した。

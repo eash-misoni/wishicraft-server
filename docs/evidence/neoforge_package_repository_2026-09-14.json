@@ -1,0 +1,118 @@
+{
+  "decision": "D-109",
+  "scope": "repository-only",
+  "production_operations": false,
+  "aws_reads_or_writes": false,
+  "validated_code_head": "5999f49dbb7f02a66b6ed4a96212a7d97644b51f",
+  "qualification_run": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34838782817",
+  "qualification_conclusion": "success",
+  "standard_ci_run": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34838782888",
+  "package": {
+    "loader": {
+      "installer": {
+        "filename": "neoforge-21.1.219-installer.jar",
+        "sha256": "140df0fa17fd438848051ecfa3d091081515ad12bfe34fa126405037ba01de44",
+        "size": 6961236,
+        "url": "https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.219/neoforge-21.1.219-installer.jar"
+      },
+      "type": "neoforge",
+      "version": "21.1.219"
+    },
+    "minecraft_version": "1.21.1",
+    "mods": [
+      {
+        "client_required": true,
+        "file_id": "V876RuGl",
+        "filename": "create-1.21.1-6.0.10.jar",
+        "mod_id": "create",
+        "project_id": "LNytGWDc",
+        "sha256": "ef87fe5709f1ba1f5b8bb20a2925b5afb4669e178fd6d8bf10c167759eefe37a",
+        "size": 19123767,
+        "source": "modrinth",
+        "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/UjX6dr61/create-1.21.1-6.0.10.jar",
+        "version": "6.0.10",
+        "version_id": "UjX6dr61"
+      },
+      {
+        "client_required": true,
+        "file_id": "xb3oJkla",
+        "filename": "FarmersDelight-1.21.1-1.3.4.jar",
+        "mod_id": "farmersdelight",
+        "project_id": "R2OftAxM",
+        "sha256": "139ad7696462c89c03eea463f805abffa552526c5dadaadae221dd9624cb197c",
+        "size": 3160490,
+        "source": "modrinth",
+        "url": "https://cdn.modrinth.com/data/R2OftAxM/versions/XTVZDOol/FarmersDelight-1.21.1-1.3.4.jar",
+        "version": "1.3.4",
+        "version_id": "XTVZDOol"
+      }
+    ],
+    "package_id": "create-survival",
+    "package_version": "1"
+  },
+  "common_runtime_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+  "production_predecessor_digest": "373dfb9c768b8d4b0b318793551212e0de5d5fe07b8ae4dc31791226e9ba5048",
+  "memory": {
+    "xms": "1G",
+    "xmx": "4G",
+    "container_bytes": 6442450944
+  },
+  "java": "25.0.3+9 Eclipse Adoptium",
+  "loader_mod_list": [
+    "Create 6.0.10 (create)",
+    "Farmer's Delight 1.3.4 (farmersdelight)",
+    "NeoForge 21.1.219 (neoforge)"
+  ],
+  "registered_blocks": [
+    "create:andesite_casing",
+    "farmersdelight:stove"
+  ],
+  "host_sequence": [
+    "vanilla first START",
+    "NeoForge first SWITCH",
+    "NeoForge RESET with retained config/defaultconfigs",
+    "Vanilla SWITCH with preserved scoreboard"
+  ],
+  "checks": [
+    "RCON/mc-health",
+    "save-all flush",
+    "graceful stop exit 0",
+    "no OOMKilled",
+    "same-world restart",
+    "exact jar SHA-256",
+    "readonly Game cache",
+    "Game-private mods/libraries",
+    "initial materialization retry",
+    "RESET preparation retry",
+    "whitelist projection",
+    "no production data touched"
+  ],
+  "local": {
+    "pytest_passed": 1386,
+    "mypy": "205 files, macOS and explicit Linux platform",
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "synth_variants_passed": [
+      "phase1",
+      "target",
+      "control",
+      "two",
+      "creation",
+      "whitelist",
+      "packages",
+      "web",
+      "web-creation"
+    ],
+    "docker": "not installed locally; Linux CI executes real Docker",
+    "additional_serializer_regression": "passed; final CI includes 1387 tests"
+  },
+  "ci_log_sha256": "a30c999f991b7bc7e83307fecaa1364ea2fe84498f3a6db14ac425393c83d7db",
+  "loader_log_sha256": "6efece387c858bb8010d28f22bfa3fb219b7fea2b9c7ff8d49848ccb61e76fa7",
+  "limitations": [
+    "no real client connection or player load test",
+    "no production deploy or CREATE or START",
+    "UI selector/client installer deferred",
+    "upstream availability required for uncached inputs"
+  ],
+  "standard_ci_conclusion": "success"
+}

@@ -205,7 +205,9 @@ def main() -> None:
         if args[:2] == ["systemctl", "stop"]:
             current = host.inspect()[0]
             logs = real_execute(["docker", "logs", current["Id"]])
-            (root / (operation["operation_id"] + ".log")).write_text(logs)
+            (root / (operation["operation_id"] + "-" + current["Id"][:12] + ".log")).write_text(
+                logs
+            )
             compose_command(["stop", "--timeout", "150"])
             stopped = host.inspect()[0]["State"]
             assert stopped["ExitCode"] == 0 and not stopped["OOMKilled"]

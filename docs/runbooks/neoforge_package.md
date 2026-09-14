@@ -63,7 +63,9 @@ At review, downloaded mod bytes matched Modrinth SHA-512 before computing the co
 the installer matched its official Maven SHA-256. Create embeds Registrate MC1.21-1.3.0+67,
 Flywheel 1.0.6 and Ponder 1.0.82+mc1.21.1, pinned by the outer jar hash. Wishicraft verifies the
 three inputs; the pinned NeoForge installer resolves its own fixed dependency graph through its
-normal upstream integrity checks. This is not an offline mirror or a promise of byte-identical
+normal upstream integrity checks. Its embedded install profile fixes 70 libraries (URL, size,
+upstream SHA-1) and 10 processors; Wishicraft does not maintain a second transitive-library
+SHA-256 catalog. This is not an offline mirror or a promise of byte-identical
 logs/generated caches. Removal of an upstream URL fails closed; no latest/fallback URL is resolved.
 
 No jar enters Git, release assets or CI artifacts. Create distinguishes MIT code from All Rights
@@ -190,7 +192,12 @@ are required for the future release:
 - `tests/integration/neoforge_host_docker.py` exercises real operation-v2/Compose with synthetic
   AWS/systemd/mount boundaries: metadata CREATE, first materialization, retry, Vanilla→NeoForge,
   NeoForge RESET, return to Vanilla, preserved scoreboard, mod isolation and whitelist projection.
-  Final integrated CI results are added at closeout.
+  [Integrated Docker run 34838782817](https://github.com/eash-misoni/wishicraft-server/actions/runs/34838782817)
+  passed on `5999f49`, including both registered blocks before/after RESET and the preserved Vanilla
+  scoreboard on return. [Standard CI 34838782888](https://github.com/eash-misoni/wishicraft-server/actions/runs/34838782888)
+  also passed (quality, nine synth contexts, Web browser checks and all existing Vanilla Docker
+  lifecycle/CREATE/whitelist/RESET regressions). [Machine-readable evidence](../evidence/neoforge_package_repository_2026-09-14.json)
+  records exact inputs, log hashes and qualification limits.
 - Unit tests cover strict schema, complete manifest hashing, registration/serialization, partial
   artifacts, cache/projection corruption, world preservation, RESET retry, installer interruption
   at each of eight file replacements, legacy compatibility, recovery compression/resource parity.
@@ -204,3 +211,24 @@ are required for the future release:
 - [Create license](https://github.com/Creators-of-Create/Create/blob/mc1.21.1/dev/LICENSE.md)
 - [NeoForge installer](https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.219/)
 - [Pinned itzg NeoForge entrypoint](https://github.com/itzg/docker-minecraft-server/blob/2026.7.2/scripts/start-deployNeoForge)
+
+## Repository closeout — 2026-09-14
+
+D-109 is repository/runtime Completed; production remains D-108 and was neither read nor changed.
+Common package-enabled digest is `64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c`
+(previous applied D-108: `373dfb9c768b8d4b0b318793551212e0de5d5fe07b8ae4dc31791226e9ba5048`).
+The candidate package digest is `720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b`.
+These are proposed deployment artifacts, not claims of a production migration.
+
+Local full regression: 1,386 tests passed; the additional real Dynamo serializer round-trip test
+also passed. Explicit Linux and macOS type checks, Ruff format/lint and nine synth variants passed.
+The closeout commit retains a separate per-container CI log filename so consecutive STOP operations
+cannot replace each other's logs. Final HEAD CI is checked after push; run URLs are discoverable
+by that HEAD. No client connection/player load or production positive CREATE was performed.
+
+The failed Docker fixtures and their diagnostics remain historical evidence: RCON ephemeral file
+creation, canonical mount source, and the observed NeoForge trailing ANSI reset were corrected
+without loosening mount integrity, zero-player semantics, or world protection. NeoForge's upstream
+version-check notice is informational; exact installed jar hashes remain fixed and no automatic
+update occurs. User-facing package selection/detail rendering remains a follow-up, while immutable
+metadata and authenticated client-requirements API are implemented.
