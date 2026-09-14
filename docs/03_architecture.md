@@ -1,5 +1,7 @@
 # 03. Architecture
 
+> D-107 Host capacity（repository support / production未適用）: [恒久replacement guardとrelease契約](runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。devはt3a.mediumを維持し、m8a.largeへのresize・policy設定・memory増量は別release。Game/UI/lifecycleは変更しない。
+
 > Minimal Game Creation: D-105 Accepted / production deployed, positive CREATE/materialization deferred（2026-09-13）。[登録／初回起動／RESET／recoveryの差分契約](reviews/minimal_game_creation.md)、[production gate](runbooks/minimal_game_creation.md)。適用済みD-096〜104契約とA/Bは維持する。
 
 

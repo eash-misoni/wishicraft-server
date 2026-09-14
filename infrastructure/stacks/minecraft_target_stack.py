@@ -39,7 +39,6 @@ class MinecraftTargetStack(Stack):
         }
         expected = {
             "target_host.stack_name": f"MinecraftTargetStack-{stage.stage}",
-            "target_host.instance_type": "t3a.medium",
             "target_host.root_volume_type": "gp3",
             "target_host.root_volume_size_gib": 16,
             "target_host.root_volume_encrypted": True,
@@ -156,7 +155,7 @@ class MinecraftTargetStack(Stack):
             self,
             "TargetInstance",
             image_id=str(values["platform.ami_id"]),
-            instance_type=str(values["target_host.instance_type"]),
+            instance_type=stage.target_instance_type,
             iam_instance_profile=profile.ref,
             availability_zone=stage.availability_zone,
             network_interfaces=[

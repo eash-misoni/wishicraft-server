@@ -36,6 +36,9 @@ STAGE_REQUIRED_MAPPINGS: Final = (
     "monitoring",
 )
 OPTIONAL_STAGE_MAPPINGS: Final = ("minecraft_distribution",)
+SUPPORTED_TARGET_INSTANCE_TYPES: Final = frozenset(
+    {"t3a.medium", "m8a.large", "r8a.large", "m8a.xlarge"}
+)
 
 
 class ConfigValidationError(ValueError):
@@ -271,6 +274,17 @@ class StageConfig:
     def instance_type(self) -> str:
         """Return the configured EC2 instance type after phase validation."""
         return _require_string(self.values, "compute.instance_type")
+
+    @property
+    def target_instance_type(self) -> str:
+        """Deployment capacity of the shared host; independent of Game metadata."""
+        path = "host_runtime.target_host.instance_type"
+        value = _lookup_path(self.values, path)
+        if not isinstance(value, str) or value not in SUPPORTED_TARGET_INSTANCE_TYPES:
+            raise ConfigValidationError(
+                [f"{path} must be one of {', '.join(sorted(SUPPORTED_TARGET_INSTANCE_TYPES))}"]
+            )
+        return value
 
     @property
     def architecture(self) -> str:

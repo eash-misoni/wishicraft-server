@@ -347,6 +347,15 @@ Lambdaは、EC2へ直接プライベート接続する必要がない限りユ�
 
 OSと再作成可能なコードはroot volume、ゲームデータはdata volumeへ分離する。
 
+### EC2-013 Deploy-time host capacity / replacement guard `MUST`
+
+D-107では既存hostのInstanceTypeをCloudFormationが明示管理し、4候補だけを許可する。
+Game metadata/runtime workflowに型変更責務を持たせない。Target Instance/attachmentと
+retained Data EBSのReplace/Deleteを恒久stack policyで拒否し、resize時はInstanceType以外の
+semantic差分を許可しない。Conditionalはguard下のin-place更新候補としてのみ扱う。
+policy read-back、保存・停止・排他とboot非自動起動の事前証明、最終STOPPED整合が必須。
+[具体的な境界と未適用状況](runbooks/host_capacity.md)を参照。
+
 ### EC2-006 アーキテクチャ固定 `MUST / MVP`
 
 初期版はCPUアーキテクチャを1種類に固定する。複数アーキテクチャをruntime class間で混在させない。

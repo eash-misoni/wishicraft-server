@@ -1,5 +1,19 @@
 # 09. Decisions and Backlog
 
+## D-107 Host capacity / permanent replacement guard（Accepted / production deferred）
+
+2026-09-14、demand-drivenのgeneric repository slice。Game-level compute profileとruntime
+ownership移管を採用せず、既存stage instance_typeへ4候補のallowlistを追加する。
+devはt3a.medium、memoryはXmx 2G/container 2816MiBを維持。resize値は独立release commit。
+[policy・compatibility・Conditional詳細・preflight/closeout](runbooks/host_capacity.md)を正本とする。
+Target Instanceとattachment、別ownerのretained Data EBSを恒久stack policyのReplace/Delete
+拒否で保護する。Modifyだけを許可し、replacementが必要ならupdate失敗を受け入れる。
+policyはGit JSONをoperatorが明示設定・read-backする。IaC ownership、既存IAM、Gameと
+START/STOP/SWITCH/RESET等の契約は維持。readonly API/未実行previewを検証し削除済み。
+production policy未設定、resize/実deny試験/EC2起動なし。Conditionalを消すための権限緩和は禁止。
+D-105 positive CREATEとmemory artifact移行、modpack実装は別slice。D-106 Completedを維持する。
+
+
 ## D-106 Whitelist Management（Accepted / production Completed）
 
 2026-09-14、D-101第4単位。通常repository実装・tests・docs・CIとread-only調査を委任。
