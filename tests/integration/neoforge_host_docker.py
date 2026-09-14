@@ -211,7 +211,10 @@ def main() -> None:
             assert stopped["ExitCode"] == 0 and not stopped["OOMKilled"]
             state = "inactive"
             return ""
-        return real_execute(args, timeout=timeout)
+        result = real_execute(args, timeout=timeout)
+        if args[:2] == ["docker", "exec"] and args[-2:] == ["rcon-cli", "list"]:
+            print("SYNTHETIC_RCON_LIST", repr(result), flush=True)
+        return result
 
     host.execute = execute
     assert not host.inspect(), "refuse preexisting Compose project"
