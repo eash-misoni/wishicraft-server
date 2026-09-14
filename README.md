@@ -1,6 +1,6 @@
 # wishicraft-server
 
-> D-107 Host capacity（m8a.large単独release準備 / production適用待ち）: [恒久replacement guardとrelease契約](docs/runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。dev Targetはm8a.largeへの単独release設定。policy設定・resize結果はrunbookで別記し、memory増量は別slice。Game/UI/lifecycleは変更しない。
+> D-107 Host capacity（production in-place resize Completed）: [恒久replacement guardとrelease契約](docs/runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。dev Targetはm8a.large。永久replacement-deny policy下でInstance/root/Data EBSを維持し、STOPPED/HEALTHYへcloseout済み。memory増量は別slice。Game/UI/lifecycleは変更しない。
 
 Whitelist Management（D-106）はproduction Completedです。[正本と適用契約](docs/reviews/whitelist_management.md)、[移行・実証結果](docs/runbooks/whitelist_management.md#production-closeout-2026-09-14)。初期Commonは空、A/Bの既存参加許可を各Game-specificへ完全一致で移行しました。実Admin Webのno-op再保存・retryを確認済み。ゲーム内変更は一時的、Web変更は次回起動で適用します。
 

@@ -1,0 +1,453 @@
+{
+  "after": {
+    "BlockDeviceMappings": [
+      {
+        "DeviceName": "/dev/xvda",
+        "Ebs": {
+          "AttachTime": "2026-08-23 07:59:28+00:00",
+          "DeleteOnTermination": true,
+          "EbsCardIndex": 0,
+          "Status": "attached",
+          "VolumeId": "vol-092c04a633ffc6010"
+        }
+      },
+      {
+        "DeviceName": "/dev/sdf",
+        "Ebs": {
+          "AttachTime": "2026-08-23 08:29:36.506000+00:00",
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "Status": "attached",
+          "VolumeId": "vol-03ac9f534326c345c"
+        }
+      }
+    ],
+    "CpuOptions": {
+      "CoreCount": 2,
+      "ThreadsPerCore": 1
+    },
+    "ImageId": "ami-0b4d2909a55ed2c78",
+    "InstanceId": "i-04fc0629dc4ea466e",
+    "InstanceType": "m8a.large",
+    "Placement": {
+      "AvailabilityZone": "ap-northeast-1a",
+      "AvailabilityZoneId": "apne1-az4",
+      "GroupName": "",
+      "Tenancy": "default"
+    },
+    "RootDeviceName": "/dev/xvda",
+    "SubnetId": "subnet-0a70e5682ea8d0bd3",
+    "VpcId": "vpc-0c3cca1e65696ed8e",
+    "eni_ids": [
+      "eni-01caaa1fda4d76b94"
+    ]
+  },
+  "before": {
+    "BlockDeviceMappings": [
+      {
+        "DeviceName": "/dev/xvda",
+        "Ebs": {
+          "AttachTime": "2026-08-23 07:59:28+00:00",
+          "DeleteOnTermination": true,
+          "EbsCardIndex": 0,
+          "Status": "attached",
+          "VolumeId": "vol-092c04a633ffc6010"
+        }
+      },
+      {
+        "DeviceName": "/dev/sdf",
+        "Ebs": {
+          "AttachTime": "2026-08-23 08:29:36.506000+00:00",
+          "DeleteOnTermination": false,
+          "EbsCardIndex": 0,
+          "Status": "attached",
+          "VolumeId": "vol-03ac9f534326c345c"
+        }
+      }
+    ],
+    "CpuOptions": {
+      "CoreCount": 1,
+      "ThreadsPerCore": 2
+    },
+    "ImageId": "ami-0b4d2909a55ed2c78",
+    "InstanceId": "i-04fc0629dc4ea466e",
+    "InstanceType": "t3a.medium",
+    "Placement": {
+      "AvailabilityZone": "ap-northeast-1a",
+      "AvailabilityZoneId": "apne1-az4",
+      "GroupName": "",
+      "Tenancy": "default"
+    },
+    "RootDeviceName": "/dev/xvda",
+    "SubnetId": "subnet-0a70e5682ea8d0bd3",
+    "VpcId": "vpc-0c3cca1e65696ed8e",
+    "eni_ids": [
+      "eni-01caaa1fda4d76b94"
+    ]
+  },
+  "change_set_details": [
+    {
+      "ResourceChange": {
+        "Action": "Modify",
+        "AfterContext": "{\"Properties\":{\"InstanceId\":\"{{changeSet:KNOWN_AFTER_APPLY}}\",\"VolumeId\":\"vol-03ac9f534326c345c\",\"Device\":\"/dev/sdf\"},\"Metadata\":{\"aws:cdk:path\":\"MinecraftTargetStack-dev/TargetDataVolumeAttachment\"},\"UpdateReplacePolicy\":\"Retain\",\"DeletionPolicy\":\"Retain\"}",
+        "BeforeContext": "{\"Properties\":{\"InstanceId\":\"i-04fc0629dc4ea466e\",\"VolumeId\":\"vol-03ac9f534326c345c\",\"Device\":\"/dev/sdf\"},\"Metadata\":{\"aws:cdk:path\":\"MinecraftTargetStack-dev/TargetDataVolumeAttachment\"},\"UpdateReplacePolicy\":\"Retain\",\"DeletionPolicy\":\"Retain\"}",
+        "Details": [
+          {
+            "ChangeSource": "DirectModification",
+            "Evaluation": "Dynamic",
+            "Target": {
+              "AfterValue": "{{changeSet:KNOWN_AFTER_APPLY}}",
+              "Attribute": "Properties",
+              "AttributeChangeType": "Modify",
+              "BeforeValue": "i-04fc0629dc4ea466e",
+              "Name": "InstanceId",
+              "Path": "/Properties/InstanceId",
+              "RequiresRecreation": "Always"
+            }
+          },
+          {
+            "CausingEntity": "TargetInstance",
+            "ChangeSource": "ResourceReference",
+            "Evaluation": "Dynamic",
+            "Target": {
+              "AfterValue": "{{changeSet:KNOWN_AFTER_APPLY}}",
+              "Attribute": "Properties",
+              "AttributeChangeType": "Modify",
+              "BeforeValue": "i-04fc0629dc4ea466e",
+              "Name": "InstanceId",
+              "Path": "/Properties/InstanceId",
+              "RequiresRecreation": "Always"
+            }
+          }
+        ],
+        "LogicalResourceId": "TargetDataVolumeAttachment",
+        "PhysicalResourceId": "i-04fc0629dc4ea466e|vol-03ac9f534326c345c",
+        "Replacement": "Conditional",
+        "ResourceType": "AWS::EC2::VolumeAttachment",
+        "Scope": [
+          "Properties"
+        ]
+      },
+      "Type": "Resource"
+    },
+    {
+      "ResourceChange": {
+        "Action": "Modify",
+        "AfterContext": "{\"Properties\":{\"MetadataOptions\":{\"HttpTokens\":\"required\",\"InstanceMetadataTags\":\"disabled\"},\"InstanceInitiatedShutdownBehavior\":\"stop\",\"NetworkInterfaces\":[{\"DeviceIndex\":\"0\",\"GroupSet\":[\"sg-08f55bae8c8123ff6\"],\"SubnetId\":\"subnet-0a70e5682ea8d0bd3\",\"AssociatePublicIpAddress\":\"true\"}],\"BlockDeviceMappings\":[{\"Ebs\":{\"VolumeType\":\"gp3\",\"Encrypted\":\"true\",\"VolumeSize\":\"16\",\"DeleteOnTermination\":\"true\"},\"DeviceName\":\"/dev/xvda\"}],\"ImageId\":\"ami-0b4d2909a55ed2c78\",\"AvailabilityZone\":\"ap-northeast-1a\",\"IamInstanceProfile\":\"MinecraftTargetStack-dev-TargetInstanceProfile-GifjFM8NycfJ\",\"InstanceType\":\"m8a.large\",\"Monitoring\":\"false\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"phase2-target-validation\",\"Key\":\"Purpose\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]},\"Metadata\":{\"aws:cdk:path\":\"MinecraftTargetStack-dev/TargetInstance\"}}",
+        "BeforeContext": "{\"Properties\":{\"MetadataOptions\":{\"HttpTokens\":\"required\",\"InstanceMetadataTags\":\"disabled\"},\"InstanceInitiatedShutdownBehavior\":\"stop\",\"NetworkInterfaces\":[{\"DeviceIndex\":\"0\",\"GroupSet\":[\"sg-08f55bae8c8123ff6\"],\"SubnetId\":\"subnet-0a70e5682ea8d0bd3\",\"AssociatePublicIpAddress\":\"true\"}],\"BlockDeviceMappings\":[{\"Ebs\":{\"VolumeType\":\"gp3\",\"Encrypted\":\"true\",\"VolumeSize\":\"16\",\"DeleteOnTermination\":\"true\"},\"DeviceName\":\"/dev/xvda\"}],\"ImageId\":\"ami-0b4d2909a55ed2c78\",\"AvailabilityZone\":\"ap-northeast-1a\",\"IamInstanceProfile\":\"MinecraftTargetStack-dev-TargetInstanceProfile-GifjFM8NycfJ\",\"InstanceType\":\"t3a.medium\",\"Monitoring\":\"false\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"phase2-target-validation\",\"Key\":\"Purpose\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]},\"Metadata\":{\"aws:cdk:path\":\"MinecraftTargetStack-dev/TargetInstance\"}}",
+        "Details": [
+          {
+            "ChangeSource": "DirectModification",
+            "Evaluation": "Static",
+            "Target": {
+              "AfterValue": "m8a.large",
+              "Attribute": "Properties",
+              "AttributeChangeType": "Modify",
+              "BeforeValue": "t3a.medium",
+              "Name": "InstanceType",
+              "Path": "/Properties/InstanceType",
+              "RequiresRecreation": "Conditionally"
+            }
+          }
+        ],
+        "LogicalResourceId": "TargetInstance",
+        "PhysicalResourceId": "i-04fc0629dc4ea466e",
+        "Replacement": "Conditional",
+        "ResourceType": "AWS::EC2::Instance",
+        "Scope": [
+          "Properties"
+        ]
+      },
+      "Type": "Resource"
+    }
+  ],
+  "ci": {
+    "conclusion": "success",
+    "run": 34800688838,
+    "tests": 1306,
+    "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34800688838"
+  },
+  "drift": {
+    "classification": "Only D-066 known stopped-instance public IPv4 release; no new configuration drift. Same ENI had public IPv4 after CF boot.",
+    "differences": [
+      {
+        "differences": [],
+        "resource": "TargetDataVolumeAttachment",
+        "status": "IN_SYNC"
+      },
+      {
+        "differences": [
+          {
+            "ActualValue": "false",
+            "DifferenceType": "NOT_EQUAL",
+            "ExpectedValue": "true",
+            "PropertyPath": "/NetworkInterfaces/0/AssociatePublicIpAddress"
+          }
+        ],
+        "resource": "TargetInstance",
+        "status": "MODIFIED"
+      },
+      {
+        "differences": [],
+        "resource": "TargetInstanceProfile",
+        "status": "IN_SYNC"
+      },
+      {
+        "differences": [],
+        "resource": "TargetManagedNodeRole418E64DF",
+        "status": "IN_SYNC"
+      },
+      {
+        "differences": [],
+        "resource": "TargetSecurityGroup",
+        "status": "IN_SYNC"
+      }
+    ],
+    "status": "DRIFTED"
+  },
+  "ec2_observations": [
+    {
+      "at": "2026-09-14T03:11:51.116482+00:00",
+      "cpu_options": {
+        "CoreCount": 2,
+        "ThreadsPerCore": 1
+      },
+      "ec2_state": "running",
+      "instance_id": "i-04fc0629dc4ea466e",
+      "instance_type": "m8a.large",
+      "stack_status": "UPDATE_IN_PROGRESS"
+    },
+    {
+      "at": "2026-09-14T03:12:16.320601+00:00",
+      "cpu_options": {
+        "CoreCount": 2,
+        "ThreadsPerCore": 1
+      },
+      "ec2_state": "running",
+      "instance_id": "i-04fc0629dc4ea466e",
+      "instance_type": "m8a.large",
+      "stack_status": "UPDATE_COMPLETE"
+    }
+  ],
+  "events": [
+    {
+      "ClientRequestToken": "D107-81efff7-in-place-resize",
+      "EventId": "0d858be0-afea-11f1-a984-0ad1ea789abd",
+      "LogicalResourceId": "MinecraftTargetStack-dev",
+      "OperationId": "d697cb22-5425-4051-963f-e4485f492887",
+      "PhysicalResourceId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftTargetStack-dev/2f614e30-9ec8-11f1-8795-0ee8cef5bf7b",
+      "ResourceStatus": "UPDATE_COMPLETE",
+      "ResourceType": "AWS::CloudFormation::Stack",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftTargetStack-dev/2f614e30-9ec8-11f1-8795-0ee8cef5bf7b",
+      "StackName": "MinecraftTargetStack-dev",
+      "Timestamp": "2026-09-14 03:12:00.901000+00:00"
+    },
+    {
+      "ClientRequestToken": "D107-81efff7-in-place-resize",
+      "EventId": "0d02a040-afea-11f1-8c20-062ad2c9e971",
+      "LogicalResourceId": "MinecraftTargetStack-dev",
+      "OperationId": "d697cb22-5425-4051-963f-e4485f492887",
+      "PhysicalResourceId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftTargetStack-dev/2f614e30-9ec8-11f1-8795-0ee8cef5bf7b",
+      "ResourceStatus": "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS",
+      "ResourceType": "AWS::CloudFormation::Stack",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftTargetStack-dev/2f614e30-9ec8-11f1-8795-0ee8cef5bf7b",
+      "StackName": "MinecraftTargetStack-dev",
+      "Timestamp": "2026-09-14 03:12:00.057000+00:00"
+    },
+    {
+      "ClientRequestToken": "D107-81efff7-in-place-resize",
+      "EventId": "TargetInstance-UPDATE_COMPLETE-2026-09-14T03:11:58.276Z",
+      "LogicalResourceId": "TargetInstance",
+      "OperationId": "d697cb22-5425-4051-963f-e4485f492887",
+      "PhysicalResourceId": "i-04fc0629dc4ea466e",
+      "ResourceProperties": "{\"MetadataOptions\":{\"HttpTokens\":\"required\",\"InstanceMetadataTags\":\"disabled\"},\"InstanceInitiatedShutdownBehavior\":\"stop\",\"NetworkInterfaces\":[{\"DeviceIndex\":\"0\",\"GroupSet\":[\"sg-08f55bae8c8123ff6\"],\"SubnetId\":\"subnet-0a70e5682ea8d0bd3\",\"AssociatePublicIpAddress\":\"true\"}],\"BlockDeviceMappings\":[{\"Ebs\":{\"VolumeType\":\"gp3\",\"Encrypted\":\"true\",\"VolumeSize\":\"16\",\"DeleteOnTermination\":\"true\"},\"DeviceName\":\"/dev/xvda\"}],\"ImageId\":\"ami-0b4d2909a55ed2c78\",\"AvailabilityZone\":\"ap-northeast-1a\",\"IamInstanceProfile\":\"MinecraftTargetStack-dev-TargetInstanceProfile-GifjFM8NycfJ\",\"InstanceType\":\"m8a.large\",\"Monitoring\":\"false\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"phase2-target-validation\",\"Key\":\"Purpose\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]}",
+      "ResourceStatus": "UPDATE_COMPLETE",
+      "ResourceType": "AWS::EC2::Instance",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftTargetStack-dev/2f614e30-9ec8-11f1-8795-0ee8cef5bf7b",
+      "StackName": "MinecraftTargetStack-dev",
+      "Timestamp": "2026-09-14 03:11:58.276000+00:00"
+    },
+    {
+      "ClientRequestToken": "D107-81efff7-in-place-resize",
+      "EventId": "TargetInstance-UPDATE_IN_PROGRESS-2026-09-14T03:11:40.709Z",
+      "LogicalResourceId": "TargetInstance",
+      "OperationId": "d697cb22-5425-4051-963f-e4485f492887",
+      "PhysicalResourceId": "i-04fc0629dc4ea466e",
+      "ResourceProperties": "{\"MetadataOptions\":{\"HttpTokens\":\"required\",\"InstanceMetadataTags\":\"disabled\"},\"InstanceInitiatedShutdownBehavior\":\"stop\",\"NetworkInterfaces\":[{\"DeviceIndex\":\"0\",\"GroupSet\":[\"sg-08f55bae8c8123ff6\"],\"SubnetId\":\"subnet-0a70e5682ea8d0bd3\",\"AssociatePublicIpAddress\":\"true\"}],\"BlockDeviceMappings\":[{\"Ebs\":{\"VolumeType\":\"gp3\",\"Encrypted\":\"true\",\"VolumeSize\":\"16\",\"DeleteOnTermination\":\"true\"},\"DeviceName\":\"/dev/xvda\"}],\"ImageId\":\"ami-0b4d2909a55ed2c78\",\"AvailabilityZone\":\"ap-northeast-1a\",\"IamInstanceProfile\":\"MinecraftTargetStack-dev-TargetInstanceProfile-GifjFM8NycfJ\",\"InstanceType\":\"m8a.large\",\"Monitoring\":\"false\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"phase2-target-validation\",\"Key\":\"Purpose\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]}",
+      "ResourceStatus": "UPDATE_IN_PROGRESS",
+      "ResourceType": "AWS::EC2::Instance",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftTargetStack-dev/2f614e30-9ec8-11f1-8795-0ee8cef5bf7b",
+      "StackName": "MinecraftTargetStack-dev",
+      "Timestamp": "2026-09-14 03:11:40.709000+00:00"
+    },
+    {
+      "ClientRequestToken": "D107-81efff7-in-place-resize",
+      "EventId": "ff4c5770-afe9-11f1-b63a-0a3224b4fd3b",
+      "LogicalResourceId": "MinecraftTargetStack-dev",
+      "OperationId": "d697cb22-5425-4051-963f-e4485f492887",
+      "PhysicalResourceId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftTargetStack-dev/2f614e30-9ec8-11f1-8795-0ee8cef5bf7b",
+      "ResourceStatus": "UPDATE_IN_PROGRESS",
+      "ResourceStatusReason": "User Initiated",
+      "ResourceType": "AWS::CloudFormation::Stack",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/MinecraftTargetStack-dev/2f614e30-9ec8-11f1-8795-0ee8cef5bf7b",
+      "StackName": "MinecraftTargetStack-dev",
+      "Timestamp": "2026-09-14 03:11:37.046000+00:00"
+    }
+  ],
+  "executed_change_set": {
+    "at": "2026-09-14T03:11:36.848556+00:00",
+    "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/D107-resize-81efff7-20260914T031001Z/bbe2c630-2bba-4367-a4b2-20666c766c6a",
+    "head": "81efff7a99a005a3f756944ef6c30e39b2572a52"
+  },
+  "final": {
+    "active_ssm": 0,
+    "alarms": {
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0,
+      "OK": 45
+    },
+    "all_queues_empty": true,
+    "at": "2026-09-14T03:16:51.114033+00:00",
+    "data_hashes": {
+      "wc-dev-backups": "10adec345eeca9a1609a8c4c04bef94b1ff8ac1fccc01c8735c1cba2d7dfec8d",
+      "wc-dev-games": "2f019f04bf048c904e8e1498b42e8fba8e2642418540e89a83db72ba135af6ff"
+    },
+    "desired": "STOPPED",
+    "dns": [],
+    "ec2": "stopped",
+    "health": "HEALTHY",
+    "locks": 0,
+    "observed": "stopped",
+    "provenance_records": 16,
+    "queue_count": 3,
+    "sessions": 0,
+    "snapshots": 9,
+    "workflows": 0
+  },
+  "guest": {
+    "artifacts_unchanged": true,
+    "both_success": true,
+    "data_serial": "vol03ac9f534326c345c",
+    "ena_driver": "2.17.2g",
+    "enable_links": [],
+    "game_tree_entries": 920,
+    "game_tree_sha256": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+    "game_tree_unchanged": true,
+    "legacy": "LoadState=not-found\nActiveState=inactive\nUnitFileState=",
+    "minecraft_auto_started": false,
+    "mount": [
+      "/srv/minecraft",
+      "/dev/nvme1n1",
+      "xfs",
+      "420cea6d-0520-4436-bb5a-db1191f1e63b"
+    ],
+    "nvme_driver": "(builtin)\n(builtin)",
+    "post_boot_id": "8fcb601c-6597-4611-9c1e-dd66fc40f4ca",
+    "postflight_command": "fe4c41bd-8322-4f2f-98f3-6790bb47ba43",
+    "pre_boot_id": "bbb3dd38-74b1-4f6e-8174-ce44d897c573",
+    "preflight_command": "26bf5202-a75a-4b31-bca2-6f4b3ce7e0f2",
+    "receipt_sha256": "2cb79b2157b6514d58799176c458500679bb3258094e94e1e0fcf5e1c64f9133",
+    "reverse_dependencies": "wishicraft-host-runtime.service",
+    "stopped_receipt_unchanged": true,
+    "unit_files": "wishicraft-data-volume.service  static  -\nwishicraft-heartbeat.service    static  -\nwishicraft-host-runtime.service static  -\nwishicraft-heartbeat.timer      enabled disabled",
+    "unit_state": "Restart=no\nExecMainStartTimestamp=\nActiveState=inactive\nFragmentPath=/etc/systemd/system/wishicraft-host-runtime.service\nDropInPaths=\nUnitFileState=static"
+  },
+  "maintenance": {
+    "post_resize_stop": [
+      {
+        "CurrentState": {
+          "Code": 64,
+          "Name": "stopping"
+        },
+        "InstanceId": "i-04fc0629dc4ea466e",
+        "PreviousState": {
+          "Code": 16,
+          "Name": "running"
+        }
+      }
+    ],
+    "pre_resize_stop": [
+      {
+        "CurrentState": {
+          "Code": 64,
+          "Name": "stopping"
+        },
+        "InstanceId": "i-04fc0629dc4ea466e",
+        "PreviousState": {
+          "Code": 16,
+          "Name": "running"
+        }
+      }
+    ],
+    "prior_concurrency": {
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null,
+      "wc-dev-admission": null,
+      "wc-dev-discord-command": null
+    },
+    "restored_at": "2026-09-14T03:16:40.683384+00:00",
+    "start": [
+      {
+        "CurrentState": {
+          "Code": 0,
+          "Name": "pending"
+        },
+        "InstanceId": "i-04fc0629dc4ea466e",
+        "PreviousState": {
+          "Code": 80,
+          "Name": "stopped"
+        }
+      }
+    ]
+  },
+  "policy": {
+    "data_owner": {
+      "Statement": [
+        {
+          "Action": "Update:*",
+          "Effect": "Allow",
+          "Principal": "*",
+          "Resource": "*"
+        },
+        {
+          "Action": [
+            "Update:Replace",
+            "Update:Delete"
+          ],
+          "Effect": "Deny",
+          "Principal": "*",
+          "Resource": "LogicalResourceId/MinecraftDataVolume30BACD41"
+        }
+      ]
+    },
+    "read_back_equal_at_install_review_execution_closeout": true,
+    "target": {
+      "Statement": [
+        {
+          "Action": "Update:*",
+          "Effect": "Allow",
+          "Principal": "*",
+          "Resource": "*"
+        },
+        {
+          "Action": [
+            "Update:Replace",
+            "Update:Delete"
+          ],
+          "Effect": "Deny",
+          "Principal": "*",
+          "Resource": [
+            "LogicalResourceId/TargetInstance",
+            "LogicalResourceId/TargetDataVolumeAttachment"
+          ]
+        }
+      ]
+    },
+    "temporary_override_used": false
+  },
+  "release_commit": "81efff7a99a005a3f756944ef6c30e39b2572a52",
+  "scope": {
+    "memory": "Xmx 2G / container 2816MiB unchanged",
+    "minecraft_start_create_mod_work": false,
+    "runtime_iam_game_network_ami_volume_config_changes": false
+  }
+}

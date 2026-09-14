@@ -1,6 +1,6 @@
 # 09. Decisions and Backlog
 
-## D-107 Host capacity / permanent replacement guard（Accepted / resize release準備）
+## D-107 Host capacity / permanent replacement guard（Accepted / production resize Completed）
 
 2026-09-14、demand-drivenのgeneric repository slice。Game-level compute profileとruntime
 ownership移管を採用せず、既存stage instance_typeへ4候補のallowlistを追加する。
@@ -15,6 +15,14 @@ generic sliceではproduction policy未設定、resize/実deny試験/EC2起動�
 ユーザー承認は恒久policy設定、guarded in-place resizeとSTOPPED/HEALTHYへのcloseoutに限定。
 Conditionalを消すための権限緩和は禁止。
 D-105 positive CREATEとmemory artifact移行、modpack実装は別slice。D-106 Completedを維持する。
+
+2026-09-14、release `81efff7` / CI `34800688838`（1,306 tests・全job成功）を適用。
+両stackの恒久policy完全一致後、確認用maintenance boot/stopと同一ChangeSetを実行しUPDATE_COMPLETE。
+Instance/root/Data EBS/ENI/AZ/AMI/attachment不変でm8a.large（2 cores / 1 thread）へ収束した。
+CFはEC2を起動したがMinecraft自動起動なし。同一停止receipt・artifact・920-entry treeを実機確認後、
+通常maintenance停止とReconcileでSTOPPED/HEALTHYへ戻し、受付復帰済み。45 alarms OK、
+3 queues空、DNS/Lock/workflow/SSMなし、Game/whitelist/9 snapshots/16 provenance不変。
+driftはD-066の停止時public IPv4解放だけで新規差分なし。[実証記録](runbooks/host_capacity.md#production-closeout-2026-09-14)。
 
 
 ## D-106 Whitelist Management（Accepted / production Completed）

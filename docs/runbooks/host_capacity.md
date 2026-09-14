@@ -1,9 +1,9 @@
 # D-107 Host capacity: guarded CloudFormation resize
 
-**Accepted repository contract, 2026-09-14. Isolated resize release candidate.**
+**Accepted repository contract; guarded production resize Completed, 2026-09-14.**
 Generic support commit `3a5a018` kept dev `t3a.medium`. The subsequent release changes only the
 Target selector to `m8a.large`, under explicit user approval for guarded production resize.
-Approval and candidate configuration are not evidence of application; record the result below.
+The production result and its evidence are recorded in the closeout below.
 
 ## Capacity and ownership
 
@@ -79,7 +79,8 @@ unnecessarily block that reevaluation. Deny takes precedence over Allow. Under t
 action semantics, physical replacement requires Update:Replace and must be rejected, even if
 in-place execution cannot succeed. Conditional may conservatively be rejected too: accept a
 failed update, never relax the deny to force success. This behavior is specification-backed;
-no real denied replacement or guarded resize has been executed in this slice.
+the generic slice did not execute a real denial test. The subsequent guarded in-place resize
+succeeded; it did not exercise the replacement-required failure branch.
 
 Root EBS belongs to the instance's root block mapping; preventing instance replacement, preserving
 that mapping byte-for-byte and prohibiting direct volume actions protects it during this resize.
@@ -208,7 +209,8 @@ Generic support has no synthesized Target resource difference at the retained t3
 Tests cover all supported types, invalid/null values, artifact/digest stability, exact template-only
 change, canonical policy, missing/weakened policy, extra replacement triggers, resource identities,
 ChangeSet freshness shape and no automatic canonical systemd start. Existing integration/CI covers
-host lifecycle; there is no live reboot or replacement-denial integration in this slice.
+host lifecycle. Those generic-slice results are distinct from the production boot/resize below;
+no intentional production replacement-denial test was performed.
 
 - [AWS stack policy actions, explicit Deny and dependent resource updates](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/protect-stack-resources.html)
 - [AWS InstanceType conditional update behavior](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-ec2-instance.html)
@@ -229,3 +231,77 @@ migration still rejects resized configuration (9 migration tests passed). Ruff l
 only InstanceType both confirmed the single `t3a.medium -> m8a.large` property change. CI runs only
 on pushed main/PR commits; the release commit must therefore be pushed to obtain its CI result,
 which is a mandatory gate before any production policy or resize operation.
+
+
+## Production closeout (2026-09-14)
+
+Release commit `81efff7a99a005a3f756944ef6c30e39b2572a52`,
+[CI 34800688838](https://github.com/eash-misoni/wishicraft-server/actions/runs/34800688838):
+1,306 tests, lint/format/type, all eight synth contexts, shellcheck, browser and all real Docker
+integration jobs succeeded. [Structured release evidence](../evidence/host_capacity_resize_2026-09-14.json)
+contains complete ChangeSet Details, events, identities, policies and final observations.
+
+Both canonical policies were installed on the exact owning stacks and read back equal at installation,
+preview review, immediately before execution and closeout. No override was used; Replace/Delete remain
+denied permanently. Target resource template changed only InstanceType. Frozen/CP/Web templates,
+root/data/network/AMI/IAM configuration and all runtime artifacts were unchanged.
+
+Preflight admission was closed after capturing all three prior concurrency settings (UNSET). Both
+before maintenance and before execution: EC2/Desired/Observed STOPPED, HEALTHY, no current Operation,
+Lock, active workflow or SSM command/session; all three queues empty including delayed/in-flight;
+DNS absent and 45 alarms OK. Nine completed snapshots and 16 provenance records were unchanged;
+backup snapshot tags, shared recovery digests and A/B membership matched.
+
+The explicitly approved inspection-only boot verified the real host: no container, Java/save process
+or Minecraft/RCON listener; canonical service static/inactive, Restart=no, no drop-in, enable link,
+reverse boot dependency or ExecMainStartTimestamp; legacy minecraft.service absent. Compose restart
+is no and the volatile runtime-run.env is absent. Only the existing read-only heartbeat timer is enabled.
+ENA 2.17.2g and built-in NVMe drivers were observed. Exact saved/removal-ready stopped receipt,
+runtime hashes, XFS UUID/data serial and the unchanged 920-entry Game tree passed before and after resize.
+
+ChangeSet `D107-resize-81efff7-20260914T031001Z` was executed at 03:11:36 UTC. Details were the same
+Conditional shape documented above, with no extra semantic trigger. Events show TargetInstance
+UPDATE_IN_PROGRESS -> UPDATE_COMPLETE, then stack UPDATE_COMPLETE_CLEANUP_IN_PROGRESS ->
+UPDATE_COMPLETE. There was no resource create/delete/replace or physical attachment update event.
+The attachment ID and original attachment time remained unchanged.
+
+| Identity/property | Before | After |
+|---|---|---|
+| Instance | i-04fc0629dc4ea466e | unchanged |
+| InstanceType | t3a.medium | m8a.large |
+| CPU options | 1 core / 2 threads | 2 cores / 1 thread |
+| Root EBS | vol-092c04a633ffc6010 | unchanged |
+| Retained Data EBS | vol-03ac9f534326c345c | unchanged |
+| ENI | eni-01caaa1fda4d76b94 | unchanged |
+| AMI | ami-0b4d2909a55ed2c78 | unchanged |
+| AZ | ap-northeast-1a | unchanged |
+
+Inspection maintenance went STOPPED -> PENDING -> RUNNING -> STOPPING -> STOPPED. CloudFormation
+then booted the resized instance: at 03:11:51 UTC it was RUNNING/m8a.large and at 03:12:16 the stack
+was UPDATE_COMPLETE. Post-boot SSM again proved Minecraft had never started, and receipt/artifacts/
+Game tree were identical. Normal maintenance StopInstances was requested at 03:13:08; STOPPED was
+observed at 03:14:14. No force stop, Minecraft START, CREATE or data mutation was performed.
+
+The scheduled observer saw temporary DEGRADED/dns-missing-when-required while the maintenance host
+ran with Desired STOPPED. Canonical Reconcile at 03:15:16 returned STOPPED/HEALTHY with no discrepancy;
+no special repair or raw DynamoDB/DNS mutation was used. At 03:16:40 the original three UNSET
+concurrency settings were restored. Final read-back at 03:16:51: m8a.large, EC2/Desired/Observed
+STOPPED, HEALTHY, no DNS/current Operation/Lock/workflow/SSM, all three queues empty, all 45 alarms OK.
+Game metadata/registry/world paths/generations, whitelist policy and backup/provenance hashes matched.
+
+Target drift detection completed with DRIFTED solely for `/NetworkInterfaces/0/AssociatePublicIpAddress`
+(expected true, observed false while stopped). This is the same known stopped-host observation in
+D-066, not a new network change. The resized RUNNING host had an Amazon public IPv4 on the same ENI;
+EC2 releases that address on stop ([AWS stop/start behavior](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/how-ec2-instance-stop-start-works.html)).
+Attachment, role/profile and SG were IN_SYNC; InstanceType and all other explicit properties matched.
+Do not change network configuration or boot the host merely to make this known drift display disappear.
+
+Local orchestration initially failed before any AWS call because a temporary guest payload named
+inspect.py shadowed Python's standard module. A new temporary root renamed it; no production call
+was retried blindly or original evidence overwritten. CI polling before completion was kept distinct
+from the later all-success gate. These were tooling checks, not production update failures.
+
+Next slice: design and validate host-wide memory artifact migration (still Xmx 2G/container 2816MiB),
+then the concrete modded runtime/Game work and separately approved CREATE/START. The capacity
+increase alone does not increase Minecraft heap or constitute modded Game validation. Future resize
+uses the same permanent deny policies, isolated type-only release, idle preflight and exact ChangeSet.
