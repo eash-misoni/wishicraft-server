@@ -995,7 +995,8 @@ def _attribute_map(value: dict[str, object]) -> dict[str, object]:
 
 
 def _decode_attribute(value: object) -> object:
-    if not isinstance(value, dict):
+    """Decode the integer-valued Game/Operation wire contract, including nested NULL."""
+    if not isinstance(value, dict) or len(value) != 1:
         raise ValueError("malformed attribute")
     if isinstance(value.get("S"), str):
         return value["S"]

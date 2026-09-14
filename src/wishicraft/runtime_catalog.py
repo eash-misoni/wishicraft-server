@@ -91,7 +91,7 @@ def bind_operation(runtime: Any, operation_id: str, *, action: str) -> None:
     catalog.data_source(game_id)
     if os.environ.get("GAME_PACKAGES") == "1":
         from wishicraft.artifacts.game_package import load, registered
-        from wishicraft.backup_provenance import _decode_map
+        from wishicraft.operation import _decode_attribute
 
         game = runtime.targets.api.get_item(
             TableName=os.environ["GAMES_TABLE"],
@@ -99,7 +99,7 @@ def bind_operation(runtime: Any, operation_id: str, *, action: str) -> None:
             ConsistentRead=True,
         )["Item"]
         registered(
-            _decode_map(game),
+            {key: _decode_attribute(value) for key, value in game.items()},
             {
                 "packages": load(),
                 "games": RuntimeCatalog.parse(os.environ["RUNTIME_GAMES"]).game_ids,

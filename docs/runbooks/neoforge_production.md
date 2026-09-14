@@ -133,7 +133,64 @@ means normal Discord operations and Web-Lambda routes (including the public guid
 management pages) are temporarily unavailable;
 it does not change persistent IAM, networking, alarms or world data.
 
-## Required next slice
+## Forward fix: full Game decoding and owned failure closure
+
+The follow-up slice is explicitly authorized to fix the shared boundary, deploy only the necessary
+CP code, and resume START/STOP for the **existing** registered Game. Keep the three admission
+concurrency settings at zero until successful materialization, READY/mod evidence, normal STOP and
+all final health/data gates pass. Another production defect requires safe containment and stopping.
+No Game normalization, schema migration, re-CREATE or host artifact change is part of this fix.
+
+| Boundary | Existing representation and follow-up decision |
+| --- | --- |
+| Initial A/B Game write | `game._attribute_map(Game.to_item())`; explicit nested nullable fields |
+| D-105 CREATE / Operation / whitelist transaction write | `operation._attribute_map`; S/N/BOOL/NULL/M/L, integer numbers |
+| Runtime Game binding | Reuse `operation._decode_attribute`, the matching Game/Operation contract; remove provenance-decoder dependency |
+| Operation read | Same decoder; require exactly one AttributeValue type key, recursively including Map/List |
+| Registry | Dedicated `registry_ids` validates exact SS structure; unchanged, no NS consumer added |
+| Whitelist read | Exact two-field record plus `policy_json` string and policy validation; unchanged |
+| Backup / retention provenance | Dedicated narrower decoders; recovery descriptors are JSON **strings**, optional absent fields are omitted; no full Game AttributeValue map is consumed here |
+| Web/API read | `web_status.decode` already handles NULL and has distinct Decimal/fractional display semantics; unchanged |
+| Host read | Standalone targeted runtime decoder already handles NULL; unchanged to preserve D-109 artifact bytes |
+| Fixtures | Add complete `Game.to_item()` records, reset-world current reference, NeoForge immutable definition and nullable creation metadata; compare AWS TypeSerializer output with the real writer |
+
+Canonical integer-valued decoding preserves S/N/BOOL/M/L and maps exactly `{"NULL": true}` to
+None at every depth. False/non-boolean NULL, malformed nested attributes and multiple type keys
+are rejected. SS remains the registry's dedicated contract, not silently converted to List.
+No SDK TypeDeserializer substitution changes integer/Decimal semantics or canonical serialization.
+Provenance validation and all package/manifest digest checks remain intact.
+
+START and STOP `fail` actions now skip Game/catalog binding. They need only invocation identity,
+existing Operation repository configuration and the existing `complete_owned` transaction. That
+transaction still conditions on non-terminal Operation, exact resource/Operation/lease identity,
+unexpired lease and exact Current Operation. It records FAILED and removes the owned Lock/current
+atomically. Desired and Game are untouched. Success and all runtime-changing actions still bind
+and validate the Game. SWITCH/RESET use these same START/STOP handlers; no state-machine change.
+A duplicate terminal-task invocation remains conditionally rejected; retrying the admission request
+returns the same recorded Operation and cannot reopen a lease. Lost/expired ownership still needs
+the existing D-074 recovery review and actual deadline, not relaxed failure conditions.
+
+`tests/unit/test_full_game_binding.py` directly covers complete Vanilla A/B and registered NeoForge
+wire records through `bind_operation` and START preparation. Intentional non-NULL package class
+failure is raised by the actual START handler; both failure handlers then close via the real
+OperationRepository without another Game read. A foreign lease cannot close it, and original
+request replay preserves identity after FAILED. The test-only AWS transaction boundary checks the
+actual ownership conditions and applies all writes only after validation. It does not replace an
+AWS integration test. Recursive valid NULL and malformed attributes are separately covered.
+Before the fix, this suite reproduced eight failures; after it, all 12 pass. The previous package-
+fragment tests missed nullable complete Game fields, while Docker fixtures exercised host runtime
+without this Control Plane boundary. The new tests run in ordinary CI.
+
+Repository validation: 1,399 full tests passed, lint/format/type passed; package-enabled CP synth
+passed. Initial live diff has 22 changed paths: only Code/S3Key and asset-path metadata for the
+11 existing CP Lambdas. Runtime digest, environment, IAM, resources and workflow definitions are
+identical. CI and production execution results must be recorded separately after they occur.
+
+Formal maintenance START/STOP uses the existing Admission handler/service and WorkflowLauncher
+with canonical live configuration and a fresh explicit CLI idempotency key while public ingress
+remains closed. It must not directly start a State Machine or manually write Game/Operation records.
+
+## Original follow-up requirements (before the fix)
 
 Fix complete-Game NULL decoding at the actual runtime binding boundary and add regressions using
 full legacy and newly registered DynamoDB records, not only a package fragment. The existing generic `operation._decode_attribute` and host decoder already handle NULL; prefer

@@ -2,6 +2,8 @@
 
 > D-109 production実証: runtime/CP/Web配布とpositive CREATE成功、first STARTはEC2起動前のNULL decode不具合で停止。Gameは保持・UNMATERIALIZED。受付閉鎖中、materialization/NeoForge起動は未実証。[障害・復旧・再開条件](runbooks/neoforge_production.md)。
 
+> D-109 NULL修正契約: 完全Gameの読込みはGame/Operation整数型decoderを再利用し、NULLをNoneへ復元。不正な複数type keyは拒否。START/STOPのfailはGame再読込みを必須にせず、既存exact lease/Lock/Current所有条件でFAILEDと解放をatomicに確定する。成功・runtime副作用のbinding検証は維持。[根拠と検証](runbooks/neoforge_production.md#forward-fix-full-game-decoding-and-owned-failure-closure)。
+
 > D-109 pinned NeoForge package: repository/runtime実装・検証完了、production未適用。共通manifestにpackage catalogを含め、Gameのimmutable definitionと照合する。詳細は[正本runbook](runbooks/neoforge_package.md)。
 
 > D-108 共通runtime memory: production移行完了（2026-09-14）、最終STOPPED / HEALTHY。Xms 1G / Xmx 4G / container 6144MiBの設定と、digest検証を維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。

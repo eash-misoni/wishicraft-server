@@ -6,6 +6,7 @@
 first STARTは完全Game metadataのNULL decoder欠落でEC2起動前に失敗し、failure記録も同じ境界で失敗した。
 新Gameと既存A/Bを保持し、受付を閉鎖。期限後のD-074条件付き復旧とforward fixを分離する。
 **production materialization/NeoForge READYは未完了**。[実証・失敗・復旧の正本](runbooks/neoforge_production.md)。
+後続の明示GOで、Game/Operation decoder再利用とSTART/STOP failure binding分離を修正する。保存record・host artifact・state machineは不変。完全Game回帰と所有条件付き失敗確定を確認し、CI後に同じGameのSTART/STOPを再開する。適用結果は上記runbookで管理する。
 以下はrepository slice完了時の決定で、production未適用の記述は当時の範囲。
 
 Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4を固定する。

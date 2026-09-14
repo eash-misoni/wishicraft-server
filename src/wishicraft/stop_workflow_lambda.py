@@ -115,7 +115,8 @@ def handler(event: object, context: object) -> dict[str, object]:
     del context
     payload = _payload(event)
     runtime = _get_runtime()
-    if payload["action"] not in {"prepare_switch", "prepare_reset"}:
+    # Owned failure finalization must remain usable after Game binding fails.
+    if payload["action"] not in {"prepare_switch", "prepare_reset", "fail"}:
         bind_operation(runtime, _string(payload, "operation_id"), action="STOP")
         if configured_catalog() is not None:
             runtime.status_factory = AwsStatusFactory(

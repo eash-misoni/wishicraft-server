@@ -98,7 +98,10 @@ def handler(event: object, context: object) -> dict[str, object]:
     del context
     payload = _payload(event)
     runtime = _get_runtime()
-    bind_operation(runtime, _string(payload, "operation_id"), action="START")
+    # Failure closure needs only owned Operation/lease/current state, not the Game
+    # whose binding or validation may have caused the primary failure.
+    if payload["action"] != "fail":
+        bind_operation(runtime, _string(payload, "operation_id"), action="START")
     now = datetime.now(UTC)
     proof = LeaseProof(
         runtime.system_id,
