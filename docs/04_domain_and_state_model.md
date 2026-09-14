@@ -739,3 +739,11 @@ without new Operation lifecycle states. FAILED/timeout is not evidence of Snapsh
 Existing operation-scoped create reservation persists through terminal failure;
 [the interface contract](05_data_and_interface_contracts.md#backup-create-reservation)
 and [operator procedure](runbooks/backup_safety_isolated_restore.md) define observation/retry limits.
+
+## D-109 Game packageのimmutable runtime入力
+
+新package-enabled CREATEはschema 1の`package.definition`にMinecraft/loader/modの固定情報、
+`creation.package_digest`にそのcanonical SHA-256を保存する。既存`creation.config_digest`は
+全package catalogを含む共通runtime manifestを指す。Operation、world generationとpathの意味は変えない。
+Legacy A/Bは既存Vanilla referenceのまま、内容・世代・registrationを変更しない。
+Game専用mod configはGlobalに共有しない。[隔離・RESET・recovery contract](runbooks/neoforge_package.md)。

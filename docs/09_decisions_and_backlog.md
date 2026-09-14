@@ -1,5 +1,18 @@
 # 09. Decisions and Backlog
 
+## D-109 Pinned NeoForge Game package（Accepted / repository validation in progress）
+
+Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4を固定する。
+NeoForgeは両modの最低要求versionを現行Java25 imageで実Docker検証して選定した。
+Game schema 1のpackageにimmutable definition、creationにpackage_digestを追加する。
+共通manifestは全catalogを含み、Operation・登録・host・recoveryで完全digest照合を維持する。
+Game専用cache/世代mods配置、所有者receipt、hash検証、既存停止中installerを再利用する。
+RESETは当該Gameのconfig/defaultconfigsのみ追加保持し、world/serverconfigは新worldで生成する。
+汎用modpack/profile層、新AWS resource、world migration、jar再配布は作らない。
+詳細・version/source/hash・失敗/retry・将来release手順は[正本](runbooks/neoforge_package.md)。
+productionはD-108のまま。このsliceでdeploy/CREATE/START/materializationは行わない。
+
+
 ## D-108 Host-wide runtime memory capacity（Accepted / production Completed）
 
 2026-09-14、D-101の需要起点slice。既存host_runtime.memoryでXms 1G / Xmx 4G / container

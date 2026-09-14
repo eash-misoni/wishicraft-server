@@ -226,19 +226,26 @@ def test_start_uses_new_digest_without_rewriting_old_stopped_receipt() -> None:
     assert stopped == previous
 
 
-@pytest.mark.parametrize("fail_after", [1, 2, 3, 4])
+@pytest.mark.parametrize(
+    "package_support,fail_after",
+    [(False, n) for n in range(1, 5)] + [(True, n) for n in range(1, 9)],
+)
 def test_actual_four_file_installer_converges_without_data_or_receipt_rewrite(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fail_after: int
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fail_after: int, package_support: bool
 ) -> None:
     bundle = tmp_path / "bundle"
-    result = prepare(ROOT, bundle, receipt(), inventory())
+    from wishicraft.game_package_migration import prepare as package_prepare
+
+    result = (package_prepare if package_support else prepare)(ROOT, bundle, receipt(), inventory())
+    namespace = "packages-v1" if package_support else "memory-v1"
     plan = result["plan"]
     targets = []
     for index, entry in enumerate(plan["files"]):
         target = tmp_path / "host" / entry["destination"].lstrip("/")
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes((bundle / f"{index}.predecessor").read_bytes())
-        target.chmod(0o600)
+        if entry["predecessor"] is not None:
+            target.write_bytes((bundle / f"{index}.predecessor").read_bytes())
+            target.chmod(entry["mode"])
         entry["destination"] = str(target)
         targets.append(target)
     (bundle / "install.json").write_text(json.dumps(plan))
@@ -293,9 +300,10 @@ def test_actual_four_file_installer_converges_without_data_or_receipt_rewrite(
     assert applied == [actual_stat(p).st_mtime_ns for p in targets]
     for index, target in enumerate(targets):
         assert target.read_bytes() == (bundle / f"{index}.artifact").read_bytes()
-        assert (installer.RECEIPTS / f"memory-v1/predecessor-{index}.artifact").read_bytes() == (
-            bundle / f"{index}.predecessor"
-        ).read_bytes()
+        if plan["files"][index]["predecessor"] is not None:
+            assert (
+                installer.RECEIPTS / namespace / f"predecessor-{index}.artifact"
+            ).read_bytes() == (bundle / f"{index}.predecessor").read_bytes()
     assert all(
         p.read_bytes() == value and actual_stat(p).st_mtime_ns == mtime
         for p, value, mtime in originals

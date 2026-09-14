@@ -141,8 +141,13 @@ def test_dynamic_reset_requires_materialization_and_reuses_policy(creation: Any)
 
 @pytest.mark.parametrize("materialized", [False, True])
 @pytest.mark.parametrize("whitelist_enabled", [False, True])
+@pytest.mark.parametrize("package_enabled", [False, True])
 def test_shared_recovery_includes_dynamic_game(
-    creation: Any, materialized: bool, whitelist_enabled: bool, monkeypatch: pytest.MonkeyPatch
+    creation: Any,
+    materialized: bool,
+    whitelist_enabled: bool,
+    monkeypatch: pytest.MonkeyPatch,
+    package_enabled: bool,
 ) -> None:
     import hashlib
     from dataclasses import replace
@@ -158,6 +163,10 @@ def test_shared_recovery_includes_dynamic_game(
     root = Path(__file__).resolve().parents[2]
     config = load_configuration(root, "dev")
     backend.catalog = (config.project.initial_game_id, backend.catalog[1])
+    from wishicraft.artifacts.game_package import load
+
+    if package_enabled:
+        monkeypatch.setenv("GAME_PACKAGES", "1")
     rendered = render_boot_time_artifacts(
         config.project,
         config.stage,
@@ -165,8 +174,15 @@ def test_shared_recovery_includes_dynamic_game(
         observed_gid=993,
         targeted=True,
         games=backend.catalog,
+        packages=load() if package_enabled else None,
     )
-    post(creation, login(sessions), payload(seed="42", reset=True))
+    post(
+        creation,
+        login(sessions),
+        payload(
+            seed="42", reset=True, **({"package_id": "create-survival"} if package_enabled else {})
+        ),
+    )
     game = backend.db.records["games", REGISTRY_KEY]["registered_ids"]["SS"][0]
     raw = backend.db.records["games", game]
     raw["creation"]["M"]["config_digest"] = {"S": rendered.digest}
@@ -363,6 +379,10 @@ def test_pinned_neoforge_create_is_immutable_metadata_only(
     assert game["creation"]["package_digest"] == game_package.digest(package)
     assert game["materialization_state"] == "UNMATERIALIZED"
     assert game["world"]["generation"] == 1
+    capabilities = creation[0].handle(event(jar, path="/api/capabilities", method="GET"), NOW)
+    requirements = json.loads(capabilities["body"])["games"][-1]["client_requirements"]
+    assert requirements["loader"] == {"type": "neoforge", "version": "21.1.219"}
+    assert [m["version"] for m in requirements["mods"]] == ["6.0.10", "1.3.4"]
     request["creation"]["package_id"] = "vanilla"
     assert post(creation, jar, request)["statusCode"] == 409
 

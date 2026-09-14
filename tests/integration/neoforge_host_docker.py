@@ -59,6 +59,8 @@ def main() -> None:
     for mount in compose["services"]["minecraft"]["volumes"]:
         if mount["target"] == "/run/secrets/rcon-password":
             mount["source"] = str(secret)
+        elif mount["target"] in {"/data/.rcon-cli.env", "/data/.rcon-cli.yaml"}:
+            mount["source"] = str(root / Path(mount["target"]).name[1:])
     text = yaml.safe_dump(compose, sort_keys=True)
     (artifacts / "compose.yaml").write_text(text)
     manifest = json.loads(rendered.manifest_json)
@@ -168,6 +170,19 @@ def main() -> None:
                 ""  # disposable mount/platform boundary; real production script remains unchanged
             )
         if args[0].endswith("/rcon-secret-v2"):
+            run_env = dict(line.split("=", 1) for line in host.RUN_ENV.read_text().splitlines())
+            for name in ("rcon-cli.env", "rcon-cli.yaml"):
+                placeholder = Path(run_env["GAME_DIRECTORY"]) / ("." + name)
+                if placeholder.exists():
+                    assert placeholder.is_file() and placeholder.stat().st_size == 0
+                    placeholder.unlink()
+                path = root / name
+                if args[1] == "prepare":
+                    path.write_bytes(b"")
+                    os.chown(path, 993, 993)
+                    path.chmod(0o600)
+                else:
+                    path.unlink(missing_ok=True)
             return ""
         if args[:2] == ["systemctl", "show"]:
             return "success" if "--property=Result" in args else state

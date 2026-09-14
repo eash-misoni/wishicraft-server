@@ -177,6 +177,9 @@ class Operations:
             world = mapping(item.get("world"))
             reset = self.reset_policy(game, item)
             materialized = item.get("materialization_state") == "MATERIALIZED"
+            from wishicraft.artifacts.game_package import client_requirements
+
+            requirements = client_requirements(item)
             # Legacy generation is not a Reset count. No world path/Operation identity leaks.
             games.append(
                 {
@@ -197,6 +200,7 @@ class Operations:
                     if world.get("current_id")
                     else "original",
                     "world_updated_at": stamp(item.get("updated_at")),
+                    **({"client_requirements": requirements} if requirements is not None else {}),
                 }
             )
         return {

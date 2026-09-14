@@ -220,3 +220,75 @@ def test_unowned_and_symlink_refused(filesystem: Any) -> None:
     (cache / "mods/unknown.jar").symlink_to(games / "game-b/server/world/level.dat")
     with pytest.raises(ValueError, match="UNKNOWN"):
         materialize(games, package)
+
+
+def test_offline_bundle_reuses_installer_without_record_or_data_changes(tmp_path: Path) -> None:
+    from tests.unit.test_runtime_memory import inventory, receipt
+    from wishicraft.game_package_migration import prepare
+
+    result = prepare(ROOT, tmp_path / "bundle", receipt(), inventory())
+    assert result["durable_record_updates"] == []
+    assert result["new_digest"] != result["old_digest"]
+    assert result["plan"]["receipt_predecessor"] == receipt()
+    assert len(result["plan"]["files"]) == 8
+    for entry in result["plan"]["files"]:
+        assert not entry["destination"].startswith("/srv/")
+        source = tmp_path / "bundle" / entry["source"]
+        assert hashlib.sha256(source.read_bytes()).hexdigest() == entry["sha256"]
+    assert result["plan"]["package_environment"]["WISHICRAFT_PACKAGE_TYPE"] == "VANILLA"
+
+
+def test_cdk_package_digest_recovery_compression_and_no_new_resources(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from aws_cdk import App
+    from aws_cdk.assertions import Template
+
+    from infrastructure.stacks.control_plane_stack import ControlPlaneStack
+    from wishicraft.backup_workflow_lambda import recovery_runtime_config
+
+    cfg = load_configuration(ROOT, "dev")
+    games = tuple(json.loads((ROOT / "config/two-game-dev.json").read_text()))
+    policy = json.loads((ROOT / "config/reset-dev.json").read_text())
+    templates = []
+    for enabled in (False, True):
+        app = App(
+            outdir=str(tmp_path / str(enabled)),
+            context={"game_packages": str(enabled).lower(), "whitelist_management": "true"},
+        )
+        stack = ControlPlaneStack(
+            app,
+            project=cfg.project,
+            stage=cfg.stage,
+            secrets=cfg.secrets,
+            phase=8,
+            games=games,
+            reset_policies=policy,
+            game_creation=True,
+        )
+        templates.append(Template.from_stack(stack).to_json())
+    old, new = (t["Resources"] for t in templates)
+    assert {key: value["Type"] for key, value in old.items()} == {
+        key: value["Type"] for key, value in new.items()
+    }
+    for key, resource in new.items():
+        if resource["Type"] == "AWS::StepFunctions::StateMachine":
+            assert resource == old[key]
+        if resource["Type"] == "AWS::Lambda::Function":
+            env = resource["Properties"]["Environment"]["Variables"]
+            assert (
+                sum(len(k) + len(v if isinstance(v, str) else "x" * 100) for k, v in env.items())
+                < 4096
+            )
+            if resource["Properties"]["Handler"] == "wishicraft.backup_workflow_lambda.handler":
+                assert "RECOVERY_RUNTIME_JSON" not in env
+                monkeypatch.setenv("GAME_PACKAGES", "1")
+                monkeypatch.setenv(
+                    "RECOVERY_RUNTIME_ZLIB_BASE64", env["RECOVERY_RUNTIME_ZLIB_BASE64"]
+                )
+                runtime = json.loads(recovery_runtime_config())
+                assert json.loads(runtime["manifest_json"])["packages"] == packages.load()
+                assert (
+                    hashlib.sha256(runtime["compose_yaml"].encode()).hexdigest()
+                    == json.loads(runtime["manifest_json"])["compose_sha256"]
+                )

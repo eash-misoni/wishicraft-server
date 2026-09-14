@@ -178,6 +178,27 @@ def location(game_id: str) -> Path:
     return GAMES / game_id / "package-cache"
 
 
+def client_requirements(game: dict[str, Any]) -> dict[str, Any] | None:
+    """Read-only client instructions from immutable registration, without host paths."""
+    definition = game.get("package", {}).get("definition")
+    if definition is None:
+        return None
+    package = validate(definition)
+    if game.get("creation", {}).get("package_digest") != digest(package):
+        raise ValueError("PACKAGE_REGISTRATION_MISMATCH")
+    return {
+        "minecraft_version": package["minecraft_version"],
+        "loader": {key: value for key, value in package["loader"].items() if key != "installer"},
+        "mods": [
+            {
+                key: mod[key]
+                for key in ("mod_id", "version", "filename", "sha256", "client_required", "url")
+            }
+            for mod in package["mods"]
+        ],
+    }
+
+
 def directory(path: Path) -> None:
     info = path.lstat()
     if (
