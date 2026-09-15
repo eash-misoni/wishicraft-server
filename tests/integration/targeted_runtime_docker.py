@@ -645,7 +645,12 @@ services:
                 "members": {"22222222-2222-4222-8222-222222222222": "FixtureTwo"},
             }
             host.item = lambda config, table, key, identity: (
-                {"policy_json": access.encoded(common if identity == access.COMMON else specific)}
+                {
+                    "game_id": identity,
+                    "policy_json": access.encoded(
+                        common if identity == access.COMMON else specific
+                    ),
+                }
                 if table == "games_table"
                 else saved_reader(config, table, key, identity)
             )
