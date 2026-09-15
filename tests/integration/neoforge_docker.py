@@ -139,7 +139,7 @@ def main() -> None:
                 )
                 assert (
                     "Changed the block" in block_result or "Could not set the block" in block_result
-                )
+                ), repr(block_result)
                 print("REGISTERED_BLOCK", block, block_result.strip(), flush=True)
             print("NEOFORGE_READY", cycle, package["loader"]["version"], flush=True)
             print(command("docker", "exec", name, "rcon-cli", "save-all", "flush"), flush=True)

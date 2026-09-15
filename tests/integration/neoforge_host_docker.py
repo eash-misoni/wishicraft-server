@@ -309,7 +309,9 @@ def main() -> None:
                         block,
                     ]
                 )
-                assert "Changed the block" in response or "Could not set the block" in response
+                assert "Changed the block" in response or "Could not set the block" in response, (
+                    repr(response)
+                )
                 print("HOST_REGISTERED_BLOCK", block, response.strip(), flush=True)
         game["materialization_state"] = "MATERIALIZED"
         print(
