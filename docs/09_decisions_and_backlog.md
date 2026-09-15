@@ -2,8 +2,8 @@
 
 ## D-109 Pinned NeoForge Game package（Accepted / deployed; first START blocked）
 
-旧run停止完了の限定operator recoveryを明示承認。既存proofがなければ同一container/runでfresh saveを取得し、
-通常finish_stopでterminal化する。Game MATERIALIZED、新START、READY probe修正は別slice。
+旧run停止完了の限定operator recoveryを明示承認しproduction実証済み。同一container/runでfresh saveを取得し、
+通常finish_stopでterminal stopped・container cleanupへ収束。同一plan retryはno-op、saved world保持。Game MATERIALIZED、新START、READY probe修正は別slice。
 [責務・証拠・再試行・production gate](runbooks/interrupted_stop_recovery.md)。
 
 2026-09-14、`f12eb03`の停止中host更新とCP/Web配布、正式positive CREATEを実施。

@@ -1,6 +1,6 @@
 # wishicraft-server
 
-> D-109 production実証（2026-09-15）: optional-whitelist reader修正を配布し、empty projectionとNeoForge/両modの実起動・RCONまで到達。SSM stdin probeのmodule import失敗でControl Plane READY未達。保存/正常停止と正式recovery STOPによりSTOPPED/HEALTHY・45 alarms OKへ収束、受付閉鎖継続。Game recordはUNMATERIALIZEDのまま、保存済みworld・停止container・元receiptを保持しています。[障害・復旧・次sliceの条件](docs/runbooks/neoforge_production.md)。
+> D-109旧run停止復旧（2026-09-15）: 同一container/runからfresh save proofを取得し、既存finish_stopでterminal stopped・container cleanupまで成功。保存済みworldは同じpath/generationのまま保持、Game DBはUNMATERIALIZED。受付閉鎖を継続し、SSM READY probe修正・新START・materialization確定は別sliceです。[復旧契約・証跡](docs/runbooks/interrupted_stop_recovery.md)。
 
 > D-109 repository slice完了時点の記録: repository/runtime検証完了、当時production未適用。Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4。[package・隔離・release契約](docs/runbooks/neoforge_package.md)。
 

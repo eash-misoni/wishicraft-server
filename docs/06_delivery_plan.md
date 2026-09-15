@@ -1,6 +1,6 @@
 # 06. Delivery Plan
 
-> D-109 production実証（2026-09-15）: NULL修正に続きoptional-whitelist reader修正をproduction適用。empty projection、NeoForge/両mod起動・RCONまで到達したが、SSM stdin probeのmodule import失敗でREADY未達。operator保存/正常停止と正式recovery STOPでSTOPPED/HEALTHYへ収束、受付閉鎖。Game recordはUNMATERIALIZEDのまま、保存済みworld・停止container・元receiptを保持。次sliceでprobeと中断状態の復旧をレビューする。[正本・最終証跡](runbooks/neoforge_production.md)。
+> D-109旧run停止復旧（2026-09-15）: 同一container/runからfresh save proofを取得し、既存finish_stopでterminal stopped・container cleanupまで成功。保存済みworldは同じpath/generationのまま保持、Game DBはUNMATERIALIZED。受付閉鎖を継続し、SSM READY probe修正・新START・materialization確定は別sliceです。[復旧契約・証跡](runbooks/interrupted_stop_recovery.md)。
 
 > D-109 repository slice完了時点の記録: repository/runtime実装・検証完了、当時production未適用。共通manifestにpackage catalogを含め、Gameのimmutable definitionと照合する。詳細は[正本runbook](runbooks/neoforge_package.md)。
 
