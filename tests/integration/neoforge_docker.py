@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 
 import yaml
@@ -17,6 +18,21 @@ import yaml
 
 def command(*args: str, timeout: int = 60) -> str:
     return subprocess.run(args, check=True, capture_output=True, text=True, timeout=timeout).stdout
+
+
+def registered_block(execute: Callable[[list[str]], str], container: str, block: str) -> str:
+    """Qualify mod registration in a loaded chunk of the disposable CI world."""
+    prefix = ["docker", "exec", container, "rcon-cli"]
+    print("BLOCK_FORCELOAD", execute([*prefix, "forceload", "add", "0", "0"]).strip(), flush=True)
+    for _ in range(30):
+        response = execute([*prefix, "setblock", "0", "80", "0", block])
+        if "That position is not loaded" not in response:
+            assert "Changed the block" in response or "Could not set the block" in response, repr(
+                response
+            )
+            return response
+        time.sleep(1)
+    raise AssertionError("CI block chunk did not load: " + repr(response))
 
 
 def main() -> None:
@@ -121,25 +137,8 @@ def main() -> None:
                     hashlib.sha256((mods / mod["filename"]).read_bytes()).hexdigest()
                     == mod["sha256"]
                 )
-            for x, block in [(0, "create:andesite_casing"), (1, "farmersdelight:stove")]:
-                block_result = command(
-                    "docker",
-                    "exec",
-                    name,
-                    "rcon-cli",
-                    "execute",
-                    "in",
-                    "minecraft:overworld",
-                    "run",
-                    "setblock",
-                    str(x),
-                    "80",
-                    "0",
-                    block,
-                )
-                assert (
-                    "Changed the block" in block_result or "Could not set the block" in block_result
-                ), repr(block_result)
+            for block in ("create:andesite_casing", "farmersdelight:stove"):
+                block_result = registered_block(lambda args: command(*args), name, block)
                 print("REGISTERED_BLOCK", block, block_result.strip(), flush=True)
             print("NEOFORGE_READY", cycle, package["loader"]["version"], flush=True)
             print(command("docker", "exec", name, "rcon-cli", "save-all", "flush"), flush=True)

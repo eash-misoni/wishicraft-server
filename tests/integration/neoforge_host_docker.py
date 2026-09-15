@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import yaml  # noqa: E402
 
+from tests.integration.neoforge_docker import registered_block  # noqa: E402
 from web.local_operations import MemoryDynamo, service  # noqa: E402
 from wishicraft.artifacts import game_package, whitelist_policy  # noqa: E402
 from wishicraft.artifacts import targeted_runtime as host
@@ -296,22 +297,7 @@ def main() -> None:
             args = Path(target["data_source"]).joinpath("user_jvm_args.txt").read_text().split()
             assert "-Xms1G" in args and "-Xmx4G" in args
             for block in ("create:andesite_casing", "farmersdelight:stove"):
-                response = real_execute(
-                    [
-                        "docker",
-                        "exec",
-                        container["Id"],
-                        "rcon-cli",
-                        "setblock",
-                        "0",
-                        "80",
-                        "0",
-                        block,
-                    ]
-                )
-                assert "Changed the block" in response or "Could not set the block" in response, (
-                    repr(response)
-                )
+                response = registered_block(real_execute, container["Id"], block)
                 print("HOST_REGISTERED_BLOCK", block, response.strip(), flush=True)
         game["materialization_state"] = "MATERIALIZED"
         print(
