@@ -24,7 +24,7 @@ from wishicraft.artifacts import targeted_runtime as host
 from wishicraft.config import load_configuration  # noqa: E402
 from wishicraft.game_creation import create  # noqa: E402
 from wishicraft.host_runtime import render_boot_time_artifacts  # noqa: E402
-from wishicraft.operation import WebOperationContext  # noqa: E402
+from wishicraft.operation import WebOperationContext, _attribute_map  # noqa: E402
 from wishicraft.web_status import decode  # noqa: E402
 
 
@@ -106,6 +106,9 @@ def main() -> None:
         "games": legacy,
         "game_creation": True,
         "games_table": "games",
+        "operations_table": "operations_table",
+        "locks_table": "locks_table",
+        "region": "ap-northeast-1",
         "reset_policies": {},
         "initial_whitelist": [],
         "whitelist_management": True,
@@ -123,6 +126,7 @@ def main() -> None:
         "owner_operation_id": "",
         "lease_id": "lease-ci",
         "resource_id": "ci-only",
+        "lock_name": "ci-only",
         "lease_expires_at": 4070908800,
     }
 
@@ -132,10 +136,12 @@ def main() -> None:
         if table == "locks_table":
             return lease
         if identity == whitelist_policy.COMMON:
-            return {"policy_json": whitelist_policy.encoded(whitelist_policy.empty())}
+            return {
+                "game_id": identity,
+                "policy_json": whitelist_policy.encoded(whitelist_policy.empty()),
+            }
         return next((g for g in records if g["game_id"] == identity), {})
 
-    host.item = item
     real_execute = host.execute
     state = "inactive"
 
@@ -156,6 +162,11 @@ def main() -> None:
 
     def execute(args: list[str], *, timeout: int = 30) -> str:
         nonlocal state
+        if args[:3] == ["aws", "dynamodb", "get-item"]:
+            assert "--query" not in args
+            key, value = next(iter(json.loads(args[args.index("--key") + 1]).items()))
+            record = item(config, args[args.index("--table-name") + 1], key, value["S"])
+            return json.dumps({"Item": _attribute_map(record)}) if record else ""
         env = dict(os.environ)
         if args[0] == "env":
             split = args.index("bash")

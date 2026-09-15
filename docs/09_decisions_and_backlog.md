@@ -7,6 +7,7 @@ first STARTは完全Game metadataのNULL decoder欠落でEC2起動前に失敗�
 新Gameと既存A/Bを保持し、受付を閉鎖。期限後のD-074条件付き復旧とforward fixを分離する。
 **production materialization/NeoForge READYは未完了**。[実証・失敗・復旧の正本](runbooks/neoforge_production.md)。
 後続GOの修正 `0f3f7d7` は両CI成功後、CP codeのみproduction配布済み。全3 Gameの読取と通常failure確定を確認した。再STARTはcache/mod配置まで進んだが、未作成Game whitelist policyに対するhost AWS CLI空応答のJSON decodeで失敗した。既存保守EC2停止と正式STOPによりSTOPPED/HEALTHYへ復旧。保存record・host artifact・state machineは不変。追加host不具合の停止境界に従い受付閉鎖を維持し、次sliceのartifact修正/migrationレビューまで再STARTしない。詳細は上記runbook。
+2026-09-15のreader前進修正は、成功したCLI空応答のみを不存在として扱う。helper単体はinstallerの個別hashで保護され、manifest/runtime/package digestは不変。既存installerの限定1-file planで移行し、D-108 guard・creation/Operation照合・durable recordは変更しない。production実行結果はrunbookで区別する。
 以下はrepository slice完了時の決定で、production未適用の記述は当時の範囲。
 
 Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4を固定する。

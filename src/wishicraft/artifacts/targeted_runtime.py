@@ -27,7 +27,7 @@ RUN_ENV = Path("/run/wishicraft/runtime-run.env")
 
 def execute(args: list[str], *, timeout: int = 30) -> str:
     result = subprocess.run(args, capture_output=True, text=True, timeout=timeout, check=False)
-    if result.returncode:
+    if result.returncode or (args[:3] == ["aws", "dynamodb", "get-item"] and result.stderr.strip()):
         raise RuntimeError("HOST_COMMAND_FAILED")
     return result.stdout
 
@@ -51,39 +51,49 @@ def atomic(path: Path, value: str) -> None:
 
 
 def item(config: dict[str, Any], table: str, key: str, identity: str) -> dict[str, Any]:
-    raw = json.loads(
-        execute(
-            [
-                "aws",
-                "dynamodb",
-                "get-item",
-                "--region",
-                config["region"],
-                "--table-name",
-                config[table],
-                "--consistent-read",
-                "--key",
-                json.dumps({key: {"S": identity}}),
-                "--output",
-                "json",
-            ]
-        )
-    ).get("Item", {})
+    # Full GetItem envelope, without --query. Like heartbeat, successful empty stdout is absent.
+    # Diagnostics or command failure must never become an empty access policy.
+    output = execute(
+        [
+            "aws",
+            "dynamodb",
+            "get-item",
+            "--region",
+            config["region"],
+            "--table-name",
+            config[table],
+            "--consistent-read",
+            "--key",
+            json.dumps({key: {"S": identity}}),
+            "--output",
+            "json",
+        ],
+    )
+    document = json.loads(output) if output.strip() else {}
+    if not isinstance(document, dict) or set(document) - {"Item"}:
+        raise ValueError("GET_ITEM_RESPONSE_INVALID")
+    if "Item" not in document:
+        return {}
+    raw = document["Item"]
+    if not isinstance(raw, dict) or not raw or raw.get(key) != {"S": identity}:
+        raise ValueError("GET_ITEM_RECORD_INVALID")
 
     def decode(value: dict[str, Any]) -> Any:
-        if "S" in value:
+        if not isinstance(value, dict) or len(value) != 1:
+            raise ValueError("GET_ITEM_ATTRIBUTE_INVALID")
+        if "S" in value and isinstance(value["S"], str):
             return value["S"]
-        if "N" in value:
+        if "N" in value and isinstance(value["N"], str):
             return int(value["N"])
-        if "M" in value:
+        if "M" in value and isinstance(value["M"], dict):
             return {k: decode(v) for k, v in value["M"].items()}
-        if "L" in value:
+        if "L" in value and isinstance(value["L"], list):
             return [decode(v) for v in value["L"]]
-        if "BOOL" in value:
+        if "BOOL" in value and type(value["BOOL"]) is bool:
             return value["BOOL"]
-        if value.get("NULL"):
+        if value.get("NULL") is True:
             return None
-        return value
+        raise ValueError("GET_ITEM_ATTRIBUTE_INVALID")
 
     return {k: decode(v) for k, v in raw.items()}
 
@@ -545,6 +555,10 @@ def apply(request: dict[str, Any]) -> None:
                     config,
                     datetime.now(timezone.utc),
                 )
+                if set(common) != {"game_id", "policy_json"} or (
+                    specific and set(specific) != {"game_id", "policy_json"}
+                ):
+                    raise ValueError("WHITELIST_RECORD_INVALID")
                 whitelist_policy.project(
                     target,
                     json.loads(common["policy_json"]),

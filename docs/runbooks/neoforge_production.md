@@ -338,3 +338,82 @@ regardless of alarm recovery because first NeoForge READY is unproven. JVM Xms/X
 configuration remains 1G/4G/6GiB, but no process memory/CPU/GC/tick baseline was measurable.
 The user cannot connect yet; client preparation is possible separately, and intentional real
 whitelist membership plus a successful forward-fix qualification remain required.
+
+## Optional policy reader forward fix — 2026-09-15
+
+The authorized next slice preserves D-106: absent Game-specific policy means revision 0 / empty
+membership; Common absence is an incomplete migration and fails closed. CREATE does not write an
+empty policy to hide absence. No member is added and no existing Game or historical Operation is
+rewritten. The following is the reviewed release procedure; production results are recorded after
+execution, not inferred from tests.
+
+### Reader and integrity boundaries
+
+`targeted_runtime.item` is the shared host GetItem boundary for Operation, Lock, Game and whitelist.
+It requests a consistent full response using `--output json`, without `--query`. The existing
+heartbeat producer already normalizes successful blank output as absent. The host reader now
+applies that same absence semantics: only a successful command with no stderr diagnostics may
+normalize blank/whitespace output or an empty response envelope to no Item. Nonzero exit, stderr,
+malformed JSON, null/list/unexpected envelopes, explicit empty/invalid Item, wrong key identity and
+invalid AttributeValue shapes fail closed. Required callers still require their records; absence
+is not permission to proceed without an Operation, Lock, Game or Common policy. Whitelist record
+shape and membership validation precede projection. State/receipt are local JSON files, not
+optional AWS CLI reads. No host Query reader or new shared AWS access framework is introduced.
+
+The runtime manifest digest covers Compose/runtime.env plus configured runtime/package metadata;
+it does **not** contain the `operation-v2` executable bytes. Executable installation has its own
+exact predecessor/new SHA-256 contract. This separation already existed and is unchanged. No
+field is removed from manifest/digest verification for this fix.
+
+Both before and after common runtime digest are:
+`64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c`.
+Manifest, Compose, runtime.env, package catalog, MC/loader/mod versions and mod hashes do not change.
+The immutable NeoForge package digest remains
+`720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b`.
+The one installed file changes from SHA-256
+`724c5a2a7c9eea473531fad6bc4601412a1e622d8cb6baca3d0120c923d18a8d`
+to `912c45c3248a99335f1cf3f0883600a1584353c46f48cd9e4c10b2b82287a61f`.
+
+`creation.config_digest` is actively checked by CP binding, package registration, host selection
+and initial owner preparation. A genuinely changed manifest would fail these checks and require
+a separate compatibility decision; this slice does not relax any of them. New Operations pin the
+same common runtime digest with fresh request/Operation identities.
+
+### Guarded helper-only installation
+
+`game_package_migration --reader-fix` reuses the exact `runtime_install.py`; it does not call or
+weaken the D-108 A/B-only cutover guard. It rejects changed platform/config/manifest/package/other
+host sources against baseline `0889609`, requires the known runtime digest and complete registry,
+checks A/B plus one ACTIVE, schema-1, generation-1 UNMATERIALIZED registered NeoForge Game, exact
+package definition/creation digest and valid optional policies. Its one-file plan has the known
+installed predecessor, current file hash, mode and exact stopped/save-confirmed/removal-ready
+receipt. It preserves every Game/registry/policy record and all preparation/cache files.
+
+Before applying: close all ingress, verify STOPPED/HEALTHY, no Current/Lock/workflow/SSM/session,
+empty queues, no DNS, alarms OK, unchanged instance/volumes and snapshots/provenance. Use one
+maintenance boot with Minecraft inactive, capture A/B and new Game file inventories, verify the
+installed host files/manifest/catalog and exact receipt, then build a fresh private bundle.
+Transport verifies bundle hashes before invoking the existing installer with `BUNDLE` pointing to
+that fresh directory. The installer retains flock, host identity, filesystem preflight, no unit/
+container/listener, receipt, owner/mode, whole-plan validation and atomic replacement checks.
+Run the same bundle again to prove canonical files are reused without rewriting. An interrupted
+run retains the old/new hash classification and predecessor backup; unknown content stops before
+mutation. No unverified file or world is deleted to recover.
+
+After read-back and maintenance EC2 stop, deploy only necessary existing CP code assets if live
+diff agrees; expected runtime digest remains unchanged. Verify all three real Game bindings
+read-only, then formally admit a new START for existing `create-survival` and replay its request.
+Require preserved cache hashes, empty effective projection, installer/mod/READY/DNS evidence and
+0-player memory observations. Then formal STOP and all final health/data gates precede ingress
+restoration. Another production bug ends the slice after safe containment; no chain of hotfixes.
+
+Rollback before START is the reverse exact-hash inactive installer operation, with unchanged
+manifest and records. It restores the known absence bug and therefore cannot justify reopening
+admission. After first materialization or an ambiguous runtime failure, keep data and use existing
+failure/recovery procedures; do not blindly roll back, delete or re-CREATE the Game.
+
+Tests cover blank/whitespace/envelope absence, present empty/nonempty membership, Common absence,
+command/stderr/JSON/shape failures, actual empty whitelist file projection, same-manifest bundle,
+registration/digest/materialization guards and existing installer interrupted retry/idempotency.
+The NeoForge Docker host fixture now passes AWS wire envelopes and successful absent stdout
+through the actual host reader rather than replacing `host.item` with decoded Python records.
