@@ -1,8 +1,8 @@
 # 06. Delivery Plan
 
-> D-109 production実証: NULL decoderとfailure確定の修正をCPへ配布済み。再STARTはartifact取得後、未作成whitelist policyのhost読取で停止。復旧STOP成功、STOPPED/HEALTHY・受付閉鎖継続。Game/cacheは保持、NeoForge起動は未実証。[障害・復旧・再開条件](runbooks/neoforge_production.md)。
+> D-109 production実証（2026-09-15）: NULL修正に続きoptional-whitelist reader修正をproduction適用。empty projection、NeoForge/両mod起動・RCONまで到達したが、SSM stdin probeのmodule import失敗でREADY未達。operator保存/正常停止と正式recovery STOPでSTOPPED/HEALTHYへ収束、受付閉鎖。Game recordはUNMATERIALIZEDのまま、保存済みworld・停止container・元receiptを保持。次sliceでprobeと中断状態の復旧をレビューする。[正本・最終証跡](runbooks/neoforge_production.md)。
 
-> D-109 pinned NeoForge package: repository/runtime実装・検証完了、production未適用。共通manifestにpackage catalogを含め、Gameのimmutable definitionと照合する。詳細は[正本runbook](runbooks/neoforge_package.md)。
+> D-109 repository slice完了時点の記録: repository/runtime実装・検証完了、当時production未適用。共通manifestにpackage catalogを含め、Gameのimmutable definitionと照合する。詳細は[正本runbook](runbooks/neoforge_package.md)。
 
 > D-108 共通runtime memory: production移行完了（2026-09-14）、最終STOPPED / HEALTHY。Xms 1G / Xmx 4G / container 6144MiBの設定と、digest検証を維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。
 

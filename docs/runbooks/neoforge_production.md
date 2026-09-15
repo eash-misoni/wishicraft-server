@@ -1,13 +1,16 @@
-# D-109 production qualification — interrupted before materialization
+# D-109 production qualification — server starts, observation blocked
 
-**CP NULL decoder/failure-finalization fix is deployed. A second START reached EC2 and pinned
-artifact materialization, then failed at the host's absent Game-whitelist record read. NeoForge
-qualification is NOT complete.** The existing Game is retained ACTIVE/UNMATERIALIZED, generation 1,
-with partial owned files/cache preserved. Recovery STOP succeeded; Desired/EC2 are STOPPED and
-HEALTHY. Admission, Discord command and management Web remain at reserved concurrency zero.
-Do not retry START, create a policy record as a workaround, or roll back to the A/B-only runtime.
-The current outcome is in [NULL fix production follow-up](#null-fix-production-follow-up--second-host-failure).
-The initial incident sections below remain historical. [Package contract](neoforge_package.md).
+**The optional-whitelist reader fix is deployed. NeoForge, Create and Farmer's Delight started
+successfully, but the production SSM observation transport cannot import `game_package` and
+first START timed out before Control Plane READY/DNS. Qualification is NOT complete.**
+The existing Game record remains ACTIVE/UNMATERIALIZED, generation 1, while an owned, saved world
+now exists. Operator explicit save/graceful stop and an EC2-stopped formal STOP returned the
+control plane to STOPPED/HEALTHY. Admission, Discord and Web remain closed.
+A stopped container and the unchanged running receipt are intentionally retained; the next slice
+must review that interrupted state before any START, cleanup or migration. Do not delete/re-CREATE
+this Game, normalize records, force old-runtime rollback or treat the absent-policy issue as pending.
+Current results: [reader fix production follow-up](#reader-fix-production-follow-up--observation-transport-failure).
+Earlier incident sections below are historical. [Package contract](neoforge_package.md).
 
 ## Approved scope and initial state
 
@@ -417,3 +420,135 @@ command/stderr/JSON/shape failures, actual empty whitelist file projection, same
 registration/digest/materialization guards and existing installer interrupted retry/idempotency.
 The NeoForge Docker host fixture now passes AWS wire envelopes and successful absent stdout
 through the actual host reader rather than replacing `host.item` with decoded Python records.
+
+
+## Reader fix production follow-up — observation transport failure
+
+On 2026-09-15, fix `d766901` plus CI-only fixture corrections through `ba23f49` passed
+[standard CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/34957906404)
+and [NeoForge CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/34957906159).
+The standard suite passed 1,418 tests, lint/format, mypy (207 files), synth and existing Docker
+lifecycle/whitelist/reset checks. The actual NeoForge host fixture exercised successful blank
+Game-specific GetItem output through the reader and projected `[]`, then passed START/SWITCH/RESET.
+
+Two CI fixture gaps were diagnosed without changing production behavior: the candidate block
+probe failed with `That position is not loaded`, so the disposable CI world now force-loads its
+probe chunk with bounded waiting; the older whitelist/reset mock omitted the real `game_id`
+record key, which is now present. Failed runs remain evidence, not passing checks. No block
+placement was performed in production.
+
+### Applied release and preserved identity
+
+Fresh inventory at 10:09, 10:32 and 10:37 UTC proved STOPPED/HEALTHY, 45 alarms OK, no Current/Lock/
+workflow/active SSM/session/DNS, three empty queues, all ingress closed, unchanged Games, same
+instance/root/Data volume, nine snapshots and 16 provenance records. Maintenance-only EC2 boot
+then proved no Minecraft container/Java/listener, the exact saved predecessor receipt, all 11 host
+artifacts and the A/B tree hash. The fresh `--reader-fix` bundle matched the offline review.
+
+Only `operation-v2` changed using the existing inactive installer. Both manifest/runtime digests
+remain `64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c`; package digest remains
+`720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b`.
+Same-bundle retry preserved the new helper SHA and mtime. Read-back preserved every other host
+file, receipt, A/B tree and prepared/cache file, including mtime. D-108's migration guard and
+all creation/Operation digest checks remain unchanged; no durable record migration occurred.
+
+Maintenance EC2 was stopped before deploying only `WishicraftControlPlaneStack-dev`.
+Fresh live diff was exactly 11 existing Lambda Code/S3Key changes plus their asset metadata;
+there were no IAM, new resource, state-machine, Target/Data or Web changes. Read-back verified
+UPDATE_COMPLETE, physical IDs, code archive hashes, expected runtime/catalog configuration and
+closed ingress. All three Games bound read-only through canonical code without record changes.
+The maintenance DesiredStoppedEc2Running alarm naturally returned to OK before the 10:48 UTC
+complete pre-START gate. Alarm state/thresholds were not overridden.
+
+### Actual first startup and new failure boundary
+
+Formal START `op-76571b92-0fe6-47a9-b31e-00a0e0048e36` reused existing `create-survival`;
+request replay returned the same Operation with `created=false`. The host reused the three
+verified cached artifacts and two projected mod jars without changing hashes or mtimes.
+Empty whitelist projection succeeded without creating a policy record. NeoForge's installer ran,
+the generation-1 server/world was generated, and the server logged `Done` at 10:50:42 UTC.
+Production loader evidence contains:
+
+- `NeoForge 21.1.219 (neoforge)`
+- `Create 6.0.10 (create)`
+- `Farmer's Delight 1.3.4 (farmersdelight)`
+
+Read-only RCON list/health and tick query succeeded with zero players. No test blocks were placed.
+The mods' upstream version-check messages do not install updates; the pinned files remained exact.
+
+However, `ssm_probe._canonical_probe_command` streams the standalone probe to `python3 -`.
+`host_runtime_probe.package_version` falls back to `import game_package`, but this execution context
+does not place `/usr/local/libexec/wishicraft` on the module search path. The verified installed
+module exists; the SSM probe exits 1 with `ModuleNotFoundError: No module named 'game_package'`.
+Control Plane observation stays UNKNOWN and cannot publish READY/DNS. Docker fixtures imported
+the repository modules directly and did not exercise this exact deployed stdin/import boundary.
+This is a distinct defect; no production import-path workaround or follow-on implementation was
+made. START reached the existing READY deadline and closed FAILED/MINECRAFT_READY_TIMEOUT,
+releasing Lock/Current normally. No stale-record/deadline repair was needed.
+
+### Zero-player observation, not a capacity claim
+
+At 10:55:06 UTC, before containment:
+
+| Observation | Value |
+|---|---:|
+| Host MemTotal / MemAvailable | 7,944,160 / 5,811,400 KiB |
+| Container current / peak | 1,911,500,800 / 1,912,983,552 bytes |
+| Container configured limit | 6,442,450,944 bytes (6 GiB) |
+| JVM arguments | Xms 1G / Xmx 4G |
+| Java RSS | 1,588,236 KiB |
+| Host CPU / container CPU | 0.30% / 2.29% of one core, ~5-second sample |
+| Java `ps` CPU | 14.8%, process lifetime average including startup |
+| Tick query | target 20/s, average 0.0 ms; P95 0.2 / P99 0.3 ms, 100 samples |
+| Kernel OOM / cgroup OOM / memory pressure | none / zero / zero |
+| Obvious GC errors | none observed in logs; no full GC profiling performed |
+
+These are idle observations, not player-load capacity validation. Memory settings were unchanged.
+
+### Safe containment and retained incomplete state
+
+Formal running-host STOP requires an observed target; the broken probe prevents that precondition.
+After START was terminal and no Lock/Current/workflow/active SSM remained, the existing fixed
+explicit `save-all flush` and systemd graceful stop were used as operator containment. The exact
+container/run/data binding and installed stop script hash were checked first. At 11:02:22 UTC,
+save succeeded, container exited 0 without OOM, listeners disappeared, and world data was retained.
+This is operator graceful-stop evidence, not a claim that the normal running-host STOP workflow
+passed. No force stop, Game deletion, container removal, receipt fabrication or code patch occurred.
+
+A/B tree hash remained `f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c`.
+The post-stop new Game tree contained 405 entries including the saved world. Its three cache jars
+and two server mods still matched their original bytes, size, ownership, mode and mtime. EC2 was
+then normally stopped; the existing EC2-stopped formal STOP
+`op-dd421ed4-6e99-4fef-8e0d-449e7c694403` succeeded and its request retry was idempotent.
+Desired/EC2 became STOPPED/HEALTHY with no Current Operation. No snapshot was created.
+
+The important retained state is:
+
+- DynamoDB Game/registry/creation/package are unchanged: ACTIVE/UNMATERIALIZED, generation 1.
+- The physical server, six generated config files and saved `world/level.dat` now exist.
+  No files were observed under `defaultconfigs`; `world/serverconfig/readme.txt` was present.
+- The initial owner still reports `prepared`; completion was never committed by Control Plane.
+- One verified exited container is retained. Receipt still has phase `running` and the failed
+  START's run identity, unchanged rather than rewritten to manufacture normal STOP completion.
+- Common/specific/effective membership remain 0/0/0; no Game-specific policy record was inserted.
+- All 77 prior Operations are unchanged; only this START and recovery STOP were added.
+
+The next slice must cover the deployed probe transport/import contract and review safe convergence
+of this owned world/container/receipt state. Do not blindly retry START or apply the earlier
+inactive installer: its stopped-receipt guard is not satisfied. Preserve world and provenance;
+use no Game re-CREATE, arbitrary receipt rewrite, Vanilla fallback or forced rollback. Only after
+an eventual full START/READY/STOP and all closeout gates may ingress reopen. Client connection is
+not available while ingress/DNS are closed and effective whitelist is empty.
+
+[Sanitized release, failure, containment and final inventory evidence](../evidence/optional_whitelist_reader_production_2026-09-15.json)
+records the final alarm recovery separately from earlier alarm checkpoints.
+
+
+Final inventory at **2026-09-15 11:17:22 UTC** confirmed STOPPED/HEALTHY, EC2 STOPPED,
+all 45 alarms OK, no DNS/Current/Lock/running workflow/active SSM/session, and three empty queues.
+The final Game/registry/whitelist records and 77 pre-existing Operations were byte-semantically
+unchanged; the nine snapshots and 16 provenance records were unchanged. Target/Data/Web templates
+and all resource identities were preserved; CP matched the reviewed deployed assembly.
+Ingress remained reserved concurrency zero for Admission, Discord Command and Web. Alarm recovery
+was natural; no alarm settings or metric values were changed. Production work ended at this
+checkpoint. Repository evidence does not mark the incomplete first START as successful.

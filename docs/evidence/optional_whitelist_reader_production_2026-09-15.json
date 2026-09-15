@@ -1,0 +1,455 @@
+{
+  "status": "READER_FIX_DEPLOYED; SERVER_STARTED; CONTROL_PLANE_READY_BLOCKED; SAFELY_STOPPED; INGRESS_CLOSED",
+  "fix_commit": "d76690172528e69267c39b612644a58b0138e943",
+  "release_commit": "ba23f49e839d13e733c39777f2dd159660ebf280",
+  "initial": {
+    "at": "2026-09-15T10:09:39.382642+00:00",
+    "state": "STOPPED/HEALTHY",
+    "alarms_ok": 45,
+    "snapshots": 9,
+    "provenance": 16
+  },
+  "reader": {
+    "cli": "consistent GetItem full JSON envelope; no --query",
+    "absence": [
+      "successful stderr-free blank/whitespace",
+      "empty envelope without Item"
+    ],
+    "failure": [
+      "nonzero exit",
+      "stderr diagnostic",
+      "malformed JSON/envelope/Item/AttributeValue"
+    ],
+    "common_required": true,
+    "specific_absent_is_empty": true,
+    "policy_record_inserted": false
+  },
+  "migration": {
+    "old_runtime_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+    "new_runtime_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+    "file": {
+      "destination": "/usr/local/libexec/wishicraft/operation-v2",
+      "mode": 493,
+      "predecessor": "724c5a2a7c9eea473531fad6bc4601412a1e622d8cb6baca3d0120c923d18a8d",
+      "sha256": "912c45c3248a99335f1cf3f0883600a1584353c46f48cd9e4c10b2b82287a61f",
+      "source": "reader.artifact"
+    },
+    "bundle_sha256": "7a96df4120badd593bbaed988085999e92af4fc6cb26d4be8a9a1d5877fa09ba",
+    "same_bundle_retry_preserved_sha_and_mtime": true,
+    "other_host_files_and_prepared_data_unchanged": true,
+    "package_catalog_changed": false,
+    "package_digest": "720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b",
+    "durable_record_updates": [],
+    "guard": "same manifest/catalog; one registered ACTIVE schema-1 generation-1 UNMATERIALIZED NeoForge Game; known helper old/new; exact stopped receipt; unchanged D-108 guard"
+  },
+  "deployment": {
+    "stack": "WishicraftControlPlaneStack-dev",
+    "diff": {
+      "changes": [
+        "/Resources/AdmissionFunction23082B67/Metadata/aws:asset:path",
+        "/Resources/AdmissionFunction23082B67/Properties/Code/S3Key",
+        "/Resources/AutoStopEvaluatorFunctionF85F8B50/Metadata/aws:asset:path",
+        "/Resources/AutoStopEvaluatorFunctionF85F8B50/Properties/Code/S3Key",
+        "/Resources/BackupTaskFunctionA44639DC/Metadata/aws:asset:path",
+        "/Resources/BackupTaskFunctionA44639DC/Properties/Code/S3Key",
+        "/Resources/DiscordCommandFunction7D25102A/Metadata/aws:asset:path",
+        "/Resources/DiscordCommandFunction7D25102A/Properties/Code/S3Key",
+        "/Resources/DiscordMessageFunction78FA388B/Metadata/aws:asset:path",
+        "/Resources/DiscordMessageFunction78FA388B/Properties/Code/S3Key",
+        "/Resources/MonitoringObserverFunction584DA7C7/Metadata/aws:asset:path",
+        "/Resources/MonitoringObserverFunction584DA7C7/Properties/Code/S3Key",
+        "/Resources/ReconcileFunction30829CB6/Metadata/aws:asset:path",
+        "/Resources/ReconcileFunction30829CB6/Properties/Code/S3Key",
+        "/Resources/RetentionTaskFunction9F285CE4/Metadata/aws:asset:path",
+        "/Resources/RetentionTaskFunction9F285CE4/Properties/Code/S3Key",
+        "/Resources/StartTaskFunction8C564C4A/Metadata/aws:asset:path",
+        "/Resources/StartTaskFunction8C564C4A/Properties/Code/S3Key",
+        "/Resources/StatusExecutorFunction6E5C9869/Metadata/aws:asset:path",
+        "/Resources/StatusExecutorFunction6E5C9869/Properties/Code/S3Key",
+        "/Resources/StopTaskFunction11473A8C/Metadata/aws:asset:path",
+        "/Resources/StopTaskFunction11473A8C/Properties/Code/S3Key"
+      ],
+      "no_iam_resource_statemachine_target_data_changes": true
+    },
+    "readback": {
+      "admission_closed": true,
+      "at": "2026-09-15T10:45:34.293645+00:00",
+      "functions": {
+        "AdmissionFunction23082B67": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES",
+            "GAME_CREATION_DEFAULTS"
+          ]
+        },
+        "AutoStopEvaluatorFunctionF85F8B50": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES"
+          ]
+        },
+        "BackupTaskFunctionA44639DC": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES",
+            "RECOVERY_RUNTIME_ZLIB_BASE64"
+          ]
+        },
+        "DiscordCommandFunction7D25102A": {
+          "code_sha256": "hMKttf2F3EMF6kEdXco29OVrGDTTxJBMWj+VV+/LYEI=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES"
+          ]
+        },
+        "DiscordMessageFunction78FA388B": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": []
+        },
+        "MonitoringObserverFunction584DA7C7": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": []
+        },
+        "ReconcileFunction30829CB6": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES"
+          ]
+        },
+        "RetentionTaskFunction9F285CE4": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": [
+            "GAME_PACKAGES"
+          ]
+        },
+        "StartTaskFunction8C564C4A": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": [
+            "RUNTIME_CONFIG_DIGEST",
+            "GAME_PACKAGES"
+          ]
+        },
+        "StatusExecutorFunction6E5C9869": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": []
+        },
+        "StopTaskFunction11473A8C": {
+          "code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+          "verified_environment_keys": [
+            "RUNTIME_CONFIG_DIGEST",
+            "GAME_PACKAGES"
+          ]
+        }
+      },
+      "physical_resources_unchanged": true,
+      "stack": "UPDATE_COMPLETE"
+    },
+    "binding": {
+      "at": "2026-09-15T10:45:34.307283+00:00",
+      "deployed_code_sha256": "tlQuNdE/lnpdxKBmq0OiTKmQfwL9v0ktU8L0FYK2V4s=",
+      "runtime_config_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+      "read_only_api_only": true,
+      "results": [
+        {
+          "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+          "historical_operation_id": "op-961a0756-5b60-4cf6-b828-9c619e905dd6",
+          "bound_data_source": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+          "record_unchanged": true,
+          "schema_version": 1,
+          "nullable_fields_decoded": true
+        },
+        {
+          "game_id": "game-vanilla-main",
+          "historical_operation_id": "op-697ab4c0-a4df-410c-b7e9-46c67345f436",
+          "bound_data_source": "/srv/minecraft/games/game-vanilla-main/server",
+          "record_unchanged": true,
+          "schema_version": 1,
+          "nullable_fields_decoded": true
+        },
+        {
+          "game_id": "game-vanilla-secondary",
+          "historical_operation_id": "op-07de4cd2-ed3f-40f8-94e2-a99aab215a6b",
+          "bound_data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "record_unchanged": true,
+          "schema_version": 1,
+          "nullable_fields_decoded": true
+        }
+      ]
+    }
+  },
+  "package": {
+    "loader": {
+      "installer": {
+        "filename": "neoforge-21.1.219-installer.jar",
+        "sha256": "140df0fa17fd438848051ecfa3d091081515ad12bfe34fa126405037ba01de44",
+        "size": 6961236,
+        "url": "https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.219/neoforge-21.1.219-installer.jar"
+      },
+      "type": "neoforge",
+      "version": "21.1.219"
+    },
+    "minecraft_version": "1.21.1",
+    "mods": [
+      {
+        "client_required": true,
+        "file_id": "V876RuGl",
+        "filename": "create-1.21.1-6.0.10.jar",
+        "mod_id": "create",
+        "project_id": "LNytGWDc",
+        "sha256": "ef87fe5709f1ba1f5b8bb20a2925b5afb4669e178fd6d8bf10c167759eefe37a",
+        "size": 19123767,
+        "source": "modrinth",
+        "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/UjX6dr61/create-1.21.1-6.0.10.jar",
+        "version": "6.0.10",
+        "version_id": "UjX6dr61"
+      },
+      {
+        "client_required": true,
+        "file_id": "xb3oJkla",
+        "filename": "FarmersDelight-1.21.1-1.3.4.jar",
+        "mod_id": "farmersdelight",
+        "project_id": "R2OftAxM",
+        "sha256": "139ad7696462c89c03eea463f805abffa552526c5dadaadae221dd9624cb197c",
+        "size": 3160490,
+        "source": "modrinth",
+        "url": "https://cdn.modrinth.com/data/R2OftAxM/versions/XTVZDOol/FarmersDelight-1.21.1-1.3.4.jar",
+        "version": "1.3.4",
+        "version_id": "XTVZDOol"
+      }
+    ],
+    "package_id": "create-survival",
+    "package_version": "1"
+  },
+  "start": {
+    "operation_id": "op-76571b92-0fe6-47a9-b31e-00a0e0048e36",
+    "result": "FAILED",
+    "error": "MINECRAFT_READY_TIMEOUT",
+    "terminal_at": "2026-09-15 20:00:43.537000+09:00",
+    "request_retry_same_operation": true,
+    "host_start_and_empty_projection_succeeded": true,
+    "verified_artifacts": [
+      {
+        "gid": 0,
+        "mtime_ns": 1789394554558571747,
+        "path": "package-cache/mods/create-1.21.1-6.0.10.jar",
+        "sha256": "ef87fe5709f1ba1f5b8bb20a2925b5afb4669e178fd6d8bf10c167759eefe37a",
+        "size": 19123767,
+        "uid": 0
+      },
+      {
+        "gid": 993,
+        "mtime_ns": 1789394554967757681,
+        "path": "server/mods/create-1.21.1-6.0.10.jar",
+        "sha256": "ef87fe5709f1ba1f5b8bb20a2925b5afb4669e178fd6d8bf10c167759eefe37a",
+        "size": 19123767,
+        "uid": 993
+      },
+      {
+        "gid": 0,
+        "mtime_ns": 1789394554813495939,
+        "path": "package-cache/mods/FarmersDelight-1.21.1-1.3.4.jar",
+        "sha256": "139ad7696462c89c03eea463f805abffa552526c5dadaadae221dd9624cb197c",
+        "size": 3160490,
+        "uid": 0
+      },
+      {
+        "gid": 993,
+        "mtime_ns": 1789394554981521575,
+        "path": "server/mods/FarmersDelight-1.21.1-1.3.4.jar",
+        "sha256": "139ad7696462c89c03eea463f805abffa552526c5dadaadae221dd9624cb197c",
+        "size": 3160490,
+        "uid": 993
+      },
+      {
+        "gid": 0,
+        "mtime_ns": 1789394554953180072,
+        "path": "package-cache/neoforge-21.1.219-installer.jar",
+        "sha256": "140df0fa17fd438848051ecfa3d091081515ad12bfe34fa126405037ba01de44",
+        "size": 6961236,
+        "uid": 0
+      }
+    ],
+    "verified_cache_and_projected_mod_files_reused": 5,
+    "mod_evidence": [
+      "Create 6.0.10 (create)",
+      "Farmer's Delight 1.3.4 (farmersdelight)",
+      "NeoForge 21.1.219 (neoforge)",
+      "[10:50:42] [Server thread/INFO] [minecraft/DedicatedServer]: Done (9.244s)! For help, type \"help\""
+    ],
+    "world_generated_and_saved": true,
+    "control_plane_ready": false,
+    "dns_published": false,
+    "common_specific_effective_members": [
+      0,
+      0,
+      0
+    ]
+  },
+  "new_failure": {
+    "error": "ModuleNotFoundError: No module named 'game_package'",
+    "boundary": "ssm_probe._canonical_probe_command -> python3 stdin -> host_runtime_probe.package_version import fallback",
+    "verified_module_installed": true,
+    "test_gap": "repository module imports did not cover deployed stdin transport/module search path",
+    "follow_on_production_fix_or_restart": false,
+    "normal_failure_released_lock_current": true
+  },
+  "zero_player_baseline": {
+    "at": "2026-09-15T10:55:06.312952+00:00",
+    "host_mem_kib": {
+      "MemAvailable": 5811400,
+      "MemTotal": 7944160,
+      "SwapTotal": 0
+    },
+    "container_memory_limit": 6442450944,
+    "container_memory_current": 1911500800,
+    "container_memory_peak": 1912983552,
+    "container_memory_events": {
+      "high": "0",
+      "low": "0",
+      "max": "0",
+      "oom": "0",
+      "oom_group_kill": "0",
+      "oom_kill": "0"
+    },
+    "jvm_heap_args": [
+      "-Xmx4G",
+      "-Xms1G"
+    ],
+    "java_processes": "PID                 COMMAND             %CPU                RSS\n3760                mc-server-runne     0.0                 6912\n4192                bash                0.0                 3748\n4193                java                14.8                1588236\n",
+    "host_cpu_percent": 0.3033367037411527,
+    "container_cpu_percent_one_core": 2.285659457610562,
+    "sample_seconds": 5.00043869700005,
+    "memory_pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+    "kernel_oom": [],
+    "gc_obvious_errors": [],
+    "players": "There are 0 of a max of 20 players online: \n\u001b[0m\n",
+    "tick_query": "The game is running normally\n\u001b[0mTarget tick rate: 20.0 per second.\n\u001b[0mAverage time per tick: 0.0ms (Target: 50.0ms)\n\u001b[0mPercentiles: P50: 0.0ms P95: 0.2ms P99: 0.3ms, sample: 100\n\u001b[0m\n",
+    "health": "localhost:25565 : version=1.21.1 online=0 max=20 motd='A Minecraft Server'\n",
+    "config_files": {
+      "config": [
+        "config/fml.toml",
+        "config/farmersdelight-common.toml",
+        "config/neoforge-common.toml",
+        "config/create-common.toml",
+        "config/neoforge-server.toml",
+        "config/create-server.toml"
+      ],
+      "defaultconfigs": [],
+      "world/serverconfig": [
+        "world/serverconfig/readme.txt"
+      ]
+    }
+  },
+  "containment": {
+    "operator_stop_at": "2026-09-15T11:02:22.337712+00:00",
+    "explicit_save": "Saving the game (this may take a moment!)\n\u001b[0mSaved the game\n\u001b[0m\n",
+    "container_id": "83896a0ff67b05067bcd01a408b5c0f1bcb85b5dca1bc12c459d9e92a288ad9e",
+    "exit_code": 0,
+    "oom_killed": false,
+    "shutdown_evidence": [
+      "[11:02:19] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved",
+      "[11:02:19] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Saved the game]",
+      "[11:02:19] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]",
+      "[11:02:19] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server",
+      "[11:02:19] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players",
+      "[11:02:19] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds",
+      "[11:02:21] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld",
+      "[11:02:21] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether",
+      "[11:02:21] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end",
+      "[11:02:21] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved"
+    ],
+    "force_stop": false,
+    "stopped_container_retained": true,
+    "receipt_preserved_phase": "running",
+    "formal_stop_operation": "op-dd421ed4-6e99-4fef-8e0d-449e7c694403",
+    "formal_stop_result": "SUCCEEDED",
+    "formal_stop_terminal_at": "2026-09-15 20:05:59.236000+09:00",
+    "formal_stop_branch": "EC2 already stopped; no RunHostStop/StopEc2; not a successful running-host STOP qualification",
+    "stop_request_retry_same_operation": true
+  },
+  "data": {
+    "all_game_registry_whitelist_records_unchanged": true,
+    "create_survival_db": "ACTIVE/UNMATERIALIZED generation 1",
+    "world_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server/world",
+    "world_level_dat_preserved": true,
+    "initial_owner_phase": "prepared",
+    "game_tree_entries_after_stop": 405,
+    "game_tree_sha256_after_stop": "502f37de99fdb5e38cb41c525303021686d04a82480b5cf2a1ab44dbe645a4cf",
+    "legacy_tree_sha256": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+    "old_operations_unchanged": 77,
+    "snapshots_unchanged": 9,
+    "provenance_unchanged": 16,
+    "instance_id": "i-04fc0629dc4ea466e",
+    "instance_type": "m8a.large",
+    "volume_ids": [
+      "vol-03ac9f534326c345c",
+      "vol-092c04a633ffc6010"
+    ]
+  },
+  "validation": {
+    "unit_tests_passed": 1418,
+    "reader_regressions": 19,
+    "lint_format_type_synth": "passed; mypy 207 files",
+    "standard_ci": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34957906404",
+    "neoforge_ci": "https://github.com/eash-misoni/wishicraft-server/actions/runs/34957906159",
+    "local_docker": "unavailable; actual Docker executed in CI",
+    "ci_fixture_repairs": [
+      "bounded load of disposable block-probe chunk after proven That position is not loaded",
+      "real policy game_id included in whitelist/reset mock"
+    ],
+    "failed_diagnostic_ci": [
+      "34957031251",
+      "34957564392",
+      "34957031263"
+    ]
+  },
+  "final": {
+    "at": "2026-09-15T11:17:22.064899+00:00",
+    "desired": "STOPPED",
+    "ec2": "stopped",
+    "health": "HEALTHY",
+    "alarms": {
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0,
+      "OK": 45
+    },
+    "dns": [],
+    "locks": [],
+    "current_operation": null,
+    "active_workflows": 0,
+    "active_ssm": 0,
+    "active_sessions": 0,
+    "queues": {
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      }
+    },
+    "ingress": "Discord/Admission/Web reserved concurrency 0",
+    "client_connection_ready": false
+  },
+  "next_slice": [
+    "fix and test actual SSM stdin probe import boundary",
+    "review safe convergence of retained exited container/running receipt/prepared owner/saved world with unchanged UNMATERIALIZED record",
+    "no blind START, record normalization, world recreation or rollback",
+    "qualify full START/READY/STOP before reopening ingress; whitelist remains empty"
+  ],
+  "private_evidence_sha256": {
+    "final-workflow-history.json": "3f76534687ce22dae67773b1eb367c3c4ff78a62179ae0cd30522dc48da67e7c",
+    "ci-block-diagnostic-v1.log": "eb01ec06924e203cc3d6c37d4d75ed94e8a7bf092f768201ff7741f406df3dfa",
+    "ci-policy-shape-v1.log": "8d658b61c91381a9dea63b4fabf5ef5ce6dcd9e6801cddc3163e45650c678ccf",
+    "standard-ci-passed-v1.log": "98830d430bcc3ee99e61b497a271d881a86eecefca314bfe5541997995471c9d",
+    "neoforge-ci-passed-v1.log": "dbe242ada47b7ca4998d8831a3f72547a24340800a191a9d0678849272747d17",
+    "cp-deploy-v1.log": "0ed5261eefd85327636f35426a7583c29ac4eed9f180cc47599be09758263fd7"
+  }
+}
