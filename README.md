@@ -1,8 +1,8 @@
 # wishicraft-server
 
-> D-109 production実証: NULL decoderとfailure確定の修正をCPへ配布済み。再STARTはartifact取得後、未作成whitelist policyのhost読取で停止。復旧STOP成功、STOPPED/HEALTHY・受付閉鎖継続。Game/cacheは保持、NeoForge起動は未実証。[障害・復旧・再開条件](docs/runbooks/neoforge_production.md)。
+> D-109 production実証（2026-09-15）: optional-whitelist reader修正を配布し、empty projectionとNeoForge/両modの実起動・RCONまで到達。SSM stdin probeのmodule import失敗でControl Plane READY未達。保存/正常停止と正式recovery STOPによりSTOPPED/HEALTHY・45 alarms OKへ収束、受付閉鎖継続。Game recordはUNMATERIALIZEDのまま、保存済みworld・停止container・元receiptを保持しています。[障害・復旧・次sliceの条件](docs/runbooks/neoforge_production.md)。
 
-> D-109 pinned NeoForge Game package: repository/runtime検証完了、production未適用。Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4。[package・隔離・release契約](docs/runbooks/neoforge_package.md)。
+> D-109 repository slice完了時点の記録: repository/runtime検証完了、当時production未適用。Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4。[package・隔離・release契約](docs/runbooks/neoforge_package.md)。
 
 > D-108 共通runtime memory: production移行完了（2026-09-14）、最終STOPPED / HEALTHY。Xms 1G / Xmx 4G / container 6144MiBの設定と、digest検証を維持するA/B限定停止中移行。[正本・production適用状況](docs/runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。
 
