@@ -122,6 +122,7 @@ def main() -> None:
         root / "runtime-run.env",
     )
     host.CONFIG.write_text(json.dumps(config))
+    host.CONFIG.chmod(0o600)
     host.actual_instance = lambda: config["instance_id"]
     operation: dict[str, Any] = {}
     lease = {
