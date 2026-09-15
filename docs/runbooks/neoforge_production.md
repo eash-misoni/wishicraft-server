@@ -1,5 +1,8 @@
 # D-109 production qualification — server starts, observation blocked
 
+The next separately authorized unit is [old-run stop recovery](interrupted_stop_recovery.md).
+It does not fix the READY probe, commit Game materialization or start a new run.
+
 **The optional-whitelist reader fix is deployed. NeoForge, Create and Farmer's Delight started
 successfully, but the production SSM observation transport cannot import `game_package` and
 first START timed out before Control Plane READY/DNS. Qualification is NOT complete.**

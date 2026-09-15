@@ -2,6 +2,10 @@
 
 ## D-109 Pinned NeoForge Game package（Accepted / deployed; first START blocked）
 
+旧run停止完了の限定operator recoveryを明示承認。既存proofがなければ同一container/runでfresh saveを取得し、
+通常finish_stopでterminal化する。Game MATERIALIZED、新START、READY probe修正は別slice。
+[責務・証拠・再試行・production gate](runbooks/interrupted_stop_recovery.md)。
+
 2026-09-14、`f12eb03`の停止中host更新とCP/Web配布、正式positive CREATEを実施。
 first STARTは完全Game metadataのNULL decoder欠落でEC2起動前に失敗し、failure記録も同じ境界で失敗した。
 新Gameと既存A/Bを保持し、受付を閉鎖。期限後のD-074条件付き復旧とforward fixを分離する。

@@ -20,6 +20,7 @@ import yaml  # noqa: E402
 
 from tests.integration.neoforge_docker import registered_block  # noqa: E402
 from web.local_operations import MemoryDynamo, service  # noqa: E402
+from wishicraft import interrupted_stop_recovery as recovery  # noqa: E402
 from wishicraft.artifacts import game_package, whitelist_policy  # noqa: E402
 from wishicraft.artifacts import targeted_runtime as host
 from wishicraft.config import load_configuration  # noqa: E402
@@ -235,7 +236,7 @@ def main() -> None:
     sequence = 0
     current: dict[str, str] | None = None
 
-    def start(game: dict[str, Any], *, reset: bool = False) -> dict[str, Any]:
+    def start(game: dict[str, Any], *, reset: bool = False, commit: bool = True) -> dict[str, Any]:
         nonlocal sequence, current
         sequence += 1
         run = "op-package-" + str(sequence)
@@ -299,7 +300,8 @@ def main() -> None:
             for block in ("create:andesite_casing", "farmersdelight:stove"):
                 response = registered_block(real_execute, container["Id"], block)
                 print("HOST_REGISTERED_BLOCK", block, response.strip(), flush=True)
-        game["materialization_state"] = "MATERIALIZED"
+        if commit:
+            game["materialization_state"] = "MATERIALIZED"
         print(
             "HOST_PACKAGE_READY", sequence, package["package_id"], target["data_source"], flush=True
         )
@@ -307,6 +309,47 @@ def main() -> None:
 
     try:
         vanilla, neo = records
+        interrupted = start(neo, commit=False)
+        assert current is not None
+        old_target = dict(current)
+        old_game = json.dumps(neo, sort_keys=True)
+        old_world = Path(current["data_source"]) / "world"
+        world_inode = old_world.stat().st_ino
+        real_execute(["docker", "exec", interrupted["Id"], "rcon-cli", "save-all", "flush"])
+        execute(["systemctl", "stop", host.UNIT])
+        assert json.loads((root / "receipt.json").read_text())["phase"] == "running"
+        operation["status"] = "FAILED"
+        saved_lease = dict(lease)
+        lease.clear()
+        initial_owner = game_package.GAMES / (neo["game_id"] + ".initial-owner.json")
+        plan = {
+            "schema_version": 1,
+            "target": old_target,
+            "container_id": interrupted["Id"],
+            "original_started_at": interrupted["State"]["StartedAt"],
+            "game_sha256": recovery.digest(neo),
+            "world_directory_inode": world_inode,
+            "prepared_owner_sha256": recovery.digest(
+                {**json.loads(initial_owner.read_text()), "phase": "prepared"}
+            ),
+            "package_digest": game_package.digest(
+                game_package.registered(neo, manifest, artifact_digest)
+            ),
+        }
+
+        def recovery_gate() -> None:
+            assert not lease and operation["status"] == "FAILED"
+            assert json.dumps(neo, sort_keys=True) == old_game
+
+        recovery.recover(host, plan, operator_gate=recovery_gate)
+        recovery.recover(host, plan, operator_gate=recovery_gate)
+        assert not host.inspect()
+        assert json.loads((root / "receipt.json").read_text())["target"] == old_target
+        assert old_world.stat().st_ino == world_inode and (old_world / "level.dat").is_file()
+        assert json.dumps(neo, sort_keys=True) == old_game
+        print("OLD_RUN_FRESH_PROOF_FINALIZED_WORLD_AND_UNMATERIALIZED_GAME_RETAINED", flush=True)
+        lease.update(saved_lease)
+        current = None
         first = start(vanilla)
         real_execute(
             [

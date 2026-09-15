@@ -1,5 +1,9 @@
 # 05. Data and Interface Contracts
 
+> D-109 interrupted-stop recovery: explicit operator-only, same old run/container,
+> fresh canonical save proof when absent, unchanged finish_stop, Game still UNMATERIALIZED.
+> No receipt fabrication or new START. [限定契約・retry・release gate](runbooks/interrupted_stop_recovery.md)。
+
 > Optional policy reader: Game-specific不存在は空、Common不存在は拒否。成功・stderrなしのblank GetItem出力のみ不存在として扱い、command failure／不正JSON・shapeは拒否する。helper個別SHA更新でmanifest/package digestは不変。[同digestの限定移行](runbooks/neoforge_production.md#optional-policy-reader-forward-fix--2026-09-15)。
 
 > D-109 production実証: NULL decoderとfailure確定の修正をCPへ配布済み。再STARTはartifact取得後、未作成whitelist policyのhost読取で停止。復旧STOP成功、STOPPED/HEALTHY・受付閉鎖継続。Game/cacheは保持、NeoForge起動は未実証。[障害・復旧・再開条件](runbooks/neoforge_production.md)。
