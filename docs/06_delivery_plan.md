@@ -1,5 +1,7 @@
 # 06. Delivery Plan
 
+> 2026-09-18 current checkpoint: Game authority / SSM import fixes deployed under the explicit Case D guard. create-survival completed first materialization and normal START/READY/Reconcile/STOP with its preserved generation-1 world. A separate dynamic-Game heartbeat monitoring defect blocks ingress restoration/client qualification; no additional implementation or restart in this slice. [Current evidence and remaining boundary](runbooks/ssm_ready_probe.md#separate-heartbeat-incident--keep-ingress-closed). Older checkpoint notes below are historical.
+
 > D-109 READY probe（2026-09-18）: stdin module解決のrepository修正を実装。配布前に別のCP parser不具合（Minecraft versionが26.2固定で、正当な1.21.1応答を拒否）を再現し、production deploy／新STARTを停止。既存world・Game UNMATERIALIZED・受付閉鎖を維持。[実行境界とrelease blocker](runbooks/ssm_ready_probe.md)。
 
 > D-109旧run停止復旧（2026-09-15）: 同一container/runからfresh save proofを取得し、既存finish_stopでterminal stopped・container cleanupまで成功。保存済みworldは同じpath/generationのまま保持、Game DBはUNMATERIALIZED。受付閉鎖を継続し、SSM READY probe修正・新START・materialization確定は別sliceです。[復旧契約・証跡](runbooks/interrupted_stop_recovery.md)。

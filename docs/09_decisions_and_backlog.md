@@ -1,5 +1,7 @@
 # 09. Decisions and Backlog
 
+> 2026-09-18 Case D Accepted / production applied: explicit five-resource dependency-propagated semantic-no-op Definition allowlist plus eleven Lambda Code updates. Raw/resolved/canonical identities unchanged; first create-survival START → READY → scheduled Reconcile → MATERIALIZED → normal STOP succeeded with the existing world. Separate fresh-heartbeat/runtime-unknown inconsistency found; no extra fix/restart, ingress remains closed. [Release guard, evidence and next-slice boundary](runbooks/ssm_ready_probe.md#case-d-release-guard--explicit-dependency-propagated-semantic-no-op). Earlier hold statements below describe prior checkpoints.
+
 > 2026-09-18 D-109 follow-up / Accepted, repository qualified; production change-set gate blocked: CREATE後のpackage更新経路は存在せず、immutable Game登録＋固定catalogをREADY/Reconcileのauthorityとする。Operation pin／IAM追加は不要。将来package更新を追加する前にrun authorityを再レビューする。[比較・writer inventory・検証境界](runbooks/ssm_ready_probe.md#immutable-game-authority-correction-repository-qualification-in-progress)。
 
 > D-109 SSM READY transport: stdin実行のmodule解決をcanonical runtime directoryへ固定。READY判定・host/package artifactは不変。[実行境界・回帰・production gate](runbooks/ssm_ready_probe.md)。

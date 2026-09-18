@@ -1,5 +1,12 @@
 # SSM READY probe execution boundary
 
+> 2026-09-18 production: the Game-authority and stdin-import corrections are deployed.
+> `create-survival` completed START → READY → ordinary scheduled Reconcile → MATERIALIZED
+> → normal STOP using its existing world (generation 1). The explicitly approved Case D
+> release retained all State Machine semantic identities. A separate runtime-heartbeat
+> monitoring inconsistency was observed after READY; ingress remains closed and no further
+> START/fix was attempted. See the production closeout below; earlier release holds are historical.
+
 Scope: D-109 observation transport fix and the existing create-survival prepared
 world's first successful formal START/READY/materialization/STOP. Production
 qualification below is separate from repository qualification. No new CREATE,
@@ -65,9 +72,10 @@ recovery sidecar, cache/projection and all installed artifact hashes/metadata eq
 to the previous terminal closeout. No container/Java/listener existed. Minecraft
 was not started; maintenance EC2 normal stop was requested after inspection.
 
-Release requires both CIs, stopped healthy preflight and a live diff limited to
-Control Plane Lambda code. Any IAM/resource/state-machine/Target/Data/unrelated Web
-change stops release. Re-read retained disk identities immediately before formal
+The initial import-only release gate required both CIs, stopped healthy preflight and
+Control Plane Lambda code only. The later explicit Case D approval below supersedes
+that gate only for its five named semantic-no-op Definition updates. IAM/resource,
+Target/Data/unrelated Web or other State Machine changes still stop release. Re-read retained disk identities immediately before formal
 START. Use a new admitted request and verify its retry returns the same Operation.
 Only successful READY may commit MATERIALIZED, generation 1 and the same world path.
 Then use normal STOP, canonical save proof and container cleanup, and verify final
@@ -263,3 +271,119 @@ Vanilla 26.2 (package digest `75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9
 create-survival 1.21.1 / NeoForge 21.1.219 with unchanged `720deb9f…122f0b`.
 This is candidate-code verification on captured records, **not deployed-code readback**.
 [Machine-readable qualification and hold evidence](../evidence/game_package_authority_2026-09-18.json).
+
+## Case D release guard — explicit dependency-propagated semantic no-op
+
+The user accepted **Case D**, distinct from the earlier A/B/C classification.
+CloudFormation's dependency evaluation can list a Definition update even when the
+submitted and deployed State Machine properties are byte-identical. Do not reverse
+engineer opaque truncated signatures as a release requirement, and do not treat a
+matching ASL hash alone as authorization. The following are all required:
+
+1. Explicit release-specific logical-ID allowlist; all changes fully paginated and saved.
+2. Deployed/candidate raw State Machine Properties byte-identical, intrinsic-resolved
+   ASL identical, canonical ASL identical; no DefinitionSubstitutions value difference.
+3. Non-property-evaluated Details identify the updated dependency's intrinsic reference;
+   independently read back referenced resolved identities (here unqualified Lambda ARNs).
+4. In the property-evaluated final change set: Modify, Replacement=False,
+   Scope=[Properties], Target.Name=Definition, RequiresRecreation=Never only.
+5. No Role/IAM, logging, tracing, type, name, Tags or other property changes. Updated
+   dependencies must retain their physical identity; here only Lambda Code/asset metadata.
+6. Immediately before executing that same reviewed ChangeSet: ingress closed, no active
+   workflow, Current Operation or Lock, empty queues, STOPPED/HEALTHY and EC2 stopped.
+7. After completion: read back ARN, ASL hash, Role/configuration and referenced identities;
+   record revision separately. A revision change alone is not an ASL change.
+
+This release's exact allowlist: `BackupStateMachine`, `ResetWorkflow`,
+`StartStateMachine`, `StopStateMachine`, `SwitchWorkflow`. Retention or a sixth State
+Machine in the **property-evaluated final** change list must stop execution.
+The non-property-evaluated dependency listing does include Retention; retain both API
+responses, do not silently conflate them. Conditions outside this guard stop release.
+No manual UpdateStateMachine, hotswap, template manipulation, resource recreation,
+new alias/version or host migration is an alternative to this reviewed CF route.
+
+## Production release and first materialization — 2026-09-18
+
+Release HEAD `53491920057d427db605be0bb76655490d5371dc` matched freshly fetched origin/main,
+with clean working tree and successful standard CI `35347044601` and NeoForge CI
+`35347044712`. Implementation commits were `f95fb023` (import) and `c59d94ab` (authority).
+Fresh synth matched the preceding deterministic candidate exactly:
+`433c39d0ddf75048e3b1544102975a58b834b5cd2f94bafd74da2ead6cb17d08`.
+
+Preflight at 13:25:12 UTC confirmed stopped/healthy, 45 alarms OK, all admission closed,
+no active work/Lock/SSM/session/DNS, three empty queues, nine snapshots and sixteen
+provenance records. Inspection-only maintenance found the initialized owner, old canonical
+stopped receipt, no container, identical world inode/tree/cache and identical A/B tree.
+Minecraft was not started by maintenance. EC2 was stopped again before deployment.
+
+New ChangeSet `case-d-release-20260918T132834Z` was fully reviewed and executed through
+CloudFormation. Its property-evaluated changes were exactly eleven existing Lambda
+Code/asset metadata updates plus the five allowlisted Definition updates, no replacements.
+The stack reached UPDATE_COMPLETE at 13:32:38 UTC. All physical resource identities,
+all six State Machine ASLs/configurations, and eleven Lambda ARNs were unchanged.
+The captured stack events contain Lambda updates and no State Machine update events;
+reported revision IDs were also unchanged. Distinguish the preview's listed changes
+from evidence of actual service updates; no direct Step Functions API update was used.
+
+Hash-verified **deployed** Lambda ZIP code resolved consistent-read production records:
+A/B → Vanilla 26.2; create-survival → Minecraft 1.21.1 / NeoForge 21.1.219 / unchanged
+`720deb9f…122f0b`. No Game or historical Operation migration occurred.
+
+- START: `op-5e28ed5c-441d-40f2-8928-348f73089901`, SUCCEEDED. Same request retry returned
+  the same Operation, created=false. Existing prepared state was reused; no new CREATE.
+- Container `8319d152952ac30df6821634ba26782c162454629668a1f44233b1d15ebd4481`
+  used the same server/world path and world directory inode **4316448**, generation **1**.
+  Three cache artifacts retained exact size/SHA-256/uid/gid/mtime; owner plan stayed initialized.
+- Production logs recognized NeoForge 21.1.219, Create 6.0.10 and Farmer's Delight 1.3.4.
+  RCON and mc-health succeeded with zero players. Common/Game-specific/effective whitelist
+  stayed 0/0/0 (specific policy absent); `whitelist.json=[]`, online-mode/enforcement stayed true.
+- Exact SSM transport imported correctly, observed version 1.21.1/protocol 767 and passed
+  independent CP Game authority/exact comparison. READY, endpoint/DNS and HEALTHY succeeded.
+- Ordinary `scheduled_reconcile` completed observed at **13:41:07.877160 UTC**. Read-back
+  retained runtime_ready=true, HEALTHY, the exact new run/Game and present matching DNS.
+- Game committed MATERIALIZED. Only materialization_state, last_started_at and updated_at
+  changed; creation/package/world/generation and all other Game/registry/policy records did not.
+- Xms 1G / Xmx 4G / container 6,442,450,944 bytes. Zero-player memory sample:
+  container 1,704,267,776 bytes; host MemTotal 7,944,160 KiB / MemAvailable 5,971,168 KiB.
+  Tick P95 0.2 ms, P99 0.3 ms; no kernel/container OOM, memory pressure or obvious GC errors.
+- Normal STOP: `op-2a2c90b1-8e7b-4a60-9dd3-90a403226677`, SUCCEEDED. Request retry returned
+  the same Operation. The ordinary workflow passed save, graceful stop, cleanup, EC2 stop
+  and DNS deletion. No interrupted-stop recovery path was invoked.
+- Inspection-only post-STOP read-back found `phase=stopped`, `save_confirmed=true`,
+  `removal_ready=true`, exact new container ID/StartedAt and START run target; container absent.
+  Existing world inode, initialized owner, verified cache, installed artifacts and A/B tree
+  were preserved. The old finalized recovery journal was unchanged. Maintenance did not
+  run Minecraft and ended with normal EC2 stop.
+
+## Separate heartbeat incident — keep ingress closed
+
+At **13:40:50.925 UTC**, after Control Plane READY, monitoring logged a **fresh heartbeat
+but runtime unknown**. The alarm reported 13:36/13:41 datapoints and entered ALARM at
+13:46:26 UTC. A later maintenance observation must not be used to explain away that
+running-state inconsistency. START/Reconcile/materialization/normal STOP remain successful;
+full operational release and client use remain blocked by this separate monitoring boundary.
+
+Read-only code review found `runtime_heartbeat_producer.produce_once` selects the observed
+Game as canonical only from the fixed two-Game host contract. A dynamic registered Game
+falls back to GAME_ID (legacy A); `derive_heartbeat` then preserves ready protocol but clears
+player_count, and `evaluate_telemetry` reports RuntimeObservationUnknown. An isolated
+repository fixture reproduced ready/0 players → ready/null → metric 1. This is a concrete
+repository defect consistent with the production log, **not a claim that this slice read
+back the installed producer's bytes or the historical running heartbeat row**. The final
+row was subsequently replaced by stopped/maintenance observations. Verify the installed
+producer and its integrity/migration ownership in the next slice before selecting a fix.
+
+No extra implementation, host artifact update, alarm suppression, membership addition or
+second START was performed. Keep all three ingress functions closed even after alarms
+naturally recover in stopped state. Next slice: dynamic-Game heartbeat authority and
+zero-player continuity, preserving run/package checks and fail-closed behavior. Client
+connection additionally requires an explicitly authorized whitelist membership (currently none).
+
+[Machine-readable release evidence](../evidence/case_d_ready_production_2026-09-18.json).
+
+Final read-only closeout at **2026-09-18 13:58:11 UTC**: STOPPED/HEALTHY, EC2 stopped,
+45 alarms OK, no Current Operation/Lock/workflow/SSM/session/DNS, three empty queues.
+The RuntimeObservationUnknown alarm recovered naturally; no alarm state/threshold change.
+All other Game/registry/policy records, historical Operations, Data/root EBS metadata,
+nine snapshots and sixteen provenance records matched baseline. All three ingress
+functions remain reserved concurrency 0. Client use is **not yet released**.

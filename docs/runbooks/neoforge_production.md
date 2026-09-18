@@ -1,19 +1,19 @@
-# D-109 production qualification — server starts, observation blocked
+# D-109 production qualification — materialized; heartbeat follow-up held
 
-The next separately authorized unit is [old-run stop recovery](interrupted_stop_recovery.md).
-It does not fix the READY probe, commit Game materialization or start a new run.
+2026-09-18: Game-authority / SSM import fixes were deployed through the explicitly approved
+Case D CloudFormation release. The same create-survival completed START → READY → ordinary
+Reconcile → MATERIALIZED → normal STOP with generation 1 and its original prepared world.
+The new run has canonical stopped/save proof and its container was removed. A/B and backup
+provenance remain unchanged. No new Game, world reset or interrupted recovery was used.
 
-**The optional-whitelist reader fix is deployed. NeoForge, Create and Farmer's Delight started
-successfully, but the production SSM observation transport cannot import `game_package` and
-first START timed out before Control Plane READY/DNS. Qualification is NOT complete.**
-The existing Game record remains ACTIVE/UNMATERIALIZED, generation 1, while an owned, saved world
-now exists. Operator explicit save/graceful stop and an EC2-stopped formal STOP returned the
-control plane to STOPPED/HEALTHY. Admission, Discord and Web remain closed.
-A stopped container and the unchanged running receipt are intentionally retained; the next slice
-must review that interrupted state before any START, cleanup or migration. Do not delete/re-CREATE
-this Game, normalize records, force old-runtime rollback or treat the absent-policy issue as pending.
-Current results: [reader fix production follow-up](#reader-fix-production-follow-up--observation-transport-failure).
-Earlier incident sections below are historical. [Package contract](neoforge_package.md).
+A separate fresh-heartbeat/runtime-unknown monitoring inconsistency was observed after READY.
+Keep Discord/Admission/Web closed; do not add another fix/restart in this slice. Full current
+release evidence, exact Operations, guard and next-slice boundary are recorded in
+[SSM READY production closeout](ssm_ready_probe.md#production-release-and-first-materialization--2026-09-18).
+Whitelist remains 0/0/0; player access is not enabled.
+
+The following incident sections are historical, including their then-current receipt,
+materialization and deployment states. [Package contract](neoforge_package.md).
 
 ## Approved scope and initial state
 

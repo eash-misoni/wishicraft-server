@@ -1,0 +1,822 @@
+{
+  "release_head": "53491920057d427db605be0bb76655490d5371dc",
+  "classification": "Case D: dependency-propagated semantic no-op",
+  "release_ci": {
+    "standard": 35347044601,
+    "neoforge": 35347044712
+  },
+  "change_set_name": "case-d-release-20260918T132834Z",
+  "changes": [
+    {
+      "LogicalResourceId": "AdmissionFunction23082B67",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "AutoStopEvaluatorFunctionF85F8B50",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "BackupStateMachine",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):5b7cc89d4320f4f97d78d0c113c16e7b6e63870b19cd6ce6d2c5a740b3154b84",
+            "AfterValue": "(Truncated-Signature):aff3c98da726dd3dbb8d35b7f1e36310c5b7bd8bfcc2914242dcd13cf6a801b0",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "BackupTaskFunctionA44639DC",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "DiscordCommandFunction7D25102A",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.e1b58b2862954791571802356a0113ea5e56053eae772cf3c8368dcade60aa3b",
+            "AfterValue": "asset.337f4c45b16d2ab231cdb89de609a683d4d7c42dfa19c6a08e5089b4c2c2ec20",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "e1b58b2862954791571802356a0113ea5e56053eae772cf3c8368dcade60aa3b.zip",
+            "AfterValue": "337f4c45b16d2ab231cdb89de609a683d4d7c42dfa19c6a08e5089b4c2c2ec20.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "DiscordMessageFunction78FA388B",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "MonitoringObserverFunction584DA7C7",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "ReconcileFunction30829CB6",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "ResetWorkflow",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):59df8b6ae1a9a4a48a9d7243c4e7a4f7f6d0ca9665d0c98d5181c661ecf002f2",
+            "AfterValue": "(Truncated-Signature):7e58208977655022b33755ffb9dc7c95b5cb2f65c532412cdebdd9d96d4a28c1",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "RetentionTaskFunction9F285CE4",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "StartStateMachine",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):755ba278fc39b725da29942f4c368325268a298cbebe550b4c4086f9bdc1eb5e",
+            "AfterValue": "(Truncated-Signature):19467bf9cbbd118e92fa5e04a48521b327f594f45689bb4a9165b1048c89b2b1",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "StartTaskFunction8C564C4A",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "StatusExecutorFunction6E5C9869",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "StopStateMachine",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):91036fd7e32e1ee34ae81a4e8cb7b7dfe761b16832dda32cb8a17edfd99897b2",
+            "AfterValue": "(Truncated-Signature):9ce308a68b3146ab4f4c782855635bf978e950efcb296c0d5b202adfa79c73d6",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "StopTaskFunction11473A8C",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Metadata",
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Code",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Code/S3Key",
+            "BeforeValue": "04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5.zip",
+            "AfterValue": "bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5.zip",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Metadata",
+            "RequiresRecreation": "Never",
+            "Path": "/Metadata/aws:asset:path",
+            "BeforeValue": "asset.04777fd2653230694e5298f0b8689ab4a963894da801e839e876bd4ac17a24f5",
+            "AfterValue": "asset.bf062520b2adce6c290bacd7bf80a58d6559f187563995be7e04341929e1e5b5",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    },
+    {
+      "LogicalResourceId": "SwitchWorkflow",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):24b0c935d0564d3d6ab1f63185bbe262b39cbf16fca63f0b90f621752b442bd2",
+            "AfterValue": "(Truncated-Signature):6636bf80dc1948df2d50d6d4a5f2108224c4332b7becd02cc29ab1771d95866b",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ]
+    }
+  ],
+  "raw_properties": {
+    "BackupStateMachine": {
+      "raw_bytes_equal": true,
+      "sha256": "530d119778947f1d05aa9c12e83c83a4b73995dfb85e011deee23d55b63c8d08"
+    },
+    "ResetWorkflow": {
+      "raw_bytes_equal": true,
+      "sha256": "9387591f55ad478c24e35797be1fee9eea4fa47f6c330b31bd6bd5a2e9d299de"
+    },
+    "StartStateMachine": {
+      "raw_bytes_equal": true,
+      "sha256": "02c0d7877d3b4ecd6f0eea7524645000c7276e07690e50d013b81bb193a08e5d"
+    },
+    "StopStateMachine": {
+      "raw_bytes_equal": true,
+      "sha256": "06d612c8cd166f74edce67ddc52fac028dd68c5cf06e613e2c88cd07a4606385"
+    },
+    "SwitchWorkflow": {
+      "raw_bytes_equal": true,
+      "sha256": "6292c2179c915fb821b1d062f213dcba8edc7c599ed2f3fc0573ae762cc903da"
+    }
+  },
+  "post_deploy": {
+    "machines": {
+      "BackupStateMachine": {
+        "arn_before": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+        "arn_after": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+        "revision_before": "abd31155-2ef5-46b7-8473-76c160542e4d",
+        "revision_after": "abd31155-2ef5-46b7-8473-76c160542e4d",
+        "canonical_sha256_before": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213",
+        "canonical_sha256_after": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213",
+        "configuration_unchanged": true
+      },
+      "ResetWorkflow": {
+        "arn_before": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+        "arn_after": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+        "revision_before": null,
+        "revision_after": null,
+        "canonical_sha256_before": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce",
+        "canonical_sha256_after": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce",
+        "configuration_unchanged": true
+      },
+      "RetentionStateMachine": {
+        "arn_before": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+        "arn_after": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+        "revision_before": null,
+        "revision_after": null,
+        "canonical_sha256_before": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e",
+        "canonical_sha256_after": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e",
+        "configuration_unchanged": true
+      },
+      "StartStateMachine": {
+        "arn_before": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+        "arn_after": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+        "revision_before": null,
+        "revision_after": null,
+        "canonical_sha256_before": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8",
+        "canonical_sha256_after": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8",
+        "configuration_unchanged": true
+      },
+      "StopStateMachine": {
+        "arn_before": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+        "arn_after": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+        "revision_before": "1c2ff03e-9c99-4268-8592-e621c9709308",
+        "revision_after": "1c2ff03e-9c99-4268-8592-e621c9709308",
+        "canonical_sha256_before": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f",
+        "canonical_sha256_after": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f",
+        "configuration_unchanged": true
+      },
+      "SwitchWorkflow": {
+        "arn_before": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+        "arn_after": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+        "revision_before": null,
+        "revision_after": null,
+        "canonical_sha256_before": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2",
+        "canonical_sha256_after": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2",
+        "configuration_unchanged": true
+      }
+    },
+    "lambda_arns": {
+      "AdmissionFunction23082B67": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-admission",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-admission"
+      },
+      "AutoStopEvaluatorFunctionF85F8B50": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-auto-stop-evaluator",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-auto-stop-evaluator"
+      },
+      "BackupTaskFunctionA44639DC": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task"
+      },
+      "DiscordCommandFunction7D25102A": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-command",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-command"
+      },
+      "DiscordMessageFunction78FA388B": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-message",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-message"
+      },
+      "MonitoringObserverFunction584DA7C7": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-monitoring-observer",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-monitoring-observer"
+      },
+      "ReconcileFunction30829CB6": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile"
+      },
+      "RetentionTaskFunction9F285CE4": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task"
+      },
+      "StartTaskFunction8C564C4A": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task"
+      },
+      "StatusExecutorFunction6E5C9869": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-status-executor",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-status-executor"
+      },
+      "StopTaskFunction11473A8C": {
+        "before": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+        "after": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task"
+      }
+    }
+  },
+  "authority_readback": {
+    "at": "2026-09-18T13:35:10.854688+00:00",
+    "code_sha256": "4Ez2f7ImjgmeJ5HEsh2NoDKKvmIzdWN0+m+SRXfi9HM=",
+    "authority_source": "deployed S3 Lambda asset, read-only execution",
+    "games": {
+      "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f": {
+        "minecraft_version": "1.21.1",
+        "loader": {
+          "type": "neoforge",
+          "version": "21.1.219"
+        },
+        "package_digest": "720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b",
+        "record_unchanged": true
+      },
+      "game-vanilla-main": {
+        "minecraft_version": "26.2",
+        "loader": {
+          "type": "vanilla"
+        },
+        "package_digest": "75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9c15eb9784ac78e",
+        "record_unchanged": true
+      },
+      "game-vanilla-secondary": {
+        "minecraft_version": "26.2",
+        "loader": {
+          "type": "vanilla"
+        },
+        "package_digest": "75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9c15eb9784ac78e",
+        "record_unchanged": true
+      }
+    }
+  },
+  "start_operation": "op-5e28ed5c-441d-40f2-8928-348f73089901",
+  "stop_operation": "op-2a2c90b1-8e7b-4a60-9dd3-90a403226677",
+  "both_operations": "SUCCEEDED",
+  "request_retries": "same Operation, created=false",
+  "running_verification": {
+    "materialization_state": {
+      "S": "MATERIALIZED"
+    },
+    "generation": {
+      "N": "1"
+    },
+    "world_inode": 4316448,
+    "cache_reused_hash_size_mtime_owner": [
+      "package-cache/mods/create-1.21.1-6.0.10.jar",
+      "package-cache/mods/FarmersDelight-1.21.1-1.3.4.jar",
+      "package-cache/neoforge-21.1.219-installer.jar"
+    ],
+    "prepared_owner_unchanged": true,
+    "container_id": "8319d152952ac30df6821634ba26782c162454629668a1f44233b1d15ebd4481",
+    "memory_limit": 6442450944,
+    "memory_current": 1704267776,
+    "host_mem_kib": {
+      "MemAvailable": 5971168,
+      "MemTotal": 7944160,
+      "SwapTotal": 0
+    },
+    "jvm_heap": [
+      "-Xmx4G",
+      "-Xms1G"
+    ],
+    "mod_evidence": [
+      "\t\tCreate 6.0.10 (create)",
+      "\t\tFarmer's Delight 1.3.4 (farmersdelight)",
+      "\t\tNeoForge 21.1.219 (neoforge)",
+      "[13:37:48] [Server thread/INFO] [minecraft/DedicatedServer]: Done (3.554s)! For help, type \"help\""
+    ],
+    "tick": "The game is running normally\n\u001b[0mTarget tick rate: 20.0 per second.\n\u001b[0mAverage time per tick: 0.0ms (Target: 50.0ms)\n\u001b[0mPercentiles: P50: 0.0ms P95: 0.2ms P99: 0.3ms, sample: 100\n\u001b[0m\n",
+    "gc_errors": [],
+    "oom": [],
+    "pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+    "whitelist_count": 0
+  },
+  "final_host": {
+    "receipt": {
+      "phase": "stopped",
+      "stop": {
+        "container_id": "8319d152952ac30df6821634ba26782c162454629668a1f44233b1d15ebd4481",
+        "removal_ready": true,
+        "save_confirmed": true,
+        "started_at": "2026-09-18T13:37:20.382992659Z"
+      },
+      "target": {
+        "config_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+        "data_source": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+        "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-5e28ed5c-441d-40f2-8928-348f73089901"
+      }
+    },
+    "old_recovery_journal_unchanged": true,
+    "prepared_owner_unchanged": true,
+    "world_inode": 4316448,
+    "container_absent": true,
+    "legacy_tree_sha256": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+    "verified_cache_unchanged": true,
+    "host_artifacts_unchanged": true
+  },
+  "record_comparison": {
+    "only_Game_changed_fields": [
+      "last_started_at",
+      "materialization_state",
+      "updated_at"
+    ],
+    "other_Game_registry_policy_records_unchanged": true,
+    "historical_operations_unchanged": true,
+    "two_new_operations_succeeded": true,
+    "provenance_unchanged": true
+  },
+  "final_state": {
+    "at": "2026-09-18T13:58:11.025969+00:00",
+    "instance": "stopped",
+    "instance_id": "i-04fc0629dc4ea466e",
+    "instance_type": "m8a.large",
+    "locks": [],
+    "active_workflows": 0,
+    "active_ssm": 0,
+    "active_sessions": 0,
+    "queues": {
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      }
+    },
+    "dns": [],
+    "alarms": {
+      "ALARM": 0,
+      "INSUFFICIENT_DATA": 0,
+      "OK": 45
+    },
+    "snapshot_count": 9,
+    "provenance_count": 16
+  },
+  "desired_actual_observed": "STOPPED / HEALTHY",
+  "snapshots_and_provenance_unchanged": true,
+  "ebs_metadata_unchanged": true,
+  "ingress": "CLOSED: all three reserved concurrency 0",
+  "new_incident": {
+    "alarm": "RuntimeObservationUnknown",
+    "fresh_heartbeat_runtime_unknown_at": "2026-09-18T13:40:50.925Z",
+    "repository_reproduction": "A/B-only canonical Game selection clears dynamic Game player_count; monitoring rejects READY/null",
+    "installed_producer_bytes_verified_this_slice": false,
+    "additional_fix_or_start": false,
+    "client_ready": false
+  },
+  "private_evidence_root": "/private/tmp/wishicraft-case-d-release-v1.9svggv"
+}

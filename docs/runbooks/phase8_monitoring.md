@@ -178,3 +178,20 @@ GO後の最終local validationはcanonical toolchainでfull pytest **852 passed*
 - [statvfs filesystem counters](https://docs.python.org/3.12/library/os.html#os.statvfs)
 - [CloudWatch regional pricing](https://aws.amazon.com/cloudwatch/pricing/)
 - [Systems Manager pricing](https://aws.amazon.com/systems-manager/pricing/)
+
+
+## Explicit dependency-propagated semantic-no-op approval (Case D)
+
+A State Machine Definition entry is not an unconditional stop if a release explicitly
+approves a bounded logical-ID allowlist and proves byte-identical deployed/candidate
+Properties, equal resolved/canonical ASL, the updated dependency's intrinsic-reference
+source, unchanged resolved identity, Replacement=False, Definition-only changes and no
+active workflow/Current/Lock/queued work. Role/IAM and other property changes still stop.
+Retain both DescribeChangeSet modes, execute the exact reviewed CF ChangeSet, and read
+back physical/semantic identities afterward. Opaque truncated-signature internals are
+not themselves the safety authority. This is not blanket permission for State Machine
+updates. [Exact five-resource release and evidence](ssm_ready_probe.md#case-d-release-guard--explicit-dependency-propagated-semantic-no-op).
+
+The first NeoForge READY/normal STOP succeeded, but a separate fresh-heartbeat/runtime-unknown
+observation blocked reopening ingress. Stopped-state alarm recovery does not qualify
+running-state telemetry; keep that defect as the next implementation slice.

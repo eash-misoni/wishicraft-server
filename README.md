@@ -1,6 +1,6 @@
 # wishicraft-server
 
-> D-109 READY probe（2026-09-18）: stdin module解決のrepository修正を実装。配布前に別のCP parser不具合（Minecraft versionが26.2固定で、正当な1.21.1応答を拒否）を再現し、production deploy／新STARTを停止。既存world・Game UNMATERIALIZED・受付閉鎖を維持。[実行境界とrelease blocker](docs/runbooks/ssm_ready_probe.md)。
+> D-109 production実証（2026-09-18）: Game authority／SSM import修正をCase D guard付きCloudFormation releaseで適用。create-survivalは既存world・generation 1でSTART → READY → 通常Reconcile → MATERIALIZED → 正常STOPまで成功。別のheartbeat監視不具合を確認したため受付閉鎖を維持。最終STOPPED / HEALTHY・45 alarms OK、実client利用は未解放。[release・監視blocker・証跡](docs/runbooks/ssm_ready_probe.md)。
 
 > D-109旧run停止復旧（2026-09-15）: 同一container/runからfresh save proofを取得し、既存finish_stopでterminal stopped・container cleanupまで成功。保存済みworldは同じpath/generationのまま保持、Game DBはUNMATERIALIZED。受付閉鎖を継続し、SSM READY probe修正・新START・materialization確定は別sliceです。[復旧契約・証跡](docs/runbooks/interrupted_stop_recovery.md)。
 
