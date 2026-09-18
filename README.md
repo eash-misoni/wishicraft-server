@@ -1,5 +1,7 @@
 # wishicraft-server
 
+> D-109 READY probe（2026-09-18）: stdin module解決のrepository修正を実装。配布前に別のCP parser不具合（Minecraft versionが26.2固定で、正当な1.21.1応答を拒否）を再現し、production deploy／新STARTを停止。既存world・Game UNMATERIALIZED・受付閉鎖を維持。[実行境界とrelease blocker](docs/runbooks/ssm_ready_probe.md)。
+
 > D-109旧run停止復旧（2026-09-15）: 同一container/runからfresh save proofを取得し、既存finish_stopでterminal stopped・container cleanupまで成功。保存済みworldは同じpath/generationのまま保持、Game DBはUNMATERIALIZED。受付閉鎖を継続し、SSM READY probe修正・新START・materialization確定は別sliceです。[復旧契約・証跡](docs/runbooks/interrupted_stop_recovery.md)。
 
 > D-109 repository slice完了時点の記録: repository/runtime検証完了、当時production未適用。Minecraft 1.21.1 / NeoForge 21.1.219 / Create 6.0.10 / Farmer's Delight 1.3.4。[package・隔離・release契約](docs/runbooks/neoforge_package.md)。

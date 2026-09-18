@@ -84,3 +84,59 @@ hash-locked bundling, not application assertions. Local Docker CLI is unavailabl
 real Docker qualification is required in CI. Synth versus current live template
 shows only Code changes to the eleven existing Control Plane Lambdas sharing the
 bundle, with no new resources or IAM/state-machine/configuration changes.
+
+
+## Release blocked before deployment — second observation defect
+
+The import correction is insufficient for end-to-end READY. Review of the next
+Control Plane boundary found `probe._parse_protocol` independently checking
+`version_match` against global `EXPECTED_MINECRAFT_VERSION = "26.2"`. The host's
+integrity-checked NeoForge package correctly reports Minecraft 1.21.1 and true,
+but the parser rejects this as `protocol version comparison is inconsistent`.
+`status.py` calls this parser without a Game-specific expected version input.
+
+A local reproduction uses the existing complete running probe fixture, changes
+reported_version to 1.21.1 and protocol_version to 767, preserves ready=true and
+version_match=true, then calls parse_host_runtime_probe with its exact instance.
+It raises ProbeContractError with the above message. Read-only retrieval of the
+currently deployed Reconcile S3 code asset confirmed probe.py is byte-identical
+to the repository parser, including the fixed 26.2 predicate. This is a separate
+pre-existing production defect, discovered before another production START.
+
+The current Docker fixture verifies real host package/protocol observation but
+cannot certify Control Plane acceptance: CI lacks production IMDS/mount context.
+The previously separate host/protocol and parser tests covered different expected
+versions. Green transport/Docker tests must not override this release blocker.
+
+**No production code deploy, host migration, new START or materialization commit
+was performed.** Keep all three ingress functions closed. Existing initialized
+world, stopped old receipt and absent container remain intact. Do not change this
+parser within the import-only slice or trust host-supplied version_match blindly.
+The next separately scoped correction must supply the Control Plane parser with
+an independently validated expected version from the bound Game/package identity,
+preserve wrong-version/Game/run/generation rejection, and test the full transported
+response through Status/Reconcile before retrying formal START.
+
+Final production observation **2026-09-18 11:51:00 UTC**: STOPPED/HEALTHY,
+EC2 stopped, 45 alarms OK, no Current Operation/Lock/workflow/SSM/session/DNS,
+three queues empty. Seven Game/registry/policy records, all 79 Operations,
+16 provenance rows, nine snapshot metadata entries, volume metadata and four
+CloudFormation templates matched beginning baseline. The maintenance-only
+DesiredStoppedEc2Running alarm recovered naturally; no alarm suppression occurred.
+Ingress remains closed. There are no new START/STOP Operation IDs for this slice.
+
+
+## Repository qualification complete; production remains blocked
+
+Fix commit `f95fb02328961a99b8ddb2319f72918877e95603` passed
+[standard CI 35341251311](https://github.com/eash-misoni/wishicraft-server/actions/runs/35341251311)
+and [NeoForge Docker CI 35341251322](https://github.com/eash-misoni/wishicraft-server/actions/runs/35341251322).
+The final suite has 1,445 tests; lint, format, type, synth, Web and real Docker
+lifecycle checks passed. At 11:50:40 UTC Docker recorded
+`INITIALIZED_PREPARED_WORLD_REUSED_NEW_RUN_READY`; the unmodified stdin command
+observed create-survival and Vanilla in six checkpoints, followed by
+`HOST_NEOFORGE_START_SWITCH_RESET_WHITELIST_PASSED` at 11:53:01 UTC.
+These qualify the import correction and host reuse, not the blocked production
+parser/READY/materialization boundary. No new production capacity sample or normal
+START/STOP proof exists in this slice. Whitelist remains 0/0/0; client access is
+not ready and ingress was not restored.

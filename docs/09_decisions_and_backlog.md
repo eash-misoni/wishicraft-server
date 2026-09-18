@@ -2,6 +2,8 @@
 
 > D-109 SSM READY transport: stdin実行のmodule解決をcanonical runtime directoryへ固定。READY判定・host/package artifactは不変。[実行境界・回帰・production gate](runbooks/ssm_ready_probe.md)。
 
+> 2026-09-18: import修正後の別境界で、配布済みCP parserの26.2固定照合を確認。1.21.1正当応答を拒否するため、このsliceはproductionへ進めず受付閉鎖を維持。parserの期待versionを検証済みGame/packageへ結び付ける修正は次slice。
+
 ## D-109 Pinned NeoForge Game package（Accepted / deployed; first START blocked）
 
 旧run停止完了の限定operator recoveryを明示承認しproduction実証済み。同一container/runでfresh saveを取得し、
