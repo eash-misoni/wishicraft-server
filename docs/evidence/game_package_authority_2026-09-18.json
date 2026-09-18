@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "slice": "immutable-game-package-ready-authority",
+  "date": "2026-09-18",
+  "fix_commit": "c59d94ab03b30f97a78bf0c9c2ca901d2174bf3c",
+  "authority": "immutable Game registration + exact fixed catalog; no Operation pin",
+  "runtime_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+  "package_digest": "720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b",
+  "validation": {
+    "full_tests": 1462,
+    "lint": "passed",
+    "format": "passed",
+    "mypy": "passed",
+    "synth": "passed",
+    "standard_ci": 35345075443,
+    "neoforge_ci": 35345075632,
+    "both_ci": "success",
+    "local_docker": "CLI unavailable; real integration in CI",
+    "combined_ssm_authority_parser": "Vanilla 26.2 and NeoForge 1.21.1 passed",
+    "initialized_prepared_world_reuse": "passed"
+  },
+  "maintenance": {
+    "ssm_command": "6af7e198-343a-4c55-97bf-1676ca3bbf50",
+    "minecraft_started": false,
+    "world_inode": 4316448,
+    "game_tree_sha256": "7fbfd4469da0f294d09348a4bfeb04a8eab2faaaa01f0259843e2eb86ece5cf8",
+    "a_b_tree_sha256": "f2c62614f20c6b18b399a73d0f129d99bb3ab47ac0f36b963c84cb812cf8696c",
+    "owner": "initialized",
+    "receipt": "stopped",
+    "containers": 0,
+    "cache_and_installed_files": "exactly equal to prior inventory"
+  },
+  "release": {
+    "status": "blocked-before-execution",
+    "template_structural_diff": "eleven existing Lambda Code/asset metadata only",
+    "actual_change_set": "also five State Machine Definition updates",
+    "state_machines_flagged": [
+      "BackupStateMachine",
+      "ResetWorkflow",
+      "StartStateMachine",
+      "StopStateMachine",
+      "SwitchWorkflow"
+    ],
+    "state_machine_semantic_review": {
+      "BackupStateMachine": {
+        "semantically_equal": true,
+        "before_canonical_sha256": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213",
+        "candidate_canonical_sha256": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213"
+      },
+      "ResetWorkflow": {
+        "semantically_equal": true,
+        "before_canonical_sha256": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce",
+        "candidate_canonical_sha256": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce"
+      },
+      "RetentionStateMachine": {
+        "semantically_equal": true,
+        "before_canonical_sha256": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e",
+        "candidate_canonical_sha256": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e"
+      },
+      "StartStateMachine": {
+        "semantically_equal": true,
+        "before_canonical_sha256": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8",
+        "candidate_canonical_sha256": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8"
+      },
+      "StopStateMachine": {
+        "semantically_equal": true,
+        "before_canonical_sha256": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f",
+        "candidate_canonical_sha256": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f"
+      },
+      "SwitchWorkflow": {
+        "semantically_equal": true,
+        "before_canonical_sha256": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2",
+        "candidate_canonical_sha256": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2"
+      }
+    },
+    "signature_cause": "not conclusively diagnosed; resolved ASL equal",
+    "change_set_deleted_unexecuted": true,
+    "lambda_deployed": false,
+    "host_migrated": false,
+    "new_start_operation": null,
+    "normal_stop_operation": null,
+    "production_ready_or_materialization_claimed": false
+  },
+  "candidate_code_on_captured_records": {
+    "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f": {
+      "minecraft_version": "1.21.1",
+      "loader": {
+        "type": "neoforge",
+        "version": "21.1.219"
+      },
+      "package_digest": "720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b"
+    },
+    "game-vanilla-main": {
+      "minecraft_version": "26.2",
+      "loader": {
+        "type": "vanilla"
+      },
+      "package_digest": "75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9c15eb9784ac78e"
+    },
+    "game-vanilla-secondary": {
+      "minecraft_version": "26.2",
+      "loader": {
+        "type": "vanilla"
+      },
+      "package_digest": "75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9c15eb9784ac78e"
+    }
+  },
+  "final": {
+    "observed_at": "2026-09-18T12:50:50.864890+00:00",
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "ec2": "stopped",
+    "alarms_ok": 45,
+    "current_operation": null,
+    "lock": false,
+    "active_workflows": 0,
+    "active_ssm": 0,
+    "active_sessions": 0,
+    "dns": false,
+    "queues_empty": 3,
+    "snapshots": 9,
+    "provenance": 16,
+    "ingress": "all three closed",
+    "game": "ACTIVE / UNMATERIALIZED / generation 1",
+    "all_game_registry_policy_records_unchanged": true,
+    "historical_operations_unchanged": 79,
+    "four_stack_templates_unchanged": true,
+    "volumes_metadata_unchanged": true
+  }
+}

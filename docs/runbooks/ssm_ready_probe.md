@@ -216,3 +216,50 @@ Control Plane Lambdas. Runtime digest equals the installed value above; no IAM,
 configuration, resource identity or state-machine changes. Initial live observation
 12:27:09 UTC was STOPPED/HEALTHY, 45 OK, drained and ingress closed. CI and production
 START/READY/Reconcile/STOP are still pending at this implementation checkpoint.
+
+## Qualified Game authority; production change-set gate held
+
+Fix `c59d94ab03b30f97a78bf0c9c2ca901d2174bf3c` passed
+[standard CI 35345075443](https://github.com/eash-misoni/wishicraft-server/actions/runs/35345075443)
+and [NeoForge Docker CI 35345075632](https://github.com/eash-misoni/wishicraft-server/actions/runs/35345075632).
+Actual Docker logs recorded `EXACT_SSM_PACKAGE_AUTHORITY_PARSER_READY` for
+create-survival 1.21.1 and Vanilla 26.2, initialized-world reuse at 12:35:38 UTC,
+and the complete host START/SWITCH/RESET/whitelist sequence at 12:38:03 UTC.
+These are CI results, not a production START/READY claim.
+
+Read-only production maintenance SSM `6af7e198-343a-4c55-97bf-1676ca3bbf50` found
+world tree/inode 4316448, initialized ownership, package/cache bytes and metadata,
+old stopped receipt, absent container, A/B tree, and all installed artifact files
+identical to the previous inventory. Minecraft/Java/listeners were absent. EC2 was
+normally stopped after inspection; no host migration or receipt edit was performed.
+
+Although candidate/live template objects compare equal outside eleven Lambda
+Code/asset-path changes, the actual CloudFormation change set additionally flags
+Definition updates on **five** resources: StartStateMachine, StopStateMachine,
+SwitchWorkflow, ResetWorkflow and BackupStateMachine. With IncludePropertyValues,
+CloudFormation reports differing truncated Definition signatures. Read-only
+DescribeStateMachine plus actual Lambda ARN resolution proves all six candidate/live
+ASL objects (including unchanged Retention) semantically equal. This does not prove
+why CloudFormation reports different signatures, or authorize extra resource writes.
+The requested release gate permits only Lambda Code for branch A. Therefore the
+change set was **deleted without execution**, rather than silently accepting those
+additional updates or switching to an unreviewed direct-code/hotswap deployment.
+No production Lambda code changed; the SSM import fix is also still undeployed.
+Before resuming, separately review the deployment representation/signature difference
+and a release method or scope that explicitly covers the resulting change set.
+No runtime/application workaround, timeout change or package pin was added.
+
+Final read-only production observation **2026-09-18 12:50:50 UTC**:
+STOPPED/HEALTHY, EC2 stopped, 45 alarms OK, no Current/Lock/workflow/SSM/session/DNS,
+three empty queues and three closed ingress functions. All seven Game/registry/policy
+records, 79 historical Operations, sixteen provenance rows, nine snapshots, volume
+metadata and four stack templates match the initial baseline. create-survival stays
+ACTIVE/UNMATERIALIZED/generation 1 with its preserved initialized world. Whitelist is
+still 0/0/0; no client access is enabled. There is no new START/STOP Operation, no
+production READY/Reconcile qualification and no materialization commit in this slice.
+
+Candidate code also resolved captured complete production records read-only: A/B
+Vanilla 26.2 (package digest `75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9c15eb9784ac78e`),
+create-survival 1.21.1 / NeoForge 21.1.219 with unchanged `720deb9f…122f0b`.
+This is candidate-code verification on captured records, **not deployed-code readback**.
+[Machine-readable qualification and hold evidence](../evidence/game_package_authority_2026-09-18.json).

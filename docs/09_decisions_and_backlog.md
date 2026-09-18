@@ -1,10 +1,12 @@
 # 09. Decisions and Backlog
 
-> 2026-09-18 D-109 follow-up / Accepted design, production pending: CREATE後のpackage更新経路は存在せず、immutable Game登録＋固定catalogをREADY/Reconcileのauthorityとする。Operation pin／IAM追加は不要。将来package更新を追加する前にrun authorityを再レビューする。[比較・writer inventory・検証境界](runbooks/ssm_ready_probe.md#immutable-game-authority-correction-repository-qualification-in-progress)。
+> 2026-09-18 D-109 follow-up / Accepted, repository qualified; production change-set gate blocked: CREATE後のpackage更新経路は存在せず、immutable Game登録＋固定catalogをREADY/Reconcileのauthorityとする。Operation pin／IAM追加は不要。将来package更新を追加する前にrun authorityを再レビューする。[比較・writer inventory・検証境界](runbooks/ssm_ready_probe.md#immutable-game-authority-correction-repository-qualification-in-progress)。
 
 > D-109 SSM READY transport: stdin実行のmodule解決をcanonical runtime directoryへ固定。READY判定・host/package artifactは不変。[実行境界・回帰・production gate](runbooks/ssm_ready_probe.md)。
 
 > 2026-09-18: import修正後の別境界で、配布済みCP parserの26.2固定照合を確認。1.21.1正当応答を拒否するため、このsliceはproductionへ進めず受付閉鎖を維持。parserの期待versionを検証済みGame/packageへ結び付ける修正は次slice。
+
+> 2026-09-18 release review: Game authority fix `c59d94a` は全1,462 testsと両CI成功。live template構造差分はLambda Codeのみだが、実change setが5 State Machine Definition更新を含むため未実行削除。全ASLの意味的比較は同一、signature差の原因は未確定。productionはSTOPPED/HEALTHY・45 OK・受付閉鎖、START未実施。[証跡](evidence/game_package_authority_2026-09-18.json)。
 
 ## D-109 Pinned NeoForge Game package（Accepted / deployed; first START blocked）
 
