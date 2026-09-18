@@ -1,4 +1,4 @@
-"""Actual migration files -> installed probe -> unchanged heartbeat producer; no AWS."""
+"""Historical reset migration files and their then-installed heartbeat producer; no AWS."""
 
 import base64
 import builtins
@@ -129,8 +129,9 @@ class Installed:
         )
         for filename in ("runtime_heartbeat.py", "runtime_heartbeat_producer.py"):
             path = self.paths[PROBE].parent / filename
+            # Keep the historical reset fixture pinned to the producer available
+            # at that migration, independently of later host-only releases.
             path.write_bytes(history("src/wishicraft/" + filename))
-            assert path.read_bytes() == (ROOT / "src/wishicraft" / filename).read_bytes()
         self.heartbeat = load(
             self.paths[PROBE].parent / "runtime_heartbeat.py",
             "wishicraft.runtime_heartbeat",

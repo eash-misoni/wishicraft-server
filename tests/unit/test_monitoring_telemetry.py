@@ -8,7 +8,9 @@ import pytest
 from boto3.dynamodb.types import TypeSerializer  # type: ignore[import-untyped]
 
 from wishicraft import monitoring_lambda
+from wishicraft import runtime_heartbeat_producer as producer
 from wishicraft.monitoring_telemetry import evaluate_telemetry, integer, timestamp
+from wishicraft.runtime_heartbeat import ProtocolState, RuntimeObservation, derive_heartbeat
 
 NOW = datetime(2026, 9, 10, 12, tzinfo=UTC)
 INSTANCE = "i-04fc0629dc4ea466e"
@@ -104,6 +106,53 @@ def test_missing_heartbeat_is_not_zero_players_or_zero_capacity() -> None:
     assert metrics["RuntimeHeartbeatUnavailable"] == 1
     assert metrics["RuntimeObservationUnknown"] == 1
     assert "DataFilesystemUsagePercent" not in metrics
+
+
+@pytest.mark.parametrize("players,expected_unknown", [(0, 0), (4, 0), (None, 1)])
+def test_dynamic_game_heartbeat_roundtrip_preserves_zero_and_unknown(
+    players: int | None, expected_unknown: int
+) -> None:
+    game_id = "game-" + "f" * 64
+    values = inputs()
+    values["game_id"] = game_id
+    values["state"]["game_id"] = game_id
+    values["state"]["desired_game_id"] = game_id
+    heartbeat = derive_heartbeat(
+        system_id="wishicraft-main",
+        canonical_game_id=game_id,
+        observation=RuntimeObservation(
+            instance_id=INSTANCE,
+            runtime_id="wishicraft-host-runtime",
+            boot_id=BOOT,
+            active_game_id=game_id,
+            protocol_state=ProtocolState.READY,
+            player_count=players,
+            observed_at=NOW,
+            run_id="op-dynamic",
+            process_id="a" * 64,
+        ),
+        previous=None,
+    )
+    wire = producer._encode(heartbeat)
+    decoded = producer._decode(wire)
+    assert decoded.player_count == players
+    values["heartbeat"] = {
+        "schema_version": decoded.schema_version,
+        "system_id": decoded.system_id,
+        "instance_id": decoded.instance_id,
+        "runtime_id": decoded.runtime_id,
+        "boot_id": decoded.boot_id,
+        "active_game_id": decoded.active_game_id,
+        "protocol_state": decoded.protocol_state.value,
+        "player_count": decoded.player_count,
+        "observed_at": decoded.observed_at.isoformat(),
+    }
+    metrics, reasons = evaluate_telemetry(**values)
+    assert reasons["heartbeat"] == "fresh"
+    assert metrics["RuntimeHeartbeatUnavailable"] == 0
+    assert metrics["RuntimeObservationUnknown"] == expected_unknown
+    assert reasons["runtime"] == ("unknown" if expected_unknown else "ready")
+    assert metrics["RuntimeIdentityMismatch"] == 0
 
 
 def test_fresh_unknown_runtime_is_separate_from_heartbeat_and_system_state_stale() -> None:

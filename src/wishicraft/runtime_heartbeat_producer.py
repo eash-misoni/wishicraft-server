@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -57,12 +58,24 @@ def observe(*, now: datetime) -> RuntimeObservation:
         protocol = minecraft["protocol"]
         instance_id = identity["instance_id"]
         runtime_id = identity["runtime_id"]
-        active_game_id = (
-            active_game["game_id"]
-            if active_game.get("state") == "observed"
+        execution = document.get("execution")
+        target = execution.get("target") if isinstance(execution, dict) else None
+        active_game_id = None
+        if (
+            active_game.get("state") == "observed"
             and active_game.get("binding_consistency") == "consistent"
-            else None
-        )
+            and isinstance(target, dict)
+            and execution.get("phase") == "running"
+            and isinstance(target.get("game_id"), str)
+            and target["game_id"] == active_game.get("game_id")
+            and isinstance(target.get("run_id"), str)
+            and re.fullmatch(r"op-[a-z0-9-]+", target["run_id"]) is not None
+            and isinstance(target.get("config_digest"), str)
+            and re.fullmatch(r"[0-9a-f]{64}", target["config_digest"]) is not None
+            and isinstance(target.get("data_source"), str)
+            and target["data_source"].startswith("/srv/minecraft/games/" + target["game_id"] + "/")
+        ):
+            active_game_id = target["game_id"]
         raw_state = minecraft["protocol_state"]
         try:
             protocol_state = ProtocolState(raw_state)
@@ -71,12 +84,14 @@ def observe(*, now: datetime) -> RuntimeObservation:
         player_count = (
             protocol.get("player_count") if protocol_state is ProtocolState.READY else None
         )
-        execution = document.get("execution")
         if (
             not isinstance(execution, dict)
             or execution.get("phase") != "running"
             or not isinstance(execution.get("process_id"), str)
+            or re.fullmatch(r"[0-9a-f]{64}", execution["process_id"]) is None
+            or active_game_id is None
         ):
+            active_game_id = None
             protocol_state = ProtocolState.UNKNOWN
             player_count = None
         errors = document["errors"]
@@ -96,8 +111,14 @@ def observe(*, now: datetime) -> RuntimeObservation:
     return RuntimeObservation(
         instance_id=instance_id,
         runtime_id=runtime_id,
-        run_id=(document.get("execution") or {}).get("target", {}).get("run_id"),
-        process_id=(document.get("execution") or {}).get("process_id"),
+        run_id=target["run_id"]
+        if active_game_id is not None and isinstance(target, dict)
+        else None,
+        process_id=(
+            execution["process_id"]
+            if active_game_id is not None and isinstance(execution, dict)
+            else None
+        ),
         boot_id=boot_id,
         active_game_id=active_game_id,
         protocol_state=protocol_state,
@@ -189,15 +210,10 @@ def produce_once(*, now: Optional[datetime] = None) -> bool:
     region = _required("AWS_REGION")
     previous = load_previous(table=table, system_id=system_id, region=region)
     observation = observe(now=now or datetime.now(timezone.utc))  # noqa: UP017
-    # Host distribution supplies the same immutable allowlist as the execution adapter.
-    contract_path = Path("/etc/wishicraft/runtime-contract.json")
-    host_contract = json.loads(contract_path.read_text()) if contract_path.exists() else {}
-    games = host_contract.get("games")
-    if games is not None:
-        if not isinstance(games, list) or len(games) != 2:
-            raise ProducerError("INVALID_GAME_ALLOWLIST")
-        if isinstance(observation.active_game_id, str) and observation.active_game_id in games:
-            game_id = observation.active_game_id
+    # The probe binds the observed container to the current durable run receipt.
+    # GAME_ID remains the legacy fallback only while no run can be trusted.
+    if observation.active_game_id is not None:
+        game_id = observation.active_game_id
     current = derive_heartbeat(
         system_id=system_id,
         canonical_game_id=game_id,
