@@ -28,12 +28,18 @@ from wishicraft.probe import (
 
 
 def parse(document: dict[str, object]) -> HostRuntimeProbe:
-    return parse_host_runtime_probe(json.dumps(document), expected_instance_id=TARGET_INSTANCE_ID)
+    return parse_host_runtime_probe(
+        json.dumps(document),
+        expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
+    )
 
 
 def test_valid_runtime_stopped_probe() -> None:
     probe = parse_host_runtime_probe(
-        json.dumps(runtime_stopped_document()), expected_instance_id=TARGET_INSTANCE_ID
+        json.dumps(runtime_stopped_document()),
+        expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
     )
 
     assert probe.mount.state is MountState.EXPECTED
@@ -51,7 +57,9 @@ def test_valid_runtime_stopped_probe() -> None:
 @pytest.mark.parametrize("stdout", ["", "not-json", "[]"])
 def test_invalid_json_or_top_level_type_is_rejected(stdout: str) -> None:
     with pytest.raises(ProbeContractError):
-        parse_host_runtime_probe(stdout, expected_instance_id=TARGET_INSTANCE_ID)
+        parse_host_runtime_probe(
+            stdout, expected_instance_id=TARGET_INSTANCE_ID, expected_minecraft_version="26.2"
+        )
 
 
 def test_unknown_schema_version_is_rejected() -> None:
@@ -78,7 +86,9 @@ def test_missing_required_field_is_rejected() -> None:
 
 def test_running_protocol_success_establishes_ready() -> None:
     probe = parse_host_runtime_probe(
-        json.dumps(runtime_running_document()), expected_instance_id=TARGET_INSTANCE_ID
+        json.dumps(runtime_running_document()),
+        expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
     )
 
     assert probe.container.state is ContainerState.RUNNING
@@ -106,6 +116,7 @@ def test_protocol_failure_never_establishes_ready(result: str) -> None:
             )
         ),
         expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
     )
 
     assert probe.protocol.result.value == result
@@ -118,6 +129,7 @@ def test_protocol_version_mismatch_is_explicitly_not_ready() -> None:
             runtime_running_document(reported_version="Minecraft 26.3", version_match=False)
         ),
         expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
     )
 
     assert probe.protocol.compatible_response is True
@@ -130,6 +142,7 @@ def test_version_comparison_accepts_expected_version_with_label() -> None:
     probe = parse_host_runtime_probe(
         json.dumps(runtime_running_document(reported_version="Minecraft 26.2")),
         expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
     )
 
     assert probe.protocol.version_match is True
@@ -186,7 +199,11 @@ def test_docker_unavailable_requires_unknown_container() -> None:
     assert isinstance(protocol, dict)
     protocol["result"] = "unknown"
 
-    probe = parse_host_runtime_probe(json.dumps(document), expected_instance_id=TARGET_INSTANCE_ID)
+    probe = parse_host_runtime_probe(
+        json.dumps(document),
+        expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
+    )
 
     assert probe.docker_state is DockerState.INACTIVE
     assert probe.container.state is ContainerState.UNKNOWN
@@ -195,7 +212,9 @@ def test_docker_unavailable_requires_unknown_container() -> None:
 
 def test_container_missing_is_a_known_not_running_state() -> None:
     probe = parse_host_runtime_probe(
-        json.dumps(runtime_stopped_document()), expected_instance_id=TARGET_INSTANCE_ID
+        json.dumps(runtime_stopped_document()),
+        expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
     )
 
     assert probe.container.state is ContainerState.NOT_FOUND
@@ -236,7 +255,11 @@ def test_observation_failure_remains_unknown() -> None:
     )
     document["errors"] = ["MOUNT_OBSERVATION_FAILED"]
 
-    probe = parse_host_runtime_probe(json.dumps(document), expected_instance_id=TARGET_INSTANCE_ID)
+    probe = parse_host_runtime_probe(
+        json.dumps(document),
+        expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
+    )
 
     assert probe.mount.state is MountState.UNKNOWN
     assert probe.errors == ("MOUNT_OBSERVATION_FAILED",)
@@ -248,6 +271,7 @@ def test_instance_identity_mismatch_is_rejected() -> None:
         parse_host_runtime_probe(
             json.dumps(runtime_stopped_document()),
             expected_instance_id="i-00000000000000000",
+            expected_minecraft_version="26.2",
         )
 
 

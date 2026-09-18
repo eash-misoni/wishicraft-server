@@ -12,7 +12,6 @@ from typing import cast
 INSTANCE_ID_PATTERN = re.compile(r"^i-[0-9a-f]{17}$")
 SHA256_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 ERROR_CODE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
-EXPECTED_MINECRAFT_VERSION = "26.2"
 GAME_ID_PATTERN = re.compile(r"^game-[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
@@ -150,7 +149,9 @@ class HostRuntimeProbe:
     execution: dict[str, object] | None = None
 
 
-def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostRuntimeProbe:
+def parse_host_runtime_probe(
+    stdout: str, *, expected_instance_id: str, expected_minecraft_version: str | None = None
+) -> HostRuntimeProbe:
     """Parse exactly schema v1 and reject unsafe or impossible combinations."""
     if INSTANCE_ID_PATTERN.fullmatch(expected_instance_id) is None:
         raise ProbeContractError("invalid expected instance ID")
@@ -193,7 +194,9 @@ def parse_host_runtime_probe(stdout: str, *, expected_instance_id: str) -> HostR
     minecraft = _mapping(document.get("minecraft"), "minecraft")
     minecraft_runtime_state = _string(minecraft, "runtime_state")
     protocol_state = _enum(ProtocolState, minecraft, "protocol_state")
-    protocol = _parse_protocol(_mapping(minecraft.get("protocol"), "minecraft.protocol"))
+    protocol = _parse_protocol(
+        _mapping(minecraft.get("protocol"), "minecraft.protocol"), expected_minecraft_version
+    )
     ready = _boolean(minecraft, "ready")
     errors = _errors(document.get("errors"))
 
@@ -426,7 +429,7 @@ def _parse_active_game(value: dict[str, object]) -> ActiveGameObservation:
     return ActiveGameObservation(state, game_id, consistency)
 
 
-def _parse_protocol(value: dict[str, object]) -> ProtocolObservation:
+def _parse_protocol(value: dict[str, object], expected_version: str | None) -> ProtocolObservation:
     attempted = _boolean(value, "attempted")
     result = _enum(ProtocolResult, value, "result")
     compatible_response = _boolean(value, "compatible_response")
@@ -448,7 +451,9 @@ def _parse_protocol(value: dict[str, object]) -> ProtocolObservation:
         assert reported_version is not None
         if player_count is not None and player_count < 0:
             raise ProbeContractError("protocol player count must be non-negative")
-        if version_match is not _version_matches_expected(reported_version):
+        if not expected_version:
+            raise ProbeContractError("protocol expected package version is unresolved")
+        if version_match is not _version_matches_expected(reported_version, expected_version):
             raise ProbeContractError("protocol version comparison is inconsistent")
     elif compatible_response or any(item is not None for item in response_fields):
         raise ProbeContractError("unsuccessful protocol observation contains response metadata")
@@ -473,8 +478,8 @@ def _parse_protocol(value: dict[str, object]) -> ProtocolObservation:
     )
 
 
-def _version_matches_expected(reported_version: str) -> bool:
-    pattern = rf"(?:^|[^0-9.]){re.escape(EXPECTED_MINECRAFT_VERSION)}(?:$|[^0-9.])"
+def _version_matches_expected(reported_version: str, expected_version: str) -> bool:
+    pattern = rf"(?:^|[^0-9.]){re.escape(expected_version)}(?:$|[^0-9.])"
     return re.search(pattern, reported_version) is not None
 
 

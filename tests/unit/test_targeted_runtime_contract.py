@@ -391,7 +391,11 @@ def test_real_probe_parser_carries_target_and_rejects_different_observation() ->
     document = runtime_running_document()
     target = {**TARGET, "instance_id": TARGET_INSTANCE_ID}
     document["execution"] = {"target": target, "phase": "running", "process_id": "b" * 64}
-    probe = parse_host_runtime_probe(json.dumps(document), expected_instance_id=TARGET_INSTANCE_ID)
+    probe = parse_host_runtime_probe(
+        json.dumps(document),
+        expected_instance_id=TARGET_INSTANCE_ID,
+        expected_minecraft_version="26.2",
+    )
     assert probe.execution is not None and probe.execution["target"] == target
     runtime = SimpleNamespace(targets=SimpleNamespace(read=lambda op: target))
     assert_observed(runtime, "op-current", {"observation": {"execution": probe.execution}})

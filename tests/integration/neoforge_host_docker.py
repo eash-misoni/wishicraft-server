@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import yaml  # noqa: E402
 
 from tests.integration.neoforge_docker import registered_block  # noqa: E402
+from tests.probe_fixtures import runtime_running_document  # noqa: E402
 from web.local_operations import MemoryDynamo, service  # noqa: E402
 from wishicraft import interrupted_stop_recovery as recovery  # noqa: E402
 from wishicraft.artifacts import game_package, whitelist_policy  # noqa: E402
@@ -27,6 +28,8 @@ from wishicraft.config import load_configuration  # noqa: E402
 from wishicraft.game_creation import create  # noqa: E402
 from wishicraft.host_runtime import render_boot_time_artifacts  # noqa: E402
 from wishicraft.operation import WebOperationContext, _attribute_map  # noqa: E402
+from wishicraft.package_authority import GamePackageAuthority  # noqa: E402
+from wishicraft.probe import parse_host_runtime_probe  # noqa: E402
 from wishicraft.ssm_probe import _canonical_probe_command  # noqa: E402
 from wishicraft.web_status import decode  # noqa: E402
 
@@ -332,6 +335,30 @@ def main() -> None:
         assert probe_document["active_game"]["binding_consistency"] == "consistent"
         assert probe_document["execution"]["target"] == target
         assert probe_document["minecraft"]["protocol"]["version_match"] is True
+        # CI has no EC2 IMDS or retained XFS mount. Substitute ONLY these
+        # infrastructure observations; retain actual package/protocol/execution.
+        assert set(probe_document["errors"]) <= {
+            "INSTANCE_ID_UNAVAILABLE",
+            "INSTANCE_ID_INVALID",
+            "MOUNT_OBSERVATION_FAILED",
+        }, probe_document["errors"]
+        probe_document["identity"]["instance_id"] = target["instance_id"]
+        probe_document["mount"] = runtime_running_document()["mount"]
+        probe_document["errors"] = []
+        db.records["games", game["game_id"]] = _attribute_map(game)
+        stdout = json.dumps(probe_document)
+        expected = GamePackageAuthority(db, "games", legacy).expected_version(stdout)
+        parsed = parse_host_runtime_probe(
+            stdout,
+            expected_instance_id=target["instance_id"],
+            expected_minecraft_version=expected,
+        )
+        assert parsed.ready and parsed.protocol.version_match
+        assert parsed.active_game.game_id == game["game_id"]
+        assert parsed.execution and parsed.execution["target"] == target
+        print(
+            "EXACT_SSM_PACKAGE_AUTHORITY_PARSER_READY", package["package_id"], expected, flush=True
+        )
         print("EXACT_SSM_STDIN_PACKAGE_OBSERVED", package["package_id"], flush=True)
         assert container["HostConfig"]["Memory"] == 6442450944
         assert json.loads(Path(target["data_source"]).joinpath("whitelist.json").read_text()) == []

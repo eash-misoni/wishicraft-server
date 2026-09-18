@@ -140,3 +140,79 @@ These qualify the import correction and host reuse, not the blocked production
 parser/READY/materialization boundary. No new production capacity sample or normal
 START/STOP proof exists in this slice. Whitelist remains 0/0/0; client access is
 not ready and ingress was not restored.
+
+## Immutable Game authority correction (repository qualification in progress)
+
+The subsequent review selected **Game authority**, not a new Operation package pin.
+D-109 registration is immutable in the supported application contract: CREATE's
+conditional Put is the only package writer; bootstrap GameRepository.register also
+requires absence. There is no Game/package edit endpoint. START completion updates
+materialization/timestamps; SWITCH changes selection; RESET changes world.current_id;
+whitelist has separate records. Backup recovery and interrupted-stop recovery read
+and validate packages. Stopped runtime migrations validate existing identity and do
+not rewrite Game packages. Local restore/fixtures are isolated test authorities,
+not production package update paths. Root/operator direct DynamoDB writes are outside
+this contract; this design does not claim to defeat a privileged out-of-band rewrite.
+
+`game_package.canonical` sorts keys, uses compact JSON plus newline; SHA-256 covers
+all definition fields, including exact Minecraft, loader/installer, mods, versions,
+URLs, upstream IDs, sizes, hashes and client requirements. `registered` resolves the
+exact package ID/version in the fixed deployed catalog, checks definition equality
+and creation.package_digest; common runtime compatibility remains independently
+checked. Legacy A/B have no creation/definition: only configured legacy Game IDs
+and a canonical Vanilla catalog reference qualify. No record migration is required.
+
+| Concern | Immutable Game authority (selected) | Operation package pin |
+| --- | --- | --- |
+| Durable fields | None | New pin for new runs |
+| IAM/config | Existing Games GetItem | Reconcile Operations GetItem/table setting |
+| Legacy A/B | Existing allowlist + Vanilla catalog | Same resolution then new pin |
+| TOCTOU | Package has no mutation operation | Per-run frozen package |
+| Reconcile | Existing Game reads | Extra Operation lookup |
+| Future package edits | Must review run authority before introducing | Can distinguish old/new runs |
+| Failure/retry | Missing/invalid authority stays unknown | Also needs missing-pin compatibility |
+
+The CP `package_authority` reader checks the returned Game ID/schema/active status,
+uses canonical registration validation and the fixed catalog, and returns the exact
+package identity. Observation binds receipt target Game/instance to active Game and
+probe instance, and compares dynamic registration's runtime provenance with the
+receipt target. START's existing assert_observed still compares the complete target
+with its frozen Operation before DNS/success; no pin, lease or target check is removed.
+For SWITCH source observation the observed Game may differ from selected destination:
+its immutable package is validated, while existing status/Game matching prevents it
+from satisfying destination READY. Generation/path comparisons remain at their
+existing host, target and Reconcile boundaries.
+
+Reconcile factory supplies this authority to TargetStatusObserver whenever
+GAME_PACKAGES=1. Both workflow ReconcileReady and normal scheduled Reconcile share
+this exact path. The parser no longer has a 26.2 constant or implicit fallback;
+successful protocol observations require an independently supplied expected version.
+The existing exact numeric version-token comparison is unchanged (no prefix/range
+matching); host version_match must equal the CP comparison, and false cannot become
+READY. Pre-package deployments explicitly select the canonical legacy Vanilla
+catalog identity. Missing Game/module/digest/version or malformed observations fail
+closed, never health/RCON-only READY. Loader/mod/environment/hash verification stays
+in the unchanged integrity-checked host package observer; the existing response
+has no separate loader field, so this change does not invent independent loader
+telemetry or accept an unvalidated host package assertion.
+
+Future application writes MUST NOT mutate package or creation.package_digest after
+CREATE. A package update feature requires a separate reviewed version/run authority
+contract and regression updates before release. CREATE retry mutation and unsupported
+Web PUT/PATCH regression preserve this boundary. No generic update API is added.
+
+Common runtime `64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c`
+and package `720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b`
+remain unchanged. No host migration, IAM/config, durable schema or state-machine
+change is intended. Real Docker now feeds the exact stdin probe result through
+Game authority and CP parser. CI substitutes only unavailable IMDS/XFS observations;
+actual package/protocol/run values are retained. This is repository evidence, not
+production READY. Existing initialized-world/cache reuse regression remains intact.
+
+Local qualification on 2026-09-18: 1,462 tests passed, ruff lint/format and mypy
+passed, full production-context CDK synth passed. Live template comparison permits
+only Code and corresponding asset-path metadata on the eleven existing shared-bundle
+Control Plane Lambdas. Runtime digest equals the installed value above; no IAM,
+configuration, resource identity or state-machine changes. Initial live observation
+12:27:09 UTC was STOPPED/HEALTHY, 45 OK, drained and ingress closed. CI and production
+START/READY/Reconcile/STOP are still pending at this implementation checkpoint.

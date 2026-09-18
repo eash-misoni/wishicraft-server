@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import os
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Protocol, cast
 
@@ -25,14 +26,24 @@ class AwsSession(Protocol):
 
 
 class AwsStatusFactory:
-    def __init__(self, ec2: object, ssm: object, *, game_id: str, timeout_seconds: int) -> None:
+    def __init__(
+        self,
+        ec2: object,
+        ssm: object,
+        *,
+        game_id: str,
+        timeout_seconds: int,
+        expected_version: Callable[[str], str | None] | None = None,
+    ) -> None:
         self._ec2, self._ssm = ec2, ssm
+        self._expected_version = expected_version
         self._game_id, self._timeout = game_id, timeout_seconds
 
     def create(self, instance_id: str) -> TargetStatusObserver:
         return TargetStatusObserver(
             instance_id=instance_id,
             expected_game_id=self._game_id,
+            expected_version=self._expected_version,
             ec2=cast(Ec2Api, self._ec2),
             ssm=cast(SsmApi, self._ssm),
             host_runtime_probe=cast(
@@ -154,6 +165,16 @@ def _build_service() -> ReconcileService:
         from wishicraft.world_reference import selected_source
 
         expected_source = selected_source(dynamodb, _required_environment("GAMES_TABLE"), game_id)
+    expected_version = None
+    if os.environ.get("GAME_PACKAGES") == "1":
+        from wishicraft.package_authority import GamePackageAuthority
+        from wishicraft.runtime_catalog import RuntimeCatalog
+
+        expected_version = GamePackageAuthority(
+            dynamodb,
+            _required_environment("GAMES_TABLE"),
+            RuntimeCatalog.parse(_required_environment("RUNTIME_GAMES")).game_ids,
+        ).expected_version
     return ReconcileService(
         expected_data_source=expected_source,
         system_id=_required_environment("SYSTEM_ID"),
@@ -172,6 +193,7 @@ def _build_service() -> ReconcileService:
                 ssm,
                 game_id=game_id,
                 timeout_seconds=int(_required_environment("SSM_PROBE_TIMEOUT_SECONDS")),
+                expected_version=expected_version,
             ),
         ),
         dns_observer=Route53Observer(

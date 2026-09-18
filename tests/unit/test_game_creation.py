@@ -396,8 +396,15 @@ def test_pinned_neoforge_create_is_immutable_metadata_only(
     requirements = json.loads(capabilities["body"])["games"][-1]["client_requirements"]
     assert requirements["loader"] == {"type": "neoforge", "version": "21.1.219"}
     assert [m["version"] for m in requirements["mods"]] == ["6.0.10", "1.3.4"]
+    immutable = copy.deepcopy(backend.db.records["games", game_id])
     request["creation"]["package_id"] = "vanilla"
     assert post(creation, jar, request)["statusCode"] == 409
+    assert backend.db.records["games", game_id] == immutable
+    # Package editing is not an authenticated Web operation, even for its creator.
+    for method in ("PUT", "PATCH"):
+        rejected = creation[0].handle(event(jar, path=f"/api/games/{game_id}", method=method), NOW)
+        assert rejected["statusCode"] in {404, 405}
+        assert backend.db.records["games", game_id] == immutable
 
 
 def test_package_selection_disabled_or_unknown(

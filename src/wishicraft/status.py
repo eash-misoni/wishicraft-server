@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ipaddress
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -175,6 +176,7 @@ class TargetStatusObserver:
         ec2: Ec2Api,
         ssm: SsmApi,
         host_runtime_probe: HostRuntimeProbeApi,
+        expected_version: Callable[[str], str | None] | None = None,
     ) -> None:
         if INSTANCE_ID_PATTERN.fullmatch(instance_id) is None:
             raise ValueError("invalid target EC2 instance ID")
@@ -185,6 +187,14 @@ class TargetStatusObserver:
         self._ec2 = ec2
         self._ssm = ssm
         self._host_runtime_probe = host_runtime_probe
+        self._expected_version = expected_version
+
+    def _version(self, stdout: str) -> str | None:
+        if self._expected_version is not None:
+            return self._expected_version(stdout)
+        from wishicraft.package_authority import legacy_package
+
+        return str(legacy_package()["minecraft_version"])
 
     def observe(self, *, observed_at: datetime) -> TargetStatus:
         """Return UNKNOWN on API/schema failure; never infer STOPPED."""
@@ -232,7 +242,9 @@ class TargetStatusObserver:
             try:
                 transport = self._host_runtime_probe.run_probe(instance_id=self._instance_id)
                 probe = parse_host_runtime_probe(
-                    transport.stdout, expected_instance_id=self._instance_id
+                    transport.stdout,
+                    expected_instance_id=self._instance_id,
+                    expected_minecraft_version=self._version(transport.stdout),
                 )
                 return _status_from_probe(
                     instance_id=self._instance_id,

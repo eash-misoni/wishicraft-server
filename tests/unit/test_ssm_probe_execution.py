@@ -84,4 +84,6 @@ def test_health_or_malformed_output_cannot_be_ready(stdout: str) -> None:
     from wishicraft.probe import ProbeContractError, parse_host_runtime_probe
 
     with pytest.raises(ProbeContractError):
-        parse_host_runtime_probe(stdout, expected_instance_id="i-0123456789abcdef0")
+        parse_host_runtime_probe(
+            stdout, expected_instance_id="i-0123456789abcdef0", expected_minecraft_version="26.2"
+        )
