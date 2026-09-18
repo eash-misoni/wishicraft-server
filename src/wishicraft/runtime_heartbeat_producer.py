@@ -66,6 +66,7 @@ def observe(*, now: datetime) -> RuntimeObservation:
             and active_game.get("binding_consistency") == "consistent"
             and isinstance(target, dict)
             and execution.get("phase") == "running"
+            and target.get("instance_id") == instance_id
             and isinstance(target.get("game_id"), str)
             and target["game_id"] == active_game.get("game_id")
             and isinstance(target.get("run_id"), str)

@@ -61,8 +61,8 @@ and monitoring emitted `RuntimeObservationUnknown`. This explains the fresh-hear
 The producer now chooses the Game from the **running receipt target** only when the
 host probe has verified the container's Game label and `/data` bind, exact run ID,
 manifest digest/package version and process identity. The producer checks that the
-receipt target Game equals the observed Game and has an expected run, digest and Game
-path. No filesystem scan or A/B list decides the running Game. The legacy `GAME_ID`
+receipt target Game equals the observed Game and has the actual instance identity,
+an expected run, digest and Game path. No filesystem scan or A/B list decides the running Game. The legacy `GAME_ID`
 is only a fallback while no running identity is trusted; it cannot turn an unknown
 observation into a trusted zero. Invalid binding, player observation failure and an
 absent target remain unknown/null. Heartbeat schema and 60-second cadence are unchanged.

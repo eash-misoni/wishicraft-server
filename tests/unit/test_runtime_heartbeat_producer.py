@@ -157,6 +157,7 @@ def test_registered_run_identity_is_not_limited_to_legacy_games(
             "phase": "running",
             "process_id": "d" * 64,
             "target": {
+                "instance_id": record().instance_id,
                 "game_id": game_id,
                 "run_id": "op-new-run",
                 "config_digest": "e" * 64,
@@ -190,7 +191,7 @@ def test_registered_run_identity_is_not_limited_to_legacy_games(
     assert producer._decode(producer._encode(written[0])) == written[0]
 
 
-@pytest.mark.parametrize("mismatch", ["game", "path", "run", "process", "observation"])
+@pytest.mark.parametrize("mismatch", ["instance", "game", "path", "run", "process", "observation"])
 def test_untrusted_run_or_player_observation_never_becomes_zero(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, mismatch: str
 ) -> None:
@@ -207,6 +208,7 @@ def test_untrusted_run_or_player_observation_never_becomes_zero(
             "phase": "running",
             "process_id": "d" * 64,
             "target": {
+                "instance_id": record().instance_id,
                 "game_id": game_id,
                 "run_id": "op-new-run",
                 "config_digest": "e" * 64,
@@ -215,7 +217,9 @@ def test_untrusted_run_or_player_observation_never_becomes_zero(
         },
         "errors": [],
     }
-    if mismatch == "game":
+    if mismatch == "instance":
+        payload["execution"]["target"]["instance_id"] = "i-00000000000000000"
+    elif mismatch == "game":
         payload["execution"]["target"]["game_id"] = "game-other"
     elif mismatch == "path":
         payload["execution"]["target"]["data_source"] = "/srv/minecraft/games/game-other/server"
