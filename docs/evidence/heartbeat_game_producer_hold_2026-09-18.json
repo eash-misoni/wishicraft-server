@@ -1,0 +1,51 @@
+{
+  "date_utc": "2026-09-18",
+  "scope": "registered-Game heartbeat producer; production stopped migration attempt",
+  "repository_head": "8463fc74636f298ec44f5b3198db107563719fc2",
+  "repository_validation": {
+    "full_pytest": "1480 passed",
+    "standard_ci_run": 35358236596,
+    "standard_ci_result": "success",
+    "neoforge_docker_ci_run": 35358236727,
+    "neoforge_docker_ci_result": "success"
+  },
+  "installed_producer_before": {
+    "path": "/usr/local/libexec/wishicraft/runtime_heartbeat_producer.py",
+    "sha256": "831645ac04e0f8f0affe44dc51e071ec77ca0a2bdb2ddb251796c64b4bce229a",
+    "matched_repository_predecessor": true,
+    "timer": "wishicraft-heartbeat.timer; 60 seconds",
+    "service_command": "/usr/bin/python3 -m wishicraft.runtime_heartbeat_producer"
+  },
+  "reviewed_candidate_sha256": "ea5a80cc2e52253fba3e95a6f2c7142f7efac371edeb608706153d6a62f87c5c",
+  "bundle_archive_sha256": "ea29b589f9b7c56eca446615b78df201409143c2a1096634b5cbe032542d2d96",
+  "migration_result": "failed before replacement",
+  "failed_step": "inactive installer filesystem_preflight.sh / docker compose ps",
+  "reason": "required NeoForge package environment absent from reviewed migration bundle",
+  "preflight_mount_guard": "passed",
+  "producer_updated": false,
+  "producer_update_evidence": "installer failed before backup/atomic replacement code; post-failure host file hash was not independently read back",
+  "host_runtime_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+  "game_package_digest": "720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b",
+  "cloudformation_deploy": false,
+  "minecraft_start": false,
+  "new_operation": false,
+  "read_only_diagnosis": "reproduced missing package environment; EC2 stopped afterwards",
+  "closeout_utc": "2026-09-18T15:00:16.484806+00:00",
+  "closeout": {
+    "desired_actual_health": "STOPPED / EC2 STOPPED / HEALTHY",
+    "alarms_ok": 45,
+    "current_operation": false,
+    "lock": false,
+    "active_workflow": false,
+    "active_ssm_or_session": false,
+    "dns": false,
+    "three_queues_empty": true,
+    "game_records_unchanged": true,
+    "operations_unchanged": true,
+    "volumes_unchanged": true,
+    "snapshots_unchanged": 9,
+    "provenance_unchanged": 16,
+    "ingress": "Discord / Admission / Web reserved concurrency 0"
+  },
+  "next_gate": "new reviewed package-aware inactive migration bundle and production-equivalent preflight regression before START"
+}

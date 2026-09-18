@@ -107,3 +107,32 @@ part of this correction.
    stopped receipt, container absence, EC2 stop, DNS removal, 45 alarms OK and all
    ingress prerequisites before reopening any of the three paths. A distinct bug
    ends this slice with ingress closed and no second START.
+
+### 2026-09-18 production hold: inactive installer preflight
+
+The first reviewed one-file bundle was transported to the stopped Target during
+maintenance, but its inactive installer failed **before the file replacement**.
+The canonical `filesystem_preflight.sh` passed the Data EBS raw-device and mount
+guards, then `docker compose ps` rejected missing required NeoForge package
+environment variables (`WISHICRAFT_PACKAGE_*` and `GAME_PACKAGE_DIRECTORY`).
+The adapter had reused the generic inactive installer without supplying its
+existing `package_environment` input. This is a release adapter defect, not an
+observed heartbeat result. The installer runs preflight before target validation,
+backup and atomic replacement, so the producer remained at its predecessor hash.
+The archive staged on root EBS is **not** an approved installed release; do not
+invoke or reuse it for the next attempt.
+
+A separate read-only maintenance session reproduced the exact preflight failure
+and then stopped EC2. No Minecraft START, Game/Operation/receipt rewrite, common
+runtime migration or CloudFormation deploy occurred. The 2026-09-18 15:00 UTC
+read-only closeout showed STOPPED / HEALTHY, EC2 stopped, 45 alarms OK, no
+Current Operation, Lock, workflow, active SSM/session or DNS, and all three queues
+empty. Game records, Operations, volumes, nine snapshots and sixteen provenance
+records matched the preflight baseline. All three ingress paths remain closed.
+
+The next slice must build a **new** dedicated bundle from a verified package
+environment for the exact stopped Game/run and test its Compose preflight with
+the production-equivalent NeoForge environment. Check old/new file hashes and
+the complete stopped receipt before any retry. Do not treat the failed staged
+archive as a valid producer update, and do not START until the stopped migration
+and read-back succeed.
