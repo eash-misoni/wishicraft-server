@@ -120,7 +120,12 @@ def _canonical_probe_command() -> str:
         .read_text(encoding="utf-8")
     )
     encoded = base64.b64encode(source.encode()).decode("ascii")
-    return f"printf '%s' '{encoded}' | base64 --decode | python3 -"
+    # stdin has no script directory. Match the installed helpers' module location,
+    # independent of SSM's working directory, PYTHONPATH and user site packages.
+    return (
+        f"printf '%s' '{encoded}' | base64 --decode | "
+        "(cd /usr/local/libexec/wishicraft && exec python3 -E -s -B -)"
+    )
 
 
 def _command_id(response: object) -> str | None:

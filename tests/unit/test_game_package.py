@@ -294,7 +294,9 @@ def test_cdk_package_digest_recovery_compression_and_no_new_resources(
                 )
 
 
-@pytest.mark.parametrize("damage", ["version", "loader", "digest", "mount", "missing", "symlink"])
+@pytest.mark.parametrize(
+    "damage", ["version", "loader", "digest", "mount", "missing", "symlink", "game", "generation"]
+)
 def test_observation_rejects_wrong_runtime_or_missing_mods(filesystem: Any, damage: str) -> None:
     games, package = filesystem
     materialize(games, package)
@@ -326,11 +328,15 @@ def test_observation_rejects_wrong_runtime_or_missing_mods(filesystem: Any, dama
         actual["Mounts"][0]["RW"] = True
     elif damage == "missing":
         (games / "game-a/server/mods" / package["mods"][0]["filename"]).unlink()
+    elif damage == "game":
+        target["game_id"] = "game-b"
+    elif damage == "generation":
+        target["data_source"] = str(games / "game-a/worlds/op-other/server")
     else:
         directory = games / "game-a/server/mods"
         directory.rename(directory.with_name("saved-mods"))
         directory.symlink_to(directory.with_name("saved-mods"), target_is_directory=True)
-    with pytest.raises(ValueError):
+    with pytest.raises((ValueError, OSError)):
         packages.observed(actual, manifest, target)
 
 
@@ -383,6 +389,12 @@ def test_protocol_version_comes_from_integrity_checked_package(
     assert probe.package_version("container") == "1.21.1"
     assert probe.version_matches_expected("1.21.1", "1.21.1")
     assert not probe.version_matches_expected("26.2", "1.21.1")
+    target["run_id"] = "op-other"
+    paths["/var/lib/wishicraft/runtime/receipt.json"].write_text(json.dumps({"target": target}))
+    with pytest.raises(ValueError, match="RUN_MISMATCH"):
+        probe.package_version("container")
+    target["run_id"] = "op-test"
+    paths["/var/lib/wishicraft/runtime/receipt.json"].write_text(json.dumps({"target": target}))
     paths["/etc/wishicraft/host-runtime/runtime.env"].write_text("changed")
     with pytest.raises(ValueError, match="ARTIFACT_MISMATCH"):
         probe.package_version("container")

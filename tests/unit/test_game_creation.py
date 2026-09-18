@@ -331,6 +331,19 @@ def test_initial_preparation_retry_unknown_and_other_game(
     (data / "world").mkdir()
     (data / "world/level.dat").write_bytes(b"synthetic world")
     assert initial_game.initialized(target, atomic) is True
+    world_inode = (data / "world").stat().st_ino
+    before = (data / "world/level.dat").read_bytes()
+    initial_game.prepare(
+        game,
+        config,
+        {**target, "run_id": "op-new-start"},
+        atomic,
+        uid=os.getuid(),
+        gid=os.getgid(),
+    )
+    assert (data / "world").stat().st_ino == world_inode
+    assert (data / "world/level.dat").read_bytes() == before
+    assert game["materialization_state"] == "UNMATERIALIZED"
     (data / "world/level.dat").unlink()
     with pytest.raises(ValueError, match="INITIAL_WORLD_MISSING"):
         initial_game.initialized(target, atomic)

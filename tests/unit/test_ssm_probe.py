@@ -132,7 +132,9 @@ def test_canonical_command_contains_exact_packaged_probe() -> None:
     source = Path("src/wishicraft/artifacts/host_runtime_probe.py").read_text(encoding="utf-8")
 
     assert decoded == source
-    assert command.endswith("| base64 --decode | python3 -")
+    assert command.endswith(
+        "| base64 --decode | (cd /usr/local/libexec/wishicraft && exec python3 -E -s -B -)"
+    )
 
 
 def test_probe_artifact_contains_no_mutation_or_minecraft_file_access() -> None:

@@ -27,6 +27,7 @@ from wishicraft.config import load_configuration  # noqa: E402
 from wishicraft.game_creation import create  # noqa: E402
 from wishicraft.host_runtime import render_boot_time_artifacts  # noqa: E402
 from wishicraft.operation import WebOperationContext, _attribute_map  # noqa: E402
+from wishicraft.ssm_probe import _canonical_probe_command  # noqa: E402
 from wishicraft.web_status import decode  # noqa: E402
 
 
@@ -123,6 +124,25 @@ def main() -> None:
     )
     host.CONFIG.write_text(json.dumps(config))
     host.CONFIG.chmod(0o600)
+    # Exercise the unmodified SSM stdin command in the installed layout, outside
+    # the checkout. Only systemd/IMDS/mount are unavailable in disposable CI.
+    runtime_modules = Path("/usr/local/libexec/wishicraft")
+    assert not runtime_modules.exists()
+    runtime_modules.mkdir(parents=True)
+    (runtime_modules / "game_package.py").write_bytes(Path(game_package.__file__).read_bytes())
+    installed_artifacts = Path("/etc/wishicraft/host-runtime")
+    assert not installed_artifacts.exists()
+    installed_artifacts.parent.mkdir(parents=True, exist_ok=True)
+    installed_artifacts.symlink_to(artifacts, target_is_directory=True)
+    receipt_path = Path("/var/lib/wishicraft/runtime/receipt.json")
+    assert not receipt_path.exists()
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.symlink_to(root / "receipt.json")
+    probe_bin = root / "probe-bin"
+    probe_bin.mkdir()
+    systemctl = probe_bin / "systemctl"
+    systemctl.write_text("#!/bin/sh\n[ \"$1\" = show ] || exit 1\nprintf 'loaded\\nactive\\n'\n")
+    systemctl.chmod(0o755)
     host.actual_instance = lambda: config["instance_id"]
     operation: dict[str, Any] = {}
     lease = {
@@ -293,6 +313,26 @@ def main() -> None:
         host.validate_container(container, target)
         host.configured_container(container, manifest)
         package = game_package.observed(container, manifest, target)
+        probe_result = subprocess.run(
+            ["/bin/sh", "-c", _canonical_probe_command()],
+            cwd="/",
+            env={
+                **os.environ,
+                "PATH": str(probe_bin) + os.pathsep + os.environ["PATH"],
+                "PYTHONPATH": "/does-not-exist",
+            },
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        assert probe_result.returncode == 0, probe_result.stderr
+        probe_document = json.loads(probe_result.stdout)
+        assert probe_document["minecraft"]["ready"] is True, probe_document
+        assert probe_document["active_game"]["game_id"] == game["game_id"]
+        assert probe_document["active_game"]["binding_consistency"] == "consistent"
+        assert probe_document["execution"]["target"] == target
+        assert probe_document["minecraft"]["protocol"]["version_match"] is True
+        print("EXACT_SSM_STDIN_PACKAGE_OBSERVED", package["package_id"], flush=True)
         assert container["HostConfig"]["Memory"] == 6442450944
         assert json.loads(Path(target["data_source"]).joinpath("whitelist.json").read_text()) == []
         if package["loader"]["type"] == "neoforge":
@@ -351,6 +391,21 @@ def main() -> None:
         print("OLD_RUN_FRESH_PROOF_FINALIZED_WORLD_AND_UNMATERIALIZED_GAME_RETAINED", flush=True)
         lease.update(saved_lease)
         current = None
+        assert json.loads(initial_owner.read_text())["phase"] == "initialized"
+        cache_before = {
+            p: (p.read_bytes(), p.stat().st_mtime_ns)
+            for p in game_package.location(neo["game_id"]).rglob("*.jar")
+        }
+        resumed = start(neo, commit=False)
+        assert resumed["Id"] != interrupted["Id"]
+        assert json.dumps(neo, sort_keys=True) == old_game
+        assert old_world.stat().st_ino == world_inode
+        assert all(
+            (p.read_bytes(), p.stat().st_mtime_ns) == value for p, value in cache_before.items()
+        )
+        # The fixture only commits after the exact SSM protocol/package observation.
+        neo["materialization_state"] = "MATERIALIZED"
+        print("INITIALIZED_PREPARED_WORLD_REUSED_NEW_RUN_READY", flush=True)
         first = start(vanilla)
         real_execute(
             [

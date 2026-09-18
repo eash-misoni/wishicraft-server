@@ -1,5 +1,7 @@
 # 05. Data and Interface Contracts
 
+> D-109 SSM READY transport: stdin実行のmodule解決をcanonical runtime directoryへ固定。READY判定・host/package artifactは不変。[実行境界・回帰・production gate](runbooks/ssm_ready_probe.md)。
+
 > D-109 interrupted-stop recovery: explicit operator-only, same old run/container,
 > fresh canonical save proof when absent, unchanged finish_stop, Game still UNMATERIALIZED.
 > No receipt fabrication or new START. [限定契約・retry・release gate](runbooks/interrupted_stop_recovery.md)。

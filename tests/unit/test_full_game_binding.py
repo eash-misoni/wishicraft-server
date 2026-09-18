@@ -273,3 +273,40 @@ def test_recursive_null_and_existing_scalar_types() -> None:
 def test_malformed_attribute_fails_closed(wire: Any) -> None:
     with pytest.raises(ValueError):
         _decode_attribute(wire)
+
+
+@pytest.mark.parametrize("ready", [False, True])
+def test_first_materialization_requires_exact_ready_before_commit(
+    boundary: Any, monkeypatch: pytest.MonkeyPatch, ready: bool
+) -> None:
+    from wishicraft import game_creation
+    from wishicraft.start_workflow import StartWorkflowError
+
+    db, runtime = boundary
+    request = admit(db, GAMES[2])
+    before = copy.deepcopy(db.records["games", GAMES[2]])
+    monkeypatch.setattr(start_workflow_lambda, "assert_observed", Mock())
+    observation = Mock()
+    observation.ready_for_success.return_value = ready
+    monkeypatch.setattr(StartObservation, "from_item", Mock(return_value=observation))
+    commit = Mock()
+    monkeypatch.setattr(game_creation, "complete_materialization", commit)
+    runtime.operations.complete_owned = Mock()
+    event = {
+        "schema_version": 1,
+        "action": "complete",
+        "operation_id": request.operation_id,
+        "lease_id": request.lease_id,
+        "state": {},
+    }
+    if ready:
+        assert start_workflow_lambda.handler(event, None) == {"status": "SUCCEEDED"}
+        commit.assert_called_once()
+        runtime.operations.complete_owned.assert_called_once()
+    else:
+        with pytest.raises(StartWorkflowError):
+            start_workflow_lambda.handler(event, None)
+        commit.assert_not_called()
+        runtime.operations.complete_owned.assert_not_called()
+    observation.ready_for_success.assert_called_once_with(GAMES[2])
+    assert db.records["games", GAMES[2]] == before
