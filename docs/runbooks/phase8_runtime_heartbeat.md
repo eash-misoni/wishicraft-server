@@ -171,3 +171,40 @@ why a producer-only correction does not change common runtime digest
 The v2 validation tightens that existing ownership boundary; it does not exclude a
 manifest-owned file or weaken digest checking. The create-survival package digest
 remains `720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b`.
+
+### Registered Game heartbeat production closeout — 2026-09-19
+
+Implementation HEAD `c46fa6579a02b9f36ae212b730caf1b582ce2c6b` passed 1491
+tests, Ruff, format, mypy, every standard synth variant, standard CI run
+`35422158798` and NeoForge Docker run `35422158787`. The latter ran the
+production-shape Compose migration preflight for both canonical NeoForge and
+legacy Vanilla environments before the real NeoForge server tests.
+
+The fresh `heartbeat-game-v2` bundle resolved the exact production Game GetItem
+through the immutable package authority. Its Compose environment selected
+Minecraft 1.21.1, NeoForge 21.1.219 and Game cache
+`/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/package-cache`.
+All file-write preconditions passed. The single producer changed from SHA-256
+`831645ac04e0f8f0affe44dc51e071ec77ca0a2bdb2ddb251796c64b4bce229a`
+to `ea5a80cc2e52253fba3e95a6f2c7142f7efac371edeb608706153d6a62f87c5c`;
+direct host read-back confirmed it. The common runtime and Game package digests
+did not change. No CloudFormation deploy or durable record migration occurred.
+
+Normal START `op-aa748ddd-fab0-480b-b5d5-2240f3653b16` reused generation 1
+world inode 4316448 and reached READY. Scheduled Reconcile accepted the running
+Game. Three successive heartbeats at 60-second cadence bound the same
+Game/run/instance/runtime/boot/process, reported protocol `ready` and stored
+`player_count=0` as DynamoDB `N`, never `NULL`. All 45 alarms remained OK.
+Host evidence reconfirmed NeoForge 21.1.219, Create 6.0.10, Farmer's Delight
+1.3.4, empty effective whitelist, Xms 1G/Xmx 4G and the 6 GiB container limit.
+
+Normal STOP `op-79b9b983-1223-493a-9cbf-60f45b4043df` produced canonical
+save/stop proof, removed the container and DNS, and stopped EC2. A final
+inspection-only boot left a transitional stopped-state observation until the
+ordinary scheduled Reconcile observed the completed EC2 stop; it then returned
+to STOPPED/HEALTHY. This was observation timing, not a runtime failure, and no
+second START or code fix was used. A/B and create-survival Game records, existing
+Operations, volumes, nine snapshots and sixteen provenance records were unchanged;
+only the expected START/STOP Operations were added. Discord, Admission and Web
+ingress were reopened after the final gates passed. Exact evidence is in
+`docs/evidence/heartbeat_game_producer_production_2026-09-19.json`.

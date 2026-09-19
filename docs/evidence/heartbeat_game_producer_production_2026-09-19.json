@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "stage": "dev",
+  "repository": {
+    "implementation_commit": "c46fa6579a02b9f36ae212b730caf1b582ce2c6b",
+    "local_tests": {
+      "pytest": "1491 passed",
+      "ruff": "passed",
+      "format": "passed",
+      "mypy": "215 source files passed",
+      "synth": "all standard dev variants passed"
+    },
+    "ci": [
+      {
+        "name": "CI",
+        "run_id": 35422158798,
+        "conclusion": "success"
+      },
+      {
+        "name": "NeoForge runtime integration",
+        "run_id": 35422158787,
+        "conclusion": "success",
+        "package_migration_compose": "passed",
+        "neoforge_docker": "passed",
+        "neoforge_host_docker": "passed"
+      }
+    ]
+  },
+  "preflight": {
+    "observed_at": "2026-09-19T04:58:07.148832+00:00",
+    "system": "STOPPED / HEALTHY",
+    "ec2": "stopped",
+    "alarms_ok": 45,
+    "current_operation": null,
+    "locks": 0,
+    "active_workflows": 0,
+    "active_ssm_commands": 0,
+    "active_ssm_sessions": 0,
+    "dns_records": 0,
+    "queues_empty": 3,
+    "ingress": "Discord / Admission / Web closed",
+    "snapshots": 9,
+    "provenance_records": 16
+  },
+  "migration": {
+    "cloudformation_deploy": false,
+    "bundle_namespace": "heartbeat-game-v2",
+    "failed_v1_bundle_reused": false,
+    "bundle_archive_sha256": "2e9934da91253023d5b70626fe2cb5e3af745a5a3e66d3be79f3cf0735fccd80",
+    "bundle_archive_bytes": 7854,
+    "target": "/usr/local/libexec/wishicraft/runtime_heartbeat_producer.py",
+    "old_sha256": "831645ac04e0f8f0affe44dc51e071ec77ca0a2bdb2ddb251796c64b4bce229a",
+    "new_sha256": "ea5a80cc2e52253fba3e95a6f2c7142f7efac371edeb608706153d6a62f87c5c",
+    "direct_readback": "matched new_sha256",
+    "preflight_before_file_write": [
+      "exact ACTIVE / MATERIALIZED Game authority",
+      "canonical package digest and fixed catalog",
+      "Data EBS mount and selected data source",
+      "package-owner.json and verified package cache",
+      "exact installer/mod filenames, sizes and SHA-256",
+      "canonical Compose configuration",
+      "inactive runtime, no container and no listeners",
+      "exact old producer hash"
+    ],
+    "package_environment": {
+      "GAME_PACKAGE_DIRECTORY": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/package-cache",
+      "WISHICRAFT_PACKAGE_DIGEST": "720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b",
+      "WISHICRAFT_PACKAGE_TYPE": "NEOFORGE",
+      "WISHICRAFT_PACKAGE_VERSION": "1.21.1",
+      "WISHICRAFT_PACKAGE_NEOFORGE_VERSION": "21.1.219",
+      "WISHICRAFT_PACKAGE_NEOFORGE_INSTALLER": "/wishicraft-package/neoforge-21.1.219-installer.jar",
+      "WISHICRAFT_PACKAGE_NEOFORGE_FORCE_REINSTALL": "true"
+    },
+    "data_source": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+    "generation": 1,
+    "runtime_digest": "64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c",
+    "package_digest": "720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b",
+    "world_inode_before_after": 4316448
+  },
+  "runtime_verification": {
+    "start_operation_id": "op-aa748ddd-fab0-480b-b5d5-2240f3653b16",
+    "start_status": "SUCCEEDED",
+    "start_request_retry": "same Operation",
+    "scheduled_reconcile": "observed",
+    "minecraft_version": "1.21.1",
+    "neoforge_version": "21.1.219",
+    "mods": [
+      "Create 6.0.10",
+      "Farmer's Delight 1.3.4"
+    ],
+    "whitelist": {
+      "common": 0,
+      "game_specific": 0,
+      "effective": 0
+    },
+    "jvm": {
+      "xms": "1G",
+      "xmx": "4G"
+    },
+    "container_memory_limit_bytes": 6442450944,
+    "rcon_player_count": 0,
+    "world_recreated": false,
+    "world_inode": 4316448,
+    "heartbeat_observations": [
+      {
+        "observed_at": "2026-09-19T05:10:17.080243Z",
+        "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+        "run_id": "op-aa748ddd-fab0-480b-b5d5-2240f3653b16",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "runtime_id": "wishicraft-host-runtime",
+        "protocol_state": "ready",
+        "player_count": 0
+      },
+      {
+        "observed_at": "2026-09-19T05:11:18.084211Z",
+        "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+        "run_id": "op-aa748ddd-fab0-480b-b5d5-2240f3653b16",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "runtime_id": "wishicraft-host-runtime",
+        "protocol_state": "ready",
+        "player_count": 0
+      },
+      {
+        "observed_at": "2026-09-19T05:12:19.088837Z",
+        "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+        "run_id": "op-aa748ddd-fab0-480b-b5d5-2240f3653b16",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "runtime_id": "wishicraft-host-runtime",
+        "protocol_state": "ready",
+        "player_count": 0
+      }
+    ],
+    "runtime_observation": "known / HEALTHY",
+    "heartbeat_alarms": "remained OK"
+  },
+  "stop": {
+    "operation_id": "op-79b9b983-1223-493a-9cbf-60f45b4043df",
+    "status": "SUCCEEDED",
+    "request_retry": "same Operation",
+    "receipt_phase": "stopped",
+    "receipt_run_id": "op-aa748ddd-fab0-480b-b5d5-2240f3653b16",
+    "save_confirmed": true,
+    "removal_ready": true,
+    "container_absent": true,
+    "world_inode": 4316448
+  },
+  "data_protection": {
+    "all_game_records_unchanged": true,
+    "legacy_a_b_unchanged": true,
+    "existing_operations_unchanged": true,
+    "added_operations": [
+      "op-aa748ddd-fab0-480b-b5d5-2240f3653b16",
+      "op-79b9b983-1223-493a-9cbf-60f45b4043df"
+    ],
+    "volumes_unchanged": true,
+    "snapshots": 9,
+    "provenance_records": 16
+  },
+  "final": {
+    "observed_at": "2026-09-19T05:22:32.813542+00:00",
+    "system": "STOPPED / HEALTHY",
+    "ec2": "stopped",
+    "alarms_ok": 45,
+    "current_operation": null,
+    "locks": 0,
+    "active_workflows": 0,
+    "active_ssm_commands": 0,
+    "active_ssm_sessions": 0,
+    "dns_records": 0,
+    "queues_empty": 3,
+    "discord_ingress": "open",
+    "admission_ingress": "open",
+    "web_ingress": "open"
+  }
+}
