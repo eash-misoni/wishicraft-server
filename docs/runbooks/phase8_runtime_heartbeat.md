@@ -84,12 +84,21 @@ part of this correction.
    provenance baselines. Inspect the installed source hash, unit, timer, manifest,
    receipt and no-container proof before choosing a bundle.
 2. Build a fresh output with `python -m wishicraft.heartbeat_game_migration --receipt
-   <captured-stopped-receipt.json> --output <new-bundle-root>`. This offline adapter
+   <captured-stopped-receipt.json> --game-record <exact-dynamodb-get-item.json>
+   --output <new-bundle-root>`. This offline adapter
    reuses the established inactive-only installer: exact old/new source hashes,
    root/mode checks, completed stop proof, filesystem preflight, no container/listener,
    predecessor backup, fsync/atomic rename and retry on old or new hash. It changes
    **only** the producer file. It keeps the predecessor under the exact
-   `heartbeat-game-v1` root-EBS namespace for stopped rollback review.
+   `heartbeat-game-v2` root-EBS namespace for stopped rollback review. The v1 bundle
+   from the failed attempt is never reused.
+   The adapter decodes the exact registered Game through the canonical DynamoDB
+   decoder, verifies ACTIVE/MATERIALIZED, generation/path and immutable package
+   definition plus `creation.package_digest` against the deployed runtime manifest
+   and fixed catalog, then uses the ordinary START package projection. For a
+   NeoForge Game this supplies Minecraft/loader/install flags and
+   `GAME_PACKAGE_DIRECTORY`; legacy Vanilla uses the same compatibility resolver.
+   No operator-entered package value is accepted.
 3. Transport the complete reviewed bundle with an exact archive SHA-256, verify it on
    the host, run the bundled installer during maintenance, and read back producer,
    heartbeat service/timer and unchanged common manifest hashes. A failed/partial
@@ -136,3 +145,29 @@ the production-equivalent NeoForge environment. Check old/new file hashes and
 the complete stopped receipt before any retry. Do not treat the failed staged
 archive as a valid producer update, and do not START until the stopped migration
 and read-back succeed.
+
+### Package-aware migration contract
+
+`GAME_PACKAGE_DIRECTORY` is the Game-scoped verified cache
+`/srv/minecraft/games/<game-id>/package-cache`. It is shared by that Game's
+generations; the selected world/server directory remains the separately verified
+receipt `data_source`. For create-survival generation 1 the migration must refer to
+the existing Game cache and existing `/server` data source. It must not copy, move or
+regenerate either directory.
+
+The v2 installer validates every package input before it creates a receipt backup or
+replaces the producer: exact stopped receipt and selected data source, canonical
+package digest/environment, `package-owner.json`, root ownership and non-writable
+cache permissions, and every expected installer/mod filename, size and SHA-256. The
+Compose filesystem preflight receives the same environment renderer used by START.
+Missing environment, a wrong Game/path/digest, an unverified artifact, an active
+container/listener or an unknown producer hash therefore fails before file write.
+Retry accepts only the reviewed old hash or the already-installed new hash.
+
+The producer remains an operational helper installed separately from the fixed common
+Compose/runtime.env/manifest artifact. This boundary was established by D-092 and is
+why a producer-only correction does not change common runtime digest
+`64bbfff50b03dd0411ca496ada7060d93d015ecd81aab02ca14963dcb9f8073c`.
+The v2 validation tightens that existing ownership boundary; it does not exclude a
+manifest-owned file or weaken digest checking. The create-survival package digest
+remains `720deb9f4a32515af87c7f620cf9d2667cabbc7e9b793db109cb011b71122f0b`.

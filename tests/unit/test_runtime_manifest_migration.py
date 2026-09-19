@@ -14,6 +14,7 @@ from typing import Any
 
 import pytest
 
+from wishicraft.artifacts import game_package
 from wishicraft.artifacts import runtime_install as installer
 from wishicraft.config import load_configuration
 from wishicraft.host_runtime import render_boot_time_artifacts
@@ -179,6 +180,109 @@ def test_existing_manifest_install_and_same_bundle_resume(
     (host_tree["receipts"] / "receipt.json").write_text("{}")
     with pytest.raises(ValueError, match="EXECUTION_ALREADY_RECORDED"):
         installer.install()
+
+
+def package_host_tree(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[dict[str, Any], Path]:
+    games = tmp_path / "games"
+    game_id = "game-test"
+    root = games / game_id
+    cache = root / "package-cache"
+    mods = cache / "mods"
+    mods.mkdir(parents=True)
+    package = json.loads(json.dumps(game_package.load()[1]))
+    artifacts = []
+    for original in [*package["mods"], package["loader"]["installer"]]:
+        content = original["filename"].encode()
+        original["size"] = len(content)
+        original["sha256"] = hashlib.sha256(content).hexdigest()
+        spec = {
+            "filename": original["filename"],
+            "size": len(content),
+            "sha256": hashlib.sha256(content).hexdigest(),
+        }
+        path = (mods if original in package["mods"] else cache) / original["filename"]
+        path.write_bytes(content)
+        path.chmod(0o444)
+        artifacts.append(spec)
+    owner = root / "package-owner.json"
+    owner.write_text(game_package.canonical({"game_id": game_id, "package": package}))
+    monkeypatch.setattr(installer, "GAMES", games)
+    monkeypatch.setattr(installer, "PACKAGE_OWNER_UID", os.getuid())
+    monkeypatch.setattr(installer, "PACKAGE_OWNER_GID", os.getgid())
+    context = {
+        "game_id": game_id,
+        "data_source": str(root / "server"),
+        "generation": 1,
+        "package": package,
+        "package_digest": game_package.digest(package),
+        "package_directory": str(cache),
+        "artifacts": artifacts,
+    }
+    manifest = {
+        "receipt_predecessor": {
+            "target": {
+                "game_id": game_id,
+                "data_source": str(root / "server"),
+                "run_id": "op-package-test",
+                "config_digest": "a" * 64,
+            }
+        },
+        "package_context": context,
+        "package_environment": {
+            **game_package.projection(game_id, package),
+            "GAME_PACKAGE_DIRECTORY": str(cache),
+        },
+    }
+    return manifest, cache
+
+
+def test_package_context_verifies_owner_cache_and_exact_artifacts_before_write(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest, _ = package_host_tree(tmp_path, monkeypatch)
+    installer.verify_package_context(manifest)
+
+
+@pytest.mark.parametrize("damage", ["missing-env", "digest", "directory", "artifact"])
+def test_package_context_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, damage: str
+) -> None:
+    manifest, cache = package_host_tree(tmp_path, monkeypatch)
+    if damage == "missing-env":
+        manifest.pop("package_environment")
+    elif damage == "digest":
+        manifest["package_context"]["package_digest"] = "0" * 64
+    elif damage == "directory":
+        manifest["package_environment"]["GAME_PACKAGE_DIRECTORY"] = str(cache) + "-wrong"
+    else:
+        artifact = manifest["package_context"]["artifacts"][0]
+        path = cache / "mods" / artifact["filename"]
+        path.chmod(0o644)
+        path.write_bytes(b"wrong")
+    with pytest.raises(ValueError, match="PACKAGE_"):
+        installer.verify_package_context(manifest)
+
+
+def test_invalid_package_context_stops_install_before_first_replace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, host_tree: dict[str, Any]
+) -> None:
+    manifest, _ = package_host_tree(tmp_path / "package", monkeypatch)
+    manifest.pop("package_environment")
+    plan_path = installer.BUNDLE / "install.json"
+    plan = json.loads(plan_path.read_text())
+    plan.update(manifest)
+    plan_path.write_text(json.dumps(plan))
+    before = {
+        path.name: path.read_bytes() for path in host_tree["targets"].iterdir() if path.is_file()
+    }
+    with pytest.raises(ValueError, match="PACKAGE_CONTEXT_SCHEMA"):
+        installer.install()
+    assert {
+        path.name: path.read_bytes() for path in host_tree["targets"].iterdir() if path.is_file()
+    } == before
+    assert not host_tree["receipts"].exists()
 
 
 @pytest.mark.parametrize(

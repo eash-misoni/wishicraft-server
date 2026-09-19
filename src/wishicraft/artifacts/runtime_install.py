@@ -6,6 +6,7 @@ import fcntl
 import hashlib
 import json
 import os
+import re
 import stat
 import subprocess
 import tempfile
@@ -15,6 +16,8 @@ from typing import Any
 
 BUNDLE = Path("/var/tmp/wishicraft-targeted-runtime-v1")
 RECEIPTS = Path("/var/lib/wishicraft/runtime")
+GAMES = Path("/srv/minecraft/games")
+PACKAGE_OWNER_UID, PACKAGE_OWNER_GID = 0, 0
 
 
 def digest(path: Path) -> str:
@@ -82,6 +85,123 @@ def verify_stopped_predecessor(manifest: dict[str, Any]) -> None:
         raise ValueError("RECEIPT_STOP_UNPROVEN")
 
 
+def verify_package_context(manifest: dict[str, Any]) -> None:
+    """Validate the reviewed Game package cache before any managed file is replaced."""
+    context = manifest.get("package_context")
+    environment = manifest.get("package_environment")
+    if context is None:
+        return
+    if not isinstance(context, dict) or not isinstance(environment, dict):
+        raise ValueError("PACKAGE_CONTEXT_SCHEMA")
+    required = {
+        "game_id",
+        "data_source",
+        "generation",
+        "package",
+        "package_digest",
+        "package_directory",
+        "artifacts",
+    }
+    if (
+        set(context) != required
+        or context["game_id"] != manifest["receipt_predecessor"]["target"]["game_id"]
+    ):
+        raise ValueError("PACKAGE_CONTEXT_SCHEMA")
+    game_id = context["game_id"]
+    if not isinstance(game_id, str) or re.fullmatch(r"game-[a-z0-9-]+", game_id) is None:
+        raise ValueError("PACKAGE_CONTEXT_IDENTITY")
+    root = GAMES / game_id
+    package_directory = root / "package-cache"
+    if (
+        context["package_directory"] != str(package_directory)
+        or environment.get("GAME_PACKAGE_DIRECTORY") != str(package_directory)
+        or context["data_source"] != manifest["receipt_predecessor"]["target"]["data_source"]
+        or environment.get("WISHICRAFT_PACKAGE_DIGEST") != context["package_digest"]
+    ):
+        raise ValueError("PACKAGE_CONTEXT_IDENTITY")
+    package = context["package"]
+    canonical = json.dumps(package, sort_keys=True, separators=(",", ":")) + "\n"
+    if hashlib.sha256(canonical.encode()).hexdigest() != context["package_digest"]:
+        raise ValueError("PACKAGE_CONTEXT_DIGEST")
+    loader = package.get("loader")
+    mods = package.get("mods")
+    if not isinstance(loader, dict) or not isinstance(mods, list):
+        raise ValueError("PACKAGE_CONTEXT_SCHEMA")
+    neo = loader.get("type") == "neoforge"
+    if not neo and loader != {"type": "vanilla"}:
+        raise ValueError("PACKAGE_CONTEXT_SCHEMA")
+    expected_environment = {
+        "GAME_PACKAGE_DIRECTORY": str(package_directory),
+        "WISHICRAFT_PACKAGE_DIGEST": context["package_digest"],
+        "WISHICRAFT_PACKAGE_TYPE": "NEOFORGE" if neo else "VANILLA",
+        "WISHICRAFT_PACKAGE_VERSION": package.get("minecraft_version"),
+        "WISHICRAFT_PACKAGE_NEOFORGE_VERSION": loader.get("version", ""),
+        "WISHICRAFT_PACKAGE_NEOFORGE_INSTALLER": (
+            "/wishicraft-package/" + loader.get("installer", {}).get("filename", "") if neo else ""
+        ),
+        "WISHICRAFT_PACKAGE_NEOFORGE_FORCE_REINSTALL": "true" if neo else "false",
+    }
+    if environment != expected_environment:
+        raise ValueError("PACKAGE_ENVIRONMENT_MISMATCH")
+    owner = root / "package-owner.json"
+    if (
+        digest(owner)
+        != hashlib.sha256(
+            (
+                json.dumps(
+                    {"game_id": game_id, "package": package}, sort_keys=True, separators=(",", ":")
+                )
+                + "\n"
+            ).encode()
+        ).hexdigest()
+    ):
+        raise ValueError("PACKAGE_OWNER_MISMATCH")
+    owner_info = owner.stat()
+    if (
+        owner_info.st_uid != PACKAGE_OWNER_UID
+        or owner_info.st_gid != PACKAGE_OWNER_GID
+        or owner_info.st_nlink != 1
+        or owner_info.st_mode & 0o022
+    ):
+        raise ValueError("PACKAGE_OWNER_IDENTITY")
+    package_info = package_directory.lstat()
+    if (
+        not stat.S_ISDIR(package_info.st_mode)
+        or package_info.st_uid != PACKAGE_OWNER_UID
+        or package_info.st_gid != PACKAGE_OWNER_GID
+        or package_info.st_mode & 0o022
+    ):
+        raise ValueError("PACKAGE_DIRECTORY_IDENTITY")
+    artifacts = context["artifacts"]
+    if not isinstance(artifacts, list):
+        raise ValueError("PACKAGE_CONTEXT_SCHEMA")
+    expected_specs = [
+        {key: artifact[key] for key in ("filename", "size", "sha256")}
+        for artifact in ([*mods, loader["installer"]] if neo else mods)
+    ]
+    if artifacts != expected_specs:
+        raise ValueError("PACKAGE_ARTIFACT_IDENTITY")
+    mod_names = {mod["filename"] for mod in mods}
+    for artifact in artifacts:
+        if not isinstance(artifact, dict) or set(artifact) != {"filename", "size", "sha256"}:
+            raise ValueError("PACKAGE_CONTEXT_SCHEMA")
+        filename = artifact["filename"]
+        if not isinstance(filename, str) or Path(filename).name != filename:
+            raise ValueError("PACKAGE_ARTIFACT_IDENTITY")
+        path = package_directory / ("mods" if filename in mod_names else "") / filename
+        info = path.lstat()
+        if (
+            not stat.S_ISREG(info.st_mode)
+            or info.st_uid != PACKAGE_OWNER_UID
+            or info.st_gid != PACKAGE_OWNER_GID
+            or info.st_nlink != 1
+            or info.st_mode & 0o222
+            or info.st_size != artifact["size"]
+            or digest(path) != artifact["sha256"]
+        ):
+            raise ValueError("PACKAGE_ARTIFACT_IDENTITY")
+
+
 def install() -> None:
     if os.geteuid() != 0:
         raise ValueError("ROOT_REQUIRED")
@@ -140,6 +260,7 @@ def install() -> None:
         raise ValueError("LISTENER_REMAINS")
     for entry in manifest["files"]:
         validate_entry(entry)
+    verify_package_context(manifest)
     RECEIPTS.mkdir(mode=0o700, parents=True, exist_ok=True)
     verify_stopped_predecessor(manifest)
     backup_root = RECEIPTS

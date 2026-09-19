@@ -150,6 +150,10 @@ def prepare_reader_fix(
 
     baseline = "0889609b0d398ee55cf8b752708ae03a80443f59"
     source = "src/wishicraft/artifacts/targeted_runtime.py"
+    allowed_sources = {
+        "src/wishicraft/artifacts/runtime_install.py",
+        source,
+    }
     changed = subprocess.check_output(
         [
             "git",
@@ -165,7 +169,7 @@ def prepare_reader_fix(
         cwd=root,
         text=True,
     ).splitlines()
-    if changed != [source]:
+    if set(changed) != allowed_sources:
         raise ValueError("reader-only release requires unchanged manifest/platform/package sources")
     cfg = load_configuration(root, "dev")
     games = tuple(json.loads((root / "config/two-game-dev.json").read_text()))
