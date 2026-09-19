@@ -44,6 +44,7 @@ def main() -> None:
     temporary = Path(tempfile.mkdtemp(prefix="wishicraft-package-migration-compose-"))
     definition = temporary / "compose.yaml"
     definition.write_text(rendered.compose_yaml)
+    (temporary / "runtime.env").write_text(rendered.runtime_env)
     base = dict(
         line.split("=", 1)
         for line in rendered.runtime_env.splitlines()
