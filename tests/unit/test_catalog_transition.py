@@ -97,7 +97,7 @@ def test_old_game_registration_stays_byte_identical() -> None:
 def test_initialized_owner_and_world_are_not_rewritten_by_new_runtime(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from tests.unit.test_game_creation import atomic
+    from wishicraft.artifacts.targeted_runtime import atomic
 
     edge = transition()
     before, after = map(packages.digest, (edge["predecessor"], edge["successor"]))
@@ -125,7 +125,7 @@ def test_initialized_owner_and_world_are_not_rewritten_by_new_runtime(
         "config_digest": before,
         "run_id": "op-original",
     }
-    config = {"initial_whitelist": []}
+    config: dict[str, Any] = {"initial_whitelist": []}
     initial_game.prepare(game, config, target, atomic, uid=os.getuid(), gid=os.getgid())
     world = Path(target["data_source"]) / "world"
     world.mkdir()
