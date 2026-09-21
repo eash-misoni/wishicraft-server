@@ -1,5 +1,7 @@
 # 06. Delivery Plan
 
+> 2026-09-21 current slice: create-terralith固定worldgen packageと限定catalog追加migration。D-109/D-105経路を利用し、既存create-survivalを保持。repository/Docker qualification中、production CREATE/materializationは未実施。[gate・状況](runbooks/create_terralith.md)。
+
 > 2026-09-18 current checkpoint: Game authority / SSM import fixes deployed under the explicit Case D guard. create-survival completed first materialization and normal START/READY/Reconcile/STOP with its preserved generation-1 world. A separate dynamic-Game heartbeat monitoring defect blocks ingress restoration/client qualification; no additional implementation or restart in this slice. [Current evidence and remaining boundary](runbooks/ssm_ready_probe.md#separate-heartbeat-incident--keep-ingress-closed). Older checkpoint notes below are historical.
 
 > D-109 READY probe（2026-09-18）: stdin module解決のrepository修正を実装。配布前に別のCP parser不具合（Minecraft versionが26.2固定で、正当な1.21.1応答を拒否）を再現し、production deploy／新STARTを停止。既存world・Game UNMATERIALIZED・受付閉鎖を維持。[実行境界とrelease blocker](runbooks/ssm_ready_probe.md)。

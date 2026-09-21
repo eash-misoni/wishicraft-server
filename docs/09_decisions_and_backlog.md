@@ -1,5 +1,7 @@
 # 09. Decisions and Backlog
 
+> 2026-09-21 create-terralith: fixed worldgen packageと限定catalog追加migrationをユーザー承認の範囲で実装・検証中。既存Game/package/world/owner/provenanceは書換禁止。完全な旧／新manifestで1 package追加だけを許すcreation provenance互換性を導入する。production未適用、実client未検証。[契約・release gate](runbooks/create_terralith.md)。
+
 > 2026-09-21 Discord management-Web導線 / 日本語description production適用: `config/web-dev.json` → `load_web_public_url()` をURL正本とし、既存 `/mc status` 末尾へ管理Webを表示した。既存Guild `/mc` は同一command ID・構造・権限・scopeのままdescriptionだけを日本語化し、global commandは0件を維持した。Control Planeは11 Lambda code（Message Lambdaは正本由来の環境変数を追加）とCase D guard済み5 State Machine semantic no-opだけをChangeSetで適用。実STATUS、45/45 alarms OK、STOPPED/HEALTHYを確認済み。[証跡](evidence/management_web_discord_production_2026-09-21.json)。
 
 > 2026-09-18 registered-Game heartbeat correction (repository qualification): production-installed producer hash matches repository source. The host's A/B-only canonical selection caused a valid third Game's zero-player sample to become null and `RuntimeObservationUnknown`. Use the probe-verified running receipt/label/bind identity for all formally registered Games; keep unknown distinct from zero. A single producer-file stopped migration and a multi-period production observation are the release gate. Until those complete, Discord/Admission/Web ingress remains closed. [Contract and runbook](runbooks/phase8_runtime_heartbeat.md#registered-game-heartbeat-correction--2026-09-18).

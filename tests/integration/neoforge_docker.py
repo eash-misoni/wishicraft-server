@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 import urllib.request
+import zipfile
 from collections.abc import Callable
 from pathlib import Path
 
@@ -42,9 +43,12 @@ def main() -> None:
     root = Path(tempfile.mkdtemp(prefix="wishicraft-neoforge-docker-"))
     print("FIXTURE", root, flush=True)
     root.chmod(0o755)
-    package = json.loads((repo / "src/wishicraft/artifacts/game-packages.json").read_text())[
+    candidates = json.loads((repo / "src/wishicraft/artifacts/game-packages.json").read_text())[
         "packages"
-    ][1]
+    ]
+    package_id = os.environ.get("WISHICRAFT_TEST_PACKAGE", "create-survival")
+    package = next(p for p in candidates if p["package_id"] == package_id)
+    assert package_id in {"create-survival", "create-terralith"}
     stage = yaml.safe_load((repo / "config/stages/dev.yaml").read_text())["host_runtime"]
     image = stage["image"]["reference"]
     command("docker", "pull", image, timeout=300)
@@ -94,6 +98,7 @@ def main() -> None:
     }
     try:
         for cycle in range(2):
+            started = time.monotonic()
             args = [
                 "docker",
                 "run",
@@ -141,6 +146,19 @@ def main() -> None:
                 block_result = registered_block(lambda args: command(*args), name, block)
                 print("REGISTERED_BLOCK", block, block_result.strip(), flush=True)
             print("NEOFORGE_READY", cycle, package["loader"]["version"], flush=True)
+            print("STARTUP_SECONDS", time.monotonic() - started, flush=True)
+            print(
+                "DOCKER_STATS",
+                command("docker", "stats", "--no-stream", "--format", "{{json .}}", name),
+                flush=True,
+            )
+            print(
+                "TICK_BASELINE",
+                command("docker", "exec", name, "rcon-cli", "tick", "query"),
+                flush=True,
+            )
+            if package_id == "create-terralith":
+                worldgen_evidence(lambda args: command(*args, timeout=180), name)
             print(command("docker", "exec", name, "rcon-cli", "save-all", "flush"), flush=True)
             command("docker", "stop", "--time", "150", name, timeout=180)
             info = json.loads(command("docker", "inspect", name))[0]
@@ -155,6 +173,46 @@ def main() -> None:
             print((result.stdout + result.stderr)[-18000:], flush=True)
         subprocess.run(["docker", "stop", "--time", "150", name], capture_output=True, timeout=180)
         subprocess.run(["docker", "rm", name], capture_output=True)
+
+
+def worldgen_evidence(execute: Callable[[list[str]], str], container: str) -> None:
+    """Read active packs and locate a generated biome; no custom terrain preset."""
+    prefix = ["docker", "exec", container, "rcon-cli"]
+    packs = execute([*prefix, "datapack", "list", "enabled"])
+    print("WORLDGEN_ENABLED_PACKS", packs, flush=True)
+    assert "terralith" in packs.lower() and "tectonic" in packs.lower(), packs
+    biome = execute([*prefix, "locate", "biome", "terralith:yellowstone"])
+    print("TERRALITH_BIOME", biome, flush=True)
+    assert "terralith:yellowstone" in biome and " is at " in biome, biome
+    # Correlate active packs and a real biome-source query with the exact
+    # integrated Tectonic/Terralith overworld definition, not only the mod list.
+    with tempfile.TemporaryDirectory(prefix="wishicraft-worldgen-evidence-") as temporary:
+        jar = Path(temporary) / "tectonic.jar"
+        execute(
+            [
+                "docker",
+                "cp",
+                container + ":/data/mods/tectonic-3.0.26-neoforge-21.1.jar",
+                str(jar),
+            ]
+        )
+        with zipfile.ZipFile(jar) as archive:
+            name = (
+                "resourcepacks/tectonic/overlay.terratonic/"
+                "data/minecraft/worldgen/noise_settings/overworld.json"
+            )
+            terrain = archive.read(name)
+            json.loads(terrain)
+            assert b"tectonic:" in terrain
+            print(
+                "TECTONIC_INTEGRATED_OVERWORLD",
+                name,
+                hashlib.sha256(terrain).hexdigest(),
+                flush=True,
+            )
+    report = execute([*prefix, "debug", "report"])
+    print("WORLDGEN_DEBUG_REPORT", report, flush=True)
+    assert "report" in report.lower() and "Unknown" not in report, report
 
 
 if __name__ == "__main__":

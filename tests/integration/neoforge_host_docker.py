@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import yaml  # noqa: E402
 
-from tests.integration.neoforge_docker import registered_block  # noqa: E402
+from tests.integration.neoforge_docker import registered_block, worldgen_evidence  # noqa: E402
 from tests.probe_fixtures import runtime_running_document  # noqa: E402
 from web.local_operations import MemoryDynamo, service  # noqa: E402
 from wishicraft import interrupted_stop_recovery as recovery  # noqa: E402
@@ -376,7 +376,7 @@ def main() -> None:
         return container
 
     try:
-        vanilla, neo = records
+        vanilla, neo, worldgen = records
         interrupted = start(neo, commit=False)
         assert current is not None
         old_target = dict(current)
@@ -460,6 +460,11 @@ def main() -> None:
             reset_server / "defaultconfigs/wishicraft-ci.toml"
         ).read_bytes() == custom.read_bytes()
         assert (neo_server / "world/level.dat").is_file()
+        terrain = start(worldgen)
+        worldgen_evidence(real_execute, terrain["Id"])
+        assert set(
+            p.name for p in (game_package.GAMES / worldgen["game_id"] / "server/mods").iterdir()
+        ) == {m["filename"] for m in packages[2]["mods"]}
         final = start(vanilla)
         assert "preserved" in real_execute(
             ["docker", "exec", final["Id"], "rcon-cli", "scoreboard", "objectives", "list"]

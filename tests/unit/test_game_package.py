@@ -73,7 +73,7 @@ def test_floating_and_unsupported_versions(field: str, value: str) -> None:
         ("url", "https://example.com/latest.jar"),
         ("version", ">=6.0"),
         ("size", True),
-        ("client_required", False),
+        ("client_required", "false"),
         ("file_id", "latest"),
     ],
 )

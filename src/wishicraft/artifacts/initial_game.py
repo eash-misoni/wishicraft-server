@@ -34,7 +34,7 @@ def prepare(
         re.fullmatch(r"game-[0-9a-f]{64}", game_id) is None
         or target["game_id"] != game_id
         or target["data_source"] != str(worlds.GAMES / game_id / "server")
-        or creation["config_digest"] != target["config_digest"]
+        or not _config_matches(game, target)
         or creation["operation_id"] != "op-" + game_id[5:]
         or type(game["world"]["seed"]) is not int
         or not -(2**63) <= game["world"]["seed"] < 2**63
@@ -105,6 +105,23 @@ def prepare(
     worlds.sync_directory(server)
     worlds.sync_directory(parent)
     atomic(owner, json.dumps({**record, "phase": "prepared"}))
+
+
+def _config_matches(game: dict[str, Any], target: dict[str, str]) -> bool:
+    created = game["creation"]["config_digest"]
+    if created == target["config_digest"]:
+        return True
+    try:
+        from wishicraft.artifacts.game_package import compatible_config
+    except ImportError:
+        import importlib
+
+        compatible_config = importlib.import_module("game_package").compatible_config
+    return bool(
+        compatible_config(
+            created, target["config_digest"], game.get("package", {}).get("definition", {})
+        )
+    )
 
 
 def initialized(target: dict[str, str], atomic: Callable[[Path, str], None]) -> bool:

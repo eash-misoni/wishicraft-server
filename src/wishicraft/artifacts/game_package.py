@@ -54,7 +54,7 @@ def artifact(value: Any, *, mod: bool, version: str = "") -> None:
     if mod:
         if (
             value["source"] != "modrinth"
-            or value["client_required"] is not True
+            or type(value["client_required"]) is not bool
             or not isinstance(value["mod_id"], str)
             or re.fullmatch(r"[a-z][a-z0-9_]{1,63}", value["mod_id"]) is None
             or not isinstance(value["version"], str)
@@ -162,7 +162,7 @@ def registered(
     if "creation" in game:
         creation = game["creation"]
         if (
-            creation.get("config_digest") != config_digest
+            not compatible_config(creation.get("config_digest"), config_digest, package)
             or creation.get("package_digest") != digest(package)
             or game["package"].get("definition") != package
         ):
@@ -170,6 +170,36 @@ def registered(
     elif game["game_id"] not in manifest["games"] or package["loader"]["type"] != "vanilla":
         raise ValueError("PACKAGE_LEGACY_MISMATCH")
     return package
+
+
+def compatible_config(created: Any, current: str, package: dict[str, Any]) -> bool:
+    """Accept only the reviewed complete append-only catalog transition.
+
+    Creation and on-disk owner provenance remain immutable. This does not authorize
+    an old Operation/receipt to execute under a different runtime target digest.
+    """
+    if created == current:
+        return True
+    path = Path(__file__).with_name("catalog-transition.json")
+    if not path.is_file() or path.is_symlink():
+        return False
+    transition = json.loads(path.read_text())
+    fields(transition, {"schema_version", "predecessor", "successor"})
+    if type(transition["schema_version"]) is not int or transition["schema_version"] != 1:
+        raise ValueError("CATALOG_TRANSITION_SCHEMA")
+    before, after = transition["predecessor"], transition["successor"]
+    if not isinstance(before, dict) or not isinstance(after, dict):
+        raise ValueError("CATALOG_TRANSITION_SCHEMA")
+    previous, following = catalog(before["packages"]), catalog(after["packages"])
+    if (
+        {k: v for k, v in before.items() if k != "packages"}
+        != {k: v for k, v in after.items() if k != "packages"}
+        or len(following) != len(previous) + 1
+        or following[:-1] != previous
+        or following[-1]["package_id"] in {p["package_id"] for p in previous}
+    ):
+        raise ValueError("CATALOG_TRANSITION_NOT_APPEND_ONLY")
+    return created == digest(before) and current == digest(after) and package in previous
 
 
 def location(game_id: str) -> Path:

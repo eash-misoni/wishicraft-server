@@ -83,13 +83,23 @@ def recovery_digest(value: str) -> str:
                 continue
             creation = record.get("creation", {})
             if (
-                creation.get("config_digest") != digest
+                not _creation_config_matches(record, digest)
                 or creation.get("operation_id") != "op-" + game_id[5:]
                 or record.get("materialization_state") not in {"UNMATERIALIZED", "MATERIALIZED"}
                 or type(record.get("world", {}).get("seed")) is not int
             ):
                 raise ValueError("invalid dynamic Game recovery")
     return hashlib.sha256(value.encode()).hexdigest()
+
+
+def _creation_config_matches(record: dict[str, Any], runtime_digest: str) -> bool:
+    from wishicraft.artifacts.game_package import compatible_config
+
+    return compatible_config(
+        record.get("creation", {}).get("config_digest"),
+        runtime_digest,
+        record.get("package", {}).get("definition", {}),
+    )
 
 
 def shared_tags(tags: dict[str, str], recovery_json: str) -> dict[str, str]:

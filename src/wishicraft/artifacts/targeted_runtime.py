@@ -381,7 +381,13 @@ def apply(request: dict[str, Any]) -> None:
                 raise ValueError("GAME_NOT_REGISTERED")
             if game_id not in config["games"]:
                 creation = game["creation"]
-                if creation["config_digest"] != config["config_digest"]:
+                if creation["config_digest"] != config[
+                    "config_digest"
+                ] and not package_module().compatible_config(
+                    creation["config_digest"],
+                    config["config_digest"],
+                    game.get("package", {}).get("definition", {}),
+                ):
                     raise ValueError("GAME_CONFIG_MISMATCH")
                 config = {**config, "reset_policies": {**config["reset_policies"]}}
                 if creation["reset_policy"] is not None:

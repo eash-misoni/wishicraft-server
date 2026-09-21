@@ -17,6 +17,7 @@ jobs:
       - run: tools/dev-env run -- uv sync --frozen --all-groups
       - run: tools/dev-env run -- uv run python tests/integration/package_migration_compose.py
       - run: sudo --preserve-env=CI .venv/bin/python tests/integration/neoforge_docker.py
+      - run: sudo --preserve-env=CI env WISHICRAFT_TEST_PACKAGE=create-terralith .venv/bin/python tests/integration/neoforge_docker.py
       - run: sudo --preserve-env=CI .venv/bin/python tests/integration/neoforge_host_docker.py
       - uses: actions/upload-artifact@v4
         if: always()

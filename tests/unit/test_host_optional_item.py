@@ -91,7 +91,9 @@ def test_absent_specific_projects_empty(monkeypatch: pytest.MonkeyPatch, tmp_pat
     assert (tmp_path / "whitelist.json").read_bytes() == b"[]\n"
 
 
-def test_same_manifest_reader_bundle_preserves_registered_game(tmp_path: Path) -> None:
+def test_same_manifest_reader_bundle_preserves_registered_game(
+    tmp_path: Path, historical_catalog_root: Path
+) -> None:
     import copy
     import hashlib
 
@@ -100,7 +102,7 @@ def test_same_manifest_reader_bundle_preserves_registered_game(tmp_path: Path) -
     from wishicraft.game_creation import REGISTRY_KEY
     from wishicraft.game_package_migration import prepare_reader_fix
 
-    root = Path(__file__).resolve().parents[2]
+    root = historical_catalog_root
     evidence = json.loads(
         (root / "docs/evidence/neoforge_package_production_2026-09-14.json").read_text()
     )

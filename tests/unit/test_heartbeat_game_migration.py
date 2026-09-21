@@ -72,8 +72,10 @@ def game_document(*, legacy: bool = False) -> dict[str, object]:
     return {"Item": {key: attribute(value) for key, value in game.items()}}
 
 
-def test_only_exact_producer_is_replaced_using_inactive_installer(tmp_path: Path) -> None:
-    plan = prepare(ROOT, tmp_path / "bundle", stopped_receipt(), game_document())
+def test_only_exact_producer_is_replaced_using_inactive_installer(
+    tmp_path: Path, historical_catalog_root: Path
+) -> None:
+    plan = prepare(historical_catalog_root, tmp_path / "bundle", stopped_receipt(), game_document())
     assert plan["backup_namespace"] == "heartbeat-game-v2"
     assert plan["receipt_predecessor"] == stopped_receipt()
     assert len(plan["files"]) == 1
@@ -122,9 +124,13 @@ def test_migration_rejects_incomplete_stop_or_wrong_runtime(tmp_path: Path, fiel
     assert not (tmp_path / "bundle").exists()
 
 
-def test_vanilla_game_uses_same_authority_and_projection(tmp_path: Path) -> None:
+def test_vanilla_game_uses_same_authority_and_projection(
+    tmp_path: Path, historical_catalog_root: Path
+) -> None:
     receipt = stopped_receipt("game-vanilla-main")
-    plan = prepare(ROOT, tmp_path / "bundle", receipt, game_document(legacy=True))
+    plan = prepare(
+        historical_catalog_root, tmp_path / "bundle", receipt, game_document(legacy=True)
+    )
     assert plan["package_environment"]["WISHICRAFT_PACKAGE_TYPE"] == "VANILLA"
     assert plan["package_environment"]["WISHICRAFT_PACKAGE_VERSION"] == "26.2"
     assert plan["package_context"]["artifacts"] == []
