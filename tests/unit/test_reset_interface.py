@@ -67,6 +67,96 @@ def test_command_extension_keeps_existing_commands_and_disabled_policy() -> None
     assert result[0]["options"][-1]["name"] == "reset"
 
 
+def test_current_registration_contract_shape_is_unchanged_by_descriptions() -> None:
+    commands = extend(
+        declaration(Path(__file__).resolve().parents[2], now=datetime(2026, 9, 12, tzinfo=UTC))[
+            "discord_commands"
+        ],
+        (GAME,),
+    )
+
+    def without_descriptions(value: Any) -> Any:
+        if isinstance(value, list):
+            return [without_descriptions(item) for item in value]
+        if isinstance(value, dict):
+            return {
+                key: without_descriptions(item)
+                for key, item in value.items()
+                if key != "description"
+            }
+        return value
+
+    assert without_descriptions(commands) == [
+        {
+            "type": 1,
+            "name": "mc",
+            "options": [
+                {"type": 1, "name": "status"},
+                {
+                    "type": 1,
+                    "name": "start",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "game",
+                            "choices": [
+                                {"name": "game-vanilla-main", "value": "game-vanilla-main"},
+                                {
+                                    "name": "game-vanilla-secondary",
+                                    "value": "game-vanilla-secondary",
+                                },
+                            ],
+                        }
+                    ],
+                },
+                {"type": 1, "name": "stop"},
+                {"type": 1, "name": "backup"},
+                {
+                    "type": 1,
+                    "name": "switch",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "game",
+                            "choices": [
+                                {"name": "game-vanilla-main", "value": "game-vanilla-main"},
+                                {
+                                    "name": "game-vanilla-secondary",
+                                    "value": "game-vanilla-secondary",
+                                },
+                            ],
+                            "required": True,
+                        },
+                        {"type": 5, "name": "confirm", "required": True},
+                    ],
+                },
+                {
+                    "type": 1,
+                    "name": "reset",
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "game",
+                            "required": True,
+                            "choices": [{"name": GAME, "value": GAME}],
+                        },
+                        {"type": 5, "name": "confirm", "required": True},
+                        {
+                            "type": 3,
+                            "name": "seed",
+                            "required": True,
+                            "choices": [
+                                {"name": "Fixed seed", "value": "fixed"},
+                                {"name": "New seed", "value": "new"},
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+    ]
+
+
 def test_sdk_total_attempt_one_has_no_internal_send_retry() -> None:
     import boto3  # type: ignore[import-untyped]
     from botocore.config import Config  # type: ignore[import-untyped]

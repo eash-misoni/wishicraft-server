@@ -19,25 +19,25 @@ def extend(commands: list[dict[str, Any]], enabled_games: tuple[str, ...]) -> li
         {
             "type": 1,
             "name": "reset",
-            "description": "Replace the empty supported Game's world; no Snapshot on each reset",
+            "description": "対応Gameのworldを新しくして同じGameでRESETします",
             "options": [
                 {
                     "type": 3,
                     "name": "game",
-                    "description": "Currently running Reset-enabled Game",
+                    "description": "現在稼働中のRESET対応Gameを選択します",
                     "required": True,
                     "choices": [{"name": game, "value": game} for game in enabled_games],
                 },
                 {
                     "type": 5,
                     "name": "confirm",
-                    "description": "Confirm resetting this empty Game",
+                    "description": "worldを新しくすることを確認します",
                     "required": True,
                 },
                 {
                     "type": 3,
                     "name": "seed",
-                    "description": "Use the declared fixed seed or a new seed",
+                    "description": "固定seedまたは新しいseedを選択します",
                     "required": True,
                     "choices": [
                         {"name": "Fixed seed", "value": "fixed"},

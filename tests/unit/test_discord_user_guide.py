@@ -29,5 +29,25 @@ def test_guide_covers_generated_current_commands_and_required_reset_options() ->
     assert "EBS喪失" in guide and "race" in guide and "直近3個" in guide
 
     assert "STOPPED/HEALTHY" in guide
-    assert "Web/Whitelist management URL: /mc status" in commands[0]["description"]
+    assert commands[0]["description"] == (
+        "Wishicraftを操作します。管理Webは /mc status から確認できます"
+    )
+    assert {option["name"]: option["description"] for option in commands[0]["options"]} == {
+        "status": "Minecraftサーバーの現在の状態を表示します",
+        "start": "MinecraftサーバーをSTARTします",
+        "stop": "現在のGameを保存し、MinecraftサーバーをSTOPします",
+        "backup": "停止中の共有Data EBSをSnapshotへBACKUPします",
+        "switch": "稼働中のGameを保存・停止し、別のGameへSWITCHします",
+        "reset": "対応Gameのworldを新しくして同じGameでRESETします",
+    }
+    assert options["start"]["options"][0]["description"] == "起動するGameを選択します"
+    assert [option["description"] for option in options["switch"]["options"]] == [
+        "起動するGameを選択します",
+        "現在のGameを停止することを確認します",
+    ]
+    assert [option["description"] for option in options["reset"]["options"]] == [
+        "現在稼働中のRESET対応Gameを選択します",
+        "worldを新しくすることを確認します",
+        "固定seedまたは新しいseedを選択します",
+    ]
     assert "管理Web URL" in (root / "docs/discord_user_guide.md").read_text(encoding="utf-8")

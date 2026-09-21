@@ -41,11 +41,19 @@ def declaration(root: Path, *, now: datetime) -> dict[str, Any]:
         + "\n",
     }
     commands = json.loads((root / "config/discord/commands.v1.json").read_text())
-    commands[0]["description"] = "Wishicraft controls; Web/Whitelist management URL: /mc status"
+    commands[0]["description"] = "Wishicraftを操作します。管理Webは /mc status から確認できます"
+    descriptions = {
+        "status": "Minecraftサーバーの現在の状態を表示します",
+        "start": "MinecraftサーバーをSTARTします",
+        "stop": "現在のGameを保存し、MinecraftサーバーをSTOPします",
+        "backup": "停止中の共有Data EBSをSnapshotへBACKUPします",
+    }
+    for option in commands[0]["options"]:
+        option["description"] = descriptions[option["name"]]
     game_option = {
         "type": 3,
         "name": "game",
-        "description": "Game to start",
+        "description": "起動するGameを選択します",
         "choices": [{"name": name, "value": name} for name in catalog.game_ids],
     }
     for option in commands[0]["options"]:
@@ -55,13 +63,13 @@ def declaration(root: Path, *, now: datetime) -> dict[str, Any]:
         {
             "type": 1,
             "name": "switch",
-            "description": "Admin: save/stop the empty current Game and start another",
+            "description": "稼働中のGameを保存・停止し、別のGameへSWITCHします",
             "options": [
                 {**game_option, "required": True},
                 {
                     "type": 5,
                     "name": "confirm",
-                    "description": "Confirm stopping the current Game",
+                    "description": "現在のGameを停止することを確認します",
                     "required": True,
                 },
             ],
