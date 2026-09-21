@@ -1,6 +1,6 @@
 # 06. Delivery Plan
 
-> 2026-09-21 current slice: create-terralith固定worldgen packageと限定catalog追加migration。D-109/D-105経路を利用し、既存create-survivalを保持。repository/Docker qualification中、production CREATE/materializationは未実施。[gate・状況](runbooks/create_terralith.md)。
+> 2026-09-21 current slice completed (server-side): create-terralith固定worldgen package、限定catalog互換性、CP/Web release、正式CREATE、新world generation 1 materialization/worldgenと正常STOPを実証。既存3 Gameを保持、STOPPED/HEALTHY・45 alarms OK・通常受付復帰。実client接続はユーザーの後続確認。[実証範囲・性能・client構成](runbooks/create_terralith.md)。
 
 > 2026-09-18 current checkpoint: Game authority / SSM import fixes deployed under the explicit Case D guard. create-survival completed first materialization and normal START/READY/Reconcile/STOP with its preserved generation-1 world. A separate dynamic-Game heartbeat monitoring defect blocks ingress restoration/client qualification; no additional implementation or restart in this slice. [Current evidence and remaining boundary](runbooks/ssm_ready_probe.md#separate-heartbeat-incident--keep-ingress-closed). Older checkpoint notes below are historical.
 

@@ -1,14 +1,24 @@
 # Create + Terralith + Tectonic
 
-Repository candidate, 2026-09-21. Production migration, CREATE and materialization
-are not yet performed. The user authorized qualification and, after its gates
-pass, the existing normal STOP, guarded release, new CREATE/START/STOP. They also
-explicitly authorized the limited catalog migration described below.
+Production server-side qualification completed, 2026-09-21 UTC (2026-09-22 JST).
+The additive host migration, guarded Control Plane/Web release, real Admin Web
+CREATE, fresh generation-1 materialization/worldgen, and normal STOP succeeded.
+Existing A/B/create-survival were preserved. Actual Minecraft client login remains
+unverified and is explicitly delegated to the user. See the closeout below and
+[machine-readable evidence](../evidence/create_terralith_production_2026-09-21.json).
 
 Local qualification: 1,513 tests passed; Ruff lint/format and mypy (218 source
 files) passed; package-enabled Control Plane CDK synth passed. Real Docker
 qualification runs on the existing Linux CI because this checkout has no Docker
-CLI. CI and all production steps remain pending until their evidence is recorded.
+CLI. These were intermediate local results; final release commit `e87994a` passed
+standard CI `35619255358` and real NeoForge Docker CI `35619255294` before release.
+The release CI ran 1,515 tests, Ruff (292 formatted files), mypy (218 source files),
+Web qualification and the configured CDK synth variants successfully.
+Closeout local revalidation also passed all 1,515 tests (99.31 s), Ruff/format and
+mypy. Its first sandboxed run had 8 failures/47 setup errors because the pinned
+Lambda bundler could not resolve PyPI DNS; a focused check confirmed this cause.
+The failed evidence was retained and a fresh network-enabled test root passed,
+without implementation changes or treating the blocked run as successful.
 
 First Docker attempt, run `35617068544`: existing Create passed; new package
 reached health/RCON with all verified artifact hashes. The test incorrectly
@@ -165,8 +175,135 @@ canonical files. No Data EBS layout or IAM changes are introduced.
 
 ## Qualification evidence
 
-Pending. Docker and production results must be appended with exact commit/run/
-Operation IDs and observations; this section must not imply success in advance.
+### Docker and immutable migration
+
+Release implementation HEAD `e87994a35cd9e8d4463526b5dff7418510140142` was clean and
+equal to remote main. Both CI runs above succeeded. The Linux Docker tests cover
+Vanilla, existing Create and the new package, fresh generation, RCON/health,
+save/graceful stop/restart, registered blocks, Terralith biome-source lookup and
+the exact Tectonic integrated overworld definition. No candidate version changed.
+
+The six-file host migration completed in the preceding maintenance session.
+Post-install and same-bundle no-op retry preserved existing files' canonical
+bytes/mtime and old Game trees/owners. Final real-host observation was SSM
+`6290733e-bc4e-4f11-b09e-2c387891613a`, 15:59:06 UTC. The intentional maintenance
+state (desired STOPPED / EC2 RUNNING / Minecraft stopped) triggered
+DesiredStoppedEc2Running, RuntimeObservationUnknown and DesiredActualDivergence.
+After explicit approval, ordinary non-forced EC2 StopInstances closed maintenance;
+scheduled Reconcile restored HEALTHY and all 45 alarms were OK by 16:06:31 UTC.
+No alarm suppression or monitoring setting change was performed.
+
+On resumption the user accepted this stopped-host evidence as the handoff basis.
+CloudTrail checks found only that last read-only SSM and the approved StopInstances,
+not subsequent start, SSM/session or EBS mutation. This is not a filesystem-wide
+write audit. **Migration was not rerun and no inspection-only boot was added.**
+Normal first START passed existing host integrity checks; subsequent live SHA-256
+readback reconfirmed all six targets, unchanged Compose/runtime.env and the current
+heartbeat producer. Complete old/new manifests differ only by the appended package;
+existing canonical package bytes, historical creation digests and A/B resolution
+remain unchanged. Exact old/new/current file hashes are in the evidence JSON.
+
+### Guarded release and authenticated CREATE
+
+Fresh ChangeSets `terralith-resume-cp-20260921-v1` and
+`terralith-resume-web-20260921-v1` were reviewed and executed through CloudFormation.
+CP changed eleven existing Lambda code assets plus the necessary runtime/defaults
+environment values. The five explicitly allowed Case D State Machine Definition
+entries passed raw/resolved/live ASL equality, unchanged roles/configuration and
+referenced physical identities; all six post-release ASLs remained identical.
+Web changed existing Web/Auth shared code assets only. Auth's inclusion did not
+change OAuth, session rules, IAM, environment, URL or resource topology.
+No resource addition/removal/replacement or Target/Data stack update occurred.
+Both stacks reached UPDATE_COMPLETE. Actual downloaded Lambda ZIPs matched service
+CodeSha256, repository source and resolved template environment. Both deployed
+Admission/Web validators resolved all three existing Games with unchanged digests.
+
+The CREATE-only window was 16:24:16–16:27:36 UTC: Web/Admission concurrency 1,
+Discord 0. The user logged into a dedicated Edge using real Discord Admin OAuth.
+Formal Web CREATE returned accepted; identical request replay returned the same
+SUCCEEDED Operation. Consistent reads verified its deterministic request,
+idempotency, Operation and Game identity. No cookie/token was exported.
+
+- Game: `game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4`
+- CREATE: `op-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4`
+- Created ACTIVE / UNMATERIALIZED, generation 1, independent fresh seed/world.
+- Exact package digest `5f653900b7438059311f25e3f296e2260f10717e83f9374619b7bb7cb0026c35`.
+- Game-specific policy absent/empty; no membership copied or added. Existing Common
+  revision 2 had one member and was projected unchanged (effective count 1).
+
+Web/Admission were immediately reclosed. CLI qualification used the existing
+Admission service and WorkflowLauncher with canonical live configuration, not
+direct State Machine starts or manual Game/Operation writes.
+
+### First START, worldgen and performance
+
+START `op-ddbab77a-928f-4937-9e91-07e33b67dd70` succeeded at 16:33:20.781053 UTC.
+All six cache artifacts (installer plus five mods) and all five deployed mod jars
+matched exact filenames, sizes and SHA-256. Logs recognized NeoForge 21.1.219,
+Create 6.0.10, Farmer's Delight 1.3.4, Terralith 2.6.2, Tectonic 3.0.26 and
+Lithostitched 1.7.12. Receipt/container labels/bind matched the new Game/run and
+current runtime/package digests. New level.dat and matching seed were observed;
+RCON and mc-health succeeded, DNS was published, Reconcile recorded HEALTHY and
+MATERIALIZED, generation stayed 1, and fresh heartbeat reported this Game/run,
+protocol ready and zero players. Online mode and whitelist enforcement remained true.
+
+Worldgen evidence (SSM `e54c8396-6ed1-4118-a651-394cbccd52c2`): enabled `mod_data`
+and `tectonic`; real biome-source query located `terralith:yellowstone` at
+`[1296, 65, 656]`, 1889 blocks away. The exact active Tectonic jar contains the
+Terralith-conditioned `overlay.terratonic` integrated overworld noise/surface
+definition with SHA-256 `a194b8bcc0a5c98c4f7c2b5343373dc7fa4d361ff046d50fc1e8a1ccd670ecf5`.
+This correlates an actual biome-source result with active packs and integrated
+worldgen resources, not merely mod-list presence. It does not claim client visual
+inspection or persisted chunks at that distant coordinate. No terrain preset,
+height tuning, teleport, block edits or bulk chunk generation was performed.
+
+At 0 players, m8a.large / Xms 1G / Xmx 4G / container 6 GiB unchanged:
+
+| Observation | Result |
+|---|---|
+| Container memory / CPU sample | 1.92 GiB / 6 GiB; 2.49% |
+| Host CPU busy, 1-second sample | 0.51% |
+| JVM RSS / lifetime-average CPU | 1,839,532 KiB (about 1.75 GiB) / 20.7% |
+| Host available memory | 5,562,060 KiB |
+| Tick target / mean | 20 TPS / 0.1 ms; P95 0.2 ms, P99 0.4 ms, 100 samples |
+| Memory pressure / OOM | PSI some/full zero; OOMKilled false; no OutOfMemoryError |
+| Container start → Minecraft Done | 16:30:30.174 → 16:31:20.711 UTC, about 50.5 s |
+| Minecraft reported startup | 25.183 s (not the full EC2/Admission lifecycle) |
+| Biome lookup | 2.05 s; one warning at that time: 2005 ms / 40 ticks behind |
+
+The lookup briefly stalled the server thread; no sustained overload was observed.
+These are short samples, not a multiplayer or chunk-generation throughput benchmark.
+No host resize was performed. An upstream Create update-check labelled its same
+base version outdated; Wishicraft did not resolve latest or replace any fixed jar.
+
+### Normal STOP and final production
+
+STOP `op-49153de4-38c3-46d8-aab6-2769b3ce3330` succeeded at 16:41:00.701333 UTC.
+The normal host path executed save-all flush, persisted save proof, graceful
+service stop and exact stopped-container cleanup. Workflow Reconcile at
+16:39:48.619960 observed matching target/run with receipt phase stopped and
+container not-found **before** StopEc2. Raw receipt was not separately fetched
+after shutdown; success of the verified host path and this live probe are the
+stop evidence. EC2 stopped, DNS deletion/INSYNC and final healthy Reconcile followed.
+
+Final held preflight 16:41:41 UTC: STOPPED/HEALTHY, EC2 stopped, 45/45 alarms OK,
+no Current Operation/Lock/workflow/active SSM/session/DNS, all three queues empty.
+Existing Game/whitelist records, nine snapshots and sixteen backup/provenance
+records were unchanged. While the new Game was running, all old Game trees and
+create-survival's initial owner matched the stopped baseline exactly. No final
+inspection boot was added; normal STOP was bound only to the new Game's container.
+Data EBS identity/attachment/layout were preserved; its new-Game contents are an
+expected addition. Registry gained only the new Game. Historical evidence was not edited.
+
+All three ingress functions were restored to recorded ordinary UNSET concurrency
+at 16:42:11 UTC, only after these gates passed. A full readback at 16:43:29 UTC
+confirmed the same safe final state and all three ordinary concurrency settings.
+Actual client connection is next:
+Minecraft 1.21.1, NeoForge 21.1.219, Create 6.0.10 and Farmer's Delight 1.3.4 are
+required. Terralith 2.6.2 / Tectonic 3.0.26 / Lithostitched 1.7.12 are server-side,
+client-not-required by fixed metadata; omission on a real client remains to be
+tested by the user. JEI is outside the Game package. The server is stopped, so use
+a normal authorized START for that test; do not bypass whitelist policy.
 
 Official exact versions:
 [Create](https://modrinth.com/mod/create/version/UjX6dr61),

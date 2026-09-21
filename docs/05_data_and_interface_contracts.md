@@ -1,6 +1,6 @@
 # 05. Data and Interface Contracts
 
-> create-terralith catalog追加契約（2026-09-21、repository実装中・production未適用）: 完全な旧／新manifestを固定した1件追加の互換性だけをGame creation provenanceへ許可する。既存package、Game、owner、worldは不変。Operation/host/receiptのcurrent digest検証は維持。client_requiredは既存boolean fieldでserver-onlyをfalseと分類。[限定契約](runbooks/create_terralith.md)。
+> create-terralith catalog追加契約（2026-09-21、production実証済み）: 完全な旧／新manifestを固定した1件追加の互換性だけをGame creation provenanceへ許可する。既存package、Game、owner、worldは不変。Operation/host/receiptのcurrent digest検証は維持。client_requiredは既存boolean fieldでserver-onlyをfalseと分類。正式CREATE・新world materialization・通常STOPまで実証、実client接続は未検証。[限定契約・証跡](runbooks/create_terralith.md)。
 
 > D-109 SSM READY transport: stdin実行のmodule解決をcanonical runtime directoryへ固定。READY判定・host/package artifactは不変。[実行境界・回帰・production gate](runbooks/ssm_ready_probe.md)。
 
