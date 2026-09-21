@@ -318,6 +318,27 @@ def test_nonce_is_stable_unique_width_and_projection_is_safe() -> None:
     assert "token-like" not in str(error.value)
 
 
+def test_status_response_ends_with_canonical_management_web_link() -> None:
+    record = replace(
+        Store().record,
+        operation_type="STATUS",
+        operation_status="SUCCEEDED",
+        projection=projection(),
+    )
+
+    rendered = render_operation_projection(record, management_web_url="https://web.wishicraft.net")
+
+    assert "Minecraft: online" in rendered
+    assert "Health: healthy" in rendered
+    assert rendered.endswith("管理Web: https://web.wishicraft.net")
+    assert rendered.count("https://web.wishicraft.net") == 1
+
+    start = replace(record, operation_type="START", projection={})
+    assert "https://web.wishicraft.net" not in render_operation_projection(
+        start, management_web_url="https://web.wishicraft.net"
+    )
+
+
 def test_start_progress_updates_one_message_monotonically() -> None:
     store, messages, queue = Store(), Messages(), Queue()
     store.record = replace(

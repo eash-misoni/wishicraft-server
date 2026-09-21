@@ -29,3 +29,5 @@ def test_guide_covers_generated_current_commands_and_required_reset_options() ->
     assert "EBS喪失" in guide and "race" in guide and "直近3個" in guide
 
     assert "STOPPED/HEALTHY" in guide
+    assert "Web/Whitelist management URL: /mc status" in commands[0]["description"]
+    assert "管理Web URL" in (root / "docs/discord_user_guide.md").read_text(encoding="utf-8")

@@ -19,5 +19,6 @@
 - 新表示の契約・適用記録: [D-099](reviews/discord_progress.md)。
 
 whitelist管理、Web、汎用Restore、死亡自動検知等は、この利用可能コマンド一覧には含みません。
+Discordの `/mc` コマンド一覧は、詳細管理・Whitelist管理をWebで行えることと、`/mc status` で管理Web URLを確認できることを案内します。
 
 参加する場合はGame一覧から対象を選んでください。各Game詳細は共通構成と申請原稿を再利用して生成し、必要なclientと参加手順を一ページにまとめます。編集方法は[Webレビュー](reviews/user_guide_web.md)を参照してください。

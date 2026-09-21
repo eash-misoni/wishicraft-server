@@ -11,6 +11,7 @@ from wishicraft.config import (
     load_project_config,
     load_secrets_example_config,
     load_stage_config,
+    load_web_public_url,
     validate_stage_for_action,
 )
 
@@ -35,6 +36,19 @@ def test_project_dev_prod_and_secrets_load() -> None:
     assert dev.stage.heartbeat_seconds("interval") == 60
     assert dev.stage.heartbeat_seconds("stale") == 300
     assert dev.stage.heartbeat_seconds("ttl") == 86_400
+    assert load_web_public_url(REPOSITORY_ROOT, "dev") == "https://web.wishicraft.net"
+
+
+def test_web_public_url_rejects_non_https_origin_shape(tmp_path: Path) -> None:
+    config = tmp_path / "config"
+    config.mkdir()
+    (config / "web-dev.json").write_text(
+        '{"schema_version":1,"domain_name":"https://web.wishicraft.net"}',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError, match="lowercase DNS name"):
+        load_web_public_url(tmp_path, "dev")
 
 
 def test_dev_phase_zero_synth_allows_known_nulls() -> None:

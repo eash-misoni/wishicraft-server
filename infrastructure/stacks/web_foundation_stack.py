@@ -21,7 +21,12 @@ from aws_cdk import aws_route53 as route53
 from constructs import Construct
 
 from web.foundation import build_foundation
-from wishicraft.config import ProjectConfig, SecretsExampleConfig, StageConfig
+from wishicraft.config import (
+    ProjectConfig,
+    SecretsExampleConfig,
+    StageConfig,
+    load_web_public_url,
+)
 from wishicraft.naming import resource_name
 
 
@@ -61,17 +66,10 @@ class WebFoundationStack(Stack):
         domain_name = None
         certificate = None
         if domain_phase != "legacy":
-            web_config = json.loads((root / "config" / f"web-{stage.stage}.json").read_text())
-            if (
-                not isinstance(web_config, dict)
-                or set(web_config) != {"schema_version", "domain_name"}
-                or type(web_config["schema_version"]) is not int
-                or web_config["schema_version"] != 1
-            ):
-                raise ValueError("explicit Web domain configuration required")
-            domain_name = web_config.get("domain_name")
-            if domain_name != "web.wishicraft.net" or stage.aws_region != "ap-northeast-1":
-                raise ValueError("unapproved Web domain or region")
+            configured_origin = load_web_public_url(root, stage.stage)
+            domain_name = configured_origin.removeprefix("https://")
+            if stage.aws_region != "ap-northeast-1":
+                raise ValueError("unapproved Web region")
             certificate = acm.CfnCertificate(
                 self,
                 "WebCertificate",
@@ -88,7 +86,7 @@ class WebFoundationStack(Stack):
             certificate.apply_removal_policy(RemovalPolicy.RETAIN)
             CfnOutput(self, "WebCertificateArn", value=certificate.ref)
             if domain_phase == "canonical":
-                canonical_origin = "https://" + domain_name
+                canonical_origin = configured_origin
         api = apigw.HttpApi(self, "WebApi", create_default_stage=True)
         if domain_phase in {"domain", "canonical"}:
             assert certificate is not None and isinstance(domain_name, str)

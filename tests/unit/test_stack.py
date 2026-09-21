@@ -778,10 +778,12 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
         "OPERATIONS_TABLE",
         "BOT_TOKEN_PARAMETER_NAME",
         "DELIVERY_RETRY_QUEUE_URL",
+        "MANAGEMENT_WEB_URL",
     }
     assert message_environment["BOT_TOKEN_PARAMETER_NAME"] == (
         "/wishicraft/dev/secret/discord-bot-token"
     )
+    assert message_environment["MANAGEMENT_WEB_URL"] == "https://web.wishicraft.net"
     message_role = message["Properties"]["Role"]["Fn::GetAtt"][0]
     message_statements = [
         statement

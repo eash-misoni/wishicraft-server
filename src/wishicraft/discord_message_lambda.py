@@ -547,6 +547,7 @@ def _get_service() -> DiscordDeliveryService:
                 )
             ),
             QueueRetry(sqs, queue_url=_required_environment("DELIVERY_RETRY_QUEUE_URL")),
+            management_web_url=_required_environment("MANAGEMENT_WEB_URL"),
         )
     return _service
 

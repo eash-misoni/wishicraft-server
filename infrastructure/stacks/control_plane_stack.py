@@ -25,7 +25,7 @@ from constructs import Construct
 
 from infrastructure.discord_command_bundle import discord_command_bundling
 from wishicraft.artifacts.host_runtime_probe import EXPECTED_FILESYSTEM_UUID
-from wishicraft.config import ProjectConfig, SecretsExampleConfig, StageConfig
+from wishicraft.config import ProjectConfig, SecretsExampleConfig, StageConfig, load_web_public_url
 from wishicraft.host_runtime import render_boot_time_artifacts
 from wishicraft.naming import resource_name, resource_tags
 
@@ -1382,6 +1382,7 @@ def _add_discord_ingress(
             "OPERATIONS_TABLE": operations_table.table_name,
             "BOT_TOKEN_PARAMETER_NAME": bot_token_parameter_name,
             "DELIVERY_RETRY_QUEUE_URL": delivery_queue.queue_url,
+            "MANAGEMENT_WEB_URL": load_web_public_url(repository_root, stage.stage),
             **(
                 {"AUTO_STOP_INTENTS_TABLE": auto_stop_intents_table.table_name}
                 if auto_stop_intents_table is not None

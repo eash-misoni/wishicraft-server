@@ -110,11 +110,13 @@ class DiscordDeliveryService:
         retry_queue: RetryQueue,
         *,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+        management_web_url: str | None = None,
     ) -> None:
         self._store = store
         self._messages = messages
         self._retry_queue = retry_queue
         self._clock = clock
+        self._management_web_url = management_web_url
 
     def deliver(self, *, operation_id: str, attempt_id: str, source_revision: int = 0) -> None:
         now_epoch = int(self._clock().timestamp())
@@ -162,7 +164,9 @@ class DiscordDeliveryService:
             )
             return
         try:
-            content = render_operation_projection(claimed)
+            content = render_operation_projection(
+                claimed, management_web_url=self._management_web_url
+            )
             if claimed.message_id is None:
                 message_id = self._messages.create(
                     channel_id=claimed.channel_id,
@@ -288,7 +292,9 @@ def render_status_projection(projection: object) -> str:
     return "\n".join(lines)
 
 
-def render_operation_projection(record: DeliveryRecord) -> str:
+def render_operation_projection(
+    record: DeliveryRecord, *, management_web_url: str | None = None
+) -> str:
     if record.operation_type not in {"STATUS", "START", "STOP", "BACKUP", "SWITCH", "RESET"}:
         raise ValueError("unsupported public Operation")
     state = {
@@ -367,6 +373,10 @@ def render_operation_projection(record: DeliveryRecord) -> str:
             lines.append("Old world cleanup pending; data retained.")
     else:
         lines.append("Check /mc status before retrying; contact an admin if the result is unclear.")
+    if record.operation_type == "STATUS" and management_web_url is not None:
+        if re.fullmatch(r"https://[a-z0-9.-]+", management_web_url) is None:
+            raise ValueError("invalid management Web URL")
+        lines.append(f"管理Web: {management_web_url}")
     content = "\n".join(lines)
     if len(content.encode("utf-16-le")) // 2 > 2000:
         raise ValueError("public message exceeds Discord limit")

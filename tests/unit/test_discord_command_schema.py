@@ -15,6 +15,9 @@ def test_phase8c_command_schema_is_exact_and_guild_only() -> None:
     assert set(command) == {"type", "name", "description", "options"}
     assert command["type"] == 1
     assert command["name"] == "mc"
+    assert command["description"] == (
+        "Wishicraft controls; Web/Whitelist management URL: /mc status"
+    )
     assert [(option["name"], option["type"]) for option in command["options"]] == [
         ("status", 1),
         ("start", 1),

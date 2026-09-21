@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -424,6 +425,37 @@ def load_configuration(repository_root: Path, stage: str) -> Configuration:
     stage_config = load_stage_config(repository_root / "config" / "stages" / f"{stage}.yaml", stage)
     secrets = load_secrets_example_config(repository_root / "config" / "secrets.example.yaml")
     return Configuration(project=project, stage=stage_config, secrets=secrets)
+
+
+def load_web_public_url(repository_root: Path, stage: str) -> str:
+    """Load the canonical public Web origin from the stage's Web configuration."""
+    path = repository_root / "config" / f"web-{stage}.json"
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as error:
+        raise ConfigValidationError(
+            [f"{path}: could not read configuration ({error.strerror})"]
+        ) from error
+    except json.JSONDecodeError as error:
+        raise ConfigValidationError([f"{path}: invalid JSON ({error})"]) from error
+    if (
+        not isinstance(value, dict)
+        or set(value) != {"schema_version", "domain_name"}
+        or type(value.get("schema_version")) is not int
+        or value.get("schema_version") != 1
+    ):
+        raise ConfigValidationError([f"{path}: must contain only schema_version 1 and domain_name"])
+    domain_name = value.get("domain_name")
+    if (
+        not isinstance(domain_name, str)
+        or re.fullmatch(
+            r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+",
+            domain_name,
+        )
+        is None
+    ):
+        raise ConfigValidationError([f"{path}: domain_name must be a lowercase DNS name"])
+    return f"https://{domain_name}"
 
 
 def load_project_config(path: Path) -> ProjectConfig:
