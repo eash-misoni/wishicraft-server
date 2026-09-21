@@ -370,15 +370,16 @@ def test_host_bundle_reproduces_predecessors_and_never_moves_worlds(tmp_path: Pa
         prepare(root, tmp_path / "bundle", receipt)
 
 
+@pytest.mark.parametrize("package_id", ["create-survival", "create-terralith"])
 def test_pinned_neoforge_create_is_immutable_metadata_only(
-    creation: Any, monkeypatch: pytest.MonkeyPatch
+    creation: Any, monkeypatch: pytest.MonkeyPatch, package_id: str
 ) -> None:
     from wishicraft.artifacts import game_package
 
     monkeypatch.setenv("GAME_PACKAGES", "1")
     _, sessions, backend, launches, _ = creation
     before = copy.deepcopy(backend.db.records)
-    request = payload(package_id="create-survival")
+    request = payload(package_id=package_id)
     jar = login(sessions)
     assert post(creation, jar, request)["statusCode"] == 202
     assert post(creation, jar, request)["statusCode"] == 200
@@ -387,7 +388,7 @@ def test_pinned_neoforge_create_is_immutable_metadata_only(
         assert backend.db.records[key] == value
     game_id = backend.db.records["games", REGISTRY_KEY]["registered_ids"]["SS"][0]
     game = {k: decode(v) for k, v in backend.db.records["games", game_id].items()}
-    package = game_package.load()[1]
+    package = next(p for p in game_package.load() if p["package_id"] == package_id)
     assert game["package"]["definition"] == package
     assert game["creation"]["package_digest"] == game_package.digest(package)
     assert game["materialization_state"] == "UNMATERIALIZED"
@@ -395,7 +396,13 @@ def test_pinned_neoforge_create_is_immutable_metadata_only(
     capabilities = creation[0].handle(event(jar, path="/api/capabilities", method="GET"), NOW)
     requirements = json.loads(capabilities["body"])["games"][-1]["client_requirements"]
     assert requirements["loader"] == {"type": "neoforge", "version": "21.1.219"}
-    assert [m["version"] for m in requirements["mods"]] == ["6.0.10", "1.3.4"]
+    assert [m["version"] for m in requirements["mods"] if m["client_required"]] == [
+        "6.0.10",
+        "1.3.4",
+    ]
+    assert [m["version"] for m in requirements["mods"] if not m["client_required"]] == (
+        ["2.6.2", "3.0.26", "1.7.12"] if package_id == "create-terralith" else []
+    )
     immutable = copy.deepcopy(backend.db.records["games", game_id])
     request["creation"]["package_id"] = "vanilla"
     assert post(creation, jar, request)["statusCode"] == 409

@@ -16,6 +16,17 @@ required a separately named Terralith pack; NeoForge reported `mod_data` and
 `tectonic` enabled. This fixture assertion is corrected; the actual Terralith
 biome lookup remains required. No package/version or production change followed
 this test failure. Original failed-run evidence is retained.
+Second attempt `35617665677` passed the actual Terralith biome lookup, then
+failed another fixture assumption: the integrated overworld JSON does not need
+to contain a literal `tectonic:` reference. The replacement assertion checks
+the actual `neoforge:overlays` activation condition (`terralith` loaded), the
+integrated noise/surface definition and its hash. No candidate version changed.
+
+The user also explicitly authorized the existing Web stack shared Lambda code
+asset update. Its old package validator rejects `client_required=false` while
+projecting a newly created Game. Both Create packages now have Web CREATE /
+capabilities / idempotency / immutable-record regression coverage. Web IAM,
+authentication, URLs and resource structure must remain unchanged in ChangeSet.
 
 ## Fixed package and isolation
 
