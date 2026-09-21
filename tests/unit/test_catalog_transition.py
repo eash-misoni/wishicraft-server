@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Any, cast
@@ -11,6 +12,7 @@ from typing import Any, cast
 import pytest
 
 from wishicraft.artifacts import game_package as packages
+from wishicraft.artifacts import initial_game, reset_worlds
 from wishicraft.config import load_configuration
 from wishicraft.host_runtime import render_boot_time_artifacts
 
@@ -92,6 +94,59 @@ def test_old_game_registration_stays_byte_identical() -> None:
     assert not packages.compatible_config(before, after, changed)
 
 
+def test_initialized_owner_and_world_are_not_rewritten_by_new_runtime(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from tests.unit.test_game_creation import atomic
+
+    edge = transition()
+    before, after = map(packages.digest, (edge["predecessor"], edge["successor"]))
+    game_id = "game-" + "d" * 64
+    p = packages.load()[1]
+    game = {
+        "game_id": game_id,
+        "creation": {
+            "operation_id": "op-" + "d" * 64,
+            "config_digest": before,
+            "package_digest": packages.digest(p),
+        },
+        "package": {"definition": p},
+        "world": {"seed": 42},
+        "materialization_state": "UNMATERIALIZED",
+    }
+    games = tmp_path / "games"
+    games.mkdir(mode=0o755)
+    monkeypatch.setattr(reset_worlds, "GAMES", games)
+    monkeypatch.setattr(reset_worlds, "OWNER_UID", os.getuid())
+    monkeypatch.setattr(reset_worlds, "OWNER_GID", os.getgid())
+    target = {
+        "game_id": game_id,
+        "data_source": str(games / game_id / "server"),
+        "config_digest": before,
+        "run_id": "op-original",
+    }
+    config = {"initial_whitelist": []}
+    initial_game.prepare(game, config, target, atomic, uid=os.getuid(), gid=os.getgid())
+    world = Path(target["data_source"]) / "world"
+    world.mkdir()
+    (world / "level.dat").write_bytes(b"existing fixture world")
+    assert initial_game.initialized(target, atomic)
+    owner = games / (game_id + ".initial-owner.json")
+    original = (owner.read_bytes(), owner.stat().st_mtime_ns, world.stat().st_ino)
+    snapshot = copy.deepcopy(game)
+    initial_game.prepare(
+        game,
+        config,
+        {**target, "config_digest": after, "run_id": "op-new"},
+        atomic,
+        uid=os.getuid(),
+        gid=os.getgid(),
+    )
+    assert (owner.read_bytes(), owner.stat().st_mtime_ns, world.stat().st_ino) == original
+    assert (world / "level.dat").read_bytes() == b"existing fixture world"
+    assert game == snapshot
+
+
 @pytest.mark.parametrize("field", ["image", "compose_sha256", "runtime_env_sha256", "games"])
 def test_changed_non_catalog_manifest_is_never_compatible(
     field: str, monkeypatch: pytest.MonkeyPatch
@@ -102,3 +157,64 @@ def test_changed_non_catalog_manifest_is_never_compatible(
     monkeypatch.setattr(Path, "read_text", lambda self: json.dumps(edge))
     with pytest.raises(ValueError, match="NOT_APPEND_ONLY"):
         packages.compatible_config("a" * 64, "b" * 64, package)
+
+
+def test_old_and_mixed_provenance_backups_remain_valid() -> None:
+    from wishicraft.backup_recovery import recovery_digest
+
+    cfg = load_configuration(ROOT, "dev")
+    edge = transition()
+    runtime = render_boot_time_artifacts(
+        cfg.project,
+        cfg.stage,
+        observed_uid=993,
+        observed_gid=993,
+        targeted=True,
+        enable_rcon=True,
+        rcon_parameter_name=cfg.secrets.rcon_password_parameter_name("dev"),
+        games=tuple(edge["successor"]["games"]),
+        reset_policies=json.loads((ROOT / "config/reset-dev.json").read_text()),
+        packages=packages.load(),
+    )
+    old_digest = packages.digest(edge["predecessor"])
+    new_digest = packages.digest(edge["successor"])
+    for name in ("predecessor", "successor"):
+        games = {}
+        ids = [*edge[name]["games"], "game-" + "a" * 64]
+        if name == "successor":
+            ids.append("game-" + "b" * 64)
+        for index, identity in enumerate(ids):
+            p = packages.load()[max(0, index - 1)]
+            game: dict[str, Any] = {
+                "game_id": identity,
+                "data_source": f"/srv/minecraft/games/{identity}/server",
+                "runtime": {"class": "default"},
+                "world": {"generation": 1, "seed": 42},
+                "materialization_state": "MATERIALIZED",
+                "package": {k: p[k] for k in ("package_id", "package_version")},
+            }
+            if index >= 2:
+                game["package"]["definition"] = p
+                game["creation"] = {
+                    "operation_id": "op-" + identity[5:],
+                    "config_digest": old_digest if index == 2 else new_digest,
+                    "package_digest": packages.digest(p),
+                }
+            games[identity] = game
+        document = {
+            "schema_version": 2,
+            "source_volume_id": "vol-0123456789abcdef0",
+            "games": games,
+            "runtime": {
+                "manifest_json": packages.canonical(edge[name]),
+                "runtime_env": runtime.runtime_env,
+                "compose_yaml": runtime.compose_yaml,
+                "creation_config": {"initial_whitelist": []},
+            },
+        }
+        serialized = json.dumps(document, sort_keys=True)
+        assert recovery_digest(serialized)
+        assert json.dumps(document, sort_keys=True) == serialized
+        games[ids[2]]["creation"]["config_digest"] = "0" * 64
+        with pytest.raises(ValueError, match="PACKAGE_REGISTRATION_MISMATCH"):
+            recovery_digest(json.dumps(document))

@@ -5,7 +5,7 @@ are not yet performed. The user authorized qualification and, after its gates
 pass, the existing normal STOP, guarded release, new CREATE/START/STOP. They also
 explicitly authorized the limited catalog migration described below.
 
-Local qualification: 1,512 tests passed; Ruff lint/format and mypy (218 source
+Local qualification: 1,513 tests passed; Ruff lint/format and mypy (218 source
 files) passed; package-enabled Control Plane CDK synth passed. Real Docker
 qualification runs on the existing Linux CI because this checkout has no Docker
 CLI. CI and all production steps remain pending until their evidence is recorded.
@@ -27,6 +27,10 @@ asset update. Its old package validator rejects `client_required=false` while
 projecting a newly created Game. Both Create packages now have Web CREATE /
 capabilities / idempotency / immutable-record regression coverage. Web IAM,
 authentication, URLs and resource structure must remain unchanged in ChangeSet.
+Additional focused provenance regressions passed (9 transition tests): an
+initialized initial-owner file retains exact bytes/mtime and the world retains
+its inode/content when preparing the new runtime; both historical predecessor
+and mixed old/new-creation-provenance backup descriptions validate without edits.
 
 ## Fixed package and isolation
 
