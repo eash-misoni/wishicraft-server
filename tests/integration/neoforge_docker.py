@@ -204,8 +204,18 @@ def worldgen_evidence(execute: Callable[[list[str]], str], container: str) -> No
                 "data/minecraft/worldgen/noise_settings/overworld.json"
             )
             terrain = archive.read(name)
-            json.loads(terrain)
-            assert b"tectonic:" in terrain
+            definition = json.loads(terrain)
+            assert {"noise_router", "surface_rule"} <= set(definition)
+            metadata = json.loads(archive.read("resourcepacks/tectonic/pack.mcmeta"))
+            overlay = next(
+                e
+                for e in metadata["neoforge:overlays"]["entries"]
+                if e["directory"] == "overlay.terratonic"
+            )
+            assert overlay["neoforge:conditions"] == [
+                {"type": "neoforge:mod_loaded", "modid": "terralith"}
+            ]
+            print("TECTONIC_TERRALITH_ACTIVATION", json.dumps(overlay), flush=True)
             print(
                 "TECTONIC_INTEGRATED_OVERWORLD",
                 name,
