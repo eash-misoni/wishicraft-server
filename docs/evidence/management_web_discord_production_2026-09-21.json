@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "stage": "dev",
+  "completed_at": "2026-09-21T05:42:35Z",
+  "repository": {
+    "implementation_commit": "d69182768570f4249907ba56c5221db95be66984",
+    "management_web_url_source": "config/web-dev.json domain_name via load_web_public_url()",
+    "management_web_url": "https://web.wishicraft.net",
+    "local_validation": {
+      "pytest": "1494 passed",
+      "ruff_lint": "passed",
+      "ruff_format": "passed",
+      "mypy": "passed",
+      "cdk_synth": "passed"
+    },
+    "implementation_ci": [
+      {
+        "name": "CI",
+        "run_id": 35562858276,
+        "conclusion": "success"
+      },
+      {
+        "name": "NeoForge runtime integration",
+        "run_id": 35562858294,
+        "conclusion": "success"
+      }
+    ]
+  },
+  "cloudformation": {
+    "stack": "WishicraftControlPlaneStack-dev",
+    "change_set_name": "management-web-ja-20260921T051013Z",
+    "change_set_id": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/management-web-ja-20260921T051013Z/09a15e47-ab0d-44d3-bc21-e579b11afecb",
+    "status": "UPDATE_COMPLETE",
+    "updated_at": "2026-09-21T05:23:40.964000Z",
+    "change_count": 16,
+    "lambda_changes": {
+      "count": 11,
+      "logical_ids": [
+        "AdmissionFunction23082B67",
+        "AutoStopEvaluatorFunctionF85F8B50",
+        "BackupTaskFunctionA44639DC",
+        "DiscordCommandFunction7D25102A",
+        "DiscordMessageFunction78FA388B",
+        "MonitoringObserverFunction584DA7C7",
+        "ReconcileFunction30829CB6",
+        "RetentionTaskFunction9F285CE4",
+        "StartTaskFunction8C564C4A",
+        "StatusExecutorFunction6E5C9869",
+        "StopTaskFunction11473A8C"
+      ],
+      "properties": "Code/S3Key and aws:asset:path for every function; DiscordMessageFunction additionally adds MANAGEMENT_WEB_URL only",
+      "management_web_url": "https://web.wishicraft.net",
+      "all_code_hashes_changed": true,
+      "function_names_arns_roles_unchanged": true,
+      "replacement": false,
+      "iam_changes": 0,
+      "new_resources": 0
+    },
+    "state_machine_case_d": {
+      "count": 5,
+      "logical_ids": [
+        "BackupStateMachine",
+        "ResetWorkflow",
+        "StartStateMachine",
+        "StopStateMachine",
+        "SwitchWorkflow"
+      ],
+      "action": "Modify",
+      "replacement": false,
+      "scope": [
+        "Properties"
+      ],
+      "target": "Definition",
+      "requires_recreation": "Never",
+      "classification": "dependency-propagated semantic no-op",
+      "raw_properties_equal": true,
+      "resolved_asl_equal": true,
+      "canonical_asl_equal": true,
+      "arn_role_logging_tracing_type_name_tags_unchanged": true,
+      "definition_hashes_before_after": {
+        "BackupStateMachine": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213",
+        "ResetWorkflow": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce",
+        "StartStateMachine": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8",
+        "StopStateMachine": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f",
+        "SwitchWorkflow": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2"
+      }
+    },
+    "all_134_physical_resource_ids_unchanged": true,
+    "deployed_template_matches_candidate": true,
+    "hotswap_or_manual_lambda_or_state_machine_update": false
+  },
+  "discord_registration": {
+    "operation": "PATCH existing Guild command",
+    "command_name": "mc",
+    "command_id_before": "1544004156543737876",
+    "command_id_after": "1544004156543737876",
+    "version_before": "1548294394397073439",
+    "version_after": "1551465110126465144",
+    "top_level_description_before": "Wishicraft Minecraft controls",
+    "top_level_description_after": "Wishicraftを操作します。管理Webは /mc status から確認できます",
+    "descriptions_after": {
+      "status": "Minecraftサーバーの現在の状態を表示します",
+      "start": "MinecraftサーバーをSTARTします",
+      "start.game": "起動するGameを選択します",
+      "stop": "現在のGameを保存し、MinecraftサーバーをSTOPします",
+      "backup": "停止中の共有Data EBSをSnapshotへBACKUPします",
+      "switch": "稼働中のGameを保存・停止し、別のGameへSWITCHします",
+      "switch.game": "起動するGameを選択します",
+      "switch.confirm": "現在のGameを停止することを確認します",
+      "reset": "対応Gameのworldを新しくして同じGameでRESETします",
+      "reset.game": "現在稼働中のRESET対応Gameを選択します",
+      "reset.confirm": "worldを新しくすることを確認します",
+      "reset.seed": "固定seedまたは新しいseedを選択します"
+    },
+    "name_structure_types_required_choices_unchanged": true,
+    "default_member_permissions_before_after": null,
+    "separate_command_permissions_before_after": "not configured (HTTP 404)",
+    "guild_scope_unchanged": true,
+    "global_commands_before": 0,
+    "global_commands_after": 0,
+    "new_command_or_subcommand": false,
+    "new_command_registration": false
+  },
+  "production_observation": {
+    "status_message_id": "1551467943546716241",
+    "status_message_timestamp": "2026-09-21T05:39:42.622000Z",
+    "status_line_api_readback": "管理Web: https://web.wishicraft.net",
+    "status_preserved": {
+      "minecraft": "stopped",
+      "current_operation": "none",
+      "health": "healthy"
+    },
+    "discord_client_copy_note": "The user-visible client copy showed a trailing slash; Discord API read-back and the sent content have no trailing slash.",
+    "command_picker_description": "Wishicraftを操作します。管理Webは /mc status から確認できます"
+  },
+  "final_state": {
+    "desired": "STOPPED",
+    "actual": "STOPPED",
+    "health": "HEALTHY",
+    "ec2": "stopped",
+    "current_operation": null,
+    "locks": 0,
+    "running_workflows": 0,
+    "active_ssm_commands": 0,
+    "active_ssm_sessions": 0,
+    "queues_empty": 3,
+    "alarms": "45/45 OK",
+    "dns_present": false,
+    "ingress_restored": "Discord / Admission / Web reserved concurrency UNSET",
+    "minecraft_start_stop_game_data_world_changes": false
+  }
+}

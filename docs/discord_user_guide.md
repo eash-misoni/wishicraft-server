@@ -21,4 +21,6 @@
 whitelist管理、Web、汎用Restore、死亡自動検知等は、この利用可能コマンド一覧には含みません。
 Discordの `/mc` コマンド一覧は、詳細管理・Whitelist管理をWebで行えることと、`/mc status` で管理Web URLを確認できることを案内します。
 
+2026-09-21に既存Guild `/mc` のcommand・subcommand・option descriptionを日本語へ統一し、command IDと構造、権限、Guild scopeを維持したままproductionへ反映しました。`/mc status` の実応答末尾は、設定正本 `config/web-dev.json` の `domain_name` を `load_web_public_url()` でHTTPS URLへした `管理Web: https://web.wishicraft.net` です。[production証跡](evidence/management_web_discord_production_2026-09-21.json)を参照してください。
+
 参加する場合はGame一覧から対象を選んでください。各Game詳細は共通構成と申請原稿を再利用して生成し、必要なclientと参加手順を一ページにまとめます。編集方法は[Webレビュー](reviews/user_guide_web.md)を参照してください。
