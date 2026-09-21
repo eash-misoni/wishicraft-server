@@ -180,7 +180,9 @@ def worldgen_evidence(execute: Callable[[list[str]], str], container: str) -> No
     prefix = ["docker", "exec", container, "rcon-cli"]
     packs = execute([*prefix, "datapack", "list", "enabled"])
     print("WORLDGEN_ENABLED_PACKS", packs, flush=True)
-    assert "terralith" in packs.lower() and "tectonic" in packs.lower(), packs
+    # NeoForge merges mod resources (including Terralith) into mod_data.
+    # A successful Terralith biome-source query below is the stronger check.
+    assert "mod_data" in packs.lower() and "tectonic" in packs.lower(), packs
     biome = execute([*prefix, "locate", "biome", "terralith:yellowstone"])
     print("TERRALITH_BIOME", biome, flush=True)
     assert "terralith:yellowstone" in biome and " is at " in biome, biome

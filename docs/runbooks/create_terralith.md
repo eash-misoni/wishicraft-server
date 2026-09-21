@@ -10,6 +10,13 @@ files) passed; package-enabled Control Plane CDK synth passed. Real Docker
 qualification runs on the existing Linux CI because this checkout has no Docker
 CLI. CI and all production steps remain pending until their evidence is recorded.
 
+First Docker attempt, run `35617068544`: existing Create passed; new package
+reached health/RCON with all verified artifact hashes. The test incorrectly
+required a separately named Terralith pack; NeoForge reported `mod_data` and
+`tectonic` enabled. This fixture assertion is corrected; the actual Terralith
+biome lookup remains required. No package/version or production change followed
+this test failure. Original failed-run evidence is retained.
+
 ## Fixed package and isolation
 
 `create-terralith`, package version `1`, uses Minecraft 1.21.1 / NeoForge 21.1.219,
