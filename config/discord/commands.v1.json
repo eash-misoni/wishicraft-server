@@ -2,7 +2,7 @@
   {
     "type": 1,
     "name": "mc",
-    "description": "Wishicraft controls; Web/Whitelist management URL: /mc status",
+    "description": "Wishicraft Minecraft controls",
     "options": [
       {
         "type": 1,

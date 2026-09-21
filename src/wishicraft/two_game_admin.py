@@ -41,6 +41,7 @@ def declaration(root: Path, *, now: datetime) -> dict[str, Any]:
         + "\n",
     }
     commands = json.loads((root / "config/discord/commands.v1.json").read_text())
+    commands[0]["description"] = "Wishicraft controls; Web/Whitelist management URL: /mc status"
     game_option = {
         "type": 3,
         "name": "game",
