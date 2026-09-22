@@ -75,4 +75,35 @@ changes. Do not induce a real START/STOP or artificial Discord error to test thi
 race in production. Deterministic concurrency verification is local; real-traffic
 absence of Errors is an observation, not proof the race was exercised.
 
-Release status: pending validation and ChangeSet review.
+Release status: repository fix complete; **deployment held by the requested scope gate**.
+Implementation commit: `b54dae4a923a34f382772746a1263fdc5fc08bd8`.
+
+The synthesized candidate preserved the exact deployed template except
+`DiscordMessageFunction78FA388B.Properties.Code`. ZIP comparison verified that
+only `wishicraft/discord_message_lambda.py` changed among source files. Generated
+local Python bytecode was excluded by a fresh cache-free canonical synth; the
+first candidate was rejected before upload because it included test-generated
+bytecode. No bundling implementation or dependency was changed.
+
+Actual ChangeSet `discord-supersede-20260922`, suffix
+`2a861ae2-3d95-4ab4-8cae-72a9215202d2`, nevertheless reported six modifications:
+Message Lambda Code plus Definition on BackupStateMachine, ResetWorkflow,
+StartStateMachine, StopStateMachine and SwitchWorkflow. The five Definition
+properties were structurally unchanged in the submitted template; that is not
+permission to bypass the user's explicit resource/workflow stop condition.
+The ChangeSet was **never executed and was deleted**. No direct Lambda update,
+START/STOP, Game/host operation, IAM or alarm update was performed. Candidate
+asset/template remain immutable release evidence in the existing CDK asset bucket;
+no resource was created for them.
+
+At 06:52:27 UTC the deployed template and Message Lambda CodeSha256 remained
+unchanged. Read-only dev observation was RUNNING/HEALTHY, no Current Operation,
+zero Locks; all 43 returned `wc-dev-` metric alarms were OK and their definitions
+unchanged. No matching composite alarms were returned. This slice does not claim
+that the production race is fixed: the running Lambda still has the old code.
+A future release requires separately resolving/reviewing the additional ChangeSet
+entries; do not treat earlier broad Case D approvals as authorization for this slice.
+
+[Machine-readable qualification and release evidence](../evidence/discord_progress_supersede_2026-09-22.json).
+
+Implementation CI runs: [quality/Web/host integration](https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336695), [Paper](https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336649), [NeoForge](https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336582). These run links are evidence references; final HEAD CI is checked separately at handoff.

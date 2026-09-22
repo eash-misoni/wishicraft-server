@@ -1,6 +1,6 @@
 # 09. Decisions and Backlog
 
-> 2026-09-22 D-086/D-087 delivery correction (Accepted, repository validation): normalize only proven strictly-newer progress supersession after successful Discord delivery. The production progress-before-new-claim gap is covered; same-revision completion conflicts now fail closed, superseding the historical same-revision terminal no-op. Lifecycle, format, alarm and resources are unchanged. [Contract and evidence](runbooks/discord_progress_supersede.md).
+> 2026-09-22 D-086/D-087 delivery correction (Accepted, repository qualified; deployment held): normalize only proven strictly-newer progress supersession after successful Discord delivery. The production progress-before-new-claim gap is covered; same-revision completion conflicts now fail closed, superseding the historical same-revision terminal no-op. The actual ChangeSet additionally listed five State Machine Definition updates, so it was deleted unexecuted under the explicit scope gate. Lifecycle, format, alarm and deployed resources are unchanged. [Contract and evidence](runbooks/discord_progress_supersede.md).
 
 ## D-110 Same-runtime Paper IMPORT（Accepted / dev real-world validation complete）
 

@@ -1,0 +1,114 @@
+{
+  "slice": "Discord progress completion supersession",
+  "implementation_commit": "b54dae4a923a34f382772746a1263fdc5fc08bd8",
+  "stage": "dev",
+  "account": "385526546525",
+  "region": "ap-northeast-1",
+  "validation": {
+    "focused_tests_passed": 130,
+    "full_tests_passed": 1593,
+    "ruff_lint": "passed",
+    "ruff_format": "passed",
+    "mypy_source_files": 226,
+    "full_feature_cp_synth": "passed",
+    "baseline_ordering_regression": "fails with original ConditionalFailure as expected"
+  },
+  "candidate": {
+    "code": {
+      "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+      "S3Key": "83a4e99ecbaf2276dd3962fd7a01f6cfd078b16450d0a5e36335b87afd07f0a7.zip"
+    },
+    "archive_bytes": 266450,
+    "archive_sha256": "d70486a258aab484511b58c4a9558aa60acbeb38a7af21d1a4f9731daf240a41",
+    "lambda_code_sha256": "1wSGoliqtIRRG1jEqVWKpgrL6zinryHRpPlzHa8kCkE=",
+    "template_bytes": 201240,
+    "changed_paths": [
+      "Resources.DiscordMessageFunction78FA388B.Properties.Code"
+    ],
+    "other_template_fields_identical": true
+  },
+  "changeset_changes": [
+    {
+      "LogicalResourceId": "BackupStateMachine",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ]
+    },
+    {
+      "LogicalResourceId": "DiscordMessageFunction78FA388B",
+      "ResourceType": "AWS::Lambda::Function",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ]
+    },
+    {
+      "LogicalResourceId": "ResetWorkflow",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ]
+    },
+    {
+      "LogicalResourceId": "StartStateMachine",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ]
+    },
+    {
+      "LogicalResourceId": "StopStateMachine",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ]
+    },
+    {
+      "LogicalResourceId": "SwitchWorkflow",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Action": "Modify",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ]
+    }
+  ],
+  "release": {
+    "observed_at": "2026-09-22T06:52:27.693386+00:00",
+    "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/discord-supersede-20260922/2a861ae2-3d95-4ab4-8cae-72a9215202d2",
+    "change_set_deleted_without_execution": true,
+    "stack_template_unchanged": true,
+    "message_code_sha256_unchanged": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+    "desired": {
+      "S": "RUNNING"
+    },
+    "health": {
+      "S": "HEALTHY"
+    },
+    "current_operation_id": null,
+    "lock_count": 0,
+    "alarms": {
+      "total": 43,
+      "non_ok": []
+    },
+    "alarm_definitions_unchanged": true
+  },
+  "deployed": false,
+  "stop_reason": "Actual ChangeSet includes five State Machine Definition updates, outside the user-authorized Message Lambda code-only scope. No execution or direct Lambda update bypass.",
+  "production_race_validation": "not performed; fix not deployed",
+  "implementation_ci_runs": {
+    "CI": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336695",
+    "Paper same-runtime import integration": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336649",
+    "NeoForge runtime integration": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336582"
+  }
+}
