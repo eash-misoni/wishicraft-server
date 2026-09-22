@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import time
 from copy import deepcopy
@@ -160,6 +161,7 @@ def test_signed_autocomplete_routes_without_admission(
     monkeypatch.setenv("RUNTIME_GAMES", '["game-legacy"]')
     monkeypatch.setenv("GAMES_TABLE", "games")
     monkeypatch.setenv("RESET_POLICIES", "{}")
+    monkeypatch.setattr(ingress, "_autocomplete_reader", None)
     import boto3  # type: ignore[import-untyped]
 
     monkeypatch.setattr(boto3, "client", lambda *a, **k: registry)
@@ -287,3 +289,67 @@ def test_legacy_and_created_games_share_record_authority(registry: Registry) -> 
     del registry.items[legacy[0]]
     registry.items[legacy[1]]["lifecycle_state"] = "ARCHIVED"
     assert len(discovery.read()) == 4
+
+
+@pytest.mark.parametrize("initialization_fails", [False, True])
+def test_cold_init_prepares_client_but_reads_only_after_authorization(
+    registry: Registry,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    initialization_fails: bool,
+) -> None:
+    import boto3
+
+    monkeypatch.setenv("RUNTIME_GAMES", '["game-legacy"]')
+    monkeypatch.setenv("GAMES_TABLE", "games")
+    monkeypatch.setenv("RESET_POLICIES", "{}")
+    created = []
+    reads = []
+    original_read = registry.get_item
+
+    def client(*args: Any, **kwargs: Any) -> Registry:
+        created.append(args)
+        if initialization_fails and len(created) == 1:
+            raise RuntimeError("private initialization detail token")
+        return registry
+
+    def read(**kwargs: Any) -> dict[str, Any]:
+        reads.append(kwargs)
+        return original_read(**kwargs)
+
+    monkeypatch.setattr(boto3, "client", client)
+    monkeypatch.setattr(registry, "get_item", read)
+    assert ingress.__file__ is not None
+    spec = importlib.util.spec_from_file_location("cold_discord_ingress", ingress.__file__)
+    assert spec is not None and spec.loader is not None
+    cold = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cold)
+    assert created == [("dynamodb",)] and reads == []
+    key = SigningKey.generate()
+    monkeypatch.setattr(cold, "_configuration", lambda: configuration(key))
+    payload: Any = command_payload("start", roles=[ADMIN_ROLE_ID])
+    payload["type"] = 4
+    payload["data"]["options"][0]["options"] = [
+        {"name": "game", "type": 3, "value": "", "focused": True}
+    ]
+    denied = signed_event(payload, SigningKey.generate())
+    assert cold.handler(denied, None)["statusCode"] == 401
+    assert reads == []
+    event = signed_event(payload, key)
+    first = json.loads(cold.handler(event, None)["body"])
+    assert len(first["data"]["choices"]) == 4
+    new_id = registry.add(91, game_package.load()[2])
+    second = json.loads(cold.handler(event, None)["body"])
+    assert new_id in {x["value"] for x in second["data"]["choices"]}
+    assert created == [("dynamodb",)] * (2 if initialization_fails else 1)
+    registry.fail = True
+    assert json.loads(cold.handler(event, None)["body"])["data"]["choices"] == []
+    logs = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+    if initialization_fails:
+        assert logs.pop(0)["result"] == "initialization_failed"
+    assert [log["result"] for log in logs] == ["ok", "ok", "unavailable"]
+    assert [log.get("count") for log in logs] == [4, 5, None]
+    assert logs[-1]["reason"] == "read_failure"
+    assert "private" not in json.dumps(logs)
+    assert "token" not in json.dumps(logs)
+    assert "query" not in json.dumps(logs)

@@ -125,3 +125,18 @@ reused that provider. No secrets were written to files/logs or permissions chang
 A final guide-copy cleanup removes implementation language from the public page and describes
 reload behavior for readers. This does not change discovery logic or the command contract;
 its Web-only asset release uses a fresh Code-only ChangeSet and the same CI checks.
+
+
+## Empty-picker cold-start follow-up (2026-09-22)
+
+The user reported empty choices after the initial release. Pre-release signed tests,
+registration read-back and operator projection are insufficient evidence of actual Discord
+picker delivery. Three cold Lambda executions exceeded the three-second response limit;
+the following warm execution took 301 ms. See the design's cold-start follow-up.
+
+The correction initializes and reuses the read-only SDK client during Lambda INIT, without
+caching Game membership. Repeat full qualification, fresh Case D ChangeSets and deployed
+read-back. Observe `discord-autocomplete` safe structured logs and Lambda REPORT together:
+`result=ok`/counts alone do not prove Discord accepted a late response. Check INIT plus
+Duration against the end-to-end deadline and obtain user picker confirmation. No Game
+command needs to be submitted and command registration must remain unchanged.

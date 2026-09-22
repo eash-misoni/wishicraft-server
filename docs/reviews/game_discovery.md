@@ -1,7 +1,8 @@
 # D-112 Registry-backed Game discovery
 
 Accepted scope, 2026-09-22. Implements DIS-001/002/003/007/008 and D-084/D-105 discovery.
-Dev functional release qualified; human Discord picker observation remains a user check.
+Dev release read-back passed, but the user reported empty Discord picker results.
+Qualification is reopened for the cold-start response-time fix below.
 Repository qualification and deployment evidence are recorded separately in the
 [release runbook](../runbooks/game_discovery.md).
 
@@ -57,6 +58,27 @@ maximum 25. Every request rereads registry and records; no membership cache or r
 Reads have a 1.8-second application budget and bounded SDK connect/read timeouts, zero retries.
 Failure returns empty choices with a safe structured failure log; no A/B fallback or admission.
 Existing execution parser/Admission and Lambda monitoring behavior are preserved.
+
+### Cold-start follow-up
+
+The first live picker test returned empty results. CloudWatch recorded three cold requests
+at 3,097–3,157 ms plus 205–226 ms INIT, versus 301 ms for a warm request; one request logged
+`unavailable`. Signed local tests and registry projection had not exercised Lambda cold-start
+latency and therefore did not qualify actual picker behavior. The user report supersedes
+any earlier functional-release qualification for Discord.
+
+Initialize the SDK/service model and read-only reader during Lambda INIT, reusing only its
+connection and immutable deployment configuration. No registry or Game read occurs until
+signature/authorization succeeds; every autocomplete still rereads current records. Failed
+initialization is contained and retried on a later autocomplete request. No provisioned
+concurrency, memory increase, extra resource, permission or command update is introduced.
+Safe result/count/duration and coarse failure-reason logs omit tokens, user identities,
+queries, exception messages and Game records. Cold and warm actual response measurements,
+including INIT plus execution, are required before closing this follow-up.
+
+AWS recommends [initializing SDK clients outside handlers](https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html).
+Moving work to INIT does not exempt it from Discord's end-to-end deadline; live latency must
+still be checked, and a failed measurement must not be called success.
 
 Official specifications: [application commands](https://docs.discord.com/developers/interactions/application-commands),
 [interaction responses](https://docs.discord.com/developers/interactions/receiving-and-responding).
