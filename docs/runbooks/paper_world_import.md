@@ -212,6 +212,29 @@ No bucket creation or broader IAM is an implicit fallback for archive transport.
 
 ## Verification and future boundaries
 
+Repository qualification checkpoints (2026-09-22 UTC): implementation commit
+`8e2466af518b13aa595dbd5456b7f13fcaed14d4`; isolated fixture correction
+`e70dc5f390470ded4f3de4b586322e1765052dff`.
+[Paper integration run 35683472535](https://github.com/eash-misoni/wishicraft-server/actions/runs/35683472535)
+passed: synthetic source READY, three dimension markers, vanilla/bukkit/paper datapacks,
+save/normal stop, identical prepared generation 1 tree, target READY twice with retained
+markers and normal save/stop each time. Source archive hash remained unchanged.
+The earlier failed run used a broadcast-command response as its assertion; the corrected
+fixture directly tests the saved block. The NeoForge fixture separately excludes Paper
+from ordinary CREATE because Paper requires explicit import provenance.
+
+The first full CI unit suite passed 1,565 tests; local full suite passed 1,563 before the
+last two focused cases, and the subsequent focused suite passed 49. Local lint/format,
+type checking and four dev CDK synth targets passed. CI exposed one integration-only
+JSON return annotation missing under its fresh type check; this is fixed explicitly.
+The final commit's complete CI result must also pass before release. Local Docker is
+absent; the Paper runtime evidence above is from the isolated Linux CI runner.
+
+Production status remains unchanged: no VPS stop, final source archive/hash, AWS release,
+new Game, real-world first START/MATERIALIZED or final target STOP. Therefore there is
+no new production rollback archive yet, and client verification is not ready. Existing
+A/B/create-survival/create-terralith production state has not been modified by this work.
+
 Unit tests cover archive paths/types/collisions/limits, runtime pinning and mismatch,
 source freeze assertions, generation 1, owned retry/rename crash, lease loss, missing-world
 refusal, empty access projection and existing data preservation. Dedicated Linux Docker

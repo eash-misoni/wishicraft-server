@@ -11,6 +11,7 @@ import tempfile
 import time
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -61,7 +62,7 @@ def main() -> None:
     cycle = 0
     source_java = ""
 
-    def start(data: Path, package_cache: Path) -> dict[str, object]:
+    def start(data: Path, package_cache: Path) -> dict[str, Any]:
         nonlocal cycle
         cycle += 1
         environment = {
@@ -93,7 +94,7 @@ def main() -> None:
             args.extend(["-e", k + "=" + v])
         command(*args, image)
         for _ in range(120):
-            info = json.loads(command("docker", "inspect", name))[0]
+            info: dict[str, Any] = json.loads(command("docker", "inspect", name))[0]
             if not info["State"]["Running"]:
                 raise RuntimeError("Paper exited before READY")
             logs = command("docker", "logs", name)
