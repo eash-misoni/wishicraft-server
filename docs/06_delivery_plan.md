@@ -1,5 +1,7 @@
 # 06. Delivery Plan
 
+> Current slice: Discord completion CAS superseded-race correction. Repository validation in progress; dev release requires a ChangeSet containing only the existing Message Lambda code update. No lifecycle or runtime operation is included. [Runbook](runbooks/discord_progress_supersede.md).
+
 > D-110実world dev検証を承認（2026-09-22）: VPSを一時停止してpoint-in-time archiveを取得し、VPSは再開する。devへ同一PaperでIMPORTし正常STOPまで検証。dev/VPSは独立し、将来prod cutoverはfresh archiveを再取得する。現在の実行結果は[runbook](runbooks/paper_world_import.md)へ記録する。
 
 > Current checkpoint (2026-09-22): D-110 same-runtime Paper 26.1.2/build 53 real-world dev IMPORT completed. VPS saved/synced archive captured and source restarted; new `vps-survival` generation 1 reached READY/MATERIALIZED and normal STOP. Final dev STOPPED/HEALTHY, EC2 stopped, 45 alarms OK, ingress restored; existing Games unchanged. Client verification is a later user check. D-101 Runtime Extension remains the next roadmap slice, not started here. [Runbook](runbooks/paper_world_import.md).

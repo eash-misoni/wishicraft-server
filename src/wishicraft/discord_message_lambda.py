@@ -47,6 +47,8 @@ class DynamoDeliveryStore:
         item = response.get("Item") if isinstance(response, dict) else None
         if not isinstance(item, dict):
             raise ValueError("Discord delivery Operation does not exist")
+        if _string(item, "operation_id") != operation_id:
+            raise ValueError("Discord delivery Operation identity mismatch")
         if _string(item, "operation_type") != "STATUS":
             if _string(item, "operation_type") not in {
                 "START",
@@ -296,6 +298,7 @@ class DynamoDeliveryStore:
                 record,
                 current=current,
                 completed_status=status,
+                attempt_id=attempt_id,
                 message_id=message_id or record.message_id,
             ):
                 return
@@ -307,6 +310,7 @@ class DynamoDeliveryStore:
         *,
         current: DeliveryRecord,
         completed_status: DeliveryStatus,
+        attempt_id: str,
         message_id: str | None,
     ) -> bool:
         expected_delivery_id = operation_nonce(record.operation_id)
@@ -319,24 +323,43 @@ class DynamoDeliveryStore:
             and message_id is not None
             and current.message_id == message_id
         )
-        if not identity_matches:
+        if (
+            not identity_matches
+            or completed_status is not DeliveryStatus.DELIVERED
+            or record.delivery_status is not DeliveryStatus.PENDING
+            or record.delivery_source_revision != record.source_revision
+            or not attempt_id
+            or record.attempt_id != attempt_id
+            or current.source_revision <= record.source_revision
+            or (record.message_id is not None and record.message_id != message_id)
+        ):
             return False
-        if current.source_revision > record.source_revision:
+        # Progress may advance before its stream consumer claims delivery. Only
+        # the same pending owner can occupy the attempted revision in that gap.
+        if current.delivery_source_revision == record.source_revision:
             return (
-                current.delivery_source_revision == current.source_revision
-                and current.delivery_status is not None
+                current.delivery_status is DeliveryStatus.PENDING
+                and current.attempt_id == attempt_id
+                and current.delivered_revision == record.delivered_revision
+                and current.outcome_unknown == record.outcome_unknown
             )
-        if current.source_revision != record.source_revision:
+        # A newer consumer may itself lag the latest authoritative progress.
+        # Its ownership and delivery receipt must still form a coherent revision.
+        revision = current.delivery_source_revision
+        if (
+            revision is None
+            or not record.source_revision < revision <= current.source_revision
+            or not current.attempt_id
+            or current.attempt_id == attempt_id
+        ):
             return False
-        if current.delivery_source_revision != record.source_revision:
-            return False
-        if completed_status is DeliveryStatus.DELIVERED:
-            return (
-                current.delivery_status is DeliveryStatus.DELIVERED
-                and current.delivered_revision is not None
-                and current.delivered_revision >= record.source_revision
-            )
-        return current.delivery_status is completed_status
+        if current.delivery_status is DeliveryStatus.DELIVERED:
+            return current.delivered_revision == revision and not current.outcome_unknown
+        return current.delivery_status in {
+            DeliveryStatus.PENDING,
+            DeliveryStatus.RETRYABLE_FAILED,
+            DeliveryStatus.FAILED,
+        } and (current.delivered_revision is None or 0 <= current.delivered_revision < revision)
 
 
 class ParameterToken:

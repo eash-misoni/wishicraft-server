@@ -80,7 +80,7 @@ def test_store_load_accepts_long_running_operations(operation_type: str) -> None
     api.item["current_step"] = {"S": "SNAPSHOT_CREATING"}
 
     record = discord_message_lambda.DynamoDeliveryStore(api, table_name="wc-dev-operations").load(
-        "op-backup-001"
+        "op-status-001"
     )
 
     assert record.operation_type == operation_type
@@ -93,7 +93,7 @@ def test_store_load_rejects_unsupported_operation() -> None:
 
     with pytest.raises(ValueError, match="unsupported Discord delivery Operation"):
         discord_message_lambda.DynamoDeliveryStore(api, table_name="wc-dev-operations").load(
-            "op-restore-001"
+            "op-status-001"
         )
 
 
@@ -253,7 +253,7 @@ def test_production_stale_completion_race_is_noop_after_newer_revision_delivered
     assert final.delivery_source_revision == 5
 
 
-def test_same_revision_already_delivered_completion_is_noop() -> None:
+def test_same_revision_already_delivered_completion_fails_closed() -> None:
     current = delivery_item(
         progress_revision=4,
         delivery_source_revision=4,
@@ -270,15 +270,16 @@ def test_same_revision_already_delivered_completion_is_noop() -> None:
         attempt_id="ddb:duplicate",
     )
 
-    store.mark_delivered(
-        claimed,
-        attempt_id="ddb:duplicate",
-        message_id="1532999999999999999",
-        now_epoch=1788270466,
-    )
+    with pytest.raises(ConditionalFailure):
+        store.mark_delivered(
+            claimed,
+            attempt_id="ddb:duplicate",
+            message_id="1532999999999999999",
+            now_epoch=1788270466,
+        )
 
 
-def test_newer_pending_revision_supersedes_old_completion() -> None:
+def test_api_failure_completion_conflict_is_not_success() -> None:
     current = delivery_item(
         progress_revision=5,
         delivery_source_revision=5,
@@ -295,15 +296,16 @@ def test_newer_pending_revision_supersedes_old_completion() -> None:
         attempt_id="ddb:older",
     )
 
-    store.mark_failed(
-        old_claim,
-        attempt_id="ddb:older",
-        status=DeliveryStatus.RETRYABLE_FAILED,
-        code="DISCORD_NETWORK_FAILURE",
-        next_attempt_epoch=1788270471,
-        outcome_unknown=False,
-        now_epoch=1788270466,
-    )
+    with pytest.raises(ConditionalFailure):
+        store.mark_failed(
+            old_claim,
+            attempt_id="ddb:older",
+            status=DeliveryStatus.RETRYABLE_FAILED,
+            code="DISCORD_NETWORK_FAILURE",
+            next_attempt_epoch=1788270471,
+            outcome_unknown=False,
+            now_epoch=1788270466,
+        )
 
 
 @pytest.mark.parametrize(
