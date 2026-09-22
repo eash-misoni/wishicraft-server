@@ -1,12 +1,11 @@
 # 09. Decisions and Backlog
 
-> D-111 planned host maintenance: repository implementation / deployment qualification in
-> progress. Independent SystemState maintenance lease, atomic Admission fence, unchanged
+> D-111 planned host maintenance: Accepted / dev deployed and qualified (2026-09-22). Independent SystemState maintenance lease, atomic Admission fence, unchanged
 > observation metrics, three narrowly suppressed notification composites, absolute expiry
 > and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
 > [operator runbook](runbooks/planned_host_maintenance.md). No MAINTENANCE Desired state.
 
-## D-111 Planned host maintenance（repository実装、実環境qualification前）
+## D-111 Planned host maintenance（Accepted / dev実証完了）
 
 2026-09-22、明示的operator intentを既存SystemStateの期限付きleaseへ分離する。
 Desired STOPPED/RUNNINGとworkflow state machineは維持し、通常mutationのAdmissionへ

@@ -1,7 +1,6 @@
 # 08. Human Operation Flows
 
-> D-111 planned host maintenance: repository implementation / deployment qualification in
-> progress. Independent SystemState maintenance lease, atomic Admission fence, unchanged
+> D-111 planned host maintenance: Accepted / dev deployed and qualified (2026-09-22). Independent SystemState maintenance lease, atomic Admission fence, unchanged
 > observation metrics, three narrowly suppressed notification composites, absolute expiry
 > and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
 > [operator runbook](runbooks/planned_host_maintenance.md). No MAINTENANCE Desired state.

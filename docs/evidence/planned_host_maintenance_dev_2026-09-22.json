@@ -1,0 +1,874 @@
+{
+  "stage": "dev",
+  "account": "385526546525",
+  "region": "ap-northeast-1",
+  "separate_prod_stage": "unconfigured; not deployed",
+  "implementation_commit": "ab15481de08dfa336402bdb5eeedd3c4bbfebdad",
+  "deployed_commit": "f6280eed973eedc061eca2428001888084777b90",
+  "correction_commits": [
+    "00102701ae7a703cb24f945a32c96b990a8a3647",
+    "f6280eed973eedc061eca2428001888084777b90"
+  ],
+  "validation": {
+    "pytest_passed": 1672,
+    "ruff_check": "passed",
+    "ruff_format_files": 309,
+    "mypy_files": 231,
+    "synth": "all CI variants passed; frozen prepare and active current-feature assemblies passed",
+    "cloudwatch_metric_math_get_metric_data": "EPOCH expression accepted before deployment",
+    "docker_and_shellcheck": "passed in CI; unavailable locally",
+    "ci": [
+      {
+        "conclusion": "success",
+        "name": "Paper same-runtime import integration",
+        "status": "completed",
+        "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35710569300"
+      },
+      {
+        "conclusion": "success",
+        "name": "NeoForge runtime integration",
+        "status": "completed",
+        "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35710569234"
+      },
+      {
+        "conclusion": "success",
+        "name": "CI",
+        "status": "completed",
+        "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35710569214"
+      }
+    ]
+  },
+  "release": {
+    "prepare": {
+      "reviewed": true,
+      "mode": "prepare",
+      "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/maintenance-prepare-f6280ee/d20c16e8-71c8-423b-a7f5-e61999bcc694",
+      "changes": [
+        {
+          "logical_id": "AdmissionFunction23082B67",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "BackupStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "BackupTaskFunctionA44639DC",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "DesiredActualDivergenceAlarmNotification0704533F",
+          "type": "AWS::CloudWatch::CompositeAlarm",
+          "action": "Add",
+          "replacement": null
+        },
+        {
+          "logical_id": "DesiredStoppedEc2RunningAlarmNotification554397F3",
+          "type": "AWS::CloudWatch::CompositeAlarm",
+          "action": "Add",
+          "replacement": null
+        },
+        {
+          "logical_id": "DiscordCommandFunction7D25102A",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "DiscordMessageFunction78FA388B",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "MaintenanceSuppressorAlarm48FA0D89",
+          "type": "AWS::CloudWatch::Alarm",
+          "action": "Add",
+          "replacement": null
+        },
+        {
+          "logical_id": "MonitoringObserverFunction584DA7C7",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "ReconcileFunction30829CB6",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "ResetWorkflow",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "RetentionTaskFunction9F285CE4",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "RuntimeObservationUnknownAlarmNotification0A0D05B9",
+          "type": "AWS::CloudWatch::CompositeAlarm",
+          "action": "Add",
+          "replacement": null
+        },
+        {
+          "logical_id": "StartStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "StartTaskFunction8C564C4A",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "StatusExecutorFunction6E5C9869",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "StopStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "StopTaskFunction11473A8C",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "SwitchWorkflow",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        }
+      ],
+      "workflows": [
+        {
+          "logical_id": "StartStateMachine",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+          "sha256": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8"
+        },
+        {
+          "logical_id": "StopStateMachine",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+          "sha256": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f"
+        },
+        {
+          "logical_id": "BackupStateMachine",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+          "sha256": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213"
+        },
+        {
+          "logical_id": "RetentionStateMachine",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+          "sha256": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e"
+        },
+        {
+          "logical_id": "SwitchWorkflow",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+          "sha256": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2"
+        },
+        {
+          "logical_id": "ResetWorkflow",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+          "sha256": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce"
+        }
+      ],
+      "lambda_arn_resolution": {
+        "ReconcileFunction30829CB6": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+        "StartTaskFunction8C564C4A": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+        "StopTaskFunction11473A8C": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+        "BackupTaskFunctionA44639DC": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+        "RetentionTaskFunction9F285CE4": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task"
+      },
+      "template_sha256": "6daf7bd03081200c5a42739ee716826bf09ddfee2b44f05506f173f522e70075"
+    },
+    "active": {
+      "reviewed": true,
+      "mode": "active",
+      "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/maintenance-active-f6280ee/8c1348b4-9862-44cf-95e9-d3b9c7ea855b",
+      "changes": [
+        {
+          "logical_id": "BackupStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "DesiredActualDivergenceAlarm8060A5DB",
+          "type": "AWS::CloudWatch::Alarm",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "DesiredStoppedEc2RunningAlarm3E13A371",
+          "type": "AWS::CloudWatch::Alarm",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "ResetWorkflow",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "RuntimeObservationUnknownAlarm030E44C1",
+          "type": "AWS::CloudWatch::Alarm",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "StartStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "StopStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        },
+        {
+          "logical_id": "SwitchWorkflow",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": "False"
+        }
+      ],
+      "workflows": [
+        {
+          "logical_id": "StartStateMachine",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+          "sha256": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8"
+        },
+        {
+          "logical_id": "StopStateMachine",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+          "sha256": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f"
+        },
+        {
+          "logical_id": "BackupStateMachine",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+          "sha256": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213"
+        },
+        {
+          "logical_id": "RetentionStateMachine",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+          "sha256": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e"
+        },
+        {
+          "logical_id": "SwitchWorkflow",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+          "sha256": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2"
+        },
+        {
+          "logical_id": "ResetWorkflow",
+          "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+          "sha256": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce"
+        }
+      ],
+      "lambda_arn_resolution": {
+        "ReconcileFunction30829CB6": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+        "StartTaskFunction8C564C4A": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+        "StopTaskFunction11473A8C": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+        "BackupTaskFunctionA44639DC": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+        "RetentionTaskFunction9F285CE4": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task"
+      },
+      "template_sha256": "22574e573200aef6f126688acd0176443125482f89f8660f46193aa1be98b553"
+    },
+    "readback": {
+      "at": "2026-09-22T09:52:28.925936+00:00",
+      "active_template_exact": true,
+      "existing_physical_ids_unchanged": true,
+      "resource_delta": {
+        "WishicraftControlPlaneStack-dev": 4,
+        "WishicraftWebStack-dev": 0
+      },
+      "functions": [
+        {
+          "name": "wc-dev-admission",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-auto-stop-evaluator",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-backup-task",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-discord-command",
+          "code_sha256": "fEpVAhQ+Wbj1iqH7jqpLO0uXJwvDSMOwE1hFslLrP0w=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-discord-message",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-monitoring-observer",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-reconcile",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-retention-task",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-start-task",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-status-executor",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        },
+        {
+          "name": "wc-dev-stop-task",
+          "code_sha256": "pzzMX5iRRBgk4ac69iVtjfn5EnCqvGaG+aynNoJhSPA=",
+          "state": "Active",
+          "update": "Successful"
+        }
+      ]
+    },
+    "iam_changes": [],
+    "workflow_semantic_changes": [],
+    "base_evaluation_changes": [],
+    "web_stack_deployed": false,
+    "sns_subscriptions_modified": false
+  },
+  "planned_maintenance": {
+    "begin": {
+      "schema_version": 1,
+      "id": "maint-dev-20260922-validation",
+      "status": "ACTIVE",
+      "reason": "planned-host-maintenance-validation",
+      "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+      "stage": "dev",
+      "started_at": 1790070457,
+      "expires_at": 1790074057
+    },
+    "ec2_start_requested_at": "2026-09-22T09:51:49.302011+00:00",
+    "suppression": {
+      "at": "2026-09-22T10:07:01.990680+00:00",
+      "proof": [
+        {
+          "metric": "DesiredStoppedEc2Running",
+          "base": "wc-dev-desiredstoppedec2runningalarm",
+          "base_state": "ALARM",
+          "composite": "wc-dev-desiredstoppedec2runningalarm-notification",
+          "composite_state": "ALARM",
+          "actions_suppressed_by": "Alarm",
+          "sns_action": [
+            "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+          ],
+          "action_history": [
+            {
+              "actionState": "Suppressed",
+              "stateUpdateTimestamp": 1790070985421,
+              "notificationResource": "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+              "publishedMessage": null,
+              "error": null,
+              "muteWindowEndTimestamp": null
+            }
+          ]
+        },
+        {
+          "metric": "RuntimeObservationUnknown",
+          "base": "wc-dev-runtimeobservationunknownalarm",
+          "base_state": "ALARM",
+          "composite": "wc-dev-runtimeobservationunknownalarm-notification",
+          "composite_state": "ALARM",
+          "actions_suppressed_by": "Alarm",
+          "sns_action": [
+            "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+          ],
+          "action_history": [
+            {
+              "actionState": "Suppressed",
+              "stateUpdateTimestamp": 1790071296360,
+              "notificationResource": "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+              "publishedMessage": null,
+              "error": null,
+              "muteWindowEndTimestamp": null
+            }
+          ]
+        },
+        {
+          "metric": "DesiredActualDivergence",
+          "base": "wc-dev-desiredactualdivergencealarm",
+          "base_state": "ALARM",
+          "composite": "wc-dev-desiredactualdivergencealarm-notification",
+          "composite_state": "ALARM",
+          "actions_suppressed_by": "Alarm",
+          "sns_action": [
+            "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+          ],
+          "action_history": [
+            {
+              "actionState": "Suppressed",
+              "stateUpdateTimestamp": 1790071614025,
+              "notificationResource": "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+              "publishedMessage": null,
+              "error": null,
+              "muteWindowEndTimestamp": null
+            }
+          ]
+        }
+      ],
+      "other_42_alarms_ok": true,
+      "baseline_configuration_preserved": "all 45 evaluations; 42 untouched actions; three allowed action relocations"
+    },
+    "ec2_normal_stop_requested_at": "2026-09-22T10:07:49.856020+00:00",
+    "stopped_healthy_at": "2026-09-22T10:09:24.574752+00:00",
+    "base_and_composite_natural_recovery_at": "2026-09-22T10:12:16.567067+00:00",
+    "end": {
+      "schema_version": 1,
+      "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+      "reason": "planned-host-maintenance-validation",
+      "expires_at": 1790074057,
+      "stage": "dev",
+      "started_at": 1790070457,
+      "id": "maint-dev-20260922-validation",
+      "status": "ENDED",
+      "ended_at": 1790071971,
+      "ended_by": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2"
+    },
+    "suppressor_ok_at": "2026-09-22T10:14:45.156993+00:00",
+    "minecraft_started": false,
+    "alarm_state_forced": false,
+    "synthetic_metrics_published": false
+  },
+  "expiry": {
+    "duration_seconds": 120,
+    "before": {
+      "at": "2026-09-22T10:16:00.289008+00:00",
+      "status": {
+        "stage": "dev",
+        "maintenance": {
+          "schema_version": 1,
+          "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+          "reason": "stopped-expiry-validation",
+          "expires_at": 1790072236,
+          "stage": "dev",
+          "started_at": 1790072116,
+          "id": "maint-dev-20260922-expiry",
+          "status": "ACTIVE"
+        },
+        "active": true,
+        "admission_closed": true
+      },
+      "observer": {
+        "metric_count": 15
+      },
+      "ec2": "stopped"
+    },
+    "after": {
+      "at": "2026-09-22T10:17:40.211286+00:00",
+      "status": {
+        "stage": "dev",
+        "maintenance": {
+          "schema_version": 1,
+          "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+          "reason": "stopped-expiry-validation",
+          "expires_at": 1790072236,
+          "stage": "dev",
+          "started_at": 1790072116,
+          "id": "maint-dev-20260922-expiry",
+          "status": "ACTIVE"
+        },
+        "active": false,
+        "admission_closed": true
+      },
+      "observer": {
+        "metric_count": 15
+      },
+      "ec2": "stopped"
+    },
+    "cloudwatch_points": [
+      {
+        "Timestamp": "2026-09-22 19:16:00+09:00",
+        "Minimum": 1.0,
+        "Maximum": 1.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-22 19:17:00+09:00",
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      }
+    ],
+    "end": {
+      "schema_version": 1,
+      "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+      "reason": "stopped-expiry-validation",
+      "expires_at": 1790072236,
+      "stage": "dev",
+      "started_at": 1790072116,
+      "id": "maint-dev-20260922-expiry",
+      "status": "ENDED",
+      "ended_at": 1790072325,
+      "ended_by": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2"
+    },
+    "scope": "Real retained-record application expiry and MaintenanceActive 1->0 while EC2 stopped. <=600-second lease never grants suppression; ALARM notification resumption after expiry was not deliberately triggered. EPOCH deadline/config/tests and AWS documented current-state action semantics cover that path."
+  },
+  "always_notify": {
+    "existing_sns_alarms_unchanged": 40,
+    "web_no_action_alarms_unchanged": 2,
+    "deferred": [
+      "dedicated DLQ alarms",
+      "SNS actions for two Web Errors alarms"
+    ],
+    "comparison": "all 45 evaluations; 42 untouched actions; three allowed action relocations"
+  },
+  "final": {
+    "at": "2026-09-22T10:19:00.237357+00:00",
+    "alarm_count": 49,
+    "all_alarms_ok": true,
+    "alarms": [
+      {
+        "name": "WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT",
+        "state": "OK"
+      },
+      {
+        "name": "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-admissionfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-admissionfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-auto-stop-evaluator-silence",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopevaluatorfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopevaluatorfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopwarningblockedalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backuptaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backuptaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backupworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-datafilesystemobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-datafilesystemusagehighalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredactualdivergencealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredrunningnotreadyalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredstoppedec2runningalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordcommandfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordcommandfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordmessagefunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordmessagefunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-expiredoperationlockalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-maintenance-suppressor",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobserverfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobserverfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-reconcilefunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-reconcilefunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-resetworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentiontaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentiontaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentionworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeheartbeatunavailablealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeidentitymismatchalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-scheduledstopcancelledalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-starttaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-starttaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-startworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-statusexecutorfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-statusexecutorfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stoptaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stoptaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stopworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-switchworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-systemstateobservationstalealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-targetrunningtoolongalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredactualdivergencealarm-notification",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeobservationunknownalarm-notification",
+        "state": "OK"
+      }
+    ],
+    "safety_and_audit": {
+      "at": "2026-09-22T10:19:46.918691+00:00",
+      "desired": "STOPPED",
+      "health": "HEALTHY",
+      "ec2": "stopped",
+      "dns": "absent",
+      "current": null,
+      "lock_absent": true,
+      "active_workflows_commands_sessions_absent": true,
+      "concurrency": {
+        "wc-dev-admission": null,
+        "wc-dev-discord-command": null,
+        "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null
+      },
+      "audit": [
+        {
+          "system_id": "maintenance#maint-dev-20260922-validation#begin",
+          "maintenance": {
+            "schema_version": 1,
+            "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+            "reason": "planned-host-maintenance-validation",
+            "expires_at": 1790074057,
+            "stage": "dev",
+            "started_at": 1790070457,
+            "id": "maint-dev-20260922-validation",
+            "status": "ACTIVE"
+          },
+          "event": "begin",
+          "subject_system_id": "wishicraft-main",
+          "recorded_at": 1790070457
+        },
+        {
+          "recorded_at": 1790071971,
+          "system_id": "maintenance#maint-dev-20260922-validation#end",
+          "event": "end",
+          "maintenance": {
+            "schema_version": 1,
+            "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+            "reason": "planned-host-maintenance-validation",
+            "expires_at": 1790074057,
+            "stage": "dev",
+            "started_at": 1790070457,
+            "ended_by": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+            "id": "maint-dev-20260922-validation",
+            "ended_at": 1790071971,
+            "status": "ENDED"
+          },
+          "subject_system_id": "wishicraft-main"
+        },
+        {
+          "event": "begin",
+          "maintenance": {
+            "schema_version": 1,
+            "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+            "reason": "stopped-expiry-validation",
+            "expires_at": 1790072236,
+            "stage": "dev",
+            "started_at": 1790072116,
+            "id": "maint-dev-20260922-expiry",
+            "status": "ACTIVE"
+          },
+          "subject_system_id": "wishicraft-main",
+          "system_id": "maintenance#maint-dev-20260922-expiry#begin",
+          "recorded_at": 1790072116
+        },
+        {
+          "maintenance": {
+            "schema_version": 1,
+            "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+            "reason": "stopped-expiry-validation",
+            "expires_at": 1790072236,
+            "stage": "dev",
+            "started_at": 1790072116,
+            "ended_by": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+            "id": "maint-dev-20260922-expiry",
+            "ended_at": 1790072325,
+            "status": "ENDED"
+          },
+          "system_id": "maintenance#maint-dev-20260922-expiry#end",
+          "event": "end",
+          "subject_system_id": "wishicraft-main",
+          "recorded_at": 1790072325
+        }
+      ]
+    }
+  },
+  "evidence_roots": [
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-release-v3-b03t3jtc",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-observation-v4-yydwgaah",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-active-review-v3-cs815hav",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-wiring-v2-xyadp0y4"
+  ],
+  "raw_evidence_sha256": {
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-release-v3-b03t3jtc/prepare-execute.json": "b23a2235137fecdf03e622cb5213045a837bbf23e5596c044f3149ea08bc84a6",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-release-v3-b03t3jtc/active-execute.json": "3d5cfccf566a1315e11afb67a7a58e049ddc44a16e95ea5b4f23ca7090b99f2c",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-release-v3-b03t3jtc/final-safety-and-audit.json": "0c455491dc84b2e12b43be107df19c3d8759ad37bc05f689c861d1ad8242fb7f",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-observation-v4-yydwgaah/running-final.json": "cd3a853972654cf1240e18e9353b48a4cd7b7b8cead557f7a75d9542b81bf235",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-observation-v4-yydwgaah/final-closeout.json": "55f66dbaf4c222531bae4541c5dd8d2e8fa834543eef916e4bd3f43eb764ce31",
+    "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-release-v3-b03t3jtc/expiry-metric-proof.json": "6904cc54aa5d4b66098aa6706cc3f1a60c83ff196f83f70441e2147e5412ab80"
+  }
+}

@@ -1,7 +1,10 @@
 # Planned host maintenance — D-111
 
-Repository qualified (1,671 tests, lint/format/type, dev synth and alarm diff); CI and AWS
-release / real maintenance qualification pending.
+Accepted / dev deployed and qualified on 2026-09-22. CI passed 1,672 tests plus
+lint/format/type/synth and real Docker integrations. Three real base ALARMs retained,
+three SNS actions explicitly suppressed, safe end and retained-record expiry verified.
+[Execution evidence](../evidence/planned_host_maintenance_dev_2026-09-22.json) and
+[operator closeout](../runbooks/planned_host_maintenance.md#dev-release-and-real-maintenance--2026-09-22-utc).
 
 ## Current architecture and inventory
 
@@ -160,8 +163,9 @@ Manual DisableAlarmActions/EnableAlarmActions is rejected because cleanup can be
 AWS semantics: [action suppression](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-suppression.html)
 and [mute-rule transitions](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-mute-rules-behaviour.html).
 When suppression ends with the composite still ALARM, CloudWatch executes the current-state
-action; a new base ALARM transition is not required. This behavior must be inspected during
-integration, not inferred from a test that simulates AWS implementation.
+action; a new base ALARM transition is not required. The real integration below proves suppression and normal end. Expiry with an ongoing
+base ALARM was not deliberately prolonged on EC2; that resumption path relies on these
+AWS semantics, the deployed deadline/configuration and repository expiry tests.
 
 ## Release and rollback
 
@@ -186,7 +190,7 @@ otherwise reverting its fence could admit START against ongoing maintenance. Pre
 existing alarms; do not delete base alarms or relax thresholds. New-resource removal during
 rollback requires the same explicit release scope review.
 
-State Machine definitions are expected byte-identical. Dependency-propagated Case D changes
+State Machine definitions must remain structurally identical in both deployment stages. Dependency-propagated Case D changes
 require existing exact logical-ID/semantic proof; unknown differences stop before execution.
 Any unexpected IAM/public boundary, replacement, durable-data mutation or resource change
 stops release. Repository completion and production qualification are reported separately.

@@ -1,6 +1,6 @@
 # Planned host maintenance
 
-D-111 repository procedure; real release/maintenance evidence is recorded separately below.
+D-111 Accepted / dev deployed and qualified, 2026-09-22. Execution evidence is below.
 [Architecture, exact 45-alarm classification and deployment contract](../reviews/planned_host_maintenance.md).
 Use for host/runtime migrations, controlled Data EBS maintenance, resize inspection and
 IMPORT staging while Minecraft Desired remains STOPPED. A lease does not authorize extra
@@ -110,8 +110,9 @@ Earlier runs are retained: initial focused tests detected expected fixture/count
 sandbox PyPI failure; focused v2 passed 201 tests. Full v3 had 1,658 passes and one historical
 Phase7 alarm-count assertion failure, corrected to the explicit new count and notification
 paths in v4. No failures were converted to skips. Docker and shellcheck are unavailable locally;
-CI runs their existing checks. CI, ChangeSets and actual maintenance are pending. Repository
-tests do not by themselves prove CloudWatch action delivery or real suppression.
+CI runs their existing checks. At that repository checkpoint CI, ChangeSets and actual maintenance were pending.
+The completed qualification below supersedes that checkpoint, without treating repository
+tests alone as CloudWatch delivery evidence.
 
 
 Implementation `ab15481` passed CI quality/Web and Paper integration, but NeoForge and
@@ -119,4 +120,104 @@ standard Docker CREATE fixtures failed because they had never initialized System
 Both fixtures now seed an ordinary initialized state with no maintenance intent; the
 production condition remains unchanged. A missing-state CREATE regression proves the
 refusal, and the focused 99 tests plus lint/format/no-incremental type (including Web) pass.
-The failed CI runs are retained; a new commit/CI must qualify the repaired fixtures.
+The failed CI runs are retained; `0010270` and the final implementation `f6280ee` passed
+all three CI workflows, including both repaired Docker fixtures.
+
+
+## Dev release and real maintenance — 2026-09-22 UTC
+
+[Machine-readable release, alarm actions, expiry and final-state evidence](../evidence/planned_host_maintenance_dev_2026-09-22.json).
+Implementation began at `ab15481`; deployed source is `f6280eed973eedc061eca2428001888084777b90`.
+[CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/35710569214),
+[NeoForge](https://github.com/eash-misoni/wishicraft-server/actions/runs/35710569234) and
+[Paper](https://github.com/eash-misoni/wishicraft-server/actions/runs/35710569300) all succeeded.
+CI: **1,672 tests**, Ruff check, 309-file format check, mypy 231 files, all synth variants,
+shellcheck, real Docker/runtime integrations and Chromium checks passed. Local Docker and
+shellcheck remain unavailable; CI supplied those checks.
+
+The initially synthesized deadline used unsupported `TIME`. Read-only CloudWatch
+GetMetricData rejected it before any deployment. `f6280ee` uses the documented
+[EPOCH function](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html),
+accepted by the actual API; focused maintenance tests passed 57/57 and CI requalified it.
+A sandbox-only PyPI DNS failure was rerun with network access, not converted to a skip.
+
+The canonical caller account matched dev `385526546525` in `ap-northeast-1`.
+This is the existing live dev workload; the separate placeholder prod stage was not deployed.
+Preflight found actual target stopped, STOPPED/HEALTHY, no Current/Lock/running workflow/
+active SSM/DNS, three empty queues, 45 OK alarms and one confirmed SNS subscription.
+Admission, Discord Command and Web concurrency were captured as UNSET, temporarily set to
+zero for release, and restored exactly after the formal lease fenced ordinary mutations.
+Observer and Reconcile remained enabled throughout.
+
+Two exact reviewed ChangeSets were executed:
+
+| ChangeSet | Reviewed actual change |
+|---|---|
+| `maintenance-prepare-f6280ee` | Four alarm additions; 11 Lambda code assets, Admission schema-version environment. Existing SNS actions retained. |
+| `maintenance-active-f6280ee` | Only three base AlarmActions removed as substantive change, after the composite paths existed and were verified. |
+
+Both ChangeSets also displayed five existing State Machine Definition modifications.
+All six live parsed ASL definitions matched the candidates, with the existing exact five-ID
+Case D allowlist and Definition-only/Replacement=false checks. These were semantic no-ops;
+no lifecycle change was introduced. The first active review stopped because its helper
+allowed that known no-op only in prepare; a new version independently repeated the full
+live comparison before execution. No deletion/replacement/IAM/SNS/KMS policy change or
+unrelated monitoring update was accepted. Final template exactly matched the active synth;
+all prior physical IDs remained, 11 Lambdas were Active/Successful, Web resources unchanged.
+
+The first wiring helper expected a name-based AlarmRule, while CDK correctly emitted the
+actual base AlarmArn. A new evidence version verified the exact ARN rather than changing
+AWS. Initial history collection defaulted to metric alarms; the subsequent version explicitly
+requested MetricAlarm and CompositeAlarm. Earlier incomplete snapshots were retained, and
+only the complete history version is used for the suppression proof.
+
+| UTC checkpoint | Observed result |
+|---|---|
+| 09:47:37 | Formal begin, 60-minute lease, expires 10:47:37; immutable begin audit. |
+| 09:51:03 | Maintenance suppressor naturally ALARM; Active and eligible metrics 1. |
+| 09:51:49 | Only existing EC2 started; no Minecraft START or workflow invocation. |
+| 09:52–10:07 | Fresh probe: SSM online, expected Data EBS identity/mount, no container/Game/runtime, DNS absent. Desired STOPPED and actual DEGRADED retained. |
+| 09:56 / 10:01 / 10:06 | DesiredStoppedEc2Running, RuntimeObservationUnknown, then DesiredActualDivergence naturally ALARM under unchanged evaluation rules. |
+| 10:07:01 | All three base metrics 1, all three bases and composites ALARM, each composite ActionsSuppressedBy=Alarm. Each SNS action history says Successfully suppressed, actionState=Suppressed, publishedMessage=null, error=null. Other 42 alarms OK. |
+| 10:07:49 | Fresh no-container/no-work gate passed; normal EC2 StopInstances, Force=false. |
+| 10:09:24 | Actual stopped; ordinary Reconcile STOPPED/HEALTHY; real metrics return to 0. |
+| 10:12:16 | All base/composite alarms naturally OK; lease/suppressor still active. |
+| 10:12:51 | Formal end repeats external safety checks, records ended_at/actor and immutable end audit. |
+| 10:14:45 | Suppressor OK, all 49 alarms OK, STOPPED/HEALTHY. |
+
+Every snapshot compared all 45 original alarm evaluations. Forty existing SNS-connected
+alarms kept all properties/actions, two Web Errors alarms kept their absent actions, and
+only the three documented base actions moved to their one-to-one composites. ActionsEnabled
+remained true. No metric fabrication, alarm-state forcing, DisableAlarmActions, threshold/
+period/missing-data relaxation, alarm deletion or subscription change was used.
+No unexpected failure was deliberately injected to test always-notify; preserved settings,
+regression tests and real unchanged alarm configuration are the evidence. Dedicated DLQ
+alarms and Web Errors SNS actions remain the explicitly deferred monitoring gaps.
+
+### Retained-record expiry and final closeout
+
+A second formal lease was created at 10:15:16 for 120 seconds, with EC2 continuously stopped.
+At 10:16:00 formal status was active=true, admission_closed=true. At 10:17:40, after the
+10:17:16 expiry, the same stored ACTIVE record remained but status was active=false;
+admission_closed stayed true until safe end. The real observer produced CloudWatch
+MaintenanceActive Minimum=Maximum=1 at 10:16 and Minimum=Maximum=0 at 10:17, before end.
+No DynamoDB deletion or forced clock was involved.
+
+This short lease never grants action suppression because of the conservative 600-second
+cutoff. Thus this proves application expiry and metric publication with a retained record;
+it does **not** claim a real ALARM-to-SNS resumption at expiry. EC2 was not deliberately left
+running until the long lease expired. Deadline/configuration tests and AWS documented
+current-state action resumption cover that path; normal end's real suppressor release was
+separately observed above.
+
+The expired lease safely ended at 10:18:45. Final alarm snapshot at **10:19:00: 49/49 OK**.
+Final safety/audit read-back at 10:19:46: Desired STOPPED / actual stopped / HEALTHY, DNS absent,
+Current/Lock/running workflow/active SSM command/session absent. All three ingress concurrency
+settings were the original UNSET. Four durable begin/end audit events exist in the original
+SystemState table; both leases retain who/why/stage/start/expiry/end. Ordinary mutations are
+open again. No Minecraft container was started during this qualification.
+
+Host capacity, runtime migration, runtime memory, IMPORT and monitoring runbooks now require
+the deployed formal maintenance path for subsequent EC2-only maintenance. Their separate
+artifact/data/safety permissions remain applicable. UI/Discord maintenance commands, new
+IAM, lifecycle states, data migration and deferred notification-coverage additions are absent.

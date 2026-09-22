@@ -1,6 +1,6 @@
 # D-110 Same-runtime Paper world import
 
-> Planned host maintenance (D-111): once the maintenance release is deployed, use the
+> Planned host maintenance (D-111, deployed and qualified 2026-09-22): use the
 > [formal begin/status/end procedure](planned_host_maintenance.md) around every EC2-only
 > migration/inspection/IMPORT session. Preserve this runbook's artifact/data/approval gates.
 > Historical direct-maintenance evidence below predates the lease and must not be replayed
