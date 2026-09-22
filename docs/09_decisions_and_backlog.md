@@ -1,13 +1,25 @@
 # 09. Decisions and Backlog
 
-## D-110 Same-runtime Paper IMPORT（repository qualification; production not applied）
+## D-110 Same-runtime Paper IMPORT（Accepted / dev real-world validation complete）
+
+2026-09-22 policy update (Accepted): the real-world dev validation run uses a
+saved/stopped/synced point-in-time archive, then restarts the same VPS for continued
+normal play. Dev and VPS intentionally diverge; no sync. A future separate prod
+deployment must obtain a fresh final archive for cutover. The current user scope
+authorizes the guarded dev release/import/server-side validation/normal STOP,
+but not prod creation, runtime upgrade or existing Game mutation.
+The authorized dev run completed: `vps-survival` generation 1 reached READY and
+MATERIALIZED, then normal STOP. Final dev is STOPPED/HEALTHY with 45 alarms OK
+and normal ingress restored; the VPS continues running. Existing Game/world/access
+records and 96 historical Operations were unchanged. Client verification remains
+a later user check. [Execution evidence and future boundaries](runbooks/paper_world_import.md).
 
 User-confirmed source and target are Minecraft 26.1.2 / Paper build 53, commit 39a1aa5.
 Import only `/opt/minecraft2/wishinkaiwai` into a new D-105 Game; never rewrite existing Games.
 **IMPORT preserves package/runtime identity. Version changes are performed by a future explicit UPGRADE operation.**
 Package remains immutable after CREATE. No UPGRADE/revisions, normalization, forceUpgrade,
-plugin upload, new persistent AWS resource or IAM expansion. Source stop/final archive and
-production release are separate execution boundaries. [Contract and gates](runbooks/paper_world_import.md).
+plugin upload, new persistent AWS resource or IAM expansion. Future prod source stop/final
+archive and release remain separate execution boundaries. [Contract and gates](runbooks/paper_world_import.md).
 
 > 2026-09-21 create-terralith: fixed worldgen packageと限定catalog追加互換契約をproduction実証済み。完了済みhost migrationを再実行せず引継ぎ、guarded CP/Web release→正式CREATE→新world generation 1 READY/MATERIALIZED/worldgen→正常STOPまで成功。既存Game/package/world/owner/provenance不変、45 alarms OK、通常受付復帰。実clientはユーザー後続確認で未検証。[契約・実証・性能上の限界](runbooks/create_terralith.md)。
 

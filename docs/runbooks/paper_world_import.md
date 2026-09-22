@@ -1,8 +1,149 @@
 # D-110 Same-runtime Paper world import
 
-Status: repository implementation in qualification; **not deployed or imported**.
-Source mutation, final archive and production release require the separate concrete
-execution boundary below. Current roadmap: D-101 demand-driven Runtime Extension.
+## Dev point-in-time validation policy (2026-09-22)
+
+The user authorized a temporary stop of `minecraft-25566.service`, a saved/synced
+immutable **dev IMPORT validation archive**, and restart of the same VPS service,
+Paper build and world. This is not a final cutover. After capture the VPS remains
+the friends' normal playable server; subsequent VPS progress is intentionally not
+copied into dev. All dev validation compares against the immutable archive, never
+against the evolving live VPS world. No synchronization, replication or delta
+archive mechanism is introduced.
+
+The authorized dev execution includes isolated real-world validation, the existing
+guarded dev host/CP/Web release, new D-105 Game CREATE/import, normal START through
+READY/Reconcile/heartbeat/MATERIALIZED, server-side inspection and normal STOP.
+Existing Games, access policies and historical provenance must remain unchanged.
+Client login is a later user check, not required for this server-side slice.
+An unknown source identity, nonzero/unknown player count, unsafe archive or
+unproven save/stop blocks capture. Unknown dev mutation or a separate runtime bug
+requires safe stopping and diagnosis, not repeated START attempts.
+
+For future friends-facing cutover, provision a separate prod deployment with its
+own tables, queues, workflows, EC2, Data EBS and alarms; smoke-test it; confirm VPS
+player zero; gracefully stop; acquire a **fresh final archive**; IMPORT into prod;
+perform client verification; change the friends' destination; retain the stopped
+old VPS for a period before decommissioning. This dev archive is not that future
+final dataset. Creating prod and UPGRADE remain separate slices.
+
+The qualification and original cutover-oriented gate below are historical context.
+For this authorized dev run, restart of the VPS immediately after archive capture
+supersedes the original expectation of keeping the source stopped through cutover.
+Actual execution results are recorded separately; authorization is not evidence
+that capture, release or IMPORT succeeded.
+
+### Source capture and isolated real-world evidence
+
+[Execution evidence](../evidence/paper_dev_validation_2026-09-22.json) records the
+2026-09-22 dev validation copy. Immediately before stop, three recorded protocol
+samples at 04:08:50/52/54 UTC each reported zero players. Normal systemd stop was
+requested at 04:08:56 UTC. Paper saved players, chunks and all three dimensions;
+the process exited with status 143. The existing unit classifies that SIGTERM exit
+as failed. After verifying complete saves, no Java process and no listener, only
+the unit's failed-state bookkeeping was reset. No force stop or Java kill was used.
+A temporary runtime-only `SendSIGKILL=no` override prevented a timeout force-kill;
+the override was removed and the original setting restored after capture.
+
+The synced, stopped source yielded an uncompressed USTAR archive at
+`/var/tmp/wishicraft-dev-validation-20260922T041045Z-b802fe7d/source.tar`:
+3,516,702,720 bytes, 1,545 regular files including four server-local configs,
+SHA-256 `4456c31739b1f8451b785b65d9d603bc0ab52c9f5ca6cb646ce4643b1480678d`.
+Archive metadata was fixed at 04:15:18 UTC. Source tree hashes before/after capture
+matched. Files are read-only inside a non-writable capture directory; this is an
+operationally immutable rollback/evidence copy, not a claim of storage-level WORM.
+
+The same VPS service restarted at 04:15:55 and was verified READY at 04:16:25 UTC
+with Paper 26.1.2 build 53 and the same world. Total stop-request-to-verified-READY
+downtime was about 7 minutes 29 seconds. Friends can continue normal VPS play.
+All subsequent comparisons use the captured archive; changes to the live VPS are
+expected and are not synchronized.
+
+The repository validator accepted the real archive and reproduced its canonical
+tree. A fresh isolated copy ran the exact official Paper JAR on Corretto 25.0.3,
+bound only to loopback. Two startup/save/graceful-stop cycles passed, including
+all three dimensions, world borders and enabled vanilla/bukkit/Paper datapacks.
+Twelve player NBT files, fourteen stats and fourteen advancements files remained
+byte-identical. Inventory, ender-chest contents and positions were readable; no
+client login is claimed. The nine changed world files contain only elapsed tick,
+weather timer and LastPlayed changes; no files were added or removed, and the
+DataVersion remained 4790. The source archive hash remained unchanged.
+
+The first isolated test harness falsely rejected ANSI-colored datapack output.
+Its copy/logs were preserved and stopped gracefully. A new extraction and revised
+test-only ANSI normalization passed; no runtime or validator requirement changed.
+
+The archive reached the existing Data EBS staging directory with the identical
+size/hash, root ownership and mode 0400. Initial direct SSM stream transport was
+too slow and its partial file was retained. A temporary object in the existing
+private, KMS-encrypted CDK transport bucket supplied the exact archive; no bucket,
+IAM rule, public endpoint or upload framework was created. Its short-lived GET URL
+was handled only in memory over an encrypted SSM loopback channel, never stored
+or printed. After independent host-side hash verification, that exact S3 object
+version was deleted; no versions, delete markers or multipart uploads remained.
+Both temporary forwarding sessions and receivers were closed.
+
+The nine-file inactive host migration and identical-bundle retry passed. Read-back
+verified all destination hashes, owners and modes; all four existing Game trees
+and the stopped receipt were unchanged. Maintenance EC2 stop was requested at
+04:56:59 UTC, and canonical Reconcile confirmed STOPPED/HEALTHY, no discrepancy
+and DNS absent at 04:58:10. The intentional maintenance interval triggered
+DesiredStoppedEc2Running, RuntimeObservationUnknown and DesiredActualDivergence;
+all 45 alarms were observed OK at 05:01:40, without suppressing or editing alarms.
+
+### Dev release, IMPORT and normal STOP completed
+
+The explicitly approved CP/Web ChangeSets completed and all thirteen Lambda
+code hashes and resolved environments matched their candidates. All six live
+workflow definitions retained their semantic identities. No resource was added
+or replaced and no IAM expansion occurred.
+
+The formal D-105 Admin CREATE registered `vps-survival` as
+`game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21`.
+CREATE Operation:
+`op-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21`.
+The initial response was HTTP 202; the identical request replay returned HTTP 200
+and the same successful operation. ACTIVE/UNMATERIALIZED, generation 1, the exact
+package and captured import provenance were verified before START.
+
+Formal START `op-bcd7bd39-93fb-4427-81fc-dd6e743fe17d` ran from 05:29:54 to
+05:35:12 UTC. Staging validation committed generation 1 at 05:32:12, with an
+independently calculated prepared tree of 1,547 files, 3,515,809,463 bytes and SHA-256
+`45eee3182ff64675dcdf647ba907ed1f930f165b5545e0e0b7d57b1700719d22`.
+The two additional files are the authoritative server properties and initial empty
+whitelist. The imported source tree was used rather than generating a new world.
+
+Paper 26.1.2 build 53 reported Done at 05:32:37. The dev container uses Temurin
+25.0.3+9; the source and native isolated test use Corretto 25.0.3+9. Both are Java
+25.0.3, while the exact Paper artifact and world DataVersion 4790 are identical.
+READY, bound fresh zero-player heartbeats, endpoint Reconcile and MATERIALIZED
+were verified. RCON confirmed Overworld/Nether/End world borders and the three
+enabled vanilla/bukkit/Paper datapacks. All 61 player/history/stats/advancements,
+gamerule and border files matched the archive byte-for-byte; 12 UUIDs with
+inventory, ender chest and position were readable server-side. No ERROR/FATAL
+startup lines occurred. Source access-control files were not imported: the new
+Game-specific whitelist is empty, the existing Common whitelist projects its one
+member, and OP/ban lists are empty. No user was added.
+
+Formal STOP `op-f8601ed8-e48c-4a1f-81e7-0d2fa76fb913` ran from 05:37:45 to
+05:39:25 UTC. The qualified host stop command succeeded after save/durable proof,
+graceful exit and cleanup; Reconcile observed the bound stopped receipt and no
+container before EC2 stop. The on-disk stop proof was not reread after power-off.
+EC2 stopped and DNS was removed through the formal workflow, with no extra START.
+
+Final observation at 05:42:22 UTC: STOPPED/HEALTHY, EC2 stopped, all 45 alarms OK,
+no Current Operation, Lock, running workflow, active SSM command/session or DNS,
+and all queues empty. All three ingress functions have their original unreserved
+concurrency. Existing four Game trees, packages, generations, whitelists, backup
+records and 96 historical Operations were unchanged. Only the new Game and its
+formal Operations were added to their respective authorities.
+
+Status: **dev deployed and real-world IMPORT validated, normal STOP complete**.
+Client verification can proceed later by normal START of `vps-survival`; it was
+not performed in this slice. The source VPS remains active on its same service,
+world and Paper build. Archive/VPS divergence is intentional. Current roadmap:
+D-101 demand-driven Runtime Extension, not implemented here. The qualification
+and original execution gates below remain historical, not pending work for this
+completed dev run.
 
 **IMPORT preserves package/runtime identity. Version changes are performed by a future explicit UPGRADE operation.**
 
@@ -100,6 +241,15 @@ Existing CREATE authorization, actor-bound idempotency and immutable creation/pa
 records apply. A Paper CREATE without import provenance is rejected, preventing
 accidental empty-world generation. Existing Games are never IMPORT destinations.
 
+Operator transport must preserve the provenance JSON exactly. In particular,
+`import.source.seed` is a signed 64-bit integer; do not parse and stringify the
+manifest through JavaScript `Number`. Send the prepared JSON text directly as the
+authenticated request body. The ordinary CREATE `seed` field remains its exact
+decimal string. The dev operator helper initially rounded the provenance seed;
+admission correctly rejected the mismatch with no Game/Operation write. A new
+helper uses raw JSON text and verifies the sent-body hash, without changing the
+archive, provenance schema or validation rules.
+
 The provenance schema is validated by `world_import.validate`: exact source runtime,
 Java, DataVersion, seed, level-name/online-mode; archive SHA-256/size/count/expanded
 size/tree digest; captured UTC timestamp; save/stopped/sync proof assertions; reviewed
@@ -183,7 +333,7 @@ Game records/worlds or replays the completed Terralith migration. CP/Web code an
 manifest release require a guarded ChangeSet, unchanged persistent resources/IAM and
 existing workflow semantic no-op review. No deployment is authorized by this document.
 
-## Separate production/source mutation boundary
+## Original cutover execution gate (historical; future prod requires fresh review)
 
 Before asking for GO, supply finalized commit/CI, exact affected host/CP/Web artifacts,
 existing Game/whitelist/provenance snapshots, approved transport/staging path, isolated
@@ -234,10 +384,15 @@ JSON return annotation missing under its fresh type check; this is fixed explici
 The final commit's complete CI result must also pass before release. Local Docker is
 absent; the Paper runtime evidence above is from the isolated Linux CI runner.
 
-Production status remains unchanged: no VPS stop, final source archive/hash, AWS release,
-new Game, real-world first START/MATERIALIZED or final target STOP. Therefore there is
-no new production rollback archive yet, and client verification is not ready. Existing
-A/B/create-survival/create-terralith production state has not been modified by this work.
+At that qualification checkpoint, no source stop, archive or dev release had run.
+That historical limitation is superseded by the completed dev execution above.
+Implementation HEAD `3791e6567a048e410a2b07611353ed1f6124322d` subsequently passed
+1,567 tests and all three CI workflows: [quality/infrastructure](https://github.com/eash-misoni/wishicraft-server/actions/runs/35684105707),
+[Paper](https://github.com/eash-misoni/wishicraft-server/actions/runs/35684105701),
+and [NeoForge](https://github.com/eash-misoni/wishicraft-server/actions/runs/35684105736).
+This operational slice changes only documentation/evidence; the release also
+completed fresh CP/Web synth. Its final documentation commit CI is reported in
+the handoff. No final prod cutover has occurred.
 
 Unit tests cover archive paths/types/collisions/limits, runtime pinning and mismatch,
 source freeze assertions, generation 1, owned retry/rename crash, lease loss, missing-world

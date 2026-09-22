@@ -39,6 +39,7 @@ D-095の隔離復元は2026-09-08復旧点のcopy上で検証済み。後日の�
 - 開発・統合テスト用。
 - 専用prefixとタグを使用する。
 - 本番Gameデータを置かない。
+- D-110の明示承認例外として、VPS worldのimmutable point-in-time copyをdev IMPORT検証に使用する。友達向け利用の正本は再開したVPSであり、devとの同期やdevをprod最終データとして流用しない。取り込むaccess policyはWishicraft authorityを維持する。
 - 短いログ保持期間を許可する。
 
 ### prod

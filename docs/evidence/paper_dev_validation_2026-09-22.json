@@ -1,0 +1,822 @@
+{
+  "schema_version": 1,
+  "purpose": "dev_import_validation_point_in_time_copy",
+  "implementation_commit": "3791e6567a048e410a2b07611353ed1f6124322d",
+  "status": "dev_real_world_import_validated_normal_stop_complete",
+  "source": {
+    "host": "162.43.29.104",
+    "service": "minecraft-25566.service",
+    "world": "/opt/minecraft2/wishinkaiwai",
+    "prestop_samples": [
+      {
+        "at": "2026-09-22T04:08:50.332196Z",
+        "players": {
+          "max": 20,
+          "online": 0
+        },
+        "version": {
+          "name": "Paper 26.1.2",
+          "protocol": 775
+        }
+      },
+      {
+        "at": "2026-09-22T04:08:52.335173Z",
+        "players": {
+          "max": 20,
+          "online": 0
+        },
+        "version": {
+          "name": "Paper 26.1.2",
+          "protocol": 775
+        }
+      },
+      {
+        "at": "2026-09-22T04:08:54.338072Z",
+        "players": {
+          "max": 20,
+          "online": 0
+        },
+        "version": {
+          "name": "Paper 26.1.2",
+          "protocol": 775
+        }
+      }
+    ],
+    "stop_requested_at": "2026-09-22T04:08:56.341091Z",
+    "normal_save_confirmed": true,
+    "normal_shutdown_exit": 143,
+    "systemd_original_result": "exit-code",
+    "systemd_reset_failed_after_pid_listener_and_save_proof": true,
+    "forced_stop": false,
+    "archive_path": "/var/tmp/wishicraft-dev-validation-20260922T041045Z-b802fe7d/source.tar",
+    "archive_format": "USTAR-uncompressed",
+    "rollback_point_retained": true,
+    "world_tree": {
+      "expanded_size": 3515790094,
+      "file_count": 1541,
+      "tree_sha256": "cd1e6c6ff832f205aac6d2b30001845355c1ea9195eeb19cd57405c7ba045feb"
+    },
+    "restart_requested_at": "2026-09-22T04:15:55.128647Z",
+    "restart_ready_at": "2026-09-22T04:16:25.093751Z",
+    "restart_status": {
+      "players": {
+        "max": 20,
+        "online": 0
+      },
+      "version": {
+        "name": "Paper 26.1.2",
+        "protocol": 775
+      }
+    },
+    "friends_may_continue_playing": true,
+    "sync_to_dev": false,
+    "final_read_only_service_check": {
+      "main_pid": 1067511,
+      "working_directory": "/opt/minecraft2",
+      "active_state": "active",
+      "sub_state": "running",
+      "checked_after_dev_stop": true
+    }
+  },
+  "import_provenance": {
+    "archive_sha256": "4456c31739b1f8451b785b65d9d603bc0ab52c9f5ca6cb646ce4643b1480678d",
+    "archive_size": 3516702720,
+    "captured_at": "2026-09-22T04:15:18.491490Z",
+    "configs": {
+      "bukkit.yml": "a72396bbd1b69636b63f990995ed1ce31df7183af275868b4d638071fd4c866a",
+      "config/paper-global.yml": "0670a9c4367afbcb841898a4754ba6eba0dba6367c4cb159269f0957d25ae762",
+      "config/paper-world-defaults.yml": "abf93aa72a8498289b81a563f5aef57b684198efb85973f26757ab6353b4acfe",
+      "spigot.yml": "1330538aef435b16c2b941d3123c5efe432c4a241d2f09c5db82495421c1d6e6"
+    },
+    "expanded_size": 3515809203,
+    "file_count": 1545,
+    "filesystem_synced": true,
+    "properties": {
+      "difficulty": "easy",
+      "gamemode": "survival",
+      "generate-structures": "true",
+      "generator-settings": "{}",
+      "hardcore": "false",
+      "level-seed": "",
+      "level-type": "minecraft\\:normal",
+      "simulation-distance": "10",
+      "view-distance": "10"
+    },
+    "save_confirmed": true,
+    "schema_version": 1,
+    "source": {
+      "data_version": 4790,
+      "jar_sha256": "6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf",
+      "java_version": "25.0.3",
+      "level_name": "wishinkaiwai",
+      "minecraft_version": "26.1.2",
+      "online_mode": true,
+      "paper_build": 53,
+      "paper_commit": "39a1aa5c7fa9742accf82c247a0ea18014788b5f",
+      "seed": -3498469689692331574,
+      "server_type": "paper"
+    },
+    "source_stopped": true,
+    "target_package_digest": "c2a1aa734412ae6a8a0327b8a82611e69b342fd2f0e55514cd4fc803055e287a",
+    "tree_sha256": "e600e14c2a15d97512b3e666ee543aaa8e906eaed35f48706ba15c8c98dbb23d"
+  },
+  "isolated": {
+    "runtime": {
+      "data_version": 4790,
+      "jar_sha256": "6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf",
+      "java_version": "25.0.3",
+      "level_name": "wishinkaiwai",
+      "minecraft_version": "26.1.2",
+      "online_mode": true,
+      "paper_build": 53,
+      "paper_commit": "39a1aa5c7fa9742accf82c247a0ea18014788b5f",
+      "seed": -3498469689692331574,
+      "server_type": "paper"
+    },
+    "before_tree": {
+      "file_count": 1541,
+      "expanded_size": 3515790094,
+      "tree_sha256": "cd1e6c6ff832f205aac6d2b30001845355c1ea9195eeb19cd57405c7ba045feb"
+    },
+    "players": 12,
+    "stats": 14,
+    "advancements": 14,
+    "cycles": [
+      {
+        "cycle": 1,
+        "ready": true,
+        "saved": true,
+        "graceful_exit": 0,
+        "three_dimension_borders": true,
+        "players_stats_advancements_byte_identical": true
+      },
+      {
+        "cycle": 2,
+        "ready": true,
+        "saved": true,
+        "graceful_exit": 0,
+        "three_dimension_borders": true,
+        "players_stats_advancements_byte_identical": true
+      }
+    ],
+    "bind": "127.0.0.1",
+    "after_tree": {
+      "file_count": 1541,
+      "expanded_size": 3515790100,
+      "tree_sha256": "b60695c3ddd6a1bf9efe03d086b7965a67e5dd2cd4c688e40900c196db7c5b08"
+    },
+    "source_archive_unchanged": true
+  },
+  "isolated_tree_diff": {
+    "added": [],
+    "removed": [],
+    "changed": [
+      "wishinkaiwai/dimensions/minecraft/overworld/data/minecraft/weather.dat",
+      "wishinkaiwai/dimensions/minecraft/overworld/data/minecraft/world_clocks.dat",
+      "wishinkaiwai/dimensions/minecraft/overworld/data/paper/level_overrides.dat",
+      "wishinkaiwai/dimensions/minecraft/the_end/data/minecraft/world_clocks.dat",
+      "wishinkaiwai/dimensions/minecraft/the_end/data/paper/level_overrides.dat",
+      "wishinkaiwai/dimensions/minecraft/the_nether/data/minecraft/world_clocks.dat",
+      "wishinkaiwai/dimensions/minecraft/the_nether/data/paper/level_overrides.dat",
+      "wishinkaiwai/level.dat",
+      "wishinkaiwai/level.dat_old"
+    ]
+  },
+  "isolated_nbt_differences": {
+    "wishinkaiwai/dimensions/minecraft/overworld/data/minecraft/weather.dat": [
+      {
+        "key": "/data/rain_time",
+        "before": "1197",
+        "after": "1137"
+      },
+      {
+        "key": "/data/thunder_time",
+        "before": "111912",
+        "after": "111852"
+      }
+    ],
+    "wishinkaiwai/dimensions/minecraft/overworld/data/minecraft/world_clocks.dat": [
+      {
+        "key": "/data/minecraft:overworld/total_ticks",
+        "before": "16258333",
+        "after": "16258393"
+      },
+      {
+        "key": "/data/minecraft:the_end/total_ticks",
+        "before": "458331",
+        "after": "458391"
+      }
+    ],
+    "wishinkaiwai/dimensions/minecraft/overworld/data/paper/level_overrides.dat": [
+      {
+        "key": "/data/game_time",
+        "before": "30219191",
+        "after": "30219251"
+      }
+    ],
+    "wishinkaiwai/dimensions/minecraft/the_end/data/minecraft/world_clocks.dat": [
+      {
+        "key": "/data/minecraft:overworld/total_ticks",
+        "before": "30219191",
+        "after": "30219251"
+      },
+      {
+        "key": "/data/minecraft:the_end/total_ticks",
+        "before": "458331",
+        "after": "458391"
+      }
+    ],
+    "wishinkaiwai/dimensions/minecraft/the_end/data/paper/level_overrides.dat": [
+      {
+        "key": "/data/game_time",
+        "before": "30219191",
+        "after": "30219251"
+      }
+    ],
+    "wishinkaiwai/dimensions/minecraft/the_nether/data/minecraft/world_clocks.dat": [
+      {
+        "key": "/data/minecraft:overworld/total_ticks",
+        "before": "30219191",
+        "after": "30219251"
+      },
+      {
+        "key": "/data/minecraft:the_end/total_ticks",
+        "before": "458331",
+        "after": "458391"
+      }
+    ],
+    "wishinkaiwai/dimensions/minecraft/the_nether/data/paper/level_overrides.dat": [
+      {
+        "key": "/data/game_time",
+        "before": "30219191",
+        "after": "30219251"
+      }
+    ],
+    "wishinkaiwai/level.dat": [
+      {
+        "key": "/Data/LastPlayed",
+        "before": "1790050143553",
+        "after": "1790051371947"
+      },
+      {
+        "key": "/Data/Time",
+        "before": "30219191",
+        "after": "30219251"
+      }
+    ],
+    "wishinkaiwai/level.dat_old": [
+      {
+        "key": "/Data/LastPlayed",
+        "before": "1790039679097",
+        "after": "1790051370806"
+      },
+      {
+        "key": "/Data/Time",
+        "before": "30219191",
+        "after": "30219231"
+      }
+    ]
+  },
+  "future_prod": "Separate prod deployment and fresh final VPS archive; do not reuse this dev snapshot as final data.",
+  "upgrade": "IMPORT preserves package/runtime identity. Version changes are performed by a future explicit UPGRADE operation.",
+  "dev_staging": {
+    "archive_sha256": "4456c31739b1f8451b785b65d9d603bc0ab52c9f5ca6cb646ce4643b1480678d",
+    "archive_size": 3516702720,
+    "gid": 0,
+    "listeners": "",
+    "mode": "0o400",
+    "preserved_partial_bytes": 1258979328,
+    "receipt": {
+      "archive_sha256": "4456c31739b1f8451b785b65d9d603bc0ab52c9f5ca6cb646ce4643b1480678d",
+      "archive_size": 3516702720,
+      "path": "/srv/minecraft/imports/4456c31739b1f8451b785b65d9d603bc0ab52c9f5ca6cb646ce4643b1480678d/source.tar",
+      "transport": "existing private KMS S3 temporary object; ephemeral GET URL only in memory via encrypted SSM loopback"
+    },
+    "uid": 0,
+    "temporary_s3_exact_version_deleted": true,
+    "temporary_s3_version_and_multipart_remaining": 0,
+    "public_access_or_iam_changed": false
+  },
+  "host_release": {
+    "bundle_sha256": "31c0756192837ed08aeb7dc33f96d3c2d9e200eb73d4aa89b04754cec39031e9",
+    "successor_manifest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+    "install_ssm": "779f0bd4-8e2d-4cee-aa06-44dc3901634c",
+    "same_bundle_retry_ssm": "3b1f522d-a5d9-48cf-ac6b-66ca204b8b01",
+    "nine_artifacts": {
+      "/etc/wishicraft/host-runtime/compose.yaml": {
+        "gid": 0,
+        "mode": "0o600",
+        "sha256": "fb8349c02c4aecc51023f27f602f855b05f25c5cb992a42cfeb46f7da8fe06b8",
+        "uid": 0
+      },
+      "/etc/wishicraft/host-runtime/manifest.json": {
+        "gid": 0,
+        "mode": "0o600",
+        "sha256": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+        "uid": 0
+      },
+      "/etc/wishicraft/runtime-contract.json": {
+        "gid": 0,
+        "mode": "0o600",
+        "sha256": "f64b2b5ad9e92cff23af3b7cb954f8d3837c4b15143d6c44e5b8c738e8d0d0b7",
+        "uid": 0
+      },
+      "/usr/local/libexec/wishicraft/game_package.py": {
+        "gid": 0,
+        "mode": "0o644",
+        "sha256": "bdfdf4e9d191784ade7e8dbf619a56c95927d76216383a528d40d73a50c01f52",
+        "uid": 0
+      },
+      "/usr/local/libexec/wishicraft/initial_game.py": {
+        "gid": 0,
+        "mode": "0o644",
+        "sha256": "962e357ff9e501864cba61bc511ce0409e1a65d6d6e9988937c9be583ec73e29",
+        "uid": 0
+      },
+      "/usr/local/libexec/wishicraft/operation-v2": {
+        "gid": 0,
+        "mode": "0o755",
+        "sha256": "6e710c1ad68a5f8e0270b01b620d1811daf8481af82b4810af5660ae0645ef0d",
+        "uid": 0
+      },
+      "/usr/local/libexec/wishicraft/paper-transition.json": {
+        "gid": 0,
+        "mode": "0o644",
+        "sha256": "1701549bcc821d4af471c118ba6c1192493b92a0fd217e97d426eca5390cb65b",
+        "uid": 0
+      },
+      "/usr/local/libexec/wishicraft/world_import.py": {
+        "gid": 0,
+        "mode": "0o644",
+        "sha256": "0a934cff209c9214bba66a8b8bbd81cc8c865b3b0e411ddf4e1910cfe2c85d70",
+        "uid": 0
+      },
+      "/usr/local/libexec/wishicraft/world_nbt.py": {
+        "gid": 0,
+        "mode": "0o644",
+        "sha256": "01770fa63daaab1239f04ae00e2945fae27377db84fad72bc400edac281a3161",
+        "uid": 0
+      }
+    },
+    "existing_four_game_trees_and_receipt_unchanged": true,
+    "maintenance_stop_requested_at": "2026-09-22T04:56:59.829496+00:00",
+    "post_stop_reconcile": {
+      "desired_state": "STOPPED",
+      "health": "HEALTHY",
+      "ec2": "stopped",
+      "dns": "absent",
+      "discrepancies": []
+    },
+    "cloudformation": "Both approved ChangeSets executed and verified"
+  },
+  "control_plane_release": {
+    "stack": "WishicraftControlPlaneStack-dev",
+    "status": "UPDATE_COMPLETE",
+    "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/paper-import-20260922/3339ee87-5232-4e01-bc2a-d866af2e6cca",
+    "functions": {
+      "AdmissionFunction23082B67": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-admission",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "AutoStopEvaluatorFunctionF85F8B50": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-auto-stop-evaluator",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "BackupTaskFunctionA44639DC": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "DiscordCommandFunction7D25102A": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-command",
+        "code_sha256": "nPDDavUqGXNpjRRs+jjaSb/RcF0VqFrXCuEXtNm7OHc=",
+        "environment_matches_template": true
+      },
+      "DiscordMessageFunction78FA388B": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-message",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "MonitoringObserverFunction584DA7C7": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-monitoring-observer",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "ReconcileFunction30829CB6": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "RetentionTaskFunction9F285CE4": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "StartTaskFunction8C564C4A": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "StatusExecutorFunction6E5C9869": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-status-executor",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      },
+      "StopTaskFunction11473A8C": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+        "code_sha256": "N2FvYWkxLAbigQWRKpT1B/2tUU3xcFZYegLHt7HB7vI=",
+        "environment_matches_template": true
+      }
+    },
+    "workflows": {
+      "BackupStateMachine": {
+        "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+        "semantic_identity_preserved": true
+      },
+      "ResetWorkflow": {
+        "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+        "semantic_identity_preserved": true
+      },
+      "RetentionStateMachine": {
+        "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+        "semantic_identity_preserved": true
+      },
+      "StartStateMachine": {
+        "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+        "semantic_identity_preserved": true
+      },
+      "StopStateMachine": {
+        "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+        "semantic_identity_preserved": true
+      },
+      "SwitchWorkflow": {
+        "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+        "semantic_identity_preserved": true
+      }
+    }
+  },
+  "release_approval": {
+    "initial_automatic_review_rejected": true,
+    "change_sets_remained_unexecuted_after_rejection": true,
+    "user_subsequently_explicitly_approved_both_change_sets": true
+  },
+  "web_release": {
+    "stack": "WishicraftWebStack-dev",
+    "status": "UPDATE_COMPLETE",
+    "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/paper-import-20260922/7b572734-e916-4342-8325-8998447ca5de",
+    "functions": {
+      "AuthC256A5EC": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd",
+        "code_sha256": "U0FcuSXYdTaMH1OOLtu9zq8FexrguWRtADEAd1bg+Qs=",
+        "environment_matches_template": true
+      },
+      "Web3C8945DB": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp",
+        "code_sha256": "U0FcuSXYdTaMH1OOLtu9zq8FexrguWRtADEAd1bg+Qs=",
+        "environment_matches_template": true
+      }
+    },
+    "workflows": {}
+  },
+  "operator_transport_rejection": {
+    "http_status": 400,
+    "error": "invalid_input",
+    "cause": "Operator browser helper parsed the numeric import.source.seed through JavaScript Number; canonical seed string remained exact and admission rejected their mismatch.",
+    "original_seed": "-3498469689692331574",
+    "rounded_value": "-3498469689692331500",
+    "game_or_operation_mutated": false,
+    "historical_operations_unchanged": 96,
+    "first_start_attempted": false,
+    "correction": "New private helper sends the canonical request JSON as raw text without numeric parse/stringify; archive and manifest unchanged.",
+    "raw_json_transport": {
+      "raw_body_sha256": "ace745a4248ac36ce52ee6f9bb018d060fc5cc4611273859efa8b7e336907c1d",
+      "raw_body_bytes": 2018,
+      "string_transport_byte_identical": true
+    }
+  },
+  "dev_import": {
+    "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+    "display_name": "vps-survival",
+    "create_operation_id": "op-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+    "create_http_status": 202,
+    "same_request_replay_http_status": 200,
+    "create_state": "ACTIVE / UNMATERIALIZED",
+    "materialization_state": "MATERIALIZED",
+    "generation": 1,
+    "package": {
+      "definition": {
+        "mods": [],
+        "package_id": "vps-survival",
+        "package_version": "1",
+        "minecraft_version": "26.1.2",
+        "loader": {
+          "commit": "39a1aa5c7fa9742accf82c247a0ea18014788b5f",
+          "server": {
+            "filename": "paper-26.1.2-53.jar",
+            "size": 52926064,
+            "sha256": "6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf",
+            "url": "https://fill-data.papermc.io/v1/objects/6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf/paper-26.1.2-53.jar"
+          },
+          "level_name": "wishinkaiwai",
+          "type": "paper",
+          "build": 53
+        }
+      },
+      "package_id": "vps-survival",
+      "package_version": "1"
+    },
+    "import_provenance_matches_captured_manifest": true,
+    "package_immutable_and_unchanged": true,
+    "first_start_only": true
+  },
+  "dev_runtime_validation": {
+    "durable_record_files": 61,
+    "durable_records_digest": "a353f83210d1cf9933efd3886e44f18f93c324e6b47e12d40ad3e4cafc05704b",
+    "error_or_fatal_lines": 0,
+    "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+    "generation": 1,
+    "java": "openjdk version \"25.0.3\" 2026-04-21 LTS\nOpenJDK Runtime Environment Temurin-25.0.3+9 (build 25.0.3+9-LTS)\nOpenJDK 64-Bit Server VM Temurin-25.0.3+9 (build 25.0.3+9-LTS, mixed mode, sharing)\n",
+    "online_mode": true,
+    "owner_phase": "initialized",
+    "package_digest": "c2a1aa734412ae6a8a0327b8a82611e69b342fd2f0e55514cd4fc803055e287a",
+    "paper_jar_sha256": "6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf",
+    "player_count": 12,
+    "prepared_at": "2026-09-22T05:32:12.749301+00:00",
+    "prepared_tree": {
+      "expanded_size": 3515809463,
+      "file_count": 1547,
+      "tree_sha256": "45eee3182ff64675dcdf647ba907ed1f930f165b5545e0e0b7d57b1700719d22"
+    },
+    "receipt": {
+      "phase": "running",
+      "target": {
+        "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+        "data_source": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+        "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-bcd7bd39-93fb-4427-81fc-dd6e743fe17d"
+      }
+    },
+    "responses": {
+      "datapacks": "There are 3 data pack(s) enabled: [vanilla (built-in)], [file/bukkit (world)], [paper (built-in)]",
+      "list": "There are 0 of a max of 20 players online:",
+      "overworld": "The world border is currently 59999968 block(s) wide",
+      "the_end": "The world border is currently 59999968 block(s) wide",
+      "the_nether": "The world border is currently 59999968 block(s) wide"
+    },
+    "run_id": "op-bcd7bd39-93fb-4427-81fc-dd6e743fe17d",
+    "source_access_control_not_imported": {
+      "banned-ips.json": 0,
+      "banned-players.json": 0,
+      "ops.json": 0
+    },
+    "source_player_stats_advancements_gamerules_borders_byte_identical": true,
+    "startup_evidence": [
+      "[05:32:35 INFO]: Starting minecraft server version 26.1.2",
+      "[05:32:35 INFO]: This server is running Paper version 26.1.2-53-main@39a1aa5 (2026-05-01T07:50:35Z) (Implementing API version 26.1.2.build.53-stable)",
+      "[05:32:36 INFO]: Preparing level \"wishinkaiwai\"",
+      "[05:32:37 INFO]: Done (6.249s)! For help, type \"help\""
+    ],
+    "whitelist_count": 1,
+    "world_data_version": 4790,
+    "player_identity_validation": "12 UUIDs, inventories, ender chests and positions decoded server-side; exact per-file hashes retained in private operator evidence. No client login."
+  },
+  "operations": {
+    "start": {
+      "operation_id": "op-bcd7bd39-93fb-4427-81fc-dd6e743fe17d",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-bcd7bd39-93fb-4427-81fc-dd6e743fe17d",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-22 14:29:54.962000+09:00",
+      "completed_at": "2026-09-22 14:35:12.436000+09:00",
+      "event_count": 215,
+      "checkpoints": [
+        "InitializeWorkflow",
+        "ReconcileBeforeStart",
+        "SetDesiredRunning",
+        "AlreadyReady",
+        "StartEc2IfNeeded",
+        "InitEc2Poll",
+        "WaitEc2Running",
+        "IncrementEc2Poll",
+        "Ec2PollWithinDeadline",
+        "RenewBeforeEc2Probe",
+        "ReconcileEc2",
+        "Ec2Running",
+        "InitSsmPoll",
+        "WaitSsmOnline",
+        "IncrementSsmPoll",
+        "SsmPollWithinDeadline",
+        "RenewBeforeSsmProbe",
+        "ReconcileSsm",
+        "SsmOnline",
+        "RunStartScript",
+        "InitHostPoll",
+        "WaitHostStart",
+        "IncrementHostPoll",
+        "HostPollWithinDeadline",
+        "RenewBeforeHostCheck",
+        "CheckHostStart",
+        "HostStartComplete",
+        "WaitHostStart",
+        "IncrementHostPoll",
+        "HostPollWithinDeadline",
+        "RenewBeforeHostCheck",
+        "CheckHostStart",
+        "HostStartComplete",
+        "WaitHostStart",
+        "IncrementHostPoll",
+        "HostPollWithinDeadline",
+        "RenewBeforeHostCheck",
+        "CheckHostStart",
+        "HostStartComplete",
+        "WaitHostStart",
+        "IncrementHostPoll",
+        "HostPollWithinDeadline",
+        "RenewBeforeHostCheck",
+        "CheckHostStart",
+        "HostStartComplete",
+        "WaitHostStart",
+        "IncrementHostPoll",
+        "HostPollWithinDeadline",
+        "RenewBeforeHostCheck",
+        "CheckHostStart",
+        "HostStartComplete",
+        "InitReadyPoll",
+        "WaitReady",
+        "IncrementReadyPoll",
+        "ReadyPollWithinDeadline",
+        "RenewBeforeReadyProbe",
+        "ReconcileReady",
+        "RuntimeReady",
+        "UpdateDnsRecord",
+        "InitDnsPoll",
+        "WaitDnsInSync",
+        "IncrementDnsPoll",
+        "DnsPollWithinDeadline",
+        "RenewBeforeDnsProbe",
+        "CheckDnsChange",
+        "DnsChangeInSync",
+        "ReconcileDns",
+        "EndpointReady",
+        "MarkSucceeded"
+      ],
+      "ssm": [
+        {
+          "CommandId": "f1931906-ec17-41b5-bd20-0ef3c1ed2eb6",
+          "Status": "Success",
+          "ResponseCode": 0,
+          "ExecutionStartDateTime": "2026-09-22T05:31:12.727Z",
+          "ExecutionEndDateTime": "2026-09-22T05:32:24.727Z",
+          "StandardOutputContent": "{\"schema_version\":2,\"status\":\"succeeded\"}\n",
+          "StandardErrorContent": ""
+        }
+      ]
+    },
+    "stop": {
+      "operation_id": "op-f8601ed8-e48c-4a1f-81e7-0d2fa76fb913",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-f8601ed8-e48c-4a1f-81e7-0d2fa76fb913",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-22 14:37:45.478000+09:00",
+      "completed_at": "2026-09-22 14:39:25.972000+09:00",
+      "event_count": 134,
+      "checkpoints": [
+        "InitializeWorkflow",
+        "ReconcileBeforeStop",
+        "AutomaticStopFinalGate",
+        "AutomaticStopMayProceed",
+        "SetDesiredStopped",
+        "AlreadyEc2Stopped",
+        "AlreadyRuntimeStopped",
+        "RenewBeforeHostStop",
+        "RunHostStop",
+        "InitHostPoll",
+        "WaitHostStop",
+        "IncrementHostPoll",
+        "HostPollWithinDeadline",
+        "RenewBeforeHostCheck",
+        "CheckHostStop",
+        "HostStopComplete",
+        "ReconcileRuntimeStopped",
+        "RuntimeStopped",
+        "RenewBeforeEc2Stop",
+        "StopEc2",
+        "InitEc2Poll",
+        "WaitEc2Stopped",
+        "IncrementEc2Poll",
+        "Ec2PollWithinDeadline",
+        "RenewBeforeEc2Probe",
+        "ReconcileEc2Stopped",
+        "Ec2Stopped",
+        "RenewBeforeDnsDelete",
+        "DeleteDns",
+        "DnsAlreadyAbsent",
+        "InitDnsPoll",
+        "WaitDnsInSync",
+        "IncrementDnsPoll",
+        "DnsPollWithinDeadline",
+        "RenewBeforeDnsCheck",
+        "CheckDnsChange",
+        "DnsInSync",
+        "ReconcileAfterStop",
+        "MarkSucceeded"
+      ],
+      "ssm": [
+        {
+          "CommandId": "02b3f35b-fa4c-4230-aac7-f7841bbb155d",
+          "Status": "Success",
+          "ResponseCode": 0,
+          "ExecutionStartDateTime": "2026-09-22T05:37:56.727Z",
+          "ExecutionEndDateTime": "2026-09-22T05:38:02.727Z",
+          "StandardOutputContent": "{\"schema_version\":2,\"status\":\"succeeded\"}\n",
+          "StandardErrorContent": ""
+        }
+      ]
+    }
+  },
+  "stop_proof": {
+    "host_stop_ssm_succeeded": true,
+    "runtime_stopped_reconcile_at": "2026-09-22T05:38:13.318033Z",
+    "receipt_phase": "stopped",
+    "receipt_run_id": "op-bcd7bd39-93fb-4427-81fc-dd6e743fe17d",
+    "container_state": "not-found",
+    "service_state": "not-running",
+    "host_state": "not-running",
+    "proof_basis": "Verified installed targeted_runtime.finish_stop succeeds only after save-all flush confirmation, durable save/removal proof, exited container code 0 with no OOM/error, persistence validation and cleanup. Formal STOP SSM succeeded; subsequent Reconcile observed the bound stopped receipt before EC2 stop. Full on-disk stop proof was not separately reread after power-off."
+  },
+  "existing_games_preserved": {
+    "at": "2026-09-22T05:43:03.693129+00:00",
+    "historical_operations_unchanged": 96,
+    "existing_game_and_policy_records_unchanged": 7,
+    "backup_records_unchanged": true,
+    "new_game_materialized_generation": 1,
+    "game_specific_whitelist_empty": true,
+    "all_final_safety_assertions_passed": true,
+    "all_prior_game_tree_metadata_hashes_unchanged": true
+  },
+  "final_dev": {
+    "alarm_count": 45,
+    "alarms": {},
+    "concurrency": {
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null,
+      "wc-dev-admission": null,
+      "wc-dev-discord-command": null
+    },
+    "current": null,
+    "desired": "STOPPED",
+    "dns": [],
+    "ec2": "stopped",
+    "games_records": 9,
+    "health": "HEALTHY",
+    "locks": 0,
+    "queues": {
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesDelayed": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0"
+      }
+    },
+    "running": {
+      "BackupStateMachine": 0,
+      "ResetWorkflow": 0,
+      "RetentionStateMachine": 0,
+      "StartStateMachine": 0,
+      "StopStateMachine": 0,
+      "SwitchWorkflow": 0
+    },
+    "ssm_active": 0,
+    "time": "2026-09-22T05:42:22.470297+00:00",
+    "active_ssm_sessions": 0,
+    "all_ingress_restored_to_original": true
+  },
+  "verification": {
+    "implementation_commit": "3791e6567a048e410a2b07611353ed1f6124322d",
+    "qualified_unit_tests": 1567,
+    "qualified_ci_runs": [
+      35684105707,
+      35684105701,
+      35684105736
+    ],
+    "control_plane_and_web_release_synth": "passed",
+    "this_slice_changes": "operational evidence and policy docs only; implementation unchanged",
+    "final_documentation_ci": "Reported with final commit in handoff; not asserted before execution."
+  },
+  "boundaries": {
+    "dev_vps_divergence": "Intentional from the immutable point-in-time capture; VPS remains the friends live server. No synchronization.",
+    "future_prod": "Separate prod deployment, smoke test and fresh stopped/saved archive at cutover; this dev archive is not the final prod dataset.",
+    "upgrade": "IMPORT preserves package/runtime identity. Version changes are performed by a future explicit UPGRADE operation.",
+    "client_check": "Can proceed later by normal START of vps-survival; no whitelist addition was made. Currently dev is STOPPED.",
+    "restore_export": "Archive validation, canonical-tree inspection and staging/commit primitives are candidates for separate RESTORE/EXPORT designs; neither implemented in this slice."
+  }
+}

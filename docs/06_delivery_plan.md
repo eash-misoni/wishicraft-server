@@ -1,6 +1,8 @@
 # 06. Delivery Plan
 
-> Current slice: D-110 same-runtime Paper 26.1.2/build 53 IMPORT, repository qualification in progress. Source inventory complete for selected world; final immutable archive, real-world isolated validation and production release pending. [Runbook](runbooks/paper_world_import.md).
+> D-110実world dev検証を承認（2026-09-22）: VPSを一時停止してpoint-in-time archiveを取得し、VPSは再開する。devへ同一PaperでIMPORTし正常STOPまで検証。dev/VPSは独立し、将来prod cutoverはfresh archiveを再取得する。現在の実行結果は[runbook](runbooks/paper_world_import.md)へ記録する。
+
+> Current checkpoint (2026-09-22): D-110 same-runtime Paper 26.1.2/build 53 real-world dev IMPORT completed. VPS saved/synced archive captured and source restarted; new `vps-survival` generation 1 reached READY/MATERIALIZED and normal STOP. Final dev STOPPED/HEALTHY, EC2 stopped, 45 alarms OK, ingress restored; existing Games unchanged. Client verification is a later user check. D-101 Runtime Extension remains the next roadmap slice, not started here. [Runbook](runbooks/paper_world_import.md).
 
 > 2026-09-21 current slice completed (server-side): create-terralith固定worldgen package、限定catalog互換性、CP/Web release、正式CREATE、新world generation 1 materialization/worldgenと正常STOPを実証。既存3 Gameを保持、STOPPED/HEALTHY・45 alarms OK・通常受付復帰。実client接続はユーザーの後続確認。[実証範囲・性能・client構成](runbooks/create_terralith.md)。
 
