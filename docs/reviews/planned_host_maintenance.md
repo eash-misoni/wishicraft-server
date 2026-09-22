@@ -133,7 +133,7 @@ DNS/Game/run/mount/SSM state never authorizes suppression. Boot/stop transitions
 positive evidence may notify; maintenance is not a blanket grace period.
 
 One suppressor metric alarm uses FILL(eligible,0) and absolute-expiry metric math.
-`TIME(eligible) + 600 < FILL(expiry,0)` provides a conservative two-period deadline margin.
+`EPOCH(eligible) + 600 < FILL(expiry,0)` provides a conservative two-period deadline margin.
 Missing data becomes zero, not reuse of an indefinitely positive sample. Minimum statistics
 allow a zero sample to revoke eligibility within a period. WaitPeriod=0 and ExtensionPeriod=0.
 The suppression window ends conservatively before lease expiry (up to ten minutes early

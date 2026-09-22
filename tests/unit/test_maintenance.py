@@ -293,7 +293,7 @@ def test_alarm_actions_are_one_to_one_and_only_three_are_suppressed(
             assert not alarm.get("AlarmActions")
             assert alarm["TreatMissingData"] == "notBreaching"
             assert alarm["Metrics"][0]["Expression"] == (
-                "IF((FILL(eligible, 0) >= 1) AND (TIME(eligible) + 600 < FILL(expiry, 0)), 1, 0)"
+                "IF((FILL(eligible, 0) >= 1) AND (EPOCH(eligible) + 600 < FILL(expiry, 0)), 1, 0)"
             )
         else:
             assert alarm["AlarmActions"], logical

@@ -1728,7 +1728,7 @@ def _add_release_monitoring(
             # producer stops. FILL prevents evaluation-range reuse of an old positive sample.
             expression=(
                 "IF((FILL(eligible, 0) >= 1) AND "
-                f"(TIME(eligible) + {stage.monitoring_int('observer_schedule_minutes') * 120} "
+                f"(EPOCH(eligible) + {stage.monitoring_int('observer_schedule_minutes') * 120} "
                 "< FILL(expiry, 0)), 1, 0)"
             ),
             using_metrics={
