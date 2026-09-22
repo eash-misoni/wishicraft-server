@@ -1,5 +1,7 @@
 # wishicraft-server
 
+> D-112 Game discovery（2026-09-22）: Games registryからDiscord START/SWITCH/RESET候補とpublic guide一覧を取得します。CREATE後は再deploy・再登録不要。初回pickerの空表示報告を受けたSDK cold-start修正もdev配布済みですが、修正後の実client再確認はserver-side検証と区別します。[設計・A/B inventory](docs/reviews/game_discovery.md)、[配布証跡と確認範囲](docs/runbooks/game_discovery.md)。
+
 > D-111 planned host maintenance（2026-09-22、dev適用・実証完了）: Desired STOPPEDのまま期限付きleaseを管理し、3つのbase ALARMと異常metricを保持してSNS通知だけを条件付き抑制します。正式begin/status/end、120秒expiry、最終STOPPED/HEALTHY・49 alarms OKを確認済み。[正式手順と実証](docs/runbooks/planned_host_maintenance.md)、[全45 alarm分類・設計](docs/reviews/planned_host_maintenance.md)。DLQ/Webの既存監視欠落の補完は別sliceです。
 
 > 2026-09-21 UTC create-terralith production server-side実証完了: 完了済みcatalog migrationを再実行せず引継ぎ、Case D guard付きCP/Web release、実Admin Web CREATE、新world generation 1のREADY/MATERIALIZED、Terralith/Tectonic worldgen、正常STOPまで成功。既存A/B/create-survivalとprovenanceは保持。最終STOPPED/HEALTHY・45 alarms OK・通常受付復帰済み。実client接続はユーザーの後続確認。[実証・性能・client構成](docs/runbooks/create_terralith.md#qualification-evidence)。以下のcheckpointは各時点の履歴です。

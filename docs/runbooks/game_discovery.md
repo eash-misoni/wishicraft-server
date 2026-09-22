@@ -140,3 +140,31 @@ read-back. Observe `discord-autocomplete` safe structured logs and Lambda REPORT
 `result=ok`/counts alone do not prove Discord accepted a late response. Check INIT plus
 Duration against the end-to-end deadline and obtain user picker confirmation. No Game
 command needs to be submitted and command registration must remain unchanged.
+
+
+Correction `3380515d1a655ca664ff4c8ff9c68b20ed262604` passed 1,689 CI tests, lint/format/type,
+standard CI [35727961766](https://github.com/eash-misoni/wishicraft-server/actions/runs/35727961766),
+Paper [35727961803](https://github.com/eash-misoni/wishicraft-server/actions/runs/35727961803),
+and NeoForge [35727961622](https://github.com/eash-misoni/wishicraft-server/actions/runs/35727961622).
+Fresh `discovery-cold-cp-20260922` / `discovery-cold-web-20260922` ChangeSets passed Case D
+review and completed. Source ZIPs, all unchanged Lambda configuration and all six workflow
+ASL definitions were read back; ingress returned to its exact prior UNSET configuration.
+The earlier pending guide-copy ChangeSet is no longer present after the replacement release.
+
+A deliberately unsigned request was rejected with 401, without authorized Game reads or
+mutation. Its Lambda INIT was 603 ms and invocation 2.09 ms. This demonstrates the static
+initialization path, **not successful autocomplete delivery**. The first timing harness
+incorrectly matched Billed Duration; v2 corrected the parser and reread the same REPORT
+without overwriting the original evidence. At the recorded checkpoint, no post-fix signed
+picker request had arrived; user confirmation was requested and remains distinct from these
+server-side checks. Do not declare the original empty-picker report resolved solely from
+this negative authentication probe.
+
+Actual public guide browser checks again passed at desktop/mobile/narrow widths with all
+five Games, HTTP 200, no-store and JavaScript disabled. Complete Discord command definition
+still matches the initial update exactly (ID `1544004156543737876`, global 0); no second
+registration was needed. Final audit: STOPPED/HEALTHY, EC2 stopped, Games and maintenance
+unchanged, 49 alarms OK, three queues empty, Lambda errors and discovery failures zero in
+the post-release audit window. No resource/IAM/lifecycle/auth change.
+
+[Correction evidence, measurements and observation limits](../evidence/game_discovery_cold_start_2026-09-22.json).

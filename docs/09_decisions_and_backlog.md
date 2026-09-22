@@ -1,6 +1,6 @@
 # 09. Decisions and Backlog
 
-## D-112 Registry-backed Game discovery (Accepted; dev picker cold-start follow-up open)
+## D-112 Registry-backed Game discovery (Accepted; dev cold-start correction deployed, client reconfirmation separate)
 
 2026-09-22 user-requested slice. [Canonical design and fixed-list inventory](reviews/game_discovery.md),
 [release / D-084 registration runbook](runbooks/game_discovery.md). Reuse Games registry/GetItem,

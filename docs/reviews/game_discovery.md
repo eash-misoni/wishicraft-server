@@ -1,8 +1,9 @@
 # D-112 Registry-backed Game discovery
 
 Accepted scope, 2026-09-22. Implements DIS-001/002/003/007/008 and D-084/D-105 discovery.
-Dev release read-back passed, but the user reported empty Discord picker results.
-Qualification is reopened for the cold-start response-time fix below.
+Dev discovery and the empty-picker cold-start correction are deployed and read-back verified.
+Actual post-fix Discord picker delivery remains a separate user observation, not inferred
+from SDK/read-back tests. See the cold-start follow-up evidence below.
 Repository qualification and deployment evidence are recorded separately in the
 [release runbook](../runbooks/game_discovery.md).
 
@@ -121,3 +122,5 @@ not change.
 No new resource/IAM/lifecycle/maintenance changes. Shared source assets may update existing
 Lambda code and propagate five known semantic-no-op State Machine Definition dependencies;
 Case D review, fresh ChangeSets and exact deployed ASL equality are mandatory.
+
+Cold-start correction release: [dev evidence and limits](../evidence/game_discovery_cold_start_2026-09-22.json).
