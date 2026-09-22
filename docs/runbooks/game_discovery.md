@@ -74,4 +74,54 @@ was rejected before synth and corrected with the Web-specific contexts.
 Read-only preflight: dev STOPPED/HEALTHY, five ACTIVE/MATERIALIZED Games, 49 alarms OK.
 Actual legacy names are Wishicraft Vanilla / Wishicraft Vanilla B. Existing Guild command
 ID `1544004156543737876`, global commands 0; canonical candidate changes only Game options.
-No live deployment or Discord mutation has yet been claimed by this document.
+
+## Dev functional release — 2026-09-22
+
+Implementation `e89132f3ad835a32df2b110a49c6f21543ed2340` passed
+[standard CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/35723371142),
+[Paper CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/35723371150), and
+[NeoForge CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/35723371131).
+CI ran 1,687 tests, lint/format/type, current-feature synth and the real browser/runtime
+integration jobs. Local Chrome 153.0.8010.53 guide validation also passed.
+
+Fresh `discovery-cp-e89132f` / `discovery-web-e89132f` ChangeSets were reviewed and executed.
+CP: 11 existing Lambda Code updates plus the five permitted dependency-propagated Definition
+updates; Web: two existing Lambda Code updates. Resource sets, all IAM, SNS/alarm settings,
+Lambda environments and all six workflow ASL semantics/configuration/identities are unchanged.
+Read-back verified deployed source bytes in the actual Discord/Web ZIPs. No Target/Data stack,
+Game/host/lifecycle action, new resource, auth/OAuth semantic change or permission expansion.
+
+D-084 PATCH preserved command ID `1544004156543737876`. Names, Japanese descriptions,
+option types/required, permissions and Guild scope are unchanged; global 0 before/after.
+Only Game choices on START/SWITCH/RESET became autocomplete. Seed choices are unchanged.
+
+| Real registry projection | Actual eligible names |
+|---|---|
+| START / SWITCH | create-survival, create-terralith, vps-survival, Wishicraft Vanilla, Wishicraft Vanilla B |
+| RESET | Wishicraft Vanilla B only |
+| Search `terr` / `vps` | create-terralith / vps-survival |
+
+The live public guide changed from two Vanilla entries to these five. Actual Chrome verified
+1440/390/320px, JS disabled, HTTP 200/no-store, all runtime versions and no overflow/private
+identifiers. Future existing-package CREATE is covered by repeated-request fixtures; no test
+Game was created. Human Discord picker interaction is **not observed by the agent**; signed
+routing fixtures, deployed-source verification and live registry projection are not labelled
+as a real Discord client E2E. The user has been asked to verify without submitting commands.
+
+Safety snapshot at 12:10:17 UTC: five Game records byte-equivalent to before, unchanged
+maintenance record, STOPPED/HEALTHY, EC2 stopped, DNS absent, no Current/Lock/workflow/SSM,
+49 alarms OK, three queues empty, Lambda Errors sum 0 and discovery unavailable logs 0.
+Original three ingress concurrency settings restored to UNSET. Metrics are observations
+within the recorded window, not a promise that no future errors can occur.
+
+[Machine-readable evidence and qualified limits](../evidence/game_discovery_2026-09-22.json).
+Initial review/guard/read-back harness failures remain separate evidence; they were corrected
+without relaxing safety predicates. One pre-execution comparison stopped on Decimal-vs-string
+serialization; ingress was restored before retry. Raw AttributeValues proved maintenance
+unchanged. Post-deployment SDK SSO refresh expired, while canonical CLI credentials remained
+valid; caller was reverified, ingress restored through CLI and standard SDK credential_process
+reused that provider. No secrets were written to files/logs or permissions changed.
+
+A final guide-copy cleanup removes implementation language from the public page and describes
+reload behavior for readers. This does not change discovery logic or the command contract;
+its Web-only asset release uses a fresh Code-only ChangeSet and the same CI checks.

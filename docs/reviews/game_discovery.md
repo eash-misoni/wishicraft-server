@@ -1,6 +1,7 @@
 # D-112 Registry-backed Game discovery
 
 Accepted scope, 2026-09-22. Implements DIS-001/002/003/007/008 and D-084/D-105 discovery.
+Dev functional release qualified; human Discord picker observation remains a user check.
 Repository qualification and deployment evidence are recorded separately in the
 [release runbook](../runbooks/game_discovery.md).
 

@@ -1,0 +1,1159 @@
+{
+  "schema_version": 1,
+  "slice": "D-112",
+  "stage": "dev",
+  "implementation_commit": "e89132f3ad835a32df2b110a49c6f21543ed2340",
+  "ci": {
+    "CI": 35723371142,
+    "Paper": 35723371150,
+    "NeoForge": 35723371131,
+    "conclusion": "success",
+    "tests_passed": 1687
+  },
+  "changesets": [
+    {
+      "stack": "WishicraftControlPlaneStack-dev",
+      "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/discovery-cp-e89132f/15117822-3dac-4dfd-8544-3c9d111d24c3",
+      "changes": [
+        {
+          "logical_id": "AdmissionFunction23082B67",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "BackupStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": false,
+          "properties": []
+        },
+        {
+          "logical_id": "BackupTaskFunctionA44639DC",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "DiscordCommandFunction7D25102A",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "DiscordMessageFunction78FA388B",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "MonitoringObserverFunction584DA7C7",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "ReconcileFunction30829CB6",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "ResetWorkflow",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": false,
+          "properties": []
+        },
+        {
+          "logical_id": "RetentionTaskFunction9F285CE4",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "StartStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": false,
+          "properties": []
+        },
+        {
+          "logical_id": "StartTaskFunction8C564C4A",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "StatusExecutorFunction6E5C9869",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "StopStateMachine",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": false,
+          "properties": []
+        },
+        {
+          "logical_id": "StopTaskFunction11473A8C",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "SwitchWorkflow",
+          "type": "AWS::StepFunctions::StateMachine",
+          "action": "Modify",
+          "replacement": false,
+          "properties": []
+        }
+      ],
+      "reviewed": true
+    },
+    {
+      "stack": "WishicraftWebStack-dev",
+      "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/discovery-web-e89132f/88fdbcbb-03e5-4cc6-b52a-c4eb624c653c",
+      "changes": [
+        {
+          "logical_id": "AuthC256A5EC",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        },
+        {
+          "logical_id": "Web3C8945DB",
+          "type": "AWS::Lambda::Function",
+          "action": "Modify",
+          "replacement": false,
+          "properties": [
+            "Code"
+          ]
+        }
+      ],
+      "reviewed": true
+    }
+  ],
+  "readback": {
+    "at": "2026-09-22T12:08:27.179978+00:00",
+    "results": [
+      {
+        "function": "wc-dev-admission",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "wc-dev-auto-stop-evaluator",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "wc-dev-backup-task",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "wc-dev-discord-command",
+        "code_sha256": "ypG4DYRU0ojwcmmMoHXtPJo37SG48MlSTyi9Lp/dbxg=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "wc-dev-discord-message",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "wc-dev-monitoring-observer",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "wc-dev-reconcile",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "wc-dev-retention-task",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "wc-dev-start-task",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": false
+      },
+      {
+        "function": "wc-dev-status-executor",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": false
+      },
+      {
+        "function": "wc-dev-stop-task",
+        "code_sha256": "+vjHiN5F2ePetc9Q0ckVSaCxEysfqH81KOSLCDq5J7g=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": false
+      },
+      {
+        "workflow": "StartStateMachine",
+        "asl_sha256": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8",
+        "revision": null,
+        "unchanged_semantics": true
+      },
+      {
+        "workflow": "StopStateMachine",
+        "asl_sha256": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f",
+        "revision": "1c2ff03e-9c99-4268-8592-e621c9709308",
+        "unchanged_semantics": true
+      },
+      {
+        "workflow": "BackupStateMachine",
+        "asl_sha256": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213",
+        "revision": "abd31155-2ef5-46b7-8473-76c160542e4d",
+        "unchanged_semantics": true
+      },
+      {
+        "workflow": "RetentionStateMachine",
+        "asl_sha256": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e",
+        "revision": null,
+        "unchanged_semantics": true
+      },
+      {
+        "workflow": "SwitchWorkflow",
+        "asl_sha256": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2",
+        "revision": null,
+        "unchanged_semantics": true
+      },
+      {
+        "workflow": "ResetWorkflow",
+        "asl_sha256": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce",
+        "revision": null,
+        "unchanged_semantics": true
+      },
+      {
+        "deployed_source_verified": "wc-dev-discord-command",
+        "modules": 5
+      },
+      {
+        "function": "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd",
+        "code_sha256": "Gys+piVM59N+hauz5i8Ob3HxNScvWqF51Hd4IPoAOUY=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "function": "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp",
+        "code_sha256": "Gys+piVM59N+hauz5i8Ob3HxNScvWqF51Hd4IPoAOUY=",
+        "matches_unchanged_template_config": true,
+        "raw_preflight_config_available": true
+      },
+      {
+        "deployed_source_verified": "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp",
+        "modules": 5
+      }
+    ]
+  },
+  "discord": {
+    "stage": "dev",
+    "observed_at": "2026-09-22T12:08:55.464948+00:00",
+    "command_id": "1544004156543737876",
+    "definition_sha256": "2361dc3754545184d15ca8b8d48535bacd6e87ae0519860e624004217455521e",
+    "before": [
+      {
+        "id": "1544004156543737876",
+        "application_id": "1531887197433757768",
+        "version": "1551465110126465144",
+        "default_member_permissions": null,
+        "type": 1,
+        "name": "mc",
+        "description": "Wishicraftを操作します。管理Webは /mc status から確認できます",
+        "guild_id": "1251169327554625757",
+        "options": [
+          {
+            "type": 1,
+            "name": "status",
+            "description": "Minecraftサーバーの現在の状態を表示します"
+          },
+          {
+            "type": 1,
+            "name": "start",
+            "description": "MinecraftサーバーをSTARTします",
+            "options": [
+              {
+                "type": 3,
+                "name": "game",
+                "description": "起動するGameを選択します",
+                "choices": [
+                  {
+                    "name": "game-vanilla-main",
+                    "value": "game-vanilla-main"
+                  },
+                  {
+                    "name": "game-vanilla-secondary",
+                    "value": "game-vanilla-secondary"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": 1,
+            "name": "stop",
+            "description": "現在のGameを保存し、MinecraftサーバーをSTOPします"
+          },
+          {
+            "type": 1,
+            "name": "backup",
+            "description": "停止中の共有Data EBSをSnapshotへBACKUPします"
+          },
+          {
+            "type": 1,
+            "name": "switch",
+            "description": "稼働中のGameを保存・停止し、別のGameへSWITCHします",
+            "options": [
+              {
+                "type": 3,
+                "name": "game",
+                "description": "起動するGameを選択します",
+                "required": true,
+                "choices": [
+                  {
+                    "name": "game-vanilla-main",
+                    "value": "game-vanilla-main"
+                  },
+                  {
+                    "name": "game-vanilla-secondary",
+                    "value": "game-vanilla-secondary"
+                  }
+                ]
+              },
+              {
+                "type": 5,
+                "name": "confirm",
+                "description": "現在のGameを停止することを確認します",
+                "required": true
+              }
+            ]
+          },
+          {
+            "type": 1,
+            "name": "reset",
+            "description": "対応Gameのworldを新しくして同じGameでRESETします",
+            "options": [
+              {
+                "type": 3,
+                "name": "game",
+                "description": "現在稼働中のRESET対応Gameを選択します",
+                "required": true,
+                "choices": [
+                  {
+                    "name": "game-vanilla-secondary",
+                    "value": "game-vanilla-secondary"
+                  }
+                ]
+              },
+              {
+                "type": 5,
+                "name": "confirm",
+                "description": "worldを新しくすることを確認します",
+                "required": true
+              },
+              {
+                "type": 3,
+                "name": "seed",
+                "description": "固定seedまたは新しいseedを選択します",
+                "required": true,
+                "choices": [
+                  {
+                    "name": "Fixed seed",
+                    "value": "fixed"
+                  },
+                  {
+                    "name": "New seed",
+                    "value": "new"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "nsfw": false
+      }
+    ],
+    "global_count_before": 0,
+    "candidate_patch": {
+      "options": [
+        {
+          "type": 1,
+          "name": "status",
+          "description": "Minecraftサーバーの現在の状態を表示します"
+        },
+        {
+          "type": 1,
+          "name": "start",
+          "description": "MinecraftサーバーをSTARTします",
+          "options": [
+            {
+              "type": 3,
+              "name": "game",
+              "description": "起動するGameを選択します",
+              "autocomplete": true
+            }
+          ]
+        },
+        {
+          "type": 1,
+          "name": "stop",
+          "description": "現在のGameを保存し、MinecraftサーバーをSTOPします"
+        },
+        {
+          "type": 1,
+          "name": "backup",
+          "description": "停止中の共有Data EBSをSnapshotへBACKUPします"
+        },
+        {
+          "type": 1,
+          "name": "switch",
+          "description": "稼働中のGameを保存・停止し、別のGameへSWITCHします",
+          "options": [
+            {
+              "type": 3,
+              "name": "game",
+              "description": "起動するGameを選択します",
+              "required": true,
+              "autocomplete": true
+            },
+            {
+              "type": 5,
+              "name": "confirm",
+              "description": "現在のGameを停止することを確認します",
+              "required": true
+            }
+          ]
+        },
+        {
+          "type": 1,
+          "name": "reset",
+          "description": "対応Gameのworldを新しくして同じGameでRESETします",
+          "options": [
+            {
+              "type": 3,
+              "name": "game",
+              "description": "現在稼働中のRESET対応Gameを選択します",
+              "required": true,
+              "autocomplete": true
+            },
+            {
+              "type": 5,
+              "name": "confirm",
+              "description": "worldを新しくすることを確認します",
+              "required": true
+            },
+            {
+              "type": 3,
+              "name": "seed",
+              "description": "固定seedまたは新しいseedを選択します",
+              "required": true,
+              "choices": [
+                {
+                  "name": "Fixed seed",
+                  "value": "fixed"
+                },
+                {
+                  "name": "New seed",
+                  "value": "new"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "after": [
+      {
+        "id": "1544004156543737876",
+        "application_id": "1531887197433757768",
+        "version": "1551928281232834561",
+        "default_member_permissions": null,
+        "type": 1,
+        "name": "mc",
+        "description": "Wishicraftを操作します。管理Webは /mc status から確認できます",
+        "guild_id": "1251169327554625757",
+        "options": [
+          {
+            "type": 1,
+            "name": "status",
+            "description": "Minecraftサーバーの現在の状態を表示します"
+          },
+          {
+            "type": 1,
+            "name": "start",
+            "description": "MinecraftサーバーをSTARTします",
+            "options": [
+              {
+                "type": 3,
+                "name": "game",
+                "description": "起動するGameを選択します",
+                "autocomplete": true
+              }
+            ]
+          },
+          {
+            "type": 1,
+            "name": "stop",
+            "description": "現在のGameを保存し、MinecraftサーバーをSTOPします"
+          },
+          {
+            "type": 1,
+            "name": "backup",
+            "description": "停止中の共有Data EBSをSnapshotへBACKUPします"
+          },
+          {
+            "type": 1,
+            "name": "switch",
+            "description": "稼働中のGameを保存・停止し、別のGameへSWITCHします",
+            "options": [
+              {
+                "type": 3,
+                "name": "game",
+                "description": "起動するGameを選択します",
+                "required": true,
+                "autocomplete": true
+              },
+              {
+                "type": 5,
+                "name": "confirm",
+                "description": "現在のGameを停止することを確認します",
+                "required": true
+              }
+            ]
+          },
+          {
+            "type": 1,
+            "name": "reset",
+            "description": "対応Gameのworldを新しくして同じGameでRESETします",
+            "options": [
+              {
+                "type": 3,
+                "name": "game",
+                "description": "現在稼働中のRESET対応Gameを選択します",
+                "required": true,
+                "autocomplete": true
+              },
+              {
+                "type": 5,
+                "name": "confirm",
+                "description": "worldを新しくすることを確認します",
+                "required": true
+              },
+              {
+                "type": 3,
+                "name": "seed",
+                "description": "固定seedまたは新しいseedを選択します",
+                "required": true,
+                "choices": [
+                  {
+                    "name": "Fixed seed",
+                    "value": "fixed"
+                  },
+                  {
+                    "name": "New seed",
+                    "value": "new"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "nsfw": false
+      }
+    ],
+    "global_count_after": 0
+  },
+  "live_registry_projection": {
+    "games": [
+      {
+        "id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+        "name": "create-survival",
+        "status": "ACTIVE",
+        "kind": "neoforge",
+        "minecraft_version": "1.21.1",
+        "reset": false,
+        "label": "create-survival"
+      },
+      {
+        "id": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+        "name": "create-terralith",
+        "status": "ACTIVE",
+        "kind": "neoforge",
+        "minecraft_version": "1.21.1",
+        "reset": false,
+        "label": "create-terralith"
+      },
+      {
+        "id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+        "name": "vps-survival",
+        "status": "ACTIVE",
+        "kind": "paper",
+        "minecraft_version": "26.1.2",
+        "reset": false,
+        "label": "vps-survival"
+      },
+      {
+        "id": "game-vanilla-main",
+        "name": "Wishicraft Vanilla",
+        "status": "ACTIVE",
+        "kind": "vanilla",
+        "minecraft_version": "26.2",
+        "reset": false,
+        "label": "Wishicraft Vanilla"
+      },
+      {
+        "id": "game-vanilla-secondary",
+        "name": "Wishicraft Vanilla B",
+        "status": "ACTIVE",
+        "kind": "vanilla",
+        "minecraft_version": "26.2",
+        "reset": true,
+        "label": "Wishicraft Vanilla B"
+      }
+    ],
+    "results": {
+      "start": [
+        {
+          "name": "create-survival",
+          "value": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f"
+        },
+        {
+          "name": "create-terralith",
+          "value": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4"
+        },
+        {
+          "name": "vps-survival",
+          "value": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21"
+        },
+        {
+          "name": "Wishicraft Vanilla",
+          "value": "game-vanilla-main"
+        },
+        {
+          "name": "Wishicraft Vanilla B",
+          "value": "game-vanilla-secondary"
+        }
+      ],
+      "switch": [
+        {
+          "name": "create-survival",
+          "value": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f"
+        },
+        {
+          "name": "create-terralith",
+          "value": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4"
+        },
+        {
+          "name": "vps-survival",
+          "value": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21"
+        },
+        {
+          "name": "Wishicraft Vanilla",
+          "value": "game-vanilla-main"
+        },
+        {
+          "name": "Wishicraft Vanilla B",
+          "value": "game-vanilla-secondary"
+        }
+      ],
+      "reset": [
+        {
+          "name": "Wishicraft Vanilla B",
+          "value": "game-vanilla-secondary"
+        }
+      ],
+      "search": {
+        "terr": [
+          {
+            "name": "create-terralith",
+            "value": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4"
+          }
+        ],
+        "vps": [
+          {
+            "name": "vps-survival",
+            "value": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21"
+          }
+        ],
+        "create": [
+          {
+            "name": "create-survival",
+            "value": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f"
+          },
+          {
+            "name": "create-terralith",
+            "value": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4"
+          }
+        ]
+      },
+      "read_seconds": 0.363
+    },
+    "kind": "operator read of live registry; not a Discord client interaction"
+  },
+  "public_guide": {
+    "before": {
+      "root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-discovery-live-guide-cuqL91",
+      "at": "2026-09-22T11:53:39.168Z",
+      "checks": [
+        {
+          "label": "desktop",
+          "names": [
+            "Wishicraft Vanilla",
+            "Wishicraft Vanilla B"
+          ],
+          "status": 200,
+          "javascript": false,
+          "noStore": true
+        },
+        {
+          "label": "mobile",
+          "names": [
+            "Wishicraft Vanilla",
+            "Wishicraft Vanilla B"
+          ],
+          "status": 200,
+          "javascript": false,
+          "noStore": true
+        },
+        {
+          "label": "narrow",
+          "names": [
+            "Wishicraft Vanilla",
+            "Wishicraft Vanilla B"
+          ],
+          "status": 200,
+          "javascript": false,
+          "noStore": true
+        }
+      ],
+      "errors": [],
+      "status": "passed"
+    },
+    "after": {
+      "root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-discovery-live-guide-XZftPG",
+      "at": "2026-09-22T12:08:32.473Z",
+      "checks": [
+        {
+          "label": "desktop",
+          "names": [
+            "create-survival",
+            "create-terralith",
+            "vps-survival",
+            "Wishicraft Vanilla",
+            "Wishicraft Vanilla B"
+          ],
+          "status": 200,
+          "javascript": false,
+          "noStore": true
+        },
+        {
+          "label": "mobile",
+          "names": [
+            "create-survival",
+            "create-terralith",
+            "vps-survival",
+            "Wishicraft Vanilla",
+            "Wishicraft Vanilla B"
+          ],
+          "status": 200,
+          "javascript": false,
+          "noStore": true
+        },
+        {
+          "label": "narrow",
+          "names": [
+            "create-survival",
+            "create-terralith",
+            "vps-survival",
+            "Wishicraft Vanilla",
+            "Wishicraft Vanilla B"
+          ],
+          "status": 200,
+          "javascript": false,
+          "noStore": true
+        }
+      ],
+      "errors": [],
+      "status": "passed"
+    }
+  },
+  "safety_audit": {
+    "at": "2026-09-22T12:10:17.702188+00:00",
+    "window_start": "2026-09-22T12:01:27.522456+00:00",
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "ec2": "stopped",
+    "dns": "absent",
+    "current_lock_workflow_ssm": "none",
+    "games_unchanged": true,
+    "game_count": 5,
+    "maintenance_unchanged": true,
+    "queues": [
+      {
+        "name": "DiscordMessageDlqD31D21DD",
+        "counts": {
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        }
+      },
+      {
+        "name": "DiscordMessageRetryQueue4EAB3A83",
+        "counts": {
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        }
+      },
+      {
+        "name": "StatusExecutorDlqD0B32ADE",
+        "counts": {
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        }
+      }
+    ],
+    "alarms": [
+      {
+        "name": "WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT",
+        "state": "OK"
+      },
+      {
+        "name": "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-admissionfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-admissionfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-auto-stop-evaluator-silence",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopevaluatorfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopevaluatorfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopwarningblockedalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backuptaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backuptaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backupworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-datafilesystemobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-datafilesystemusagehighalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredactualdivergencealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredrunningnotreadyalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredstoppedec2runningalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordcommandfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordcommandfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordmessagefunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordmessagefunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-expiredoperationlockalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-maintenance-suppressor",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobserverfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobserverfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-reconcilefunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-reconcilefunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-resetworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentiontaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentiontaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentionworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeheartbeatunavailablealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeidentitymismatchalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-scheduledstopcancelledalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-starttaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-starttaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-startworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-statusexecutorfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-statusexecutorfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stoptaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stoptaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stopworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-switchworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-systemstateobservationstalealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-targetrunningtoolongalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredactualdivergencealarm-notification",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeobservationunknownalarm-notification",
+        "state": "OK"
+      }
+    ],
+    "alarm_sns_iam_config_unchanged": true,
+    "lambda_errors": [
+      {
+        "function": "wc-dev-admission",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-auto-stop-evaluator",
+        "errors": 0.0,
+        "datapoints": 9
+      },
+      {
+        "function": "wc-dev-backup-task",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-discord-command",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-discord-message",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-monitoring-observer",
+        "errors": 0.0,
+        "datapoints": 1
+      },
+      {
+        "function": "wc-dev-reconcile",
+        "errors": 0.0,
+        "datapoints": 2
+      },
+      {
+        "function": "wc-dev-retention-task",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-start-task",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-status-executor",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-stop-task",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp",
+        "errors": 0.0,
+        "datapoints": 1
+      }
+    ],
+    "discovery_failure_logs": 0,
+    "concurrency": {
+      "wc-dev-admission": null,
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null
+    }
+  },
+  "discord_client_picker": {
+    "status": "not_observed_by_agent",
+    "reason": "No authenticated Discord client available; user verification requested. Signed routing fixtures and live registry projection are distinct from actual client interactions."
+  },
+  "release_harness_notes": [
+    "Initial ChangeSource check expected ResourceReference; corrected to exact ResourceAttribute / causing Lambda Arn and requalified in a new audit root.",
+    "First guard stopped before ExecuteChangeSet because Decimal snapshot fields serialized as strings; ingress restored, then raw AttributeValue equality verified in a new execution root.",
+    "Three Lambda preflight configurations were absent due to the DescribeStackResources 100-resource limit; read-back uses paginated resources and verifies all functions against resolved unchanged CloudFormation Properties.",
+    "SDK SSO refresh expired after deployments; canonical CLI provider was still valid with the same verified caller. Ingress restored through CLI, SDK standard credential_process reused the canonical provider without persisting credentials."
+  ]
+}
