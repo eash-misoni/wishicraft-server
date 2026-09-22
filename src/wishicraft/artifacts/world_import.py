@@ -361,6 +361,24 @@ def inspect_world(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 def expected_level(target: dict[str, str]) -> str:
+    data = Path(target["data_source"])
+    if data.parent.parent.name == "worlds":
+        try:
+            from wishicraft.artifacts import reset_worlds
+        except ImportError:
+            import importlib
+
+            reset_worlds = importlib.import_module("reset_worlds")
+        record = reset_worlds.record(reset_worlds.owner_path(data.parent))
+        if "restore" in record:
+            plan = record["restore"]
+            if (
+                plan["target_data_source"] != target["data_source"]
+                or plan["game_id"] != target["game_id"]
+                or record["level_name"] not in {"world", LEVEL}
+            ):
+                raise ValueError("RESTORE_OWNER_TARGET")
+            return str(record["level_name"])
     owner = packages.GAMES / (target["game_id"] + ".initial-owner.json")
     if not owner.exists() and not owner.is_symlink():
         return "world"

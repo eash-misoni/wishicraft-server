@@ -233,8 +233,11 @@ def initialized(
         raise ValueError("RESET_OWNER_MISMATCH")
     if info["phase"] not in {"prepared", "initialized"}:
         raise ValueError("RESET_WORLD_UNAVAILABLE")
-    if not (data / "world/level.dat").is_file():
-        if require or info["phase"] != "prepared":
+    level = info.get("level_name", "world") if "restore" in info else "world"
+    if level not in {"world", "wishinkaiwai"}:
+        raise ValueError("RESTORE_LEVEL_NAME")
+    if not (data / level / "level.dat").is_file():
+        if require or info["phase"] != "prepared" or "restore" in info:
             raise ValueError("EXISTING_WORLD_MISSING")
     else:
         atomic(owner_path(data.parent), json.dumps({**info, "phase": "initialized"}))

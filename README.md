@@ -130,3 +130,5 @@ Phase 2 target hostは`deployment=target`で独立assemblyとしてsynthし、de
 `config/stages/dev.yaml`の`host_runtime`は、AL2023 release/kernel/公式AMI identity、Compose checksum、itzg release image digest、Minecraft 26.2、initial memory/timeoutを固定する。`wishicraft.host_runtime.render_boot_time_artifacts`は、実機preflightで観測したnumeric UID/GIDを受け取り、secretを含まないcanonicalな`compose.yaml`、`runtime.env`、manifest、render digestを新しい専用output rootへ生成する。
 
 Phase 2aのrepository validationはDocker Engineを必要としない。Phase 2b-1ではGitHub-hosted Linux x86_64 runnerの既設Dockerだけを使い、固定digest imageを`SETUP_ONLY=true`で実行するsynthetic ownership integration testを追加した。local開発環境へDockerをinstallせず、実world、実`server.properties`、secret、AWSを使用しない。
+
+> D-113 RESTORE implementation candidate: [contract](docs/reviews/game_restore.md), [operator runbook](docs/runbooks/game_restore.md). 同一Game/packageのsnapshotから新generationを準備し、元worldを保持します。実環境qualificationは未完了。

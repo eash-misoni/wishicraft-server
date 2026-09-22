@@ -1,5 +1,7 @@
 # 07. Operations, Security, and Cost
 
+> D-113 RESTORE candidate: [一時EBS・read-only抽出・事前BACKUP・cleanup/rollback契約](reviews/game_restore.md)。既存operator AWS credentialsを使い、application IAM／永続AWS resource／snapshot retention削除権限を追加しない。正式maintenance内で実行し、元Data EBSは置換しない。実環境qualificationは未完了。
+
 > D-111 planned host maintenance: Accepted / dev deployed and qualified (2026-09-22). Independent SystemState maintenance lease, atomic Admission fence, unchanged
 > observation metrics, three narrowly suppressed notification composites, absolute expiry
 > and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);

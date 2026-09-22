@@ -1313,3 +1313,7 @@ real STARTは一Operation/一State MachineでREADY、DNS UPSERT/INSYNC、public 
 復元試験の前倒しだけはD-095でAccepted。共有backup/metadata、Reset cleanup/認可、whitelist、
 world参照、SWITCH/RESET順序は未Accepted。Phase 8 Completedは取り消さず、Phase 9は未着手。
 [限定deploy/実試験計画](runbooks/backup_safety_isolated_restore.md)はユーザーのGOで実行承認済み。
+
+## D-113 Operator Game RESTORE（implementation candidate）
+
+2026-09-23 user-requested slice。[正式契約候補](reviews/game_restore.md)、[checkpointとrollback](runbooks/game_restore.md)。shared-volume v2 provenanceをauthorityに、operator管理の一時read-only EBSから同一Game/packageだけを新generationへ抽出する。現在world／他Game／Control Plane metadataは巻き戻さない。D-111 maintenance-admin経路と既存STARTを組み合わせ、application IAM／巨大state machineを追加しない。実環境qualificationは未完了。

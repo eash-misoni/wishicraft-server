@@ -1127,3 +1127,7 @@ Phase 8 Completedを維持し、Phase 9は未着手、Restore UI・汎用workflo
 新BACKUP経路の実AWS E2Eとmanaged Lambda SDK versionは未確認。人間の目視接続は未実施。
 [実証範囲・失敗と修正・exact evidence](runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照。
 共有backup、whitelist、Reset認可・保持policy、world参照、SWITCH/RESET順序はProposedのまま。
+
+## D-113 — Operator Game RESTORE（implementation candidate）
+
+[契約](reviews/game_restore.md)と[runbook](runbooks/game_restore.md)。D-101 independent trackとして、同一Game/packageのsnapshotから新generationを復元する。UI/EXPORT/retention削除releaseは対象外。repository検証とdev実証は区別し、実環境qualificationは未完了。

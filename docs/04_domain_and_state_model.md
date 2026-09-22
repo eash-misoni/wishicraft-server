@@ -1,5 +1,7 @@
 # 04. Domain and State Model
 
+> D-113 RESTORE candidate: [maintenance-admin journal、prepared/committed境界、N+1採番と明示rollback](reviews/game_restore.md)。通常Operation enum/state machineへ混入せず、既存START/STOPとmaintenance fenceを使用する。実環境適用済み契約とは区別する。
+
 > D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](reviews/game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
 
 > D-111 planned host maintenance: Accepted / dev deployed and qualified (2026-09-22). Independent SystemState maintenance lease, atomic Admission fence, unchanged

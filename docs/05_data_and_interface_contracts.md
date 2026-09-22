@@ -1,5 +1,7 @@
 # 05. Data and Interface Contracts
 
+> D-113 RESTORE candidate: [schemaとauthority](reviews/game_restore.md)、[operator checkpoint/runbook](runbooks/game_restore.md)。既存SystemState audit領域の`restore#<operation>`、Game world参照の条件付き更新、rollback後も再利用しないgeneration_counter、root-owned prepared ownerを追加。BACKUP provenanceやpackage/access authorityは書換えない。実環境qualificationは未完了。
+
 > D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](reviews/game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
 
 > D-111 planned host maintenance: Accepted / dev deployed and qualified (2026-09-22). Independent SystemState maintenance lease, atomic Admission fence, unchanged

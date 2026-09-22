@@ -1,5 +1,7 @@
 # 02. Requirements
 
+> D-113 RESTORE implementation candidate: [同一Game/packageのsnapshot内容から新世代を準備するoperator契約](reviews/game_restore.md)。BAK-004の正式復元経路を追加し、current／他Gameのin-place rollbackを禁止する。RESET enablementとは独立した管理操作。実環境qualificationは未完了。
+
 > D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](reviews/game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
 
 > Existing Operations via Web: D-104 Accepted / production Completed (2026-09-13). [共有Admission・認可・CSRF・request/Operation契約](reviews/existing_operations_web.md)、[release/E2E/rollback](runbooks/existing_operations_web.md)。既存backend safety contractを維持する。
