@@ -1,9 +1,9 @@
 # D-112 Registry-backed Game discovery
 
 Accepted scope, 2026-09-22. Implements DIS-001/002/003/007/008 and D-084/D-105 discovery.
-Dev discovery and the empty-picker cold-start correction are deployed and read-back verified.
-Actual post-fix Discord picker delivery remains a separate user observation, not inferred
-from SDK/read-back tests. See the cold-start follow-up evidence below.
+Dev discovery and the empty-picker cold-start correction are deployed and qualified.
+The user confirmed actual START five-Game and RESET Vanilla-B-only choices after the fix;
+actual signed requests returned the matching counts in 101–347 ms. See the evidence below.
 Repository qualification and deployment evidence are recorded separately in the
 [release runbook](../runbooks/game_discovery.md).
 

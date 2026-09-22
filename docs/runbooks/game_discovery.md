@@ -168,3 +168,19 @@ unchanged, 49 alarms OK, three queues empty, Lambda errors and discovery failure
 the post-release audit window. No resource/IAM/lifecycle/auth change.
 
 [Correction evidence, measurements and observation limits](../evidence/game_discovery_cold_start_2026-09-22.json).
+
+
+### Actual Discord picker confirmation after correction
+
+After the preceding checkpoint, the user confirmed in the real operation channel (without
+submitting a lifecycle command): **START showed five Games; RESET showed only Wishicraft
+Vanilla B**. The corresponding signed requests logged START count 5 three times and RESET
+count 1 once, all `result=ok`. Lambda execution durations were 347.45, 112.81, 101.24 ms
+(START) and 108.33 ms (RESET); discovery itself took 319, 92, 99 and 88 ms respectively.
+This closes the user-reported empty-picker symptom for START/RESET.
+
+These positive requests reused the environment initialized by the earlier negative probe.
+Therefore a positive cold request's full end-to-end latency was not directly measured; INIT
+603 ms and the positive request measurements are separate evidence. SWITCH's actual client
+picker was not reported; its eligibility/search/routing are covered by the same registry
+projection and signed tests. No ordinary START, SWITCH or RESET was submitted.

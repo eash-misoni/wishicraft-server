@@ -5801,9 +5801,408 @@
     }
   },
   "limits": [
-    "At this evidence checkpoint no post-fix signed Discord picker request was observed. User confirmation has been requested; do not claim actual picker delivery from negative signature rejection or operator registry reads.",
+    "The earlier no-positive-request checkpoint is superseded by the appended actual START/RESET user confirmation and signed request results. Positive requests were warm; the separate negative probe measured INIT. Actual SWITCH client observation was not reported.",
     "The previous initial-release read-back and local signed tests did not establish cold-start response latency.",
     "No Game lifecycle operation or test Game CREATE was performed."
   ],
-  "temporary_evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-discovery-cold-v1-b3t8xhiv"
+  "temporary_evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-discovery-cold-v1-b3t8xhiv",
+  "actual_picker_confirmation": {
+    "user_report": "STARTは5 Game、RESETはBだけ表示された",
+    "lifecycle_command_submitted": false,
+    "requests": {
+      "at": "2026-09-22T12:58:34.046478+00:00",
+      "start": "2026-09-22T12:49:09.302263+00:00",
+      "events": [
+        {
+          "timestamp": 1790081528825,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "report": {
+            "Duration": 2.09,
+            "Init Duration": 603.0
+          },
+          "init_plus_duration_ms": 605.09
+        },
+        {
+          "timestamp": 1790081730216,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "component": "discord-autocomplete",
+          "result": "ok",
+          "command": "START",
+          "count": 5,
+          "elapsed_ms": 319
+        },
+        {
+          "timestamp": 1790081730236,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "report": {
+            "Duration": 347.45
+          },
+          "init_plus_duration_ms": 347.45
+        },
+        {
+          "timestamp": 1790081756876,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "component": "discord-autocomplete",
+          "result": "ok",
+          "command": "START",
+          "count": 5,
+          "elapsed_ms": 92
+        },
+        {
+          "timestamp": 1790081756896,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "report": {
+            "Duration": 112.81
+          },
+          "init_plus_duration_ms": 112.81
+        },
+        {
+          "timestamp": 1790081760736,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "component": "discord-autocomplete",
+          "result": "ok",
+          "command": "START",
+          "count": 5,
+          "elapsed_ms": 99
+        },
+        {
+          "timestamp": 1790081760737,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "report": {
+            "Duration": 101.24
+          },
+          "init_plus_duration_ms": 101.24
+        },
+        {
+          "timestamp": 1790081766656,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "component": "discord-autocomplete",
+          "result": "ok",
+          "command": "RESET",
+          "count": 1,
+          "elapsed_ms": 88
+        },
+        {
+          "timestamp": 1790081766676,
+          "stream": "2026/09/22/wc-dev-discord-command[$LATEST]31e635ebfcbb4d25bea9d610ea1f0b6b",
+          "report": {
+            "Duration": 108.33
+          },
+          "init_plus_duration_ms": 108.33
+        }
+      ]
+    },
+    "positive_requests_were_warm": true,
+    "switch_actual_client_observed": false
+  },
+  "final_audit_after_actual_picker": {
+    "at": "2026-09-22T12:59:40.995475+00:00",
+    "window_start": "2026-09-22T12:45:47.116814+00:00",
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "ec2": "stopped",
+    "dns": "absent",
+    "current_lock_workflow_ssm": "none",
+    "games_unchanged": true,
+    "game_count": 5,
+    "maintenance_unchanged": true,
+    "queues": [
+      {
+        "name": "DiscordMessageDlqD31D21DD",
+        "counts": {
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        }
+      },
+      {
+        "name": "DiscordMessageRetryQueue4EAB3A83",
+        "counts": {
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        }
+      },
+      {
+        "name": "StatusExecutorDlqD0B32ADE",
+        "counts": {
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        }
+      }
+    ],
+    "alarms": [
+      {
+        "name": "WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT",
+        "state": "OK"
+      },
+      {
+        "name": "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-admissionfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-admissionfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-auto-stop-evaluator-silence",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopevaluatorfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopevaluatorfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-autostopwarningblockedalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backuptaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backuptaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-backupworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-datafilesystemobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-datafilesystemusagehighalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredactualdivergencealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredrunningnotreadyalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredstoppedec2runningalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordcommandfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordcommandfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordmessagefunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-discordmessagefunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-expiredoperationlockalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-maintenance-suppressor",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobserverfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-monitoringobserverfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-reconcilefunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-reconcilefunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-resetworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentiontaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentiontaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-retentionworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeheartbeatunavailablealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeidentitymismatchalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeobservationunknownalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-scheduledstopcancelledalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-starttaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-starttaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-startworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-statusexecutorfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-statusexecutorfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stoptaskfunctionerrorsalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stoptaskfunctionthrottlesalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-stopworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-switchworkflowfailurealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-systemstateobservationstalealarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-targetrunningtoolongalarm",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredactualdivergencealarm-notification",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "state": "OK"
+      },
+      {
+        "name": "wc-dev-runtimeobservationunknownalarm-notification",
+        "state": "OK"
+      }
+    ],
+    "alarm_sns_iam_config_unchanged": true,
+    "lambda_errors": [
+      {
+        "function": "wc-dev-admission",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-auto-stop-evaluator",
+        "errors": 0.0,
+        "datapoints": 14
+      },
+      {
+        "function": "wc-dev-backup-task",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-discord-command",
+        "errors": 0.0,
+        "datapoints": 3
+      },
+      {
+        "function": "wc-dev-discord-message",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-monitoring-observer",
+        "errors": 0.0,
+        "datapoints": 3
+      },
+      {
+        "function": "wc-dev-reconcile",
+        "errors": 0.0,
+        "datapoints": 3
+      },
+      {
+        "function": "wc-dev-retention-task",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-start-task",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-status-executor",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "wc-dev-stop-task",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd",
+        "errors": 0,
+        "datapoints": 0
+      },
+      {
+        "function": "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp",
+        "errors": 0.0,
+        "datapoints": 1
+      }
+    ],
+    "discovery_failure_logs": 0,
+    "concurrency": {
+      "wc-dev-admission": null,
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null
+    }
+  }
 }
