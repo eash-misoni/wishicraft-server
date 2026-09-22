@@ -247,11 +247,8 @@ def main() -> None:
                     "100",
                     "0",
                     "minecraft:diamond_block",
-                    "run",
-                    "say",
-                    "import-preserved",
                 )
-                assert "import-preserved" in response, response
+                assert "Test passed" in response, (dimension, response)
             assert initial_game.initialized(target, atomic)
             stop()
         assert imp.sha(archive) == manifest["archive_sha256"]
@@ -264,7 +261,8 @@ def main() -> None:
         print("PAPER_IMPORT_PASSED", flush=True)
     finally:
         # Disposable CI container only; production worlds are never used by this test.
-        subprocess.run(["docker", "logs", name], capture_output=True, text=True)
+        logs = subprocess.run(["docker", "logs", name], capture_output=True, text=True)
+        (root / f"cycle-{cycle}-final.log").write_text(logs.stdout + logs.stderr)
         subprocess.run(["docker", "rm", "-f", name], capture_output=True, text=True)
 
 

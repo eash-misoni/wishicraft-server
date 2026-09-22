@@ -81,6 +81,9 @@ def main() -> None:
     domain = service(db)
     records = []
     for index, package in enumerate(packages):
+        if package["loader"]["type"] == "paper":
+            # Paper admission requires the separate same-runtime import fixture.
+            continue
         result = create(
             domain._repository,
             value={
