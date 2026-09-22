@@ -114,3 +114,86 @@ with the original false-cancellation reason. Synthetic fixture validation initia
 stopped at a missing VolumeId; the fixture was corrected and every case now asserts
 that it actually reached the direct probe. No production predicate was relaxed.
 Production/CI results remain separate from this local qualification.
+
+### Combined dev deployment — 2026-09-22
+
+Implementation `b232bc807be3d89d89b593ba0cf9d32c346b51f9` includes Discord
+supersession `b54dae4`. All three implementation CI runs succeeded:
+[standard quality/Web/real host](https://github.com/eash-misoni/wishicraft-server/actions/runs/35699003044),
+[Paper](https://github.com/eash-misoni/wishicraft-server/actions/runs/35699003050),
+[NeoForge](https://github.com/eash-misoni/wishicraft-server/actions/runs/35699002994).
+Local Docker and ShellCheck were unavailable; the standard CI supplied those
+checks. No skipped local check is counted as local success.
+
+The reviewed and executed Control Plane ChangeSet was
+`auto-stop-authority-discord-20260922`, suffix
+`23031878-c104-4d67-b448-6cb23dc85ee4`, in account `385526546525`,
+`ap-northeast-1`. The canonical synth changed eleven existing Lambda Code assets.
+CloudFormation also listed Backup, Reset, Start, Stop and Switch State Machine
+Definition entries; the existing Case D guard proved identical raw properties,
+resolved/canonical ASL and referenced Lambda ARNs. All plain/property-evaluated
+ChangeSet pages were retained. No new resource, IAM expansion, runtime artifact,
+Game migration or workflow semantic change was accepted.
+
+Two fresh direct observations and heartbeat confirmed the same READY Paper Game
+with zero players before the normal release STOP. Formal CLI Operation
+`op-e7cc5767-c857-4d47-96b0-f75e0f29b9aa` succeeded at 07:33:17 UTC.
+At the stopped release guard, EC2 was stopped, DNS absent, all 45 alarms OK,
+with no Current Operation, Lock, workflow, active SSM or queued work. The three
+ingress functions were temporarily closed and later restored to their exact
+original unset reserved-concurrency settings.
+
+The stack reached UPDATE_COMPLETE. Read-back at 07:37:06 UTC verified all eleven
+Lambda CodeSha256 values against published ZIPs, both corrected source files in
+the deployed ZIP, unchanged physical resource IDs, all six workflow definitions
+and configuration, and all 45 alarm definitions. The common Lambda ZIP SHA-256 is
+`cdf11cbcc167f5b6a53d7869cf7b58b65897d6b54aeaf2cdaacefd284a76b5fc`.
+This is a completed dev deployment of both fixes; the earlier Discord-only hold
+is historical, not the current deployment status.
+
+After ingress restoration and another stopped preflight, formal START
+`op-5f438e13-67e8-4dc4-baa5-09870744d4bf` succeeded at 07:44:08 UTC.
+The existing `vps-survival` generation-1 world reached READY. Its new run's
+trusted zero-player period began at `2026-09-22T07:42:23.921652Z`.
+Neither the old cancelled intent nor the configured idle/warning intervals was
+modified. Natural automatic-STOP qualification is recorded after completion below.
+
+### Natural automatic STOP proof — 2026-09-22
+
+The new run stayed READY with fresh trusted zero-player heartbeats from
+`07:42:23.921652Z`. The evaluator created intent
+`asi-10a1c14b6f062379f8ebe519296cc523` at 08:07:46 UTC for the same
+Game/run/process. Discord warning delivery reached DELIVERED once at
+`08:07:49.073370Z`; the five-minute warning interval and 30-minute idle
+interval made the STOP eligible only after 08:12:49 UTC. No heartbeat, intent,
+timer or player count was forged or shortened.
+
+The existing evaluator admitted SCHEDULE STOP
+`op-8bf94f28-45cc-4a5a-af20-5b2d5f56bf8e` after that boundary. Its
+`AutomaticStopFinalGate` returned `{"proceed":true,"automatic":true}` before
+`SetDesiredStopped` at 08:14:01 UTC. The saved final direct SSM response
+`acea41ca-92ea-4eed-9fb2-d8355474c093` at 08:14:00 UTC reports Paper
+26.1.2, READY, zero players and the same Game/run/process, with no host errors.
+Replaying that saved response against the final immutable Game registration and
+the deployed Stop Lambda's catalog through the shared GamePackageAuthority
+resolves expected Minecraft version `26.1.2`. The replay is an independent
+read-only corroboration; the production workflow's successful gate and normal
+STOP path are the actual integration proof.
+
+The STOP Operation and Standard execution both SUCCEEDED at 08:15:31 UTC.
+The workflow used its normal host save/stop, EC2 stop, DNS delete, final
+Reconcile and MarkSucceeded path. At 08:17:22 UTC, SystemState was
+STOPPED/HEALTHY with no Current Operation or Lock, EC2 stopped, no running
+workflow, active SSM, SSM session, DNS or queued messages, and all 45 alarms OK.
+The three ingress functions retained their original unset reserved concurrency.
+All eight other Game/policy/registry records, the target Game's complete record,
+all 16 backup records and 101 pre-existing Operation records matched their
+pre-release snapshots exactly. Only the three new formal release/validation
+Operations were added. Alarm definitions and thresholds were unchanged.
+
+The Discord supersession correction was present in the same deployed ZIP, but
+this natural STOP run did not induce the specific Discord revision race. Its
+concurrency regression and deployment read-back are the evidence for that fix;
+no post-deploy production race is claimed here. The old false-cancellation
+intent remains historical and unmodified. [Machine-readable release and STOP
+evidence](../evidence/auto_stop_package_authority_2026-09-22.json).

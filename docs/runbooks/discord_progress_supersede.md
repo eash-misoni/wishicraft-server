@@ -114,3 +114,8 @@ The next automatic-STOP Game-authority slice explicitly includes this fix and
 permits the established Case D semantic-no-op guard. The earlier held/deleted
 Message-only ChangeSet remains historical evidence and is never reused. Combined
 release/production results belong to [the automatic-STOP runbook](phase8_automatic_stop.md#immutable-game-authority-for-the-final-direct-observation--2026-09-22).
+The combined dev ChangeSet was subsequently executed after the explicit Case D
+review, and the corrected Message Lambda ZIP was verified on the deployed
+function. The natural Paper auto-stop qualification succeeded, but did not
+reproduce the Discord revision supersession ordering in production; that
+specific fix retains its concurrency regression as behavioral evidence.
