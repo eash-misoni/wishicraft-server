@@ -350,7 +350,7 @@ def test_real_handler_decodes_attribute_values_decimal_and_publishes_units(
 ) -> None:
     aws = setup_handler(monkeypatch)
     result = monitoring_lambda.handler({}, None)
-    assert result["metric_count"] == 16
+    assert result["metric_count"] == 19
     metrics = {metric["MetricName"]: metric for metric in aws.published[0]["MetricData"]}
     assert metrics["ExpiredOperationLock"]["Value"] == 1
     assert metrics["DataFilesystemUsedBytes"]["Value"] == 750

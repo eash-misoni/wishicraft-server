@@ -116,7 +116,8 @@ def test_competing_operation_admission_is_one_atomic_transaction() -> None:
     current = cast(dict[str, object], items[4]["Update"])
     assert current["ConditionExpression"] == (
         "attribute_exists(system_id) AND (attribute_not_exists(current_operation_id) OR "
-        "attribute_type(current_operation_id, :null_type))"
+        "attribute_type(current_operation_id, :null_type)) AND "
+        "(attribute_not_exists(maintenance) OR maintenance.#ms = :maintenance_ended)"
     )
 
 

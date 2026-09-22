@@ -806,6 +806,7 @@ class ControlPlaneStack(Stack):
             memory_size=256,
             log_group=admission_log_group,
             environment={
+                "MAINTENANCE_SCHEMA_VERSION": "1",
                 "SYSTEM_STATE_TABLE": table.table_name,
                 "GAMES_TABLE": games_table.table_name,
                 "OPERATIONS_TABLE": operations_table.table_name,
@@ -1713,6 +1714,51 @@ def _add_release_monitoring(
     )
 
     alarm_action = cloudwatch_actions.SnsAction(topic)
+    from wishicraft.maintenance import SUPPRESSIBLE
+
+    maintenance_mode = stack.node.try_get_context("maintenance_notification_mode") or "active"
+    if maintenance_mode not in {"prepare", "active"}:
+        raise ValueError("maintenance_notification_mode must be prepare or active")
+    suppressor = cloudwatch.Alarm(
+        stack,
+        "MaintenanceSuppressorAlarm",
+        alarm_name=resource_name(project.resource_prefix, stage.stage, "maintenance-suppressor"),
+        metric=cloudwatch.MathExpression(
+            # End suppression conservatively before the absolute deadline, even if the
+            # producer stops. FILL prevents evaluation-range reuse of an old positive sample.
+            expression=(
+                "IF((FILL(eligible, 0) >= 1) AND "
+                f"(TIME(eligible) + {stage.monitoring_int('observer_schedule_minutes') * 120} "
+                "< FILL(expiry, 0)), 1, 0)"
+            ),
+            using_metrics={
+                "eligible": cloudwatch.Metric(
+                    namespace=namespace,
+                    metric_name="MaintenanceSuppressionEligible",
+                    dimensions_map=dimensions,
+                    statistic="Minimum",
+                    period=Duration.minutes(stage.monitoring_int("observer_schedule_minutes")),
+                ),
+                "expiry": cloudwatch.Metric(
+                    namespace=namespace,
+                    metric_name="MaintenanceExpiresAt",
+                    dimensions_map=dimensions,
+                    statistic="Minimum",
+                    period=Duration.minutes(stage.monitoring_int("observer_schedule_minutes")),
+                ),
+            },
+            period=Duration.minutes(stage.monitoring_int("observer_schedule_minutes")),
+        ),
+        threshold=1,
+        evaluation_periods=1,
+        datapoints_to_alarm=1,
+        comparison_operator=cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
+        alarm_description=(
+            "Unexpired planned host maintenance AND fresh expected stopped runtime. "
+            "Missing opens notifications."
+        ),
+    )
 
     def add_alarm(
         construct_id: str,
@@ -1733,7 +1779,23 @@ def _add_release_monitoring(
             comparison_operator=cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
             treat_missing_data=missing,
         )
-        alarm.add_alarm_action(alarm_action)
+        if construct_id.removesuffix("Alarm") in SUPPRESSIBLE:
+            composite = cloudwatch.CompositeAlarm(
+                stack,
+                construct_id + "Notification",
+                composite_alarm_name=resource_name(
+                    project.resource_prefix, stage.stage, construct_id.lower() + "-notification"
+                ),
+                alarm_rule=cloudwatch.AlarmRule.from_alarm(alarm, cloudwatch.AlarmState.ALARM),
+                actions_suppressor=suppressor,
+                actions_suppressor_wait_period=Duration.seconds(0),
+                actions_suppressor_extension_period=Duration.seconds(0),
+            )
+            composite.add_alarm_action(alarm_action)
+            if maintenance_mode == "prepare":
+                alarm.add_alarm_action(alarm_action)
+        else:
+            alarm.add_alarm_action(alarm_action)
 
     monitored_workflows = [("Start", start_workflow), ("Stop", stop_workflow)]
     if backup_workflow is not None:

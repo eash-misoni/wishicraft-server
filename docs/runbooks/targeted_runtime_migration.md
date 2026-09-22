@@ -1,5 +1,12 @@
 # Targeted runtime contract / inactive-only migration
 
+> Planned host maintenance (D-111): once the maintenance release is deployed, use the
+> [formal begin/status/end procedure](planned_host_maintenance.md) around every EC2-only
+> migration/inspection/IMPORT session. Preserve this runbook's artifact/data/approval gates.
+> Historical direct-maintenance evidence below predates the lease and must not be replayed
+> as the current entrypoint.
+
+
 **状態: Completed — D-096 Accepted。2026-09-11 UTC、限定STOP復旧・前進修正・通常START/STOP二巡・受付復元・最終STOPPED/HEALTHYを実機確認済み。**
 以下の途中BLOCKED／未実施記録は当時のcheckpointとして保持し、現在の結果は末尾のcloseoutを正本とする。
 基準は `30b029295c3cd94d00fbfe1aacd0f60094d2f011`。Phase 8およびBACKUP安全性／隔離復元sliceのCompletedを変更しない。

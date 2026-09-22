@@ -1,5 +1,12 @@
 # Phase 8.3 monitoring production gate and evidence
 
+> Planned host maintenance (D-111): once the maintenance release is deployed, use the
+> [formal begin/status/end procedure](planned_host_maintenance.md) around every EC2-only
+> migration/inspection/IMPORT session. Preserve this runbook's artifact/data/approval gates.
+> Historical direct-maintenance evidence below predates the lease and must not be replayed
+> as the current entrypoint.
+
+
 - 対象は既存実環境のdev stage。`prod.yaml`はplaceholderのまま。
 - 状態: D-094 Accepted / Phase 8.3 Completed（2026-09-10 UTC）。基準HEAD `bc6b4ca52db3c3f72c97b2462181edb5ffe74f84`についてユーザーの限定GOを受領し、設計承認後にdev production適用・監視E2Eを実証した。
 - 実行時は直前deployed template/config/code識別情報を保存し、template diff後に`cdk deploy --method=prepare-change-set`で実ChangeSetを作る。全paginationを確認して承認差分・replacement/deletionなしの場合だけ、その同じChangeSetを実行する。rollback元はGitの直前commitではなく保存済みdeployed構成とする。

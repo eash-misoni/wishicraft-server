@@ -620,3 +620,13 @@ Phase 8B/8Cで停止中Data EBSの検証済みEBS Snapshot backupとDiscord adap
 ### NFR-011 EULA operator gate `MUST`
 
 itzg採用後もMinecraft EULA同意をoperator policy/gateとして扱い、人間の承認済み事実がある場合だけruntimeへ同意入力を渡す。runtime入力の存在だけを承認記録の代替にしない。
+
+
+### NFR-012 Planned host maintenance
+
+Operator-triggered maintenance is a bounded lease independent of Minecraft Desired.
+It preserves metrics and base alarm evaluation while suppressing only the three validated
+expected notification paths. Unknown/unexpected state, expiry, missing producer or incident
+restores notifications; all other alarms remain enabled. Atomic Admission fencing prevents
+normal mutations until safe explicit closeout, including after expiry.
+[Schema, classification, AWS impact and verification](reviews/planned_host_maintenance.md).

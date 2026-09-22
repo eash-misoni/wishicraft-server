@@ -1,5 +1,12 @@
 # Shared runtime memory capacity (D-108)
 
+> Planned host maintenance (D-111): once the maintenance release is deployed, use the
+> [formal begin/status/end procedure](planned_host_maintenance.md) around every EC2-only
+> migration/inspection/IMPORT session. Preserve this runbook's artifact/data/approval gates.
+> Historical direct-maintenance evidence below predates the lease and must not be replayed
+> as the current entrypoint.
+
+
 Repository implementation and production migration completed on 2026-09-14. This is one D-101 demand-driven slice,
 before the first modded Game. Requirements: SYS-002/006/007, START-001/002; preserve D-096/097/098/105/106.
 The production deployment uses stage **dev**, account/region from its canonical configuration.

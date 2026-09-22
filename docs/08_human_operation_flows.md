@@ -1,5 +1,12 @@
 # 08. Human Operation Flows
 
+> D-111 planned host maintenance: repository implementation / deployment qualification in
+> progress. Independent SystemState maintenance lease, atomic Admission fence, unchanged
+> observation metrics, three narrowly suppressed notification composites, absolute expiry
+> and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
+> [operator runbook](runbooks/planned_host_maintenance.md). No MAINTENANCE Desired state.
+
+
 > Minimal Game Creation: D-105 Accepted / production deployed, positive CREATE/materialization deferred（2026-09-13）。[登録／初回起動／RESET／recoveryの差分契約](reviews/minimal_game_creation.md)、[production gate](runbooks/minimal_game_creation.md)。適用済みD-096〜104契約とA/Bは維持する。
 
 

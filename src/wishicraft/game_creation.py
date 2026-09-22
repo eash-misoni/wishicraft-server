@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import Any
 
 from wishicraft.game import Game, GameLifecycle, MaterializationState
+from wishicraft.maintenance import admission_check
 from wishicraft.operation import (
     AdmissionConflict,
     OperationAdmissionRepository,
@@ -239,6 +240,7 @@ def create(
         )
     )
     transaction = [
+        admission_check(table=repository._system_state, system_id=repository._system_id),
         repository._idempotency_put(request),
         op,
         {

@@ -1,5 +1,12 @@
 # D-107 Host capacity: guarded CloudFormation resize
 
+> Planned host maintenance (D-111): once the maintenance release is deployed, use the
+> [formal begin/status/end procedure](planned_host_maintenance.md) around every EC2-only
+> migration/inspection/IMPORT session. Preserve this runbook's artifact/data/approval gates.
+> Historical direct-maintenance evidence below predates the lease and must not be replayed
+> as the current entrypoint.
+
+
 **Accepted repository contract; guarded production resize Completed, 2026-09-14.**
 Generic support commit `3a5a018` kept dev `t3a.medium`. The subsequent release changes only the
 Target selector to `m8a.large`, under explicit user approval for guarded production resize.

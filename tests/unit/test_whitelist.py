@@ -333,3 +333,13 @@ def test_concurrent_duplicate_has_one_policy_transaction(access: Any) -> None:
         replies = list(pool.map(lambda _: post(access, jar, request), range(2)))
     assert {reply["statusCode"] for reply in replies} <= {200, 202}
     assert access[2].db.transactions == 1
+
+
+def test_maintenance_fences_whitelist(access: Any) -> None:
+    backend = access[2]
+    backend.db.records["system", "local"]["maintenance"] = {
+        "M": {"status": {"S": "ACTIVE"}, "expires_at": {"N": "0"}}
+    }
+    before = copy.deepcopy(backend.db.records)
+    assert post(access, login(access[1]), payload())["statusCode"] == 409
+    assert backend.db.records == before

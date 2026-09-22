@@ -10,6 +10,7 @@ from typing import Any
 import boto3  # type: ignore[import-untyped]
 from boto3.dynamodb.types import TypeDeserializer  # type: ignore[import-untyped]
 
+from wishicraft.maintenance import maintenance_metrics
 from wishicraft.monitoring import (
     MonitoringSnapshot,
     MonitoringThresholds,
@@ -119,6 +120,28 @@ def handler(event: dict[str, Any], context: object) -> dict[str, object]:
         )
     if lock and _optional_int(lock.get("lease_expires_at")) is None:
         metrics["MonitoringObservationUnknown"] = 1.0
+    maintenance = maintenance_metrics(
+        state=state,
+        lock=lock,
+        instance=instance,
+        now=now,
+        freshness_seconds=thresholds.observation_freshness_seconds,
+    )
+    if instance["State"]["Name"] == "running" and (
+        "RUNTIME_HEARTBEATS_TABLE" not in os.environ
+        or heartbeat.get("active_game_id") is not None
+        or heartbeat.get("protocol_state") != "unknown"
+        or any(
+            metrics.get(name) != 0
+            for name in (
+                "RuntimeIdentityMismatch",
+                "RuntimeHeartbeatUnavailable",
+                "DataFilesystemObservationUnknown",
+            )
+        )
+    ):
+        maintenance["MaintenanceSuppressionEligible"] = 0.0
+    metrics.update(maintenance)
     cloudwatch.put_metric_data(
         Namespace=os.environ["METRIC_NAMESPACE"],
         MetricData=[

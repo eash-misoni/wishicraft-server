@@ -45,7 +45,7 @@ def test_synthesized_environment_drives_actual_handler_and_all_new_alarms(
             monkeypatch.setenv(key, table)
         else:
             monkeypatch.setenv(key, value)
-    assert monitoring_lambda.handler({}, None)["metric_count"] == 16
+    assert monitoring_lambda.handler({}, None)["metric_count"] == 19
     alarm_metrics = {
         value["Properties"].get("MetricName"): value["Properties"]
         for value in resources.values()
@@ -70,7 +70,7 @@ def test_synthesized_environment_drives_actual_handler_and_all_new_alarms(
             "ignore" if name == "DataFilesystemUsageHigh" else "breaching"
         )
         assert alarm["Statistic"] == "Maximum"
-        assert alarm["AlarmActions"]
+        assert bool(alarm.get("AlarmActions")) == (name != "RuntimeObservationUnknown")
     schedule = next(
         value["Properties"]
         for value in resources.values()

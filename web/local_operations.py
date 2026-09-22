@@ -63,6 +63,16 @@ class MemoryDynamo:
                         raise TransactionCancelled()
                 elif "ConditionCheck" in action:
                     check = action["ConditionCheck"]
+                    if "system_id" in check["Key"]:
+                        state = self.records.get(
+                            (check["TableName"], check["Key"]["system_id"]["S"])
+                        )
+                        if state is None or (
+                            "maintenance" in state
+                            and state["maintenance"].get("M", {}).get("status") != {"S": "ENDED"}
+                        ):
+                            raise TransactionCancelled()
+                        continue
                     if "lock_name" in check["Key"]:
                         lock = self.records.get(
                             (check["TableName"], check["Key"]["lock_name"]["S"]), {}
@@ -95,6 +105,10 @@ class MemoryDynamo:
                     if state is None or state.get("current_operation_id", {"NULL": True}) != {
                         "NULL": True
                     }:
+                        raise TransactionCancelled()
+                    if "maintenance" in state and state["maintenance"].get("M", {}).get(
+                        "status"
+                    ) != {"S": "ENDED"}:
                         raise TransactionCancelled()
             for action in items:
                 if "Put" in action:

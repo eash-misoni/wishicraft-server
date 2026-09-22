@@ -907,8 +907,16 @@ def test_phase_seven_release_monitoring_is_complete_and_read_only() -> None:
         "throttlesalarm",
     ):
         assert any(fragment in name for name in names)
-    assert len(alarms) == 24
-    assert all(alarm["Properties"]["AlarmActions"] for alarm in alarms.values())
+    assert len(alarms) == 25  # Existing 24 plus suppressor.
+    composites = template.find_resources("AWS::CloudWatch::CompositeAlarm")
+    assert len(composites) == 2  # RuntimeObservationUnknown is introduced in Phase 8.
+    for logical, alarm in alarms.items():
+        prop = alarm["Properties"]
+        expected = prop.get("MetricName") in {"DesiredStoppedEc2Running", "DesiredActualDivergence"}
+        assert bool(prop.get("AlarmActions")) == (
+            not expected and "MaintenanceSuppressor" not in logical
+        )
+    assert all(c["Properties"]["AlarmActions"] for c in composites.values())
     custom = [
         alarm["Properties"]
         for alarm in alarms.values()

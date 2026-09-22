@@ -1,5 +1,12 @@
 # 07. Operations, Security, and Cost
 
+> D-111 planned host maintenance: repository implementation / deployment qualification in
+> progress. Independent SystemState maintenance lease, atomic Admission fence, unchanged
+> observation metrics, three narrowly suppressed notification composites, absolute expiry
+> and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
+> [operator runbook](runbooks/planned_host_maintenance.md). No MAINTENANCE Desired state.
+
+
 > D-110: external archives use bounded, root-owned staging and exact hashes before new-Game prepared commit. Source save/stop/sync/final archive is a separate production boundary; no new resource/IAM or existing-world overwrite. [Security/retry/release contract](runbooks/paper_world_import.md).
 
 > D-108 共通runtime memory: production移行完了（2026-09-14）、最終STOPPED / HEALTHY。Xms 1G / Xmx 4G / container 6144MiBの設定と、digest検証を維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。

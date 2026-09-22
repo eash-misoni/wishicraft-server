@@ -1,0 +1,180 @@
+{
+  "baseline_head": "6ec0b2dfc296a802bbe3af48600ff42e1a1c8c57",
+  "baseline_alarm_count": 45,
+  "new_resources": {
+    "MaintenanceSuppressorAlarm48FA0D89": "AWS::CloudWatch::Alarm",
+    "DesiredActualDivergenceAlarmNotification0704533F": "AWS::CloudWatch::CompositeAlarm",
+    "RuntimeObservationUnknownAlarmNotification0A0D05B9": "AWS::CloudWatch::CompositeAlarm",
+    "DesiredStoppedEc2RunningAlarmNotification554397F3": "AWS::CloudWatch::CompositeAlarm"
+  },
+  "removed_resources": [],
+  "preserved_control_plane_alarm_properties_and_actions": [
+    "StartWorkflowFailureAlarm094B4597",
+    "StopWorkflowFailureAlarm11A5802E",
+    "BackupWorkflowFailureAlarm08CF8103",
+    "RetentionWorkflowFailureAlarm4057050C",
+    "TargetRunningTooLongAlarmB0F7A191",
+    "ExpiredOperationLockAlarmA597CB39",
+    "DesiredRunningNotReadyAlarm3FA56865",
+    "MonitoringObservationUnknownAlarm191AA0B9",
+    "RuntimeHeartbeatUnavailableAlarmA0BD30CA",
+    "RuntimeIdentityMismatchAlarm9765B260",
+    "SystemStateObservationStaleAlarm188D2D6B",
+    "DataFilesystemObservationUnknownAlarmFF4003B7",
+    "DataFilesystemUsageHighAlarm5D45B3C0",
+    "ReconcileFunctionErrorsAlarm67C26B02",
+    "ReconcileFunctionThrottlesAlarm57F2C5FF",
+    "StartTaskFunctionErrorsAlarmE46B67EC",
+    "StartTaskFunctionThrottlesAlarm9BF90695",
+    "StopTaskFunctionErrorsAlarm231A6B42",
+    "StopTaskFunctionThrottlesAlarmF4282518",
+    "BackupTaskFunctionErrorsAlarmA435CC21",
+    "BackupTaskFunctionThrottlesAlarm33BB401B",
+    "RetentionTaskFunctionErrorsAlarm04FE3725",
+    "RetentionTaskFunctionThrottlesAlarm254FC6AE",
+    "AdmissionFunctionErrorsAlarm991AB370",
+    "AdmissionFunctionThrottlesAlarm9664517B",
+    "DiscordCommandFunctionErrorsAlarm73C9198E",
+    "DiscordCommandFunctionThrottlesAlarm143E88BE",
+    "StatusExecutorFunctionErrorsAlarmFA378F6F",
+    "StatusExecutorFunctionThrottlesAlarmB8837687",
+    "DiscordMessageFunctionErrorsAlarmFAA7118A",
+    "DiscordMessageFunctionThrottlesAlarm1B913925",
+    "AutoStopEvaluatorFunctionErrorsAlarmA297309B",
+    "AutoStopEvaluatorFunctionThrottlesAlarm7F4BE192",
+    "MonitoringObserverFunctionErrorsAlarm3224A1A9",
+    "MonitoringObserverFunctionThrottlesAlarmBBB697CA",
+    "AutoStopEvaluatorSilenceAlarm427B4CE6",
+    "AutoStopWarningBlockedAlarmB50C80BE",
+    "ScheduledStopCancelledAlarm22EE364F",
+    "SwitchWorkflowFailureAlarm1CB19679",
+    "ResetWorkflowFailureAlarmBA9D144E"
+  ],
+  "notification_actions_moved": [
+    "DesiredStoppedEc2RunningAlarm3E13A371",
+    "DesiredActualDivergenceAlarm8060A5DB",
+    "RuntimeObservationUnknownAlarm030E44C1"
+  ],
+  "base_evaluations_unchanged": true,
+  "iam_changes": [],
+  "workflow_definition_changes": [],
+  "changed_properties": [
+    {
+      "logical_id": "ReconcileFunction30829CB6",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "StartTaskFunction8C564C4A",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "StopTaskFunction11473A8C",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "BackupTaskFunctionA44639DC",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "RetentionTaskFunction9F285CE4",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "AdmissionFunction23082B67",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Environment",
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "DiscordCommandFunction7D25102A",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "StatusExecutorFunction6E5C9869",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "DiscordMessageFunction78FA388B",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "MonitoringObserverFunction584DA7C7",
+      "type": "AWS::Lambda::Function",
+      "properties": [
+        "Code"
+      ]
+    },
+    {
+      "logical_id": "DesiredStoppedEc2RunningAlarm3E13A371",
+      "type": "AWS::CloudWatch::Alarm",
+      "properties": [
+        "AlarmActions"
+      ]
+    },
+    {
+      "logical_id": "DesiredActualDivergenceAlarm8060A5DB",
+      "type": "AWS::CloudWatch::Alarm",
+      "properties": [
+        "AlarmActions"
+      ]
+    },
+    {
+      "logical_id": "RuntimeObservationUnknownAlarm030E44C1",
+      "type": "AWS::CloudWatch::Alarm",
+      "properties": [
+        "AlarmActions"
+      ]
+    }
+  ],
+  "deferred_gaps": [
+    "Two DLQs have no dedicated alarm",
+    "Two Web Errors alarms have no SNS action"
+  ],
+  "validation": {
+    "pytest": 1671,
+    "lint": "passed",
+    "format": "passed",
+    "type": "passed",
+    "synth": [
+      "phase1",
+      "target",
+      "control-plane-current-features",
+      "web"
+    ]
+  },
+  "aws_deployment": "not-yet-performed",
+  "evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-maintenance-validation-v4-d3oo60zj"
+}

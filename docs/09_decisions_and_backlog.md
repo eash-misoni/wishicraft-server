@@ -1,5 +1,25 @@
 # 09. Decisions and Backlog
 
+> D-111 planned host maintenance: repository implementation / deployment qualification in
+> progress. Independent SystemState maintenance lease, atomic Admission fence, unchanged
+> observation metrics, three narrowly suppressed notification composites, absolute expiry
+> and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
+> [operator runbook](runbooks/planned_host_maintenance.md). No MAINTENANCE Desired state.
+
+## D-111 Planned host maintenance（repository実装、実環境qualification前）
+
+2026-09-22、明示的operator intentを既存SystemStateの期限付きleaseへ分離する。
+Desired STOPPED/RUNNINGとworkflow state machineは維持し、通常mutationのAdmissionへ
+原子的なmaintenance fenceを追加する。期限切れは通知を復帰させるが、安全なendまで
+受付を再開しない。既存base metric/threshold/evaluation/missing-dataは維持する。
+独立3 Composite + fail-open suppressor 1件だけを追加し、既存SNSへの通知を一対一で移管する。
+DynamoDB table・Lambda・schedule・IAM grantの追加はない。lease監査は既存tableへ保持する。
+user指定により、現行DLQ alarm欠落とWeb Errors 2件のSNS action欠落の補完は別sliceへDeferred。
+[比較・全45件分類・二段階release/rollback](reviews/planned_host_maintenance.md)と
+[正式begin/status/end/incident](runbooks/planned_host_maintenance.md)を正本とする。
+
+
+
 > 2026-09-22 D-093/D-109 correction (Accepted / dev completed): reuse READY/Reconcile GamePackageAuthority for the STOP final direct observation; no player gate, idle/intent, heartbeat, lifecycle, schema or alarm change. The combined Case D dev release includes Discord supersession. A fresh natural zero-player Paper period completed warning, final direct gate and SCHEDULE STOP with final STOPPED/HEALTHY and 45 alarms OK. This supersedes the previous slice's narrower release permission, not its fail-closed delivery contract. [Authority and production proof](runbooks/phase8_automatic_stop.md).
 
 > 2026-09-22 D-086/D-087 delivery correction (Accepted / combined dev deployment complete): normalize only proven strictly-newer progress supersession after successful Discord delivery. The production progress-before-new-claim gap is covered; same-revision completion conflicts fail closed, superseding the historical same-revision terminal no-op. The earlier Discord-only ChangeSet listed five State Machine Definition updates and was deleted unexecuted under its narrow scope; the later combined Case D release above was separately reviewed and executed. Lifecycle, message format, alarm and resource identities are unchanged. [Contract and evidence](runbooks/discord_progress_supersede.md).

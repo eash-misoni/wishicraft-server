@@ -1,5 +1,12 @@
 # 05. Data and Interface Contracts
 
+> D-111 planned host maintenance: repository implementation / deployment qualification in
+> progress. Independent SystemState maintenance lease, atomic Admission fence, unchanged
+> observation metrics, three narrowly suppressed notification composites, absolute expiry
+> and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
+> [operator runbook](runbooks/planned_host_maintenance.md). No MAINTENANCE Desired state.
+
+
 > D-110 repository qualification: [same-runtime Paper IMPORT contract](runbooks/paper_world_import.md). Exact 26.1.2/build 53, immutable creation provenance, staged USTAR validation and owned generation-1 prepared commit; production not applied.
 
 > create-terralith catalog追加契約（2026-09-21、production実証済み）: 完全な旧／新manifestを固定した1件追加の互換性だけをGame creation provenanceへ許可する。既存package、Game、owner、worldは不変。Operation/host/receiptのcurrent digest検証は維持。client_requiredは既存boolean fieldでserver-onlyをfalseと分類。正式CREATE・新world materialization・通常STOPまで実証、実client接続は未検証。[限定契約・証跡](runbooks/create_terralith.md)。
@@ -173,6 +180,11 @@ IDはシェルパスとして直接使用せず、許可文字を検証した上
 secret、token、RCON password、AWS credentialを含めない。
 
 ## 3. DynamoDB: SystemState
+
+D-111 adds an independent `maintenance` map to the current item and immutable
+`maintenance#<id>#begin|end|incident` audit items in the same table. No DynamoDB TTL
+or new table is used. Reconcile continues partial updates of its original attributes.
+[Exact schema, expiry, atomic write/admission and audit contract](reviews/planned_host_maintenance.md#lease-and-concurrency-contract).
 
 ### Key
 

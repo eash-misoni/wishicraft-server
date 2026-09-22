@@ -404,6 +404,8 @@ class OperationAdmissionRepository:
     def _ownership_transaction(
         self, request: OperationRequest, lease_id: str
     ) -> list[dict[str, object]]:
+        from wishicraft.maintenance import ADMISSION_CONDITION
+
         requested_epoch = int(request.requested_at.timestamp())
         return [
             {
@@ -435,9 +437,12 @@ class OperationAdmissionRepository:
                     "ConditionExpression": (
                         "attribute_exists(system_id) AND "
                         "(attribute_not_exists(current_operation_id) OR "
-                        "attribute_type(current_operation_id, :null_type))"
+                        "attribute_type(current_operation_id, :null_type)) AND "
+                        + ADMISSION_CONDITION
                     ),
+                    "ExpressionAttributeNames": {"#ms": "status"},
                     "ExpressionAttributeValues": {
+                        ":maintenance_ended": {"S": "ENDED"},
                         ":operation_id": {"S": request.operation_id},
                         ":null_type": {"S": "NULL"},
                     },

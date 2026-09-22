@@ -1,5 +1,12 @@
 # D-110 Same-runtime Paper world import
 
+> Planned host maintenance (D-111): once the maintenance release is deployed, use the
+> [formal begin/status/end procedure](planned_host_maintenance.md) around every EC2-only
+> migration/inspection/IMPORT session. Preserve this runbook's artifact/data/approval gates.
+> Historical direct-maintenance evidence below predates the lease and must not be replayed
+> as the current entrypoint.
+
+
 ## Dev point-in-time validation policy (2026-09-22)
 
 The user authorized a temporary stop of `minecraft-25566.service`, a saved/synced

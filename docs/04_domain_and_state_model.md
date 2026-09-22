@@ -1,5 +1,12 @@
 # 04. Domain and State Model
 
+> D-111 planned host maintenance: repository implementation / deployment qualification in
+> progress. Independent SystemState maintenance lease, atomic Admission fence, unchanged
+> observation metrics, three narrowly suppressed notification composites, absolute expiry
+> and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
+> [operator runbook](runbooks/planned_host_maintenance.md). No MAINTENANCE Desired state.
+
+
 > D-110 repository qualification: IMPORT reuses ACTIVE/UNMATERIALIZED → prepared generation 1 → ordinary START/READY → MATERIALIZED. No IMPORT state machine or package update path. [Contract](runbooks/paper_world_import.md); production not applied.
 
 > D-106 Whitelist Management: Accepted / production Completed（2026-09-14）。[正本・適用contract](reviews/whitelist_management.md)と[移行・production証跡](runbooks/whitelist_management.md)。初期Commonは空、A/B既存accessはGame-specificへ完全一致で保存。D-105 positive CREATE/materialization deferredは維持。

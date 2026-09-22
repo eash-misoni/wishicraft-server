@@ -1,5 +1,12 @@
 # 06. Delivery Plan
 
+> D-111 planned host maintenance: repository implementation / deployment qualification in
+> progress. Independent SystemState maintenance lease, atomic Admission fence, unchanged
+> observation metrics, three narrowly suppressed notification composites, absolute expiry
+> and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
+> [operator runbook](runbooks/planned_host_maintenance.md). No MAINTENANCE Desired state.
+
+
 > 2026-09-22 current slice completed: automatic STOP final direct observation uses the running Game's immutable package authority. Combined Case D dev release includes the Discord supersession correction. A fresh natural 30-minute zero-player Paper run passed warning delivery, final direct gate and normal SCHEDULE STOP; final dev is STOPPED/HEALTHY with 45 alarms OK. [Runbook and exact proof](runbooks/phase8_automatic_stop.md). Earlier held-release entries below are historical checkpoints.
 
 > Historical Discord-only checkpoint: Discord completion CAS superseded-race correction was repository qualified, but its narrow ChangeSet was held and deleted because it listed five State Machine Definition updates. The later combined Case D release above completed deployment; the prior held scope remains evidence of the approval boundary. [Runbook](runbooks/discord_progress_supersede.md).

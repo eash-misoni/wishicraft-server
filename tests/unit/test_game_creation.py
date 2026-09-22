@@ -437,3 +437,14 @@ def test_paper_create_requires_import_and_never_dispatches_runtime(
         post(creation, login(creation[1]), payload(package_id="vps-survival"))["statusCode"] == 400
     )
     assert creation[2].db.transactions == 0 and creation[3] == []
+
+
+@pytest.mark.parametrize("status", ["ACTIVE", "INCIDENT"])
+def test_maintenance_fences_create_even_after_expiry(creation: Any, status: str) -> None:
+    backend = creation[2]
+    backend.db.records["system", "local"]["maintenance"] = {
+        "M": {"status": {"S": status}, "expires_at": {"N": "0"}}
+    }
+    before = copy.deepcopy(backend.db.records)
+    assert post(creation, login(creation[1]), payload())["statusCode"] == 409
+    assert backend.db.records == before

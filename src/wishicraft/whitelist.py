@@ -148,7 +148,10 @@ def mutate(
     }
     if game is not None and before == model.empty():
         policy_put["ConditionExpression"] += " OR attribute_not_exists(game_id)"
+    from wishicraft.maintenance import admission_check
+
     transaction = [
+        admission_check(table=repository._system_state, system_id=repository._system_id),
         repository._idempotency_put(request),
         op,
         {"Put": policy_put},
