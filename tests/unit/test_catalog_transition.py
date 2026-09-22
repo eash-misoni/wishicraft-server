@@ -32,7 +32,7 @@ def test_catalog_preserves_both_existing_package_identities() -> None:
             ["git", "show", "866f6ca:src/wishicraft/artifacts/game-packages.json"], cwd=ROOT
         )
     )["packages"]
-    current = packages.load()
+    current = transition()["successor"]["packages"]
     assert current[:-1] == old
     assert [packages.digest(p) for p in current[:-1]] == [packages.digest(p) for p in old]
     assert packages.digest(current[1]) == (
@@ -62,7 +62,7 @@ def test_reviewed_transition_matches_complete_current_renderer() -> None:
         rcon_parameter_name=cfg.secrets.rcon_password_parameter_name("dev"),
         games=tuple(json.loads((ROOT / "config/two-game-dev.json").read_text())),
         reset_policies=json.loads((ROOT / "config/reset-dev.json").read_text()),
-        packages=packages.load(),
+        packages=transition()["successor"]["packages"],
     )
     edge = transition()
     assert json.loads(current.manifest_json) == edge["successor"]
@@ -174,7 +174,7 @@ def test_old_and_mixed_provenance_backups_remain_valid() -> None:
         rcon_parameter_name=cfg.secrets.rcon_password_parameter_name("dev"),
         games=tuple(edge["successor"]["games"]),
         reset_policies=json.loads((ROOT / "config/reset-dev.json").read_text()),
-        packages=packages.load(),
+        packages=transition()["successor"]["packages"],
     )
     old_digest = packages.digest(edge["predecessor"])
     new_digest = packages.digest(edge["successor"])

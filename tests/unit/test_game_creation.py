@@ -427,3 +427,13 @@ def test_package_selection_disabled_or_unknown(
         == 400
     )
     assert creation[2].db.transactions == 0
+
+
+def test_paper_create_requires_import_and_never_dispatches_runtime(
+    creation: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GAME_PACKAGES", "1")
+    assert (
+        post(creation, login(creation[1]), payload(package_id="vps-survival"))["statusCode"] == 400
+    )
+    assert creation[2].db.transactions == 0 and creation[3] == []

@@ -27,6 +27,7 @@ def prepare(
     *,
     uid: int = 993,
     gid: int = 993,
+    verify: Callable[[], None] | None = None,
 ) -> None:
     game_id = game["game_id"]
     creation = game["creation"]
@@ -41,6 +42,17 @@ def prepare(
     ):
         raise ValueError("INITIAL_GAME_IDENTITY")
     worlds.directory(worlds.GAMES)
+    if "import" in creation:
+        try:
+            from wishicraft.artifacts import world_import
+        except ImportError:
+            import importlib
+
+            world_import = importlib.import_module("world_import")
+        if verify is None:
+            raise ValueError("IMPORT_AUTHORIZATION_REQUIRED")
+        world_import.prepare(game, target, atomic, uid=uid, gid=gid, verify=verify)
+        return
     parent = worlds.GAMES / game_id
     owner = worlds.GAMES / (game_id + ".initial-owner.json")
     plan = {
@@ -137,7 +149,10 @@ def initialized(target: dict[str, str], atomic: Callable[[Path, str], None]) -> 
         raise ValueError("INITIAL_OWNER_TARGET")
     if record["phase"] not in {"prepared", "initialized"}:
         raise ValueError("INITIAL_NOT_PREPARED")
-    if (Path(target["data_source"]) / "world/level.dat").is_file():
+    level = (
+        record["plan"]["creation"].get("import", {}).get("source", {}).get("level_name", "world")
+    )
+    if (Path(target["data_source"]) / level / "level.dat").is_file():
         atomic(owner, json.dumps({**record, "phase": "initialized"}))
     elif record["phase"] == "initialized":
         raise ValueError("INITIAL_WORLD_MISSING")

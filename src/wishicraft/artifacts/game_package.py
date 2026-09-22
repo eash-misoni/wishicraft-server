@@ -1,4 +1,4 @@
-"""Immutable Vanilla/NeoForge packages and inactive, Game-private artifact preparation."""
+"""Immutable Vanilla/NeoForge/Paper packages and inactive, Game-private artifact preparation."""
 
 from __future__ import annotations
 
@@ -87,6 +87,33 @@ def artifact(value: Any, *, mod: bool, version: str = "") -> None:
         raise ValueError("PACKAGE_CANONICAL_URL")
 
 
+def paper_artifact(loader: dict[str, Any], version: str) -> None:
+    fields(loader, {"type", "build", "commit", "server", "level_name"})
+    if (
+        version != "26.1.2"
+        or type(loader["build"]) is not int
+        or loader["build"] != 53
+        or loader["commit"] != "39a1aa5c7fa9742accf82c247a0ea18014788b5f"
+        or loader["level_name"] != "wishinkaiwai"
+    ):
+        raise ValueError("UNSUPPORTED_PAPER_PACKAGE")
+    spec = loader["server"]
+    fields(spec, {"filename", "url", "size", "sha256"})
+    checksum = "6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf"
+    filename = "paper-26.1.2-53.jar"
+    if (
+        spec
+        != {
+            "filename": filename,
+            "size": 52926064,
+            "sha256": checksum,
+            "url": "https://fill-data.papermc.io/v1/objects/" + checksum + "/" + filename,
+        }
+        or type(spec["size"]) is not int
+    ):
+        raise ValueError("PAPER_ARTIFACT_PIN")
+
+
 def validate(package: Any) -> dict[str, Any]:
     fields(package, {"package_id", "package_version", "minecraft_version", "loader", "mods"})
     for name, pattern in [
@@ -103,6 +130,10 @@ def validate(package: Any) -> dict[str, Any]:
         fields(loader, {"type"})
         if package["mods"]:
             raise ValueError("VANILLA_WITH_MODS")
+    elif loader.get("type") == "paper":
+        paper_artifact(loader, package["minecraft_version"])
+        if package["mods"]:
+            raise ValueError("PAPER_WITH_MODS")
     elif loader.get("type") == "neoforge":
         fields(loader, {"type", "version", "installer"})
         if (
@@ -167,6 +198,16 @@ def registered(
             or game["package"].get("definition") != package
         ):
             raise ValueError("PACKAGE_REGISTRATION_MISMATCH")
+        if "import" in creation:
+            try:
+                from wishicraft.artifacts import world_import
+            except ImportError:
+                import importlib
+
+                world_import = importlib.import_module("world_import")
+            world_import.validate(creation["import"], package)
+            if creation.get("reset_policy") is not None:
+                raise ValueError("IMPORT_RESET_NOT_SUPPORTED")
     elif game["game_id"] not in manifest["games"] or package["loader"]["type"] != "vanilla":
         raise ValueError("PACKAGE_LEGACY_MISMATCH")
     return package
@@ -180,6 +221,20 @@ def compatible_config(created: Any, current: str, package: dict[str, Any]) -> bo
     """
     if created == current:
         return True
+    paper_path = Path(__file__).with_name("paper-transition.json")
+    if paper_path.is_file() and not paper_path.is_symlink():
+        frozen = paper_path.read_bytes()
+        if (
+            hashlib.sha256(frozen).hexdigest()
+            != "1701549bcc821d4af471c118ba6c1192493b92a0fd217e97d426eca5390cb65b"
+        ):
+            raise ValueError("PAPER_TRANSITION_INTEGRITY")
+        edge = json.loads(frozen)
+        if current == digest(edge["successor"]):
+            return any(
+                created == digest(edge[k]) and package in edge[k]["packages"]
+                for k in ("historical", "predecessor")
+            )
     path = Path(__file__).with_name("catalog-transition.json")
     if not path.is_file() or path.is_symlink():
         return False
@@ -218,7 +273,11 @@ def client_requirements(game: dict[str, Any]) -> dict[str, Any] | None:
         raise ValueError("PACKAGE_REGISTRATION_MISMATCH")
     return {
         "minecraft_version": package["minecraft_version"],
-        "loader": {key: value for key, value in package["loader"].items() if key != "installer"},
+        "loader": {
+            key: value
+            for key, value in package["loader"].items()
+            if key not in {"installer", "server"}
+        },
         "mods": [
             {
                 key: mod[key]
@@ -264,7 +323,7 @@ def verify_file(path: Path, spec: dict[str, Any]) -> None:
 
 def fetch(spec: dict[str, Any]) -> bytes:
     request = urllib.request.Request(
-        spec["url"], headers={"User-Agent": "Wishicraft/pinned-package"}
+        spec["url"], headers={"User-Agent": "Wishicraft/1.0 (https://wishicraft.net)"}
     )
     with urllib.request.urlopen(request, timeout=45) as response:
         if response.geturl() != spec["url"]:
@@ -300,6 +359,9 @@ def prepare(game_id: str, package: dict[str, Any], atomic: Callable[[Path, str],
     if package["loader"]["type"] == "neoforge":
         installer = package["loader"]["installer"]
         entries.append((base / installer["filename"], installer))
+    if package["loader"]["type"] == "paper":
+        server = package["loader"]["server"]
+        entries.append((base / server["filename"], server))
     expected = {p for p, _ in entries}
     allowed = expected | {Path(str(p) + ".partial") for p in expected} | {mods}
     if any(p not in allowed for p in [*base.iterdir(), *mods.iterdir()]):
@@ -332,6 +394,18 @@ def environment(package: dict[str, Any]) -> dict[str, str]:
     validate(package)
     loader = package["loader"]
     neo = loader["type"] == "neoforge"
+    if loader["type"] == "paper":
+        return {
+            "TYPE": "PAPER",
+            "VERSION": package["minecraft_version"],
+            "NEOFORGE_VERSION": "",
+            "NEOFORGE_INSTALLER": "",
+            "NEOFORGE_FORCE_REINSTALL": "false",
+            "PAPER_BUILD": str(loader["build"]),
+            "PAPER_CUSTOM_JAR": "/wishicraft-package/" + loader["server"]["filename"],
+            "SKIP_DOWNLOAD_DEFAULTS": "true",
+            "LEVEL": loader["level_name"],
+        }
     return {
         "TYPE": "NEOFORGE" if neo else "VANILLA",
         "VERSION": package["minecraft_version"],
@@ -475,5 +549,8 @@ def observed(
             raise ValueError("PACKAGE_MATERIALIZED_HASH")
     if package["loader"]["type"] == "neoforge":
         spec = package["loader"]["installer"]
+        verify_file(base / spec["filename"], spec)
+    if package["loader"]["type"] == "paper":
+        spec = package["loader"]["server"]
         verify_file(base / spec["filename"], spec)
     return package

@@ -154,6 +154,15 @@ def render_boot_time_artifacts(
             key: "${WISHICRAFT_PACKAGE_" + key + "?verified package required}"
             for key in package_environment(legacy[0])
         }
+        if any(p["loader"]["type"] == "paper" for p in packages):  # type: ignore[index]
+            service["environment"].update(  # type: ignore[attr-defined]
+                {
+                    "PAPER_BUILD": "${WISHICRAFT_PACKAGE_PAPER_BUILD:-}",
+                    "PAPER_CUSTOM_JAR": "${WISHICRAFT_PACKAGE_PAPER_CUSTOM_JAR:-}",
+                    "SKIP_DOWNLOAD_DEFAULTS": "${WISHICRAFT_PACKAGE_SKIP_DOWNLOAD_DEFAULTS:-false}",
+                    "LEVEL": "${WISHICRAFT_PACKAGE_LEVEL:-world}",
+                }
+            )
         labels = service["labels"]
         assert isinstance(labels, dict)
         labels["com.wishicraft.package-digest"] = (

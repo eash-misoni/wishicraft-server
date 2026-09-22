@@ -80,6 +80,7 @@ def validate(value: object) -> dict[str, Any]:
     if not isinstance(value, dict) or set(value) not in (
         {"display_name", "seed", "reset"},
         {"display_name", "seed", "reset", "package_id"},
+        {"display_name", "seed", "reset", "package_id", "import"},
     ):
         raise ValueError("invalid creation fields")
     name, seed, reset = value["display_name"], value["seed"], value["reset"]
@@ -151,6 +152,16 @@ def create(
         defaults = {**defaults, "package": package}
     elif "package_id" in payload:
         raise ValueError("package selection is not deployed")
+    if "import" in payload:
+        from wishicraft.artifacts import world_import
+
+        if package is None or payload["reset"]:
+            raise ValueError("import requires fixed Paper package and RESET disabled")
+        world_import.validate(payload["import"], package)
+        if payload["seed"] != str(payload["import"]["source"]["seed"]):
+            raise ValueError("import seed must match source world")
+    elif package is not None and package["loader"]["type"] == "paper":
+        raise ValueError("Paper package requires explicit import provenance")
     identity = hashlib.sha256(("wishicraft-create-v1|" + key).encode()).hexdigest()
     game_id, operation_id = "game-" + identity, "op-" + identity
     request = OperationRequest(
@@ -210,6 +221,8 @@ def create(
             "definition": package,
         }
         game["creation"]["package_digest"] = game_package.digest(package)  # type: ignore[index]
+    if "import" in payload:
+        game["creation"]["import"] = payload["import"]  # type: ignore[index]
     op = repository._operation_put(request, None)
     put = op["Put"]
     assert isinstance(put, dict) and isinstance(put["Item"], dict)

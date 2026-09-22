@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-09-22",
+  "mode": "read-only running-source inventory; not a frozen snapshot",
+  "source": {
+    "host": "162.43.29.104",
+    "service": "minecraft-25566.service",
+    "working_directory": "/opt/minecraft2",
+    "world": "/opt/minecraft2/wishinkaiwai",
+    "level_name": "wishinkaiwai",
+    "minecraft_version": "26.1.2",
+    "server_type": "paper",
+    "paper_build": 53,
+    "paper_version": "26.1.2-53-39a1aa5",
+    "commit": "39a1aa5c7fa9742accf82c247a0ea18014788b5f",
+    "jar": "/opt/minecraft2/server.jar",
+    "jar_size": 52926064,
+    "jar_sha256": "6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf",
+    "java": "Amazon Corretto 25.0.3+9-LTS",
+    "data_version": 4790,
+    "seed": -3498469689692331574,
+    "online_mode": true,
+    "running": true,
+    "online_players_at_probe": 0,
+    "world_logical_bytes_at_scan": 3515768253,
+    "world_file_count_at_scan": 1541,
+    "disk_available_bytes_at_scan": 72696311808,
+    "enable_rcon": false
+  },
+  "identity_evidence": [
+    "systemd ExecStart/WorkingDirectory/MainPID",
+    "/proc MainPID cwd/exe",
+    "Paperclip version.json",
+    "runtime JAR META-INF/MANIFEST.MF",
+    "version_history.json",
+    "live Minecraft status protocol",
+    "level.dat and world_gen_settings.dat read-only NBT"
+  ],
+  "official_distribution": {
+    "api": "https://fill.papermc.io/v3/projects/paper/versions/26.1.2/builds/53",
+    "metadata_size_sha256_match_source": true,
+    "downloaded_bytes_qualification": "record separately in integration result"
+  },
+  "plugins": {
+    "external_plugin_jars_found": [],
+    "auxiliary": [
+      "Paper remap cache",
+      "bundled spark profiler config/temporary files",
+      "bStats config"
+    ],
+    "required_external_plugin_dependencies_observed": false
+  },
+  "world": {
+    "dimension_namespaces": [
+      "minecraft"
+    ],
+    "dimensions": [
+      "overworld",
+      "the_nether",
+      "the_end"
+    ],
+    "mca_counts_region_entities_poi": {
+      "overworld": 1085,
+      "the_nether": 62,
+      "the_end": 119
+    },
+    "player_dat_files": 12,
+    "stats_files": 14,
+    "advancement_files": 14,
+    "owner_player_inventory_items": 26,
+    "owner_player_ender_chest_items": 22,
+    "player_data_versions_observed": [
+      4671,
+      4790
+    ],
+    "datapack_files": [
+      "datapacks/bukkit/pack.mcmeta"
+    ],
+    "enabled_datapacks": [
+      "vanilla",
+      "file/bukkit",
+      "paper"
+    ],
+    "world_config_overrides": "each dimension only _version: 31"
+  },
+  "configs": {
+    "config/paper-global.yml": "0670a9c4367afbcb841898a4754ba6eba0dba6367c4cb159269f0957d25ae762",
+    "config/paper-world-defaults.yml": "abf93aa72a8498289b81a563f5aef57b684198efb85973f26757ab6353b4acfe",
+    "bukkit.yml": "a72396bbd1b69636b63f990995ed1ce31df7183af275868b4d638071fd4c866a",
+    "spigot.yml": "1330538aef435b16c2b941d3123c5efe432c4a241d2f09c5db82495421c1d6e6"
+  },
+  "backup": {
+    "manager_auto_files": 0,
+    "manager_manual_files": 0,
+    "ubuntu_backup_cron_observed": false,
+    "minecraft_backup_timer_observed": false,
+    "provider_or_other_backup": "unknown; must resolve at source-stop gate"
+  },
+  "production": {
+    "source_stopped": false,
+    "final_archive_created": false,
+    "aws_mutation": false,
+    "new_game_created": false,
+    "client_ready": false
+  },
+  "configs_secret_fields_empty": true
+}

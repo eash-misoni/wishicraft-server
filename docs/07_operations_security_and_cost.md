@@ -1,5 +1,7 @@
 # 07. Operations, Security, and Cost
 
+> D-110: external archives use bounded, root-owned staging and exact hashes before new-Game prepared commit. Source save/stop/sync/final archive is a separate production boundary; no new resource/IAM or existing-world overwrite. [Security/retry/release contract](runbooks/paper_world_import.md).
+
 > D-108 共通runtime memory: production移行完了（2026-09-14）、最終STOPPED / HEALTHY。Xms 1G / Xmx 4G / container 6144MiBの設定と、digest検証を維持するA/B限定停止中移行。[正本・production適用状況](runbooks/runtime_memory_capacity.md)。D-107のinstance/volumeは不変、D-105 positive CREATEはDeferred。
 
 > D-107 Host capacity（production in-place resize Completed）: [恒久replacement guardとrelease契約](runbooks/host_capacity.md)。InstanceTypeはCloudFormation所有、4型を許可。dev Targetはm8a.large。永久replacement-deny policy下でInstance/root/Data EBSを維持し、STOPPED/HEALTHYへcloseout済み。memory増量は別slice。Game/UI/lifecycleは変更しない。

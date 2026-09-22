@@ -133,6 +133,24 @@
       ],
       "package_id": "create-terralith",
       "package_version": "1"
+    },
+    {
+      "package_id": "vps-survival",
+      "package_version": "1",
+      "minecraft_version": "26.1.2",
+      "loader": {
+        "type": "paper",
+        "build": 53,
+        "commit": "39a1aa5c7fa9742accf82c247a0ea18014788b5f",
+        "level_name": "wishinkaiwai",
+        "server": {
+          "filename": "paper-26.1.2-53.jar",
+          "size": 52926064,
+          "sha256": "6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf",
+          "url": "https://fill-data.papermc.io/v1/objects/6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf/paper-26.1.2-53.jar"
+        }
+      },
+      "mods": []
     }
   ],
   "schema_version": 1

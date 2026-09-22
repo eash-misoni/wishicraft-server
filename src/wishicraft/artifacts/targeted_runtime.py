@@ -208,6 +208,16 @@ def validate_container(container: dict[str, Any], target: dict[str, str]) -> Non
         raise ValueError("CONTAINER_TARGET_MISMATCH")
 
 
+def persistence_level(target: dict[str, str]) -> str:
+    try:
+        from wishicraft.artifacts import world_import
+    except ImportError:
+        import importlib
+
+        world_import = importlib.import_module("world_import")
+    return str(world_import.expected_level(target))
+
+
 def validate_persistence(container: dict[str, Any], target: dict[str, str]) -> None:
     """Pinned vanilla /image/scripts/start stores world, players and configuration under /data."""
     data = Path(target["data_source"])
@@ -234,7 +244,8 @@ def validate_persistence(container: dict[str, Any], target: dict[str, str]) -> N
     levels = [
         line.partition("=")[2] for line in properties.splitlines() if line.startswith("level-name=")
     ]
-    if levels != ["world"] or not (data / "world/level.dat").is_file():
+    level = persistence_level(target)
+    if levels != [level] or not (data / level / "level.dat").is_file():
         raise ValueError("PERSISTENCE_UNPROVEN")
     for path in data.rglob("*"):
         if path.is_symlink() and data.resolve() not in path.resolve().parents:
@@ -442,7 +453,23 @@ def apply(request: dict[str, Any]) -> None:
                 raise ValueError("UNRESOLVED_RUNTIME")
             if not containers_before:
                 stopped_environment()
-            initial_module().prepare(game, config, target, atomic)
+
+            def verify_import_authority() -> None:
+                authorize(
+                    request,
+                    item(config, "operations_table", "operation_id", request["operation_id"]),
+                    item(config, "locks_table", "lock_name", config["lock_name"]),
+                    config,
+                    datetime.now(timezone.utc),
+                )
+
+            initial_module().prepare(
+                game,
+                config,
+                target,
+                atomic,
+                **({"verify": verify_import_authority} if "import" in game["creation"] else {}),
+            )
         preflight_target = (
             operation["switch_source"] if request["action"] == "RESET_PREPARE" else target
         )
@@ -518,7 +545,9 @@ def apply(request: dict[str, Any]) -> None:
             if (
                 "games" in config
                 and not managed
-                and not (Path(target["data_source"]) / "world/level.dat").is_file()
+                and not (
+                    Path(target["data_source"]) / persistence_level(target) / "level.dat"
+                ).is_file()
             ):
                 if not (
                     config.get("game_creation") is True

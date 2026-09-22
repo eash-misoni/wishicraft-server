@@ -1110,10 +1110,16 @@ class ControlPlaneStack(Stack):
                 import base64
                 import zlib
 
+                from wishicraft.artifacts.game_package import canonical, load
+
+                compressor = zlib.compressobj(level=9, zdict=canonical(load()).encode())
+                compressed = compressor.compress(recovery_runtime.encode()) + compressor.flush()
+
                 backup_task.add_environment(
                     "RECOVERY_RUNTIME_ZLIB_BASE64",
-                    base64.b64encode(zlib.compress(recovery_runtime.encode(), 9)).decode(),
+                    base64.b64encode(compressed).decode(),
                 )
+                backup_task.add_environment("RECOVERY_RUNTIME_COMPRESSION", "catalog-zlib-v1")
             else:
                 backup_task.add_environment("RECOVERY_RUNTIME_JSON", recovery_runtime)
             backup_task.add_to_role_policy(

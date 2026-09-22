@@ -13,6 +13,7 @@ import pytest
 from tests.unit.test_heartbeat_game_migration import attribute, game_document, stopped_receipt
 from tests.unit.test_runtime_memory import inventory, receipt
 from wishicraft import catalog_migration, game_package_migration
+from wishicraft.artifacts import game_package as packages
 from wishicraft.game_creation import REGISTRY_KEY
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -48,8 +49,12 @@ def inputs(tmp_path: Path, historical_catalog_root: Path) -> dict[str, Any]:
 
 
 def test_exact_append_preserves_records_and_configuration(
-    tmp_path: Path, inputs: dict[str, Any]
+    tmp_path: Path, inputs: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    historical = json.loads(
+        (ROOT / "src/wishicraft/artifacts/catalog-transition.json").read_text()
+    )["successor"]["packages"]
+    monkeypatch.setattr(packages, "load", lambda: historical)
     snapshot = copy.deepcopy(inputs)
     output = tmp_path / "cutover"
     review = catalog_migration.prepare(ROOT, output, **inputs)

@@ -304,6 +304,17 @@ def recovery_runtime_config() -> str:
         import zlib
 
         encoded = _env("RECOVERY_RUNTIME_ZLIB_BASE64")
+        codec = os.environ.get("RECOVERY_RUNTIME_COMPRESSION")
+        if codec == "catalog-zlib-v1":
+            from wishicraft.artifacts.game_package import canonical, load
+
+            decoder = zlib.decompressobj(zdict=canonical(load()).encode())
+            content = decoder.decompress(base64.b64decode(encoded, validate=True), 262144)
+            if not decoder.eof or decoder.unused_data or decoder.unconsumed_tail:
+                raise ValueError("invalid complete recovery runtime compression")
+            return content.decode()
+        if codec is not None:
+            raise ValueError("unknown recovery runtime compression")
         return zlib.decompress(base64.b64decode(encoded, validate=True)).decode()
     return _env("RECOVERY_RUNTIME_JSON")
 

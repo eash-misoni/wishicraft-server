@@ -284,6 +284,9 @@ def test_cdk_package_digest_recovery_compression_and_no_new_resources(
                 assert "RECOVERY_RUNTIME_JSON" not in env
                 monkeypatch.setenv("GAME_PACKAGES", "1")
                 monkeypatch.setenv(
+                    "RECOVERY_RUNTIME_COMPRESSION", env["RECOVERY_RUNTIME_COMPRESSION"]
+                )
+                monkeypatch.setenv(
                     "RECOVERY_RUNTIME_ZLIB_BASE64", env["RECOVERY_RUNTIME_ZLIB_BASE64"]
                 )
                 runtime = json.loads(recovery_runtime_config())
@@ -448,3 +451,23 @@ def test_real_dynamo_serializers_preserve_package_list_and_booleans(
         == document
     )
     assert _decode_map(attributes) == document
+
+
+def test_recovery_transport_retains_legacy_zlib_and_rejects_unknown_codec(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import base64
+    import zlib
+
+    from wishicraft.backup_workflow_lambda import recovery_runtime_config
+
+    original = '{"manifest_json":"historical complete descriptor"}'
+    monkeypatch.setenv("GAME_PACKAGES", "1")
+    monkeypatch.delenv("RECOVERY_RUNTIME_COMPRESSION", raising=False)
+    monkeypatch.setenv(
+        "RECOVERY_RUNTIME_ZLIB_BASE64", base64.b64encode(zlib.compress(original.encode())).decode()
+    )
+    assert recovery_runtime_config() == original
+    monkeypatch.setenv("RECOVERY_RUNTIME_COMPRESSION", "unknown")
+    with pytest.raises(ValueError, match="unknown recovery"):
+        recovery_runtime_config()

@@ -128,7 +128,8 @@ def verify_package_context(manifest: dict[str, Any]) -> None:
     if not isinstance(loader, dict) or not isinstance(mods, list):
         raise ValueError("PACKAGE_CONTEXT_SCHEMA")
     neo = loader.get("type") == "neoforge"
-    if not neo and loader != {"type": "vanilla"}:
+    paper = loader.get("type") == "paper"
+    if not neo and not paper and loader != {"type": "vanilla"}:
         raise ValueError("PACKAGE_CONTEXT_SCHEMA")
     expected_environment = {
         "GAME_PACKAGE_DIRECTORY": str(package_directory),
@@ -141,6 +142,17 @@ def verify_package_context(manifest: dict[str, Any]) -> None:
         ),
         "WISHICRAFT_PACKAGE_NEOFORGE_FORCE_REINSTALL": "true" if neo else "false",
     }
+    if paper:
+        expected_environment.update(
+            {
+                "WISHICRAFT_PACKAGE_TYPE": "PAPER",
+                "WISHICRAFT_PACKAGE_PAPER_BUILD": str(loader["build"]),
+                "WISHICRAFT_PACKAGE_PAPER_CUSTOM_JAR": "/wishicraft-package/"
+                + loader["server"]["filename"],
+                "WISHICRAFT_PACKAGE_SKIP_DOWNLOAD_DEFAULTS": "true",
+                "WISHICRAFT_PACKAGE_LEVEL": loader["level_name"],
+            }
+        )
     if environment != expected_environment:
         raise ValueError("PACKAGE_ENVIRONMENT_MISMATCH")
     owner = root / "package-owner.json"
@@ -179,6 +191,10 @@ def verify_package_context(manifest: dict[str, Any]) -> None:
         {key: artifact[key] for key in ("filename", "size", "sha256")}
         for artifact in ([*mods, loader["installer"]] if neo else mods)
     ]
+    if paper:
+        expected_specs.append(
+            {key: loader["server"][key] for key in ("filename", "size", "sha256")}
+        )
     if artifacts != expected_specs:
         raise ValueError("PACKAGE_ARTIFACT_IDENTITY")
     mod_names = {mod["filename"] for mod in mods}

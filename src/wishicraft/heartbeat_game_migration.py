@@ -68,6 +68,8 @@ def _package_context(game: dict[str, Any], package: dict[str, Any], source: str)
     artifacts = list(package["mods"])
     if package["loader"]["type"] == "neoforge":
         artifacts.append(package["loader"]["installer"])
+    if package["loader"]["type"] == "paper":
+        artifacts.append(package["loader"]["server"])
     return {
         "game_id": game["game_id"],
         "data_source": source,

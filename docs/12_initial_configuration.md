@@ -1,5 +1,7 @@
 # 12. Initial Configuration
 
+> D-110 repository candidate adds fixed `vps-survival` Paper 26.1.2/build 53; source `wishinkaiwai` is preserved. Stage Vanilla defaults and existing packages are unchanged. Host/CP release is not yet applied. [Exact artifact and transition](runbooks/paper_world_import.md).
+
 > 2026-09-21 UTC current runtime: create-terralith additive catalog successor `9554899a…e28975`をhost/Control Planeへ適用済み。既存Gameのhistorical creation digestは不変、full-manifest限定互換性を利用する。Web validatorも配布済み、新Game CREATE→generation 1 materialization/worldgen→正常STOP成功、通常受付復帰。m8a.large / 1G・4G・6GiBは不変。[exact digest・hash・実証](runbooks/create_terralith.md)。以下の未適用記述は各slice当時の履歴です。
 
 > D-109 production実証: NULL decoderとfailure確定の修正をCPへ配布済み。再STARTはartifact取得後、未作成whitelist policyのhost読取で停止。復旧STOP成功、STOPPED/HEALTHY・受付閉鎖継続。Game/cacheは保持、NeoForge起動は未実証。[障害・復旧・再開条件](runbooks/neoforge_production.md)。

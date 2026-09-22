@@ -1,5 +1,14 @@
 # 09. Decisions and Backlog
 
+## D-110 Same-runtime Paper IMPORT（repository qualification; production not applied）
+
+User-confirmed source and target are Minecraft 26.1.2 / Paper build 53, commit 39a1aa5.
+Import only `/opt/minecraft2/wishinkaiwai` into a new D-105 Game; never rewrite existing Games.
+**IMPORT preserves package/runtime identity. Version changes are performed by a future explicit UPGRADE operation.**
+Package remains immutable after CREATE. No UPGRADE/revisions, normalization, forceUpgrade,
+plugin upload, new persistent AWS resource or IAM expansion. Source stop/final archive and
+production release are separate execution boundaries. [Contract and gates](runbooks/paper_world_import.md).
+
 > 2026-09-21 create-terralith: fixed worldgen packageと限定catalog追加互換契約をproduction実証済み。完了済みhost migrationを再実行せず引継ぎ、guarded CP/Web release→正式CREATE→新world generation 1 READY/MATERIALIZED/worldgen→正常STOPまで成功。既存Game/package/world/owner/provenance不変、45 alarms OK、通常受付復帰。実clientはユーザー後続確認で未検証。[契約・実証・性能上の限界](runbooks/create_terralith.md)。
 
 > 2026-09-21 Discord management-Web導線 / 日本語description production適用: `config/web-dev.json` → `load_web_public_url()` をURL正本とし、既存 `/mc status` 末尾へ管理Webを表示した。既存Guild `/mc` は同一command ID・構造・権限・scopeのままdescriptionだけを日本語化し、global commandは0件を維持した。Control Planeは11 Lambda code（Message Lambdaは正本由来の環境変数を追加）とCase D guard済み5 State Machine semantic no-opだけをChangeSetで適用。実STATUS、45/45 alarms OK、STOPPED/HEALTHYを確認済み。[証跡](evidence/management_web_discord_production_2026-09-21.json)。

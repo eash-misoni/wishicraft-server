@@ -447,9 +447,9 @@ Gameは具体的なPackage version、Minecraft version、Java runtimeへ固定�
 
 同一package ID/versionの中身を上書きしない。
 
-### PKG-002 サーバー種別 `D-109 Vanilla/NeoForge; others LATER`
+### PKG-002 サーバー種別 `D-109 Vanilla/NeoForge; D-110 Paper repository qualification`
 
-D-109の最小実装はVanillaとMinecraft 1.21.1の固定NeoForge packageのみ。残りは将来候補であり未実装。
+D-109はVanillaとMinecraft 1.21.1の固定NeoForge package。D-110は同一runtime IMPORT用にPaper 26.1.2/build 53を追加する（repository qualification、production未適用）。他種別は将来候補。
 [package定義・hash検証・client requirement・失敗回復](runbooks/neoforge_package.md)を必須契約とする。
 
 - vanilla
@@ -467,6 +467,17 @@ Admin限定Webからdisplay name・numeric initial seed（blankは一度固定�
 actor-bound idempotency、unmaterialized表示、途中準備のowner照合、dynamic RESET capability、shared-v2 recoveryへの全登録Game収録を必須とする。既存A/Bのidentity/world/path/seed/policyは変更しない。詳細と失敗・loss boundaryは[D-105](reviews/minimal_game_creation.md)。production deploy済み、positive CREATE/初回materializationは実用Gameまで延期。`/mc create`、削除、汎用wizard、Package/Preset/Template/runtime一般化は今回対象外。
 
 作成Gameをpublic guideへ自動掲載しない。掲載は説明とclient要件を揃えた明示的公開登録とする。作成時に必要な初期whitelistと、後から編集するWhitelist Managementは別scopeとする。
+
+### IMPORT-001 Same-runtime import `MUST / D-110 repository qualification`
+
+New Game only, immutable exact Paper 26.1.2/build 53 package and source/target artifact identity.
+Preserve wishinkaiwai layout, durable player/world data and allowlisted Game-local config.
+Use stopped/save-confirmed/synced immutable USTAR archive, bounded staging validation,
+source provenance and owned generation-1 prepared commit; normal START must not regenerate.
+Reuse CREATE/START/READY/MATERIALIZED, Common whitelist authority and existing host lease.
+Reject runtime mismatch, unknown plugin dependency, unsafe archive or existing target world.
+No UPGRADE, normalization, forceUpgrade, access-file import or existing Game mutation.
+[Exact contract, retries and production gates](runbooks/paper_world_import.md).
 
 ### RESET-001 世代交換 `LATER`
 
