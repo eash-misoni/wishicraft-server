@@ -448,3 +448,11 @@ def test_maintenance_fences_create_even_after_expiry(creation: Any, status: str)
     before = copy.deepcopy(backend.db.records)
     assert post(creation, login(creation[1]), payload())["statusCode"] == 409
     assert backend.db.records == before
+
+
+def test_create_requires_initialized_system_state(creation: Any) -> None:
+    backend = creation[2]
+    del backend.db.records["system", "local"]
+    before = copy.deepcopy(backend.db.records)
+    assert post(creation, login(creation[1]), payload())["statusCode"] == 409
+    assert backend.db.records == before

@@ -472,6 +472,7 @@ services:
         from wishicraft.web_status import decode
 
         db = MemoryDynamo()
+        db.records["system", "local"] = {"system_id": {"S": "local"}}
         domain = service(db)
         config.update(
             game_creation=True, games_table="games", reset_policies={}, initial_whitelist=[]

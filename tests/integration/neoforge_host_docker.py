@@ -78,6 +78,7 @@ def main() -> None:
     subprocess.run(["docker", "pull", manifest["image"]], check=True, timeout=300)
     Path("/srv/minecraft/games").mkdir(parents=True, exist_ok=True, mode=0o755)
     db = MemoryDynamo()
+    db.records["system", "local"] = {"system_id": {"S": "local"}}
     domain = service(db)
     records = []
     for index, package in enumerate(packages):

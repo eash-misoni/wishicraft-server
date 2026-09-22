@@ -112,3 +112,11 @@ Phase7 alarm-count assertion failure, corrected to the explicit new count and no
 paths in v4. No failures were converted to skips. Docker and shellcheck are unavailable locally;
 CI runs their existing checks. CI, ChangeSets and actual maintenance are pending. Repository
 tests do not by themselves prove CloudWatch action delivery or real suppression.
+
+
+Implementation `ab15481` passed CI quality/Web and Paper integration, but NeoForge and
+standard Docker CREATE fixtures failed because they had never initialized SystemState.
+Both fixtures now seed an ordinary initialized state with no maintenance intent; the
+production condition remains unchanged. A missing-state CREATE regression proves the
+refusal, and the focused 99 tests plus lint/format/no-incremental type (including Web) pass.
+The failed CI runs are retained; a new commit/CI must qualify the repaired fixtures.

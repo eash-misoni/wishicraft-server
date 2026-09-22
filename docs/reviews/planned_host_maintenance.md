@@ -33,13 +33,14 @@ notification delivery was tested or preserved where no such path exists.
 
 All rows are deployed dev alarms. Separate prod resources are **not applicable**: stage
 configuration is incomplete, not an additional uninspected set of 45 alarms.
-Always-notify is the maintenance policy; the two pre-existing Web notification gaps remain
+The split is 3 suppressible, 40 always-notify and 2 not applicable to SNS suppression.
+The two pre-existing Web notification gaps remain
 explicit below and are not represented as working notification paths.
 
 | Existing physical alarm | Classification | Action change |
 |---|---|---|
-| `WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT` | always-notify | 既存actionなしを維持。補完は別slice |
-| `WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj` | always-notify | 既存actionなしを維持。補完は別slice |
+| `WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT` | not applicable（SNS通知なし） | 既存actionなしを維持。補完は別slice |
+| `WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj` | not applicable（SNS通知なし） | 既存actionなしを維持。補完は別slice |
 | `wc-dev-admissionfunctionerrorsalarm` | always-notify | 既存SNSを維持 |
 | `wc-dev-admissionfunctionthrottlesalarm` | always-notify | 既存SNSを維持 |
 | `wc-dev-auto-stop-evaluator-silence` | always-notify | 既存SNSを維持 |
