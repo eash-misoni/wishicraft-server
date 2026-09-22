@@ -107,3 +107,10 @@ entries; do not treat earlier broad Case D approvals as authorization for this s
 [Machine-readable qualification and release evidence](../evidence/discord_progress_supersede_2026-09-22.json).
 
 Implementation CI runs: [quality/Web/host integration](https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336695), [Paper](https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336649), [NeoForge](https://github.com/eash-misoni/wishicraft-server/actions/runs/35696336582). These run links are evidence references; final HEAD CI is checked separately at handoff.
+
+## Subsequent combined-release authorization
+
+The next automatic-STOP Game-authority slice explicitly includes this fix and
+permits the established Case D semantic-no-op guard. The earlier held/deleted
+Message-only ChangeSet remains historical evidence and is never reused. Combined
+release/production results belong to [the automatic-STOP runbook](phase8_automatic_stop.md#immutable-game-authority-for-the-final-direct-observation--2026-09-22).

@@ -119,11 +119,22 @@ def handler(event: object, context: object) -> dict[str, object]:
     if payload["action"] not in {"prepare_switch", "prepare_reset", "fail"}:
         bind_operation(runtime, _string(payload, "operation_id"), action="STOP")
         if configured_catalog() is not None:
+            expected_version = None
+            if os.environ.get("GAME_PACKAGES") == "1":
+                from wishicraft.package_authority import GamePackageAuthority
+                from wishicraft.runtime_catalog import RuntimeCatalog
+
+                expected_version = GamePackageAuthority(
+                    runtime.dynamodb,
+                    _env("GAMES_TABLE"),
+                    RuntimeCatalog.parse(_env("RUNTIME_GAMES")).game_ids,
+                ).expected_version
             runtime.status_factory = AwsStatusFactory(
                 runtime.ec2,
                 runtime.ssm,
                 game_id=runtime.game_id,
                 timeout_seconds=int(_env("SSM_PROBE_TIMEOUT_SECONDS")),
+                expected_version=expected_version,
             )
     now = datetime.now(UTC)
     proof = LeaseProof(

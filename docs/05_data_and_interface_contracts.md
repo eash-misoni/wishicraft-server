@@ -1235,6 +1235,8 @@ Phase 7 release monitoring observerはSystemStateとfixed global Lockをconsiste
 Route 53 observerはcanonical Hosted Zone/FQDNに対するread-only ListResourceRecordSetsだけを使う。record absent、単一A record、unexpected valuesを分離し、duplicate、Alias/unsupported shape、malformed response、API failureはunknownへfail-closedする。
 ## AutoStopIntents
 
+2026-09-22 final-observation correction: with GAME_PACKAGES enabled, STOP's direct status factory uses the same `GamePackageAuthority.expected_version` as READY/Reconcile. The observed running receipt binds Game/instance; consistent-read immutable registration, full definition/digest and fixed catalog resolve the exact expected version. Existing STOP Game/run/process, READY and exact player-zero gates remain unchanged. Unknown/mismatch cancels; no global Vanilla fallback is allowed when package authority is unresolved. Existing pre-package Vanilla compatibility and cancellation reason/metric semantics remain unchanged. [Authority comparison, regression and release](runbooks/phase8_automatic_stop.md#immutable-game-authority-for-the-final-direct-observation--2026-09-22).
+
 D-093の停止予告はRuntimeHeartbeats/SystemState/Operationsへ混在させず、専用tableの`game_id` partition keyと`intent_id` sort keyでdurableに保持する。`intent_id`はGame ID、boot ID、`empty_since`から決定的に導出し、同じempty periodのEvaluator再実行で増殖しない。warning delivery identity/state/attempt、`warning_delivered_at`、idle/warning policy、created/updated、block/cancel reason、STOP Operation IDを保持する。TTLは設定せず、freshnessやeligibilityは必ずsource heartbeatとtimestampを再検証する。
 
 ## BACKUP create reservation

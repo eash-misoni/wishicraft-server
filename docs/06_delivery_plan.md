@@ -1,5 +1,7 @@
 # 06. Delivery Plan
 
+> Current slice: automatic STOP final direct observation uses immutable Game package authority, together with the qualified Discord supersession fix. Repository qualification and guarded Case D combined dev release are authorized; production auto-stop validation requires a fresh natural empty period. [Runbook](runbooks/phase8_automatic_stop.md). Earlier held-release entries below are historical checkpoints.
+
 > Current slice: Discord completion CAS superseded-race correction. Repository qualification is complete. Deployment is held: the actual ChangeSet also listed five State Machine Definition updates and was deleted without execution. A separately reviewed release must satisfy the explicit scope boundary. No lifecycle or runtime operation is included. [Runbook](runbooks/discord_progress_supersede.md).
 
 > D-110実world dev検証を承認（2026-09-22）: VPSを一時停止してpoint-in-time archiveを取得し、VPSは再開する。devへ同一PaperでIMPORTし正常STOPまで検証。dev/VPSは独立し、将来prod cutoverはfresh archiveを再取得する。現在の実行結果は[runbook](runbooks/paper_world_import.md)へ記録する。
