@@ -366,13 +366,16 @@ def expected_level(target: dict[str, str]) -> str:
         return "world"
     packages.regular(owner)
     record = json.loads(owner.read_text())
+    imported = record["plan"]["creation"].get("import")
+    if imported is None:
+        # Ordinary Games can RESET away from their initial generation's path.
+        return "world"
     if (
         record["plan"]["data_source"] != target["data_source"]
         or record["plan"]["game_id"] != target["game_id"]
     ):
         raise ValueError("IMPORT_OWNER_TARGET")
-    imported = record["plan"]["creation"].get("import")
-    return LEVEL if imported is not None else "world"
+    return LEVEL
 
 
 def prepare(

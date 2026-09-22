@@ -143,6 +143,21 @@ def game(value: dict[str, Any], package: dict[str, Any]) -> tuple[dict[str, Any]
     }
 
 
+@pytest.mark.parametrize("imported", [False, True])
+def test_reset_path_uses_initial_owner_only_for_imported_game(source: Any, imported: bool) -> None:
+    _, manifest, package = source
+    record, target = game(manifest, package)
+    provenance = record["creation"] if imported else {}
+    owner = packages.GAMES / (record["game_id"] + ".initial-owner.json")
+    owner.write_text(json.dumps({"plan": {**target, "creation": provenance}}))
+    changed = {**target, "data_source": target["data_source"] + "-generation-2"}
+    if imported:
+        with pytest.raises(ValueError, match="IMPORT_OWNER_TARGET"):
+            imp.expected_level(changed)
+    else:
+        assert imp.expected_level(changed) == "world"
+
+
 def test_exact_identity_and_prepare_without_regeneration(source: Any) -> None:
     archive, manifest, package = source
     assert imp.validate(manifest, package) == manifest

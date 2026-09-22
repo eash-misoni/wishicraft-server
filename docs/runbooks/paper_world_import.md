@@ -222,6 +222,10 @@ markers and normal save/stop each time. Source archive hash remained unchanged.
 The earlier failed run used a broadcast-command response as its assertion; the corrected
 fixture directly tests the saved block. The NeoForge fixture separately excludes Paper
 from ordinary CREATE because Paper requires explicit import provenance.
+The extended NeoForge host regression also caught initial-generation path validation
+being applied after an ordinary Game RESET. Initial-owner path binding now applies only
+to imported Games; ordinary Games retain their generation-specific world path. A paired
+regression verifies ordinary RESET acceptance and imported-path mismatch rejection.
 
 The first full CI unit suite passed 1,565 tests; local full suite passed 1,563 before the
 last two focused cases, and the subsequent focused suite passed 49. Local lint/format,
