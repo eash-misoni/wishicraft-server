@@ -1,5 +1,7 @@
 # D-102 Web Foundation — production approval package
 
+> D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
+
 状態: **Accepted / read-only production release Completed**。2026-09-13。失効/logoutを含む実証範囲は[runbook](../runbooks/web_foundation.md)を参照。
 承認基準1636f18。token取得後のgrant validationをrevokeのfinally内へ移し、WebSessionsだけDESTROYへ限定是正する。full validation/CI成功・live diffが承認範囲内なら追加gateなくreleaseする。
 基準HEADはD-101 `89fb8ec`。Web Foundationだけを扱い、current sequenceを維持する。

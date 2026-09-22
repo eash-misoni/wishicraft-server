@@ -1,4 +1,4 @@
-# Explicit publication registration; runtime values and capabilities are resolved from canonical sources.
+# Authored legacy reference pages only; current Game listing reads the Games registry.
 - id: game-vanilla-main
   slug: a
   client:

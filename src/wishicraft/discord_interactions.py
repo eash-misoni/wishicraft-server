@@ -17,6 +17,7 @@ from wishicraft.runtime_catalog import configured_catalog
 
 PING = 1
 APPLICATION_COMMAND = 2
+APPLICATION_COMMAND_AUTOCOMPLETE = 4
 CHAT_INPUT = 1
 SUB_COMMAND = 1
 PONG = 1
@@ -94,6 +95,7 @@ class AuthorizedInteraction:
     seed_mode: str | None = None
     user_id: str | None = None
     display_name: str | None = None
+    autocomplete_query: str | None = None
 
 
 def raw_body_from_event(event: object) -> tuple[bytes, dict[str, str]]:
@@ -170,7 +172,7 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
         if "data" in payload:
             raise MalformedInteraction("invalid interaction")
         return AuthorizedInteraction(interaction_id, interaction_token, InteractionKind.PING)
-    if interaction_type != APPLICATION_COMMAND:
+    if interaction_type not in {APPLICATION_COMMAND, APPLICATION_COMMAND_AUTOCOMPLETE}:
         raise MalformedInteraction("unsupported interaction")
     if _snowflake(payload.get("guild_id")) != config.guild_id:
         raise UnauthorizedInteraction("request is not authorized")
@@ -182,7 +184,11 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
     roles = member.get("roles")
     if not isinstance(roles, list) or not all(isinstance(role, str) for role in roles):
         raise UnauthorizedInteraction("request is not authorized")
-    kind = _parse_command(payload.get("data"), expected_guild_id=config.guild_id)
+    query = None
+    if interaction_type == APPLICATION_COMMAND_AUTOCOMPLETE:
+        kind, query = _parse_autocomplete(payload.get("data"), expected_guild_id=config.guild_id)
+    else:
+        kind = _parse_command(payload.get("data"), expected_guild_id=config.guild_id)
     from wishicraft.authorization import operation_authorized
 
     if not operation_authorized(
@@ -192,6 +198,10 @@ def parse_and_authorize(raw_body: bytes, *, config: DiscordIngressConfig) -> Aut
         admin_role_id=config.admin_role_id,
     ):
         raise UnauthorizedInteraction("request is not authorized")
+    if query is not None:
+        return AuthorizedInteraction(
+            interaction_id, interaction_token, kind, autocomplete_query=query
+        )
     actor = _actor(member)
     return AuthorizedInteraction(
         interaction_id,
@@ -365,3 +375,68 @@ def _snowflake(value: object) -> str:
     if not isinstance(value, str) or SNOWFLAKE.fullmatch(value) is None:
         raise MalformedInteraction("invalid Discord identity")
     return value
+
+
+def _parse_autocomplete(raw_data: object, *, expected_guild_id: str) -> tuple[InteractionKind, str]:
+    """Partial options are legal; focused Game is never an executable selection."""
+    if not isinstance(raw_data, dict) or set(raw_data) - {
+        "id",
+        "name",
+        "type",
+        "options",
+        "guild_id",
+    }:
+        raise MalformedInteraction("invalid autocomplete")
+    _snowflake(raw_data.get("id"))
+    if "guild_id" in raw_data and _snowflake(raw_data["guild_id"]) != expected_guild_id:
+        raise UnauthorizedInteraction("request is not authorized")
+    if raw_data.get("name") != "mc" or raw_data.get("type") != CHAT_INPUT:
+        raise MalformedInteraction("invalid autocomplete")
+    options = raw_data.get("options")
+    if not isinstance(options, list) or len(options) != 1 or not isinstance(options[0], dict):
+        raise MalformedInteraction("invalid autocomplete")
+    command = options[0]
+    if (
+        set(command) != {"name", "type", "options"}
+        or command["type"] != SUB_COMMAND
+        or not isinstance(command["name"], str)
+        or command["name"] not in {"start", "switch", "reset"}
+    ):
+        raise MalformedInteraction("invalid autocomplete")
+    partial = command["options"]
+    if not isinstance(partial, list):
+        raise MalformedInteraction("invalid autocomplete")
+    query = None
+    seen = set()
+    allowed = {"game": 3}
+    if command["name"] in {"switch", "reset"}:
+        allowed["confirm"] = 5
+    if command["name"] == "reset":
+        allowed["seed"] = 3
+    for option in partial:
+        if (
+            not isinstance(option, dict)
+            or set(option) - {"name", "type", "value", "focused"}
+            or not {"name", "type", "value"} <= set(option)
+        ):
+            raise MalformedInteraction("invalid autocomplete option")
+        name = option["name"]
+        if (
+            not isinstance(name, str)
+            or name not in allowed
+            or name in seen
+            or option["type"] != allowed[name]
+        ):
+            raise MalformedInteraction("invalid autocomplete option")
+        seen.add(name)
+        if type(option["value"]) is not (bool if name == "confirm" else str):
+            raise MalformedInteraction("invalid autocomplete value")
+        if "focused" in option and type(option["focused"]) is not bool:
+            raise MalformedInteraction("invalid autocomplete focus")
+        if option.get("focused") is True:
+            if name != "game" or not isinstance(option["value"], str) or len(option["value"]) > 100:
+                raise MalformedInteraction("invalid autocomplete focus")
+            query = option["value"]
+    if query is None:
+        raise MalformedInteraction("missing autocomplete focus")
+    return InteractionKind(command["name"].upper()), query

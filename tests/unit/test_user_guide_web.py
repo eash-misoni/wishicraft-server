@@ -199,12 +199,10 @@ def test_current_safety_contract_remains_in_public_text() -> None:
         "STOPPED/HEALTHY",
         "共有Data EBS全体",
         "選択中・稼働中・観測0人",
-        "seed 0",
         "その操作に固定",
         "server.properties",
         "所持品/位置/進捗",
         "gamerule/scoreboard",
-        "直近3個",
         "別枠",
         "anchor",
         "EBS喪失",
@@ -267,11 +265,6 @@ def third_game(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
             "server": "TEST_LOADER",
         }
     )
-    for command in schema[0]["options"]:
-        if command["name"] in {"start", "switch"}:
-            command["options"][0]["choices"].append(
-                {"name": "Test third", "value": "game-test-third"}
-            )
     monkeypatch.setattr(builder, "sources", lambda root: (schema, games, facts))
     path = tmp_path / "web/games.yaml"
     entries = yaml.safe_load(path.read_text())
@@ -304,12 +297,13 @@ def test_third_game_is_independent_and_order_safe(third_game: Path) -> None:
     assert "Reset：非対応" in page.body
     assert "seed 0" not in page.body and "26.2" not in page.body
     assert "/mc start game:game-test-third" in page.body
-    assert "third-game.md" in pages["commands/start"].body
+    assert "現在のGame一覧" in pages["commands/start"].body
     assert "third-game.md" not in pages["commands/reset"].body
     site = third_game / "site"
     build(third_game, site)
     assert (site / "games/third-game/index.html").is_file()
-    assert 'href="third-game/"' in (site / "games/index.html").read_text()
+    assert "<!-- registered-games -->" in (site / "games/index.html").read_text()
+    assert 'href="third-game/"' not in (site / "games/index.html").read_text()
     for document in site.rglob("*.html"):
         parser = Links()
         parser.feed(document.read_text())

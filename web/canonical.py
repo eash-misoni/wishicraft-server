@@ -1,6 +1,6 @@
-"""Read-only projection of the current backend contract into per-Game Web records.
+"""Build-time projection for authored legacy reference pages and command examples.
 
-Current declarations still resolve the default Vanilla runtime for two Games.
+Current Game discovery is served by wishicraft.game_discovery, not this adapter.
 No production lookup, Game registration or runtime expansion occurs here.
 """
 
@@ -11,6 +11,7 @@ from typing import Any
 
 import yaml
 
+from wishicraft.discovery_commands import autocomplete
 from wishicraft.game_admin import initial_game
 from wishicraft.reset_commands import extend
 from wishicraft.reset_policy import policies
@@ -46,7 +47,7 @@ def sources(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dic
                 "server": runtime["type"],
             }
         )
-    commands = extend(document["discord_commands"], tuple(reset))
+    commands = autocomplete(extend(document["discord_commands"], tuple(reset)))
     for command in commands[0]["options"]:
         identifiers = [command["name"]]
         for option in command.get("options", []):

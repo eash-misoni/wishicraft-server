@@ -1,5 +1,14 @@
 # 09. Decisions and Backlog
 
+## D-112 Registry-backed Game discovery (Accepted; qualification in progress)
+
+2026-09-22 user-requested slice. [Canonical design and fixed-list inventory](reviews/game_discovery.md),
+[release / D-084 registration runbook](runbooks/game_discovery.md). Reuse Games registry/GetItem,
+existing Discord/Web Lambdas, no IAM/resource addition. Explicit approval covers minimal public
+ACTIVE Game fields and scoped dev code/command update after tests/CI/Case D review.
+Game lifecycle, maintenance, backups, registry writes, OAuth and host are unchanged.
+
+
 > D-111 planned host maintenance: Accepted / dev deployed and qualified (2026-09-22). Independent SystemState maintenance lease, atomic Admission fence, unchanged
 > observation metrics, three narrowly suppressed notification composites, absolute expiry
 > and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);

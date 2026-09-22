@@ -1,5 +1,7 @@
 # D-105 Minimal Game Creation
 
+> D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
+
 > Current production status (2026-09-14): D-109 deployed and real CREATE succeeded; first START failed before EC2 start on full-Game NULL decoding. Game retained UNMATERIALIZED, admission closed. [Evidence and recovery boundary](../runbooks/neoforge_production.md). Earlier deferred/repository-only statements below retain their historical scope.
 
 Accepted 2026-09-13. **Production deployed, positive CREATE/materialization deferred.**

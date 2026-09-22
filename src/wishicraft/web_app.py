@@ -69,9 +69,11 @@ class WebApp:
         status: Callable[[datetime], dict[str, Any]],
         operations: Callable[[], Any] | None = None,
         origin: str = "",
+        discovery: Callable[[], list[dict[str, Any]]] | None = None,
     ) -> None:
         self.assets, self.sessions, self.status = assets, sessions, status
         self.operations, self.origin = operations, origin
+        self.discovery = discovery
         self.allowlist = set(json.loads((assets / "routes.json").read_text()))
 
     def handle(self, event: dict[str, Any], now: datetime) -> dict[str, Any]:
@@ -123,9 +125,20 @@ class WebApp:
             if name.endswith(".js")
             else "text/html"
         )
-        result = response(
-            200, (self.assets / name).read_text(), content_type=kind + "; charset=utf-8"
-        )
+        body = (self.assets / name).read_text()
+        status_code = 200
+        from wishicraft.game_discovery import GUIDE_SLOT, GUIDE_UNAVAILABLE, guide_html
+
+        if GUIDE_SLOT in body:
+            try:
+                if self.discovery is None:
+                    raise RuntimeError("discovery unavailable")
+                listing = guide_html(self.discovery())
+            except Exception:
+                print('{"component":"web-game-discovery","result":"unavailable"}')
+                listing, status_code = GUIDE_UNAVAILABLE, 503
+            body = body.replace(GUIDE_SLOT + GUIDE_UNAVAILABLE, listing)
+        result = response(status_code, body, content_type=kind + "; charset=utf-8")
         if name == "manage/index.html":
             # Chrome form POST must retain a same-origin Origin for logout validation.
             result["headers"]["referrer-policy"] = "same-origin"

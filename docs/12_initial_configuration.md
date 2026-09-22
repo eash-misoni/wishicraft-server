@@ -1,5 +1,7 @@
 # 12. Initial Configuration
 
+> D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](reviews/game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
+
 > D-110 repository candidate adds fixed `vps-survival` Paper 26.1.2/build 53; source `wishinkaiwai` is preserved. Stage Vanilla defaults and existing packages are unchanged. Host/CP release is not yet applied. [Exact artifact and transition](runbooks/paper_world_import.md).
 
 > 2026-09-21 UTC current runtime: create-terralith additive catalog successor `9554899a…e28975`をhost/Control Planeへ適用済み。既存Gameのhistorical creation digestは不変、full-manifest限定互換性を利用する。Web validatorも配布済み、新Game CREATE→generation 1 materialization/worldgen→正常STOP成功、通常受付復帰。m8a.large / 1G・4G・6GiBは不変。[exact digest・hash・実証](runbooks/create_terralith.md)。以下の未適用記述は各slice当時の履歴です。

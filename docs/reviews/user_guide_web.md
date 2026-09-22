@@ -1,5 +1,7 @@
 # D-100 静的利用案内Webと公開準備
 
+> D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
+
 > D-102 release追記: 2026-09-13 Conditional GOにより既存dev AWS・generated HTTPS URLでの初回read-only公開を承認・適用済み。custom domainは対象外。限定是正/CI/live diff条件と適用状況は[Web runbook](../runbooks/web_foundation.md)を参照。
 
 

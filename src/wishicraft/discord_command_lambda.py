@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import time
 from typing import Protocol, TypedDict, cast
 
 from wishicraft.discord_interaction_callback import DiscordInteractionCallbackClient
@@ -123,6 +124,8 @@ def handler(event: object, context: object) -> dict[str, object]:
     except SignatureRejected:
         return _http_response(401, {"error": "invalid request"})
     except UnauthorizedInteraction:
+        if json.loads(raw_body).get("type") == 4:
+            return _http_response(200, {"type": 8, "data": {"choices": []}})
         return _http_response(200, unauthorized_response())
     except MalformedInteraction:
         return _http_response(400, {"error": "invalid interaction"})
@@ -130,6 +133,8 @@ def handler(event: object, context: object) -> dict[str, object]:
         return _http_response(500, {"error": "service unavailable"})
     if interaction.kind is InteractionKind.PING:
         return _http_response(200, pong_response())
+    if interaction.autocomplete_query is not None:
+        return _autocomplete_response(interaction.kind, interaction.autocomplete_query)
     callback = _get_interaction_callback()
     try:
         callback.defer(
@@ -258,3 +263,31 @@ def _empty_http_response(status_code: int) -> dict[str, object]:
         "body": "",
         "isBase64Encoded": False,
     }
+
+
+def _autocomplete_response(kind: InteractionKind, query: str) -> dict[str, object]:
+    from wishicraft.game_discovery import Discovery, choices
+    from wishicraft.reset_policy import policies
+    from wishicraft.runtime_catalog import RuntimeCatalog
+
+    try:
+        from botocore.config import Config  # type: ignore[import-untyped]
+
+        deadline = time.monotonic() + 1.8
+        catalog = RuntimeCatalog.parse(_required_environment("RUNTIME_GAMES"))
+        api = importlib.import_module("boto3").client(
+            "dynamodb",
+            config=Config(connect_timeout=0.3, read_timeout=0.3, retries={"max_attempts": 0}),
+        )
+        reader = Discovery(
+            api,
+            _required_environment("GAMES_TABLE"),
+            catalog.game_ids,
+            policies(os.environ.get("RESET_POLICIES", "{}"), catalog),
+        )
+        result = choices(reader.read(deadline=deadline), kind.value.lower(), query)
+    except Exception:
+        # Do not defer, call Admission or expose AWS/registry error details.
+        print('{"component":"discord-autocomplete","result":"unavailable"}')
+        result = []
+    return _http_response(200, {"type": 8, "data": {"choices": result}})

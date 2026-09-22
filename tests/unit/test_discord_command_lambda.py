@@ -571,7 +571,9 @@ def test_phase7f_handler_only_connects_commands_to_shared_admission_lambda() -> 
     for forbidden in (
         "Reconcile",
         "StartExecution",
-        "dynamodb",
+        "put_item",
+        "update_item",
+        "transact_write_items",
         "ec2",
         "ssm",
         "route53",

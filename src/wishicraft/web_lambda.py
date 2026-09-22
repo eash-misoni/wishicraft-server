@@ -1,4 +1,4 @@
-"""AWS initialization is lazy: public guide requests do not retrieve secrets or state."""
+"""Lazy AWS initialization; public Game discovery never reads authentication secrets."""
 
 from __future__ import annotations
 
@@ -129,6 +129,7 @@ def web_app() -> WebApp:
         sessions=sessions,
         status=lambda now: status_reader().read(now),
         operations=operations,
+        discovery=lambda: discovery().read(),
         origin=os.environ.get("WEB_CANONICAL_ORIGIN", ""),
     )
 
@@ -197,3 +198,17 @@ def canonical_guard(event: dict[str, Any]) -> dict[str, Any] | None:
     if not isinstance(path, str) or not path.startswith("/") or path.startswith("//"):
         return response(400)
     return response(308, location=origin + quote(path, safe="/-._~"))
+
+
+def discovery() -> Any:
+    from wishicraft.game_discovery import Discovery
+    from wishicraft.reset_policy import policies
+    from wishicraft.runtime_catalog import RuntimeCatalog
+
+    catalog = RuntimeCatalog.parse(os.environ["WEB_RUNTIME_GAMES"])
+    return Discovery(
+        client("dynamodb"),
+        os.environ["WEB_GAMES_TABLE"],
+        catalog.game_ids,
+        policies(os.environ["WEB_RESET_POLICIES"], catalog),
+    )

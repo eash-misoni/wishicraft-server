@@ -112,7 +112,14 @@ def public_games(root: Path) -> list[dict[str, Any]]:
         available = []
         for name, command in commands.items():
             option = next((o for o in command.get("options", []) if o["name"] == "game"), None)
-            if option is None or game_id in {c["value"] for c in option.get("choices", [])}:
+            if (
+                option is None
+                or (
+                    option.get("autocomplete") is True
+                    and (name != "reset" or game_id in facts["reset"])
+                )
+                or game_id in {c["value"] for c in option.get("choices", [])}
+            ):
                 available.append(name)
         reset = facts["reset"].get(game_id)
         if (reset is not None) != ("reset" in available):
@@ -212,6 +219,8 @@ def argument_table(command: dict[str, Any], public_ids: set[str]) -> str:
             for c in option.get("choices", [])
             if option["name"] != "game" or c["value"] in public_ids
         )
+        if option.get("autocomplete"):
+            choices = "登録済みGameから検索（表示名で選択）"
         if option["type"] == 5:
             choices = "`true`（`false`は拒否）"
         rows.append(
@@ -268,7 +277,10 @@ def load_pages(root: Path) -> dict[str, GuidePage]:
             body = body.replace(
                 "{{examples}}", "\n\n".join(f"```text\n{c}\n```" for c in samples[name])
             )
-            body = body.replace("{{supported-games}}", supported_games(root, name))
+            body = body.replace(
+                "{{supported-games}}",
+                "[現在のGame一覧](../games.md)とDiscordの候補で確認してください。RESETは対応Gameだけが候補に出ます。",
+            )
         if game:
             body = body.replace("{{game-id}}", game["id"])
             _, intro_meta, notes = (root / source_path(route)).read_text().split("---", 2)
@@ -300,6 +312,12 @@ def load_pages(root: Path) -> dict[str, GuidePage]:
                 if game["reset"]
                 else "非対応。"
             )
+            if game["reset"]:
+                policy = game["reset"]
+                operations += (
+                    f" この参考Gameのfixed seed {policy['fixed_seed']}、"
+                    f"直近{policy['retain_previous']}個のmanaged旧worldを保持します。"
+                )
             operations += (
                 " BACKUPは正常停止中（STOPPED/HEALTHY）専用で、共有Data EBS全体を保護します。"
             )
@@ -366,6 +384,10 @@ def listings(page: GuidePage, pages: dict[str, GuidePage], root: Path) -> str:
         "games": tuple(r for r in pages if r.startswith("games/")),
         "commands": tuple(r for r in pages if r.startswith("commands/")),
     }
+    if page.route == "games":
+        from wishicraft.game_discovery import GUIDE_SLOT, GUIDE_UNAVAILABLE
+
+        return GUIDE_SLOT + GUIDE_UNAVAILABLE
     if page.route not in groups:
         return ""
     games = {f"games/{g['slug']}": g for g in public_games(root)}
@@ -451,7 +473,7 @@ def page_html(page: GuidePage, pages: dict[str, GuidePage], root: Path) -> str:
 <main id="content" tabindex="-1"><nav class="breadcrumbs" aria-label="現在位置">{crumbs}</nav>
 <h1>{escape(page.title)}</h1><p class="summary">{escape(page.summary)}</p>
 {conditions}{warning}{toc_html}{body_html}{back}
-</main><footer>dev環境の静的利用案内です。現在の状態はDiscordの
+</main><footer>dev環境の利用案内です。現在の状態はDiscordの
 <a href="{relative_url(page.route, "commands/status")}">/mc status</a> で確認してください。</footer>
 <p id="copy-feedback" class="copy-feedback" role="status" aria-live="polite"></p></body></html>
 '''
