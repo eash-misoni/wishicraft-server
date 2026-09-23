@@ -34,6 +34,18 @@ def transition(
             raise ValueError("maintenance already open, including expired/incident leases")
         if not lease_active(lease, now=now):
             raise ValueError("new maintenance lease is not active")
+    elif event == "recover-restore":
+        if (
+            not isinstance(previous, dict)
+            or previous.get("status") not in {"ACTIVE", "INCIDENT"}
+            or lease_active(previous, now=now)
+            or not lease_active(lease, now=now)
+            or previous.get("id") != lease.get("previous_maintenance_id")
+            or previous.get("id") == lease.get("id")
+            or previous.get("stage") != lease.get("stage")
+            or not lease.get("restore_operation_id")
+        ):
+            raise ValueError("invalid RESTORE maintenance recovery")
     elif event not in {"end", "incident"} or not isinstance(previous, dict):
         raise ValueError("maintenance transition requires an existing lease")
     elif previous.get("id") != lease.get("id") or previous.get("status") == "ENDED":
@@ -89,6 +101,9 @@ def transition(
                         "recorded_at": int(now.timestamp()),
                         "maintenance": lease,
                         "subject_system_id": system_id,
+                        **(
+                            {"previous_maintenance": previous} if event == "recover-restore" else {}
+                        ),
                     }
                 ),
                 "ConditionExpression": "attribute_not_exists(system_id)",

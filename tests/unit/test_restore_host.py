@@ -12,6 +12,57 @@ from wishicraft.artifacts import restore_host, restore_tree
 from wishicraft.artifacts import targeted_runtime as host
 
 
+@pytest.mark.parametrize(
+    "change", ["incident", "replaced", "expired", "system", "revision", "operation"]
+)
+def test_host_rechecks_current_authority_at_each_boundary(
+    monkeypatch: pytest.MonkeyPatch, change: str
+) -> None:
+    import copy
+    import time
+
+    lease = {
+        "id": "maint-1",
+        "status": "ACTIVE",
+        "stage": "dev",
+        "started_at": int(time.time()) - 10,
+        "expires_at": int(time.time()) + 600,
+    }
+    envelope = {
+        "plan": {"system_id": "system", "stage": "dev"},
+        "maintenance": copy.deepcopy(lease),
+        "maintenance_id": "maint-1",
+        "instance_id": "i-test",
+        "system_state_table": "state",
+        "protection_revision": 7,
+    }
+    state = {
+        "system_id": "system",
+        "maintenance": lease,
+        "desired_state": "STOPPED",
+        "target_instance_id": "i-test",
+        "desired_revision": 7,
+    }
+    config = {"system_id": "system"}
+    monkeypatch.setattr(host, "item", lambda *args: state)
+    restore_host.maintenance_fence(config, envelope)
+    if change == "incident":
+        lease["status"] = "INCIDENT"
+    elif change == "replaced":
+        lease["id"] = "maint-2"
+    elif change == "expired":
+        lease["expires_at"] = int(time.time()) - 1
+        envelope["maintenance"] = copy.deepcopy(lease)
+    elif change == "system":
+        config["system_id"] = "other"
+    elif change == "revision":
+        state["desired_revision"] = 9
+    else:
+        state["current_operation_id"] = "op-active"
+    with pytest.raises(ValueError, match="RESTORE_HOST_"):
+        restore_host.maintenance_fence(config, envelope)
+
+
 def test_helper_upgrade_is_exact_and_resumable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -54,15 +105,41 @@ def test_read_only_mount_precedes_tree_read_and_is_unmounted(
     artifacts.mkdir()
     (artifacts / "manifest.json").write_text("{}")
     config = tmp_path / "config.json"
-    config.write_text(json.dumps({"instance_id": "i-test", "lock_name": "global"}))
+    config.write_text(
+        json.dumps({"instance_id": "i-test", "lock_name": "global", "system_id": "system"})
+    )
     monkeypatch.setattr(host, "ROOT", root)
     monkeypatch.setattr(host, "CONFIG", config)
     monkeypatch.setattr(host, "ARTIFACTS", artifacts)
     monkeypatch.setattr(host, "actual_instance", lambda: "i-test")
     monkeypatch.setattr(host, "inspect", lambda: [])
     monkeypatch.setattr(host, "stopped_environment", lambda: None)
+    import time
+
+    lease = {
+        "id": "maint-test",
+        "status": "ACTIVE",
+        "stage": "dev",
+        "started_at": int(time.time()) - 10,
+        "expires_at": int(time.time()) + 600,
+    }
+    state = {
+        "system_id": "system",
+        "target_instance_id": "i-test",
+        "desired_state": "STOPPED",
+        "desired_revision": 1,
+        "maintenance": lease,
+    }
     monkeypatch.setattr(
-        host, "item", lambda *args: {} if args[1] == "locks_table" else {"world": {}}
+        host,
+        "item",
+        lambda *args: (
+            state
+            if args[1] == "restore_state_table"
+            else {}
+            if args[1] == "locks_table"
+            else {"world": {}}
+        ),
     )
     from types import SimpleNamespace
 
@@ -72,7 +149,7 @@ def test_read_only_mount_precedes_tree_read_and_is_unmounted(
     mount = tmp_path / "mount"
     monkeypatch.setattr(restore_host, "MOUNT", mount)
     monkeypatch.setattr(restore_host, "OWNER_UID", os.getuid())
-    monkeypatch.setattr(restore_host, "install_helpers", lambda updates: None)
+    monkeypatch.setattr(restore_host, "install_helpers", lambda updates, **kwargs: None)
     commands: list[list[str]] = []
     volume = "vol-0123456789abcdef0"
 
@@ -132,11 +209,17 @@ def test_read_only_mount_precedes_tree_read_and_is_unmounted(
         {
             "plan": {
                 "game_id": "game-test",
+                "system_id": "system",
+                "stage": "dev",
                 "previous_world": {},
                 "package": {},
                 "source_volume_id": "vol-other",
                 "operation_id": "op-test",
             },
+            "maintenance": lease,
+            "maintenance_id": lease["id"],
+            "system_state_table": "state",
+            "protection_revision": 1,
             "volume_id": volume,
             "instance_id": "i-test",
             "expires_at": int(time.time()) + 600,

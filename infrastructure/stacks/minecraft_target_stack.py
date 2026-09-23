@@ -111,6 +111,19 @@ class MinecraftTargetStack(Stack):
                 ],
             )
         )
+        # RESTORE host fencing reads only this system's current maintenance authority.
+        role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["dynamodb:GetItem"],
+                resources=[
+                    f"arn:aws:dynamodb:{stage.aws_region}:{stage.aws_account_id}:table/"
+                    + resource_name(project.resource_prefix, stage.stage, "system-state")
+                ],
+                conditions={
+                    "ForAllValues:StringEquals": {"dynamodb:LeadingKeys": [project.system_id]}
+                },
+            )
+        )
         heartbeat_table_name = resource_name(
             project.resource_prefix, stage.stage, "runtime-heartbeats"
         )

@@ -94,6 +94,12 @@ def prepare(
     uid: int = 993,
     gid: int = 993,
 ) -> dict[str, Any]:
+    def guarded_atomic(path: Path, value: str) -> None:
+        verify()
+        original_atomic(path, value)
+
+    original_atomic = atomic
+    atomic = guarded_atomic
     verify()
     source = source_path(mount, plan)
     level = level_name(plan)
@@ -118,6 +124,7 @@ def prepare(
         if owner["phase"] == "prepared":
             if inspect(target / "server", plan) != owner["prepared_tree"]:
                 raise ValueError("RESTORE_PREPARED_CHANGED")
+            verify()
             cleanup_attempts(target, owner)
             return owner
         if owner["phase"] != "preparing":
@@ -162,6 +169,7 @@ def prepare(
         if shutil.disk_usage(target).free < before["expanded_size"] + imported.RESERVE:
             raise ValueError("RESTORE_INSUFFICIENT_CAPACITY")
         inspect(source, plan)
+        verify()
         candidate = Path(tempfile.mkdtemp(prefix="staging-", dir=target))
         owner = {**owner, "attempts": [*owner.get("attempts", []), candidate.name]}
         atomic(owner_file, packages.canonical(owner))
@@ -172,6 +180,7 @@ def prepare(
         elif loader == "paper":
             names |= imported.CONFIGS
         for name in sorted(names):
+            verify()
             path = source / name
             if not path.exists():
                 if name == level or loader == "paper":
@@ -180,7 +189,10 @@ def prepare(
             destination = candidate / name
             destination.parent.mkdir(parents=True, exist_ok=True)
             if path.is_dir():
+                # A copy is private staging, not publication. Recheck after this bounded
+                # tree copy; invoking AWS CLI for every file would exhaust the SSM deadline.
                 shutil.copytree(path, destination)
+                verify()
                 if imported.tree(destination) != imported.tree(path):
                     raise ValueError("RESTORE_COPY_HASH")
             else:
@@ -190,6 +202,7 @@ def prepare(
         # Keep current server policy, including OP/ban files. Snapshot access files never enter
         # staging. Whitelist is subsequently projected from the current control plane at START.
         for name in worlds.CONFIG_FILES:
+            verify()
             path = current / name
             if path.exists():
                 shutil.copyfile(path, candidate / name)
@@ -207,6 +220,7 @@ def prepare(
         )
         if imported.tree(source) != before:
             raise ValueError("RESTORE_SOURCE_CHANGED")
+        verify()
         for path in [candidate, *candidate.rglob("*")]:
             os.chown(path, uid, gid)
             path.chmod(0o750 if path.is_dir() else 0o640)
@@ -237,6 +251,7 @@ def prepare(
     else:
         if candidate.is_symlink() or inspect(candidate, plan) != receipt["prepared_tree"]:
             raise ValueError("RESTORE_CANDIDATE_CHANGED")
+        verify()
         os.rename(candidate, server)
     worlds.sync_directory(target)
     verify()
@@ -257,6 +272,7 @@ def prepare(
         },
     }
     atomic(owner_file, packages.canonical(owner))
+    verify()
     cleanup_attempts(target, owner)
     return owner
 

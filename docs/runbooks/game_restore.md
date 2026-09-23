@@ -1,7 +1,8 @@
 # Operator Game RESTORE
 
 [D-113 contract and candidate inventory](../reviews/game_restore.md).
-Production qualification is pending. Do not treat repository tests as a mounted
+Real RESTORE qualification is pending. This is a plan requiring separate approval;
+no command below is authorized by the repository-only review. Do not treat repository tests as a mounted
 snapshot, successful START or final cleanup proof.
 
 ## Execution checkpoints
@@ -32,7 +33,8 @@ snapshot, successful START or final cleanup proof.
    target EC2**, wait for SSM and a fresh normal host probe proving no container,
    expected production mount, no listener/Game and absent DNS. This is the D-111
    host-work step, not ordinary Minecraft START or an unleased maintenance boot.
-7. Run `attach` until attachment is ATTACHED; transition states are observations,
+7. After separately approved application of the reviewed host SystemState GetItem
+   policy (one table/LeadingKey; no EBS permissions), run `attach` until attachment is ATTACHED; transition states are observations,
    not completion. Run `prepare` once. The fixed SSM payload verifies host/package,
    mount, no Lock/container and unexpired maintenance window. It upgrades only the
    two exact reviewed helper predecessors (`reset_worlds.py`, `world_import.py`),
@@ -45,8 +47,8 @@ snapshot, successful START or final cleanup proof.
    by exact operation/comment/parameters; absence never authorizes another send.
    `retry-prepare` is allowed only after a known command has definitely Failed with
    a positive exit code, no active SSM, and a fresh idle-host observation. It records
-   the failed command before permitting the same plan's next copy attempt. Timeout,
-   cancellation and outcome unknown require investigation, not automatic retry.
+   the failed command before permitting the same plan's next copy attempt. TimedOut/Cancelled require actual EC2 stopped before explicit retry. Running or
+   unresolved/ambiguous transport outcomes never authorize automatic redispatch.
 9. Verify source and prepared hashes, previous tree and other Games unchanged, no
    active SSM/process, then normally stop EC2 under the same maintenance session.
 10. With stopped EC2, run `commit`. The conditional transaction advances only the
@@ -63,7 +65,7 @@ snapshot, successful START or final cleanup proof.
     generation files and restored content against saved pre-START copy hashes;
     Minecraft may legitimately change level.dat/chunks during START.
 13. Use normal STOP. Record final EC2 stopped, STOPPED/HEALTHY, all alarms normal,
-    Lock/Current/workflow/SSM/DNS absent, both queues empty, previous generation
+    Lock/Current/workflow/SSM/DNS absent, all deployed queues empty, previous generation
     present, source snapshot unchanged and temporary volume/staging cleanup complete.
 
 Checkpoint syntax after planning:
@@ -113,5 +115,113 @@ environment issue. The next full run passed 1715 tests. Final repository validat
 cached bundling dependencies and `UV_OFFLINE=1`, passed **1727 tests**, Ruff lint/format,
 and mypy (246 source files). Four synth contexts passed: frozen Phase 1 (synth only),
 Target, base Control Plane and configured two-Game/RESET/CREATE/whitelist/package Control Plane.
-CI and real dev evidence remain to be recorded.
+The original implementation CI passed all three workflows (5695049).
+The interrupted historical dev attempt reached only PLANNED; see the pause evidence.
+The present recovery revision validation is recorded separately below.
 Docker CLI is unavailable locally; do not label mocked mount/EC2 tests real integration.
+
+
+## Expiry / interruption matrix (separate execution approval required)
+
+Never mutate raw maintenance or rollback_dispatch fields. Do not delete world data
+merely to make closeout possible. Retain the journal, owner receipts and snapshots.
+
+```sh
+tools/dev-env run -- python -m wishicraft.restore_operator recover-maintenance --maintenance-id NEW_UNIQUE_APPROVED_LEASE --previous-maintenance-id EXACT_EXPIRED_OR_INCIDENT_LEASE --operation-id RESTORE_OPERATION_ID --duration-seconds 3600 --execute
+```
+
+This records a replacement lease and complete previous lease atomically with fresh
+state/Lock fencing; normal Admission stays closed. It does not boot/stop EC2, mount,
+copy, select a Game, or silently renew a lease. Capture stdout and new evidence.
+On a lost transaction reply, read status and the new lease's recover-restore audit;
+do not invent another ID. Verify suppressor eligibility from actual observations.
+
+| Interrupted checkpoint | Resume under a new approved lease | Data/resource protection |
+|---|---|---|
+| PLANNED / CREATE_INTENT | Recheck Desired revision; volume discovers exact tagged result before stable-token create | Legacy plan lacking revision requires new qualifying BACKUP and new request; never patch old plan |
+| VOLUME_CREATED | Observe exact volume, attach after approved idle-host boot | Original Data EBS stays attached and unchanged |
+| PREPARE_DISPATCH / copy partial | collect exact command first; definite Failed permits retry-prepare; then prepare uses a new private staging attempt | Existing owner/receipt/hash decides recovery; no overwrite of current server |
+| SSM reply lost | collect by exact operation/payload/instance/ID; none or duplicates stop | No blind redispatch |
+| TimedOut / Cancelled | Observe terminal SSM, prove Minecraft absent, obtain separate approval for normal EC2 stop if necessary; after actual stopped, explicit retry-prepare/retry-rollback; only then boot under recovered maintenance | Stop is never Force; unknown Minecraft/save state blocks this path. Stopped host proves old process cannot overlap retry |
+| PREPARED | Collect success if needed; stop idle EC2; commit only with unchanged protection revision/world/package | Retain old and prepared trees; no recopy is needed for recorded success |
+| COMMITTED, volume remains | Stopped host permits cleanup through persisted detach/delete intent/readback | Old/new world remain; COMMITTED is not READY |
+| Rollback check Failed | retry-rollback archives reconciled failed command; check-rollback and collect-rollback again | No manual dispatch clearing |
+| Rollback check Success, lease expired | collect-rollback accepts exact historical proof for audit; retry-rollback under new lease invalidates it; check/collect again, stop EC2, rollback | Selection requires proof for the current lease |
+| Protection revision changed | Stop forward execution; clean temporary resource under valid lease, preserve old audit and owned staged data; new BACKUP/request requires separate approval | Same world ID does not imply unchanged bytes; partial data is retained for review, not silently discarded |
+
+A new recovery lease can be issued on a positively idle running host after terminal
+work, or on a stopped host. Therefore cleanup does not require ending the old lease
+first. A running host with unknown/timed-out transport must be safely stopped under
+explicit recovery approval before this shortcut is eligible. No container/unknown
+mount/DNS/Lock/active work can be waived by marking a lease INCIDENT.
+
+## Proposed dev proof (not executed in this review)
+
+Candidate: Vanilla B, historical source `snap-0be8e05ab05d70e84` (2026-09-12
+10:31:35.625 UTC, source generation 1, legacy server path). Its schema-2 provenance
+and same Vanilla 26.2 package were historically verified. Re-read current state,
+source ownership/provenance and availability immediately before approval/execution.
+Do not choose vps-survival. Neither candidate inventory nor prior ordinary Vanilla B
+START is proof of a restored START.
+
+The approval bundle must name account/profile/instance/Data EBS, source/Game,
+new request, temporary-volume tags/AZ/encryption, narrow Target GetItem policy
+application (review a no-replacement diff), the two exact host helper updates,
+maintenance/recovery TTLs and these specific operations:
+
+1. Fresh qualifying normal BACKUP of current stopped content. The old protection
+   snapshot and PLANNED journal from the pause are historical, not fresh authority.
+   If current Game cannot use existing BACKUP IAM, stop for a narrow reviewed fix;
+   do not secretly switch/start Games as a workaround in this approval.
+2. Formal maintenance and positive suppression proof. Capture full tree hashes of
+   previous and other Game server directories, metadata and current access policies.
+3. Create/discover one tagged temporary EBS, attach, verify device serial and actual
+   readonly XFS options. Reject source needing journal replay or filesystem repair.
+4. Check source path/owner/package/NBT and record full source world hash plus selected
+   content landmarks (seed, known region/player data) before copy. Compare staged
+   world hash with source exactly. No snapshot-time whole-world hash is claimed.
+5. Observe PREPARED; prove previous/other tree hashes unchanged and source unmodified.
+   Normal maintenance EC2 stop, conditional commit, cleanup temporary EBS and close
+   maintenance. Verify source snapshot still exists and retained owners are protected.
+6. Normal START of restored path; verify runtime bind/receipt, READY, Reconcile,
+   heartbeat, materialization and selected saved content. Post-START world files may
+   legitimately change, so use the pre-START exact-copy hash plus meaningful landmarks.
+7. Normal STOP; demonstrate explicit rollback even after successful START: new formal
+   maintenance, check-rollback/collect-rollback, stopped-host rollback CAS, retain both
+   directories/high-water counter. End maintenance, normal START of original path,
+   verify original content, normal STOP. Do not manufacture a failed Minecraft boot.
+8. Exercise one controlled interrupted checkpoint on this test Game under the approved
+   bundle; matrix cases not exercised remain repository-only evidence. Capture old/new
+   lease IDs and prove old payload refusal without touching current world.
+9. Finish STOPPED/HEALTHY, EC2 stopped, maintenance ENDED, alarms normal, no Lock,
+   Current Operation, running workflow, active SSM/session or DNS; all queues empty,
+   no temporary EBS/mount or disposable staging. Retained generations/owner/validated
+   receipts are intentional recovery data. Record scope of any remaining untested cases.
+
+## Repository review validation
+
+Local recovery review: 1766 tests passed, Ruff lint/format and mypy (247 files)
+passed. Four local CDK synth contexts passed (Phase 1, Target, base and configured
+Control Plane). A local `cdk diff --template` against 5695049 shows one added
+GetItem statement on `wc-dev-system-state`, constrained to `wishicraft-main`, plus
+CDK path metadata; no resource properties outside that policy change. This is not
+a comparison with the deployed stack. IAM deployment is not approved here.
+
+Regression coverage includes exact rollback send-loss reconciliation, failed/stale
+proof retry, ambiguous/running/timeout refusal, stopped-host terminal-timeout retry,
+all four interrupted phases under stopped/running recovery, revocation at host
+boundaries, changed Desired revision, copy interruption in all three runtime trees,
+managed previous-world protection through subsequent RESET cleanup, and the exact
+one-key IAM allowance. EBS/mount lifecycle remains mocked; temporary filesystem
+copy/hash/rename tests use real local files.
+
+Original candidate CI: [CI](https://github.com/eash-misoni/wishicraft-server/actions/runs/35752151440),
+[NeoForge](https://github.com/eash-misoni/wishicraft-server/actions/runs/35752151394),
+[Paper](https://github.com/eash-misoni/wishicraft-server/actions/runs/35752151538) all succeeded.
+The recovery commit's CI result is reported with its final commit in the handoff.
+Initial review tests had three fixture signature failures plus two network-dependent
+bundling failures; the former were corrected without changing saved evidence, and
+hash-locked cached bundling with UV_OFFLINE resolved the latter. No failure was
+relabeled as a pass. No real AWS inspection,
+RESTORE, BACKUP, START, reference switch, temporary volume or IAM deployment was
+performed during this repository-only review. Mocked EBS/mount tests are not XFS proof.

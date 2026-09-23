@@ -70,6 +70,16 @@ minutes before expires_at. Plan work and closeout before that cutoff. Do not tre
 status alone as proof that actions are suppressed. Delayed/missing observer samples open
 notifications. The metrics/state continue to show the true abnormal condition throughout.
 
+## RESTORE-scoped recovery candidate
+
+The repository-only D-113 revision adds `restore_operator recover-maintenance` for
+an existing RESTORE journal and exact expired/INCIDENT lease. It atomically installs
+a separately approved new lease and retains the previous lease in an audit, while
+Admission stays closed. No general auto-renewal or forced host stop is introduced.
+[Recovery matrix and separate dev approval](game_restore.md#expiry--interruption-matrix-separate-execution-approval-required).
+This candidate has not been applied or qualified in dev; the historical D-111
+execution evidence below is unchanged.
+
 ## Expiry and failed closeout
 
 At `expires_at <= now`, the record remains auditable but is inactive; observer publishes

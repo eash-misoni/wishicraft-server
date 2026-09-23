@@ -72,7 +72,7 @@ def setup() -> tuple[Database, RestoreRepository, dict[str, Any], dict[str, Any]
         plan,
         lease=lease,
         now=NOW,
-        protection={"snapshot_id": "snap-protection"},
+        protection={"snapshot_id": "snap-protection", "desired_revision": 7},
         current_package={"package_id": "vanilla"},
     )
     return db, repo, lease, record

@@ -23,7 +23,7 @@ OWNER_GID = 0
 HELPERS = Path("/usr/local/libexec/wishicraft")
 
 
-def install_helpers(updates: dict[str, Any]) -> None:
+def install_helpers(updates: dict[str, Any], *, verify: Any = lambda: None) -> None:
     """Only two reviewed helper predecessors; never repair arbitrary runtime drift."""
     predecessors = {
         "reset_worlds.py": "7dc80ce2469c454a32cb5c2dd6ab673ef1e216544c99acf057bb693d81f61b41",
@@ -50,6 +50,7 @@ def install_helpers(updates: dict[str, Any]) -> None:
     for name, previous in predecessors.items():
         target = parent / name
         value = updates[name]
+        verify()
         if target.read_text() == value:
             continue
         if hashlib.sha256(target.read_bytes()).hexdigest() != previous:
@@ -67,11 +68,43 @@ def install_helpers(updates: dict[str, Any]) -> None:
                 os.fchmod(stream.fileno(), 0o644)
                 stream.flush()
                 os.fsync(stream.fileno())
+            verify()
             os.replace(temporary, target)
             host.reset_module().sync_directory(parent)
         finally:
             if os.path.exists(temporary):
                 os.unlink(temporary)
+
+
+def maintenance_fence(config: dict[str, Any], envelope: dict[str, Any]) -> None:
+    """Consistent authority read, including revocation; no cached envelope-only lease."""
+    plan = envelope["plan"]
+    if config["system_id"] != plan["system_id"]:
+        raise ValueError("RESTORE_HOST_SYSTEM")
+    state = host.item(
+        {**config, "restore_state_table": envelope["system_state_table"]},
+        "restore_state_table",
+        "system_id",
+        config["system_id"],
+    )
+    lease = state.get("maintenance", {})
+    now = datetime.now(timezone.utc).timestamp()
+    if (
+        state.get("system_id") != plan["system_id"]
+        or state.get("target_instance_id") != envelope["instance_id"]
+        or state.get("desired_state") != "STOPPED"
+        or state.get("current_operation_id") is not None
+        or lease != envelope["maintenance"]
+        or lease.get("id") != envelope["maintenance_id"]
+        or lease.get("stage") != plan["stage"]
+        or lease.get("status") != "ACTIVE"
+        or not lease.get("started_at", now + 1) <= now < lease.get("expires_at", 0) - 60
+        or (
+            envelope.get("action") != "verify-rollback"
+            and state.get("desired_revision") != envelope["protection_revision"]
+        )
+    ):
+        raise ValueError("RESTORE_HOST_MAINTENANCE")
 
 
 def run(envelope: dict[str, Any]) -> dict[str, Any]:
@@ -81,6 +114,7 @@ def run(envelope: dict[str, Any]) -> dict[str, Any]:
         config = json.loads(host.CONFIG.read_text())
 
         def verify() -> None:
+            maintenance_fence(config, envelope)
             if (
                 datetime.now(timezone.utc).timestamp() + 60 >= envelope["expires_at"]
                 or host.actual_instance() != envelope["instance_id"]
@@ -129,7 +163,7 @@ def run(envelope: dict[str, Any]) -> dict[str, Any]:
                 "previous_tree": observed,
                 "maintenance_id": envelope["maintenance_id"],
             }
-        install_helpers(envelope["helper_updates"])
+        install_helpers(envelope["helper_updates"], verify=verify)
         verify()
         volume = envelope["volume_id"]
         if re.fullmatch(r"vol-[a-f0-9]{17}", volume) is None or volume == plan["source_volume_id"]:
@@ -161,6 +195,7 @@ def run(envelope: dict[str, Any]) -> dict[str, Any]:
             or info.st_mode & (0o022 if points else 0o077)
         ):
             raise ValueError("RESTORE_MOUNT_DIRECTORY")
+        verify()
         host.execute(["blockdev", "--setro", device])
         if host.execute(["blockdev", "--getro", device]).strip() != "1":
             raise ValueError("RESTORE_DEVICE_NOT_READ_ONLY")

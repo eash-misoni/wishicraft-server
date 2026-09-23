@@ -22,8 +22,9 @@ from botocore.config import Config  # type: ignore[import-untyped]
 from wishicraft.config import load_configuration
 from wishicraft.endpoint import DnsState, Route53Observer
 from wishicraft.game_creation import registry_ids
-from wishicraft.maintenance import lease_active
+from wishicraft.maintenance import lease_active, maintenance_metrics, new_lease
 from wishicraft.maintenance_operator import invoke, item, no_external_work, safe_state
+from wishicraft.maintenance_repository import transition
 from wishicraft.reconcile import TargetResolver
 from wishicraft.restore_repository import RestoreRepository
 from wishicraft.restore_source import make_plan, request_operation, verified_snapshot
@@ -286,8 +287,112 @@ class Operator:
                 "operation_id": protection["operation_id"],
                 "captured_at": protection["snapshot_start_time"],
                 "config_digest": self.runtime_digest,
+                "desired_revision": state["desired_revision"],
             },
         )
+
+    def recover_maintenance(
+        self, operation: str, previous_id: str, duration: int
+    ) -> dict[str, Any]:
+        """Explicitly approved replacement lease for this RESTORE; never renew an old lease."""
+        record = normalized(self.repo.read(operation))
+        if not record or record["plan"]["system_id"] != self.cfg.project.system_id:
+            raise ValueError("RESTORE_UNKNOWN_REQUEST")
+        no_external_work(
+            self.session, stack="WishicraftControlPlaneStack-" + self.stage, instance_id=self.target
+        )
+        invoke(self.functions, self.prefix + "reconcile")
+        state = self.state()
+        previous = state.get("maintenance", {})
+        now = datetime.now(UTC)
+        if (
+            previous.get("id") != previous_id
+            or previous.get("stage") != self.stage
+            or previous.get("status") not in {"ACTIVE", "INCIDENT"}
+            or lease_active(previous, now=now)
+            or previous_id == self.maintenance_id
+            or state.get("current_operation_id") is not None
+        ):
+            raise ValueError("RESTORE_RECOVERY_LEASE_CONFLICT")
+        lock = item(self.ddb, self.env["LOCKS_TABLE"], "lock_name", self.cfg.stage.global_lock_name)
+        actual = self.ec2.describe_instances(InstanceIds=[self.target])["Reservations"][0][
+            "Instances"
+        ][0]
+        lease = new_lease(
+            lease_id=self.maintenance_id,
+            actor=self.session.client("sts").get_caller_identity()["Arn"],
+            reason="restore-recovery",
+            stage=self.stage,
+            duration=duration,
+            now=now,
+        )
+        lease.update(previous_maintenance_id=previous_id, restore_operation_id=operation)
+        metrics = maintenance_metrics(
+            state={**state, "maintenance": lease},
+            lock=lock,
+            instance=actual,
+            now=now,
+            freshness_seconds=120,
+        )
+        if metrics["MaintenanceSuppressionEligible"] != 1:
+            raise ValueError("RESTORE_RECOVERY_HOST_NOT_QUIESCENT")
+        if actual["State"]["Name"] == "running":
+            # A timed-out shell may outlive its SSM transport; stopped EC2 proves it cannot.
+            for page in self.ssm.get_paginator("list_commands").paginate(InstanceId=self.target):
+                for command in page["Commands"]:
+                    if operation in command.get("Comment", "") and command["Status"] not in {
+                        "Success",
+                        "Failed",
+                    }:
+                        raise ValueError("RESTORE_RECOVERY_COMMAND_UNKNOWN_STOP_HOST_FIRST")
+        transition(
+            self.ddb,
+            table=self.env["SYSTEM_STATE_TABLE"],
+            locks_table=self.env["LOCKS_TABLE"],
+            system_id=self.cfg.project.system_id,
+            lock_name=self.cfg.stage.global_lock_name,
+            state=state,
+            lease=lease,
+            event="recover-restore",
+            now=now,
+        )
+        if self.state().get("maintenance") != lease:
+            raise ValueError("RESTORE_RECOVERY_READBACK")
+        return {"maintenance": lease, "phase": record["phase"]}
+
+    def rollback_command(self, record: dict[str, Any]) -> dict[str, Any]:
+        excluded = {c["command_id"] for c in record.get("rollback_history", [])}
+        commands = [
+            c
+            for page in self.ssm.get_paginator("list_commands").paginate(InstanceId=self.target)
+            for c in page["Commands"]
+            if c.get("Comment") == "Wishicraft rollback " + record["plan"]["operation_id"]
+            and c["CommandId"] not in excluded
+        ]
+        if (
+            len(commands) != 1
+            or commands[0].get("Parameters", {}).get("commands") != [record["rollback_dispatch"]]
+            or commands[0].get("InstanceIds") != [self.target]
+            or record.get("rollback_command_id") not in (None, commands[0]["CommandId"])
+        ):
+            raise ValueError("RESTORE_ROLLBACK_CHECK_UNKNOWN")
+        return dict(
+            self.ssm.get_command_invocation(
+                CommandId=commands[0]["CommandId"], InstanceId=self.target
+            )
+        )
+
+    def envelope(self, record: dict[str, Any], lease: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "plan": record["plan"],
+            "instance_id": self.target,
+            "expires_at": int(lease["expires_at"]),
+            "maintenance_id": lease["id"],
+            "maintenance": lease,
+            "system_state_table": self.env["SYSTEM_STATE_TABLE"],
+            "protection_revision": record["pre_restore_backup"].get("desired_revision"),
+            "config_digest": record["pre_restore_backup"]["config_digest"],
+        }
 
     def action(self, action: str, operation: str) -> dict[str, Any]:
         record = normalized(self.repo.read(operation))
@@ -297,6 +402,13 @@ class Operator:
             return dict(record)
         lease, actual = self.preflight(external_work=action in {"collect", "collect-rollback"})
         plan = record["plan"]
+        if (
+            action in {"volume", "attach", "prepare", "retry-prepare", "commit"}
+            and record["phase"] != "COMMITTED"
+        ):
+            expected = record["pre_restore_backup"].get("desired_revision")
+            if expected is None or self.state().get("desired_revision") != expected:
+                raise ValueError("RESTORE_PROTECTION_STALE_NEW_REQUEST_REQUIRED")
         volume = RestoreVolume(
             self.ec2, plan, az=self.cfg.stage.availability_zone, instance=self.target
         )
@@ -314,16 +426,12 @@ class Operator:
                 raise ValueError("RESTORE_ROLLBACK_CHECK_PHASE")
             command = host_command(
                 {
+                    **self.envelope(record, lease),
                     "action": "verify-rollback",
-                    "plan": plan,
-                    "instance_id": self.target,
-                    "expires_at": int(lease["expires_at"]),
-                    "maintenance_id": lease["id"],
                     "previous_tree": record["host_receipt"]["previous_tree"],
-                    "config_digest": record["pre_restore_backup"]["config_digest"],
                 }
             )
-            record = save(rollback_dispatch=command)
+            record = save(rollback_dispatch=command, rollback_maintenance_id=lease["id"])
             response = self.ssm.send_command(
                 InstanceIds=[self.target],
                 DocumentName="AWS-RunShellScript",
@@ -335,22 +443,7 @@ class Operator:
         if action == "collect-rollback":
             if record["phase"] != "COMMITTED" or not record.get("rollback_dispatch"):
                 raise ValueError("RESTORE_ROLLBACK_CHECK_PHASE")
-            commands = [
-                c
-                for page in self.ssm.get_paginator("list_commands").paginate(InstanceId=self.target)
-                for c in page["Commands"]
-                if c.get("Comment") == "Wishicraft rollback " + operation
-            ]
-            if (
-                len(commands) != 1
-                or commands[0].get("Parameters", {}).get("commands")
-                != [record["rollback_dispatch"]]
-                or commands[0].get("InstanceIds") != [self.target]
-            ):
-                raise ValueError("RESTORE_ROLLBACK_CHECK_UNKNOWN")
-            response = self.ssm.get_command_invocation(
-                CommandId=commands[0]["CommandId"], InstanceId=self.target
-            )
+            response = self.rollback_command(record)
             if response["Status"] != "Success" or response["ResponseCode"] != 0:
                 raise ValueError("RESTORE_ROLLBACK_NOT_VERIFIED")
             proof = json.loads(response["StandardOutputContent"])
@@ -358,10 +451,42 @@ class Operator:
                 "operation_id": operation,
                 "rollback_verified": True,
                 "previous_tree": record["host_receipt"]["previous_tree"],
-                "maintenance_id": lease["id"],
+                "maintenance_id": record["rollback_maintenance_id"],
             }:
                 raise ValueError("RESTORE_ROLLBACK_PROOF")
             return save(rollback_receipt=proof)
+
+        if action == "retry-rollback":
+            self.idle_host()
+            if record["phase"] != "COMMITTED" or not record.get("rollback_dispatch"):
+                raise ValueError("RESTORE_ROLLBACK_CHECK_PHASE")
+            check_result = self.rollback_command(record)
+            failed = check_result["Status"] == "Failed" and check_result["ResponseCode"] > 0
+            quiesced = actual == "stopped" and check_result["Status"] in {"TimedOut", "Cancelled"}
+            obsolete = (
+                check_result["Status"] == "Success"
+                and check_result["ResponseCode"] == 0
+                and isinstance(record.get("rollback_maintenance_id"), str)
+                and (record.get("rollback_receipt") or {}).get("rollback_verified") is True
+                and (record.get("rollback_receipt") or {}).get("maintenance_id")
+                == record.get("rollback_maintenance_id")
+                and record.get("rollback_maintenance_id") != lease["id"]
+            )
+            if not (failed or obsolete or quiesced):
+                raise ValueError("RESTORE_ROLLBACK_RETRY_NOT_SAFE")
+            return save(
+                rollback_history=[
+                    *record.get("rollback_history", []),
+                    {
+                        "command_id": check_result["CommandId"],
+                        "status": check_result["Status"],
+                        "maintenance_id": record.get("rollback_maintenance_id"),
+                    },
+                ],
+                rollback_dispatch=None,
+                rollback_command_id=None,
+                rollback_receipt=None,
+            )
 
         if action == "volume":
             if record["phase"] not in {"PLANNED", "CREATE_INTENT", "VOLUME_CREATED"}:
@@ -388,11 +513,8 @@ class Operator:
                 raise ValueError("RESTORE_PREPARE_PHASE")
             command = host_command(
                 {
-                    "plan": plan,
+                    **self.envelope(record, lease),
                     "volume_id": record["volume_id"],
-                    "instance_id": self.target,
-                    "expires_at": int(lease["expires_at"]),
-                    "config_digest": record["pre_restore_backup"]["config_digest"],
                 }
             )
             record = save(phase="PREPARE_DISPATCH", host_command=command)
@@ -411,7 +533,9 @@ class Operator:
             failed = self.ssm.get_command_invocation(
                 CommandId=record["command_id"], InstanceId=self.target
             )
-            if failed["Status"] != "Failed" or failed["ResponseCode"] <= 0:
+            definite = failed["Status"] == "Failed" and failed["ResponseCode"] > 0
+            quiesced = actual == "stopped" and failed["Status"] in {"TimedOut", "Cancelled"}
+            if not (definite or quiesced):
                 raise ValueError("RESTORE_RETRY_REQUIRES_DEFINITE_FAILURE")
             return save(
                 phase="VOLUME_CREATED",
@@ -462,7 +586,7 @@ class Operator:
             if actual != "stopped":
                 raise ValueError("RESTORE_SELECTION_REQUIRES_STOPPED_EC2")
             if action == "rollback" and (
-                record.get("rollback_receipt", {}).get("maintenance_id") != lease["id"]
+                (record.get("rollback_receipt") or {}).get("maintenance_id") != lease["id"]
                 or record["rollback_receipt"].get("rollback_verified") is not True
             ):
                 raise ValueError("RESTORE_ROLLBACK_PROOF_REQUIRED")
@@ -495,6 +619,7 @@ def main() -> None:
         "action",
         choices=[
             "plan",
+            "recover-maintenance",
             "status",
             "volume",
             "attach",
@@ -506,12 +631,15 @@ def main() -> None:
             "rollback",
             "check-rollback",
             "collect-rollback",
+            "retry-rollback",
         ],
     )
     parser.add_argument("--stage", choices=["dev"], default="dev")
     parser.add_argument("--profile", default="wishicraft-dev")
     parser.add_argument("--maintenance-id", required=True)
     parser.add_argument("--operation-id")
+    parser.add_argument("--previous-maintenance-id")
+    parser.add_argument("--duration-seconds", type=int, default=3600)
     parser.add_argument("--game-id")
     parser.add_argument("--snapshot-id")
     parser.add_argument("--pre-backup-snapshot-id")
@@ -528,7 +656,13 @@ def main() -> None:
         stage=args.stage,
         maintenance_id=args.maintenance_id,
     )
-    if args.action == "plan":
+    if args.action == "recover-maintenance":
+        if not args.operation_id or not args.previous_maintenance_id:
+            parser.error("recovery requires RESTORE operation and exact previous maintenance ID")
+        result = operator.recover_maintenance(
+            args.operation_id, args.previous_maintenance_id, args.duration_seconds
+        )
+    elif args.action == "plan":
         if not all((args.game_id, args.snapshot_id, args.pre_backup_snapshot_id, args.request_id)):
             parser.error(
                 "plan requires Game, source snapshot, pre-backup snapshot and request identity"

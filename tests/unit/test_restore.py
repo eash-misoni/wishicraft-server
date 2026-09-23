@@ -183,7 +183,7 @@ def test_partial_copy_retry_uses_new_root(
     original = shutil.copytree
     with monkeypatch.context() as scoped:
 
-        def broken(source: Path, target: Path) -> None:
+        def broken(source: Path, target: Path, **kwargs: Any) -> None:
             target.mkdir()
             (target / "partial").write_text("interrupted")
             raise OSError("interrupted")
@@ -225,3 +225,69 @@ def test_rename_committed_before_owner_response_loss(
     assert world_import.tree(server) == saved
     assert world_import.tree(current) == before
     assert not list(server.parent.glob("staging-*"))
+
+
+def test_revocation_during_copy_preserves_both_sources_and_resumes(
+    trees: tuple[dict[str, Any], Path, Path],
+) -> None:
+    plan, mount, current = trees
+    original = world_import.tree(current)
+    snapshot = world_import.tree(mount)
+    target = Path(plan["target_data_source"])
+
+    def revoked() -> None:
+        if list(target.parent.glob("staging-*/**/r.0.0.mca")):
+            raise ValueError("RESTORE_HOST_MAINTENANCE")
+
+    with pytest.raises(ValueError, match="MAINTENANCE"):
+        restore_tree.prepare(
+            plan, mount, atomic=atomic, verify=revoked, uid=os.getuid(), gid=os.getgid()
+        )
+    assert not target.exists()
+    assert world_import.tree(current) == original
+    assert world_import.tree(mount) == snapshot
+    assert prepare(plan, mount)["phase"] == "prepared"
+    assert not list(target.parent.glob("staging-*"))
+
+
+def test_managed_previous_and_restored_world_are_retention_protected(
+    trees: tuple[dict[str, Any], Path, Path],
+) -> None:
+    plan, mount, legacy = trees
+    previous = reset_worlds.parent("game-test", "op-previous") / "server"
+    previous.parent.mkdir(parents=True)
+    shutil.copytree(legacy, previous)
+    atomic(
+        reset_worlds.owner_path(previous.parent),
+        json.dumps(
+            {
+                "phase": "initialized",
+                "plan": {
+                    "source": {"game_id": "game-test", "data_source": str(legacy)},
+                    "target": {"game_id": "game-test", "data_source": str(previous)},
+                },
+            }
+        ),
+    )
+    plan["previous_data_source"] = str(previous)
+    saved = world_import.tree(previous)
+    owner = prepare(plan, mount)
+    assert owner["protected"] is True
+    assert reset_worlds.record(reset_worlds.owner_path(previous.parent))["protected"] is True
+    restored = Path(plan["target_data_source"])
+    reset_worlds.initialized(
+        {"game_id": "game-test", "data_source": str(restored)}, atomic, require=True
+    )
+    if restore_tree.level_name(plan) == "world":
+        from tests.unit.test_reset_worlds import plan as reset_plan
+        from tests.unit.test_reset_worlds import prepare as reset_prepare
+        from tests.unit.test_reset_worlds import ready
+
+        current = restored
+        for number in range(1, 5):
+            document = reset_plan(current, number)
+            current = reset_prepare(document)
+            reset_worlds.cleanup(document, receipt=ready(document), atomic=atomic)
+    # Paper RESET remains disabled; its RESTORE owners use the same protection records.
+    assert world_import.tree(previous) == saved
+    assert restored.exists() and legacy.exists()

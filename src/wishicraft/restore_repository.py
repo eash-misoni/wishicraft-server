@@ -79,9 +79,17 @@ class RestoreRepository:
                 ),
             )
         try:
-            self.api.transact_write_items(
-                TransactItems=[*self.fences(lease, now), {"Put": write}, *(extra or [])]
-            )
+            fences = self.fences(lease, now)
+            if before.get("phase") == "PREPARED" and after["phase"] == "COMMITTED":
+                revision = after["pre_restore_backup"].get("desired_revision")
+                if revision is None:
+                    raise ValueError("RESTORE_PROTECTION_REVISION_MISSING")
+                check = fences[0]["ConditionCheck"]
+                check["ConditionExpression"] += " AND desired_revision = :protection_revision"
+                check["ExpressionAttributeValues"].update(
+                    encode({":protection_revision": revision})
+                )
+            self.api.transact_write_items(TransactItems=[*fences, {"Put": write}, *(extra or [])])
         except Exception:
             if self.read(after["plan"]["operation_id"]) != after:
                 raise

@@ -11,6 +11,32 @@ from infrastructure.app import build_app
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def test_restore_host_state_read_is_one_table_one_system_key() -> None:
+    stack = cast(
+        Stack,
+        build_app(ROOT, "dev", deployment="target").node.find_child("MinecraftTargetStack-dev"),
+    )
+    template = Template.from_stack(stack).to_json()
+    statements = [
+        s
+        for r in template["Resources"].values()
+        if r["Type"] == "AWS::IAM::Policy"
+        for s in r["Properties"]["PolicyDocument"]["Statement"]
+    ]
+    matching = [s for s in statements if "wc-dev-system-state" in str(s.get("Resource"))]
+    assert matching == [
+        {
+            "Action": "dynamodb:GetItem",
+            "Effect": "Allow",
+            "Resource": "arn:aws:dynamodb:ap-northeast-1:385526546525:table/wc-dev-system-state",
+            "Condition": {
+                "ForAllValues:StringEquals": {"dynamodb:LeadingKeys": ["wishicraft-main"]}
+            },
+        }
+    ]
+    assert not any("ec2:CreateVolume" in str(s) for s in statements)
+
+
 def test_control_plane_runtime_heartbeats_table_is_retained_ttl_enabled_and_minimal() -> None:
     template = Template.from_stack(
         cast(

@@ -1,6 +1,8 @@
 # D-113 Game RESTORE
 
-Status: implementation candidate; production qualification has not run.
+Status: repository recovery review candidate; real RESTORE qualification has not run.
+The current authorization covers repository work and an execution plan only; it does
+not authorize BACKUP, START, reference changes, IAM deployment or temporary AWS resources.
 Requirements: BAK-002/003/004/006, OPR-001/004/007/010, EC2-007/012 and the
 2026-09-23 RESTORE request. This is one operator-assisted restoration slice.
 
@@ -53,7 +55,9 @@ projected through the existing normal START path. Current server files are never
 included in operator output. RCON and other secrets remain local existing files.
 
 The initial operator path uses canonical AWS credentials and the D-111 maintenance
-admission fence. There is no new application Lambda, role, state machine or UI.
+admission fence. There is no new application Lambda, role, state machine or UI. Host fencing adds
+only GetItem on the existing SystemState table, constrained to this system LeadingKey.
+This narrow Target role policy change requires separately approved deployment.
 This is not an unadmitted START: BACKUP/START/STOP always use ordinary Admission.
 RESTORE itself is a durable maintenance-admin operation recorded under
 `SystemState.system_id=restore#<operation>` with `record_type=RESTORE`. It is not
@@ -66,7 +70,10 @@ SSM/DNS. Host work requires maintenance-controlled EC2, no container/listener an
 the normal host flock and Data EBS mount guard. Every journal/selection transaction
 checks the exact active maintenance lease, Desired STOPPED and no Current/Lock.
 Host payloads are fixed, authenticated operator SSM commands with expiry, instance,
-runtime/package and current-world checks; they never accept arbitrary source paths.
+runtime/package and current-world checks. At write checkpoints they consistently read
+the current SystemState, compare the complete lease/ID/status/stage and configured
+system/instance, and reject INCIDENT/replaced/expired leases, active Operation or
+changed protection revision; they never accept arbitrary source paths.
 The maintenance end procedure refuses active SSM. Expiry stops new mutations and
 restores notification eligibility semantics; it does not discard recovery records.
 
@@ -107,7 +114,11 @@ After host preparation and normal EC2 stop, one DynamoDB transaction moves the
 Game world reference and journal to COMMITTED. It compares the old world and current
 package and requires ACTIVE/MATERIALIZED. Before that transaction selection is
 unchanged. The destination number is N+1, or the next unused number after rollback;
-source generation numbers are never adopted. `world.generation_counter` records
+source generation numbers are never adopted. The unique current_id/path is the identity;
+the number is descriptive, not a universal count of worlds. Existing RESET changes
+only current_id and preserves both numeric fields. RESTORE alone advances its
+high-water counter; rollback restores the previous number but never lowers the counter.
+A later RESET therefore may share the same number while having a different world ID. `world.generation_counter` records
 the allocation high-water mark. It is not a snapshot-restored counter.
 
 Clean up the exact temporary volume only with EC2 stopped: non-force detach,
@@ -161,3 +172,42 @@ Future EXPORT can consume the same package-defined, validated durable-content tr
 and tree receipt, then create a bounded archive. Export must separately decide
 secret/config/access-policy exclusion and point-in-time capture. No EXPORT or
 generic archive endpoint is implemented here.
+
+
+## Recovery review against 5695049
+
+| Concern | Candidate gap | Repository correction / boundary |
+|---|---|---|
+| Rollback check retry | Any rollback_dispatch blocked a second check | Exact SSM reconciliation excludes recorded history; retry-rollback archives definite failure, or obsolete successful proof collected from an old lease. Current-lease proof remains mandatory for selection. |
+| Lost SSM reply | Ambiguity risk on redispatch | Match one command by operation, exact payload, instance and known ID when present. None/multiple/mismatch cannot authorize another send. |
+| Expired/INCIDENT maintenance | Cleanup and recovery could lack an active lease | recover-maintenance performs a RESTORE-scoped exact-old-lease CAS to a fresh unique approved lease, without reopening Admission. It archives the old lease and preserves all restore resources/journal phases. |
+| Host revocation | Only supplied expiry was checked | Consistent SystemState read at each publication/write checkpoint; exact current lease plus system/instance/Desired/Operation/protection checks. No cached lease can override INCIDENT. |
+| Interrupted protection | Same world metadata did not prove no intervening START | Plan records Desired revision; forward checkpoints and commit transaction require it unchanged. Legacy plans without this evidence cannot advance. Cleanup and explicit rollback remain available. |
+| Previous content | Existing retention protections | Previous managed owner and destination stay protected; legacy anchor stays retained. Tests preserve bytes across interrupted staging and verify conditional rollback. |
+
+The host fence is a last-authority-read check before bounded local work, not an
+atomic transaction spanning DynamoDB and filesystem I/O. Revocation during an
+already-started bounded tree copy can leave only owned staging. The copy is bounded
+by the existing IMPORT byte/file limits and SSM timeout, and is rechecked immediately
+afterwards. Per-file AWS CLI calls are intentionally avoided; no staged bytes become
+selected merely because a copy finished. Subsequent copy/config checkpoints, owner writes and final rename recheck; selection remains a separate conditional
+transaction. No claim of instantaneous cancellation or AWS/filesystem atomicity.
+
+PREPARED means copied/validated content, COMMITTED means selected reference, and
+normal START plus READY/content inspection means usable restored content. These
+are three distinct proofs. Provenance SHA authenticates metadata, source/copy SHA
+proves faithful extraction at restore time, and neither proves historical file
+integrity against a hash that the old backup never captured.
+
+Recovery never edits a dispatcher or lease record by hand. An active old lease is
+not renewed. Expired ACTIVE or INCIDENT can be replaced only with separate approval,
+fresh stopped/idle-host observations, absent Lock/Current/workflows/active SSM/DNS,
+and a matching existing RESTORE journal. Existing end remains a stopped-host closeout.
+For known terminal TimedOut/Cancelled commands, first prove EC2 stopped (no old
+process can survive), then retry-prepare/retry-rollback can archive that attempt.
+Running/unknown commands still block recovery; absent or ambiguous dispatch evidence
+is an investigation stop, not permission to resend.
+
+The historical dynamic-Game BACKUP IAM mismatch in the pause evidence is not fixed
+by this slice. No wider snapshot creation rights or automatic START workaround is
+included. The dev plan requires a separately reviewed usable pre-backup route.
