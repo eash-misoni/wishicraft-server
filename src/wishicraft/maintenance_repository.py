@@ -7,12 +7,30 @@ from typing import Any
 
 from boto3.dynamodb.types import TypeSerializer  # type: ignore[import-untyped]
 
-from wishicraft.maintenance import ADMISSION_CONDITION, lease_active
+from wishicraft.maintenance import ADMISSION_CONDITION, check_restore_lease, lease_active
 
 
 def encode(item: dict[str, Any]) -> dict[str, Any]:
     serializer = TypeSerializer()
     return {k: serializer.serialize(v) for k, v in item.items()}
+
+
+def check_restore_recovery(
+    record: dict[str, Any], previous: dict[str, Any], *, operation: str, system_id: str
+) -> None:
+    """The journal must have participated in this lease, not just exist in the system."""
+    check_restore_lease(previous, operation)
+    plan = record.get("plan", {})
+    if (
+        record.get("record_type") != "RESTORE"
+        or record.get("system_id") != "restore#" + operation
+        or plan.get("operation_id") != operation
+        or plan.get("system_id") != system_id
+        or plan.get("stage") != previous.get("stage")
+        or not previous.get("id")
+        or record.get("last_maintenance_id", record.get("maintenance_id")) != previous["id"]
+    ):
+        raise ValueError("RESTORE_RECOVERY_UNRELATED_LEASE")
 
 
 def transition(
@@ -26,6 +44,7 @@ def transition(
     lease: dict[str, Any],
     event: str,
     now: datetime,
+    restore_record: dict[str, Any] | None = None,
 ) -> None:
     """Caller supplies fresh external preflight; transaction fences all Admission writers."""
     previous = state.get("maintenance")
@@ -46,6 +65,12 @@ def transition(
             or not lease.get("restore_operation_id")
         ):
             raise ValueError("invalid RESTORE maintenance recovery")
+        check_restore_recovery(
+            restore_record or {},
+            previous,
+            operation=lease["restore_operation_id"],
+            system_id=system_id,
+        )
     elif event not in {"end", "incident"} or not isinstance(previous, dict):
         raise ValueError("maintenance transition requires an existing lease")
     elif previous.get("id") != lease.get("id") or previous.get("status") == "ENDED":
@@ -117,6 +142,41 @@ def transition(
                     "TableName": locks_table,
                     "Key": {"lock_name": {"S": lock_name}},
                     "ConditionExpression": "attribute_not_exists(lock_name)",
+                }
+            }
+        )
+    if event == "recover-restore":
+        assert restore_record is not None
+        assert isinstance(previous, dict)
+        # The pointer advances with the lease/audit, including recovery with no intervening work.
+        binding = (
+            "last_maintenance_id" if "last_maintenance_id" in restore_record else "maintenance_id"
+        )
+        transaction.append(
+            {
+                "Put": {
+                    "TableName": table,
+                    "Item": encode(
+                        {
+                            **restore_record,
+                            "last_maintenance_id": lease["id"],
+                            "revision": restore_record["revision"] + 1,
+                        }
+                    ),
+                    "ConditionExpression": "#revision = :revision AND #plan = :plan AND "
+                    "#binding = :previous",
+                    "ExpressionAttributeNames": {
+                        "#revision": "revision",
+                        "#plan": "plan",
+                        "#binding": binding,
+                    },
+                    "ExpressionAttributeValues": encode(
+                        {
+                            ":revision": restore_record["revision"],
+                            ":plan": restore_record["plan"],
+                            ":previous": previous["id"],
+                        }
+                    ),
                 }
             }
         )

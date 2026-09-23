@@ -98,6 +98,10 @@ def maintenance_fence(config: dict[str, Any], envelope: dict[str, Any]) -> None:
         or lease.get("id") != envelope["maintenance_id"]
         or lease.get("stage") != plan["stage"]
         or lease.get("status") != "ACTIVE"
+        or (
+            "restore_operation_id" in lease
+            and lease["restore_operation_id"] != plan["operation_id"]
+        )
         or not lease.get("started_at", now + 1) <= now < lease.get("expires_at", 0) - 60
         or (
             envelope.get("action") != "verify-rollback"

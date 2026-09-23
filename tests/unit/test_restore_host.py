@@ -230,3 +230,41 @@ def test_read_only_mount_precedes_tree_read_and_is_unmounted(
     assert result["unmounted"] is True
     assert commands[-1] == ["umount", str(mount)]
     assert not mount.exists()
+
+
+@pytest.mark.parametrize("scope", ["op-a", "op-b", None, ""])
+def test_host_recovery_lease_is_scoped_to_exact_plan(
+    monkeypatch: pytest.MonkeyPatch, scope: str | None
+) -> None:
+    import time
+
+    lease = {
+        "id": "recovered",
+        "status": "ACTIVE",
+        "stage": "dev",
+        "started_at": int(time.time()) - 10,
+        "expires_at": int(time.time()) + 600,
+        "restore_operation_id": scope,
+    }
+    state = {
+        "system_id": "system",
+        "target_instance_id": "i-test",
+        "desired_state": "STOPPED",
+        "desired_revision": 7,
+        "maintenance": lease,
+    }
+    envelope = {
+        "plan": {"system_id": "system", "stage": "dev", "operation_id": "op-a"},
+        "maintenance": lease,
+        "maintenance_id": lease["id"],
+        "instance_id": "i-test",
+        "system_state_table": "state",
+        "protection_revision": 7,
+    }
+    monkeypatch.setattr(host, "item", lambda *args: state)
+    monkeypatch.setattr(host, "execute", lambda *args: pytest.fail("host mutation"))
+    if scope == "op-a":
+        restore_host.maintenance_fence({"system_id": "system"}, envelope)
+    else:
+        with pytest.raises(ValueError, match="RESTORE_HOST_MAINTENANCE"):
+            restore_host.maintenance_fence({"system_id": "system"}, envelope)

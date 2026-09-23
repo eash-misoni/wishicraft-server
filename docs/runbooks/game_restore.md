@@ -7,6 +7,14 @@ snapshot, successful START or final cleanup proof.
 
 ## Execution checkpoints
 
+Before generating any real-AWS execution artifacts, create a separate detached
+worktree at the exact approved commit and verify its HEAD and empty
+`git status --porcelain` output. Generate payloads, helper bytes and CDK assemblies
+only from that clean checkout into a new dedicated evidence/output root. Do not
+copy dirty primary-checkout files into it. Preserve unrelated primary-checkout
+changes; record the approved commit and artifact hashes in the execution evidence.
+An unapproved commit or a dirty execution worktree blocks execution.
+
 1. Verify committed source/CI and canonical dev STS identity. Record Game/current
    world, source snapshot/backup timestamp/source world/package. First qualification
    uses Vanilla B and the candidate recorded in D-113, never `vps-survival`.
@@ -134,7 +142,18 @@ This records a replacement lease and complete previous lease atomically with fre
 state/Lock fencing; normal Admission stays closed. It does not boot/stop EC2, mount,
 copy, select a Game, or silently renew a lease. Capture stdout and new evidence.
 On a lost transaction reply, read status and the new lease's recover-restore audit;
-do not invent another ID. Verify suppressor eligibility from actual observations.
+also verify the journal's last_maintenance_id equals the new lease ID and its
+revision advanced. Do not invent another ID. Verify suppressor eligibility from actual observations.
+
+Recovery leases are limited to their exact restore_operation_id. Using one for
+another journal/plan is rejected by operator, transaction and host. Issuance must
+match the journal's last_maintenance_id (or original maintenance_id for a legacy
+journal) to the actual old lease, with matching operation/system/stage and old
+scope. The lease/audit/journal binding advance atomically, so a second legitimate
+recovery uses the latest lease, not the initial one. Unrelated history or an
+unverifiable binding is a stop condition; never patch it manually. A fresh ordinary
+maintenance session remains available after safe closeout for explicit rollback;
+its first RESTORE checkpoint records the binding before external side effects.
 
 | Interrupted checkpoint | Resume under a new approved lease | Data/resource protection |
 |---|---|---|
@@ -225,3 +244,12 @@ hash-locked cached bundling with UV_OFFLINE resolved the latter. No failure was
 relabeled as a pass. No real AWS inspection,
 RESTORE, BACKUP, START, reference switch, temporary volume or IAM deployment was
 performed during this repository-only review. Mocked EBS/mount tests are not XFS proof.
+
+Scope correction after 632c2f5: **1798 tests passed**, Ruff lint/format, mypy
+(247 files), and the same four local CDK synth contexts passed. Added regressions
+cover matching/mismatched scoped leases at operator, repository and host boundaries,
+unrelated lease/journal rejection before Reconcile, atomic revision/plan/binding
+conditions, legacy initial binding, and repeated same-RESTORE recovery without
+intervening work. Existing expiry/INCIDENT and rollback retry coverage remains.
+CI results are reported with the final scope-correction commit in the handoff.
+This is repository evidence only; no AWS inspection or mutation was performed.

@@ -211,3 +211,29 @@ is an investigation stop, not permission to resend.
 The historical dynamic-Game BACKUP IAM mismatch in the pause evidence is not fixed
 by this slice. No wider snapshot creation rights or automatic START workaround is
 included. The dev plan requires a separately reviewed usable pre-backup route.
+
+## Recovery lease scope correction after 632c2f5
+
+A recovery lease's `restore_operation_id` is an authorization restriction, not only
+audit metadata. Operator planning/checkpoints, repository writes (including
+idempotent selection/create entrypoints), and the host's current-authority fence
+reject a different RESTORE operation. A present but null/empty scope is not an
+ordinary lease. Transactions compare the complete validated lease to SystemState,
+so another lease cannot race past this check. Ordinary leases without this field
+retain their existing uses.
+
+The journal preserves its original `maintenance_id` and records
+`last_maintenance_id` with every successful journal transaction. An operation first
+used under a new ordinary maintenance session binds that session transactionally
+before external side effects. Recovery requires that exact last lease (legacy
+journals without the new field use their original lease), matching journal key,
+plan operation/system/stage and any previous lease scope. An unrelated journal
+cannot adopt another task's expired or INCIDENT lease.
+
+Recovery atomically changes the SystemState lease, adds the immutable audit with
+the full previous lease, and advances the journal's last lease and revision under
+exact revision/plan/previous-binding conditions. Thus repeated recovery for the
+same RESTORE works even without an intervening copy/cleanup command; it is not
+fixed to the initial lease ID. Response loss is resolved by reading the new lease,
+audit and journal binding, never by editing fields or issuing another ID blindly.
+No new AWS resource or IAM change is introduced by this scope correction.

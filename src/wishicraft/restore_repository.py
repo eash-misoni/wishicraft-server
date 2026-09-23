@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from wishicraft.maintenance import lease_active
+from wishicraft.maintenance import check_restore_lease, lease_active
 from wishicraft.maintenance_operator import item
 from wishicraft.maintenance_repository import encode
 
@@ -64,6 +64,10 @@ class RestoreRepository:
         now: datetime,
         extra: list[dict[str, Any]] | None = None,
     ) -> None:
+        check_restore_lease(lease, after["plan"]["operation_id"])
+        if after["system_id"] != "restore#" + after["plan"]["operation_id"]:
+            raise ValueError("RESTORE_JOURNAL_IDENTITY")
+        after["last_maintenance_id"] = lease["id"]
         # Whole journal replacement is safe only with exact prior revision and immutable plan.
         write: dict[str, Any] = {
             "TableName": self.state_table,
@@ -103,6 +107,7 @@ class RestoreRepository:
         protection: dict[str, Any],
         current_package: dict[str, Any],
     ) -> dict[str, Any]:
+        check_restore_lease(lease, plan["operation_id"])
         existing = self.read(plan["operation_id"])
         if existing:
             immutable = ("game_id", "source_snapshot_id", "request_id", "system_id", "stage")
@@ -141,6 +146,7 @@ class RestoreRepository:
         rollback: bool = False,
     ) -> dict[str, Any]:
         plan = record["plan"]
+        check_restore_lease(lease, plan["operation_id"])
         desired_phase = "ROLLED_BACK" if rollback else "COMMITTED"
         if record["phase"] == desired_phase:
             return record

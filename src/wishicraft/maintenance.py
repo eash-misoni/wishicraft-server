@@ -30,6 +30,12 @@ def lease_active(value: object, *, now: datetime) -> bool:
     )
 
 
+def check_restore_lease(lease: dict[str, Any], operation: str) -> None:
+    """Ordinary maintenance is shared; a recovery lease is limited to one RESTORE."""
+    if "restore_operation_id" in lease and lease["restore_operation_id"] != operation:
+        raise ValueError("RESTORE_MAINTENANCE_SCOPE")
+
+
 def new_lease(
     *, lease_id: str, actor: str, reason: str, stage: str, duration: int, now: datetime
 ) -> dict[str, Any]:

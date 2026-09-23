@@ -22,9 +22,9 @@ from botocore.config import Config  # type: ignore[import-untyped]
 from wishicraft.config import load_configuration
 from wishicraft.endpoint import DnsState, Route53Observer
 from wishicraft.game_creation import registry_ids
-from wishicraft.maintenance import lease_active, maintenance_metrics, new_lease
+from wishicraft.maintenance import check_restore_lease, lease_active, maintenance_metrics, new_lease
 from wishicraft.maintenance_operator import invoke, item, no_external_work, safe_state
-from wishicraft.maintenance_repository import transition
+from wishicraft.maintenance_repository import check_restore_recovery, transition
 from wishicraft.reconcile import TargetResolver
 from wishicraft.restore_repository import RestoreRepository
 from wishicraft.restore_source import make_plan, request_operation, verified_snapshot
@@ -237,6 +237,8 @@ class Operator:
     def plan(
         self, *, game_id: str, snapshot_id: str, protection_id: str, request_id: str
     ) -> dict[str, Any]:
+        operation = request_operation(self.cfg.project.system_id, self.stage, request_id)
+        check_restore_lease(self.state().get("maintenance", {}), operation)
         existing = normalized(
             self.repo.read(request_operation(self.cfg.project.system_id, self.stage, request_id))
         )
@@ -248,6 +250,7 @@ class Operator:
                 raise ValueError("RESTORE_IDEMPOTENCY_CONFLICT")
             return dict(existing)
         lease, actual = self.idle_host()
+        check_restore_lease(lease, operation)
         if actual != "stopped":
             raise ValueError("RESTORE_PLAN_REQUIRES_STOPPED_EC2")
         game = normalized(item(self.ddb, self.env["GAMES_TABLE"], "game_id", game_id))
@@ -298,6 +301,15 @@ class Operator:
         record = normalized(self.repo.read(operation))
         if not record or record["plan"]["system_id"] != self.cfg.project.system_id:
             raise ValueError("RESTORE_UNKNOWN_REQUEST")
+        previous = self.state().get("maintenance", {})
+        if previous.get("id") != previous_id:
+            raise ValueError("RESTORE_RECOVERY_LEASE_CONFLICT")
+        check_restore_recovery(
+            record,
+            previous,
+            operation=operation,
+            system_id=self.cfg.project.system_id,
+        )
         no_external_work(
             self.session, stack="WishicraftControlPlaneStack-" + self.stage, instance_id=self.target
         )
@@ -355,6 +367,7 @@ class Operator:
             lease=lease,
             event="recover-restore",
             now=now,
+            restore_record=record,
         )
         if self.state().get("maintenance") != lease:
             raise ValueError("RESTORE_RECOVERY_READBACK")
@@ -398,9 +411,12 @@ class Operator:
         record = normalized(self.repo.read(operation))
         if not record:
             raise ValueError("RESTORE_UNKNOWN_REQUEST")
+        if record["plan"]["operation_id"] != operation:
+            raise ValueError("RESTORE_JOURNAL_IDENTITY")
         if action == "status":
             return dict(record)
         lease, actual = self.preflight(external_work=action in {"collect", "collect-rollback"})
+        check_restore_lease(lease, operation)
         plan = record["plan"]
         if (
             action in {"volume", "attach", "prepare", "retry-prepare", "commit"}
@@ -409,6 +425,9 @@ class Operator:
             expected = record["pre_restore_backup"].get("desired_revision")
             if expected is None or self.state().get("desired_revision") != expected:
                 raise ValueError("RESTORE_PROTECTION_STALE_NEW_REQUEST_REQUIRED")
+        if record.get("last_maintenance_id", record.get("maintenance_id")) != lease["id"]:
+            # Bind a fresh ordinary maintenance session before any external side effect.
+            record = self.repo.advance(record, lease=lease, now=datetime.now(UTC))
         volume = RestoreVolume(
             self.ec2, plan, az=self.cfg.stage.availability_zone, instance=self.target
         )

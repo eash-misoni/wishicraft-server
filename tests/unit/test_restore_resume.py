@@ -153,7 +153,7 @@ def test_recovery_transaction_keeps_admission_closed_and_archives_previous(statu
     from tests.unit.test_operation import FakeDynamo
     from wishicraft.maintenance_repository import transition
 
-    _, _, old, _ = setup()
+    _, _, old, record = setup()
     old.update(
         status=status,
         started_at=int((NOW - timedelta(hours=2)).timestamp()),
@@ -185,6 +185,7 @@ def test_recovery_transaction_keeps_admission_closed_and_archives_previous(statu
         lease=new,
         event="recover-restore",
         now=NOW,
+        restore_record=record,
     )
     tx: Any = api.transactions[-1]["TransactItems"]
     assert "maintenance = :previous" in tx[0]["Update"]["ConditionExpression"]
@@ -206,6 +207,7 @@ def test_formal_recovery_can_replace_expired_lease_without_cleanup_deadlock(
     row["phase"] = phase
     state = planned()["state"]
     old = state["maintenance"]
+    old["id"] = row["maintenance_id"]
     old.update(
         started_at=int((NOW - timedelta(hours=2)).timestamp()),
         expires_at=int((NOW - timedelta(hours=1)).timestamp()),
@@ -253,6 +255,12 @@ def test_formal_recovery_can_replace_expired_lease_without_cleanup_deadlock(
     assert result["phase"] == phase
     assert state["maintenance"]["id"] == "new-recovery"
     assert db.rows["restore#op-test"]["phase"] == phase
+    assert db.rows["restore#op-test"]["last_maintenance_id"] == "new-recovery"
+    # No intervening RESTORE action is necessary: issuance durably advances the binding.
+    state["maintenance"]["status"] = "INCIDENT"
+    op.maintenance_id = "next-recovery"
+    op.recover_maintenance("op-test", "new-recovery", 3600)
+    assert db.rows["restore#op-test"]["last_maintenance_id"] == "next-recovery"
 
 
 @pytest.mark.parametrize("checkpoint", ["retry-prepare", "retry-rollback"])
@@ -278,3 +286,81 @@ def test_missing_legacy_lease_proof_is_not_an_obsolete_success(operator: Any) ->
     with pytest.raises(ValueError, match="RETRY_NOT_SAFE"):
         op.action("retry-rollback", "op-test")
     assert len(op.ssm.commands) == 1
+
+
+@pytest.mark.parametrize(
+    "action",
+    [
+        "volume",
+        "attach",
+        "prepare",
+        "collect",
+        "retry-prepare",
+        "commit",
+        "cleanup",
+        "check-rollback",
+        "collect-rollback",
+        "retry-rollback",
+        "rollback",
+    ],
+)
+def test_foreign_recovery_lease_rejects_before_any_effect(operator: Any, action: str) -> None:
+    op, context, db = operator
+    context["lease"]["restore_operation_id"] = "op-other"
+    before = copy.deepcopy(db.rows)
+    calls = len(db.calls)
+    with pytest.raises(ValueError, match="MAINTENANCE_SCOPE"):
+        op.action(action, "op-test")
+    assert db.rows == before and len(db.calls) == calls and not op.ssm.commands
+
+
+def test_matching_recovery_lease_allows_rollback_check_and_retry(operator: Any) -> None:
+    op, context, _ = operator
+    context["lease"]["restore_operation_id"] = "op-test"
+    op.action("check-rollback", "op-test")
+    op.action("retry-rollback", "op-test")
+    assert op.action("check-rollback", "op-test")["rollback_command_id"] == "2"
+
+
+@pytest.mark.parametrize("foreign", ["ordinary", "scoped", "stage", "journal"])
+def test_unrelated_recovery_rejected_before_reconcile(
+    operator: Any, monkeypatch: pytest.MonkeyPatch, foreign: str
+) -> None:
+    op, context, db = operator
+    op.cfg.project = SimpleNamespace(system_id="system")
+    previous = copy.deepcopy(context["lease"])
+    previous["status"] = "INCIDENT"
+    if foreign == "ordinary":
+        previous["id"] = "unrelated-maintenance"
+    elif foreign == "scoped":
+        previous["restore_operation_id"] = "op-other"
+    elif foreign == "stage":
+        previous["stage"] = "other-stage"
+    else:
+        db.rows["restore#op-test"]["plan"]["operation_id"] = "op-other"
+    monkeypatch.setattr(op, "state", lambda: {"maintenance": previous})
+    monkeypatch.setattr(restore_operator, "invoke", lambda *args: pytest.fail("invoked Reconcile"))
+    before = copy.deepcopy(db.rows)
+    with pytest.raises(ValueError, match="SCOPE|UNRELATED_LEASE"):
+        op.recover_maintenance("op-test", previous["id"], 3600)
+    assert db.rows == before and not op.ssm.commands
+
+
+def test_scoped_lease_cannot_plan_another_restore_before_idle_probe(
+    operator: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    op, context, db = operator
+    op.cfg.project = SimpleNamespace(system_id="system")
+    op.stage = "dev"
+    context["lease"]["restore_operation_id"] = "op-other"
+    monkeypatch.setattr(op, "state", lambda: {"maintenance": context["lease"]})
+    monkeypatch.setattr(op, "idle_host", lambda: pytest.fail("idle probe invoked"))
+    before = copy.deepcopy(db.rows)
+    with pytest.raises(ValueError, match="MAINTENANCE_SCOPE"):
+        op.plan(
+            game_id="game-test",
+            snapshot_id="snap-test",
+            protection_id="snap-new",
+            request_id="new-request",
+        )
+    assert db.rows == before

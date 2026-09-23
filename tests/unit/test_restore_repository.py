@@ -141,3 +141,120 @@ def test_unprepared_selection_is_rejected() -> None:
     with pytest.raises(ValueError, match="COMMIT_PHASE"):
         repo.select(record, lease=lease, now=NOW)
     assert len(db.calls) == 1
+
+
+@pytest.mark.parametrize("action", ["create", "advance", "select", "committed-replay"])
+def test_repository_rejects_foreign_scope_even_on_idempotent_replay(action: str) -> None:
+    db, repo, lease, record = setup()
+    record["phase"] = "COMMITTED" if action == "committed-replay" else "PREPARED"
+    lease["restore_operation_id"] = "op-other"
+    before = copy.deepcopy(db.rows)
+    calls = len(db.calls)
+    with pytest.raises(ValueError, match="MAINTENANCE_SCOPE"):
+        if action == "create":
+            repo.create(record["plan"], lease=lease, now=NOW, protection={}, current_package={})
+        elif action == "advance":
+            repo.advance(record, lease=lease, now=NOW)
+        else:
+            repo.select(record, lease=lease, now=NOW)
+    assert db.rows == before and len(db.calls) == calls
+
+
+def test_matching_scope_is_part_of_exact_transaction_lease() -> None:
+    db, repo, lease, record = setup()
+    lease["restore_operation_id"] = "op-test"
+    record = repo.advance(record, lease=lease, now=NOW, phase="PREPARED")
+    assert repo.select(record, lease=lease, now=NOW)["phase"] == "COMMITTED"
+    check = db.calls[-1][0]["ConditionCheck"]
+    assert "maintenance = :lease" in check["ConditionExpression"]
+    assert TypeDeserializer().deserialize(check["ExpressionAttributeValues"][":lease"]) == lease
+
+
+@pytest.mark.parametrize("legacy", [False, True])
+def test_recovery_atomic_binding_and_conflict(legacy: bool) -> None:
+    from wishicraft.maintenance_repository import transition
+
+    db, _, old, record = setup()
+    if legacy:
+        record.pop("last_maintenance_id")
+    old["status"] = "INCIDENT"
+    new = {
+        **old,
+        "id": "recovered",
+        "status": "ACTIVE",
+        "previous_maintenance_id": old["id"],
+        "restore_operation_id": "op-test",
+    }
+    args: dict[str, Any] = dict(
+        table="state",
+        locks_table="locks",
+        system_id="system",
+        lock_name="global",
+        state={
+            "maintenance": old,
+            "desired_state": "STOPPED",
+            "desired_revision": 7,
+            "observed_at": NOW.isoformat(),
+        },
+        lease=new,
+        event="recover-restore",
+        now=NOW,
+        restore_record=record,
+    )
+    db.reject = True
+    before = copy.deepcopy(db.rows)
+    with pytest.raises(ValueError, match="condition rejected"):
+        transition(db, **args)
+    assert db.rows == before
+    db.reject = False
+    transition(db, **args)
+    saved = db.rows["restore#op-test"]
+    assert saved["last_maintenance_id"] == "recovered"
+    assert saved["maintenance_id"] == old["id"]  # Original audit provenance retained.
+    assert saved["revision"] == record["revision"] + 1
+    write = db.calls[-1][-1]["Put"]
+    assert write["ExpressionAttributeNames"]["#binding"] == (
+        "maintenance_id" if legacy else "last_maintenance_id"
+    )
+    assert "#revision = :revision" in write["ConditionExpression"]
+    assert "#plan = :plan" in write["ConditionExpression"]
+    assert "#binding = :previous" in write["ConditionExpression"]
+    assert db.rows["maintenance#recovered#recover-restore"]["previous_maintenance"] == old
+
+
+@pytest.mark.parametrize("mismatch", ["binding", "scope", "missing", "identity"])
+def test_recovery_transaction_rejects_unrelated_journal(mismatch: str) -> None:
+    from wishicraft.maintenance_repository import transition
+
+    db, _, old, record = setup()
+    old["status"] = "INCIDENT"
+    if mismatch == "binding":
+        record["last_maintenance_id"] = "unrelated"
+    elif mismatch == "scope":
+        old["restore_operation_id"] = "op-other"
+    elif mismatch == "missing":
+        record = {}
+    else:
+        record["system_id"] = "restore#op-other"
+    new = {
+        **old,
+        "id": "recovered",
+        "status": "ACTIVE",
+        "previous_maintenance_id": old["id"],
+        "restore_operation_id": "op-test",
+    }
+    calls = len(db.calls)
+    with pytest.raises(ValueError, match="SCOPE|UNRELATED_LEASE"):
+        transition(
+            db,
+            table="state",
+            locks_table="locks",
+            system_id="system",
+            lock_name="global",
+            state={"maintenance": old},
+            lease=new,
+            event="recover-restore",
+            now=NOW,
+            restore_record=record,
+        )
+    assert len(db.calls) == calls
