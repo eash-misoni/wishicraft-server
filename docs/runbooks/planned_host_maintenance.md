@@ -77,8 +77,10 @@ an existing RESTORE journal and exact expired/INCIDENT lease. It atomically inst
 a separately approved new lease and retains the previous lease in an audit, while
 Admission stays closed. No general auto-renewal or forced host stop is introduced.
 [Recovery matrix and separate dev approval](game_restore.md#expiry--interruption-matrix-separate-execution-approval-required).
-This candidate has not been applied or qualified in dev; the historical D-111
-execution evidence below is unchanged.
+The separately approved [D-113 limited dev execution](../evidence/game_restore_prepared_2026-09-23.md)
+exercised one VOLUME_CREATED / stopped-host INCIDENT → same-RESTORE recovery lease
+transition, retaining the same volume and unchanged Game selection. Other interruption
+cases remain repository evidence. The historical D-111 execution evidence below is unchanged.
 
 ## Expiry and failed closeout
 

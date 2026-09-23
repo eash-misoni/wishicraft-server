@@ -1,9 +1,13 @@
 # Operator Game RESTORE
 
 [D-113 contract and candidate inventory](../reviews/game_restore.md).
-Real RESTORE qualification is pending. This is a plan requiring separate approval;
-no command below is authorized by the repository-only review. Do not treat repository tests as a mounted
-snapshot, successful START or final cleanup proof.
+Full RESTORE qualification is pending. The separately approved b856dcf dev execution
+proved source validation, recovery-lease resumption, real read-only XFS copy and
+PREPARED, then stopped on a supplemental read-only probe output error before commit.
+See [execution and safe closeout](../evidence/game_restore_prepared_2026-09-23.md).
+Selection, restored START and explicit rollback remain unqualified. Future commands
+still require their own execution scope; repository tests are not mounted-snapshot
+or Minecraft availability evidence.
 
 ## Execution checkpoints
 

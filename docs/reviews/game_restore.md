@@ -1,8 +1,11 @@
 # D-113 Game RESTORE
 
-Status: repository recovery review candidate; real RESTORE qualification has not run.
-The current authorization covers repository work and an execution plan only; it does
-not authorize BACKUP, START, reference changes, IAM deployment or temporary AWS resources.
+Status: repository recovery review complete; limited dev proof reached PREPARED,
+then stopped safely before selection or START. Full RESTORE qualification is incomplete.
+The separately approved b856dcf execution, applied narrow host IAM/helper changes,
+real read-only XFS/copy evidence and failed supplemental read-only content probe are
+recorded in the [2026-09-23 closeout](../evidence/game_restore_prepared_2026-09-23.md).
+That execution approval is not general authorization for future AWS operations.
 Requirements: BAK-002/003/004/006, OPR-001/004/007/010, EC2-007/012 and the
 2026-09-23 RESTORE request. This is one operator-assisted restoration slice.
 

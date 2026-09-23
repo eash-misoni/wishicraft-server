@@ -1,0 +1,602 @@
+{
+  "schema_version": 1,
+  "execution_commit": "b856dcf06f8564c7c056491ff3b993a3fc828357",
+  "execution_worktree_clean": true,
+  "outcome": "PREPARED_RETAINED_STOPPED_BEFORE_COMMIT",
+  "account": "385526546525",
+  "region": "ap-northeast-1",
+  "profile": "wishicraft-dev",
+  "system": "wishicraft-main",
+  "instance": "i-04fc0629dc4ea466e",
+  "data_volume": "vol-03ac9f534326c345c",
+  "identifiers": {
+    "request_id": "restore-dev-20260923T083625Z-b856dcf",
+    "operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+    "backup_key": "backup:restore-dev-20260923T083625Z-b856dcf",
+    "maintenance_id": "d113-20260923T083625Z-begin",
+    "recovery_id": "d113-20260923T083625Z-recover",
+    "rollback_id": "d113-20260923T083625Z-rollback"
+  },
+  "implementation_ci": {
+    "CI": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35825238609",
+    "NeoForge": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35825238654",
+    "Paper": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35825238704",
+    "conclusion": "success"
+  },
+  "plan": {
+    "package": {
+      "mods": [],
+      "package_id": "vanilla",
+      "package_version": "initial-fixed-version",
+      "loader": {
+        "type": "vanilla"
+      },
+      "minecraft_version": "26.2"
+    },
+    "kind": "RESTORE",
+    "system_id": "wishicraft-main",
+    "source_world": {
+      "difficulty": null,
+      "generation": 1,
+      "seed": null,
+      "hardcore": null
+    },
+    "project": "wishicraft",
+    "source_creation": null,
+    "created_at": "2026-09-23T08:47:48.975116+00:00",
+    "package_digest": "75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9c15eb9784ac78e",
+    "previous_world": {
+      "difficulty": null,
+      "generation": 1,
+      "seed": null,
+      "hardcore": null,
+      "current_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+    },
+    "previous_data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+    "source_generation": 1,
+    "source_volume_id": "vol-03ac9f534326c345c",
+    "schema_version": 1,
+    "target_generation": 2,
+    "stage": "dev",
+    "source_snapshot_id": "snap-0be8e05ab05d70e84",
+    "source_backup_operation": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e",
+    "source_backup_timestamp": "2026-09-12T10:31:35.625000Z",
+    "operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+    "source_data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+    "target_data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+    "request_id": "restore-dev-20260923T083625Z-b856dcf",
+    "game_id": "game-vanilla-secondary"
+  },
+  "protection": {
+    "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+    "captured_at": "2026-09-23T08:38:21.444000Z",
+    "operation_id": "op-aa36d4ba-101b-47f1-bd6c-f393234b9509",
+    "desired_revision": 67,
+    "snapshot_id": "snap-0d2407a5af78afa82"
+  },
+  "protection_backup_result": {
+    "schema_version": 1,
+    "operation_id": "op-aa36d4ba-101b-47f1-bd6c-f393234b9509",
+    "created": true,
+    "lease_id": "lease-29ea00c5-8993-4ed5-b221-78cde093d137"
+  },
+  "iam": {
+    "changeset_arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d113-getitem-restore-dev-20260923T083625Z-b856dcf/15346835-9bbe-4917-90ce-9caaedb8019b",
+    "status": "UPDATE_COMPLETE",
+    "template_sha256": "cc6db8c6d173a4abea31c6c891ce0930604563402ad260bf7b2ccbaab12fa71e",
+    "only_resource_modified": "TargetManagedNodeRoleDefaultPolicy7209F5BF",
+    "replacement": false,
+    "action": "dynamodb:GetItem",
+    "resource": "arn:aws:dynamodb:ap-northeast-1:385526546525:table/wc-dev-system-state",
+    "condition": {
+      "ForAllValues:StringEquals": {
+        "dynamodb:LeadingKeys": [
+          "wishicraft-main"
+        ]
+      }
+    },
+    "stack_policy_unchanged": true
+  },
+  "recovery": {
+    "before_revision": 3,
+    "after_revision": 4,
+    "phase": "VOLUME_CREATED",
+    "old_id": "d113-20260923T083625Z-begin",
+    "new_id": "d113-20260923T083625Z-recover",
+    "restore_operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+    "same_volume": "vol-0adfd2940e3e501ca",
+    "ec2_stopped": true,
+    "game_reference_unchanged": true,
+    "audit_key": "maintenance#d113-20260923T083625Z-recover#recover-restore"
+  },
+  "temporary_volume": {
+    "id": "vol-0adfd2940e3e501ca",
+    "cleanup": "DELETED",
+    "not_found_readback": true,
+    "tagged_volumes_remaining": 0,
+    "observed_device": {
+      "name": "nvme2n1",
+      "serial": "vol0adfd2940e3e501ca",
+      "fstype": "xfs",
+      "mountpoints": [
+        null
+      ],
+      "ro": true
+    },
+    "readonly_mount_verified_by": "approved restore_host.run checks plus Success/0 receipt; mount options not separately included in stdout"
+  },
+  "prepare": {
+    "command_id": "b1bcc5fb-4c1d-4e06-b03b-27d39add592d",
+    "status": "Success",
+    "response_code": 0,
+    "receipt": {
+      "phase": "prepared",
+      "unmounted": true,
+      "volume_id": "vol-0adfd2940e3e501ca",
+      "source_tree": {
+        "file_count": 82,
+        "expanded_size": 130946284,
+        "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+      },
+      "previous_tree": {
+        "file_count": 85,
+        "expanded_size": 130980954,
+        "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+      },
+      "prepared_tree": {
+        "file_count": 36,
+        "expanded_size": 2253910,
+        "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+      },
+      "operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "source_world_tree": {
+        "file_count": 31,
+        "expanded_size": 2252092,
+        "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+      }
+    },
+    "journal_phase": "PREPARED",
+    "journal_revision": 13,
+    "staging_remaining": [],
+    "verification": {
+      "previous_and_other_games_unchanged": true,
+      "source_world_copy_exact": true,
+      "prepared_receipt_exact": true,
+      "helpers_approved": true,
+      "temporary_device": {
+        "name": "nvme2n1",
+        "serial": "vol0adfd2940e3e501ca",
+        "fstype": "xfs",
+        "mountpoints": [
+          null
+        ],
+        "ro": true
+      },
+      "owners_protected": true,
+      "staging": []
+    }
+  },
+  "helper_before": {
+    "reset_worlds.py": {
+      "sha256": "7dc80ce2469c454a32cb5c2dd6ab673ef1e216544c99acf057bb693d81f61b41",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "nlink": 1
+    },
+    "world_import.py": {
+      "sha256": "0a934cff209c9214bba66a8b8bbd81cc8c865b3b0e411ddf4e1910cfe2c85d70",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "nlink": 1
+    }
+  },
+  "helper_after": {
+    "reset_worlds.py": {
+      "sha256": "1074d1bab6291dfed8a0f1d49ea5ce53fe8a5e8cc074bcf560d5a206c19f4deb",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "nlink": 1
+    },
+    "world_import.py": {
+      "sha256": "0cfaf9eae86418d0d7c354e52136d8b64d692c3a87c983173f687c95f8e5f8c1",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "nlink": 1
+    }
+  },
+  "game_trees": {
+    "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21": {
+      "before": {
+        "file_count": 1669,
+        "expanded_size": 3680764510,
+        "tree_sha256": "36a44716ef7bdc9b190bff803209610d4e0b025fbcb2d1a5a94cd46a8e85f740"
+      },
+      "after": {
+        "file_count": 1669,
+        "expanded_size": 3680764510,
+        "tree_sha256": "36a44716ef7bdc9b190bff803209610d4e0b025fbcb2d1a5a94cd46a8e85f740"
+      }
+    },
+    "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f": {
+      "before": {
+        "file_count": 169,
+        "expanded_size": 241079115,
+        "tree_sha256": "7065f363f1a86b35936af28db1637bba5c62141293dfe3695508fde060473b87"
+      },
+      "after": {
+        "file_count": 169,
+        "expanded_size": 241079115,
+        "tree_sha256": "7065f363f1a86b35936af28db1637bba5c62141293dfe3695508fde060473b87"
+      }
+    },
+    "game-vanilla-main": {
+      "before": {
+        "file_count": 115,
+        "expanded_size": 142011631,
+        "tree_sha256": "b22795c5b20e1104b5d5e665d533f53349d89eb87175ecfe6965aef7725f83ae"
+      },
+      "after": {
+        "file_count": 115,
+        "expanded_size": 142011631,
+        "tree_sha256": "b22795c5b20e1104b5d5e665d533f53349d89eb87175ecfe6965aef7725f83ae"
+      }
+    },
+    "game-vanilla-secondary": {
+      "before": {
+        "file_count": 85,
+        "expanded_size": 130980954,
+        "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+      },
+      "after": {
+        "file_count": 85,
+        "expanded_size": 130980954,
+        "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+      }
+    },
+    "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4": {
+      "before": {
+        "file_count": 181,
+        "expanded_size": 259697819,
+        "tree_sha256": "05e6e79350372cd3fb5487e9a3f6c0a06a007f7cb7523bc470826f945a307467"
+      },
+      "after": {
+        "file_count": 181,
+        "expanded_size": 259697819,
+        "tree_sha256": "05e6e79350372cd3fb5487e9a3f6c0a06a007f7cb7523bc470826f945a307467"
+      }
+    }
+  },
+  "retained_owners": {
+    "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf.owner.json": {
+      "sha256": "b9bb61d665b4aed938847ab381ffbc7526465d48040f13109a0a0d07b2da8708",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o600",
+      "record": {
+        "files": {
+          "banned-ips.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "banned-players.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "ops.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "server.properties": "ec0bb4f0b00292502496dcf3e7ea3101bf36b29e6ce9a92f792b4f5b79acbef9",
+          "whitelist.json": "3e3afd7c7beed4ca84a5a67affe868a280feaace332856072d542b83f0a55969"
+        },
+        "phase": "initialized",
+        "plan": {
+          "policy": {
+            "fixed_seed": 0,
+            "minimum_free_bytes": 4294967296,
+            "retain_previous": 3
+          },
+          "schema_version": 1,
+          "seed": -8202942784802930866,
+          "source": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-f221de43-6a0c-46b8-b182-7892ce35e361/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-f221de43-6a0c-46b8-b182-7892ce35e361"
+          },
+          "target": {
+            "config_digest": "1c0b8a75989e4ac81130a7ab24df93c2a88793ed1509752e3a429c2f08f06c1e",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+          }
+        },
+        "protected": true
+      }
+    },
+    "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730.owner.json": {
+      "sha256": "7d7f49a6fdf1607951cd5bb7130878e5ac90b9d74097d0da93cdfb183679dfc5",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o600",
+      "record": {
+        "attempts": [
+          "staging-i64hivrt"
+        ],
+        "level_name": "world",
+        "phase": "prepared",
+        "plan": {
+          "source": {
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary"
+          },
+          "target": {
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+            "game_id": "game-vanilla-secondary"
+          }
+        },
+        "prepared_tree": {
+          "expanded_size": 2253910,
+          "file_count": 36,
+          "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+        },
+        "previous_tree": {
+          "expanded_size": 130980954,
+          "file_count": 85,
+          "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+        },
+        "protected": true,
+        "restore": {
+          "created_at": "2026-09-23T08:47:48.975116+00:00",
+          "game_id": "game-vanilla-secondary",
+          "kind": "RESTORE",
+          "operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+          "package": {
+            "loader": {
+              "type": "vanilla"
+            },
+            "minecraft_version": "26.2",
+            "mods": [],
+            "package_id": "vanilla",
+            "package_version": "initial-fixed-version"
+          },
+          "package_digest": "75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9c15eb9784ac78e",
+          "previous_data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "previous_world": {
+            "current_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+            "difficulty": null,
+            "generation": 1,
+            "hardcore": null,
+            "seed": null
+          },
+          "project": "wishicraft",
+          "request_id": "restore-dev-20260923T083625Z-b856dcf",
+          "schema_version": 1,
+          "source_backup_operation": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e",
+          "source_backup_timestamp": "2026-09-12T10:31:35.625000Z",
+          "source_creation": null,
+          "source_data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+          "source_generation": 1,
+          "source_snapshot_id": "snap-0be8e05ab05d70e84",
+          "source_volume_id": "vol-03ac9f534326c345c",
+          "source_world": {
+            "difficulty": null,
+            "generation": 1,
+            "hardcore": null,
+            "seed": null
+          },
+          "stage": "dev",
+          "system_id": "wishicraft-main",
+          "target_data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+          "target_generation": 2
+        },
+        "source_tree": {
+          "expanded_size": 130946284,
+          "file_count": 82,
+          "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+        },
+        "source_world_tree": {
+          "expanded_size": 2252092,
+          "file_count": 31,
+          "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+        }
+      }
+    }
+  },
+  "failure": {
+    "command_id": "3730aceb-dd34-41d4-8421-7cc60113bcfb",
+    "status": "Failed",
+    "response_code": 1,
+    "kind": "supplemental_read_only_evidence_probe",
+    "error": "TypeError: Object of type bytes is not JSON serializable",
+    "at_boundary": "print(json.dumps(result)); source includes level.dat spawn NBT value",
+    "payload_sha256": "16de7cc73a3ef4bc1f20c936137df7df268f432d67225860a85086b4c96ab826",
+    "retry_count": 0,
+    "repository_restore_code_changed": false,
+    "world_write": false
+  },
+  "unexecuted": [
+    "COMMITTED",
+    "restored START/READY/MATERIALIZED",
+    "restored normal STOP",
+    "check-rollback/collect-rollback/rollback",
+    "original normal START/STOP"
+  ],
+  "final": {
+    "observed_at": "2026-09-23T09:13:26.919039+00:00",
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "ec2": "stopped",
+    "desired_revision": 67,
+    "current_operation_id": null,
+    "lock_present": false,
+    "external_work": "clear",
+    "dns": "absent",
+    "maintenance": {
+      "reason": "restore-recovery",
+      "restore_operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "schema_version": 1,
+      "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+      "expires_at": 1790157209,
+      "previous_maintenance_id": "d113-20260923T083625Z-begin",
+      "stage": "dev",
+      "started_at": 1790153609,
+      "incident_reason": "d113-read-only-landmark-json-bytes-failed-prepared-retained",
+      "ended_by": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+      "id": "d113-20260923T083625Z-recover",
+      "incident_at": 1790154604,
+      "ended_at": 1790154669,
+      "status": "ENDED",
+      "incident_by": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2"
+    },
+    "queue_attributes": {
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      }
+    },
+    "alarm_count": 49,
+    "non_ok_alarms": [],
+    "ingress": {
+      "wc-dev-admission": null,
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null
+    },
+    "game_record_differences": [],
+    "snapshots": [
+      {
+        "SnapshotId": "snap-0d2407a5af78afa82",
+        "State": "completed",
+        "Encrypted": true,
+        "VolumeId": "vol-03ac9f534326c345c",
+        "StartTime": "2026-09-23 08:38:21.444000+00:00"
+      },
+      {
+        "SnapshotId": "snap-0be8e05ab05d70e84",
+        "State": "completed",
+        "Encrypted": true,
+        "VolumeId": "vol-03ac9f534326c345c",
+        "StartTime": "2026-09-12 10:31:35.625000+00:00"
+      }
+    ]
+  },
+  "artifact_and_evidence_sha256": {
+    "alarm_history.py": "0672b8b2731166df0305528af4543e7081ece214c2bc6fad976399587061ef2f",
+    "attach-090018-e08a9a13.json": "770ff7d3603b4b381d6bff8a44f77ff192f3498afb9290dd1f43168da137440c",
+    "attach-090056-e92af1f7.json": "b2df724d124bc29585fb3e9377878b9e1d318478b4cf36e46d280ae1003b7520",
+    "backup-admission.json": "ddafbcfecab12d77b54aaf6fe73327f1dc5276308d68aeccdc27f2423760466b",
+    "backup-observe-083910.json": "c0ec341a1e48037469b8a08ba53f10de49552e4d0ecb5be6798fa83cdc77bf7b",
+    "backup-request.json": "b7433663e2ce8aaa0203f3c5c5fbb9dc71aa77fd60004a48177c17a4f2c2c056",
+    "baseline-host.json": "ed4660f5b08f1b6f5e328c280235401028f362a1d6c99b4c7a2c8303cb16921c",
+    "baseline-read-artifact.json": "37cbd695aae8a322df6f59677355ed8a3c0c3ec798135dfbec7231068469ae72",
+    "baseline-read-command.json": "676260555d1915e3f999925ec541e2cee23da5365a7b411260cf2837596010a4",
+    "baseline-read-probe.py": "c4c84b35394a54e67a43045fd3e1f4cf2caebdb151819b7e02dc4b7b88148f8b",
+    "baseline-ssm-intent.json": "04866cfddcae08f9c95c1e4e0bf471e8ffaf243c1a03b5377a533cf38e8e7050",
+    "baseline-ssm-observe-085925.json": "f6fa507589c3a6820e72872c51b557ebbd665d3b010eefa1aeded11e4efd47f5",
+    "baseline-ssm-observe-085949.json": "8b7370734b6bc295e2e4f33032c9efea70df086470a5ffb0c557b41172fa7838",
+    "baseline-ssm-result.json": "edfd17f41d18f745e506adc3584f4d8bdc8daba8d2ff28c4a1686c9edb667743",
+    "build_closeout_evidence.py": "a04383702a2f618ea773d20180a99914d0d65e5c010f4d9377da3379b2fe89f7",
+    "changeset-created.json": "9607abd53b522ede9d8a0451baa5e702c33ff36ec3246229f4a02767554574c3",
+    "changeset-executed.json": "90fb75dc066edfa5fdca80ab829ebc7eacfe3f29b22e2fc0ff9d851c497cc837",
+    "changeset-intent.json": "b96f3c9529189c0a744fcbea530540dba866adc679815dea583eef55b3fc4d9e",
+    "changeset-observe-083910.json": "be9ec9ed40ae8beb3b3912224477bf54433fa95f51ff291bab8bc687ed5ede53",
+    "changeset-reviewed.json": "449e8babf0b279fe0229812aef536f42d2df71d21bbb3ef725a7fdbf97a6f9cd",
+    "checkpoint_runner.py": "85190ef0b38bc6ded17b69f081d88b86929edba26a894a48dae0cc838ab89efe",
+    "cleanup-090756-65983b40.json": "83dbae7f16c0eeb38949edcd6bdfd1a39b3a64cfb91dcdcd620c793b9cbe5c4a",
+    "cleanup-090847-b6ecf6dd.json": "fdbd7a1fc8cdfb96e172202a4cad4b72007645e742572af36d2703f4e1e4ccae",
+    "cleanup-090905-94353d4b.json": "6cf2091ef91dfa6aa8f6cac9256ef00e76450afedc7c6f048eb14870db173c60",
+    "cleanup-090936-e3f68b2d.json": "f58bc88a9d0ac79a64379de2be6daa25f4b72a98c9cdd9dc52b65705c9af30d7",
+    "close_maintenance.py": "445cd6203b9a3decab84f8599979ee695da702ebec29f2b0a583262905996335",
+    "collect-090324-edf76e14.json": "0dba78574d92daf517be5dbe975e1a5b7e2f411d4dc3b70e3a995e333b04cb95",
+    "collect_baseline.py": "c0844662ac43cc63f78f5df50eb3e10f43c7260a5abe4dffb1f75969401f5e6b",
+    "collect_landmarks.py": "4e8a8750864d83448dfcfa8be7be4bdfd65be12cb0ea63549137e3b6aa5ec466",
+    "collect_prepared.py": "c226ca3b785b62afae56ae17496eab788f95256155a5737304cc70f955fc23df",
+    "current-runtime-manifest.json": "8cf0e42f7bee05e557a390593edd7cb471a55436806704904a62dc04f2196da7",
+    "execution-source-hashes.json": "705f349bcf8c83d58488629dd2a359baa53254e7df7da56659919a2ba0629f5a",
+    "final-observe-091147.json": "17dd765149fe30d0d73a82a5bf9d1b5b42212853dad447c0127dc061834b2a64",
+    "final-observe-091338.json": "c901ed8ea19af83617548af951ca89041277f51a88f3c95589988ff225d70d4f",
+    "final_observe.py": "7972d494f7ddcdb68d626c7f245c25b89a2c691b84a38409b08bb801d2650250",
+    "host-observe-085819.json": "b08f9980e3ff0e143371bacdcfce0cc7d32cd9d817c721261155be8a20edbff1",
+    "host-observe-090736.json": "50816a33c859a8f6dc0a98a0f142c888ab6fb85cee311049bc62474e17a9e990",
+    "host-suppression-090126.json": "c0fea9441ae7ee49af27c3a3f339ca1ae09e96f7c7bd209a92d4121c95c80135",
+    "host_observe.py": "ec9e8e74b3f4b2a15c211d2cadf5845749fbb82426ef1b8654eccb019f38ffd9",
+    "iam-applied-readback.json": "1a68422ce53dca68ad99edf295c651b0153faa0245f5f428e74b8f9fb30e9dd6",
+    "identifiers.json": "fcd7c4836f1cc0c5c53830245d2558c14da1410445d0c55d7540c7f15c7c347c",
+    "incident-command.json": "7c5262ea25188c80bd87b180addb4e33eb7e3d0c476a30fd377f2df63f009171",
+    "ingress-close-0.json": "0ff8667024b114c5ab852ced1cc5e85875105b2cd8f0d7461a0b60f7cdf5673c",
+    "ingress-close-1.json": "e739ad164b71551a6c70376380c488f077820a9dd06c0a4b004963d67cac25b5",
+    "ingress-original.json": "2ced94153058df8a7db081cd4582a234340cc7c6773eb1279517c26ae09e5f10",
+    "ingress-restored.json": "40ac66986f45548a125d12ab3e09d4380cad5fe005197388fd4146c96080eea1",
+    "interruption-before.json": "7da8ab545a92193fec8acb3d09c0cdb998236d4ae0bea100835ef1142d8fc6b7",
+    "landmarks-read-artifact.json": "4a2f68df6021630af784d222753f79b92e43bc112c184c65e617f71e7176c6a8",
+    "landmarks-read-command.json": "4332cd5df1e3cd91d19055ddd1e4fc211d7f4165dd041ff49a8dd6d139e6dacc",
+    "landmarks-read-probe.py": "16de7cc73a3ef4bc1f20c936137df7df268f432d67225860a85086b4c96ab826",
+    "landmarks-result-090620.json": "17cf4604d63a9e8eae0a3f05e1b297e6ca149bfcf386bb6b37cd25dc25a28389",
+    "landmarks-ssm-intent.json": "701c6755eb7173d7622056dcf8ee62eeb64619d6298cbc332b70d75253ea78af",
+    "landmarks-ssm-result.json": "297702198f6c98d95187993cbf48d892a016efe19286c3889a9641528821f0a3",
+    "maintenance-alarm-history.json": "a4851601b58eba9444d555a9021a5c321abd1bf3996aec4ad7ec95f233c8270c",
+    "maintenance-begin-command.json": "80e029d3d5ae6ef71d5c9ecb59cb4c7ec78450a7f4819f9c3c059e27508565a0",
+    "maintenance-closeout-end-command.json": "752f10a8da015159ed64031fc13ba2aae42b940cbeebbcb8956986a0ab09effb",
+    "maintenance-closeout-incident-command.json": "dba64426ee806683856c6448fdcff669a509d036ace0d6fed02e157336518fad",
+    "maintenance-host-start-intent.json": "0324d91507d709fa6af1be2ca84aa22b597ea6b1bfb0370353affb97fdbb8cb5",
+    "maintenance-host-start-result.json": "b2334fe4992472ed54ea785dd985ba42d06fbb9473466fa054067ecffdadfea4",
+    "maintenance-host-stop-recovery_id-intent.json": "17e6c6c1df5455b514df158fba81e52653e2c0f2b4148816066cb9802b89fe7d",
+    "maintenance-host-stop-recovery_id-result.json": "60f90ebd928af9f44b260aa8ba2fcf109583f5d62ea4641fdb456fc8c26fc430",
+    "maintenance-observation-084455.json": "bac182a218cffdcbc34cb59f97abd6704d4831c517629e4ed10784ea511d8468",
+    "make_landmarks_probe.py": "be3ba27e79998d557190e260dee48c9553c74a3d2c0dd7a96e599bdacd5944a3",
+    "make_prepared_probe.py": "0edf014388d960567ea900c5d221312e9359e5b7171281362365d7f3e02c4706",
+    "make_read_probe.py": "16802e2e83aebd6ff5ed82b5c57ad645874f414e7b58945430998309727465ca",
+    "observe_restore_command.py": "2e3e80e1466ff8789644546b8ae40fe0cec58532ea3f4f3dde561c3a125b2d63",
+    "observe_suppression.py": "364998320d1847a35ab8c003378256d8a57d3cbe4f30082f82bc34bfdd12994a",
+    "plan-084747-c0b318e2.json": "7d4882e0156685cc43ebd59506d2e0827f91d0d0f0c0baa79890c835650d40f4",
+    "preflight-read-v1-error.json": "b940632340fc02478e7b9e44c1eaaf069b8c6ac810a48315b6d18b26a93c606a",
+    "prepare-090140-baeb3e32.json": "3fdf126421f44dbf206c9357bf4491d6e6d1a85d071a8a26459e3d565a56aa23",
+    "prepared-host.json": "ce42cf0108a882d5b478a9d62a2a7361855caed23cd7cab830aa2f321b858051",
+    "prepared-read-artifact.json": "e0c0202e632ddefed4edda1f98b19c951d42de36573cf9f2116c16a014ac61b6",
+    "prepared-read-command.json": "24a07f95ebeb5da7677d30bbd03a2225f6ef255ac0f39e2fbe6c77d0445ebdd6",
+    "prepared-read-probe.py": "e1f93e3c995e6bbc7ab6b586a20826a85e7cea669ec4f835e89a72e3e7fadcc6",
+    "prepared-ssm-intent.json": "34b968193f93fa3a594217ea2a09372174e3291d4f773fa54479e45492e58689",
+    "prepared-ssm-observe-090501.json": "be229dcc6b06e02294bb34c3c85fe995fc7976b397b64635a1b231194e262462",
+    "prepared-ssm-result.json": "aea2f433220f42f7568c98c78c57c8ca01bd3313ac4cb0608c19f06e483114d2",
+    "prepared-verification.json": "fdf4482e0bc5e49f2c49e2a412cb2af4110716eeca3cd7361838bbc2ef311e7a",
+    "progress-084056.json": "44703c7988c29edd6d6cdfa4f9cd939e362faca0a32d581b6cce4d8636a25d7e",
+    "protection-description.json": "821ee8aca1f32bfdf1f039ffb23769811ce4c29b5a750aec41e0c77318d6e22e",
+    "protection-provenance.json": "22c93d65ae2a596a771f88c6e865cc071d372db3343709430c3d4361c552735e",
+    "recover-maintenance-085318-b14f2194.json": "2854b02a4d89c249b8ad24da34a502acb21eb643978b46b92e0459cdde4290c6",
+    "recovery-suppression-before-boot-v2.json": "08e8f777241ee18dbf2c0522a3e349c0dada2c7f4b31cad1e5ac26e5aee5f1c9",
+    "recovery-suppression-before-boot.json": "0decbc78028e386dd90cc8e823a7ba6383d6a3b8588bab6cc072576a709e63be",
+    "recovery-verified.json": "07b9a78c972726440d1fd20e2e092e1bafef736b2e0bf18ab28eae17af9a231f",
+    "recovery_verify.py": "a75ca3afd1b515f8791d78fd181c2d0549b0f8d41dc1a40dea5776556b01fa21",
+    "recovery_verify_v2.py": "cb48f106df36d7c326da213b5a98e8e201ab81e2f65a00718f8db9ec6745947b",
+    "restore-command-observe-090220.json": "3407bde9da53775548dc4d635b13dae06d95f9ac539c53aba2db40313c1f1d3f",
+    "restore-command-observe-090255.json": "2a7a2de72f28f4e40d7fabc6b57867b5ef313925115be16a7656bbe925636ac6",
+    "restore_ingress.py": "1594b21c40c5eed50dde06ced61ca3bf2850e0911e0862411ba00add7a97f266",
+    "send_baseline_probe.py": "474577fd25f3740169a84d1f2b931577e6b408d54763d27377ff8a3b2fec79f6",
+    "send_landmarks_probe.py": "82fcf41abcf825edec1c1ad04d4b51b5dbf10c03db5da9168b1ad62f64adf4e5",
+    "send_prepared_probe.py": "28f7fe8cbcc21b223658b551758cdb1209a688804e8d7f039857c415ae2b8e30",
+    "stack-alarm-inventory.json": "5cfa1d2e043506400fd00af83dd07e9f7add7987507ea41bc8656939891f6c8c",
+    "stack-resources.json": "59b767c6deec388bcf6d29189e8052f56a5c92b7f0f8959cf9b462172d131d1d",
+    "start_maintenance_host.py": "a170f26287e269c5037e72efc089fe57dcb92f8c2ca785b4d2cb75cfd95f30ee",
+    "start_maintenance_host_v2.py": "7c3ff25a0e1bd7a312bf7fbc831f9b1939aaa7d06f61f7a5cf4fa8db3879b0dc",
+    "stop_maintenance_host.py": "29a0ceb94eb6afa5a8d2151ba7292e084f65f09dc2498838843a432b16b78ef7",
+    "suppression-084339.json": "6f79238fc21d41c7bddc3dea36a2a8cdc49a7f8219a35cf2cbbcf0161d080549",
+    "suppression-proof-084557.json": "1fc0ee56a7789ef7b6ff112f91454f08bb29d059181ac4fef365ea7c828c4c4d",
+    "suppressor-084714.json": "f5e5918f82df336fe9f95a159c94b320d07c6b2fc6347ed2c3b524e553b3d05d",
+    "target-deployed-template.json": "de6504c3da087a45329ed648c7bbb22f1f96c258bc24ec3814e571387bf011b2",
+    "target-semantic-diff.json": "09bcb3931ae0defbe6f004221feed1360f7fb80999bd088ba9547a41429817ab",
+    "target-stack-description.json": "90d3b3b8f8d6c5070096c3463d4ef935a172ba784e964ddfa935eff743d52ef4",
+    "target-stack-policy.json": "ced151e60928be8692853276c7c2bb9637894999afa6590ca182ac18f53737af",
+    "target-synth.log": "1d5fc1ce5042839c91879a9c06196f0b9890efe038f28700691aafe03acc0cb7",
+    "validated-source-plan-read-only.json": "30716df02a40a5f3408953c3c6879f52e68033b30213b172de2c98ad91211f64",
+    "verify_prepared.py": "64a69f7504a266f04e41c4de7e4d6c7fa7a3bb1bfa0c641bf7d020337cd01cc3",
+    "volume-084839-74e9fe5a.json": "1269cade468467e3252d37f09104e3f163aee1b45e194003b48dd60e23a32b01"
+  }
+}
