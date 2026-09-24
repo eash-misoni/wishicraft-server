@@ -131,4 +131,4 @@ Phase 2 target hostは`deployment=target`で独立assemblyとしてsynthし、de
 
 Phase 2aのrepository validationはDocker Engineを必要としない。Phase 2b-1ではGitHub-hosted Linux x86_64 runnerの既設Dockerだけを使い、固定digest imageを`SETUP_ONLY=true`で実行するsynthetic ownership integration testを追加した。local開発環境へDockerをinstallせず、実world、実`server.properties`、secret、AWSを使用しない。
 
-> D-113 RESTORE implementation candidate: [contract](docs/reviews/game_restore.md), [operator runbook](docs/runbooks/game_restore.md). 同一Game/packageのsnapshotから新generationを準備し、元worldを保持します。実環境qualificationは未完了。
+> D-113 RESTORE limited dev qualified: [contract](docs/reviews/game_restore.md), [operator runbook](docs/runbooks/game_restore.md), [2026-09-24 evidence](docs/evidence/game_restore_resumed_2026-09-24.md). Vanilla Bの保持済みPREPAREDからcommit・復元先START/内容/STOP・正式rollback・元world START/内容/STOPを完遂。両worldを保持し元world選択、STOPPED/HEALTHY・49 alarms OK。Paper/NeoForge実RESTORE・全失敗経路・災害復旧は未実証。

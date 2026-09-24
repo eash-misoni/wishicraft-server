@@ -1128,6 +1128,6 @@ Phase 8 Completedを維持し、Phase 9は未着手、Restore UI・汎用workflo
 [実証範囲・失敗と修正・exact evidence](runbooks/backup_safety_isolated_restore.md#execution-closeout--2026-09-11-utc)を参照。
 共有backup、whitelist、Reset認可・保持policy、world参照、SWITCH/RESET順序はProposedのまま。
 
-## D-113 — Operator Game RESTORE（implementation candidate）
+## D-113 — Operator Game RESTORE（limited Vanilla B dev qualified）
 
-[契約](reviews/game_restore.md)と[runbook](runbooks/game_restore.md)。D-101 independent trackとして、同一Game/packageのsnapshotから新generationを復元する。UI/EXPORT/retention削除releaseは対象外。repository検証とdev実証は区別し、実環境qualificationは未完了。
+[契約](reviews/game_restore.md)と[runbook](runbooks/game_restore.md)。D-101 independent trackとして、同一Game/packageのsnapshotから新generationを復元する。[2026-09-24限定実証](evidence/game_restore_resumed_2026-09-24.md)で保持済みPREPAREDからcommit・復元先START/内容/STOP・正式rollback・元world START/内容/STOPを完遂。両world保持、元world選択・STOPPED/HEALTHY・49 alarms OK。Paper/NeoForge実RESTORE・全失敗経路・災害復旧は未実証。UI/EXPORT/retention削除releaseは対象外。

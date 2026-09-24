@@ -1,0 +1,3495 @@
+{
+  "schema_version": 1,
+  "qualification": "limited-dev Vanilla B retained PREPARED continuation, restored START/STOP and explicit rollback/original START/STOP",
+  "reviewed_restore_core": "b856dcf06f8564c7c056491ff3b993a3fc828357",
+  "prior_closeout": "73e19aa66d43acd3a8879aabcd2fd427ace8414e",
+  "reader_initial_commit": "ea8c7bf7b260d06cb26caac074f8e6300ba9d133",
+  "execution_commit": "5a17b11716830f919dec9d9dcd27e9111923d800",
+  "execution_checkout_clean": true,
+  "core_and_shared_validation_unchanged_sha256": {
+    "src/wishicraft/restore_operator.py": "f18608458d89a36ca4b72e5337b7e656b7785bbf8cc3ca73dc9ac4f593c8e9f4",
+    "src/wishicraft/restore_repository.py": "20f05eb602ba26709ec8200c0682aa340dfeff4fcbdbbc72688c85218494e8d7",
+    "src/wishicraft/restore_source.py": "d33289aa1214a00e4958f1e6e9a9612abc5652175dc89f0621d134ea83d96e9f",
+    "src/wishicraft/restore_volume.py": "a6e57cc5a485e1eab46826db176abd1206a1e093bcde6d61b57bfc59a9770195",
+    "src/wishicraft/artifacts/restore_host.py": "9a1933ea75bb40f9b1d1c7c288eb3be9548754d9fa293febb928c8739ea6862d",
+    "src/wishicraft/artifacts/restore_tree.py": "a9195a29af9a5a71fc05901715edf76026d60e72f3b07a97b3af2ad8d2150f9a",
+    "src/wishicraft/artifacts/world_import.py": "0cfaf9eae86418d0d7c354e52136d8b64d692c3a87c983173f687c95f8e5f8c1",
+    "src/wishicraft/artifacts/world_nbt.py": "01770fa63daaab1239f04ae00e2945fae27377db84fad72bc400edac281a3161",
+    "src/wishicraft/artifacts/reset_worlds.py": "1074d1bab6291dfed8a0f1d49ea5ce53fe8a5e8cc074bcf560d5a206c19f4deb"
+  },
+  "account": "385526546525",
+  "region": "ap-northeast-1",
+  "profile": "wishicraft-dev",
+  "system": "wishicraft-main",
+  "instance_id": "i-04fc0629dc4ea466e",
+  "data_volume_id": "vol-03ac9f534326c345c",
+  "restore_operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+  "game_id": "game-vanilla-secondary",
+  "source_snapshot": {
+    "snapshot_id": "snap-0be8e05ab05d70e84",
+    "backup_operation": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e",
+    "backup_timestamp": "2026-09-12T10:31:35.625000Z",
+    "generation": 1,
+    "data_source": "/srv/minecraft/games/game-vanilla-secondary/server",
+    "provenance_validated": true,
+    "retained_completed_encrypted": true
+  },
+  "protection_snapshot": {
+    "snapshot_id": "snap-0d2407a5af78afa82",
+    "backup_operation": "op-aa36d4ba-101b-47f1-bd6c-f393234b9509",
+    "snapshot_start_time": "2026-09-23T08:38:21.444000Z",
+    "desired_revision": 67,
+    "retained_completed_encrypted": true
+  },
+  "package": {
+    "mods": [],
+    "package_id": "vanilla",
+    "package_version": "initial-fixed-version",
+    "loader": {
+      "type": "vanilla"
+    },
+    "minecraft_version": "26.2"
+  },
+  "package_digest": "75426f4a2b9368269b3e8d14bfb14974464eaecb7e4eb5b2f9c15eb9784ac78e",
+  "previous_world": {
+    "difficulty": null,
+    "generation": 1,
+    "seed": null,
+    "hardcore": null,
+    "current_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+  },
+  "previous_data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+  "restored_data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+  "preflight": {
+    "at": "2026-09-24T02:52:00.186843+00:00",
+    "phase": "PREPARED",
+    "journal_revision": 13,
+    "desired_revision": 67,
+    "cleanup": "DELETED",
+    "state": "STOPPED/HEALTHY",
+    "alarms_ok": 49,
+    "queues_empty": true,
+    "no_lock_current_workflow_ssm_dns": true,
+    "source_protection_plan_receipt_verified": true,
+    "narrow_host_iam_read_back": true
+  },
+  "maintenance": {
+    "prepare_lease": {
+      "id": "d113-resume-20260924T024016Z",
+      "duration_seconds": 3600,
+      "started_at": "2026-09-24T02:53:27+00:00",
+      "ended_at": "2026-09-24T03:23:28+00:00",
+      "status": "ENDED",
+      "ordinary_begin": true
+    },
+    "rollback_lease": {
+      "id": "d113-rollback-20260924T024016Z",
+      "duration_seconds": 3600,
+      "started_at": "2026-09-24T03:36:22+00:00",
+      "ended_at": "2026-09-24T03:52:15+00:00",
+      "status": "ENDED",
+      "ordinary_begin": true
+    }
+  },
+  "reader_commands": [
+    {
+      "mode": "prepared-check",
+      "commit": "ea8c7bf7b260d06cb26caac074f8e6300ba9d133",
+      "command_id": "a19a8baf-fabe-405a-b392-e65251d09760",
+      "payload_sha256": "134f67526f98c0a202e3807506d32a2fd8ba20ca2cc3ee37d417d4bc89aa103f",
+      "status": "Failed",
+      "response_code": 1,
+      "started_at": "2026-09-24T02:59:45.118Z",
+      "ended_at": "2026-09-24T03:00:19.118Z",
+      "stdout_bytes": 0,
+      "error": "READER_OUTPUT_LIMIT"
+    },
+    {
+      "mode": "prepared-check",
+      "commit": "5a17b11716830f919dec9d9dcd27e9111923d800",
+      "command_id": "5679f848-921f-4513-88da-7a9f0fd089e5",
+      "payload_sha256": "425ea1143e3a2d7d2393d8eb8d55a117c4773ec6ef022415dc7c79ff1ea21520",
+      "status": "Success",
+      "response_code": 0,
+      "started_at": "2026-09-24T03:16:30.128Z",
+      "ended_at": "2026-09-24T03:16:34.128Z",
+      "stdout_bytes": 10174,
+      "error": null
+    },
+    {
+      "mode": "restored-live",
+      "commit": "5a17b11716830f919dec9d9dcd27e9111923d800",
+      "command_id": "18d116a8-92c2-4c2f-98a2-c08872febedd",
+      "payload_sha256": "9005bf7bca5e7b8124374f66e449da03520c075f0a0935ce1d79335a6a46fe1c",
+      "status": "Success",
+      "response_code": 0,
+      "started_at": "2026-09-24T03:31:27.627Z",
+      "ended_at": "2026-09-24T03:32:01.627Z",
+      "stdout_bytes": 10741,
+      "error": null
+    },
+    {
+      "mode": "rollback-check",
+      "commit": "5a17b11716830f919dec9d9dcd27e9111923d800",
+      "command_id": "9fb31a51-8f66-46cf-b6b3-f34532fefe3e",
+      "payload_sha256": "425ea1143e3a2d7d2393d8eb8d55a117c4773ec6ef022415dc7c79ff1ea21520",
+      "status": "Success",
+      "response_code": 0,
+      "started_at": "2026-09-24T03:45:31.688Z",
+      "ended_at": "2026-09-24T03:46:06.688Z",
+      "stdout_bytes": 10207,
+      "error": null
+    },
+    {
+      "mode": "original-live",
+      "commit": "5a17b11716830f919dec9d9dcd27e9111923d800",
+      "command_id": "919f4d90-a9c1-4739-85c2-de2e17603466",
+      "payload_sha256": "cc02afcdc77989588170007b33bf52898536d03f17718066e19e73b5a6ae02d8",
+      "status": "Success",
+      "response_code": 0,
+      "started_at": "2026-09-24T04:02:16.621Z",
+      "ended_at": "2026-09-24T04:02:50.621Z",
+      "stdout_bytes": 10685,
+      "error": null
+    }
+  ],
+  "prepared_receipt_from_previous_execution": {
+    "phase": "prepared",
+    "unmounted": true,
+    "volume_id": "vol-0adfd2940e3e501ca",
+    "source_tree": {
+      "file_count": 82,
+      "expanded_size": 130946284,
+      "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+    },
+    "previous_tree": {
+      "file_count": 85,
+      "expanded_size": 130980954,
+      "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+    },
+    "prepared_tree": {
+      "file_count": 36,
+      "expanded_size": 2253910,
+      "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+    },
+    "operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+    "source_world_tree": {
+      "file_count": 31,
+      "expanded_size": 2252092,
+      "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+    }
+  },
+  "readers": {
+    "prepared-check": {
+      "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server",
+        "server_tree": {
+          "expanded_size": 259697819,
+          "file_count": 181,
+          "tree_sha256": "05e6e79350372cd3fb5487e9a3f6c0a06a007f7cb7523bc470826f945a307467"
+        },
+        "world_path": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server/world",
+        "world_tree": {
+          "expanded_size": 48585534,
+          "file_count": 48,
+          "tree_sha256": "bb5eb55ed56cf816b9a7d739c3756032600caa1599fd3859434855d331d7107d"
+        }
+      },
+      "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+        "server_tree": {
+          "expanded_size": 3680764510,
+          "file_count": 1669,
+          "tree_sha256": "36a44716ef7bdc9b190bff803209610d4e0b025fbcb2d1a5a94cd46a8e85f740"
+        },
+        "world_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server/wishinkaiwai",
+        "world_tree": {
+          "expanded_size": 3515790024,
+          "file_count": 1541,
+          "tree_sha256": "f2f07a6d1df7dd73ca31021bb166a69938421f6bcd0c6672f3112ccfcab93b49"
+        }
+      },
+      "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+        "server_tree": {
+          "expanded_size": 241079115,
+          "file_count": 169,
+          "tree_sha256": "7065f363f1a86b35936af28db1637bba5c62141293dfe3695508fde060473b87"
+        },
+        "world_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server/world",
+        "world_tree": {
+          "expanded_size": 34153607,
+          "file_count": 36,
+          "tree_sha256": "ccfe0816fb9a0c57ac4e85416527ed6e8602549604e1e83b7eed53a597376821"
+        }
+      },
+      "game-vanilla-main": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-main/server",
+        "server_tree": {
+          "expanded_size": 142011631,
+          "file_count": 115,
+          "tree_sha256": "b22795c5b20e1104b5d5e665d533f53349d89eb87175ecfe6965aef7725f83ae"
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-main/server/world",
+        "world_tree": {
+          "expanded_size": 13300760,
+          "file_count": 39,
+          "tree_sha256": "b43606b222874043e6e04645000579babeb97a4eebb5359737e0e104e543e6d1"
+        }
+      },
+      "game-vanilla-secondary": {
+        "managed_records": {
+          "owner": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf.owner.json",
+            "record": {
+              "phase": "initialized",
+              "plan_sha256": "e3791c1f132543659cdef6a82d649cff66ac6cdef23884bcca20cca8b0468bdf",
+              "protected": true
+            },
+            "sha256": "b9bb61d665b4aed938847ab381ffbc7526465d48040f13109a0a0d07b2da8708",
+            "state": "read",
+            "uid": 0
+          },
+          "staging": [],
+          "validated": {
+            "state": "missing"
+          }
+        },
+        "nbt": {
+          "data_version": {
+            "state": "value",
+            "value": 4903
+          },
+          "legacy_seed": {
+            "location": "Data.WorldGenSettings.seed",
+            "state": "missing"
+          },
+          "level_name": {
+            "state": "value",
+            "value": "world"
+          },
+          "seed_interpretation": "Only the named legacy field is decoded; absence is not no seed",
+          "spawn": {
+            "length": 4,
+            "selected_fields": {
+              "dimension": {
+                "state": "value",
+                "value": "minecraft:overworld"
+              },
+              "pos": {
+                "length": 12,
+                "sha256": "3a35304cdf821e9caadc5c5963238b1cbbcfea13b7d8d47aa993f89990141eac",
+                "state": "unsupported",
+                "type": "bytes"
+              }
+            },
+            "state": "unsupported",
+            "type": "dict"
+          },
+          "state": "read",
+          "time": {
+            "state": "value",
+            "value": 4796
+          },
+          "version_name": {
+            "state": "value",
+            "value": "26.2"
+          }
+        },
+        "policy_file_hashes": {
+          "banned-ips.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "banned-players.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "ops.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "whitelist.json": {
+            "sha256": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+            "state": "read"
+          }
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+        "server_tree": {
+          "expanded_size": 130980954,
+          "file_count": 85,
+          "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+        },
+        "terrain_region_count": 4,
+        "terrain_samples": {
+          "dimensions/minecraft/overworld/region/r.-1.-1.mca": {
+            "sha256": "7f4c4275b4ba9f3cd20bac272ab630758279a62491dba6bf0d85ff00750a1e4e",
+            "size": 413696,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.-1.0.mca": {
+            "sha256": "6d512e4ed2d03ab79139f73d825688faf9991890e0d7eb502b2a8c0ecb8a797d",
+            "size": 651264,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.-1.mca": {
+            "sha256": "82941998b402ded0b2d228085d0c3a4d1439c9a63b2d064c0ec59f3972c4e23f",
+            "size": 450560,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.0.mca": {
+            "sha256": "754a4065328d73d33f9bfe1cda6ce2560f46d4d93d386ed8879d4dc805accc0a",
+            "size": 749568,
+            "state": "read"
+          }
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server/world",
+        "world_tree": {
+          "expanded_size": 2284846,
+          "file_count": 31,
+          "tree_sha256": "5c36aa08e70a4c65f57b8e33d4fcd8996fa380d8d73d51f9521d0738460ba481"
+        }
+      },
+      "host": {
+        "containers": [],
+        "helpers": {
+          "reset_worlds.py": {
+            "gid": 0,
+            "mode": "0o644",
+            "sha256": "1074d1bab6291dfed8a0f1d49ea5ce53fe8a5e8cc074bcf560d5a206c19f4deb",
+            "uid": 0
+          },
+          "world_import.py": {
+            "gid": 0,
+            "mode": "0o644",
+            "sha256": "0cfaf9eae86418d0d7c354e52136d8b64d692c3a87c983173f687c95f8e5f8c1",
+            "uid": 0
+          }
+        },
+        "runtime_receipt": {
+          "phase": "stopped",
+          "target": {
+            "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-7a131891-e8b7-4c7a-879e-33c76f9d91af"
+          }
+        }
+      },
+      "restored": {
+        "managed_records": {
+          "owner": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730.owner.json",
+            "record": {
+              "phase": "prepared",
+              "plan_sha256": "22db51d581bae2dacddc25ab1c568a41b9d654d16548815d0bbde6b69576bcd6",
+              "prepared_tree": {
+                "expanded_size": 2253910,
+                "file_count": 36,
+                "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+              },
+              "previous_tree": {
+                "expanded_size": 130980954,
+                "file_count": 85,
+                "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+              },
+              "protected": true,
+              "restore_sha256": "249aaf6a764019b1191629844a024597b846c68d5ccd15481d5fed5593819a7c",
+              "source_tree": {
+                "expanded_size": 130946284,
+                "file_count": 82,
+                "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+              },
+              "source_world_tree": {
+                "expanded_size": 2252092,
+                "file_count": 31,
+                "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+              }
+            },
+            "sha256": "7d7f49a6fdf1607951cd5bb7130878e5ac90b9d74097d0da93cdfb183679dfc5",
+            "state": "read",
+            "uid": 0
+          },
+          "staging": [],
+          "validated": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/validated.json",
+            "record": {
+              "candidate": "staging-i64hivrt",
+              "prepared_tree": {
+                "expanded_size": 2253910,
+                "file_count": 36,
+                "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+              },
+              "previous_tree": {
+                "expanded_size": 130980954,
+                "file_count": 85,
+                "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+              },
+              "restore_sha256": "249aaf6a764019b1191629844a024597b846c68d5ccd15481d5fed5593819a7c",
+              "source_tree": {
+                "expanded_size": 130946284,
+                "file_count": 82,
+                "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+              },
+              "source_world_tree": {
+                "expanded_size": 2252092,
+                "file_count": 31,
+                "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+              }
+            },
+            "sha256": "0d868e9298196942091eac83d71545d854c1064a282c8a1f8ef6175814733851",
+            "state": "read",
+            "uid": 0
+          }
+        },
+        "nbt": {
+          "data_version": {
+            "state": "value",
+            "value": 4903
+          },
+          "legacy_seed": {
+            "location": "Data.WorldGenSettings.seed",
+            "state": "missing"
+          },
+          "level_name": {
+            "state": "value",
+            "value": "world"
+          },
+          "seed_interpretation": "Only the named legacy field is decoded; absence is not no seed",
+          "spawn": {
+            "length": 4,
+            "selected_fields": {
+              "dimension": {
+                "state": "value",
+                "value": "minecraft:overworld"
+              },
+              "pos": {
+                "length": 12,
+                "sha256": "02865c3d5af90678145afc5eb20d8af1f49bad49c256351d91f75a705edf7869",
+                "state": "unsupported",
+                "type": "bytes"
+              }
+            },
+            "state": "unsupported",
+            "type": "dict"
+          },
+          "state": "read",
+          "time": {
+            "state": "value",
+            "value": 1199
+          },
+          "version_name": {
+            "state": "value",
+            "value": "26.2"
+          }
+        },
+        "policy_file_hashes": {
+          "banned-ips.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "banned-players.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "ops.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "whitelist.json": {
+            "sha256": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+            "state": "read"
+          }
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+        "server_tree": {
+          "expanded_size": 2253910,
+          "file_count": 36,
+          "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+        },
+        "terrain_region_count": 4,
+        "terrain_samples": {
+          "dimensions/minecraft/overworld/region/r.-1.-1.mca": {
+            "sha256": "2c8ede555d0e8b1c9b96df25e74779d45ece00e8525e61e370379bce7f8e2c1e",
+            "size": 622592,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.-1.0.mca": {
+            "sha256": "43a281e67491c1ca742339d816e9b4b92419881c4cd086f5f4caf544f78f4f9b",
+            "size": 856064,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.-1.mca": {
+            "sha256": "751c720141b3108d5d597dabf2392de111f70a5e8f8ede0ecc43e92218a9bdba",
+            "size": 335872,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.0.mca": {
+            "sha256": "347a69e620330e96789fefc487df2aeb15ed8f60ac20e0da570060ca2996bcad",
+            "size": 434176,
+            "state": "read"
+          }
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server/world",
+        "world_tree": {
+          "expanded_size": 2252092,
+          "file_count": 31,
+          "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+        }
+      }
+    },
+    "restored-live": {
+      "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server",
+        "server_tree": {
+          "expanded_size": 259697819,
+          "file_count": 181,
+          "tree_sha256": "05e6e79350372cd3fb5487e9a3f6c0a06a007f7cb7523bc470826f945a307467"
+        },
+        "world_path": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server/world",
+        "world_tree": {
+          "expanded_size": 48585534,
+          "file_count": 48,
+          "tree_sha256": "bb5eb55ed56cf816b9a7d739c3756032600caa1599fd3859434855d331d7107d"
+        }
+      },
+      "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+        "server_tree": {
+          "expanded_size": 3680764510,
+          "file_count": 1669,
+          "tree_sha256": "36a44716ef7bdc9b190bff803209610d4e0b025fbcb2d1a5a94cd46a8e85f740"
+        },
+        "world_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server/wishinkaiwai",
+        "world_tree": {
+          "expanded_size": 3515790024,
+          "file_count": 1541,
+          "tree_sha256": "f2f07a6d1df7dd73ca31021bb166a69938421f6bcd0c6672f3112ccfcab93b49"
+        }
+      },
+      "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+        "server_tree": {
+          "expanded_size": 241079115,
+          "file_count": 169,
+          "tree_sha256": "7065f363f1a86b35936af28db1637bba5c62141293dfe3695508fde060473b87"
+        },
+        "world_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server/world",
+        "world_tree": {
+          "expanded_size": 34153607,
+          "file_count": 36,
+          "tree_sha256": "ccfe0816fb9a0c57ac4e85416527ed6e8602549604e1e83b7eed53a597376821"
+        }
+      },
+      "game-vanilla-main": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-main/server",
+        "server_tree": {
+          "expanded_size": 142011631,
+          "file_count": 115,
+          "tree_sha256": "b22795c5b20e1104b5d5e665d533f53349d89eb87175ecfe6965aef7725f83ae"
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-main/server/world",
+        "world_tree": {
+          "expanded_size": 13300760,
+          "file_count": 39,
+          "tree_sha256": "b43606b222874043e6e04645000579babeb97a4eebb5359737e0e104e543e6d1"
+        }
+      },
+      "game-vanilla-secondary": {
+        "managed_records": {
+          "owner": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf.owner.json",
+            "record": {
+              "phase": "initialized",
+              "plan_sha256": "e3791c1f132543659cdef6a82d649cff66ac6cdef23884bcca20cca8b0468bdf",
+              "protected": true
+            },
+            "sha256": "b9bb61d665b4aed938847ab381ffbc7526465d48040f13109a0a0d07b2da8708",
+            "state": "read",
+            "uid": 0
+          },
+          "staging": [],
+          "validated": {
+            "state": "missing"
+          }
+        },
+        "nbt": {
+          "data_version": {
+            "state": "value",
+            "value": 4903
+          },
+          "legacy_seed": {
+            "location": "Data.WorldGenSettings.seed",
+            "state": "missing"
+          },
+          "level_name": {
+            "state": "value",
+            "value": "world"
+          },
+          "seed_interpretation": "Only the named legacy field is decoded; absence is not no seed",
+          "spawn": {
+            "length": 4,
+            "selected_fields": {
+              "dimension": {
+                "state": "value",
+                "value": "minecraft:overworld"
+              },
+              "pos": {
+                "length": 12,
+                "sha256": "3a35304cdf821e9caadc5c5963238b1cbbcfea13b7d8d47aa993f89990141eac",
+                "state": "unsupported",
+                "type": "bytes"
+              }
+            },
+            "state": "unsupported",
+            "type": "dict"
+          },
+          "state": "read",
+          "time": {
+            "state": "value",
+            "value": 4796
+          },
+          "version_name": {
+            "state": "value",
+            "value": "26.2"
+          }
+        },
+        "policy_file_hashes": {
+          "banned-ips.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "banned-players.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "ops.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "whitelist.json": {
+            "sha256": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+            "state": "read"
+          }
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+        "server_tree": {
+          "expanded_size": 130980954,
+          "file_count": 85,
+          "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+        },
+        "terrain_region_count": 4,
+        "terrain_samples": {
+          "dimensions/minecraft/overworld/region/r.-1.-1.mca": {
+            "sha256": "7f4c4275b4ba9f3cd20bac272ab630758279a62491dba6bf0d85ff00750a1e4e",
+            "size": 413696,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.-1.0.mca": {
+            "sha256": "6d512e4ed2d03ab79139f73d825688faf9991890e0d7eb502b2a8c0ecb8a797d",
+            "size": 651264,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.-1.mca": {
+            "sha256": "82941998b402ded0b2d228085d0c3a4d1439c9a63b2d064c0ec59f3972c4e23f",
+            "size": 450560,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.0.mca": {
+            "sha256": "754a4065328d73d33f9bfe1cda6ce2560f46d4d93d386ed8879d4dc805accc0a",
+            "size": 749568,
+            "state": "read"
+          }
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server/world",
+        "world_tree": {
+          "expanded_size": 2284846,
+          "file_count": 31,
+          "tree_sha256": "5c36aa08e70a4c65f57b8e33d4fcd8996fa380d8d73d51f9521d0738460ba481"
+        }
+      },
+      "host": {
+        "containers": [
+          {
+            "id": "50b9cf9c9622",
+            "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+            "mounts": [
+              {
+                "Destination": "/data/.rcon-cli.env",
+                "RW": true,
+                "Source": "/run/wishicraft/rcon-cli.env",
+                "Type": "bind"
+              },
+              {
+                "Destination": "/data/.rcon-cli.yaml",
+                "RW": true,
+                "Source": "/run/wishicraft/rcon-cli.yaml",
+                "Type": "bind"
+              },
+              {
+                "Destination": "/data",
+                "RW": true,
+                "Source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+                "Type": "bind"
+              },
+              {
+                "Destination": "/wishicraft-package",
+                "RW": false,
+                "Source": "/srv/minecraft/games/game-vanilla-secondary/package-cache",
+                "Type": "bind"
+              },
+              {
+                "Destination": "/run/secrets/rcon-password",
+                "RW": false,
+                "Source": "/run/wishicraft/rcon-password",
+                "Type": "bind"
+              }
+            ],
+            "running": true
+          }
+        ],
+        "helpers": {
+          "reset_worlds.py": {
+            "gid": 0,
+            "mode": "0o644",
+            "sha256": "1074d1bab6291dfed8a0f1d49ea5ce53fe8a5e8cc074bcf560d5a206c19f4deb",
+            "uid": 0
+          },
+          "world_import.py": {
+            "gid": 0,
+            "mode": "0o644",
+            "sha256": "0cfaf9eae86418d0d7c354e52136d8b64d692c3a87c983173f687c95f8e5f8c1",
+            "uid": 0
+          }
+        },
+        "runtime_receipt": {
+          "phase": "running",
+          "target": {
+            "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-930ca474-10f3-4028-8641-c64e78f1fe7a"
+          }
+        }
+      },
+      "restored": {
+        "managed_records": {
+          "owner": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730.owner.json",
+            "record": {
+              "phase": "initialized",
+              "plan_sha256": "22db51d581bae2dacddc25ab1c568a41b9d654d16548815d0bbde6b69576bcd6",
+              "prepared_tree": {
+                "expanded_size": 2253910,
+                "file_count": 36,
+                "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+              },
+              "previous_tree": {
+                "expanded_size": 130980954,
+                "file_count": 85,
+                "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+              },
+              "protected": true,
+              "restore_sha256": "249aaf6a764019b1191629844a024597b846c68d5ccd15481d5fed5593819a7c",
+              "source_tree": {
+                "expanded_size": 130946284,
+                "file_count": 82,
+                "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+              },
+              "source_world_tree": {
+                "expanded_size": 2252092,
+                "file_count": 31,
+                "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+              }
+            },
+            "sha256": "5dd82b3485000abdff27c868dd49a0884ef1524a0bd85af2332b75512b87359e",
+            "state": "read",
+            "uid": 0
+          },
+          "staging": [],
+          "validated": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/validated.json",
+            "record": {
+              "candidate": "staging-i64hivrt",
+              "prepared_tree": {
+                "expanded_size": 2253910,
+                "file_count": 36,
+                "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+              },
+              "previous_tree": {
+                "expanded_size": 130980954,
+                "file_count": 85,
+                "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+              },
+              "restore_sha256": "249aaf6a764019b1191629844a024597b846c68d5ccd15481d5fed5593819a7c",
+              "source_tree": {
+                "expanded_size": 130946284,
+                "file_count": 82,
+                "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+              },
+              "source_world_tree": {
+                "expanded_size": 2252092,
+                "file_count": 31,
+                "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+              }
+            },
+            "sha256": "0d868e9298196942091eac83d71545d854c1064a282c8a1f8ef6175814733851",
+            "state": "read",
+            "uid": 0
+          }
+        },
+        "nbt": {
+          "data_version": {
+            "state": "value",
+            "value": 4903
+          },
+          "legacy_seed": {
+            "location": "Data.WorldGenSettings.seed",
+            "state": "missing"
+          },
+          "level_name": {
+            "state": "value",
+            "value": "world"
+          },
+          "seed_interpretation": "Only the named legacy field is decoded; absence is not no seed",
+          "spawn": {
+            "length": 4,
+            "selected_fields": {
+              "dimension": {
+                "state": "value",
+                "value": "minecraft:overworld"
+              },
+              "pos": {
+                "length": 12,
+                "sha256": "02865c3d5af90678145afc5eb20d8af1f49bad49c256351d91f75a705edf7869",
+                "state": "unsupported",
+                "type": "bytes"
+              }
+            },
+            "state": "unsupported",
+            "type": "dict"
+          },
+          "state": "read",
+          "time": {
+            "state": "value",
+            "value": 2398
+          },
+          "version_name": {
+            "state": "value",
+            "value": "26.2"
+          }
+        },
+        "policy_file_hashes": {
+          "banned-ips.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "banned-players.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "ops.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "whitelist.json": {
+            "sha256": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+            "state": "read"
+          }
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+        "terrain_region_count": 4,
+        "terrain_samples": {
+          "dimensions/minecraft/overworld/region/r.-1.-1.mca": {
+            "sha256": "2c8ede555d0e8b1c9b96df25e74779d45ece00e8525e61e370379bce7f8e2c1e",
+            "size": 622592,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.-1.0.mca": {
+            "sha256": "43a281e67491c1ca742339d816e9b4b92419881c4cd086f5f4caf544f78f4f9b",
+            "size": 856064,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.-1.mca": {
+            "sha256": "751c720141b3108d5d597dabf2392de111f70a5e8f8ede0ecc43e92218a9bdba",
+            "size": 335872,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.0.mca": {
+            "sha256": "347a69e620330e96789fefc487df2aeb15ed8f60ac20e0da570060ca2996bcad",
+            "size": 434176,
+            "state": "read"
+          }
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server/world"
+      }
+    },
+    "rollback-check": {
+      "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server",
+        "server_tree": {
+          "expanded_size": 259697819,
+          "file_count": 181,
+          "tree_sha256": "05e6e79350372cd3fb5487e9a3f6c0a06a007f7cb7523bc470826f945a307467"
+        },
+        "world_path": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server/world",
+        "world_tree": {
+          "expanded_size": 48585534,
+          "file_count": 48,
+          "tree_sha256": "bb5eb55ed56cf816b9a7d739c3756032600caa1599fd3859434855d331d7107d"
+        }
+      },
+      "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+        "server_tree": {
+          "expanded_size": 3680764510,
+          "file_count": 1669,
+          "tree_sha256": "36a44716ef7bdc9b190bff803209610d4e0b025fbcb2d1a5a94cd46a8e85f740"
+        },
+        "world_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server/wishinkaiwai",
+        "world_tree": {
+          "expanded_size": 3515790024,
+          "file_count": 1541,
+          "tree_sha256": "f2f07a6d1df7dd73ca31021bb166a69938421f6bcd0c6672f3112ccfcab93b49"
+        }
+      },
+      "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+        "server_tree": {
+          "expanded_size": 241079115,
+          "file_count": 169,
+          "tree_sha256": "7065f363f1a86b35936af28db1637bba5c62141293dfe3695508fde060473b87"
+        },
+        "world_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server/world",
+        "world_tree": {
+          "expanded_size": 34153607,
+          "file_count": 36,
+          "tree_sha256": "ccfe0816fb9a0c57ac4e85416527ed6e8602549604e1e83b7eed53a597376821"
+        }
+      },
+      "game-vanilla-main": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-main/server",
+        "server_tree": {
+          "expanded_size": 142011631,
+          "file_count": 115,
+          "tree_sha256": "b22795c5b20e1104b5d5e665d533f53349d89eb87175ecfe6965aef7725f83ae"
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-main/server/world",
+        "world_tree": {
+          "expanded_size": 13300760,
+          "file_count": 39,
+          "tree_sha256": "b43606b222874043e6e04645000579babeb97a4eebb5359737e0e104e543e6d1"
+        }
+      },
+      "game-vanilla-secondary": {
+        "managed_records": {
+          "owner": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf.owner.json",
+            "record": {
+              "phase": "initialized",
+              "plan_sha256": "e3791c1f132543659cdef6a82d649cff66ac6cdef23884bcca20cca8b0468bdf",
+              "protected": true
+            },
+            "sha256": "b9bb61d665b4aed938847ab381ffbc7526465d48040f13109a0a0d07b2da8708",
+            "state": "read",
+            "uid": 0
+          },
+          "staging": [],
+          "validated": {
+            "state": "missing"
+          }
+        },
+        "nbt": {
+          "data_version": {
+            "state": "value",
+            "value": 4903
+          },
+          "legacy_seed": {
+            "location": "Data.WorldGenSettings.seed",
+            "state": "missing"
+          },
+          "level_name": {
+            "state": "value",
+            "value": "world"
+          },
+          "seed_interpretation": "Only the named legacy field is decoded; absence is not no seed",
+          "spawn": {
+            "length": 4,
+            "selected_fields": {
+              "dimension": {
+                "state": "value",
+                "value": "minecraft:overworld"
+              },
+              "pos": {
+                "length": 12,
+                "sha256": "3a35304cdf821e9caadc5c5963238b1cbbcfea13b7d8d47aa993f89990141eac",
+                "state": "unsupported",
+                "type": "bytes"
+              }
+            },
+            "state": "unsupported",
+            "type": "dict"
+          },
+          "state": "read",
+          "time": {
+            "state": "value",
+            "value": 4796
+          },
+          "version_name": {
+            "state": "value",
+            "value": "26.2"
+          }
+        },
+        "policy_file_hashes": {
+          "banned-ips.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "banned-players.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "ops.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "whitelist.json": {
+            "sha256": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+            "state": "read"
+          }
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+        "server_tree": {
+          "expanded_size": 130980954,
+          "file_count": 85,
+          "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+        },
+        "terrain_region_count": 4,
+        "terrain_samples": {
+          "dimensions/minecraft/overworld/region/r.-1.-1.mca": {
+            "sha256": "7f4c4275b4ba9f3cd20bac272ab630758279a62491dba6bf0d85ff00750a1e4e",
+            "size": 413696,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.-1.0.mca": {
+            "sha256": "6d512e4ed2d03ab79139f73d825688faf9991890e0d7eb502b2a8c0ecb8a797d",
+            "size": 651264,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.-1.mca": {
+            "sha256": "82941998b402ded0b2d228085d0c3a4d1439c9a63b2d064c0ec59f3972c4e23f",
+            "size": 450560,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.0.mca": {
+            "sha256": "754a4065328d73d33f9bfe1cda6ce2560f46d4d93d386ed8879d4dc805accc0a",
+            "size": 749568,
+            "state": "read"
+          }
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server/world",
+        "world_tree": {
+          "expanded_size": 2284846,
+          "file_count": 31,
+          "tree_sha256": "5c36aa08e70a4c65f57b8e33d4fcd8996fa380d8d73d51f9521d0738460ba481"
+        }
+      },
+      "host": {
+        "containers": [],
+        "helpers": {
+          "reset_worlds.py": {
+            "gid": 0,
+            "mode": "0o644",
+            "sha256": "1074d1bab6291dfed8a0f1d49ea5ce53fe8a5e8cc074bcf560d5a206c19f4deb",
+            "uid": 0
+          },
+          "world_import.py": {
+            "gid": 0,
+            "mode": "0o644",
+            "sha256": "0cfaf9eae86418d0d7c354e52136d8b64d692c3a87c983173f687c95f8e5f8c1",
+            "uid": 0
+          }
+        },
+        "runtime_receipt": {
+          "phase": "stopped",
+          "target": {
+            "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-930ca474-10f3-4028-8641-c64e78f1fe7a"
+          }
+        }
+      },
+      "restored": {
+        "managed_records": {
+          "owner": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730.owner.json",
+            "record": {
+              "phase": "initialized",
+              "plan_sha256": "22db51d581bae2dacddc25ab1c568a41b9d654d16548815d0bbde6b69576bcd6",
+              "prepared_tree": {
+                "expanded_size": 2253910,
+                "file_count": 36,
+                "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+              },
+              "previous_tree": {
+                "expanded_size": 130980954,
+                "file_count": 85,
+                "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+              },
+              "protected": true,
+              "restore_sha256": "249aaf6a764019b1191629844a024597b846c68d5ccd15481d5fed5593819a7c",
+              "source_tree": {
+                "expanded_size": 130946284,
+                "file_count": 82,
+                "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+              },
+              "source_world_tree": {
+                "expanded_size": 2252092,
+                "file_count": 31,
+                "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+              }
+            },
+            "sha256": "5dd82b3485000abdff27c868dd49a0884ef1524a0bd85af2332b75512b87359e",
+            "state": "read",
+            "uid": 0
+          },
+          "staging": [],
+          "validated": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/validated.json",
+            "record": {
+              "candidate": "staging-i64hivrt",
+              "prepared_tree": {
+                "expanded_size": 2253910,
+                "file_count": 36,
+                "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+              },
+              "previous_tree": {
+                "expanded_size": 130980954,
+                "file_count": 85,
+                "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+              },
+              "restore_sha256": "249aaf6a764019b1191629844a024597b846c68d5ccd15481d5fed5593819a7c",
+              "source_tree": {
+                "expanded_size": 130946284,
+                "file_count": 82,
+                "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+              },
+              "source_world_tree": {
+                "expanded_size": 2252092,
+                "file_count": 31,
+                "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+              }
+            },
+            "sha256": "0d868e9298196942091eac83d71545d854c1064a282c8a1f8ef6175814733851",
+            "state": "read",
+            "uid": 0
+          }
+        },
+        "nbt": {
+          "data_version": {
+            "state": "value",
+            "value": 4903
+          },
+          "legacy_seed": {
+            "location": "Data.WorldGenSettings.seed",
+            "state": "missing"
+          },
+          "level_name": {
+            "state": "value",
+            "value": "world"
+          },
+          "seed_interpretation": "Only the named legacy field is decoded; absence is not no seed",
+          "spawn": {
+            "length": 4,
+            "selected_fields": {
+              "dimension": {
+                "state": "value",
+                "value": "minecraft:overworld"
+              },
+              "pos": {
+                "length": 12,
+                "sha256": "02865c3d5af90678145afc5eb20d8af1f49bad49c256351d91f75a705edf7869",
+                "state": "unsupported",
+                "type": "bytes"
+              }
+            },
+            "state": "unsupported",
+            "type": "dict"
+          },
+          "state": "read",
+          "time": {
+            "state": "value",
+            "value": 2398
+          },
+          "version_name": {
+            "state": "value",
+            "value": "26.2"
+          }
+        },
+        "policy_file_hashes": {
+          "banned-ips.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "banned-players.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "ops.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "whitelist.json": {
+            "sha256": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+            "state": "read"
+          }
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+        "server_tree": {
+          "expanded_size": 130945908,
+          "file_count": 82,
+          "tree_sha256": "5495929a78316868bae68d00135f013ff239cf7f9083d70d6071dee5c29438c8"
+        },
+        "terrain_region_count": 4,
+        "terrain_samples": {
+          "dimensions/minecraft/overworld/region/r.-1.-1.mca": {
+            "sha256": "2c8ede555d0e8b1c9b96df25e74779d45ece00e8525e61e370379bce7f8e2c1e",
+            "size": 622592,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.-1.0.mca": {
+            "sha256": "43a281e67491c1ca742339d816e9b4b92419881c4cd086f5f4caf544f78f4f9b",
+            "size": 856064,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.-1.mca": {
+            "sha256": "751c720141b3108d5d597dabf2392de111f70a5e8f8ede0ecc43e92218a9bdba",
+            "size": 335872,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.0.mca": {
+            "sha256": "347a69e620330e96789fefc487df2aeb15ed8f60ac20e0da570060ca2996bcad",
+            "size": 434176,
+            "state": "read"
+          }
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server/world",
+        "world_tree": {
+          "expanded_size": 2252087,
+          "file_count": 31,
+          "tree_sha256": "6ebff8516cc80538c48c7a4998c86def0b5bc706f71e9b0f36f969e1a5e25e0e"
+        }
+      }
+    },
+    "original-live": {
+      "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server",
+        "server_tree": {
+          "expanded_size": 259697819,
+          "file_count": 181,
+          "tree_sha256": "05e6e79350372cd3fb5487e9a3f6c0a06a007f7cb7523bc470826f945a307467"
+        },
+        "world_path": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server/world",
+        "world_tree": {
+          "expanded_size": 48585534,
+          "file_count": 48,
+          "tree_sha256": "bb5eb55ed56cf816b9a7d739c3756032600caa1599fd3859434855d331d7107d"
+        }
+      },
+      "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+        "server_tree": {
+          "expanded_size": 3680764510,
+          "file_count": 1669,
+          "tree_sha256": "36a44716ef7bdc9b190bff803209610d4e0b025fbcb2d1a5a94cd46a8e85f740"
+        },
+        "world_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server/wishinkaiwai",
+        "world_tree": {
+          "expanded_size": 3515790024,
+          "file_count": 1541,
+          "tree_sha256": "f2f07a6d1df7dd73ca31021bb166a69938421f6bcd0c6672f3112ccfcab93b49"
+        }
+      },
+      "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+        "server_tree": {
+          "expanded_size": 241079115,
+          "file_count": 169,
+          "tree_sha256": "7065f363f1a86b35936af28db1637bba5c62141293dfe3695508fde060473b87"
+        },
+        "world_path": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server/world",
+        "world_tree": {
+          "expanded_size": 34153607,
+          "file_count": 36,
+          "tree_sha256": "ccfe0816fb9a0c57ac4e85416527ed6e8602549604e1e83b7eed53a597376821"
+        }
+      },
+      "game-vanilla-main": {
+        "managed_records": {
+          "state": "not_applicable"
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-main/server",
+        "server_tree": {
+          "expanded_size": 142011631,
+          "file_count": 115,
+          "tree_sha256": "b22795c5b20e1104b5d5e665d533f53349d89eb87175ecfe6965aef7725f83ae"
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-main/server/world",
+        "world_tree": {
+          "expanded_size": 13300760,
+          "file_count": 39,
+          "tree_sha256": "b43606b222874043e6e04645000579babeb97a4eebb5359737e0e104e543e6d1"
+        }
+      },
+      "game-vanilla-secondary": {
+        "managed_records": {
+          "owner": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf.owner.json",
+            "record": {
+              "phase": "initialized",
+              "plan_sha256": "e3791c1f132543659cdef6a82d649cff66ac6cdef23884bcca20cca8b0468bdf",
+              "protected": true
+            },
+            "sha256": "c78da6ea4679221d7af4150bd36adba3d94ca20a3c8510fa8ae741733176bb51",
+            "state": "read",
+            "uid": 0
+          },
+          "staging": [],
+          "validated": {
+            "state": "missing"
+          }
+        },
+        "nbt": {
+          "data_version": {
+            "state": "value",
+            "value": 4903
+          },
+          "legacy_seed": {
+            "location": "Data.WorldGenSettings.seed",
+            "state": "missing"
+          },
+          "level_name": {
+            "state": "value",
+            "value": "world"
+          },
+          "seed_interpretation": "Only the named legacy field is decoded; absence is not no seed",
+          "spawn": {
+            "length": 4,
+            "selected_fields": {
+              "dimension": {
+                "state": "value",
+                "value": "minecraft:overworld"
+              },
+              "pos": {
+                "length": 12,
+                "sha256": "3a35304cdf821e9caadc5c5963238b1cbbcfea13b7d8d47aa993f89990141eac",
+                "state": "unsupported",
+                "type": "bytes"
+              }
+            },
+            "state": "unsupported",
+            "type": "dict"
+          },
+          "state": "read",
+          "time": {
+            "state": "value",
+            "value": 5995
+          },
+          "version_name": {
+            "state": "value",
+            "value": "26.2"
+          }
+        },
+        "policy_file_hashes": {
+          "banned-ips.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "banned-players.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "ops.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "whitelist.json": {
+            "sha256": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+            "state": "read"
+          }
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+        "terrain_region_count": 4,
+        "terrain_samples": {
+          "dimensions/minecraft/overworld/region/r.-1.-1.mca": {
+            "sha256": "7f4c4275b4ba9f3cd20bac272ab630758279a62491dba6bf0d85ff00750a1e4e",
+            "size": 413696,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.-1.0.mca": {
+            "sha256": "6d512e4ed2d03ab79139f73d825688faf9991890e0d7eb502b2a8c0ecb8a797d",
+            "size": 651264,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.-1.mca": {
+            "sha256": "82941998b402ded0b2d228085d0c3a4d1439c9a63b2d064c0ec59f3972c4e23f",
+            "size": 450560,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.0.mca": {
+            "sha256": "754a4065328d73d33f9bfe1cda6ce2560f46d4d93d386ed8879d4dc805accc0a",
+            "size": 749568,
+            "state": "read"
+          }
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server/world"
+      },
+      "host": {
+        "containers": [
+          {
+            "id": "6dab5424b837",
+            "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+            "mounts": [
+              {
+                "Destination": "/wishicraft-package",
+                "RW": false,
+                "Source": "/srv/minecraft/games/game-vanilla-secondary/package-cache",
+                "Type": "bind"
+              },
+              {
+                "Destination": "/run/secrets/rcon-password",
+                "RW": false,
+                "Source": "/run/wishicraft/rcon-password",
+                "Type": "bind"
+              },
+              {
+                "Destination": "/data/.rcon-cli.env",
+                "RW": true,
+                "Source": "/run/wishicraft/rcon-cli.env",
+                "Type": "bind"
+              },
+              {
+                "Destination": "/data/.rcon-cli.yaml",
+                "RW": true,
+                "Source": "/run/wishicraft/rcon-cli.yaml",
+                "Type": "bind"
+              },
+              {
+                "Destination": "/data",
+                "RW": true,
+                "Source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+                "Type": "bind"
+              }
+            ],
+            "running": true
+          }
+        ],
+        "helpers": {
+          "reset_worlds.py": {
+            "gid": 0,
+            "mode": "0o644",
+            "sha256": "1074d1bab6291dfed8a0f1d49ea5ce53fe8a5e8cc074bcf560d5a206c19f4deb",
+            "uid": 0
+          },
+          "world_import.py": {
+            "gid": 0,
+            "mode": "0o644",
+            "sha256": "0cfaf9eae86418d0d7c354e52136d8b64d692c3a87c983173f687c95f8e5f8c1",
+            "uid": 0
+          }
+        },
+        "runtime_receipt": {
+          "phase": "running",
+          "target": {
+            "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+            "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+            "game_id": "game-vanilla-secondary",
+            "instance_id": "i-04fc0629dc4ea466e",
+            "run_id": "op-2be431f0-6f1f-4781-bc2c-cf88bb028055"
+          }
+        }
+      },
+      "restored": {
+        "managed_records": {
+          "owner": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730.owner.json",
+            "record": {
+              "phase": "initialized",
+              "plan_sha256": "22db51d581bae2dacddc25ab1c568a41b9d654d16548815d0bbde6b69576bcd6",
+              "prepared_tree": {
+                "expanded_size": 2253910,
+                "file_count": 36,
+                "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+              },
+              "previous_tree": {
+                "expanded_size": 130980954,
+                "file_count": 85,
+                "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+              },
+              "protected": true,
+              "restore_sha256": "249aaf6a764019b1191629844a024597b846c68d5ccd15481d5fed5593819a7c",
+              "source_tree": {
+                "expanded_size": 130946284,
+                "file_count": 82,
+                "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+              },
+              "source_world_tree": {
+                "expanded_size": 2252092,
+                "file_count": 31,
+                "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+              }
+            },
+            "sha256": "5dd82b3485000abdff27c868dd49a0884ef1524a0bd85af2332b75512b87359e",
+            "state": "read",
+            "uid": 0
+          },
+          "staging": [],
+          "validated": {
+            "gid": 0,
+            "mode": "0o600",
+            "path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/validated.json",
+            "record": {
+              "candidate": "staging-i64hivrt",
+              "prepared_tree": {
+                "expanded_size": 2253910,
+                "file_count": 36,
+                "tree_sha256": "d941e0acc31d6b3bed13fd465ff0ecb040a1cf639bc80eb1f9a33eddd6589cc3"
+              },
+              "previous_tree": {
+                "expanded_size": 130980954,
+                "file_count": 85,
+                "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+              },
+              "restore_sha256": "249aaf6a764019b1191629844a024597b846c68d5ccd15481d5fed5593819a7c",
+              "source_tree": {
+                "expanded_size": 130946284,
+                "file_count": 82,
+                "tree_sha256": "89e38cf5af6e2142b94edea7f649342750797f08644dd34a970755ff6e4f260c"
+              },
+              "source_world_tree": {
+                "expanded_size": 2252092,
+                "file_count": 31,
+                "tree_sha256": "46edae3a5e1aa8457a24c243267bcf32ee970af28f805400c46ac74b3f946ced"
+              }
+            },
+            "sha256": "0d868e9298196942091eac83d71545d854c1064a282c8a1f8ef6175814733851",
+            "state": "read",
+            "uid": 0
+          }
+        },
+        "nbt": {
+          "data_version": {
+            "state": "value",
+            "value": 4903
+          },
+          "legacy_seed": {
+            "location": "Data.WorldGenSettings.seed",
+            "state": "missing"
+          },
+          "level_name": {
+            "state": "value",
+            "value": "world"
+          },
+          "seed_interpretation": "Only the named legacy field is decoded; absence is not no seed",
+          "spawn": {
+            "length": 4,
+            "selected_fields": {
+              "dimension": {
+                "state": "value",
+                "value": "minecraft:overworld"
+              },
+              "pos": {
+                "length": 12,
+                "sha256": "02865c3d5af90678145afc5eb20d8af1f49bad49c256351d91f75a705edf7869",
+                "state": "unsupported",
+                "type": "bytes"
+              }
+            },
+            "state": "unsupported",
+            "type": "dict"
+          },
+          "state": "read",
+          "time": {
+            "state": "value",
+            "value": 2398
+          },
+          "version_name": {
+            "state": "value",
+            "value": "26.2"
+          }
+        },
+        "policy_file_hashes": {
+          "banned-ips.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "banned-players.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "ops.json": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "state": "read"
+          },
+          "whitelist.json": {
+            "sha256": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+            "state": "read"
+          }
+        },
+        "server_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+        "server_tree": {
+          "expanded_size": 130945908,
+          "file_count": 82,
+          "tree_sha256": "5495929a78316868bae68d00135f013ff239cf7f9083d70d6071dee5c29438c8"
+        },
+        "terrain_region_count": 4,
+        "terrain_samples": {
+          "dimensions/minecraft/overworld/region/r.-1.-1.mca": {
+            "sha256": "2c8ede555d0e8b1c9b96df25e74779d45ece00e8525e61e370379bce7f8e2c1e",
+            "size": 622592,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.-1.0.mca": {
+            "sha256": "43a281e67491c1ca742339d816e9b4b92419881c4cd086f5f4caf544f78f4f9b",
+            "size": 856064,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.-1.mca": {
+            "sha256": "751c720141b3108d5d597dabf2392de111f70a5e8f8ede0ecc43e92218a9bdba",
+            "size": 335872,
+            "state": "read"
+          },
+          "dimensions/minecraft/overworld/region/r.0.0.mca": {
+            "sha256": "347a69e620330e96789fefc487df2aeb15ed8f60ac20e0da570060ca2996bcad",
+            "size": 434176,
+            "state": "read"
+          }
+        },
+        "world_path": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server/world",
+        "world_tree": {
+          "expanded_size": 2252087,
+          "file_count": 31,
+          "tree_sha256": "6ebff8516cc80538c48c7a4998c86def0b5bc706f71e9b0f36f969e1a5e25e0e"
+        }
+      }
+    }
+  },
+  "committed": {
+    "phase": "COMMITTED",
+    "revision": 15,
+    "last_maintenance_id": "d113-resume-20260924T024016Z",
+    "selection_changed_at": "2026-09-24T03:19:03.909667+00:00",
+    "cleanup": "DELETED"
+  },
+  "restored_live_verification": {
+    "binding": {
+      "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+      "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+      "game_id": "game-vanilla-secondary",
+      "instance_id": "i-04fc0629dc4ea466e",
+      "run_id": "op-930ca474-10f3-4028-8641-c64e78f1fe7a"
+    },
+    "container": {
+      "id": "50b9cf9c9622",
+      "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+      "mounts": [
+        {
+          "Destination": "/data/.rcon-cli.env",
+          "RW": true,
+          "Source": "/run/wishicraft/rcon-cli.env",
+          "Type": "bind"
+        },
+        {
+          "Destination": "/data/.rcon-cli.yaml",
+          "RW": true,
+          "Source": "/run/wishicraft/rcon-cli.yaml",
+          "Type": "bind"
+        },
+        {
+          "Destination": "/data",
+          "RW": true,
+          "Source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+          "Type": "bind"
+        },
+        {
+          "Destination": "/wishicraft-package",
+          "RW": false,
+          "Source": "/srv/minecraft/games/game-vanilla-secondary/package-cache",
+          "Type": "bind"
+        },
+        {
+          "Destination": "/run/secrets/rcon-password",
+          "RW": false,
+          "Source": "/run/wishicraft/rcon-password",
+          "Type": "bind"
+        }
+      ],
+      "running": true
+    },
+    "matching_terrain_samples": [
+      "dimensions/minecraft/overworld/region/r.-1.-1.mca",
+      "dimensions/minecraft/overworld/region/r.-1.0.mca",
+      "dimensions/minecraft/overworld/region/r.0.-1.mca",
+      "dimensions/minecraft/overworld/region/r.0.0.mca"
+    ],
+    "spawn": {
+      "length": 4,
+      "selected_fields": {
+        "dimension": {
+          "state": "value",
+          "value": "minecraft:overworld"
+        },
+        "pos": {
+          "length": 12,
+          "sha256": "02865c3d5af90678145afc5eb20d8af1f49bad49c256351d91f75a705edf7869",
+          "state": "unsupported",
+          "type": "bytes"
+        }
+      },
+      "state": "unsupported",
+      "type": "dict"
+    },
+    "whitelist_hash": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+    "other_games_unchanged": true,
+    "inactive_world_unchanged": true
+  },
+  "rollback": {
+    "phase": "ROLLED_BACK",
+    "revision": 20,
+    "last_maintenance_id": "d113-rollback-20260924T024016Z",
+    "selection_changed_at": "2026-09-24T03:50:31.470190+00:00",
+    "cleanup": "DELETED",
+    "rollback_command_id": "42a1128a-9d74-4f57-b4ac-7a965a711e76",
+    "rollback_receipt": {
+      "previous_tree": {
+        "file_count": 85,
+        "expanded_size": 130980954,
+        "tree_sha256": "60a298ff91447c4956a4131eca3d22797b58b1b2ca12b267bf78d9a32dce91ce"
+      },
+      "operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "rollback_verified": true,
+      "maintenance_id": "d113-rollback-20260924T024016Z"
+    },
+    "ssm_result": {
+      "CommandId": "42a1128a-9d74-4f57-b4ac-7a965a711e76",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-24T03:47:36.819Z",
+      "ExecutionEndDateTime": "2026-09-24T03:47:38.819Z"
+    }
+  },
+  "original_live_verification": {
+    "binding": {
+      "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+      "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+      "game_id": "game-vanilla-secondary",
+      "instance_id": "i-04fc0629dc4ea466e",
+      "run_id": "op-2be431f0-6f1f-4781-bc2c-cf88bb028055"
+    },
+    "container": {
+      "id": "6dab5424b837",
+      "image": "ghcr.io/itzg/minecraft-server:2026.7.2-java25@sha256:6ec1110e4d9236d00ae9436a3e4a5929583e5b19cc94b756a7c603f7cf647a77",
+      "mounts": [
+        {
+          "Destination": "/wishicraft-package",
+          "RW": false,
+          "Source": "/srv/minecraft/games/game-vanilla-secondary/package-cache",
+          "Type": "bind"
+        },
+        {
+          "Destination": "/run/secrets/rcon-password",
+          "RW": false,
+          "Source": "/run/wishicraft/rcon-password",
+          "Type": "bind"
+        },
+        {
+          "Destination": "/data/.rcon-cli.env",
+          "RW": true,
+          "Source": "/run/wishicraft/rcon-cli.env",
+          "Type": "bind"
+        },
+        {
+          "Destination": "/data/.rcon-cli.yaml",
+          "RW": true,
+          "Source": "/run/wishicraft/rcon-cli.yaml",
+          "Type": "bind"
+        },
+        {
+          "Destination": "/data",
+          "RW": true,
+          "Source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "Type": "bind"
+        }
+      ],
+      "running": true
+    },
+    "matching_terrain_samples": [
+      "dimensions/minecraft/overworld/region/r.-1.-1.mca",
+      "dimensions/minecraft/overworld/region/r.-1.0.mca",
+      "dimensions/minecraft/overworld/region/r.0.-1.mca",
+      "dimensions/minecraft/overworld/region/r.0.0.mca"
+    ],
+    "spawn": {
+      "length": 4,
+      "selected_fields": {
+        "dimension": {
+          "state": "value",
+          "value": "minecraft:overworld"
+        },
+        "pos": {
+          "length": 12,
+          "sha256": "3a35304cdf821e9caadc5c5963238b1cbbcfea13b7d8d47aa993f89990141eac",
+          "state": "unsupported",
+          "type": "bytes"
+        }
+      },
+      "state": "unsupported",
+      "type": "dict"
+    },
+    "whitelist_hash": "e5f389fff4933bebb3af86e2bd6bb57054a082fb9e81d2bf814020197a525db3",
+    "other_games_unchanged": true,
+    "inactive_world_unchanged": true
+  },
+  "workflows": {
+    "restored-start": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-930ca474-10f3-4028-8641-c64e78f1fe7a",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-24T12:26:18.943000+09:00",
+      "stopped_at": "2026-09-24T12:30:32.259000+09:00",
+      "steps": [
+        {
+          "id": 1,
+          "at": "2026-09-24T12:26:18.943000+09:00",
+          "type": "ExecutionStarted",
+          "name": null
+        },
+        {
+          "id": 2,
+          "at": "2026-09-24T12:26:18.966000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitializeWorkflow"
+        },
+        {
+          "id": 4,
+          "at": "2026-09-24T12:26:18.966000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileBeforeStart"
+        },
+        {
+          "id": 9,
+          "at": "2026-09-24T12:26:21.003000+09:00",
+          "type": "TaskStateEntered",
+          "name": "SetDesiredRunning"
+        },
+        {
+          "id": 14,
+          "at": "2026-09-24T12:26:26.434000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "AlreadyReady"
+        },
+        {
+          "id": 16,
+          "at": "2026-09-24T12:26:26.434000+09:00",
+          "type": "TaskStateEntered",
+          "name": "StartEc2IfNeeded"
+        },
+        {
+          "id": 21,
+          "at": "2026-09-24T12:26:27.908000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitEc2Poll"
+        },
+        {
+          "id": 23,
+          "at": "2026-09-24T12:26:27.908000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitEc2Running"
+        },
+        {
+          "id": 25,
+          "at": "2026-09-24T12:26:57.967000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementEc2Poll"
+        },
+        {
+          "id": 27,
+          "at": "2026-09-24T12:26:57.967000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "Ec2PollWithinDeadline"
+        },
+        {
+          "id": 29,
+          "at": "2026-09-24T12:26:57.967000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeEc2Probe"
+        },
+        {
+          "id": 34,
+          "at": "2026-09-24T12:26:58.310000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileEc2"
+        },
+        {
+          "id": 39,
+          "at": "2026-09-24T12:27:01.680000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "Ec2Running"
+        },
+        {
+          "id": 41,
+          "at": "2026-09-24T12:27:01.680000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitSsmPoll"
+        },
+        {
+          "id": 43,
+          "at": "2026-09-24T12:27:01.680000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitSsmOnline"
+        },
+        {
+          "id": 45,
+          "at": "2026-09-24T12:27:31.763000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementSsmPoll"
+        },
+        {
+          "id": 47,
+          "at": "2026-09-24T12:27:31.763000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "SsmPollWithinDeadline"
+        },
+        {
+          "id": 49,
+          "at": "2026-09-24T12:27:31.763000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeSsmProbe"
+        },
+        {
+          "id": 54,
+          "at": "2026-09-24T12:27:32.171000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileSsm"
+        },
+        {
+          "id": 59,
+          "at": "2026-09-24T12:27:35.939000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "SsmOnline"
+        },
+        {
+          "id": 61,
+          "at": "2026-09-24T12:27:35.939000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RunStartScript"
+        },
+        {
+          "id": 66,
+          "at": "2026-09-24T12:27:36.584000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitHostPoll"
+        },
+        {
+          "id": 68,
+          "at": "2026-09-24T12:27:36.584000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitHostStart"
+        },
+        {
+          "id": 70,
+          "at": "2026-09-24T12:27:51.639000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementHostPoll"
+        },
+        {
+          "id": 72,
+          "at": "2026-09-24T12:27:51.639000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "HostPollWithinDeadline"
+        },
+        {
+          "id": 74,
+          "at": "2026-09-24T12:27:51.639000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeHostCheck"
+        },
+        {
+          "id": 79,
+          "at": "2026-09-24T12:27:51.972000+09:00",
+          "type": "TaskStateEntered",
+          "name": "CheckHostStart"
+        },
+        {
+          "id": 84,
+          "at": "2026-09-24T12:27:52.432000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "HostStartComplete"
+        },
+        {
+          "id": 86,
+          "at": "2026-09-24T12:27:52.432000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitReadyPoll"
+        },
+        {
+          "id": 88,
+          "at": "2026-09-24T12:27:52.432000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitReady"
+        },
+        {
+          "id": 90,
+          "at": "2026-09-24T12:29:52.494000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementReadyPoll"
+        },
+        {
+          "id": 92,
+          "at": "2026-09-24T12:29:52.494000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "ReadyPollWithinDeadline"
+        },
+        {
+          "id": 94,
+          "at": "2026-09-24T12:29:52.494000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeReadyProbe"
+        },
+        {
+          "id": 99,
+          "at": "2026-09-24T12:29:53.312000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileReady"
+        },
+        {
+          "id": 104,
+          "at": "2026-09-24T12:29:56.525000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "RuntimeReady"
+        },
+        {
+          "id": 106,
+          "at": "2026-09-24T12:29:56.525000+09:00",
+          "type": "TaskStateEntered",
+          "name": "UpdateDnsRecord"
+        },
+        {
+          "id": 111,
+          "at": "2026-09-24T12:29:57.593000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitDnsPoll"
+        },
+        {
+          "id": 113,
+          "at": "2026-09-24T12:29:57.593000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitDnsInSync"
+        },
+        {
+          "id": 115,
+          "at": "2026-09-24T12:30:27.645000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementDnsPoll"
+        },
+        {
+          "id": 117,
+          "at": "2026-09-24T12:30:27.645000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsPollWithinDeadline"
+        },
+        {
+          "id": 119,
+          "at": "2026-09-24T12:30:27.645000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeDnsProbe"
+        },
+        {
+          "id": 124,
+          "at": "2026-09-24T12:30:27.993000+09:00",
+          "type": "TaskStateEntered",
+          "name": "CheckDnsChange"
+        },
+        {
+          "id": 129,
+          "at": "2026-09-24T12:30:28.452000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsChangeInSync"
+        },
+        {
+          "id": 131,
+          "at": "2026-09-24T12:30:28.452000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileDns"
+        },
+        {
+          "id": 136,
+          "at": "2026-09-24T12:30:31.741000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "EndpointReady"
+        },
+        {
+          "id": 138,
+          "at": "2026-09-24T12:30:31.741000+09:00",
+          "type": "TaskStateEntered",
+          "name": "MarkSucceeded"
+        },
+        {
+          "id": 143,
+          "at": "2026-09-24T12:30:32.259000+09:00",
+          "type": "ExecutionSucceeded",
+          "name": null
+        }
+      ],
+      "operation": {
+        "timeout_at": "2026-09-24T03:56:18.386176Z",
+        "requested_by": {
+          "display_name": null,
+          "source": "ADMIN",
+          "discord_user_id": null
+        },
+        "started_at": "2026-09-24T03:26:18.711207Z",
+        "status": "SUCCEEDED",
+        "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-930ca474-10f3-4028-8641-c64e78f1fe7a",
+        "lock_name": "minecraft-control",
+        "operation_type": "START",
+        "progress_endpoint_converging_at": "2026-09-24T03:29:56.808659Z",
+        "progress_revision": 5,
+        "error": {
+          "retryable": null,
+          "code": null,
+          "message": null,
+          "detail_ref": null
+        },
+        "progress_ec2_starting_at": "2026-09-24T03:26:26.726901Z",
+        "schema_version": 1,
+        "runtime_target": {
+          "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-930ca474-10f3-4028-8641-c64e78f1fe7a",
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+          "game_id": "game-vanilla-secondary"
+        },
+        "completed_at": "2026-09-24T03:30:32.028679Z",
+        "updated_at": "2026-09-24T03:30:32.028679Z",
+        "idempotency_key": "d113-resume-20260924T024016Z:restored-start",
+        "result": null,
+        "operation_id": "op-930ca474-10f3-4028-8641-c64e78f1fe7a",
+        "progress_host_runtime_starting_at": "2026-09-24T03:27:36.207407Z",
+        "expires_at": null,
+        "lease_id": "lease-5ec8e318-c296-43a1-aaf0-8a86d88dbae8",
+        "target_game_id": "game-vanilla-secondary",
+        "workflow_execution_name": "op-930ca474-10f3-4028-8641-c64e78f1fe7a",
+        "discord": {
+          "guild_id": null,
+          "message_id": null,
+          "interaction_id": null,
+          "channel_id": null
+        },
+        "progress_desired_running_at": "2026-09-24T03:26:25.906888Z",
+        "current_step": "ENDPOINT_CONVERGING",
+        "requested_at": "2026-09-24T03:26:18.386176Z"
+      }
+    },
+    "restored-stop": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-dc7e923f-d8f3-449d-ace9-25e04e74e9cc",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-24T12:33:02.441000+09:00",
+      "stopped_at": "2026-09-24T12:34:45.077000+09:00",
+      "steps": [
+        {
+          "id": 1,
+          "at": "2026-09-24T12:33:02.441000+09:00",
+          "type": "ExecutionStarted",
+          "name": null
+        },
+        {
+          "id": 2,
+          "at": "2026-09-24T12:33:02.465000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitializeWorkflow"
+        },
+        {
+          "id": 4,
+          "at": "2026-09-24T12:33:02.465000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileBeforeStop"
+        },
+        {
+          "id": 9,
+          "at": "2026-09-24T12:33:06.381000+09:00",
+          "type": "TaskStateEntered",
+          "name": "AutomaticStopFinalGate"
+        },
+        {
+          "id": 14,
+          "at": "2026-09-24T12:33:11.466000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "AutomaticStopMayProceed"
+        },
+        {
+          "id": 16,
+          "at": "2026-09-24T12:33:11.466000+09:00",
+          "type": "TaskStateEntered",
+          "name": "SetDesiredStopped"
+        },
+        {
+          "id": 21,
+          "at": "2026-09-24T12:33:12.421000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "AlreadyEc2Stopped"
+        },
+        {
+          "id": 23,
+          "at": "2026-09-24T12:33:12.421000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "AlreadyRuntimeStopped"
+        },
+        {
+          "id": 25,
+          "at": "2026-09-24T12:33:12.421000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeHostStop"
+        },
+        {
+          "id": 30,
+          "at": "2026-09-24T12:33:13.308000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RunHostStop"
+        },
+        {
+          "id": 35,
+          "at": "2026-09-24T12:33:13.969000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitHostPoll"
+        },
+        {
+          "id": 37,
+          "at": "2026-09-24T12:33:13.969000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitHostStop"
+        },
+        {
+          "id": 39,
+          "at": "2026-09-24T12:33:29.024000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementHostPoll"
+        },
+        {
+          "id": 41,
+          "at": "2026-09-24T12:33:29.024000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "HostPollWithinDeadline"
+        },
+        {
+          "id": 43,
+          "at": "2026-09-24T12:33:29.024000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeHostCheck"
+        },
+        {
+          "id": 48,
+          "at": "2026-09-24T12:33:29.490000+09:00",
+          "type": "TaskStateEntered",
+          "name": "CheckHostStop"
+        },
+        {
+          "id": 53,
+          "at": "2026-09-24T12:33:30.073000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "HostStopComplete"
+        },
+        {
+          "id": 55,
+          "at": "2026-09-24T12:33:30.073000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileRuntimeStopped"
+        },
+        {
+          "id": 60,
+          "at": "2026-09-24T12:33:34.981000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "RuntimeStopped"
+        },
+        {
+          "id": 62,
+          "at": "2026-09-24T12:33:34.981000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeEc2Stop"
+        },
+        {
+          "id": 67,
+          "at": "2026-09-24T12:33:35.450000+09:00",
+          "type": "TaskStateEntered",
+          "name": "StopEc2"
+        },
+        {
+          "id": 72,
+          "at": "2026-09-24T12:33:36.515000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitEc2Poll"
+        },
+        {
+          "id": 74,
+          "at": "2026-09-24T12:33:36.515000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitEc2Stopped"
+        },
+        {
+          "id": 76,
+          "at": "2026-09-24T12:34:06.550000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementEc2Poll"
+        },
+        {
+          "id": 78,
+          "at": "2026-09-24T12:34:06.550000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "Ec2PollWithinDeadline"
+        },
+        {
+          "id": 80,
+          "at": "2026-09-24T12:34:06.550000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeEc2Probe"
+        },
+        {
+          "id": 85,
+          "at": "2026-09-24T12:34:07.049000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileEc2Stopped"
+        },
+        {
+          "id": 90,
+          "at": "2026-09-24T12:34:09.524000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "Ec2Stopped"
+        },
+        {
+          "id": 92,
+          "at": "2026-09-24T12:34:09.524000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeDnsDelete"
+        },
+        {
+          "id": 97,
+          "at": "2026-09-24T12:34:09.990000+09:00",
+          "type": "TaskStateEntered",
+          "name": "DeleteDns"
+        },
+        {
+          "id": 102,
+          "at": "2026-09-24T12:34:11.357000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsAlreadyAbsent"
+        },
+        {
+          "id": 104,
+          "at": "2026-09-24T12:34:11.357000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitDnsPoll"
+        },
+        {
+          "id": 106,
+          "at": "2026-09-24T12:34:11.357000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitDnsInSync"
+        },
+        {
+          "id": 108,
+          "at": "2026-09-24T12:34:41.400000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementDnsPoll"
+        },
+        {
+          "id": 110,
+          "at": "2026-09-24T12:34:41.400000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsPollWithinDeadline"
+        },
+        {
+          "id": 112,
+          "at": "2026-09-24T12:34:41.400000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeDnsCheck"
+        },
+        {
+          "id": 117,
+          "at": "2026-09-24T12:34:41.893000+09:00",
+          "type": "TaskStateEntered",
+          "name": "CheckDnsChange"
+        },
+        {
+          "id": 122,
+          "at": "2026-09-24T12:34:42.530000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsInSync"
+        },
+        {
+          "id": 124,
+          "at": "2026-09-24T12:34:42.530000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileAfterStop"
+        },
+        {
+          "id": 129,
+          "at": "2026-09-24T12:34:44.525000+09:00",
+          "type": "TaskStateEntered",
+          "name": "MarkSucceeded"
+        },
+        {
+          "id": 134,
+          "at": "2026-09-24T12:34:45.077000+09:00",
+          "type": "ExecutionSucceeded",
+          "name": null
+        }
+      ],
+      "operation": {
+        "progress_host_runtime_stopping_at": "2026-09-24T03:33:13.717268Z",
+        "operation_type": "STOP",
+        "status": "SUCCEEDED",
+        "idempotency_key": "d113-resume-20260924T024016Z:restored-stop",
+        "requested_by": {
+          "display_name": null,
+          "source": "ADMIN",
+          "discord_user_id": null
+        },
+        "workflow_execution_name": "op-dc7e923f-d8f3-449d-ace9-25e04e74e9cc",
+        "lock_name": "minecraft-control",
+        "progress_desired_stopped_at": "2026-09-24T03:33:11.893870Z",
+        "operation_id": "op-dc7e923f-d8f3-449d-ace9-25e04e74e9cc",
+        "requested_at": "2026-09-24T03:33:01.864187Z",
+        "current_step": "ENDPOINT_CLEANUP",
+        "result": null,
+        "timeout_at": "2026-09-24T03:53:01.864187Z",
+        "expires_at": null,
+        "updated_at": "2026-09-24T03:34:44.972932Z",
+        "completed_at": "2026-09-24T03:34:44.972932Z",
+        "target_game_id": "game-vanilla-secondary",
+        "progress_endpoint_cleanup_at": "2026-09-24T03:34:10.422821Z",
+        "progress_ec2_stopping_at": "2026-09-24T03:33:35.880969Z",
+        "progress_revision": 5,
+        "discord": {
+          "guild_id": null,
+          "message_id": null,
+          "interaction_id": null,
+          "channel_id": null
+        },
+        "lease_id": "lease-b2ebf296-65c2-436b-aabc-bac5283dfcd1",
+        "runtime_target": {
+          "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-930ca474-10f3-4028-8641-c64e78f1fe7a",
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730/server",
+          "game_id": "game-vanilla-secondary"
+        },
+        "schema_version": 1,
+        "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-dc7e923f-d8f3-449d-ace9-25e04e74e9cc",
+        "started_at": "2026-09-24T03:33:02.169147Z",
+        "error": {
+          "retryable": null,
+          "code": null,
+          "message": null,
+          "detail_ref": null
+        }
+      }
+    },
+    "original-start": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-2be431f0-6f1f-4781-bc2c-cf88bb028055",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-24T12:56:15.811000+09:00",
+      "stopped_at": "2026-09-24T13:00:29.254000+09:00",
+      "steps": [
+        {
+          "id": 1,
+          "at": "2026-09-24T12:56:15.811000+09:00",
+          "type": "ExecutionStarted",
+          "name": null
+        },
+        {
+          "id": 2,
+          "at": "2026-09-24T12:56:15.834000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitializeWorkflow"
+        },
+        {
+          "id": 4,
+          "at": "2026-09-24T12:56:15.834000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileBeforeStart"
+        },
+        {
+          "id": 9,
+          "at": "2026-09-24T12:56:17.807000+09:00",
+          "type": "TaskStateEntered",
+          "name": "SetDesiredRunning"
+        },
+        {
+          "id": 14,
+          "at": "2026-09-24T12:56:23.072000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "AlreadyReady"
+        },
+        {
+          "id": 16,
+          "at": "2026-09-24T12:56:23.072000+09:00",
+          "type": "TaskStateEntered",
+          "name": "StartEc2IfNeeded"
+        },
+        {
+          "id": 21,
+          "at": "2026-09-24T12:56:24.459000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitEc2Poll"
+        },
+        {
+          "id": 23,
+          "at": "2026-09-24T12:56:24.459000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitEc2Running"
+        },
+        {
+          "id": 25,
+          "at": "2026-09-24T12:56:54.512000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementEc2Poll"
+        },
+        {
+          "id": 27,
+          "at": "2026-09-24T12:56:54.512000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "Ec2PollWithinDeadline"
+        },
+        {
+          "id": 29,
+          "at": "2026-09-24T12:56:54.512000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeEc2Probe"
+        },
+        {
+          "id": 34,
+          "at": "2026-09-24T12:56:54.849000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileEc2"
+        },
+        {
+          "id": 39,
+          "at": "2026-09-24T12:56:59.045000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "Ec2Running"
+        },
+        {
+          "id": 41,
+          "at": "2026-09-24T12:56:59.045000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitSsmPoll"
+        },
+        {
+          "id": 43,
+          "at": "2026-09-24T12:56:59.045000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitSsmOnline"
+        },
+        {
+          "id": 45,
+          "at": "2026-09-24T12:57:29.095000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementSsmPoll"
+        },
+        {
+          "id": 47,
+          "at": "2026-09-24T12:57:29.095000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "SsmPollWithinDeadline"
+        },
+        {
+          "id": 49,
+          "at": "2026-09-24T12:57:29.095000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeSsmProbe"
+        },
+        {
+          "id": 54,
+          "at": "2026-09-24T12:57:29.412000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileSsm"
+        },
+        {
+          "id": 59,
+          "at": "2026-09-24T12:57:32.833000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "SsmOnline"
+        },
+        {
+          "id": 61,
+          "at": "2026-09-24T12:57:32.833000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RunStartScript"
+        },
+        {
+          "id": 66,
+          "at": "2026-09-24T12:57:33.509000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitHostPoll"
+        },
+        {
+          "id": 68,
+          "at": "2026-09-24T12:57:33.509000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitHostStart"
+        },
+        {
+          "id": 70,
+          "at": "2026-09-24T12:57:48.556000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementHostPoll"
+        },
+        {
+          "id": 72,
+          "at": "2026-09-24T12:57:48.556000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "HostPollWithinDeadline"
+        },
+        {
+          "id": 74,
+          "at": "2026-09-24T12:57:48.556000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeHostCheck"
+        },
+        {
+          "id": 79,
+          "at": "2026-09-24T12:57:48.877000+09:00",
+          "type": "TaskStateEntered",
+          "name": "CheckHostStart"
+        },
+        {
+          "id": 84,
+          "at": "2026-09-24T12:57:49.336000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "HostStartComplete"
+        },
+        {
+          "id": 86,
+          "at": "2026-09-24T12:57:49.336000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitReadyPoll"
+        },
+        {
+          "id": 88,
+          "at": "2026-09-24T12:57:49.336000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitReady"
+        },
+        {
+          "id": 90,
+          "at": "2026-09-24T12:59:49.388000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementReadyPoll"
+        },
+        {
+          "id": 92,
+          "at": "2026-09-24T12:59:49.388000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "ReadyPollWithinDeadline"
+        },
+        {
+          "id": 94,
+          "at": "2026-09-24T12:59:49.388000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeReadyProbe"
+        },
+        {
+          "id": 99,
+          "at": "2026-09-24T12:59:50.197000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileReady"
+        },
+        {
+          "id": 104,
+          "at": "2026-09-24T12:59:53.552000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "RuntimeReady"
+        },
+        {
+          "id": 106,
+          "at": "2026-09-24T12:59:53.552000+09:00",
+          "type": "TaskStateEntered",
+          "name": "UpdateDnsRecord"
+        },
+        {
+          "id": 111,
+          "at": "2026-09-24T12:59:54.541000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitDnsPoll"
+        },
+        {
+          "id": 113,
+          "at": "2026-09-24T12:59:54.541000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitDnsInSync"
+        },
+        {
+          "id": 115,
+          "at": "2026-09-24T13:00:24.592000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementDnsPoll"
+        },
+        {
+          "id": 117,
+          "at": "2026-09-24T13:00:24.592000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsPollWithinDeadline"
+        },
+        {
+          "id": 119,
+          "at": "2026-09-24T13:00:24.592000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeDnsProbe"
+        },
+        {
+          "id": 124,
+          "at": "2026-09-24T13:00:24.935000+09:00",
+          "type": "TaskStateEntered",
+          "name": "CheckDnsChange"
+        },
+        {
+          "id": 129,
+          "at": "2026-09-24T13:00:25.413000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsChangeInSync"
+        },
+        {
+          "id": 131,
+          "at": "2026-09-24T13:00:25.413000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileDns"
+        },
+        {
+          "id": 136,
+          "at": "2026-09-24T13:00:28.748000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "EndpointReady"
+        },
+        {
+          "id": 138,
+          "at": "2026-09-24T13:00:28.748000+09:00",
+          "type": "TaskStateEntered",
+          "name": "MarkSucceeded"
+        },
+        {
+          "id": 143,
+          "at": "2026-09-24T13:00:29.254000+09:00",
+          "type": "ExecutionSucceeded",
+          "name": null
+        }
+      ],
+      "operation": {
+        "requested_by": {
+          "display_name": null,
+          "source": "ADMIN",
+          "discord_user_id": null
+        },
+        "workflow_execution_name": "op-2be431f0-6f1f-4781-bc2c-cf88bb028055",
+        "status": "SUCCEEDED",
+        "lease_id": "lease-12fce815-048f-4bc1-aa28-ee021ac45808",
+        "lock_name": "minecraft-control",
+        "progress_endpoint_converging_at": "2026-09-24T03:59:53.795251Z",
+        "runtime_target": {
+          "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-2be431f0-6f1f-4781-bc2c-cf88bb028055",
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "game_id": "game-vanilla-secondary"
+        },
+        "operation_type": "START",
+        "progress_revision": 5,
+        "error": {
+          "retryable": null,
+          "code": null,
+          "message": null,
+          "detail_ref": null
+        },
+        "operation_id": "op-2be431f0-6f1f-4781-bc2c-cf88bb028055",
+        "schema_version": 1,
+        "idempotency_key": "d113-resume-20260924T024016Z:original-start",
+        "started_at": "2026-09-24T03:56:15.567077Z",
+        "progress_host_runtime_starting_at": "2026-09-24T03:57:33.132978Z",
+        "result": null,
+        "completed_at": "2026-09-24T04:00:29.036781Z",
+        "updated_at": "2026-09-24T04:00:29.036781Z",
+        "timeout_at": "2026-09-24T04:26:15.266686Z",
+        "expires_at": null,
+        "target_game_id": "game-vanilla-secondary",
+        "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-start:op-2be431f0-6f1f-4781-bc2c-cf88bb028055",
+        "discord": {
+          "guild_id": null,
+          "message_id": null,
+          "interaction_id": null,
+          "channel_id": null
+        },
+        "progress_desired_running_at": "2026-09-24T03:56:22.553185Z",
+        "requested_at": "2026-09-24T03:56:15.266686Z",
+        "progress_ec2_starting_at": "2026-09-24T03:56:23.377259Z",
+        "current_step": "ENDPOINT_CONVERGING"
+      }
+    },
+    "original-stop": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-3c160d65-59de-4d25-b5f4-70594c15be5b",
+      "status": "SUCCEEDED",
+      "started_at": "2026-09-24T13:04:57.282000+09:00",
+      "stopped_at": "2026-09-24T13:06:37.965000+09:00",
+      "steps": [
+        {
+          "id": 1,
+          "at": "2026-09-24T13:04:57.282000+09:00",
+          "type": "ExecutionStarted",
+          "name": null
+        },
+        {
+          "id": 2,
+          "at": "2026-09-24T13:04:57.305000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitializeWorkflow"
+        },
+        {
+          "id": 4,
+          "at": "2026-09-24T13:04:57.305000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileBeforeStop"
+        },
+        {
+          "id": 9,
+          "at": "2026-09-24T13:05:00.524000+09:00",
+          "type": "TaskStateEntered",
+          "name": "AutomaticStopFinalGate"
+        },
+        {
+          "id": 14,
+          "at": "2026-09-24T13:05:05.790000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "AutomaticStopMayProceed"
+        },
+        {
+          "id": 16,
+          "at": "2026-09-24T13:05:05.790000+09:00",
+          "type": "TaskStateEntered",
+          "name": "SetDesiredStopped"
+        },
+        {
+          "id": 21,
+          "at": "2026-09-24T13:05:06.671000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "AlreadyEc2Stopped"
+        },
+        {
+          "id": 23,
+          "at": "2026-09-24T13:05:06.671000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "AlreadyRuntimeStopped"
+        },
+        {
+          "id": 25,
+          "at": "2026-09-24T13:05:06.671000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeHostStop"
+        },
+        {
+          "id": 30,
+          "at": "2026-09-24T13:05:07.505000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RunHostStop"
+        },
+        {
+          "id": 35,
+          "at": "2026-09-24T13:05:08.219000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitHostPoll"
+        },
+        {
+          "id": 37,
+          "at": "2026-09-24T13:05:08.219000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitHostStop"
+        },
+        {
+          "id": 39,
+          "at": "2026-09-24T13:05:23.272000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementHostPoll"
+        },
+        {
+          "id": 41,
+          "at": "2026-09-24T13:05:23.272000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "HostPollWithinDeadline"
+        },
+        {
+          "id": 43,
+          "at": "2026-09-24T13:05:23.272000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeHostCheck"
+        },
+        {
+          "id": 48,
+          "at": "2026-09-24T13:05:23.760000+09:00",
+          "type": "TaskStateEntered",
+          "name": "CheckHostStop"
+        },
+        {
+          "id": 53,
+          "at": "2026-09-24T13:05:24.346000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "HostStopComplete"
+        },
+        {
+          "id": 55,
+          "at": "2026-09-24T13:05:24.346000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileRuntimeStopped"
+        },
+        {
+          "id": 60,
+          "at": "2026-09-24T13:05:27.610000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "RuntimeStopped"
+        },
+        {
+          "id": 62,
+          "at": "2026-09-24T13:05:27.610000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeEc2Stop"
+        },
+        {
+          "id": 67,
+          "at": "2026-09-24T13:05:28.072000+09:00",
+          "type": "TaskStateEntered",
+          "name": "StopEc2"
+        },
+        {
+          "id": 72,
+          "at": "2026-09-24T13:05:29.121000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitEc2Poll"
+        },
+        {
+          "id": 74,
+          "at": "2026-09-24T13:05:29.121000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitEc2Stopped"
+        },
+        {
+          "id": 76,
+          "at": "2026-09-24T13:05:59.171000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementEc2Poll"
+        },
+        {
+          "id": 78,
+          "at": "2026-09-24T13:05:59.171000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "Ec2PollWithinDeadline"
+        },
+        {
+          "id": 80,
+          "at": "2026-09-24T13:05:59.171000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeEc2Probe"
+        },
+        {
+          "id": 85,
+          "at": "2026-09-24T13:05:59.689000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileEc2Stopped"
+        },
+        {
+          "id": 90,
+          "at": "2026-09-24T13:06:02.538000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "Ec2Stopped"
+        },
+        {
+          "id": 92,
+          "at": "2026-09-24T13:06:02.538000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeDnsDelete"
+        },
+        {
+          "id": 97,
+          "at": "2026-09-24T13:06:03.018000+09:00",
+          "type": "TaskStateEntered",
+          "name": "DeleteDns"
+        },
+        {
+          "id": 102,
+          "at": "2026-09-24T13:06:04.360000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsAlreadyAbsent"
+        },
+        {
+          "id": 104,
+          "at": "2026-09-24T13:06:04.360000+09:00",
+          "type": "PassStateEntered",
+          "name": "InitDnsPoll"
+        },
+        {
+          "id": 106,
+          "at": "2026-09-24T13:06:04.360000+09:00",
+          "type": "WaitStateEntered",
+          "name": "WaitDnsInSync"
+        },
+        {
+          "id": 108,
+          "at": "2026-09-24T13:06:34.416000+09:00",
+          "type": "PassStateEntered",
+          "name": "IncrementDnsPoll"
+        },
+        {
+          "id": 110,
+          "at": "2026-09-24T13:06:34.416000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsPollWithinDeadline"
+        },
+        {
+          "id": 112,
+          "at": "2026-09-24T13:06:34.416000+09:00",
+          "type": "TaskStateEntered",
+          "name": "RenewBeforeDnsCheck"
+        },
+        {
+          "id": 117,
+          "at": "2026-09-24T13:06:34.834000+09:00",
+          "type": "TaskStateEntered",
+          "name": "CheckDnsChange"
+        },
+        {
+          "id": 122,
+          "at": "2026-09-24T13:06:35.473000+09:00",
+          "type": "ChoiceStateEntered",
+          "name": "DnsInSync"
+        },
+        {
+          "id": 124,
+          "at": "2026-09-24T13:06:35.473000+09:00",
+          "type": "TaskStateEntered",
+          "name": "ReconcileAfterStop"
+        },
+        {
+          "id": 129,
+          "at": "2026-09-24T13:06:37.432000+09:00",
+          "type": "TaskStateEntered",
+          "name": "MarkSucceeded"
+        },
+        {
+          "id": 134,
+          "at": "2026-09-24T13:06:37.965000+09:00",
+          "type": "ExecutionSucceeded",
+          "name": null
+        }
+      ],
+      "operation": {
+        "error": {
+          "retryable": null,
+          "code": null,
+          "message": null,
+          "detail_ref": null
+        },
+        "lock_name": "minecraft-control",
+        "runtime_target": {
+          "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+          "instance_id": "i-04fc0629dc4ea466e",
+          "run_id": "op-2be431f0-6f1f-4781-bc2c-cf88bb028055",
+          "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+          "game_id": "game-vanilla-secondary"
+        },
+        "operation_type": "STOP",
+        "status": "SUCCEEDED",
+        "requested_by": {
+          "display_name": null,
+          "source": "ADMIN",
+          "discord_user_id": null
+        },
+        "started_at": "2026-09-24T04:04:57.034671Z",
+        "workflow_execution_name": "op-3c160d65-59de-4d25-b5f4-70594c15be5b",
+        "lease_id": "lease-5b969209-0fb3-407e-a086-8bd16d5abeeb",
+        "progress_ec2_stopping_at": "2026-09-24T04:05:28.505900Z",
+        "operation_id": "op-3c160d65-59de-4d25-b5f4-70594c15be5b",
+        "progress_revision": 5,
+        "idempotency_key": "d113-resume-20260924T024016Z:original-stop",
+        "progress_endpoint_cleanup_at": "2026-09-24T04:06:03.401915Z",
+        "schema_version": 1,
+        "current_step": "ENDPOINT_CLEANUP",
+        "requested_at": "2026-09-24T04:04:56.742207Z",
+        "timeout_at": "2026-09-24T04:24:56.742207Z",
+        "progress_desired_stopped_at": "2026-09-24T04:05:06.193877Z",
+        "completed_at": "2026-09-24T04:06:37.858299Z",
+        "expires_at": null,
+        "updated_at": "2026-09-24T04:06:37.858299Z",
+        "target_game_id": "game-vanilla-secondary",
+        "result": null,
+        "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-stop:op-3c160d65-59de-4d25-b5f4-70594c15be5b",
+        "discord": {
+          "guild_id": null,
+          "message_id": null,
+          "interaction_id": null,
+          "channel_id": null
+        },
+        "progress_host_runtime_stopping_at": "2026-09-24T04:05:07.920553Z"
+      }
+    }
+  },
+  "final": {
+    "at": "2026-09-24T04:10:28.672152+00:00",
+    "observed_at": "2026-09-24T04:10:29.311407Z",
+    "desired_state": "STOPPED",
+    "health": "HEALTHY",
+    "desired_revision": 71,
+    "world": {
+      "difficulty": null,
+      "generation": 1,
+      "seed": null,
+      "generation_counter": 2,
+      "hardcore": null,
+      "current_id": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf"
+    },
+    "materialization_state": "MATERIALIZED",
+    "journal_phase": "ROLLED_BACK",
+    "journal_revision": 20,
+    "cleanup": "DELETED",
+    "old_temporary_volume_id": "vol-0adfd2940e3e501ca",
+    "old_temporary_volume_not_found": true,
+    "owned_temporary_volumes": [],
+    "both_worlds_and_protected_owners_retained": true,
+    "validated_receipt_retained": true,
+    "disposable_restore_staging": [],
+    "ec2": "stopped",
+    "maintenance": "ENDED",
+    "current_operation": null,
+    "lock": {},
+    "external_work": "clear",
+    "dns": "absent",
+    "queues": {
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      }
+    },
+    "alarms": {
+      "WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT": "OK",
+      "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj": "OK",
+      "wc-dev-admissionfunctionerrorsalarm": "OK",
+      "wc-dev-admissionfunctionthrottlesalarm": "OK",
+      "wc-dev-auto-stop-evaluator-silence": "OK",
+      "wc-dev-autostopevaluatorfunctionerrorsalarm": "OK",
+      "wc-dev-autostopevaluatorfunctionthrottlesalarm": "OK",
+      "wc-dev-autostopwarningblockedalarm": "OK",
+      "wc-dev-backuptaskfunctionerrorsalarm": "OK",
+      "wc-dev-backuptaskfunctionthrottlesalarm": "OK",
+      "wc-dev-backupworkflowfailurealarm": "OK",
+      "wc-dev-datafilesystemobservationunknownalarm": "OK",
+      "wc-dev-datafilesystemusagehighalarm": "OK",
+      "wc-dev-desiredactualdivergencealarm": "OK",
+      "wc-dev-desiredrunningnotreadyalarm": "OK",
+      "wc-dev-desiredstoppedec2runningalarm": "OK",
+      "wc-dev-discordcommandfunctionerrorsalarm": "OK",
+      "wc-dev-discordcommandfunctionthrottlesalarm": "OK",
+      "wc-dev-discordmessagefunctionerrorsalarm": "OK",
+      "wc-dev-discordmessagefunctionthrottlesalarm": "OK",
+      "wc-dev-expiredoperationlockalarm": "OK",
+      "wc-dev-maintenance-suppressor": "OK",
+      "wc-dev-monitoringobservationunknownalarm": "OK",
+      "wc-dev-monitoringobserverfunctionerrorsalarm": "OK",
+      "wc-dev-monitoringobserverfunctionthrottlesalarm": "OK",
+      "wc-dev-reconcilefunctionerrorsalarm": "OK",
+      "wc-dev-reconcilefunctionthrottlesalarm": "OK",
+      "wc-dev-resetworkflowfailurealarm": "OK",
+      "wc-dev-retentiontaskfunctionerrorsalarm": "OK",
+      "wc-dev-retentiontaskfunctionthrottlesalarm": "OK",
+      "wc-dev-retentionworkflowfailurealarm": "OK",
+      "wc-dev-runtimeheartbeatunavailablealarm": "OK",
+      "wc-dev-runtimeidentitymismatchalarm": "OK",
+      "wc-dev-runtimeobservationunknownalarm": "OK",
+      "wc-dev-scheduledstopcancelledalarm": "OK",
+      "wc-dev-starttaskfunctionerrorsalarm": "OK",
+      "wc-dev-starttaskfunctionthrottlesalarm": "OK",
+      "wc-dev-startworkflowfailurealarm": "OK",
+      "wc-dev-statusexecutorfunctionerrorsalarm": "OK",
+      "wc-dev-statusexecutorfunctionthrottlesalarm": "OK",
+      "wc-dev-stoptaskfunctionerrorsalarm": "OK",
+      "wc-dev-stoptaskfunctionthrottlesalarm": "OK",
+      "wc-dev-stopworkflowfailurealarm": "OK",
+      "wc-dev-switchworkflowfailurealarm": "OK",
+      "wc-dev-systemstateobservationstalealarm": "OK",
+      "wc-dev-targetrunningtoolongalarm": "OK",
+      "wc-dev-desiredactualdivergencealarm-notification": "OK",
+      "wc-dev-desiredstoppedec2runningalarm-notification": "OK",
+      "wc-dev-runtimeobservationunknownalarm-notification": "OK"
+    },
+    "alarm_configuration_unchanged": true,
+    "ingress_original": {
+      "wc-dev-admission": null,
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null
+    },
+    "ingress_restored": {
+      "wc-dev-admission": null,
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null
+    },
+    "all_game_registry_creation_package_access_records_unchanged_except_target_world": true
+  },
+  "not_reexecuted": [
+    "new RESTORE request/plan mutation",
+    "BACKUP",
+    "CreateVolume/attach/mount/detach/delete",
+    "snapshot extraction/copy/prepare",
+    "IAM application",
+    "host helper distribution",
+    "CloudFormation/Lambda/Web deployment",
+    "planned interruption/recovery-lease test"
+  ],
+  "unqualified": [
+    "real Paper or NeoForge RESTORE",
+    "all interruption/failure paths",
+    "full-environment disaster recovery",
+    "snapshot-time whole-world hash or decoded 26.2 seed/spawn coordinates"
+  ],
+  "validation": {
+    "local_full_tests": 1809,
+    "reader_tests_python39_and_312": 11,
+    "ruff": "pass",
+    "format": "335 files unchanged",
+    "mypy": "250 source files pass",
+    "ci": [
+      {
+        "conclusion": "success",
+        "databaseId": 35949905124,
+        "headSha": "5a17b11716830f919dec9d9dcd27e9111923d800",
+        "name": "Paper same-runtime import integration",
+        "status": "completed",
+        "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35949905124"
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 35949905125,
+        "headSha": "5a17b11716830f919dec9d9dcd27e9111923d800",
+        "name": "CI",
+        "status": "completed",
+        "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35949905125"
+      },
+      {
+        "conclusion": "success",
+        "databaseId": 35949905197,
+        "headSha": "5a17b11716830f919dec9d9dcd27e9111923d800",
+        "name": "NeoForge runtime integration",
+        "status": "completed",
+        "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/35949905197"
+      }
+    ],
+    "synth": "all existing CI quality contexts passed; no AWS deployment",
+    "environment_failure_retained": "online sandbox test attempt: 12 failed, 1750 passed, 47 setup errors due PyPI DNS/bundling; UV_OFFLINE rerun 1809 passed",
+    "local_display_failure": "initial preflight passed all gates and saved JSON; final stdout formatting failed on Decimal; saved result reread without repeating preflight"
+  },
+  "evidence_roots": [
+    "/private/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-d113-resume-20260924-jjvgsml1/outputs",
+    "/private/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-d113-resume-20260924-jjvgsml1/outputs-reader2"
+  ],
+  "artifact_hashes": {
+    "outputs/admin.py": "4bb4222262bb2b219b2286c8270e7f09650e1abbf3d161db57149eb5c601429f",
+    "outputs/checkpoint.py": "d5ca22f3a9f6129b35e66916b22d6cc57d7d48a8cecac7d4e5ac20d0542b16b5",
+    "outputs/common.py": "c94434fdfe8fbae4bfb83ee0fa3ee829855acc30bb93a1cd98ba08d028f2e605",
+    "outputs/execution-source.json": "6e28177835dcc234423f446d735b24c3a73dcf13a42e403e8c79c8ab3319c29f",
+    "outputs/host.py": "8bc0c9967b541f78e4bcc7ea4fb5b152d0c105867553de0a7d31007cad3b63ac",
+    "outputs/ingress.py": "9ac628174a956e0232dc11b8030f752b85e6a79dc59b2ac9605f00aeb2f5b8b6",
+    "outputs/maintenance.py": "004fedaa77b469c431fc9113ff434a15f74e4e6011e90f7314e4f970d8215214",
+    "outputs/preflight.py": "163c942d7848f98ec7641faddd90cad980db8baf9518a0077e0588cc0d3bdc8b",
+    "outputs/pytest-final.log": "ce69656cc41ace868e1daf0bd1dd038930c66f946f8f2ad0c122d927001f7cb2",
+    "outputs/pytest-reader-selection.log": "0178e36feca9dbaa53d00d8fb40498e662592d46179d175a3f99ee0abeb711a3",
+    "outputs/pytest-v1.log": "a93f331fae0f6cf09554535b5048def94eccd8c9db6a7ac4ab7c366c97278ef1",
+    "outputs/reader-prepared-check-intent.json": "da78ff3db72f8ec3b48ff1b227530fdc9629b8c4bec712e803d62111ca2330be",
+    "outputs/reader_collect.py": "ab082b7839a7c9963caff7a0a22be8cd200c46f5f12104cd238c3a1bf30ff91e",
+    "outputs/reader_send.py": "8338d95a4a2869b3d088335cbd99ebb075d244cd1d14de7ed0cf5cdd83c0ccef",
+    "outputs/verify_prepared.py": "d3d121c721fc19a8738e62e0da156642021514f55a8c78298cef7aa836aafb4a",
+    "outputs-reader2/admin-original-start-intent.json": "0fd7cdf1cff6601c689dd6c27525a51eba47af389fa69eae649e4bed48d6547a",
+    "outputs-reader2/admin-original-stop-intent.json": "11495ad523750d4f7418b2078fda8252f065b84c4c1fe92460636c9075de3ee7",
+    "outputs-reader2/admin-restored-start-intent.json": "2b80823840c4fbdf1be5b0bbe2bf2eaa23d4c759ca5bcde08e8386f10001ce4c",
+    "outputs-reader2/admin-restored-stop-intent.json": "07d4cbf6154bb9e9572fe653d39b2f76556ad7407a201830df6a967c2e836bf3",
+    "outputs-reader2/admin.py": "4bb4222262bb2b219b2286c8270e7f09650e1abbf3d161db57149eb5c601429f",
+    "outputs-reader2/build_closeout.py": "9836dd8c97200b0fc860f899faaa68e13f983a7e629cc179e640dcea5c325cc0",
+    "outputs-reader2/checkpoint.py": "d5ca22f3a9f6129b35e66916b22d6cc57d7d48a8cecac7d4e5ac20d0542b16b5",
+    "outputs-reader2/common.py": "09fc04f7dad4f2c6df7f1b0b8123ea6d6cb59f7e1cfe5ad555e8ee9861206f93",
+    "outputs-reader2/confirm_suppression.py": "d15a66d25245186dd665c1bf177b4bc887072e7d3c7e09af6c5b238072a4397b",
+    "outputs-reader2/execution-source-030630-a241b5.json": "4eb88c5070c5e7193c35b2bdb4684630f429218443027bd308204978272689fc",
+    "outputs-reader2/final_state.py": "f2d22e72b786fc9f868459163f1bb4cc530792aaf0bff32f8b6b83b534b735bb",
+    "outputs-reader2/host.py": "8bc0c9967b541f78e4bcc7ea4fb5b152d0c105867553de0a7d31007cad3b63ac",
+    "outputs-reader2/ingress.py": "9ac628174a956e0232dc11b8030f752b85e6a79dc59b2ac9605f00aeb2f5b8b6",
+    "outputs-reader2/live_status.py": "997cab13d7f319773204b5a01e12c1e0f54b97cc3fc14ea81b369ea0a2f04ed8",
+    "outputs-reader2/maintenance.py": "004fedaa77b469c431fc9113ff434a15f74e4e6011e90f7314e4f970d8215214",
+    "outputs-reader2/observe_operation.py": "89db38d0a4a5642b3b73a44c4d3b67bc6330184f761600f565d76d83514b79ed",
+    "outputs-reader2/pytest-offline.log": "93563fda269183ad53fc9d3fb41ad29b3ef6a83ebe5d291ae7e5d304c6b50c3b",
+    "outputs-reader2/reader-original-live-intent.json": "aaaf1d2d07d8d410a8706ac946954875493fea812d931aa0a888fb202a9af3ab",
+    "outputs-reader2/reader-prepared-check-intent.json": "e76fa071a5496937c3f1b5bbbfed25a569bf2d445b84b45bec86f43966f87901",
+    "outputs-reader2/reader-restored-live-intent.json": "66946a0c540426a9ad686dcf12bbb19b8d2af28a021635a79d26e2e0de1abe40",
+    "outputs-reader2/reader-rollback-check-intent.json": "84b53722b0a9aa8fda9b194dd367e8889ae87b3530897b765ae591e484f53821",
+    "outputs-reader2/reader_collect.py": "ab082b7839a7c9963caff7a0a22be8cd200c46f5f12104cd238c3a1bf30ff91e",
+    "outputs-reader2/reader_send.py": "aefebb5f6c955d9a9a6247908debb080cc2efcb1cd2e908836eab0b270e4250d",
+    "outputs-reader2/snapshot_state.py": "0441bdfa0e67f8e57ec0caaa28e7fa9112e41385ebc3639176376782a5108911",
+    "outputs-reader2/verify_live.py": "76cdb8cdd9fe61f23b3de7910bb0dc2e298c0557c565533f310ae8da519c17c4",
+    "outputs-reader2/verify_prepared.py": "dffe9c7eed26027dcc03030b0c7658aa391b8e7b30d19250c6accb1a0385e76a",
+    "outputs-reader2/workflow_evidence.py": "44a5b01876a57de90620f8460de01b0b5f588b2bf58c4c520fb21f0833bc10f0"
+  },
+  "maintenance_audits": {
+    "maintenance#d113-resume-20260924T024016Z#begin": {
+      "subject_system_id": "wishicraft-main",
+      "maintenance": {
+        "schema_version": 1,
+        "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+        "reason": "d113-retained-prepared-continuation",
+        "expires_at": 1790222007,
+        "stage": "dev",
+        "started_at": 1790218407,
+        "id": "d113-resume-20260924T024016Z",
+        "status": "ACTIVE"
+      },
+      "recorded_at": 1790218407,
+      "system_id": "maintenance#d113-resume-20260924T024016Z#begin",
+      "event": "begin"
+    },
+    "maintenance#d113-resume-20260924T024016Z#end": {
+      "system_id": "maintenance#d113-resume-20260924T024016Z#end",
+      "recorded_at": 1790220208,
+      "subject_system_id": "wishicraft-main",
+      "event": "end",
+      "maintenance": {
+        "schema_version": 1,
+        "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+        "reason": "d113-retained-prepared-continuation",
+        "expires_at": 1790222007,
+        "stage": "dev",
+        "started_at": 1790218407,
+        "ended_by": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+        "id": "d113-resume-20260924T024016Z",
+        "ended_at": 1790220208,
+        "status": "ENDED"
+      }
+    },
+    "maintenance#d113-rollback-20260924T024016Z#begin": {
+      "system_id": "maintenance#d113-rollback-20260924T024016Z#begin",
+      "recorded_at": 1790220982,
+      "subject_system_id": "wishicraft-main",
+      "maintenance": {
+        "schema_version": 1,
+        "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+        "reason": "d113-retained-prepared-continuation",
+        "expires_at": 1790224582,
+        "stage": "dev",
+        "started_at": 1790220982,
+        "id": "d113-rollback-20260924T024016Z",
+        "status": "ACTIVE"
+      },
+      "event": "begin"
+    },
+    "maintenance#d113-rollback-20260924T024016Z#end": {
+      "recorded_at": 1790221935,
+      "maintenance": {
+        "schema_version": 1,
+        "actor": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+        "reason": "d113-retained-prepared-continuation",
+        "expires_at": 1790224582,
+        "stage": "dev",
+        "started_at": 1790220982,
+        "ended_by": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2",
+        "id": "d113-rollback-20260924T024016Z",
+        "ended_at": 1790221935,
+        "status": "ENDED"
+      },
+      "event": "end",
+      "system_id": "maintenance#d113-rollback-20260924T024016Z#end",
+      "subject_system_id": "wishicraft-main"
+    }
+  },
+  "caller": {
+    "Account": "385526546525",
+    "Arn": "arn:aws:sts::385526546525:assumed-role/AWSReservedSSO_AdministratorAccess_980328bcb97d1cd0/misoni2"
+  }
+}

@@ -1,13 +1,15 @@
 # Operator Game RESTORE
 
 [D-113 contract and candidate inventory](../reviews/game_restore.md).
-Full RESTORE qualification is pending. The separately approved b856dcf dev execution
-proved source validation, recovery-lease resumption, real read-only XFS copy and
-PREPARED, then stopped on a supplemental read-only probe output error before commit.
-See [execution and safe closeout](../evidence/game_restore_prepared_2026-09-23.md).
-Selection, restored START and explicit rollback remain unqualified. Future commands
-still require their own execution scope; repository tests are not mounted-snapshot
-or Minecraft availability evidence.
+Limited Vanilla B dev qualification completed in the
+[2026-09-24 retained-PREPARED continuation](../evidence/game_restore_resumed_2026-09-24.md):
+conditional commit, restored START/content/STOP, formal rollback, original
+START/content/STOP, both worlds retained and final STOPPED/HEALTHY / 49 alarms OK.
+The [2026-09-23 execution](../evidence/game_restore_prepared_2026-09-23.md) separately
+proved real read-only XFS/copy/PREPARED and one recovery-lease resumption. Real
+Paper/NeoForge RESTORE, all failure paths and disaster recovery remain unqualified.
+Future AWS commands require their own execution scope. COMMITTED is selection;
+actual START/content evidence remains a separate completion state.
 
 ## Execution checkpoints
 
