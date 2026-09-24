@@ -1,7 +1,7 @@
 # Dynamic Game BACKUP — IAM alignment
 
-Repository fix for BAK-002/003/004 and D-105. Dev deployment and positive proof
-are separate gates; no successful release is claimed by this design alone.
+BAK-002/003/004 and D-105 follow-up: **limited dev release and positive BACKUP qualified
+2026-09-24**. [Exact ChangeSet, vps-survival START/STOP, snapshot/provenance and final state](../evidence/dynamic_game_backup_2026-09-24.md). Future operations require their own authorization; automatic BACKUP scheduling and retention deletion remain separate.
 
 ## Root cause and minimum contract
 

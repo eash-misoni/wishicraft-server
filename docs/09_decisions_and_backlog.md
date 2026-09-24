@@ -1,5 +1,7 @@
 # 09. Decisions and Backlog
 
+> 2026-09-24 D-105 follow-up Accepted / limited dev qualified: [dynamic Game BACKUP IAM alignment](runbooks/dynamic_game_backup.md)。CREATE有効時だけGame request-tag条件をlegacy IDまたは固定長dynamic形式へ対応させ、registry/package等の正当性は既存applicationが検証する。元volume・必須tag・作成時CreateTagsを維持し、Game追加時のIAM再deployを不要にした。[vps-survival正式BACKUP実証](evidence/dynamic_game_backup_2026-09-24.md)。自動BACKUP運用やretention実削除の承認ではない。
+
 ## D-112 Registry-backed Game discovery (Accepted; dev qualified, actual START/RESET picker confirmed)
 
 2026-09-22 user-requested slice. [Canonical design and fixed-list inventory](reviews/game_discovery.md),

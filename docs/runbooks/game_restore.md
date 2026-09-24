@@ -1,5 +1,7 @@
 # Operator Game RESTORE
 
+> 2026-09-24 follow-up: [dynamic Game BACKUP IAM修正とdev vps-survivalでの正式BACKUP成功](../evidence/dynamic_game_backup_2026-09-24.md)。過去の保護BACKUP IAM blockerは当時の履歴として保持する。今後も保護BACKUPは正式経路で成功することが条件で、D-113実証・自動BACKUP運用とは別の完了範囲。
+
 [D-113 contract and candidate inventory](../reviews/game_restore.md).
 Limited Vanilla B dev qualification completed in the
 [2026-09-24 retained-PREPARED continuation](../evidence/game_restore_resumed_2026-09-24.md):
