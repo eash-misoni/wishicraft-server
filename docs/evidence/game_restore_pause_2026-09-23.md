@@ -1,5 +1,7 @@
 # Game RESTORE — user-requested pause, 2026-09-23 JST
 
+> Follow-up: [dynamic Game BACKUP IAM alignment](../runbooks/dynamic_game_backup.md) tracks the separate fix/release. The failed Operation and observations below remain historical evidence; D-113 success alone did not fix IAM.
+
 > Historical pause record. The later repository-only recovery review in
 > [D-113](../reviews/game_restore.md#recovery-review-against-5695049) supersedes the
 > unresolved-code guidance below; it does not change these historical AWS observations.

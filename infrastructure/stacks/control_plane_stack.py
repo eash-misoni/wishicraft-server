@@ -576,11 +576,31 @@ class ControlPlaneStack(Stack):
                             "aws:RequestTag/Project": project.project_slug,
                             "aws:RequestTag/Stage": stage.stage,
                             "aws:RequestTag/WishicraftCategory": "backup",
-                            "aws:RequestTag/WishicraftGameId": list(games)
-                            if games
-                            else project.initial_game_id,
                             "aws:RequestTag/WishicraftProtected": "false",
-                        }
+                            **(
+                                {}
+                                if game_creation
+                                else {
+                                    "aws:RequestTag/WishicraftGameId": list(games)
+                                    if games
+                                    else project.initial_game_id
+                                }
+                            ),
+                        },
+                        **(
+                            {
+                                # IAM glob is not hex validation or registry lookup.
+                                # Application validates exact IDs and recovery records.
+                                "StringLike": {
+                                    "aws:RequestTag/WishicraftGameId": [
+                                        *(games or ()),
+                                        "game-" + "?" * 64,
+                                    ]
+                                }
+                            }
+                            if game_creation
+                            else {}
+                        ),
                     },
                 )
             )
