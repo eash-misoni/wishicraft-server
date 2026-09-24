@@ -257,3 +257,64 @@ conditions, legacy initial binding, and repeated same-RESTORE recovery without
 intervening work. Existing expiry/INCIDENT and rollback retry coverage remains.
 CI results are reported with the final scope-correction commit in the handoff.
 This is repository evidence only; no AWS inspection or mutation was performed.
+
+## Supplemental reader and retained PREPARED continuation
+
+`wishicraft.restore_reader_payload.command(targets)` generates a read-only SSM
+command from the exact checkout, with no host install or Python bytecode. Each
+operator-selected target has `game_id`, canonical `server`, package `level`
+(`world` or `wishinkaiwai`), and `full_tree`. Resolve these from the current journal,
+Games and immutable package; never substitute an arbitrary path. Use fixed command
+IDs/intents, preserve payload SHA-256, and collect terminal results before more work.
+The generated process has a 600-second alarm (maximum 900); pair it with the SSM
+execution timeout. The request allows at most eight targets and emits at most
+20,000 UTF-8 bytes. Exhausting a limit is a failure, not silently truncated evidence.
+
+The reader uses the existing IMPORT tree/SHA and unmodified NBT parser. It bounds
+traversal to 100,000 entries, 16 GiB per server and depth 32, rejects links/special
+files/other devices, and selects at most four terrain region file fingerprints.
+It includes `dimensions/<namespace>/<dimension>/region` and legacy region paths;
+entities/poi files are not terrain samples. It never emits all NBT, playerdata or
+server.properties text. Only stopped roots should request full server/world hashes.
+For a running selected world use `full_tree=false`: content fingerprints, runtime
+binding and readiness together are evidence; a live whole-tree equality is not.
+
+NBT fields explicitly distinguish `missing`, `null`, `unsupported`, `value`, and
+`read_failed`. Array bytes have type/length/SHA only, not invented coordinates.
+`Data.spawn` may contain array bytes in 26.2; selected dimension/pos summaries do
+not interpret that array. A reported missing `Data.WorldGenSettings.seed` describes
+only that legacy field; it does not establish that the world has no seed. Terrain
+fingerprints and measured prepared-tree provenance remain independent evidence.
+Unknown output types are rejected, never hidden by `default=str`. Region files
+changed during a read are marked `changed_during_read`, not stable evidence.
+The optional `include_host=true` also reads the two fixed helper hashes/owner/mode,
+the runtime receipt phase/target, and Docker image/running state/bind mounts only.
+It never emits Docker environment or full runtime receipt. Policy files are hashed,
+not printed.
+Managed owner/validated metadata is read at fixed paths with root:root/0600 checks;
+missing validation on a historical RESET owner is not silently fabricated.
+
+For the separately approved continuation from the 2026-09-23 PREPARED record:
+
+1. Freeze the reader commit after tests/CI and generate all AWS artifacts in its
+   clean separate worktree. Do not rerun plan/BACKUP/volume/prepare or deploy IAM/helpers.
+2. Re-read the same RESTORE journal, original selected world/package, protection
+   provenance and unchanged Desired revision 67. The one-hour BACKUP age was a
+   plan-creation gate; elapsed time alone does not invalidate retained PREPARED.
+   Revision alone also does not prove unchanged file bytes.
+3. With old maintenance ENDED, use a new ordinary maintenance begin, not recovery
+   of an ended lease. Boot only the idle host. Recheck original/prepared server trees,
+   prepared world tree, root-owned owner/validated receipt, helper hashes and other
+   Games against the prior receipt and current baseline. The deleted temporary EBS
+   is not needed: the previous source/copy proof links to the retained tree hash.
+4. If all gates hold, normally stop the host and use the same journal's `commit`.
+   Its existing checkpoint binds the new lease; do not hand-edit revision/lease/phase.
+   End maintenance, then normal Admin START/content/STOP on the restored path.
+5. New ordinary maintenance, check-rollback/collect-rollback, stopped-host rollback,
+   maintenance end, original normal START/content/STOP. Do not apply forward revision
+   67 to rollback after the expected normal lifecycle transitions.
+
+A mismatched protection revision/tree/identity is a stop for separate review, not
+permission for a new backup/request, recopy or validator relaxation. Preserve the
+prepared data. The bounded supplemental-reader-only retry exception in the current
+execution approval does not authorize retries of RESTORE or Minecraft failures.

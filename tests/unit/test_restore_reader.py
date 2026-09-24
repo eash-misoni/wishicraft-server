@@ -1,0 +1,285 @@
+from __future__ import annotations
+
+import ast
+import gzip
+import json
+import os
+import shlex
+import shutil
+import struct
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from wishicraft import restore_reader_payload as payload
+from wishicraft.artifacts import restore_reader as reader
+from wishicraft.artifacts import world_import, world_nbt
+
+
+def string(value: str) -> bytes:
+    data = value.encode()
+    return struct.pack(">H", len(data)) + data
+
+
+def compound(fields: list[tuple[int, str, bytes]]) -> bytes:
+    return b"".join(bytes([tag]) + string(key) + value for tag, key, value in fields) + b"\0"
+
+
+def fixture(root: Path) -> Path:
+    world = root / "world"
+    region = world / "dimensions/minecraft/overworld/region"
+    region.mkdir(parents=True)
+    (region / "r.0.0.mca").write_bytes(b"terrain-fixture")
+    (world / "playerdata").mkdir()
+    (world / "playerdata/private.dat").write_bytes(b"NEVER_OUTPUT_PLAYER")
+    (root / "server.properties").write_text("rcon.password=NEVER_OUTPUT_SECRET\n")
+    document = compound(
+        [
+            (
+                10,
+                "Data",
+                compound(
+                    [
+                        (10, "Version", compound([(8, "Name", string("26.2"))])),
+                        (3, "DataVersion", struct.pack(">i", 4903)),
+                        (8, "LevelName", string("world")),
+                        (4, "Time", struct.pack(">q", 123)),
+                        (
+                            10,
+                            "spawn",
+                            compound(
+                                [
+                                    (8, "dimension", string("minecraft:overworld")),
+                                    (11, "pos", struct.pack(">iiii", 3, -1, 70, 8)),
+                                ]
+                            ),
+                        ),
+                    ]
+                ),
+            ),
+        ]
+    )
+    (world / "level.dat").write_bytes(gzip.compress(b"\x0a" + string("") + document))
+    return root
+
+
+def test_real_nbt_bytes_to_json_roundtrip_and_exact_import_hash(tmp_path: Path) -> None:
+    root = fixture(tmp_path / "server")
+    before = {str(p): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+    parsed = world_nbt.read(root / "world/level.dat")
+    assert type(parsed["Data"]["spawn"]["pos"]) is bytes
+    with pytest.raises(TypeError):
+        json.dumps(parsed["Data"]["spawn"])  # Exact previous diagnostic defect.
+    result = json.loads(reader.output(reader.inspect_server(root, "world", full_tree=True)))
+    pos = result["nbt"]["spawn"]["selected_fields"]["pos"]
+    assert pos["state"] == "unsupported" and pos["type"] == "bytes" and pos["length"] == 12
+    assert len(pos["sha256"]) == 64 and "value" not in pos
+    assert result["nbt"]["legacy_seed"]["state"] == "missing"
+    assert result["terrain_region_count"] == 1
+    assert result["server_tree"] == world_import.tree(root)
+    assert result["world_tree"] == world_import.tree(root / "world")
+    assert (
+        result["terrain_samples"]["dimensions/minecraft/overworld/region/r.0.0.mca"]["state"]
+        == "read"
+    )
+    assert "NEVER_OUTPUT" not in reader.output(result)
+    assert before == {str(p): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+
+
+def test_missing_null_unsupported_and_read_failure_are_distinct(tmp_path: Path) -> None:
+    assert reader.field({}, "x", int) == {"state": "missing"}
+    assert reader.field({"x": None}, "x", int) == {"state": "null"}
+    assert reader.field({"x": True}, "x", int)["state"] == "unsupported"
+    assert reader.field({"x": 0}, "x", int) == {"state": "value", "value": 0}
+    assert reader.field({"x": "a" * 129}, "x", str)["state"] == "unsupported"
+    path = tmp_path / "level.dat"
+    assert reader.nbt_summary(path)["state"] == "missing"
+    path.write_bytes(b"invalid gzip")
+    assert reader.nbt_summary(path)["state"] == "read_failed"
+
+
+@pytest.mark.parametrize("link", ["symbolic", "hard"])
+def test_unsafe_tree_rejected(tmp_path: Path, link: str) -> None:
+    root = fixture(tmp_path / "server")
+    if link == "symbolic":
+        (root / "bad").symlink_to(root / "server.properties")
+    else:
+        os.link(root / "server.properties", root / "bad")
+    with pytest.raises(ValueError, match="READER_TREE_TYPE"):
+        reader.inspect_server(root, "world", full_tree=True)
+
+
+def test_bounds_and_no_full_hash_for_live_content(tmp_path: Path, monkeypatch: Any) -> None:
+    root = fixture(tmp_path / "server")
+    value = reader.inspect_server(root, "world", full_tree=False)
+    assert "server_tree" not in value and "world_tree" not in value
+    with pytest.raises(ValueError, match="READER_OUTPUT_LIMIT"):
+        reader.output({"large": "a" * reader.MAX_OUTPUT})
+    with pytest.raises(TypeError):
+        reader.output({"unexpected": b"not stringified"})
+    with pytest.raises(ValueError, match="READER_LEVEL_NAME"):
+        reader.inspect_server(root, "..", full_tree=False)
+    monkeypatch.setattr(reader, "MAX_ENTRIES", 1)
+    with pytest.raises(ValueError, match="READER_ENTRY_LIMIT"):
+        reader.inspect_server(root, "world", full_tree=True)
+    monkeypatch.setattr(reader, "MAX_ENTRIES", 100)
+    monkeypatch.setattr(reader, "MAX_BYTES", 1)
+    with pytest.raises(ValueError, match="READER_BYTE_LIMIT"):
+        reader.inspect_server(root, "world", full_tree=True)
+
+
+def test_live_fingerprint_marks_change(tmp_path: Path, monkeypatch: Any) -> None:
+    path = tmp_path / "region.mca"
+    path.write_bytes(b"before")
+    sha = world_import.sha
+
+    def changed(p: Path) -> str:
+        value = sha(p)
+        p.write_bytes(b"after with new size")
+        return value
+
+    monkeypatch.setattr(world_import, "sha", changed)
+    assert reader.fingerprint(path)["state"] == "changed_during_read"
+
+
+def test_fixed_payload_rejects_arbitrary_paths_and_timeout() -> None:
+    target = {
+        "game_id": "game-vanilla-secondary",
+        "server": "/etc",
+        "level": "world",
+        "full_tree": True,
+    }
+    with pytest.raises(ValueError):
+        payload.command({"test": target})
+    with pytest.raises(ValueError, match="READER_REQUEST_LIMIT"):
+        payload.command({}, timeout=99999)
+
+
+def test_payload_execution_form_and_no_bytecode(tmp_path: Path, monkeypatch: Any) -> None:
+    root = fixture(tmp_path / "server")
+    # Only test path authorization is relocated; generated reader/import/bootstrap
+    # bytes and invocation form are the production builder's exact output.
+    monkeypatch.setattr(payload, "validate_source", lambda game, value: value)
+    target = {
+        "game_id": "game-vanilla-secondary",
+        "server": str(root),
+        "level": "world",
+        "full_tree": True,
+    }
+    command = payload.command({"previous": target}, timeout=20)
+    arguments = shlex.split(command)
+    ast.parse(Path(reader.__file__).read_text(), feature_version=(3, 9))
+    interpreters = [sys.executable]
+    candidate = os.environ.get("WISHICRAFT_READER_PYTHON39")
+    if candidate:
+        assert shutil.which(candidate)
+        interpreters.append(candidate)
+    for executable in interpreters:
+        result = subprocess.run(
+            [executable, *arguments[1:]],
+            cwd=tmp_path,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        )
+        value = json.loads(result.stdout)
+        assert value["previous"]["server_tree"] == world_import.tree(root)
+        assert value["previous"]["nbt"]["spawn"]["selected_fields"]["pos"]["state"] == "unsupported"
+        assert "NEVER_OUTPUT" not in result.stdout and not result.stderr
+    assert not list(tmp_path.rglob("__pycache__"))
+
+
+def test_managed_record_identity_and_allowlist(tmp_path: Path, monkeypatch: Any) -> None:
+    from types import SimpleNamespace
+
+    server = fixture(tmp_path / "worlds/op-test/server")
+    owner = server.parent.parent / "op-test.owner.json"
+    owner.write_text(
+        json.dumps({"phase": "prepared", "protected": True, "future_secret": "HIDDEN"})
+    )
+    owner.chmod(0o600)
+    stat_before = Path.lstat
+
+    def root_stat(path: Path) -> Any:
+        info = stat_before(path)
+        if path == owner:
+            return SimpleNamespace(
+                st_mode=info.st_mode,
+                st_uid=0,
+                st_gid=0,
+                st_size=info.st_size,
+                st_nlink=info.st_nlink,
+            )
+        return info
+
+    monkeypatch.setattr(Path, "lstat", root_stat)
+    result = reader.managed_records(server)
+    assert result["owner"]["record"] == {"phase": "prepared", "protected": True}
+    assert result["validated"]["state"] == "missing"
+    assert "HIDDEN" not in reader.output(result)
+    owner.chmod(0o644)
+    with pytest.raises(ValueError, match="READER_RECORD_IDENTITY"):
+        reader.managed_records(server)
+
+
+def test_host_evidence_excludes_environment_and_secret_receipt_fields(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    helper = tmp_path / "helper.py"
+    helper.write_text("# reviewed fixture\n")
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text(
+        json.dumps(
+            {"phase": "ready", "target": {"data_source": "/test/server"}, "secret": "DO_NOT_OUTPUT"}
+        )
+    )
+    read_text = Path.read_text
+    stat_method, lstat_method = Path.stat, Path.lstat
+
+    def mapped(path: Path) -> Path:
+        if str(path).startswith("/usr/local/libexec/wishicraft/"):
+            return helper
+        if str(path) == "/var/lib/wishicraft/runtime/receipt.json":
+            return receipt
+        return path
+
+    monkeypatch.setattr(Path, "stat", lambda path, **kw: stat_method(mapped(path), **kw))
+    monkeypatch.setattr(Path, "lstat", lambda path: lstat_method(mapped(path)))
+    monkeypatch.setattr(Path, "read_text", lambda path, **kw: read_text(mapped(path), **kw))
+    sha = world_import.sha
+    monkeypatch.setattr(world_import, "sha", lambda path: sha(mapped(path)))
+    calls = []
+
+    def output(args: list[str], **kw: Any) -> str:
+        calls.append(args)
+        assert kw["timeout"] == 15
+        if args == ["docker", "ps", "-q"]:
+            return "abcdef123456\n"
+        assert args == ["docker", "inspect", "abcdef123456"]
+        return json.dumps(
+            [
+                {
+                    "Config": {"Image": "pinned-image", "Env": ["SECRET=DO_NOT_OUTPUT"]},
+                    "State": {"Running": True},
+                    "Mounts": [
+                        {
+                            "Type": "bind",
+                            "Source": "/test/server",
+                            "Destination": "/data",
+                            "RW": True,
+                        }
+                    ],
+                }
+            ]
+        )
+
+    monkeypatch.setattr(subprocess, "check_output", output)
+    result = reader.host_evidence()
+    assert result["containers"][0]["mounts"][0]["Source"] == "/test/server"
+    assert result["runtime_receipt"]["phase"] == "ready"
+    assert "DO_NOT_OUTPUT" not in reader.output(result)
+    assert len(calls) == 2
