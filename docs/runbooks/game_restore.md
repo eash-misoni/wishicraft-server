@@ -318,3 +318,16 @@ A mismatched protection revision/tree/identity is a stop for separate review, no
 permission for a new backup/request, recopy or validator relaxation. Preserve the
 prepared data. The bounded supplemental-reader-only retry exception in the current
 execution approval does not authorize retries of RESTORE or Minecraft failures.
+
+The first resumed supplemental read (2026-09-24) terminated Failed/1 at the fixed
+20,000-byte output limit; it did not change trees or fail RESTORE prepare. The
+bounded reader selection now accepts optional `content=false` for other Games:
+exact server/world tree hashes remain, without unrelated NBT/terrain/policy details.
+The target's original and restored worlds retain content evidence. Owner/validated
+records retain file hashes, root ownership/mode, phase/protection/tree fields, while
+full `plan` and `restore` objects are represented by canonical SHA-256 (same encoding
+as `game_package.digest`). Compare these digests with the frozen plans; this is
+identity evidence, not a new validator or a decoded content claim. The output limit
+is unchanged. Preserve the failed payload and result; the separately approved
+single corrected read requires terminal failure, local regression, fixed commit/CI,
+current maintenance and sufficient remaining time.

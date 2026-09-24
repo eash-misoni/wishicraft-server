@@ -130,13 +130,24 @@ def fingerprint(path: Path) -> dict[str, Any]:
     }
 
 
-def inspect_server(server: Path, level_name: str, *, full_tree: bool) -> dict[str, Any]:
+def inspect_server(
+    server: Path, level_name: str, *, full_tree: bool, content: bool = True
+) -> dict[str, Any]:
     if not level_name or Path(level_name).name != level_name or level_name in {".", ".."}:
         raise ValueError("READER_LEVEL_NAME")
     files = bounded_files(server)
     level = server / level_name
     if not level.is_dir():
         raise ValueError("READER_WORLD_MISSING")
+    if not content:
+        if not full_tree:
+            raise ValueError("READER_EMPTY_SELECTION")
+        return {
+            "server_path": str(server),
+            "world_path": str(level),
+            "server_tree": imported.tree(server),
+            "world_tree": imported.tree(level),
+        }
     # Real 26.2 worlds use dimensions/<namespace>/<dimension>/region; include that
     # layout and legacy regions without mistaking entities/poi for terrain.
     regions = [
@@ -205,8 +216,6 @@ def managed_records(server: Path) -> dict[str, Any]:
             for key in (
                 "phase",
                 "protected",
-                "restore",
-                "plan",
                 "source_tree",
                 "previous_tree",
                 "prepared_tree",
@@ -215,6 +224,12 @@ def managed_records(server: Path) -> dict[str, Any]:
             )
             if key in value
         }
+        # Bind the complete plans without repeating them in owner and receipt output.
+        # Same canonical JSON encoding as game_package.digest; no unknown fields exposed.
+        for key in ("restore", "plan"):
+            if key in value:
+                encoded = json.dumps(value[key], sort_keys=True, separators=(",", ":")) + "\n"
+                selected[key + "_sha256"] = hashlib.sha256(encoded.encode()).hexdigest()
         result[label] = {
             "state": "read",
             "path": str(path),

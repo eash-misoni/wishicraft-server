@@ -21,8 +21,10 @@ def command(
     for name, target in targets.items():
         if name == "host" or not name.isascii() or not name.replace("-", "").isalnum():
             raise ValueError("READER_LABEL")
-        if set(target) != {"game_id", "server", "level", "full_tree"}:
+        if set(target) - {"content"} != {"game_id", "server", "level", "full_tree"}:
             raise ValueError("READER_TARGET_FIELDS")
+        if type(target.get("content", True)) is not bool:
+            raise ValueError("READER_CONTENT_SELECTION")
         validate_source(target["game_id"], target["server"])
         if type(target["full_tree"]) is not bool or target["level"] not in {
             "world",
@@ -61,7 +63,7 @@ def command(
         + "targets=json.loads("
         + repr(json.dumps(targets))
         + ")\nresult={name:reader.inspect_server(Path(t['server']),t['level'],"
-        + "full_tree=t['full_tree']) for name,t in targets.items()}\n"
+        + "full_tree=t['full_tree'],content=t.get('content',True)) for name,t in targets.items()}\n"
         + "for name,t in targets.items():\n"
         + " result[name]['managed_records']=reader.managed_records(Path(t['server']))\n"
         + ("result['host']=reader.host_evidence()\n" if include_host else "")

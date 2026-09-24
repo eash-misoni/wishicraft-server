@@ -283,3 +283,69 @@ def test_host_evidence_excludes_environment_and_secret_receipt_fields(
     assert result["runtime_receipt"]["phase"] == "ready"
     assert "DO_NOT_OUTPUT" not in reader.output(result)
     assert len(calls) == 2
+
+
+def test_six_game_evidence_budget_and_plan_hashes(tmp_path: Path, monkeypatch: Any) -> None:
+    from types import SimpleNamespace
+
+    from wishicraft.artifacts.game_package import digest
+
+    prior = json.loads(
+        (
+            Path(__file__).parents[2] / "docs/evidence/game_restore_prepared_2026-09-23.json"
+        ).read_text()
+    )
+    stat_before = Path.lstat
+    records = set()
+
+    def root_stat(path: Path) -> Any:
+        info = stat_before(path)
+        if path in records:
+            return SimpleNamespace(
+                st_mode=info.st_mode,
+                st_uid=0,
+                st_gid=0,
+                st_size=info.st_size,
+                st_nlink=info.st_nlink,
+            )
+        return info
+
+    monkeypatch.setattr(Path, "lstat", root_stat)
+    evidence = {}
+    for index in range(6):
+        server = fixture(
+            tmp_path / ("game-" + "a" * 64 + str(index)) / "worlds" / ("op-" + "b" * 64) / "server"
+        )
+        for label, value in [
+            ("owner", next(reversed(prior["retained_owners"].values()))["record"]),
+            (
+                "validated",
+                {
+                    "restore": prior["plan"],
+                    "candidate": "staging-fixture",
+                    "future_secret": "HIDDEN",
+                },
+            ),
+        ]:
+            path = (
+                server.parent.parent / (server.parent.name + ".owner.json")
+                if label == "owner"
+                else server.parent / "validated.json"
+            )
+            path.write_text(json.dumps(value))
+            path.chmod(0o600)
+            records.add(path)
+        result = reader.inspect_server(server, "world", full_tree=True, content=index < 2)
+        result["managed_records"] = reader.managed_records(server)
+        assert result["managed_records"]["validated"]["record"]["restore_sha256"] == digest(
+            prior["plan"]
+        )
+        assert "restore" not in result["managed_records"]["owner"]["record"]
+        if index >= 2:
+            assert "nbt" not in result and "terrain_samples" not in result
+        evidence["game-" + str(index)] = result
+    encoded = reader.output(evidence)
+    assert len(encoded.encode()) < reader.MAX_OUTPUT
+    assert json.loads(encoded) == evidence and "HIDDEN" not in encoded
+    with pytest.raises(ValueError, match="READER_EMPTY_SELECTION"):
+        reader.inspect_server(server, "world", full_tree=False, content=False)
