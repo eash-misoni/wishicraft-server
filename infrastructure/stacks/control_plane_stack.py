@@ -927,7 +927,7 @@ class ControlPlaneStack(Stack):
             )
         )
         if phase >= 7:
-            discord_functions = _add_discord_ingress(
+            discord_functions, dead_letter_queues = _add_discord_ingress(
                 self,
                 project=project,
                 stage=stage,
@@ -953,6 +953,7 @@ class ControlPlaneStack(Stack):
                 stop_workflow=stop_workflow,
                 backup_workflow=backup_workflow,
                 retention_workflow=retention_workflow,
+                dead_letter_queues=dead_letter_queues,
                 monitored_functions=(
                     function,
                     start_task,
@@ -1265,7 +1266,7 @@ def _add_discord_ingress(
     auto_stop_intents_table: dynamodb.Table | None,
     bot_token_parameter_name: str,
     two_games: bool = False,
-) -> tuple[lambda_.Function, ...]:
+) -> tuple[tuple[lambda_.Function, ...], tuple[sqs.Queue, ...]]:
     repository_root = Path(__file__).resolve().parents[2]
     log_group = logs.LogGroup(
         stack,
@@ -1593,10 +1594,8 @@ def _add_discord_ingress(
         value=f"{api.api_endpoint}/discord/interactions",
     )
     return (
-        function,
-        status_executor,
-        message,
-        *([evaluator] if evaluator is not None else []),
+        (function, status_executor, message, *([evaluator] if evaluator is not None else [])),
+        (delivery_dlq, status_dlq),
     )
 
 
@@ -1613,6 +1612,7 @@ def _add_release_monitoring(
     backup_workflow: sfn.CfnStateMachine | None,
     retention_workflow: sfn.CfnStateMachine | None,
     monitored_functions: tuple[lambda_.Function, ...],
+    dead_letter_queues: tuple[sqs.Queue, ...],
 ) -> None:
     namespace = "Wishicraft/ControlPlane"
     dimensions = {"Stage": stage.stage, "SystemId": project.system_id}
@@ -1734,6 +1734,27 @@ def _add_release_monitoring(
     )
 
     alarm_action = cloudwatch_actions.SnsAction(topic)
+    for queue in dead_letter_queues:
+        construct_id = queue.node.id + "VisibleAlarm"
+        alarm = cloudwatch.Alarm(
+            stack,
+            construct_id,
+            alarm_name=resource_name(project.resource_prefix, stage.stage, construct_id.lower()),
+            alarm_description=(
+                f"{queue.node.id}: pending visible DLQ messages; always notify. "
+                "First read docs/runbooks/monitoring_coverage.md#dlq-response"
+            ),
+            metric=queue.metric_approximate_number_of_messages_visible(
+                statistic="Maximum", period=Duration.seconds(300)
+            ),
+            threshold=1,
+            comparison_operator=cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+            evaluation_periods=1,
+            datapoints_to_alarm=1,
+            treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
+        )
+        alarm.add_alarm_action(alarm_action)
+
     from wishicraft.maintenance import SUPPRESSIBLE
 
     maintenance_mode = stack.node.try_get_context("maintenance_notification_mode") or "active"

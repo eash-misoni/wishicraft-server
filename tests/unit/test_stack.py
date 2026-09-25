@@ -907,7 +907,7 @@ def test_phase_seven_release_monitoring_is_complete_and_read_only() -> None:
         "throttlesalarm",
     ):
         assert any(fragment in name for name in names)
-    assert len(alarms) == 25  # Existing 24 plus suppressor.
+    assert len(alarms) == 27  # Existing 24 plus suppressor and two independent DLQ alarms.
     composites = template.find_resources("AWS::CloudWatch::CompositeAlarm")
     assert len(composites) == 2  # RuntimeObservationUnknown is introduced in Phase 8.
     for logical, alarm in alarms.items():

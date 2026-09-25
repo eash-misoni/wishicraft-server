@@ -1,5 +1,7 @@
 # Planned host maintenance — D-111
 
+> Current coverage follow-up (2026-09-25): [two DLQ alarms and Web Errors SNS actions](../runbooks/monitoring_coverage.md). All four are always-notify; the three maintenance suppression paths are unchanged. Historical no-notification evidence below remains the record of its original date. Dev qualification is tracked separately in that runbook.
+
 Accepted / dev deployed and qualified on 2026-09-22. CI passed 1,672 tests plus
 lint/format/type/synth and real Docker integrations. Three real base ALARMs retained,
 three SNS actions explicitly suppressed, safe end and retained-record expiry verified.

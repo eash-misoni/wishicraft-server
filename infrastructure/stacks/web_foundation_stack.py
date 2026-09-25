@@ -13,11 +13,13 @@ from aws_cdk import aws_apigatewayv2 as apigw
 from aws_cdk import aws_apigatewayv2_integrations as integrations
 from aws_cdk import aws_certificatemanager as acm
 from aws_cdk import aws_cloudwatch as cloudwatch
+from aws_cdk import aws_cloudwatch_actions as cloudwatch_actions
 from aws_cdk import aws_dynamodb as dynamodb
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as lambda_
 from aws_cdk import aws_logs as logs
 from aws_cdk import aws_route53 as route53
+from aws_cdk import aws_sns as sns
 from constructs import Construct
 
 from web.foundation import build_foundation
@@ -153,6 +155,14 @@ class WebFoundationStack(Stack):
         if canonical_origin:
             common["WEB_CANONICAL_ORIGIN"] = canonical_origin
         code = lambda_.Code.from_asset(str(bundle(root)))
+        monitoring_topic = sns.Topic.from_topic_arn(
+            self,
+            "MonitoringTopic",
+            self.format_arn(
+                service="sns",
+                resource=resource_name(project.resource_prefix, stage.stage, "monitoring"),
+            ),
+        )
 
         def function(name: str, handler: str, environment: dict[str, str]) -> lambda_.Function:
             group = logs.LogGroup(
@@ -182,7 +192,7 @@ class WebFoundationStack(Stack):
                     ],
                 )
             )
-            cloudwatch.Alarm(
+            alarm = cloudwatch.Alarm(
                 self,
                 name + "Errors",
                 metric=fn.metric_errors(),
@@ -190,6 +200,7 @@ class WebFoundationStack(Stack):
                 evaluation_periods=1,
                 treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
             )
+            alarm.add_alarm_action(cloudwatch_actions.SnsAction(monitoring_topic))
             return fn
 
         env = {

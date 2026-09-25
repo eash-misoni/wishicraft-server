@@ -1,0 +1,107 @@
+{
+  "baseline": "f938ba6cdeea74f91e878a687df7e6044b33e227",
+  "date": "2026-09-25",
+  "scope": "NFR-008 / D-111 follow-up: two DLQ alarms, two Web SNS actions",
+  "tests": {
+    "full_pytest": {
+      "passed": 1824,
+      "seconds": 99.27
+    },
+    "ruff": "passed",
+    "format": "341 files passed",
+    "mypy": "252 source files passed"
+  },
+  "template_comparison": {
+    "cp7": {
+      "added": [
+        "DiscordMessageDlqVisibleAlarmD87DA00F",
+        "StatusExecutorDlqVisibleAlarm1D44CD44"
+      ],
+      "removed": [],
+      "changed": {},
+      "baseline_sha256": "2c27c7c16d74d45154eb5af9ffed55cd71f2733e2bb7b5af672a43293b5200fd",
+      "candidate_sha256": "3506148305d2791e96aff6a8e0de4fece76f4633e6f4ee6c0ea5c874fce6616b"
+    },
+    "cp8": {
+      "added": [
+        "DiscordMessageDlqVisibleAlarmD87DA00F",
+        "StatusExecutorDlqVisibleAlarm1D44CD44"
+      ],
+      "removed": [],
+      "changed": {},
+      "baseline_sha256": "b98a89986cd9e8964a4621d1e3f21e0e4df9d7b531d24a1929acc08377bc7bbd",
+      "candidate_sha256": "79b1423e6638efa55e310e21389c26dd3fcca05babaf91ab609461a718b5e77b"
+    },
+    "cpfull": {
+      "added": [
+        "DiscordMessageDlqVisibleAlarmD87DA00F",
+        "StatusExecutorDlqVisibleAlarm1D44CD44"
+      ],
+      "removed": [],
+      "changed": {},
+      "baseline_sha256": "d1b8b5b3e8757c01c99fcdf4e31346fb3f94c2f8d1a58e547ae480e8ad14d303",
+      "candidate_sha256": "e06c318912bff88bcb27533d8d5f4e6a57d89994302cf4212d2a814439cde825"
+    },
+    "web": {
+      "added": [],
+      "removed": [],
+      "changed": {
+        "WebErrorsC4BB781A": [
+          "Properties"
+        ],
+        "AuthErrors8D0EDC3D": [
+          "Properties"
+        ]
+      },
+      "baseline_sha256": "d963fa409edff33f6da9eef87bb7e9d0152fc4d83f38ab956c7782d173328dbf",
+      "candidate_sha256": "44ab30b6578e568a06bfd59838ea8ba1c048cc6d4a01a1b0090ea1cd46bc015c"
+    },
+    "webfull": {
+      "added": [],
+      "removed": [],
+      "changed": {
+        "WebErrorsC4BB781A": [
+          "Properties"
+        ],
+        "AuthErrors8D0EDC3D": [
+          "Properties"
+        ]
+      },
+      "baseline_sha256": "c5f9f30658d5c644fa35bd94ae9b48b4f583b3869e93585002efebe576520ac1",
+      "candidate_sha256": "96bfb632361ddf19a37c7759cd4b982c2358e85b4bfe5a305fa9d3fea7599b30"
+    }
+  },
+  "initial_live_inventory": {
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "alarms": 49,
+    "non_ok": 0,
+    "queues_visible_notvisible_delayed": [
+      0,
+      0,
+      0
+    ],
+    "web_actions": [],
+    "confirmed_email_subscriptions": 1,
+    "pending_subscriptions": 0,
+    "sns_kms_cloudwatch_permissions": "existing permissions cover targets; no policy change required",
+    "game_display_name": "vps-survival",
+    "state": "STOPPED/HEALTHY",
+    "ec2": "stopped",
+    "external_work": "absent",
+    "maintenance": "ENDED"
+  },
+  "failures_retained": [
+    "baseline helper missing PYTHONPATH; retry version used explicit repository path",
+    "sandbox dependency wheel DNS failure; baseline-v3 succeeded with network",
+    "focused-v1: 117 pass / 2 fail due to omitted inherited tag expectation; full-v1 includes correction",
+    "safe-before-v1: helper used status instead of lifecycle_state; safe-before-v3 passed with actual schema"
+  ],
+  "dev_release": "pending",
+  "notification_action_tests": "not yet executed",
+  "email_receipt": "not verified",
+  "local_optional_tools": {
+    "docker": "CLI unavailable; existing CI required",
+    "shellcheck": "unavailable; existing CI required"
+  }
+}

@@ -265,6 +265,8 @@ Phase 7B ingressはfull Interaction payloadやmember role一覧をlogへ出さ�
 
 ## 7. 監視とアラーム
 
+NFR-008 / D-111 follow-up: [DLQ 2件と既存Web Errors 2件の通知補完](runbooks/monitoring_coverage.md)。4対象はalways-notify、既存SNS/KMS policy・subscriptionとmaintenance抑制3件は維持する。追加は標準metric alarm 2件だけで、新規custom metric/producerなし。設定検証と実通知action・最終email受信を区別する。
+
 ### Phase 7の初回実用リリース前に必須
 
 - AWS Budgets通知

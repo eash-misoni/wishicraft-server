@@ -298,7 +298,8 @@ def test_alarm_actions_are_one_to_one_and_only_three_are_suppressed(
         else:
             assert alarm["AlarmActions"], logical
     dlqs = [v for v in base.values() if v.get("Namespace") == "AWS/SQS"]
-    assert not dlqs  # Existing monitoring gap is explicitly deferred by the operator.
+    assert len(dlqs) == 2
+    assert all(a["AlarmActions"] for a in dlqs)
 
 
 @pytest.mark.parametrize(
