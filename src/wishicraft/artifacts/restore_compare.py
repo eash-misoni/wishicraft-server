@@ -218,3 +218,22 @@ def compare_worlds(before: Path, after: Path) -> dict[str, Any]:
         "difference": result,
         "stable": True,
     }
+
+
+def paper_overrides(before: Path, after: Path) -> dict[str, Any]:
+    """Separate, fixed Paper saved-data selection; never widen the Minecraft group."""
+    result = []
+    names = [
+        f"dimensions/minecraft/{dimension}/data/paper/level_overrides.dat"
+        for dimension in ("overworld", "the_nether", "the_end")
+    ]
+    for world in (before, after):
+        files = reader.bounded_files(world)
+        if any(world / name not in files for name in names):
+            raise ValueError("COMPARE_PAPER_OVERRIDE_MISSING")
+        docs = {name: document(world / name) for name in names}
+        for name, doc in docs.items():
+            if stable(world / name) != doc["fingerprint"]:
+                raise ValueError("COMPARE_UNSTABLE")
+        result.append({"world_path": str(world), "documents": docs, "stable": True})
+    return {"paper_overrides": result}

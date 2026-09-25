@@ -203,3 +203,42 @@ def test_private_output_overflow_fails_without_partial_success(
     result = subprocess.run([sys.executable, *args[1:]], capture_output=True, timeout=30)
     assert result.returncode != 0 and not result.stdout
     assert b"READER_OUTPUT_LIMIT" in result.stderr
+
+
+def test_paper_overrides_are_separate_and_all_three_required(tmp_path: Path) -> None:
+    roots = [world(tmp_path / n / "wishinkaiwai") for n in ("a", "b")]
+    original = compare.snapshot(roots[0])["metadata_group"]
+    with pytest.raises(ValueError, match="COMPARE_PAPER_OVERRIDE_MISSING"):
+        compare.paper_overrides(*roots)
+    for root in roots:
+        for dimension in ("overworld", "the_nether", "the_end"):
+            path = root / f"dimensions/minecraft/{dimension}/data/paper/level_overrides.dat"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(gzip.compress(nbt(2**60 + 1), mtime=0))
+    result = compare.paper_overrides(*roots)
+    assert compare.snapshot(roots[0])["metadata_group"] == original
+    assert all(len(v["documents"]) == 3 for v in result["paper_overrides"])
+    assert all(v["stable"] for v in result["paper_overrides"])
+    for value in result["paper_overrides"]:
+        for doc in value["documents"].values():
+            assert doc["typed"]["root"][1]["ticks"] == [4, str(2**60 + 1)]
+
+
+def test_paper_override_payload_roundtrip(tmp_path: Path, monkeypatch: Any) -> None:
+    roots = [world(tmp_path / n / "wishinkaiwai") for n in ("a", "b")]
+    for root in roots:
+        for dimension in ("overworld", "the_nether", "the_end"):
+            path = root / f"dimensions/minecraft/{dimension}/data/paper/level_overrides.dat"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(gzip.compress(nbt(2**60 + 1), mtime=0))
+    monkeypatch.setattr(payload, "validate_source", lambda game, server: server)
+    args = shlex.split(
+        payload.command("game-test", [str(p.parent) for p in roots], mode="paper-overrides")
+    )
+    interpreters = [sys.executable]
+    if os.environ.get("WISHICRAFT_READER_PYTHON39"):
+        interpreters.append(os.environ["WISHICRAFT_READER_PYTHON39"])
+    for python in interpreters:
+        result = subprocess.run([python, *args[1:]], capture_output=True, timeout=30, check=True)
+        assert not result.stderr and len(result.stdout) < reader.MAX_OUTPUT
+        assert payload.decode_parts([json.loads(result.stdout)]) == compare.paper_overrides(*roots)

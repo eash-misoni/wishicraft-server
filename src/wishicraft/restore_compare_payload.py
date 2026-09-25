@@ -48,13 +48,13 @@ def decode_parts(parts: list[dict[str, Any]]) -> dict[str, Any]:
 def command(
     game_id: str, servers: list[str], *, mode: str, part: int = 0, timeout: int = 600
 ) -> str:
-    if mode not in {"snapshot", "compare"} or len(servers) != 2:
+    if mode not in {"snapshot", "compare", "paper-overrides"} or len(servers) != 2:
         raise ValueError("COMPARE_SELECTION")
     if (
         not 1 <= timeout <= 900
         or len(set(servers)) != len(servers)
         or part not in range(3)
-        or (mode == "compare" and part != 0)
+        or (mode != "snapshot" and part != 0)
     ):
         raise ValueError("COMPARE_REQUEST")
     for server in servers:
@@ -93,6 +93,8 @@ def command(
         + (
             "{'worlds':[comparison.snapshot(p) for p in paths]}"
             if mode == "snapshot"
+            else "comparison.paper_overrides(*paths)"
+            if mode == "paper-overrides"
             else "comparison.compare_worlds(*paths)"
         )
         + "\nraw=json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()\n"

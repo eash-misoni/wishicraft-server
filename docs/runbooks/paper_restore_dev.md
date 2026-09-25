@@ -258,3 +258,22 @@ Restore ingress exactly, confirm naturally normal 51 alarms and final stopped/no
 work/no DNS/empty queues. Investigate any maintenance notification against actual
 state/history; do not suppress it by changing monitoring. That race remains an
 independent backlog. The earlier completed RESTORE checkpoints are never replayed.
+
+### Proposed supplementary Paper override read
+
+The retained-world comparison identified changes in all three dimensions'
+`data/paper/level_overrides.dat`, outside the 33-file Minecraft metadata group.
+The original fixed typed snapshot does not include these files. A successful
+comparison with insufficient content coverage is not a failed-output retry.
+Original START remains gated until their values are explained as well.
+
+The separate `paper-overrides` reader selection reads exactly those three files
+in each of the two authorized worlds. It preserves types/opaque arrays, records
+individual fingerprints and read stability, and keeps the Minecraft aggregate
+unchanged. One bounded private envelope contains all six documents. Repository
+qualification does not authorize an additional SSM: freeze its separate commit,
+CI and payload hash and obtain explicit approval for one pre-start and one
+post-save invocation before using this added selection. No source remount, world
+write, RESTORE replay or safety-contract change is involved. If approval is not
+available, stop the idle maintenance host normally, end and retain both worlds;
+do not silently consume the output-failure exception.
