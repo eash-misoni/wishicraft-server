@@ -188,6 +188,9 @@ def snapshot(world: Path) -> dict[str, Any]:
     selected = {name: value for name, value in before.items() if is_metadata(name)}
     docs = {name: document(world / name) for name in selected}
     level = document(world / "level.dat")
+    level_old = (
+        document(world / "level.dat_old") if "level.dat_old" in before else {"state": "missing"}
+    )
     if before != manifest(world):
         raise ValueError("COMPARE_UNSTABLE")
     return {
@@ -197,6 +200,7 @@ def snapshot(world: Path) -> dict[str, Any]:
         "metadata_manifest": selected,
         "metadata_documents": docs,
         "level_dat": level,
+        "level_dat_old": level_old,
         "stable": True,
     }
 

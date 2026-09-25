@@ -199,8 +199,10 @@ new snapshot measurement. It is not a general property of historical backups.
 
 The supplemental `restore_compare` reader keeps the existing `file_group` encoding
 and traversal/output/time limits. It records relative paths, sizes, SHA-256 and
-read stability; level.dat is separate from modern data/minecraft metadata. Whole
-world file differences include additions/deletions/changes and unchanged counts,
+read stability; level.dat is separate from modern data/minecraft metadata.
+`level.dat_old`, when present, also retains its own typed record for save rotation;
+its absence is explicit and is not invented from the current level.dat.
+Whole-world file differences include additions/deletions/changes and unchanged counts,
 with complete filename/content aggregates. Repeated full manifests detect changes
 during the read; atime is outside the content comparison. Empty directories remain
 covered by the formal server/world tree reader, not the file-only aggregate.

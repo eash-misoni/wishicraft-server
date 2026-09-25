@@ -38,6 +38,9 @@ def world(root: Path) -> Path:
 def test_aggregate_reconstruction_and_level_separation(tmp_path: Path) -> None:
     root = world(tmp_path / "wishinkaiwai")
     before = compare.snapshot(root)
+    assert before["level_dat_old"] == {"state": "missing"}
+    (root / "level.dat_old").write_bytes((root / "level.dat").read_bytes())
+    assert compare.snapshot(root)["level_dat_old"] == before["level_dat"]
     selected = list((root / "data/minecraft").iterdir())
     assert before["metadata_group"] == reader.file_group(root, selected)
     assert before["metadata_group"] == compare.aggregate(before["metadata_manifest"])
