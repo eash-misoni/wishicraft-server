@@ -311,6 +311,39 @@ def test_managed_record_identity_and_allowlist(tmp_path: Path, monkeypatch: Any)
         reader.managed_records(server)
 
 
+def test_initial_import_owner_is_read_without_creation_contents(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    from types import SimpleNamespace
+
+    server = fixture(tmp_path / "game-paper/server")
+    owner = tmp_path / "game-paper.initial-owner.json"
+    creation = {"import": {"private_source": "NEVER_OUTPUT"}}
+    plan = {"game_id": "game-paper", "data_source": str(server), "creation": creation}
+    owner.write_text(json.dumps({"phase": "initialized", "plan": plan}))
+    owner.chmod(0o600)
+    original = Path.lstat
+
+    def root_stat(path: Path) -> Any:
+        value = original(path)
+        if path == owner:
+            return SimpleNamespace(
+                st_mode=value.st_mode, st_nlink=1, st_uid=0, st_gid=0, st_size=value.st_size
+            )
+        return value
+
+    monkeypatch.setattr(Path, "lstat", root_stat)
+    result = reader.managed_records(server)["initial_owner"]
+    assert result["record"]["phase"] == "initialized"
+    assert result["record"]["game_id"] == "game-paper"
+    assert result["record"]["data_source"] == str(server)
+    assert result["record"]["creation_sha256"] == reader.summary_hash(creation)
+    assert "NEVER_OUTPUT" not in reader.output(result)
+    owner.chmod(0o644)
+    with pytest.raises(ValueError, match="READER_RECORD_IDENTITY"):
+        reader.managed_records(server)
+
+
 def test_host_evidence_excludes_environment_and_secret_receipt_fields(
     tmp_path: Path, monkeypatch: Any
 ) -> None:

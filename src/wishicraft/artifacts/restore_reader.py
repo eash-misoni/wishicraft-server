@@ -299,12 +299,17 @@ def output(value: dict[str, Any]) -> str:
 def managed_records(server: Path) -> dict[str, Any]:
     """Only fixed owner/validation locations; no world contents or property text."""
     if server.parent.parent.name != "worlds":
-        return {"state": "not_applicable"}
-    parent = server.parent
-    paths = {
-        "owner": parent.parent / (parent.name + ".owner.json"),
-        "validated": parent / "validated.json",
-    }
+        if server.name != "server" or not server.parent.name.startswith("game-"):
+            return {"state": "not_applicable"}
+        paths = {
+            "initial_owner": server.parent.parent / (server.parent.name + ".initial-owner.json")
+        }
+    else:
+        parent = server.parent
+        paths = {
+            "owner": parent.parent / (parent.name + ".owner.json"),
+            "validated": parent / "validated.json",
+        }
     result: dict[str, Any] = {}
     for label, path in paths.items():
         if not path.exists() and not path.is_symlink():
@@ -341,6 +346,11 @@ def managed_records(server: Path) -> dict[str, Any]:
             if key in value:
                 encoded = json.dumps(value[key], sort_keys=True, separators=(",", ":")) + "\n"
                 selected[key + "_sha256"] = hashlib.sha256(encoded.encode()).hexdigest()
+        if label == "initial_owner":
+            plan = value.get("plan", {})
+            selected["game_id"] = plan.get("game_id")
+            selected["data_source"] = plan.get("data_source")
+            selected["creation_sha256"] = summary_hash(plan.get("creation"))
         result[label] = {
             "state": "read",
             "path": str(path),
@@ -350,7 +360,8 @@ def managed_records(server: Path) -> dict[str, Any]:
             "sha256": imported.sha(path),
             "record": selected,
         }
-    result["staging"] = sorted(p.name for p in parent.glob("staging-*"))[:8]
+    if server.parent.parent.name == "worlds":
+        result["staging"] = sorted(p.name for p in server.parent.glob("staging-*"))[:8]
     return result
 
 

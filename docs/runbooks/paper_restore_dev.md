@@ -229,6 +229,11 @@ Qualify exact generated python3 -c on Python 3.9 and current repository Python,
 including reassembly. Keep test fixtures and failed qualifications in new roots.
 Commit/push, required CI and a clean execution worktree precede real host work.
 No supplemental reader is installed as a host helper or changes validator authority.
+The existing target-content reader also reports the fixed initial IMPORT owner:
+root/root, mode 0600, single regular file, phase, Game/path, complete plan digest
+and creation digest. Compare these against the current Game and recorded plan;
+absence or mismatch does not authorize inventing an owner or legacy current_id.
+Creation contents are hashed rather than expanded into routine output.
 
 The first new ordinary maintenance (at most 7200 seconds) checks both retained
 worlds, all identities, other Games and the retained Vanilla world. Original must
