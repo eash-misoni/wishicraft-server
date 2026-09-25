@@ -1,6 +1,6 @@
 # Planned host maintenance
 
-> Current coverage follow-up (2026-09-25): [two DLQ alarms and Web Errors SNS actions](monitoring_coverage.md). All four are always-notify; the three maintenance suppression paths are unchanged. Historical no-notification evidence below remains the record of its original date. Dev qualification is tracked separately in that runbook.
+> Current coverage follow-up (2026-09-25): [two DLQ alarms and Web Errors SNS actions](monitoring_coverage.md). All four are always-notify; the three maintenance suppression paths are unchanged. Historical no-notification evidence below remains the record of its original date. The linked runbook records dev release, two successful SNS action tests and user-confirmed email receipt; this does not alter the historical D-111 proof below.
 
 D-111 Accepted / dev deployed and qualified, 2026-09-22. Execution evidence is below.
 [Architecture, exact 45-alarm classification and deployment contract](../reviews/planned_host_maintenance.md).

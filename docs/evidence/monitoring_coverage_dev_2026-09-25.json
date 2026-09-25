@@ -1,0 +1,1234 @@
+{
+  "baseline_commit": "f938ba6cdeea74f91e878a687df7e6044b33e227",
+  "implementation_commit": "e233e9f2fe6ac8d7d0aeb722886f7b273398013f",
+  "account": "385526546525",
+  "region": "ap-northeast-1",
+  "profile": "wishicraft-dev",
+  "stage": "dev",
+  "system": "wishicraft-main",
+  "worktree": {
+    "path": "/private/tmp/wishicraft-monitoring-release-e233e9f",
+    "status": "clean detached implementation commit; original dirty files excluded",
+    "bytecode_in_assets": false,
+    "all_artifact_file_hash_manifest_sha256": "246d8a64f9e76dd77116c54f0a7263242f8188b4b405eb9601b65ad597df2667",
+    "assets": {
+      "cp": {
+        "manifest_sha256": "4a8c875983c4e3487243f22e3f213f2d3852d3a9a8930415ca43e66187c2430e",
+        "file_asset_hashes": [
+          "5bb627095159357a3c259034e3feefc9fc6d9eca0dbdea9e45b1f58ac5f17a99",
+          "eb5f6c089636a7bc6b30d5a5060bd8ddb153a2ee96a1a319d3e1abad00ade9aa",
+          "9046b96445aafad3ad9ba6ad5790ad1a482f593552788456f9a469a2b19f89bb"
+        ]
+      },
+      "web": {
+        "manifest_sha256": "eefbcaf9aec8abe55cdada25ea0c4b1f3319504d769baa0e8bcb0029a83fa14d",
+        "file_asset_hashes": [
+          "1b17d29603ac8a13e3099719a92ba7f2de773aaee8b461479e594e5e0d974fcd",
+          "dddaf94e1a136745ff7c87aa288e8c2f325c0996c5bb279d4644495ee662306b"
+        ]
+      }
+    }
+  },
+  "implementation_ci": [
+    {
+      "conclusion": "success",
+      "databaseId": 36097378895,
+      "name": "Paper same-runtime import integration",
+      "status": "completed",
+      "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/36097378895"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 36097378888,
+      "name": "NeoForge runtime integration",
+      "status": "completed",
+      "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/36097378888"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 36097378887,
+      "name": "CI",
+      "status": "completed",
+      "url": "https://github.com/eash-misoni/wishicraft-server/actions/runs/36097378887"
+    }
+  ],
+  "changesets": {
+    "cp": {
+      "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/monitoring-coverage-cp-e233e9f/e986bbd3-60f3-4f7f-a432-e96cf1019a24",
+      "views": {
+        "False": {
+          "pages": 1,
+          "changes": {
+            "DiscordMessageDlqVisibleAlarmD87DA00F": "Add",
+            "StatusExecutorDlqVisibleAlarm1D44CD44": "Add"
+          },
+          "sha256": "b9461f63f077db231c0d26539c5a86ee266eafef7d0899b0dde01a89613706cf"
+        },
+        "True": {
+          "pages": 1,
+          "changes": {
+            "DiscordMessageDlqVisibleAlarmD87DA00F": "Add",
+            "StatusExecutorDlqVisibleAlarm1D44CD44": "Add",
+            "BackupStateMachine": "Modify",
+            "ResetWorkflow": "Modify",
+            "StartStateMachine": "Modify",
+            "StopStateMachine": "Modify",
+            "SwitchWorkflow": "Modify"
+          },
+          "sha256": "060e370626b376e57efcd21fd84501e4a12106398d9dd68301f5e469da8ca012"
+        }
+      },
+      "template_sha256": "9046b96445aafad3ad9ba6ad5790ad1a482f593552788456f9a469a2b19f89bb",
+      "parameters_sha256": "471ac6445235139e0565926e16028b3d0aeeb7597f04bf245a9619efe19c0a31"
+    },
+    "web": {
+      "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/monitoring-coverage-web-e233e9f/7543299d-6c68-41b6-a3a4-cbc366fe2d42",
+      "views": {
+        "False": {
+          "pages": 1,
+          "changes": {
+            "AuthErrors8D0EDC3D": "Modify",
+            "WebErrorsC4BB781A": "Modify",
+            "AuthC256A5EC": "Modify",
+            "Web3C8945DB": "Modify",
+            "WebApiGETRootIntegrationPermissionDA3D8AB6": "Modify",
+            "WebApiANYproxyWebIntegrationPermissionAB5E7AE3": "Modify",
+            "WebApiANYauthproxyAuthIntegration420BCBE5": "Modify",
+            "WebApiANYproxyWebIntegration241ABDD6": "Modify",
+            "WebApiANYauthproxyAuthIntegrationPermission542529A2": "Modify",
+            "WebApiGETRootIntegration18E512EF": "Modify"
+          },
+          "sha256": "dd1d29f89c2b951be185b730ef430d973d005d5357d70386916264e773ab19de"
+        },
+        "True": {
+          "pages": 1,
+          "changes": {
+            "AuthErrors8D0EDC3D": "Modify",
+            "WebErrorsC4BB781A": "Modify",
+            "AuthC256A5EC": "Modify",
+            "Web3C8945DB": "Modify"
+          },
+          "sha256": "23cf90ca942310d6a36b6c613d7b2f1d3729cbe0c9a3d94889d924c5f63655d9"
+        }
+      },
+      "template_sha256": "dddaf94e1a136745ff7c87aa288e8c2f325c0996c5bb279d4644495ee662306b",
+      "parameters_sha256": "471ac6445235139e0565926e16028b3d0aeeb7597f04bf245a9619efe19c0a31"
+    },
+    "authorization": {
+      "kind": "one-off explicit user exception for exact CP ChangeSet ARN",
+      "case_d_condition_3": "NOT SATISFIED: no evidence of updated dependency",
+      "cause": "unknown; not classified as dependency propagation",
+      "permanent_guard_change": false
+    }
+  },
+  "release_results": {
+    "cp": {
+      "status": "UPDATE_COMPLETE",
+      "execution": "EXECUTE_COMPLETE",
+      "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/monitoring-coverage-cp-e233e9f/e986bbd3-60f3-4f7f-a432-e96cf1019a24",
+      "pending_changesets": 0,
+      "resource_event_ids": [
+        "DiscordMessageDlqVisibleAlarmD87DA00F",
+        "StatusExecutorDlqVisibleAlarm1D44CD44"
+      ],
+      "state_machine_events": 0
+    },
+    "web": {
+      "status": "UPDATE_COMPLETE",
+      "execution": "EXECUTE_COMPLETE",
+      "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/monitoring-coverage-web-e233e9f/7543299d-6c68-41b6-a3a4-cbc366fe2d42",
+      "pending_changesets": 0,
+      "resource_event_ids": [
+        "AuthC256A5EC",
+        "AuthErrors8D0EDC3D",
+        "Web3C8945DB",
+        "WebErrorsC4BB781A"
+      ],
+      "state_machine_events": 0
+    }
+  },
+  "state_machines": {
+    "preflight": {
+      "StartStateMachine": {
+        "raw_properties_identical": true,
+        "resolved_equal_live": true,
+        "canonical_sha256": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8",
+        "role_type_name_logging_tracing_equal": true,
+        "physical_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+        "revision": "not returned by DescribeStateMachine"
+      },
+      "StopStateMachine": {
+        "raw_properties_identical": true,
+        "resolved_equal_live": true,
+        "canonical_sha256": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f",
+        "role_type_name_logging_tracing_equal": true,
+        "physical_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+        "revision": "1c2ff03e-9c99-4268-8592-e621c9709308"
+      },
+      "BackupStateMachine": {
+        "raw_properties_identical": true,
+        "resolved_equal_live": true,
+        "canonical_sha256": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213",
+        "role_type_name_logging_tracing_equal": true,
+        "physical_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+        "revision": "abd31155-2ef5-46b7-8473-76c160542e4d"
+      },
+      "RetentionStateMachine": {
+        "raw_properties_identical": true,
+        "resolved_equal_live": true,
+        "canonical_sha256": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e",
+        "role_type_name_logging_tracing_equal": true,
+        "physical_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+        "revision": "not returned by DescribeStateMachine"
+      },
+      "SwitchWorkflow": {
+        "raw_properties_identical": true,
+        "resolved_equal_live": true,
+        "canonical_sha256": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2",
+        "role_type_name_logging_tracing_equal": true,
+        "physical_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+        "revision": "not returned by DescribeStateMachine"
+      },
+      "ResetWorkflow": {
+        "raw_properties_identical": true,
+        "resolved_equal_live": true,
+        "canonical_sha256": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce",
+        "role_type_name_logging_tracing_equal": true,
+        "physical_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+        "revision": "not returned by DescribeStateMachine"
+      }
+    },
+    "postflight": {
+      "StartStateMachine-live": {
+        "configuration_unchanged": true,
+        "revision_before": "not returned",
+        "revision_after": "not returned"
+      },
+      "SwitchWorkflow-live": {
+        "configuration_unchanged": true,
+        "revision_before": "not returned",
+        "revision_after": "not returned"
+      },
+      "ResetWorkflow-live": {
+        "configuration_unchanged": true,
+        "revision_before": "not returned",
+        "revision_after": "not returned"
+      },
+      "RetentionStateMachine-live": {
+        "configuration_unchanged": true,
+        "revision_before": "not returned",
+        "revision_after": "not returned"
+      },
+      "BackupStateMachine-live": {
+        "configuration_unchanged": true,
+        "revision_before": "abd31155-2ef5-46b7-8473-76c160542e4d",
+        "revision_after": "abd31155-2ef5-46b7-8473-76c160542e4d"
+      },
+      "StopStateMachine-live": {
+        "configuration_unchanged": true,
+        "revision_before": "1c2ff03e-9c99-4268-8592-e621c9709308",
+        "revision_after": "1c2ff03e-9c99-4268-8592-e621c9709308"
+      }
+    },
+    "identities": {
+      "ReconcileFunction30829CB6": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+      "StartTaskFunction8C564C4A": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+      "StartWorkflowRoleA360C95C": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-StartWorkflowRoleA360C95C-5Gthd08pXog9",
+      "StopTaskFunction11473A8C": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+      "StopWorkflowRole2C1543AC": "arn:aws:iam::385526546525:role/WishicraftControlPlaneStac-StopWorkflowRole2C1543AC-mkRlbbJIBLjV",
+      "BackupTaskFunctionA44639DC": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+      "BackupWorkflowRoleD9C29485": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-BackupWorkflowRoleD9C2948-9xDR3CHieV10",
+      "RetentionTaskFunction9F285CE4": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task",
+      "RetentionWorkflowRole90B89C64": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-RetentionWorkflowRole90B8-3nnywDAwMfE9",
+      "SwitchWorkflowRoleB026EAE7": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6"
+    },
+    "cp_lambda_configurations": {
+      "AdmissionFunction23082B67": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-admission",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "f9bd4110e492d40990d115c486492d4b0672c0cb28c7e66af54e84acfdfa6856"
+      },
+      "AutoStopEvaluatorFunctionF85F8B50": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-auto-stop-evaluator",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "d570cdb8618c48a044306a65cabf3f7912a133cba32259c1ac3e3e02eba618cb"
+      },
+      "BackupTaskFunctionA44639DC": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "dde56e605102b2138a40ee6a486f0f26e80f30a27b6e0c3a35140258fe97ca7c"
+      },
+      "DiscordCommandFunction7D25102A": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-command",
+        "code_sha256": "pyUX6M0HRdgFInIKkoCV6fJ6F9fkbY1pqEm6gYGR91o=",
+        "configuration_sha256": "a5724e684a9aff0a8a447bac9d26038ef7bb9ea3aa86435aee77fd64273675b5"
+      },
+      "DiscordMessageFunction78FA388B": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-message",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "a6de75bec376db3e2065e42eea3fe0414111293edd0db86dc753d987530605fe"
+      },
+      "MonitoringObserverFunction584DA7C7": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-monitoring-observer",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "216adb5439c21d788bd02a63ac02b6b8cbb210e8997225b7b70452456f1c1013"
+      },
+      "ReconcileFunction30829CB6": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "1ccaba9dd94bd1f37ae0e4d8cd5fe1a7530a90c494c3c86eb147e311f3016c48"
+      },
+      "RetentionTaskFunction9F285CE4": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "2ead8a9bf8c199c867583308982d08643fbcb9f250cbd4f8d71d05b1f049467e"
+      },
+      "StartTaskFunction8C564C4A": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "1a5e7d9091f88506120586ae286ddace9e05e5b9ccc8c0f821f39104b7aa40ac"
+      },
+      "StatusExecutorFunction6E5C9869": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-status-executor",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "6c66b115b15868f4c7836e08e05e2b4fe28ffc68c2dc5e41250cc4c591d49849"
+      },
+      "StopTaskFunction11473A8C": {
+        "arn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+        "code_sha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+        "configuration_sha256": "7cc3992dd3383b6d28901f46af7bc5d4a78e2acc19124668538768c4f4e7df14"
+      }
+    },
+    "comparison": "all six raw Properties, resolved/live/canonical ASL, Role/logging/tracing/type/name/Tags and reference identities unchanged",
+    "case_d_condition_3": "not satisfied: no evidence of updated dependency",
+    "authorization": "separate explicit one-off user approval for exact CP ChangeSet; no permanent guard relaxation",
+    "internal_cause": "unknown; not classified as dependency propagation",
+    "cloudformation_state_machine_events": 0,
+    "update_state_machine_api_absence": "not claimed; CloudTrail API-call absence not proved"
+  },
+  "web_code_review": {
+    "AuthC256A5EC": {
+      "added": [
+        "wishicraft/artifacts/restore_host.py",
+        "wishicraft/artifacts/restore_reader.py",
+        "wishicraft/artifacts/restore_tree.py",
+        "wishicraft/restore_operator.py",
+        "wishicraft/restore_reader_payload.py",
+        "wishicraft/restore_repository.py",
+        "wishicraft/restore_source.py",
+        "wishicraft/restore_volume.py"
+      ],
+      "removed": [],
+      "changed": [
+        "wishicraft/artifacts/reset_worlds.py",
+        "wishicraft/artifacts/world_import.py",
+        "wishicraft/maintenance.py",
+        "wishicraft/maintenance_repository.py"
+      ],
+      "old_zip_sha256": "38a166c0eecd1cd22a2eb9f076802220b295067a4d14bd5957e57cfe1eaa6439",
+      "old_code_sha256": "OKFmwO7NHNIqLrnwdoAiILKVBnpNFL1ZV+V8/h6qZDk=",
+      "candidate_asset": "asset.1b17d29603ac8a13e3099719a92ba7f2de773aaee8b461479e594e5e0d974fcd"
+    },
+    "Web3C8945DB": {
+      "added": [
+        "wishicraft/artifacts/restore_host.py",
+        "wishicraft/artifacts/restore_reader.py",
+        "wishicraft/artifacts/restore_tree.py",
+        "wishicraft/restore_operator.py",
+        "wishicraft/restore_reader_payload.py",
+        "wishicraft/restore_repository.py",
+        "wishicraft/restore_source.py",
+        "wishicraft/restore_volume.py"
+      ],
+      "removed": [],
+      "changed": [
+        "wishicraft/artifacts/reset_worlds.py",
+        "wishicraft/artifacts/world_import.py",
+        "wishicraft/maintenance.py",
+        "wishicraft/maintenance_repository.py"
+      ],
+      "old_zip_sha256": "38a166c0eecd1cd22a2eb9f076802220b295067a4d14bd5957e57cfe1eaa6439",
+      "old_code_sha256": "OKFmwO7NHNIqLrnwdoAiILKVBnpNFL1ZV+V8/h6qZDk=",
+      "candidate_asset": "asset.1b17d29603ac8a13e3099719a92ba7f2de773aaee8b461479e594e5e0d974fcd"
+    }
+  },
+  "web_source_review": {
+    "all_changed_and_added_files_match_committed_source": true,
+    "web_auth_handler_operation_creation_bytes_unchanged": true,
+    "function_changes": {
+      "wishicraft/artifacts/reset_worlds.py": {
+        "changed_functions": [
+          "initialized"
+        ],
+        "added_functions": []
+      },
+      "wishicraft/artifacts/world_import.py": {
+        "changed_functions": [
+          "expected_level"
+        ],
+        "added_functions": []
+      },
+      "wishicraft/maintenance.py": {
+        "changed_functions": [],
+        "added_functions": [
+          "check_restore_lease"
+        ]
+      },
+      "wishicraft/maintenance_repository.py": {
+        "changed_functions": [
+          "transition"
+        ],
+        "added_functions": [
+          "check_restore_recovery"
+        ]
+      }
+    },
+    "disposition": "Existing full-source Web bundling necessarily includes previously committed RESTORE operator/host-only additions. Existing Web entrypoints and auth/OAuth are byte-identical; maintenance admission check and CREATE import validate are unchanged. No new handler or permission."
+  },
+  "web_code_readback": {
+    "AuthC256A5EC": {
+      "added": [],
+      "removed": [],
+      "changed": [],
+      "old_zip_sha256": "3c3de23cd5904784592218073c8d19d8a08fc1a01cbaa51a443ac09385215e83",
+      "old_code_sha256": "PD3iPNWQR4RZIhgHPI0Z2KCPwaAcuqUaRDrAk4UhXoM=",
+      "candidate_asset": "asset.1b17d29603ac8a13e3099719a92ba7f2de773aaee8b461479e594e5e0d974fcd"
+    },
+    "Web3C8945DB": {
+      "added": [],
+      "removed": [],
+      "changed": [],
+      "old_zip_sha256": "3c3de23cd5904784592218073c8d19d8a08fc1a01cbaa51a443ac09385215e83",
+      "old_code_sha256": "PD3iPNWQR4RZIhgHPI0Z2KCPwaAcuqUaRDrAk4UhXoM=",
+      "candidate_asset": "asset.1b17d29603ac8a13e3099719a92ba7f2de773aaee8b461479e594e5e0d974fcd"
+    }
+  },
+  "alarm_readback": {
+    "total": 51,
+    "metric": 48,
+    "composite": 3,
+    "unaffected_baseline_alarms_exact": 47,
+    "web_evaluations_and_physical_ids_preserved": 2,
+    "new_dlq_exact": 2,
+    "policy_queue_subscription_preserved": true,
+    "stack_templates_equal_assembly": true,
+    "non_ok": {}
+  },
+  "targets": [
+    {
+      "AlarmName": "WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT",
+      "AlarmArn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT",
+      "AlarmConfigurationUpdatedTimestamp": "2026-09-25 14:34:35.273000+09:00",
+      "ActionsEnabled": true,
+      "OKActions": [],
+      "AlarmActions": [
+        "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      ],
+      "InsufficientDataActions": [],
+      "StateValue": "OK",
+      "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+      "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-13T06:46:01.725+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-13T06:41:00.000+0000\"}]}",
+      "StateUpdatedTimestamp": "2026-09-13 15:46:01.727000+09:00",
+      "MetricName": "Errors",
+      "Namespace": "AWS/Lambda",
+      "Statistic": "Sum",
+      "Dimensions": [
+        {
+          "Name": "FunctionName",
+          "Value": "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd"
+        }
+      ],
+      "Period": 300,
+      "EvaluationPeriods": 1,
+      "Threshold": 1.0,
+      "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+      "TreatMissingData": "notBreaching",
+      "StateTransitionedTimestamp": "2026-09-13 15:46:01.727000+09:00"
+    },
+    {
+      "AlarmName": "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+      "AlarmArn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+      "AlarmConfigurationUpdatedTimestamp": "2026-09-25 14:34:35.303000+09:00",
+      "ActionsEnabled": true,
+      "OKActions": [],
+      "AlarmActions": [
+        "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      ],
+      "InsufficientDataActions": [],
+      "StateValue": "OK",
+      "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+      "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-25T05:38:28.776+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-25T05:33:00.000+0000\"}]}",
+      "StateUpdatedTimestamp": "2026-09-25 14:38:28.777000+09:00",
+      "MetricName": "Errors",
+      "Namespace": "AWS/Lambda",
+      "Statistic": "Sum",
+      "Dimensions": [
+        {
+          "Name": "FunctionName",
+          "Value": "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp"
+        }
+      ],
+      "Period": 300,
+      "EvaluationPeriods": 1,
+      "Threshold": 1.0,
+      "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+      "TreatMissingData": "notBreaching",
+      "StateTransitionedTimestamp": "2026-09-25 14:38:28.777000+09:00"
+    },
+    {
+      "AlarmName": "wc-dev-discordmessagedlqvisiblealarm",
+      "AlarmArn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:wc-dev-discordmessagedlqvisiblealarm",
+      "AlarmDescription": "DiscordMessageDlq: pending visible DLQ messages; always notify. First read docs/runbooks/monitoring_coverage.md#dlq-response",
+      "AlarmConfigurationUpdatedTimestamp": "2026-09-25 14:32:51.250000+09:00",
+      "ActionsEnabled": true,
+      "OKActions": [],
+      "AlarmActions": [
+        "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      ],
+      "InsufficientDataActions": [],
+      "StateValue": "OK",
+      "StateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (25/09/26 05:30:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+      "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-25T05:36:08.858+0000\",\"startDate\":\"2026-09-25T05:30:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-25T05:30:00.000+0000\",\"sampleCount\":5.0,\"value\":0.0}]}",
+      "StateUpdatedTimestamp": "2026-09-25 14:36:08.860000+09:00",
+      "MetricName": "ApproximateNumberOfMessagesVisible",
+      "Namespace": "AWS/SQS",
+      "Statistic": "Maximum",
+      "Dimensions": [
+        {
+          "Name": "QueueName",
+          "Value": "wc-dev-discord-message-dlq"
+        }
+      ],
+      "Period": 300,
+      "EvaluationPeriods": 1,
+      "DatapointsToAlarm": 1,
+      "Threshold": 1.0,
+      "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+      "TreatMissingData": "notBreaching",
+      "StateTransitionedTimestamp": "2026-09-25 14:36:08.860000+09:00"
+    },
+    {
+      "AlarmName": "wc-dev-statusexecutordlqvisiblealarm",
+      "AlarmArn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:wc-dev-statusexecutordlqvisiblealarm",
+      "AlarmDescription": "StatusExecutorDlq: pending visible DLQ messages; always notify. First read docs/runbooks/monitoring_coverage.md#dlq-response",
+      "AlarmConfigurationUpdatedTimestamp": "2026-09-25 14:32:51.298000+09:00",
+      "ActionsEnabled": true,
+      "OKActions": [],
+      "AlarmActions": [
+        "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      ],
+      "InsufficientDataActions": [],
+      "StateValue": "OK",
+      "StateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (25/09/26 05:27:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+      "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-25T05:33:02.326+0000\",\"startDate\":\"2026-09-25T05:27:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-25T05:27:00.000+0000\",\"sampleCount\":5.0,\"value\":0.0}]}",
+      "StateUpdatedTimestamp": "2026-09-25 14:33:02.329000+09:00",
+      "MetricName": "ApproximateNumberOfMessagesVisible",
+      "Namespace": "AWS/SQS",
+      "Statistic": "Maximum",
+      "Dimensions": [
+        {
+          "Name": "QueueName",
+          "Value": "wc-dev-status-executor-dlq"
+        }
+      ],
+      "Period": 300,
+      "EvaluationPeriods": 1,
+      "DatapointsToAlarm": 1,
+      "Threshold": 1.0,
+      "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+      "TreatMissingData": "notBreaching",
+      "StateTransitionedTimestamp": "2026-09-25 14:33:02.329000+09:00"
+    }
+  ],
+  "alarm_configuration_hashes": {
+    "WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT": {
+      "before": "3d19e049fe95012302263d6aec2edfaa081266951b1b3af99f7ec628ad538f4c",
+      "after": "ac663902145b4c30483d85e800ac6adc1f36c65a24135065cb18fc1fa36549a2",
+      "final_state": "OK"
+    },
+    "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj": {
+      "before": "ae561617a0a8d25a8b011d77767323127b35a62b1ee48f65f2ca25268dd875aa",
+      "after": "ca1e648c9cc3fe68a8b17406fce3a4f5c62a726a72b2304d4664ecc2be8caa64",
+      "final_state": "OK"
+    },
+    "wc-dev-admissionfunctionerrorsalarm": {
+      "before": "23d4ae067e4365c1b91135536259fac08c8d118b5b5ba42bd904c038bbaa50c6",
+      "after": "23d4ae067e4365c1b91135536259fac08c8d118b5b5ba42bd904c038bbaa50c6",
+      "final_state": "OK"
+    },
+    "wc-dev-admissionfunctionthrottlesalarm": {
+      "before": "ecaca402426bf03dd262c98018b59c7e8550e81f3de8d3b6d187e69012702049",
+      "after": "ecaca402426bf03dd262c98018b59c7e8550e81f3de8d3b6d187e69012702049",
+      "final_state": "OK"
+    },
+    "wc-dev-auto-stop-evaluator-silence": {
+      "before": "b6b293d85886892fa3cb83a1fca72c960b9dccc28b0c9934e128d45202641e6c",
+      "after": "b6b293d85886892fa3cb83a1fca72c960b9dccc28b0c9934e128d45202641e6c",
+      "final_state": "OK"
+    },
+    "wc-dev-autostopevaluatorfunctionerrorsalarm": {
+      "before": "fa257342947bb419fc5a6a44369e1593cf3a3de8e7fbe23fed06414b24bd7a47",
+      "after": "fa257342947bb419fc5a6a44369e1593cf3a3de8e7fbe23fed06414b24bd7a47",
+      "final_state": "OK"
+    },
+    "wc-dev-autostopevaluatorfunctionthrottlesalarm": {
+      "before": "2b775cf480d55f1ad2c4d3c74f00fa6a00b2a1036870a3ce4ba8ae40c878d562",
+      "after": "2b775cf480d55f1ad2c4d3c74f00fa6a00b2a1036870a3ce4ba8ae40c878d562",
+      "final_state": "OK"
+    },
+    "wc-dev-autostopwarningblockedalarm": {
+      "before": "ec0695296224d6a12236874cdd8d10b0d5530e44aa150d2e7e58a36e21de06c1",
+      "after": "ec0695296224d6a12236874cdd8d10b0d5530e44aa150d2e7e58a36e21de06c1",
+      "final_state": "OK"
+    },
+    "wc-dev-backuptaskfunctionerrorsalarm": {
+      "before": "7ca52b5a97b4c798201d85a536ede11843f85d05aa96dc6e0e530fcb4b666c43",
+      "after": "7ca52b5a97b4c798201d85a536ede11843f85d05aa96dc6e0e530fcb4b666c43",
+      "final_state": "OK"
+    },
+    "wc-dev-backuptaskfunctionthrottlesalarm": {
+      "before": "717120f4755b54dee8c770770e514ca88aae3a64e6fc1ef4ff03b1bf81da27c3",
+      "after": "717120f4755b54dee8c770770e514ca88aae3a64e6fc1ef4ff03b1bf81da27c3",
+      "final_state": "OK"
+    },
+    "wc-dev-backupworkflowfailurealarm": {
+      "before": "797515b66c5988a2040470ffbe1c683abb5ac557c16d995d2fbe922cd7b99301",
+      "after": "797515b66c5988a2040470ffbe1c683abb5ac557c16d995d2fbe922cd7b99301",
+      "final_state": "OK"
+    },
+    "wc-dev-datafilesystemobservationunknownalarm": {
+      "before": "a61e3d331362f837e76cbb5681d0578d5f7dbbd0563c8f8ea1843842d62a57d4",
+      "after": "a61e3d331362f837e76cbb5681d0578d5f7dbbd0563c8f8ea1843842d62a57d4",
+      "final_state": "OK"
+    },
+    "wc-dev-datafilesystemusagehighalarm": {
+      "before": "fb59993652a86e9512fd9a2b5e5f176bc890c10c2f09063bdb65d44e4832bce9",
+      "after": "fb59993652a86e9512fd9a2b5e5f176bc890c10c2f09063bdb65d44e4832bce9",
+      "final_state": "OK"
+    },
+    "wc-dev-desiredactualdivergencealarm": {
+      "before": "5311a31a25e0fddc714e43da215214922b7d4a64f41d34da4e9fc1a18218b49e",
+      "after": "5311a31a25e0fddc714e43da215214922b7d4a64f41d34da4e9fc1a18218b49e",
+      "final_state": "OK"
+    },
+    "wc-dev-desiredrunningnotreadyalarm": {
+      "before": "e5ee37ef420b24cc6b9ab9eac03381f20bc660059351f5e86178d6c95dfcfacf",
+      "after": "e5ee37ef420b24cc6b9ab9eac03381f20bc660059351f5e86178d6c95dfcfacf",
+      "final_state": "OK"
+    },
+    "wc-dev-desiredstoppedec2runningalarm": {
+      "before": "87b3062eff1e0db627b798236ab1ff8cce1714442caa58c24f8411290b841072",
+      "after": "87b3062eff1e0db627b798236ab1ff8cce1714442caa58c24f8411290b841072",
+      "final_state": "OK"
+    },
+    "wc-dev-discordcommandfunctionerrorsalarm": {
+      "before": "8a8ff004f947902e9c19b5643b0535f93b8244e6c69bb7b9f1bce7310cc3d426",
+      "after": "8a8ff004f947902e9c19b5643b0535f93b8244e6c69bb7b9f1bce7310cc3d426",
+      "final_state": "OK"
+    },
+    "wc-dev-discordcommandfunctionthrottlesalarm": {
+      "before": "9cb6692af1ff3937a66481002c25b16892c6ef8148a73a2319d40feeb4b2f7b2",
+      "after": "9cb6692af1ff3937a66481002c25b16892c6ef8148a73a2319d40feeb4b2f7b2",
+      "final_state": "OK"
+    },
+    "wc-dev-discordmessagedlqvisiblealarm": {
+      "before": "new alarm",
+      "after": "85c10c3fe0cfbb4ea114a8fa99ee0b48d0450cd68ea75df10901e6441ef2cf8b",
+      "final_state": "OK"
+    },
+    "wc-dev-discordmessagefunctionerrorsalarm": {
+      "before": "1b5a5aba3c9d90365fe01b23d554033bf0e430a938384b4c7890dd47a5c3ea24",
+      "after": "1b5a5aba3c9d90365fe01b23d554033bf0e430a938384b4c7890dd47a5c3ea24",
+      "final_state": "OK"
+    },
+    "wc-dev-discordmessagefunctionthrottlesalarm": {
+      "before": "a8da90fc6a78d715cf9ae2786c050bbc5a589b9f263ea96fbebf9a8848c3a925",
+      "after": "a8da90fc6a78d715cf9ae2786c050bbc5a589b9f263ea96fbebf9a8848c3a925",
+      "final_state": "OK"
+    },
+    "wc-dev-expiredoperationlockalarm": {
+      "before": "96b83db741657fec014410a40ded88210e30085c46eff67de2facfea7b513b0a",
+      "after": "96b83db741657fec014410a40ded88210e30085c46eff67de2facfea7b513b0a",
+      "final_state": "OK"
+    },
+    "wc-dev-maintenance-suppressor": {
+      "before": "cbb3b11ae35be2fe8abd678d4b05c7f68032c304f9df127ceb321c0ca0e6ff7a",
+      "after": "cbb3b11ae35be2fe8abd678d4b05c7f68032c304f9df127ceb321c0ca0e6ff7a",
+      "final_state": "OK"
+    },
+    "wc-dev-monitoringobservationunknownalarm": {
+      "before": "7185330c09d72bba88fd05e2436583a5b061ba1093da7cc5cc27485f0c762f54",
+      "after": "7185330c09d72bba88fd05e2436583a5b061ba1093da7cc5cc27485f0c762f54",
+      "final_state": "OK"
+    },
+    "wc-dev-monitoringobserverfunctionerrorsalarm": {
+      "before": "00b7ea819c2e0496bca5a8fb170475ca6358ae8bda7843926b74102303b6ce92",
+      "after": "00b7ea819c2e0496bca5a8fb170475ca6358ae8bda7843926b74102303b6ce92",
+      "final_state": "OK"
+    },
+    "wc-dev-monitoringobserverfunctionthrottlesalarm": {
+      "before": "6d911f2fbdcd0f35499dcbbf443d68c3f4047956f5d8d34abf71dd638fdab85d",
+      "after": "6d911f2fbdcd0f35499dcbbf443d68c3f4047956f5d8d34abf71dd638fdab85d",
+      "final_state": "OK"
+    },
+    "wc-dev-reconcilefunctionerrorsalarm": {
+      "before": "c504319c7c46e77c5cf1e545c0755552a01794233b23959826906e82cbb015db",
+      "after": "c504319c7c46e77c5cf1e545c0755552a01794233b23959826906e82cbb015db",
+      "final_state": "OK"
+    },
+    "wc-dev-reconcilefunctionthrottlesalarm": {
+      "before": "9e0756a1df5dad936e39982aae999ecc2b77b7901fe1dcad3405aa5bc19d2bff",
+      "after": "9e0756a1df5dad936e39982aae999ecc2b77b7901fe1dcad3405aa5bc19d2bff",
+      "final_state": "OK"
+    },
+    "wc-dev-resetworkflowfailurealarm": {
+      "before": "dd2934aa75c7b1a60d416525e0102f6a26cab1b3587cadbe9af14724a5ede988",
+      "after": "dd2934aa75c7b1a60d416525e0102f6a26cab1b3587cadbe9af14724a5ede988",
+      "final_state": "OK"
+    },
+    "wc-dev-retentiontaskfunctionerrorsalarm": {
+      "before": "d5d9f8769d437a880007362fc2e3197450cb33fc844a0b160d21ca7e36a3d03b",
+      "after": "d5d9f8769d437a880007362fc2e3197450cb33fc844a0b160d21ca7e36a3d03b",
+      "final_state": "OK"
+    },
+    "wc-dev-retentiontaskfunctionthrottlesalarm": {
+      "before": "424b35c86a5f52191e12baac21aa734360309e387443e50d99f9ed7e681ff8c3",
+      "after": "424b35c86a5f52191e12baac21aa734360309e387443e50d99f9ed7e681ff8c3",
+      "final_state": "OK"
+    },
+    "wc-dev-retentionworkflowfailurealarm": {
+      "before": "9c272662f39356aa2c0f2b65ab8b19391656ed988fb87269bb950a97fe263d1d",
+      "after": "9c272662f39356aa2c0f2b65ab8b19391656ed988fb87269bb950a97fe263d1d",
+      "final_state": "OK"
+    },
+    "wc-dev-runtimeheartbeatunavailablealarm": {
+      "before": "b2b2628da47511001300c7be756f73aaf93524dc52a1895f5632627f6c2dc90f",
+      "after": "b2b2628da47511001300c7be756f73aaf93524dc52a1895f5632627f6c2dc90f",
+      "final_state": "OK"
+    },
+    "wc-dev-runtimeidentitymismatchalarm": {
+      "before": "82e50a9825f3b17d2dd024f9e18e8b64cc363a37024b461b93a0da0357712966",
+      "after": "82e50a9825f3b17d2dd024f9e18e8b64cc363a37024b461b93a0da0357712966",
+      "final_state": "OK"
+    },
+    "wc-dev-runtimeobservationunknownalarm": {
+      "before": "622099a8e83bad27862946d639d557a256a3f1e7d531264a9358b2e329ed1c78",
+      "after": "622099a8e83bad27862946d639d557a256a3f1e7d531264a9358b2e329ed1c78",
+      "final_state": "OK"
+    },
+    "wc-dev-scheduledstopcancelledalarm": {
+      "before": "241ab496beda9952a76605167f5903c7ae3e817a50a1133bb7fb5ff4f9048525",
+      "after": "241ab496beda9952a76605167f5903c7ae3e817a50a1133bb7fb5ff4f9048525",
+      "final_state": "OK"
+    },
+    "wc-dev-starttaskfunctionerrorsalarm": {
+      "before": "fe00e07616c831dc9f02f94fdb5e03a170c780f132dc1b579b5572fbb2d6f29d",
+      "after": "fe00e07616c831dc9f02f94fdb5e03a170c780f132dc1b579b5572fbb2d6f29d",
+      "final_state": "OK"
+    },
+    "wc-dev-starttaskfunctionthrottlesalarm": {
+      "before": "5a51584cf1d5cac0d3f2f83a37a978c473706204bb3244d6f742e2c2435b76e2",
+      "after": "5a51584cf1d5cac0d3f2f83a37a978c473706204bb3244d6f742e2c2435b76e2",
+      "final_state": "OK"
+    },
+    "wc-dev-startworkflowfailurealarm": {
+      "before": "ccd4045f8412237c61e8c96ea2e0695d79d5de0cc572ad2b8a513aab3d1f4c9d",
+      "after": "ccd4045f8412237c61e8c96ea2e0695d79d5de0cc572ad2b8a513aab3d1f4c9d",
+      "final_state": "OK"
+    },
+    "wc-dev-statusexecutordlqvisiblealarm": {
+      "before": "new alarm",
+      "after": "1a10e4b67170c8c38d12e73698d99e4d88b6d34e2fcd250d7d2e89daf24bf260",
+      "final_state": "OK"
+    },
+    "wc-dev-statusexecutorfunctionerrorsalarm": {
+      "before": "510eecbf9516df92f92a16a0102f50ab93a9662c6ad1547a34f0e111f4134c32",
+      "after": "510eecbf9516df92f92a16a0102f50ab93a9662c6ad1547a34f0e111f4134c32",
+      "final_state": "OK"
+    },
+    "wc-dev-statusexecutorfunctionthrottlesalarm": {
+      "before": "cfbebcda063ba074f2f03644196fdd9dcebb58992f7d73ec937446e5f8169baa",
+      "after": "cfbebcda063ba074f2f03644196fdd9dcebb58992f7d73ec937446e5f8169baa",
+      "final_state": "OK"
+    },
+    "wc-dev-stoptaskfunctionerrorsalarm": {
+      "before": "6a8591b51eb754299802acdf4798e3b23ba845a94865f467eb3ec49c8e7c0290",
+      "after": "6a8591b51eb754299802acdf4798e3b23ba845a94865f467eb3ec49c8e7c0290",
+      "final_state": "OK"
+    },
+    "wc-dev-stoptaskfunctionthrottlesalarm": {
+      "before": "4969049a1e317d26813000de009de2b157234c4aa7f7ed05696a5e6e4967f4fd",
+      "after": "4969049a1e317d26813000de009de2b157234c4aa7f7ed05696a5e6e4967f4fd",
+      "final_state": "OK"
+    },
+    "wc-dev-stopworkflowfailurealarm": {
+      "before": "860295d3d0d06b0cd26fe50aa6910e5a0c35550c6b6d43477a2383743eb6ba62",
+      "after": "860295d3d0d06b0cd26fe50aa6910e5a0c35550c6b6d43477a2383743eb6ba62",
+      "final_state": "OK"
+    },
+    "wc-dev-switchworkflowfailurealarm": {
+      "before": "88a3b772f0eafa504f187d73855c0521a7dbea1918ef336aeccc1203d9b2f93a",
+      "after": "88a3b772f0eafa504f187d73855c0521a7dbea1918ef336aeccc1203d9b2f93a",
+      "final_state": "OK"
+    },
+    "wc-dev-systemstateobservationstalealarm": {
+      "before": "e0f51509edfa16fa53f61e961078ca9ad0823e4883e0a5c16b1297981ed3c51d",
+      "after": "e0f51509edfa16fa53f61e961078ca9ad0823e4883e0a5c16b1297981ed3c51d",
+      "final_state": "OK"
+    },
+    "wc-dev-desiredactualdivergencealarm-notification": {
+      "before": "d0268be2ed62d6ae1913990fe0a514b9424d2988b63c2dd4baa4b91a1f2e3736",
+      "after": "d0268be2ed62d6ae1913990fe0a514b9424d2988b63c2dd4baa4b91a1f2e3736",
+      "final_state": "OK"
+    },
+    "wc-dev-desiredstoppedec2runningalarm-notification": {
+      "before": "b81657285f64026a2106c3b6bf485092b23e681ea8275baa0e6972bf4df782f1",
+      "after": "b81657285f64026a2106c3b6bf485092b23e681ea8275baa0e6972bf4df782f1",
+      "final_state": "OK"
+    },
+    "wc-dev-runtimeobservationunknownalarm-notification": {
+      "before": "7e153229248544835460ca2527f3012369385708a5056a0e727e865acc67371d",
+      "after": "7e153229248544835460ca2527f3012369385708a5056a0e727e865acc67371d",
+      "final_state": "OK"
+    },
+    "wc-dev-targetrunningtoolongalarm": {
+      "before": "0fd471451190a11df471ab3b82af7c1af5e3f92d0c5d6b45b6dbf91134d81074",
+      "after": "0fd471451190a11df471ab3b82af7c1af5e3f92d0c5d6b45b6dbf91134d81074",
+      "final_state": "OK"
+    }
+  },
+  "notification_path": {
+    "topic": "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+    "publisher": "cloudwatch.amazonaws.com",
+    "topic_policy_sha256": "282281d4cc97886403c200f77083dad887b1cbaf34910d6af76911f1aaa4a54c",
+    "kms_policy_sha256": "5acbc1214d5eeabdee0d133707cebe7d2b8c8339e4ddb51a4328d97f5db66e16",
+    "confirmed_email_subscriptions": 1,
+    "pending_subscriptions": 0,
+    "filter_or_redrive_policy": false,
+    "additional_iam_or_policy_changes": false,
+    "topic_key_subscription_unchanged": true,
+    "web_api_routes_integrations_permissions_unchanged": true
+  },
+  "notification_tests": [
+    {
+      "id": "mcov-dlq-20260925T053541Z",
+      "name": "wc-dev-discordmessagedlqvisiblealarm",
+      "arn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:wc-dev-discordmessagedlqvisiblealarm",
+      "state": "OK",
+      "time": "2026-09-25T05:35:41.740513+00:00",
+      "set_alarm_state_alarm_calls": 1,
+      "set_alarm_state_ok_calls": 0,
+      "before": {
+        "AlarmName": "wc-dev-discordmessagedlqvisiblealarm",
+        "AlarmArn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:wc-dev-discordmessagedlqvisiblealarm",
+        "AlarmDescription": "DiscordMessageDlq: pending visible DLQ messages; always notify. First read docs/runbooks/monitoring_coverage.md#dlq-response",
+        "AlarmConfigurationUpdatedTimestamp": "2026-09-25 14:32:51.250000+09:00",
+        "ActionsEnabled": true,
+        "OKActions": [],
+        "AlarmActions": [
+          "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+        ],
+        "InsufficientDataActions": [],
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (25/09/26 05:27:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-25T05:33:36.865+0000\",\"startDate\":\"2026-09-25T05:27:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-25T05:27:00.000+0000\",\"sampleCount\":5.0,\"value\":0.0}]}",
+        "StateUpdatedTimestamp": "2026-09-25 14:33:36.867000+09:00",
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Statistic": "Maximum",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": "wc-dev-discord-message-dlq"
+          }
+        ],
+        "Period": 300,
+        "EvaluationPeriods": 1,
+        "DatapointsToAlarm": 1,
+        "Threshold": 1.0,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching",
+        "StateTransitionedTimestamp": "2026-09-25 14:33:36.867000+09:00"
+      },
+      "after": {
+        "AlarmName": "wc-dev-discordmessagedlqvisiblealarm",
+        "AlarmArn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:wc-dev-discordmessagedlqvisiblealarm",
+        "AlarmDescription": "DiscordMessageDlq: pending visible DLQ messages; always notify. First read docs/runbooks/monitoring_coverage.md#dlq-response",
+        "AlarmConfigurationUpdatedTimestamp": "2026-09-25 14:32:51.250000+09:00",
+        "ActionsEnabled": true,
+        "OKActions": [],
+        "AlarmActions": [
+          "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+        ],
+        "InsufficientDataActions": [],
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (25/09/26 05:30:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+        "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-25T05:36:08.858+0000\",\"startDate\":\"2026-09-25T05:30:00.000+0000\",\"statistic\":\"Maximum\",\"period\":300,\"recentDatapoints\":[0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-25T05:30:00.000+0000\",\"sampleCount\":5.0,\"value\":0.0}]}",
+        "StateUpdatedTimestamp": "2026-09-25 14:36:08.860000+09:00",
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Statistic": "Maximum",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": "wc-dev-discord-message-dlq"
+          }
+        ],
+        "Period": 300,
+        "EvaluationPeriods": 1,
+        "DatapointsToAlarm": 1,
+        "Threshold": 1.0,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching",
+        "StateTransitionedTimestamp": "2026-09-25 14:36:08.860000+09:00"
+      },
+      "history": [
+        {
+          "time_utc": "2026-09-25T05:36:03.441000+00:00",
+          "type": "StateUpdate",
+          "summary": "Alarm updated from OK to ALARM",
+          "data": {
+            "version": "1.0",
+            "oldState": {
+              "stateValue": "OK",
+              "stateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (25/09/26 05:27:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+              "stateReasonData": {
+                "version": "1.0",
+                "queryDate": "2026-09-25T05:33:36.865+0000",
+                "startDate": "2026-09-25T05:27:00.000+0000",
+                "statistic": "Maximum",
+                "period": 300,
+                "recentDatapoints": [
+                  0.0
+                ],
+                "threshold": 1.0,
+                "evaluatedDatapoints": [
+                  {
+                    "timestamp": "2026-09-25T05:27:00.000+0000",
+                    "sampleCount": 5.0,
+                    "value": 0.0
+                  }
+                ]
+              }
+            },
+            "newState": {
+              "stateValue": "ALARM",
+              "stateReason": "WISHICRAFT PLANNED NOTIFICATION TEST mcov-dlq-20260925T053541Z; notification action test only, NOT actual DLQ backlog or Web failure."
+            }
+          }
+        },
+        {
+          "time_utc": "2026-09-25T05:36:03.541000+00:00",
+          "type": "Action",
+          "summary": "Successfully executed action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+          "data": {
+            "actionState": "Succeeded",
+            "stateUpdateTimestamp": 1790314563441,
+            "notificationResource": "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+            "error": null,
+            "muteWindowEndTimestamp": null,
+            "published_message_sha256": "5c355f12894d25974ac70b1f46cd84fb9782bb36560bfea37e457e508b0b8756"
+          }
+        },
+        {
+          "time_utc": "2026-09-25T05:36:08.860000+00:00",
+          "type": "StateUpdate",
+          "summary": "Alarm updated from ALARM to OK",
+          "data": {
+            "version": "1.0",
+            "oldState": {
+              "stateValue": "ALARM",
+              "stateReason": "WISHICRAFT PLANNED NOTIFICATION TEST mcov-dlq-20260925T053541Z; notification action test only, NOT actual DLQ backlog or Web failure."
+            },
+            "newState": {
+              "stateValue": "OK",
+              "stateReason": "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (25/09/26 05:30:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).",
+              "stateReasonData": {
+                "version": "1.0",
+                "queryDate": "2026-09-25T05:36:08.858+0000",
+                "startDate": "2026-09-25T05:30:00.000+0000",
+                "statistic": "Maximum",
+                "period": 300,
+                "recentDatapoints": [
+                  0.0
+                ],
+                "threshold": 1.0,
+                "evaluatedDatapoints": [
+                  {
+                    "timestamp": "2026-09-25T05:30:00.000+0000",
+                    "sampleCount": 5.0,
+                    "value": 0.0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "email_receipt": {
+        "test_id": "mcov-dlq-20260925T053541Z",
+        "email_receipt": "confirmed by user-provided matching email",
+        "recipient_and_unsubscribe_link": "not retained"
+      },
+      "scope": "notification action only; no real DLQ transfer or Web exception injected"
+    },
+    {
+      "id": "mcov-web-20260925T053629Z",
+      "name": "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+      "arn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+      "state": "OK",
+      "time": "2026-09-25T05:36:29.834965+00:00",
+      "set_alarm_state_alarm_calls": 1,
+      "set_alarm_state_ok_calls": 0,
+      "before": {
+        "AlarmName": "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+        "AlarmArn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+        "AlarmConfigurationUpdatedTimestamp": "2026-09-25 14:34:35.303000+09:00",
+        "ActionsEnabled": true,
+        "OKActions": [],
+        "AlarmActions": [
+          "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+        ],
+        "InsufficientDataActions": [],
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-13T06:47:21.708+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-13T06:42:00.000+0000\"}]}",
+        "StateUpdatedTimestamp": "2026-09-13 15:47:21.709000+09:00",
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Statistic": "Sum",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp"
+          }
+        ],
+        "Period": 300,
+        "EvaluationPeriods": 1,
+        "Threshold": 1.0,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching",
+        "StateTransitionedTimestamp": "2026-09-13 15:47:21.709000+09:00"
+      },
+      "after": {
+        "AlarmName": "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+        "AlarmArn": "arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj",
+        "AlarmConfigurationUpdatedTimestamp": "2026-09-25 14:34:35.303000+09:00",
+        "ActionsEnabled": true,
+        "OKActions": [],
+        "AlarmActions": [
+          "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+        ],
+        "InsufficientDataActions": [],
+        "StateValue": "OK",
+        "StateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+        "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-25T05:38:28.776+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-25T05:33:00.000+0000\"}]}",
+        "StateUpdatedTimestamp": "2026-09-25 14:38:28.777000+09:00",
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Statistic": "Sum",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp"
+          }
+        ],
+        "Period": 300,
+        "EvaluationPeriods": 1,
+        "Threshold": 1.0,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching",
+        "StateTransitionedTimestamp": "2026-09-25 14:38:28.777000+09:00"
+      },
+      "history": [
+        {
+          "time_utc": "2026-09-25T05:36:59.546000+00:00",
+          "type": "StateUpdate",
+          "summary": "Alarm updated from OK to ALARM",
+          "data": {
+            "version": "1.0",
+            "oldState": {
+              "stateValue": "OK",
+              "stateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+              "stateReasonData": {
+                "version": "1.0",
+                "queryDate": "2026-09-13T06:47:21.708+0000",
+                "statistic": "Sum",
+                "period": 300,
+                "recentDatapoints": [],
+                "threshold": 1.0,
+                "evaluatedDatapoints": [
+                  {
+                    "timestamp": "2026-09-13T06:42:00.000+0000"
+                  }
+                ]
+              }
+            },
+            "newState": {
+              "stateValue": "ALARM",
+              "stateReason": "WISHICRAFT PLANNED NOTIFICATION TEST mcov-web-20260925T053629Z; notification action test only, NOT actual DLQ backlog or Web failure."
+            }
+          }
+        },
+        {
+          "time_utc": "2026-09-25T05:36:59.604000+00:00",
+          "type": "Action",
+          "summary": "Successfully executed action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+          "data": {
+            "actionState": "Succeeded",
+            "stateUpdateTimestamp": 1790314619546,
+            "notificationResource": "arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+            "error": null,
+            "muteWindowEndTimestamp": null,
+            "published_message_sha256": "9693d41f2df3bd513a6538de1cbb5cd6012696cca3c470e3b838d1b772e7a0a5"
+          }
+        },
+        {
+          "time_utc": "2026-09-25T05:38:28.777000+00:00",
+          "type": "StateUpdate",
+          "summary": "Alarm updated from ALARM to OK",
+          "data": {
+            "version": "1.0",
+            "oldState": {
+              "stateValue": "ALARM",
+              "stateReason": "WISHICRAFT PLANNED NOTIFICATION TEST mcov-web-20260925T053629Z; notification action test only, NOT actual DLQ backlog or Web failure."
+            },
+            "newState": {
+              "stateValue": "OK",
+              "stateReason": "Threshold Crossed: no datapoints were received for 1 period and 1 missing datapoint was treated as [NonBreaching].",
+              "stateReasonData": {
+                "version": "1.0",
+                "queryDate": "2026-09-25T05:38:28.776+0000",
+                "statistic": "Sum",
+                "period": 300,
+                "recentDatapoints": [],
+                "threshold": 1.0,
+                "evaluatedDatapoints": [
+                  {
+                    "timestamp": "2026-09-25T05:33:00.000+0000"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "email_receipt": {
+        "test_id": "mcov-web-20260925T053629Z",
+        "email_receipt": "confirmed by user-provided matching email",
+        "recipient_and_unsubscribe_link": "not retained"
+      },
+      "scope": "notification action only; no real DLQ transfer or Web exception injected"
+    }
+  ],
+  "sns_aggregate_observation": {
+    "utc_minute": "2026-09-25T05:36:00+00:00",
+    "published": 2,
+    "delivered": 2,
+    "failed": 0,
+    "individual_email_proof": false,
+    "email_proof_source": "separate user-provided matching emails for both test IDs"
+  },
+  "real_metrics": {
+    "sqs_positive_visible_notvisible_delayed_datapoints": 0,
+    "web_auth_error_datapoints_in_window": 0,
+    "missing_lambda_points": "not measured zero",
+    "queue_injection": false,
+    "lambda_failure_injection": false,
+    "metric_injection": false
+  },
+  "maintenance": {
+    "four_targets": "always-notify; normal CloudWatch conditions, no repeated/immediate action added",
+    "suppressible": [
+      "DesiredStoppedEc2Running",
+      "RuntimeObservationUnknown",
+      "DesiredActualDivergence"
+    ],
+    "suppressor_and_three_composites": "unchanged",
+    "lease_operations_performed": false
+  },
+  "final_state": {
+    "time_utc": "2026-09-25T05:39:58.499944+00:00",
+    "selected_game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+    "selected_game_name": "vps-survival",
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "ec2": "stopped",
+    "current_operation": null,
+    "lock": false,
+    "running_workflows": 0,
+    "active_ssm_commands_sessions": 0,
+    "dns_records": 0,
+    "unclosed_maintenance": false,
+    "queues_visible_notvisible_delayed": [
+      0,
+      0,
+      0
+    ],
+    "alarms_normal_ok": 51,
+    "game_world_package_policy_records_unchanged": true,
+    "ingress_original": {
+      "AdmissionFunction23082B67": {
+        "name": "wc-dev-admission",
+        "original": "UNSET",
+        "timeout": 30
+      },
+      "DiscordCommandFunction7D25102A": {
+        "name": "wc-dev-discord-command",
+        "original": "UNSET",
+        "timeout": 10
+      },
+      "Web3C8945DB": {
+        "name": "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp",
+        "original": "UNSET",
+        "timeout": 29
+      }
+    },
+    "ingress_final": {
+      "AdmissionFunction23082B67": "UNSET",
+      "AutoStopEvaluatorFunctionF85F8B50": "UNSET",
+      "BackupTaskFunctionA44639DC": "UNSET",
+      "DiscordCommandFunction7D25102A": "UNSET",
+      "DiscordMessageFunction78FA388B": "UNSET",
+      "MonitoringObserverFunction584DA7C7": "UNSET",
+      "ReconcileFunction30829CB6": "UNSET",
+      "RetentionTaskFunction9F285CE4": "UNSET",
+      "StartTaskFunction8C564C4A": "UNSET",
+      "StatusExecutorFunction6E5C9869": "UNSET",
+      "StopTaskFunction11473A8C": "UNSET",
+      "AuthC256A5EC": "UNSET",
+      "Web3C8945DB": "UNSET"
+    },
+    "ingress_restored": true,
+    "observer_reconcile_continued": true,
+    "pending_changesets": 0,
+    "running_release": false
+  },
+  "not_performed": [
+    "Minecraft lifecycle/EC2 start or stop",
+    "Game/world/package/policy mutation",
+    "SSM command or session creation",
+    "queue ReceiveMessage/DeleteMessage/PurgeQueue/redrive/test messages",
+    "Lambda exception injection",
+    "PutMetricData",
+    "SetAlarmState OK/composite/suppressor",
+    "SNS direct Publish or subscription changes",
+    "IAM/SNS/KMS changes",
+    "hotswap/manual UpdateStateMachine/template editing",
+    "prod or VPS operations",
+    "full world-byte hash inspection"
+  ],
+  "not_proved": [
+    "real DLQ transfer -> metric detection -> notification",
+    "real Web exception -> metric detection -> notification",
+    "positive notification tests for Status Executor DLQ or AuthErrors",
+    "maintenance-active positive notification test; independence verified structurally and by live configuration",
+    "absence of all UpdateStateMachine API calls"
+  ],
+  "private_evidence_root": "/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-monitoring-coverage-36lj_7xo",
+  "email_endpoint_token_secret_values": "not retained in public evidence",
+  "retained_failed_attempts": [
+    "freeze-v1 expected Web raw view to match evaluated view; stopped read-only before mutation; freeze-v2 explicitly validates dynamic ARN candidates and evaluated exclusion",
+    "earlier repository/helper failures retained in repository qualification evidence"
+  ]
+}

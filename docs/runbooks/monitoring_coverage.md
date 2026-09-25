@@ -1,7 +1,8 @@
 # Monitoring coverage: two DLQs and Web Lambda Errors
 
-2026-09-25: accepted narrow NFR-008 / D-111 follow-up. Repository implementation;
-dev release and notification qualification are pending until linked execution evidence says otherwise.
+2026-09-25: accepted narrow NFR-008 / D-111 follow-up; dev release and both bounded
+notification-action tests completed, including user-confirmed receipt of both emails.
+[Exact ChangeSets, one-off CP exception and closeout evidence](../evidence/monitoring_coverage_dev_2026-09-25.md).
 Baseline: `f938ba6cdeea74f91e878a687df7e6044b33e227`, 49 alarms.
 No monitoring redesign, application handler, IAM, queue or Minecraft change.
 
@@ -92,7 +93,9 @@ Game and fresh STOPPED/HEALTHY, actual EC2 stopped, absent Current/Lock/running 
 active SSM/DNS/unclosed maintenance, all three queues empty and existing alarms OK.
 Unknown/running state or pre-existing queue contents/Web ALARM stops release; do not
 stop a host or drain queues to satisfy the gate. Keep Observer/Reconcile enabled.
-Capture original ingress concurrency; no closure is needed for this monitoring-only diff.
+Capture original ingress concurrency. A pure monitoring-only diff does not itself require
+closure; this release used the existing stop/no-work/temporary-ingress guard for its
+separately approved CP display exception and restored the original values afterward.
 
 Generate actual assemblies from a clean worktree at the finalized implementation commit,
 with bytecode disabled and a dedicated output/evidence root. Record template and asset
@@ -137,4 +140,15 @@ failure detection or completion of all monitoring.
 
 ## Repository qualification
 
-[Machine-readable comparison and test evidence](../evidence/monitoring_coverage_repository_2026-09-25.json): 1,824 tests passed, Ruff and 341-file format check passed, mypy 252 files passed. Five actual synth comparisons preserve every existing Control Plane resource and every Web resource except the two AlarmActions. Docker/shellcheck are unavailable locally; existing standard/NeoForge/Paper CI remain required. Failed local helper/test attempts are retained separately and do not count as success.
+[Machine-readable comparison and test evidence](../evidence/monitoring_coverage_repository_2026-09-25.json): 1,824 tests passed, Ruff and 341-file format check passed, mypy 252 files passed. Five actual synth comparisons preserve every existing Control Plane resource and every Web resource except the two AlarmActions. Docker/shellcheck were unavailable locally; standard/NeoForge/Paper CI all passed for the implementation commit (links in the closeout evidence). Failed local helper/test attempts are retained separately and do not count as success.
+
+## This release's one-off CP exception
+
+Existing Case D guard condition 3 was **not satisfied**: no updated dependency was evidenced.
+The user separately approved only the full CP ChangeSet ARN fixed in the closeout, after
+both display views and all six raw/resolved/live/canonical definitions, Role/configuration,
+Tags and actual identities were compared. Internal display cause remains unknown; do not
+label it dependency propagation. This does not relax the existing guard for future releases.
+Returned revision IDs and actual CloudFormation events are recorded separately; semantic
+equality is not proof that no UpdateStateMachine API was ever called. The existing guard
+and future approval boundaries remain unchanged.

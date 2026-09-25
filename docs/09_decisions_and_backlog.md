@@ -1,6 +1,6 @@
 # 09. Decisions and Backlog
 
-> 2026-09-25 Monitoring Coverage follow-up: NFR-008 / D-111で分離したDLQ 2件のVisible alarmとWeb Errors 2件の既存SNS接続を限定sliceとして実装。4対象はalways-notify。既存queue・policy・application・抑制3件は不変。[契約・手順・別backlog](runbooks/monitoring_coverage.md)。実dev release／通知実証は同runbookの証跡で別途確認し、repository実装だけで完了としない。
+> 2026-09-25 Monitoring Coverage follow-up: NFR-008 / D-111で分離したDLQ 2件のVisible alarmとWeb Errors 2件の既存SNS接続をdev適用・限定通知実証完了。4対象はalways-notify、既存queue・policy・application・抑制3件は不変。51 alarms通常OK、2件のSNS action成功・自然復帰・ユーザーのメール受信を確認。[契約・別backlog](runbooks/monitoring_coverage.md)、[完全ARN・Case D条件3不成立の今回限定別承認・実証範囲](evidence/monitoring_coverage_dev_2026-09-25.md)。監視全面完成や実障害全経路の実証ではない。
 
 > 2026-09-24 D-105 follow-up Accepted / limited dev qualified: [dynamic Game BACKUP IAM alignment](runbooks/dynamic_game_backup.md)。CREATE有効時だけGame request-tag条件をlegacy IDまたは固定長dynamic形式へ対応させ、registry/package等の正当性は既存applicationが検証する。元volume・必須tag・作成時CreateTagsを維持し、Game追加時のIAM再deployを不要にした。[vps-survival正式BACKUP実証](evidence/dynamic_game_backup_2026-09-24.md)。自動BACKUP運用やretention実削除の承認ではない。
 
