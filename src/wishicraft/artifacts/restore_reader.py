@@ -130,6 +130,115 @@ def fingerprint(path: Path) -> dict[str, Any]:
     }
 
 
+def canonical_nbt(value: Any) -> Any:
+    """Hash selected NBT without exposing players or rounding 64-bit integers."""
+    if value is None or type(value) in (str, bool):
+        return value
+    if type(value) is int:
+        return {"integer": str(value)}
+    if type(value) is float:
+        return {"float_hex": value.hex()}
+    if type(value) is bytes:
+        return {"opaque_bytes": opaque(value)}
+    if type(value) is list:
+        return [canonical_nbt(v) for v in value]
+    if type(value) is dict:
+        return {k: canonical_nbt(v) for k, v in sorted(value.items())}
+    raise ValueError("READER_NBT_TYPE")
+
+
+def summary_hash(value: Any) -> str:
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
+
+
+def file_group(root: Path, files: list[Path]) -> dict[str, Any]:
+    records = {str(p.relative_to(root)): fingerprint(p) for p in files}
+    return {
+        "count": len(records),
+        "state": "read"
+        if all(r["state"] == "read" for r in records.values())
+        else "changed_during_read",
+        "sha256": summary_hash(records),
+        "names_sha256": summary_hash(sorted(records)),
+    }
+
+
+def paper_content(server: Path, files: list[Path]) -> dict[str, Any]:
+    """Fixed 26.1.2 layout; no conversion, and no raw player identifiers or NBT."""
+    level = server / "wishinkaiwai"
+    dimensions = {}
+    for name in ("overworld", "the_nether", "the_end"):
+        root = level / "dimensions/minecraft" / name
+        regions = [p for p in files if p.parent == root / "region" and p.suffix == ".mca"]
+        dimensions[name] = {
+            "exists": root.is_dir(),
+            "region_count": len(regions),
+            "samples": {p.name: fingerprint(p) for p in regions[:2]},
+        }
+    players = {}
+    for group in ("data", "stats", "advancements"):
+        root = level / "players" / group
+        selected = [p for p in files if p.is_relative_to(root)]
+        players[group] = {"exists": root.is_dir(), **file_group(root, selected)}
+        if group == "data":
+            decoded = {}
+            for path in selected:
+                if path.suffix != ".dat":
+                    continue
+                before = fingerprint(path)
+                doc = world_nbt.read(path)
+                decoded[path.name] = {
+                    key: {"state": "value", "sha256": summary_hash(canonical_nbt(doc[key]))}
+                    if key in doc
+                    else {"state": "missing"}
+                    for key in ("Inventory", "EnderItems", "Pos", "Dimension")
+                }
+                if before != fingerprint(path):
+                    raise ValueError("READER_PLAYER_CHANGED")
+            players[group]["decoded_count"] = len(decoded)
+            players[group]["selected_nbt_sha256"] = summary_hash(decoded)
+            players[group]["selected_fields_present"] = {
+                key: sum(v[key]["state"] == "value" for v in decoded.values())
+                for key in ("Inventory", "EnderItems", "Pos", "Dimension")
+            }
+    # Exact relative filenames establish what was observed; modern metadata remains
+    # in its original layout. Contents are hashed, not interpreted as legacy fields.
+    metadata = [
+        p
+        for p in files
+        if p.is_relative_to(level)
+        and p.suffix == ".dat"
+        and p.parent.name == "minecraft"
+        and p.parent.parent.name == "data"
+    ]
+    configs = [
+        "config/paper-global.yml",
+        "config/paper-world-defaults.yml",
+        "bukkit.yml",
+        "spigot.yml",
+    ]
+    configs += [f"wishinkaiwai/dimensions/minecraft/{d}/paper-world.yml" for d in dimensions]
+    return {
+        "dimensions": dimensions,
+        "players": players,
+        "datapacks": file_group(
+            level / "datapacks", [p for p in files if p.is_relative_to(level / "datapacks")]
+        ),
+        "metadata_group": file_group(level, metadata),
+        "saved_metadata": {
+            str(p.relative_to(level)): fingerprint(p)
+            for p in metadata
+            if p.name in {"game_rules.dat", "world_border.dat", "world_gen_settings.dat"}
+        },
+        "configs": {
+            name: fingerprint(server / name) if server / name in files else {"state": "missing"}
+            for name in configs
+        },
+    }
+
+
 def inspect_server(
     server: Path, level_name: str, *, full_tree: bool, content: bool = True
 ) -> dict[str, Any]:
@@ -172,6 +281,8 @@ def inspect_server(
                 raise ValueError("READER_POLICY_LIMIT")
             policies[name] = {"state": "read", "sha256": imported.sha(path)}
     result["policy_file_hashes"] = policies
+    if level_name == "wishinkaiwai":
+        result["paper"] = paper_content(server, files)
     if full_tree:
         result["server_tree"] = imported.tree(server)
         result["world_tree"] = imported.tree(level)
@@ -245,7 +356,9 @@ def managed_records(server: Path) -> dict[str, Any]:
 
 def host_evidence() -> dict[str, Any]:
     """Fixed local runtime identities only; never Docker environment or secret config."""
+    import shutil
     import subprocess
+    import sys
 
     helpers = {}
     for name in ("reset_worlds.py", "world_import.py"):
@@ -282,7 +395,32 @@ def host_evidence() -> dict[str, Any]:
                 ],
             }
         )
+    space = shutil.disk_usage("/srv/minecraft")
     return {
+        "python_version": sys.version.split()[0],
+        "data_space": {key: space[i] for i, key in enumerate(("total", "used", "free"))},
+        "data_mount": json.loads(
+            subprocess.check_output(
+                [
+                    "findmnt",
+                    "--json",
+                    "--mountpoint",
+                    "/srv/minecraft",
+                    "--output",
+                    "SOURCE,FSTYPE,OPTIONS",
+                ],
+                text=True,
+                timeout=15,
+            )
+        ),
+        "block_devices": json.loads(
+            subprocess.check_output(
+                ["lsblk", "--json", "--output", "PATH,SERIAL,TYPE,FSTYPE,MOUNTPOINTS,RO"],
+                text=True,
+                timeout=15,
+            )
+        ),
+        "restore_mount_exists": Path("/mnt/wishicraft-restore").exists(),
         "helpers": helpers,
         "runtime_receipt": {k: receipt.get(k) for k in ("phase", "target")},
         "containers": containers,

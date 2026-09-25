@@ -193,6 +193,91 @@ def test_payload_execution_form_and_no_bytecode(tmp_path: Path, monkeypatch: Any
     assert not list(tmp_path.rglob("__pycache__"))
 
 
+def test_paper_dimension_player_privacy_and_payload_roundtrip(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    from tests.unit.test_world_import import nbt
+
+    root = fixture(tmp_path / "server")
+    (root / "world").rename(root / "wishinkaiwai")
+    level = root / "wishinkaiwai"
+    for dimension in ("overworld", "the_nether", "the_end"):
+        d = level / "dimensions/minecraft" / dimension
+        (d / "region").mkdir(parents=True, exist_ok=True)
+        for i in range(6):
+            (d / "region" / f"r.{i}.0.mca").write_bytes(dimension.encode() + bytes([i]))
+        (d / "paper-world.yml").write_text("_version: 31\n")
+        metadata = d / "data/minecraft"
+        metadata.mkdir(parents=True)
+        (metadata / "world_border.dat").write_bytes(nbt({"data": {"size": 123}}))
+    for group in ("data", "stats", "advancements"):
+        folder = level / "players" / group
+        folder.mkdir(parents=True)
+        for player in ("private-one", "private-two", "private-three"):
+            (folder / (player + (".dat" if group == "data" else ".json"))).write_bytes(
+                nbt(
+                    {
+                        "Inventory": {"id": "private-item"},
+                        "EnderItems": {},
+                        "Pos": {"opaque": -(2**63) + 1},
+                        "Dimension": "minecraft:overworld",
+                    }
+                )
+                if group == "data"
+                else b'{"secret-progress":true}'
+            )
+    for name in world_import.CONFIGS:
+        path = root / name
+        path.parent.mkdir(exist_ok=True)
+        path.write_text("_version: 31\n")
+    before = world_import.tree(root)
+    monkeypatch.setattr(payload, "validate_source", lambda game, value: value)
+    command = payload.command(
+        {
+            "paper": {
+                "game_id": "game-test",
+                "server": str(root),
+                "level": "wishinkaiwai",
+                "full_tree": True,
+            }
+        }
+    )
+    interpreters = [sys.executable]
+    if candidate := os.environ.get("WISHICRAFT_READER_PYTHON39"):
+        assert shutil.which(candidate)
+        interpreters.append(candidate)
+    for executable in interpreters:
+        run = subprocess.run(
+            [executable, *shlex.split(command)[1:]],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
+            cwd=tmp_path,
+        )
+        parsed = json.loads(run.stdout)["paper"]["paper"]
+        assert all(
+            v["region_count"] == 6 and len(v["samples"]) == 2 for v in parsed["dimensions"].values()
+        )
+        assert all(v["count"] == 3 for v in parsed["players"].values())
+        assert parsed["players"]["data"]["decoded_count"] == 3
+        assert len(parsed["saved_metadata"]) == 3
+        assert all(v["state"] == "read" for v in parsed["configs"].values())
+        assert all(
+            word not in run.stdout for word in ("private-", "secret-progress", "NEVER_OUTPUT")
+        )
+        assert not run.stderr
+    assert world_import.tree(root) == before
+    assert not list(tmp_path.rglob("__pycache__"))
+    first = reader.paper_content(root, reader.bounded_files(root))["players"]["stats"]
+    (level / "players/stats/private-one.json").write_text('{"changed":true}')
+    second = reader.paper_content(root, reader.bounded_files(root))["players"]["stats"]
+    assert first["sha256"] != second["sha256"]
+    assert first["names_sha256"] == second["names_sha256"]
+    assert reader.canonical_nbt(-(2**63) + 1) == {"integer": "-9223372036854775807"}
+    assert "opaque_bytes" in reader.canonical_nbt(b"\0" * 12)
+
+
 def test_managed_record_identity_and_allowlist(tmp_path: Path, monkeypatch: Any) -> None:
     from types import SimpleNamespace
 
@@ -257,6 +342,8 @@ def test_host_evidence_excludes_environment_and_secret_receipt_fields(
     def output(args: list[str], **kw: Any) -> str:
         calls.append(args)
         assert kw["timeout"] == 15
+        if args[0] in {"findmnt", "lsblk"}:
+            return "{}"
         if args == ["docker", "ps", "-q"]:
             return "abcdef123456\n"
         assert args == ["docker", "inspect", "abcdef123456"]
@@ -278,11 +365,22 @@ def test_host_evidence_excludes_environment_and_secret_receipt_fields(
         )
 
     monkeypatch.setattr(subprocess, "check_output", output)
+    monkeypatch.setattr(shutil, "disk_usage", lambda path: (100, 20, 80))
     result = reader.host_evidence()
     assert result["containers"][0]["mounts"][0]["Source"] == "/test/server"
     assert result["runtime_receipt"]["phase"] == "ready"
     assert "DO_NOT_OUTPUT" not in reader.output(result)
-    assert len(calls) == 2
+    assert len(calls) == 4
+    assert result["data_space"] == {"total": 100, "used": 20, "free": 80}
+    assert calls[2] == [
+        "findmnt",
+        "--json",
+        "--mountpoint",
+        "/srv/minecraft",
+        "--output",
+        "SOURCE,FSTYPE,OPTIONS",
+    ]
+    assert calls[3] == ["lsblk", "--json", "--output", "PATH,SERIAL,TYPE,FSTYPE,MOUNTPOINTS,RO"]
 
 
 def test_six_game_evidence_budget_and_plan_hashes(tmp_path: Path, monkeypatch: Any) -> None:
