@@ -8,6 +8,10 @@ STOPPED/HEALTHY, 49 alarms OK. This does not qualify real Paper/NeoForge RESTORE
 failure path or full-environment recovery. The [2026-09-23 closeout](../evidence/game_restore_prepared_2026-09-23.md)
 retains the separate real read-only XFS/copy/PREPARED and recovery-lease evidence.
 Execution approval is not general authorization for future AWS operations.
+The separate [2026-09-25 Paper attempt](../evidence/paper_restore_dev_2026-09-25.md)
+proved real source/copy equality, restored normal START/content/STOP and formal
+rollback. It is **not full Paper qualification**: a post-STOP metadata aggregate
+change remains unlocalized, and original-world START/STOP was not performed.
 Requirements: BAK-002/003/004/006, OPR-001/004/007/010, EC2-007/012 and the
 2026-09-23 RESTORE request. This is one operator-assisted restoration slice.
 

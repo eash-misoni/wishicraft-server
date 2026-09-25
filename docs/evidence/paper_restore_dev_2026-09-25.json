@@ -1,0 +1,623 @@
+{
+  "schema_version": 1,
+  "status": "PARTIAL_PROOF_SAFE_ROLLBACK",
+  "full_success_condition_met": false,
+  "reason": "Post-STOP 33-file metadata aggregate changed without per-file attribution; original START/content/STOP not executed.",
+  "baseline_commit": "8a12b2a3aaac2aa5ab5dd8602c66a35ee1d5ac23",
+  "execution_commit": "00679608ebaa837768673dfd765d45242c4111e5",
+  "execution_worktree_clean": true,
+  "primary_unrelated_changes_preserved": true,
+  "closeout_commit_reference": "Commit adding this evidence; reported separately in handoff.",
+  "environment": {
+    "stage": "dev",
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "profile": "wishicraft-dev",
+    "system": "wishicraft-main",
+    "instance_id": "i-04fc0629dc4ea466e",
+    "data_volume_id": "vol-03ac9f534326c345c"
+  },
+  "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+  "package": {
+    "package_id": "vps-survival",
+    "package_version": "1",
+    "minecraft_version": "26.1.2",
+    "paper_build": 53,
+    "paper_version": "26.1.2-53-39a1aa5",
+    "unchanged": true
+  },
+  "snapshot": {
+    "source": "snap-0aac363f3ce09e05a",
+    "source_backup_operation": "op-4236596e-a436-4c99-833b-33b39f89dab8",
+    "protective": "snap-0e5941ab3b8e0e6ff",
+    "protective_backup_operation": "op-3315c971-8f8a-40bd-9268-fd52a32305d9",
+    "both_completed_encrypted_retained": true,
+    "formal_provenance_validation": true,
+    "protection_fresh_at_plan": true,
+    "protection_desired_revision": 73
+  },
+  "restore": {
+    "request_id": "paper-restore-20260925-0067960",
+    "operation_id": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+    "phase": "ROLLED_BACK",
+    "revision": 18,
+    "previous_data_source": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+    "restored_data_source": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/worlds/op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42/server",
+    "final_generation": 1,
+    "final_generation_counter": 2,
+    "final_current_id_present": false,
+    "both_worlds_retained": true,
+    "rollback_at": "2026-09-25T09:28:08.682860+00:00",
+    "rollback_receipt": {
+      "previous_tree": {
+        "file_count": 1670,
+        "expanded_size": 3680766267,
+        "tree_sha256": "9258f8ff8f2a773c318635df4248c690faf1e90bf0145060126cf683766005d8"
+      },
+      "operation_id": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+      "rollback_verified": true,
+      "maintenance_id": "paper-rollback-20260925-0067960"
+    }
+  },
+  "temporary_volume": {
+    "volume_id": "vol-08ccfa5f07923ad13",
+    "created_count": 1,
+    "formal_owner_and_token": true,
+    "block_read_only_and_xfs_ro_norecovery": true,
+    "source_unmounted": true,
+    "cleanup": "DELETED",
+    "not_found": true,
+    "owned_volume_set_empty": true
+  },
+  "maintenance": [
+    {
+      "id": "paper-restore-20260925-0067960",
+      "started_at": 1790324833,
+      "expires_at": 1790332033,
+      "ended_at": 1790326793,
+      "status": "ENDED"
+    },
+    {
+      "id": "paper-rollback-20260925-0067960",
+      "started_at": 1790327684,
+      "expires_at": 1790334884,
+      "ended_at": 1790328784,
+      "status": "ENDED"
+    }
+  ],
+  "workflows": {
+    "protection": {
+      "operation_id": "op-3315c971-8f8a-40bd-9268-fd52a32305d9",
+      "requested_at": "2026-09-25T08:21:11.137045Z",
+      "completed_at": "2026-09-25T08:23:19.969736Z",
+      "status": "SUCCEEDED"
+    },
+    "restored-start": {
+      "operation_id": "op-5088ccaf-f567-4900-9d06-fd340b3283b4",
+      "requested_at": "2026-09-25T09:01:00.944913Z",
+      "completed_at": "2026-09-25T09:05:15.529730Z",
+      "status": "SUCCEEDED"
+    },
+    "restored-stop": {
+      "operation_id": "op-36b96ad3-0db9-458c-8d6a-9a14800c7056",
+      "requested_at": "2026-09-25T09:11:17.012625Z",
+      "completed_at": "2026-09-25T09:12:57.793553Z",
+      "status": "SUCCEEDED"
+    }
+  },
+  "not_executed": [
+    "original normal START/content/STOP",
+    "additional diagnostic SSM",
+    "source remount",
+    "VPS access",
+    "client login/load",
+    "NeoForge or other Game RESTORE"
+  ],
+  "payload_hashes": {
+    "before-content": "a1403a9daa996d2bee31a27301f587c7f0208825969048c86e37107fb5c05fe2",
+    "protection": "d339dde3523eb8834a02ee23df25583c042b36fafa829d8ecfc706753aa83d49",
+    "prepared-content": "ee30eed85f0b08e5685bb6ce456a8740777ce5170ae618c4853013da13f935c3",
+    "restored-live": "2c4344bf617f6a4db3ac33edb889b09c9f7c6ae9bb5f759a83689b5f109424a1",
+    "rollback-content": "ee30eed85f0b08e5685bb6ce456a8740777ce5170ae618c4853013da13f935c3",
+    "original-live": "cd9eca6f3a3d9728d36a2f94822ccce1476bb5ca1dfa3fd6e2f0215a31c6a57a"
+  },
+  "unused_generated_payloads": [
+    "original-live"
+  ],
+  "formal_payload_hashes": {
+    "prepare": "7e8070ba430c8907706910bf8f15d1dbded633c52f7baf24633811d6b24a1feb",
+    "check-rollback": "7d7f81db0b9f1332f99c48545a328d4505fdfc45527df2b515d9e6d34c9d1119"
+  },
+  "runtime_source_hashes": {
+    "src/wishicraft/artifacts/restore_reader.py": "b3ef61d0c6a3c0b9d5cecc3ce4517c308024ea0c67cfdc61b8ba572e7e03e9c1",
+    "src/wishicraft/artifacts/world_nbt.py": "01770fa63daaab1239f04ae00e2945fae27377db84fad72bc400edac281a3161",
+    "src/wishicraft/artifacts/restore_tree.py": "a9195a29af9a5a71fc05901715edf76026d60e72f3b07a97b3af2ad8d2150f9a",
+    "src/wishicraft/artifacts/restore_host.py": "9a1933ea75bb40f9b1d1c7c288eb3be9548754d9fa293febb928c8739ea6862d",
+    "src/wishicraft/artifacts/reset_worlds.py": "1074d1bab6291dfed8a0f1d49ea5ce53fe8a5e8cc074bcf560d5a206c19f4deb",
+    "src/wishicraft/artifacts/world_import.py": "0cfaf9eae86418d0d7c354e52136d8b64d692c3a87c983173f687c95f8e5f8c1",
+    "src/wishicraft/restore_operator.py": "f18608458d89a36ca4b72e5337b7e656b7785bbf8cc3ca73dc9ac4f593c8e9f4"
+  },
+  "ssm": {
+    "before-content": {
+      "CommandId": "2f10f43b-b53f-4e20-9b45-ca667c1fb966",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T08:35:54.188Z",
+      "ExecutionEndDateTime": "2026-09-25T08:36:23.188Z",
+      "ExecutionElapsedTime": "PT29.085S",
+      "output_bytes": 8815,
+      "output_sha256": "a9c989adc0b4ae15f0c1232a851325e567d438d393f2757d054c3467cc57b38e"
+    },
+    "before-protection": {
+      "CommandId": "c9dd14bb-851f-4bfb-8b5b-7946b8ab163f",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T08:38:14.492Z",
+      "ExecutionEndDateTime": "2026-09-25T08:38:19.492Z",
+      "ExecutionElapsedTime": "PT5.967S",
+      "output_bytes": 5191,
+      "output_sha256": "eba10507a462dd0c6cb3cc585a81a1a74bf6b67a11d9eeabaf34c07926b497d9"
+    },
+    "prepare": {
+      "CommandId": "0427d0c1-17d1-406a-9457-28a8b48ed6ca",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T08:40:44.594Z",
+      "ExecutionEndDateTime": "2026-09-25T08:48:40.594Z",
+      "ExecutionElapsedTime": "PT7M56.446S",
+      "output_bytes": 772,
+      "output_sha256": "6e95c58df46f85f847c18870f83374cf4214ba7af6848b3d44ee08f812edae14"
+    },
+    "prepared-content": {
+      "CommandId": "b980a071-fcdc-482f-b207-94bc479c6446",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T08:51:26.746Z",
+      "ExecutionEndDateTime": "2026-09-25T08:51:57.746Z",
+      "ExecutionElapsedTime": "PT31.646S",
+      "output_bytes": 18198,
+      "output_sha256": "ef95f9c40252d0c064c5e33e4adb1211d03e56cb008fa850b2ae550a5ab9e07d"
+    },
+    "prepared-protection": {
+      "CommandId": "0e190492-7ff4-4799-a23c-d758d9da3fe6",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T08:52:57.748Z",
+      "ExecutionEndDateTime": "2026-09-25T08:53:02.748Z",
+      "ExecutionElapsedTime": "PT5.688S",
+      "output_bytes": 5191,
+      "output_sha256": "eba10507a462dd0c6cb3cc585a81a1a74bf6b67a11d9eeabaf34c07926b497d9"
+    },
+    "restored-live": {
+      "CommandId": "c4a1a303-ba08-404d-9a2f-980202b9739b",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T09:06:33.977Z",
+      "ExecutionEndDateTime": "2026-09-25T09:07:02.977Z",
+      "ExecutionElapsedTime": "PT29.305S",
+      "output_bytes": 18780,
+      "output_sha256": "ff89ad2e05eb86cf03d6581fa988a2b6e347a941e989ddd42d9f3952780ecae2"
+    },
+    "restored-protection": {
+      "CommandId": "ac51ce6f-c0ab-4b9d-a83d-1f33a9fd6e7b",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T09:08:45.009Z",
+      "ExecutionEndDateTime": "2026-09-25T09:08:50.009Z",
+      "ExecutionElapsedTime": "PT5.965S",
+      "output_bytes": 5191,
+      "output_sha256": "eba10507a462dd0c6cb3cc585a81a1a74bf6b67a11d9eeabaf34c07926b497d9"
+    },
+    "rollback-content": {
+      "CommandId": "5bdff98b-9863-4aba-90c4-d15195907c86",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T09:19:57.301Z",
+      "ExecutionEndDateTime": "2026-09-25T09:20:55.301Z",
+      "ExecutionElapsedTime": "PT58.138S",
+      "output_bytes": 18160,
+      "output_sha256": "2f2e98cb58a0d4901d7e0337de55f5f52ef3bd8384668d1269601f00b8d13501"
+    },
+    "check-rollback": {
+      "CommandId": "aaeb8f42-4036-4d7a-b4b4-f97c29844c0c",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T09:23:12.344Z",
+      "ExecutionEndDateTime": "2026-09-25T09:23:16.344Z",
+      "ExecutionElapsedTime": "PT4.776S",
+      "output_bytes": 319,
+      "output_sha256": "d4d8bc27480aa69f2ca0cedda84b50c8ca3aed44f9122a8fa788fbd4181749dc"
+    },
+    "rollback-protection": {
+      "CommandId": "078c84a0-ec64-4746-aaf6-987b64aeb3aa",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T09:25:06.942Z",
+      "ExecutionEndDateTime": "2026-09-25T09:25:11.942Z",
+      "ExecutionElapsedTime": "PT5.966S",
+      "output_bytes": 5191,
+      "output_sha256": "eba10507a462dd0c6cb3cc585a81a1a74bf6b67a11d9eeabaf34c07926b497d9"
+    }
+  },
+  "formal_trees": {
+    "operation_id": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+    "volume_id": "vol-08ccfa5f07923ad13",
+    "unmounted": true,
+    "phase": "prepared",
+    "prepared_tree": {
+      "file_count": 1550,
+      "expanded_size": 3515810898,
+      "tree_sha256": "db48749641f2df3d8c65c1a22326d0fa5bf229e3b02746688ea126627d84cef1"
+    },
+    "source_world_tree": {
+      "file_count": 1541,
+      "expanded_size": 3515790017,
+      "tree_sha256": "133e616c3bcf4482fe7df5851adab7970d81ecca549789c45973078ffe4ae7a3"
+    },
+    "source_tree": {
+      "file_count": 1670,
+      "expanded_size": 3680766267,
+      "tree_sha256": "9258f8ff8f2a773c318635df4248c690faf1e90bf0145060126cf683766005d8"
+    },
+    "previous_tree": {
+      "file_count": 1670,
+      "expanded_size": 3680766267,
+      "tree_sha256": "9258f8ff8f2a773c318635df4248c690faf1e90bf0145060126cf683766005d8"
+    }
+  },
+  "paper_restored_pre_start": {
+    "configs": {
+      "bukkit.yml": {
+        "sha256": "a72396bbd1b69636b63f990995ed1ce31df7183af275868b4d638071fd4c866a",
+        "size": 1148,
+        "state": "read"
+      },
+      "config/paper-global.yml": {
+        "sha256": "0670a9c4367afbcb841898a4754ba6eba0dba6367c4cb159269f0957d25ae762",
+        "size": 4457,
+        "state": "read"
+      },
+      "config/paper-world-defaults.yml": {
+        "sha256": "abf93aa72a8498289b81a563f5aef57b684198efb85973f26757ab6353b4acfe",
+        "size": 8603,
+        "state": "read"
+      },
+      "spigot.yml": {
+        "sha256": "1330538aef435b16c2b941d3123c5efe432c4a241d2f09c5db82495421c1d6e6",
+        "size": 4901,
+        "state": "read"
+      },
+      "wishinkaiwai/dimensions/minecraft/overworld/paper-world.yml": {
+        "sha256": "2de01ec7c9171f313bd908f50c708e8246d379649830e36c9b1a39bfda97af36",
+        "size": 320,
+        "state": "read"
+      },
+      "wishinkaiwai/dimensions/minecraft/the_end/paper-world.yml": {
+        "sha256": "2af86610b1f7fac445c8ad2107254d71f6288648f5854bb26c14bb0822cae98c",
+        "size": 318,
+        "state": "read"
+      },
+      "wishinkaiwai/dimensions/minecraft/the_nether/paper-world.yml": {
+        "sha256": "93e15aa770f9709a05ff0b1a5e4c266d5864ce4381144dcbfe621c93412974e8",
+        "size": 321,
+        "state": "read"
+      }
+    },
+    "datapacks": {
+      "count": 1,
+      "names_sha256": "804af6961e41c2fe9f2d0948942507243313b37863de90f6e53e58cc1a56cf6e",
+      "sha256": "9a63d87ad1ff3ac34a9f7f96fe1bac788c735ed8ef4bc5f96ed73c1a42bebf04",
+      "state": "read"
+    },
+    "dimensions": {
+      "overworld": {
+        "exists": true,
+        "region_count": 402,
+        "samples": {
+          "r.-1.-1.mca": {
+            "sha256": "0d9d6acdaa3d12d8ff716ca066eacf9d8b3a22cb308f5199a129c78a712b9825",
+            "size": 10973184,
+            "state": "read"
+          },
+          "r.-1.-2.mca": {
+            "sha256": "8c7ced64a46af46099ea03b421ff3c493b0bff8967b3aaff9cbbca9748a91470",
+            "size": 10043392,
+            "state": "read"
+          }
+        }
+      },
+      "the_end": {
+        "exists": true,
+        "region_count": 90,
+        "samples": {
+          "r.-1.-1.mca": {
+            "sha256": "a79ee32fbe2b4eb40b4589c10475d3cf393e39f16b4124eb435cab315df17336",
+            "size": 3506176,
+            "state": "read"
+          },
+          "r.-1.0.mca": {
+            "sha256": "2278e2f055f7ef75c321e63a8a1fef51f8c94a80b7fd9de35a3787415332a6c5",
+            "size": 4206592,
+            "state": "read"
+          }
+        }
+      },
+      "the_nether": {
+        "exists": true,
+        "region_count": 33,
+        "samples": {
+          "r.-1.-1.mca": {
+            "sha256": "c410e21b2933ca3b40a40e734d5c740acb4a32742ad0a8f1783ae56f95872c69",
+            "size": 5824512,
+            "state": "read"
+          },
+          "r.-1.-2.mca": {
+            "sha256": "26e3473f05aa891339a2ba0aff7f3ab11c8eb22b62f1e1c21c9f16e2428e8678",
+            "size": 2809856,
+            "state": "read"
+          }
+        }
+      }
+    },
+    "metadata_group": {
+      "count": 33,
+      "names_sha256": "259e9180ed1347fe9ab3121011bbb24ab410722ab880643f7c86f997a14e903e",
+      "sha256": "b35cb28b5de9306e317c4c0a973b4089a59a08d1cbc05a66f57fc052b05572cb",
+      "state": "read"
+    },
+    "players": {
+      "advancements": {
+        "count": 14,
+        "exists": true,
+        "names_sha256": "7a9cdd86749cd7e3ae9d4bea0d9ef347489ae7fa25c612560d26c55d4c91c5a5",
+        "sha256": "4bd6c7682a51d07fcb1087a0b7aab8fdf17966bb48b1d332c3497a358c85eb96",
+        "state": "read"
+      },
+      "data": {
+        "count": 27,
+        "decoded_count": 12,
+        "exists": true,
+        "names_sha256": "da5989707a5e788a54fccfd6ac44d32da53153361d571a8f4851d26d6fbab12f",
+        "selected_fields_present": {
+          "Dimension": 12,
+          "EnderItems": 12,
+          "Inventory": 12,
+          "Pos": 12
+        },
+        "selected_nbt_sha256": "e9c7790bb94859bdf7ef5d7208685a7d6c54bd899e4ca329ca52417e0a7b9674",
+        "sha256": "25e4ae6ad8b0ca53adb39d7db39389c56e224a4fc810461ca8572ba1c9551fd7",
+        "state": "read"
+      },
+      "stats": {
+        "count": 14,
+        "exists": true,
+        "names_sha256": "7a9cdd86749cd7e3ae9d4bea0d9ef347489ae7fa25c612560d26c55d4c91c5a5",
+        "sha256": "f730f3ff95a571fd63c0daa13af31885902eaf07619413cccd415fd5079db35a",
+        "state": "read"
+      }
+    },
+    "saved_metadata": {
+      "dimensions/minecraft/overworld/data/minecraft/game_rules.dat": {
+        "sha256": "acd87e5748b55cb3ea7b18086081beb4bf77c2d62ab6db90d164ec90c5b5e261",
+        "size": 808,
+        "state": "read"
+      },
+      "dimensions/minecraft/overworld/data/minecraft/world_border.dat": {
+        "sha256": "a4f9cfccff99e6934adaded930062f9a6aedcf5d15594f5d426859c88b89eb2a",
+        "size": 169,
+        "state": "read"
+      },
+      "dimensions/minecraft/overworld/data/minecraft/world_gen_settings.dat": {
+        "sha256": "4897cb8ba8182317964b036ae17c77e8ae82e82ece81b7d043aa637a4fab7ab9",
+        "size": 248,
+        "state": "read"
+      },
+      "dimensions/minecraft/the_end/data/minecraft/game_rules.dat": {
+        "sha256": "acd87e5748b55cb3ea7b18086081beb4bf77c2d62ab6db90d164ec90c5b5e261",
+        "size": 808,
+        "state": "read"
+      },
+      "dimensions/minecraft/the_end/data/minecraft/world_border.dat": {
+        "sha256": "a4f9cfccff99e6934adaded930062f9a6aedcf5d15594f5d426859c88b89eb2a",
+        "size": 169,
+        "state": "read"
+      },
+      "dimensions/minecraft/the_end/data/minecraft/world_gen_settings.dat": {
+        "sha256": "4897cb8ba8182317964b036ae17c77e8ae82e82ece81b7d043aa637a4fab7ab9",
+        "size": 248,
+        "state": "read"
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/game_rules.dat": {
+        "sha256": "acd87e5748b55cb3ea7b18086081beb4bf77c2d62ab6db90d164ec90c5b5e261",
+        "size": 808,
+        "state": "read"
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/world_border.dat": {
+        "sha256": "a4f9cfccff99e6934adaded930062f9a6aedcf5d15594f5d426859c88b89eb2a",
+        "size": 169,
+        "state": "read"
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/world_gen_settings.dat": {
+        "sha256": "4897cb8ba8182317964b036ae17c77e8ae82e82ece81b7d043aa637a4fab7ab9",
+        "size": 248,
+        "state": "read"
+      }
+    }
+  },
+  "restored_live": {
+    "selected_paper_content_exact": true,
+    "current_policy_file_hashes_exact": true,
+    "runtime_target": {
+      "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+      "instance_id": "i-04fc0629dc4ea466e",
+      "run_id": "op-5088ccaf-f567-4900-9d06-fd340b3283b4",
+      "data_source": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/worlds/op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42/server",
+      "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21"
+    },
+    "same_game_run_process_boot": true,
+    "reconcile_observed_at": "2026-09-25T09:09:47.363937Z",
+    "heartbeat_observed_at": "2026-09-25T09:10:39.853930Z",
+    "ready": true,
+    "observed_player_count": 0
+  },
+  "post_stop": {
+    "decision": "Stop forward proof; use authorized formal rollback for safe closeout. No original START yet.",
+    "original_exact_before_original_start": true,
+    "restored_stopped_receipt": {
+      "phase": "stopped",
+      "target": {
+        "config_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+        "data_source": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/worlds/op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42/server",
+        "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+        "instance_id": "i-04fc0629dc4ea466e",
+        "run_id": "op-5088ccaf-f567-4900-9d06-fd340b3283b4"
+      }
+    },
+    "before_world": {
+      "expanded_size": 3515790017,
+      "file_count": 1541,
+      "tree_sha256": "133e616c3bcf4482fe7df5851adab7970d81ecca549789c45973078ffe4ae7a3"
+    },
+    "after_world": {
+      "expanded_size": 3515790036,
+      "file_count": 1541,
+      "tree_sha256": "1e02ace2a3e4f15ec8925632220f9a666c0c53f6f7a5d0a50eb9fa018f4c5bf9"
+    },
+    "before_server": {
+      "expanded_size": 3515810898,
+      "file_count": 1550,
+      "tree_sha256": "db48749641f2df3d8c65c1a22326d0fa5bf229e3b02746688ea126627d84cef1"
+    },
+    "after_server": {
+      "expanded_size": 3680760732,
+      "file_count": 1667,
+      "tree_sha256": "b50799e8442f6ab0e238312836cd21c1069a6a112668c09fa4f2c5f40d7b0a86"
+    },
+    "unchanged_sections": [
+      "configs",
+      "datapacks",
+      "dimensions",
+      "players",
+      "saved_metadata"
+    ],
+    "changed_metadata_group": {
+      "before": {
+        "count": 33,
+        "names_sha256": "259e9180ed1347fe9ab3121011bbb24ab410722ab880643f7c86f997a14e903e",
+        "sha256": "b35cb28b5de9306e317c4c0a973b4089a59a08d1cbc05a66f57fc052b05572cb",
+        "state": "read"
+      },
+      "after": {
+        "count": 33,
+        "names_sha256": "259e9180ed1347fe9ab3121011bbb24ab410722ab880643f7c86f997a14e903e",
+        "sha256": "238895a8fd0e5f86b6d8a92408dcc5e574049f3f45b36185ada2cb9ace98d1f1",
+        "state": "read"
+      }
+    },
+    "level_dat_time": {
+      "before": {
+        "state": "value",
+        "value": 30367857
+      },
+      "after": {
+        "state": "value",
+        "value": 30378472
+      }
+    },
+    "limitation": "Normal Time advancement observed; individual changed files among 33 metadata not identified by fixed aggregate-only reader. Do not label unexplained aggregate change corrupt or wholly normal. Source/copy exact proof and live selected-content equality remain valid.",
+    "reader_retry_exception_used": false,
+    "reason_no_extra_ssm": "This is not a reader output failure. User exception excludes hash mismatch; no ad-hoc diagnostic payload sent."
+  },
+  "protection": {
+    "original_server_exact_until_rollback": true,
+    "other_four_games_and_retained_vanilla_tree_and_managed_records_exact": true,
+    "package_creation_registry_policies_unchanged": true,
+    "helper_hashes_unchanged": true,
+    "source_observation_scope": "Prepared content reader observed restored path after unmount; formal receipt links to source/copy world equality."
+  },
+  "monitoring": {
+    "sns_actions": [
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at_utc": "2026-09-25T08:56:46.750000+00:00",
+        "summary": "Successfully executed action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at_utc": "2026-09-25T08:56:46.739000+00:00",
+        "summary": "Successfully executed action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      }
+    ],
+    "email_receipt_confirmed_by_user": true,
+    "rollback_session_additional_sns_actions": 0,
+    "configuration_changed": false,
+    "individual_eligibility_failure_predicate": "not proven from historical log",
+    "followup": "Review planned-host shutdown eligibility/observation convergence and composite notification release while base alarms retain ALARM. Preserve fail-open unknown-state behavior; no automatic extension or suppression change in this slice."
+  },
+  "final": {
+    "at": "2026-09-25T09:40:02.450015+00:00",
+    "alarm_configurations_all_51_unchanged": true,
+    "host_iam_unchanged": true,
+    "all_function_concurrency_original": true,
+    "queues_same_empty": true,
+    "historical_journals_unchanged": true,
+    "desired": "STOPPED",
+    "health": "HEALTHY",
+    "ec2": "stopped",
+    "maintenance": "ENDED",
+    "alarms_ok": 51,
+    "no_external_work": true,
+    "lock_absent": true,
+    "current_operation_absent": true,
+    "dns_absent": true
+  },
+  "validation_at_execution": {
+    "tests": {
+      "full": 1826,
+      "seconds": 101.08,
+      "lint": "pass",
+      "format_files": 344,
+      "mypy_files": 253,
+      "synth": [
+        "configured control-plane",
+        "independent web"
+      ]
+    },
+    "ci_success": {
+      "CI": 36111340729,
+      "NeoForge": 36111340778,
+      "Paper": 36111340744
+    }
+  },
+  "validation_after_closeout": {
+    "focused_tests": 13,
+    "ruff": "pass",
+    "format_files": 345,
+    "mypy_files": 253,
+    "json_privacy_local_links": "pass",
+    "diff_check": "pass",
+    "synth": "Execution commit configured CP and independent Web synth retained; no infrastructure/source change in closeout. CI synth is checked separately.",
+    "ci": "Exact closeout commit workflows reported in final handoff; not inferred from execution CI."
+  },
+  "private_evidence_sha256": {
+    "frozen-payloads-v1/execution-plan.json": "37a40da3b22a0ce6ba4f358b4e9439ad7b72c48bb8b9924058466e0c442310f0",
+    "frozen-payloads-v1/baseline.diff": "8c9ebd8de9afed21b2e2e3e782ae1d9033c60b688e2d3dbb07c341f60b591e2c",
+    "source-readonly-v1.json": "aaaaac818f85cb28335c03643dd76461b54fd44685a42d9b9bb1625b1e305b67",
+    "protection-verified-v1.json": "7ecdf09a441e0d0f647e42c4c70f641ad5579ff17e6bf74c784119bc10d768e3",
+    "prepared-verification.json": "72cb89c12eea746b42f88cd044d25d753a7f654ed608ba0fedd649326bc92ca1",
+    "restored-live-verification.json": "50412563f54da21b3b48a36c04fc2aa1231559b7c36bb0b9312d6aa96c5a4bc4",
+    "post-stop-unresolved-delta.json": "f50a4404986fa5b699ba5e3403b72a4e5b41e3aa970cafe27bfabac04650a1ee",
+    "operations/restore-rollback/result.json": "c9849578fee5220e1af3e75e6f798cc3519c135784855aee2be11c291bf09cd6",
+    "operations/after-rollback-records/result.json": "5de6b1114451fc019ca62efb9bf836aa5612c50a1c271a96938e9e3c8435f8d6",
+    "operations/rollback-content-collect-2/parsed.json": "85da6e2f6f9b36f9e1cefa9e18bde0ae95093e83612b1aa68519aa80d995cd8b",
+    "operations/rollback-protection-collect-1/parsed.json": "90a4c07375e96fa769026e463c1274350b2a7e6fce6ca210bc05914685950da5",
+    "final-safe-v1/result.json": "3a1a8394231c93b50294d4bd34530ecec1bba5645963aed7c1525361500695cb",
+    "final-comparison.json": "ff0cb0627cbceff1a41774b2dd383d2ea1c55725805fb132a31f93d6f7f5d74c",
+    "final-volume-readback.json": "25de11d995824f9fe5392036c23456fcd07c81e6b3e919b8908e56074441c065",
+    "notification-investigation-final/history.json": "98c46be5e1a8e1f699d0cd99d3074ef9a6f56a8461fc85de898d4605cc17037e",
+    "notification-investigation-final/metrics.json": "5f3dcd9f8fdf955c42038b54e4c070e264fd484843bdfb17f6d8534787e6534c",
+    "notification-investigation-summary.json": "19627283959211ea3e1a962c868fe7c9d395fe0710cec4ab2a3211f27c0f44a7",
+    "ingress-close/original.json": "6f36c738155bd26dae221b0dcdb2f2956bed2077143e521cb50c70aaa243bd67",
+    "ingress-restore/complete.json": "28064e2143cffdc8abcc6495ac4ae030cf830eaf27fddd1656ece3c21ae02531"
+  }
+}

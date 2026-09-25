@@ -1,6 +1,11 @@
 # Paper RESTORE: separately authorized limited dev proof
 
-2026-09-25. **Pre-execution qualification; AWS RESTORE not yet performed.**
+2026-09-25. **Partial dev proof, formally rolled back; full Paper qualification incomplete.**
+The [execution evidence](../evidence/paper_restore_dev_2026-09-25.md) records real
+PREPARED, conditional commit, restored START/content/STOP and formal rollback.
+Post-STOP metadata changed at an aggregate level without individual-file attribution;
+original-world START/STOP was deliberately not performed. Do not report this as the
+complete requested proof or repeat completed BACKUP/RESTORE/copy checkpoints.
 Use the existing [D-113 contract](../reviews/game_restore.md) and
 [operator checkpoints](game_restore.md). The first Vanilla B proof and its
 restriction against vps-survival remain historical authority for that first run.
@@ -141,3 +146,37 @@ Decimal normalization in the test (the real host decodes integers), and macOS /v
 symlink rejection before rebuilding under its resolved /private/var path. Initial
 lint and the changed host-read call-count assertion were corrected in test/reader
 scope. No failed run was relabeled; no RESTORE safety guard was relaxed.
+
+## Retained checkpoint and next review
+
+The original initial path is selected again, with generation 1, no current_id and
+generation_counter 2. Both worlds and both snapshots are retained. The RESTORE
+journal is ROLLED_BACK with temporary-volume cleanup DELETED. The original tree
+remained exact through rollback; it was not started in this execution.
+
+Source/copy whole-world equality and restored live content equality succeeded.
+After normal STOP, the 33-file modern metadata group had the same filename set but
+a different aggregate hash. The decoded level.dat Time advanced; this explains an
+observed time change, not every changed file. Player groups, selected terrain
+samples in each dimension, datapacks, the nine selected game-rule/border/world-gen
+files and seven Paper configs still matched. Do not infer corruption or complete
+normality from the aggregate alone. The fixed reader did not fail or truncate, so
+the single output-failure retry exception was not used to add diagnostic SSM.
+
+Before any separately authorized continuation, qualify a bounded read-only
+per-file comparison of the retained original and restored trees. Freeze its commit,
+payload/hash, changed-file/output limits and local actual-Python execution tests.
+First revalidate the original against the saved previous_tree and both identities;
+then identify changed metadata files and distinguish decoded changes from opaque
+NBT arrays. No source snapshot remount, new BACKUP/RESTORE request, prepare replay,
+world editing or helper update is needed merely to review the retained difference.
+Original START remains pending until the difference is adequately explained and
+the continuation's safety/authorization conditions hold.
+
+Adjacent monitoring follow-up: two previously suppressed composite notifications
+were released after the first maintenance-host stop, before their child alarms
+returned to OK. Preserve the history and fail-open contract. Review observation
+convergence and alarm evaluation timing separately; do not extend suppression,
+inject metrics or alter alarms to hide the event. In the rollback session, the
+operator observed child-alarm convergence before formal maintenance end. This is
+an observation sequence, not a guarantee that future shutdowns cannot notify.

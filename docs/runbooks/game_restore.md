@@ -3,6 +3,11 @@
 > 2026-09-24 follow-up: [dynamic Game BACKUP IAM修正とdev vps-survivalでの正式BACKUP成功](../evidence/dynamic_game_backup_2026-09-24.md)。過去の保護BACKUP IAM blockerは当時の履歴として保持する。今後も保護BACKUPは正式経路で成功することが条件で、D-113実証・自動BACKUP運用とは別の完了範囲。
 
 [D-113 contract and candidate inventory](../reviews/game_restore.md).
+Separately authorized Paper execution: [2026-09-25 partial proof and safe rollback](../evidence/paper_restore_dev_2026-09-25.md).
+It reached restored START/content/STOP and formal rollback, but original START/STOP
+remains unperformed because post-STOP metadata differences need file-level attribution.
+The [Paper-specific runbook](paper_restore_dev.md) preserves this checkpoint;
+the historical first-Vanilla-B restriction below remains unchanged.
 Limited Vanilla B dev qualification completed in the
 [2026-09-24 retained-PREPARED continuation](../evidence/game_restore_resumed_2026-09-24.md):
 conditional commit, restored START/content/STOP, formal rollback, original
