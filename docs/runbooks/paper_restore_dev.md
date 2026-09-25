@@ -180,3 +180,74 @@ convergence and alarm evaluation timing separately; do not extend suppression,
 inject metrics or alter alarms to hide the event. In the rollback session, the
 operator observed child-alarm convergence before formal maintenance end. This is
 an observation sequence, not a guarantee that future shutdowns cannot notify.
+
+## Separately authorized retained-world continuation
+
+The 2026-09-25 continuation starts from closeout `a11e0f9`, not from a new RESTORE.
+The original initial server is already selected; journal
+`op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42`
+must remain ROLLED_BACK, generation 1 / counter 2 / current_id absent. No new BACKUP,
+request, clone volume, source mount, prepare, selection commit or rollback is allowed.
+Retain both worlds and snapshots. Do not rewrite the earlier partial result.
+
+First verify the saved private evidence hashes against the public JSON and formal
+receipt. For this particular run, source_tree and previous_tree were identical.
+Only a current original-server/world/metadata match to those saved values permits
+using the retained original as the restored world's pre-start comparison baseline.
+This is new observation of a retained tree, not inversion of an aggregate hash or
+new snapshot measurement. It is not a general property of historical backups.
+
+The supplemental `restore_compare` reader keeps the existing `file_group` encoding
+and traversal/output/time limits. It records relative paths, sizes, SHA-256 and
+read stability; level.dat is separate from modern data/minecraft metadata. Whole
+world file differences include additions/deletions/changes and unchanged counts,
+with complete filename/content aggregates. Repeated full manifests detect changes
+during the read; atime is outside the content comparison. Empty directories remain
+covered by the formal server/world tree reader, not the file-only aggregate.
+
+The private typed NBT snapshot preserves numeric tag types and exact decimal integer
+strings, float hex, compound/list structure and typed opaque array hashes/counts.
+It does not interpret arrays as positions/seeds. Unknown types, unstable reads,
+oversized input/output or excessive differences fail, rather than normalize away
+evidence. Compressed-byte equality, expanded-byte equality and typed-value equality
+are separate results. Compound ordering differences can have equal typed values;
+that fact alone does not authorize treating any changed saved value as normal.
+Any changed opaque value needs independent explanation or leaves the proof pending.
+
+Freeze the command family before AWS: one paired whole-world comparison and three
+numbered private metadata/level snapshot parts, plus the existing target-content
+and other-Game protection readers. Each private part is at most 18,000 base64
+characters inside the unchanged 20,000-byte JSON envelope. XZ is transport encoding,
+not a change to world files. All three must have the same decoded length/SHA and
+part count, and reassemble/decompress/reload exactly. A missing or disagreeing part
+is not a complete snapshot. Maximum decoded private JSON is 1 MiB; the complete
+transport is capped at 54,000 characters. Private typed records are never published
+as player data, inventories, coordinates or full server properties. This complete
+bounded record is fixed before starting original so its later save can be explained.
+
+Qualify exact generated python3 -c on Python 3.9 and current repository Python,
+including reassembly. Keep test fixtures and failed qualifications in new roots.
+Commit/push, required CI and a clean execution worktree precede real host work.
+No supplemental reader is installed as a host helper or changes validator authority.
+
+The first new ordinary maintenance (at most 7200 seconds) checks both retained
+worlds, all identities, other Games and the retained Vanilla world. Original must
+match previous_tree/source_world_tree/before metadata; restored must match the
+saved post-STOP world/after metadata. Freeze per-file metadata manifests and typed
+records privately. Explain changed files and fields using exact-version evidence;
+level.dat Time is not an explanation for another metadata file. Unexplained loss,
+unknown layout or baseline mismatch stops forward work: normally stop idle host,
+formally end and retain all data. No diagnostic source remount is authorized.
+
+Only after those gates pass, normal idle-host stop/end is followed by exactly one
+Admin original START/content/STOP. Verify original binding, unchanged package,
+READY/fresh same-run observations, current policies and Paper content. The second
+ordinary maintenance compares saved original content with the frozen private
+snapshot and checks unchanged retained restored/other trees. It then normally
+stops idle host and ends. Original lifecycle success and full post-save explanation
+are separate outcomes. No second START/STOP is authorized to repair evidence.
+
+Restore ingress exactly, confirm naturally normal 51 alarms and final stopped/no
+work/no DNS/empty queues. Investigate any maintenance notification against actual
+state/history; do not suppress it by changing monitoring. That race remains an
+independent backlog. The earlier completed RESTORE checkpoints are never replayed.
