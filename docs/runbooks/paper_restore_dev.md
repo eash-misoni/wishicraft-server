@@ -259,7 +259,7 @@ work/no DNS/empty queues. Investigate any maintenance notification against actua
 state/history; do not suppress it by changing monitoring. That race remains an
 independent backlog. The earlier completed RESTORE checkpoints are never replayed.
 
-### Proposed supplementary Paper override read
+### Separately approved supplementary Paper override read
 
 The retained-world comparison identified changes in all three dimensions'
 `data/paper/level_overrides.dat`, outside the 33-file Minecraft metadata group.
@@ -277,3 +277,30 @@ post-save invocation before using this added selection. No source remount, world
 write, RESTORE replay or safety-contract change is involved. If approval is not
 available, stop the idle maintenance host normally, end and retain both worlds;
 do not silently consume the output-failure exception.
+
+For this continuation only, the user explicitly approved commit
+`08455f6c43800d944a9f9e62b123c8d407e301a6`, payload SHA-256
+`5fc0937cc875313bbc51fc034a5d703981493ab12e23dbf58f69f2c23da325eb`, exactly
+six files per invocation and at most two invocations inside the two planned
+maintenances. All CI, clean checkout, payload identity, idle Minecraft state and
+current lease/time margin must be checked before each. This is an independent
+approval, not use or expansion of the display-failure retry allowance, and is not
+a standing permission for other files, worlds or future runs.
+
+### Continuation result and restart boundary
+
+The [2026-09-25 retained-world continuation](../evidence/paper_restore_remaining_2026-09-25.md)
+completed the original normal START/content/STOP and post-save comparison. The
+12 changed world files were individually attributed: seven Minecraft metadata
+files, three separate Paper overrides, and level.dat/level.dat_old. Original
+server/world/before aggregates first matched saved formal evidence; all typed
+records needed for the later save comparison were fixed privately before START.
+Retained restored and other Game trees remained unchanged. Both worlds and both
+snapshots are retained, with original selected and journal still ROLLED_BACK.
+
+These already completed steps must not be replayed on a later handoff. A future
+request must establish current state and its own authority; the earlier exact
+original/source equality is not assumed after original's normal save. The three
+shutdown-convergence notifications in this continuation have separate alarm/
+metric/log evidence and user-confirmed receipt. Their ordering race remains an
+independent monitoring backlog; no suppression setting was changed here.

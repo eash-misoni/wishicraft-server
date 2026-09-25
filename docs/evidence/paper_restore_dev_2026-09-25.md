@@ -12,6 +12,10 @@ See the [machine-readable record](paper_restore_dev_2026-09-25.json),
 [D-113 contract](../reviews/game_restore.md). Prior first-Vanilla-B authorization
 and evidence remain unchanged. This is a separately authorized Paper slice.
 
+The separately authorized [retained-world continuation](paper_restore_remaining_2026-09-25.md)
+records subsequent comparison and original-world verification. This page remains
+the historical PARTIAL result; later work does not change what was demonstrated here.
+
 ## Execution identity and qualification
 
 - Baseline: `8a12b2a3aaac2aa5ab5dd8602c66a35ee1d5ac23`.

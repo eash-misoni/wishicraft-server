@@ -1,0 +1,1885 @@
+{
+  "status": "PASSED_LIMITED_PAPER_CONTINUATION",
+  "baseline_commit": "a11e0f9ba3a2342a70fe86811f1849514dee7fa5",
+  "execution_commit": "fe116d870bf015672f9bbb44f00ce8c8fe4a1205",
+  "supplementary_proposal_commit": "08455f6c43800d944a9f9e62b123c8d407e301a6",
+  "supplementary_execution_authorized": true,
+  "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+  "restore_operation_id": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+  "world_selection": {
+    "generation": 1,
+    "generation_counter": 2,
+    "current_id_present": false,
+    "journal_phase": "ROLLED_BACK"
+  },
+  "paths": {
+    "original": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+    "retained_restored": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/worlds/op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42/server"
+  },
+  "payload_hashes": {
+    "world-compare": "341ae40ca0ea53b6113965db40eb9af58c58a29890662e6a322b7c28e4eb24ba",
+    "metadata-0": "c9c74d8155f29a78b6d25eb9e29afa606e53336b2a17ca43dca596bdaa551890",
+    "metadata-1": "8209e0ce8833c748aafcf10f950ffef4e589b5fb29c49541bee61c82c63fbcc5",
+    "metadata-2": "dd579f6c4d980bdff4b53676221b223d600f415db5b726dd4036170a362084b2",
+    "stopped-content": "28f2e33b51bc9e886656138a305f8b3cb74a016f33974c37497762d3613a39bb",
+    "protection": "056c61f0120c6c31117d04c7dd51cd6fe3a33698f927476017ff657cd1b6e268",
+    "original-live": "b0915587527e4dbb238b30ba9509b4c2fd2fe5e37e8abd5cb5d97928d2529c07"
+  },
+  "reads": [
+    {
+      "CommandId": "ee06af3b-8958-45ad-8656-20466c37a39c",
+      "InstanceId": "i-04fc0629dc4ea466e",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T14:50:26.809Z",
+      "ExecutionEndDateTime": "2026-09-25T14:51:24.809Z"
+    },
+    {
+      "CommandId": "7d75b1a3-2470-45be-b5a6-b0de074957bf",
+      "InstanceId": "i-04fc0629dc4ea466e",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T14:53:53.995Z",
+      "ExecutionEndDateTime": "2026-09-25T14:54:00.995Z"
+    },
+    {
+      "CommandId": "1759c27d-dcd3-490a-a949-7a0a43e2ab0a",
+      "InstanceId": "i-04fc0629dc4ea466e",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:00:15.950Z",
+      "ExecutionEndDateTime": "2026-09-25T15:00:22.950Z"
+    },
+    {
+      "CommandId": "458d774b-f9cd-4e8a-9bb9-04eeb049cbc2",
+      "InstanceId": "i-04fc0629dc4ea466e",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:06:51.018Z",
+      "ExecutionEndDateTime": "2026-09-25T15:06:58.018Z"
+    },
+    {
+      "CommandId": "58a445d8-3a66-4440-85b1-5923d77fcd97",
+      "InstanceId": "i-04fc0629dc4ea466e",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:13:41.805Z",
+      "ExecutionEndDateTime": "2026-09-25T15:13:48.805Z"
+    },
+    {
+      "CommandId": "50cc7ba8-c3c5-410d-a347-935235b234d2",
+      "InstanceId": "i-04fc0629dc4ea466e",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:15:04.469Z",
+      "ExecutionEndDateTime": "2026-09-25T15:15:09.469Z"
+    }
+  ],
+  "private_evidence_sha256": {
+    "before-comparison-v1/private-snapshots.json": "d75ae8d11eaa2eeaf19afe68a0f7adf7281bb27bb31f6e289c3515b0b8770aa2",
+    "before-comparison-v1/private-delta.json": "520b7d27470418c57e62f46fb6a2f208e698183e413abd6ab9b7a1f4399ac0f3",
+    "before-comparison-v1/content.json": "971e390282dc310bdecd0f57739f6de88d0fd0a7ac604bd2aa2cee50e0f13661",
+    "semantic-review-partial-v1.json": "a14a89e6607d1127bed6d320ce46a6f986e0b9ba22bd4a7a940ff0d34cb05c21",
+    "semantic-review-final-v1.json": "ab915613e8b97e78419d63a64dac58180f9744d356eff076a92ff83d9a1895d1",
+    "original-live-verified.json": "5abc74e019895a6a026dd3e81d83f95c3a0cae07980b78e5a7d850ee50d8a933",
+    "original-stop-verified.json": "68b6418529030a1af627d5c29339bd8da95ddad58368fbcc87975e8235c81d39",
+    "snapshot-final-v1.json": "6ac87cac4b8e9ebe815a9b0f45bdff132de1c4a3ee5d56795688eec3bcfc95a3",
+    "final-safe-v1/result.json": "c0c5c09bd549ddc9ff356815c2e32348a19cb0aea64f77ec5e8ee3f6da889875",
+    "final-preservation-v1.json": "b1a74ab8a606e42163a6f41abcb8b3a00891f6128812bb3fc612b4bf41095866",
+    "operations/final-record-audit/result.json": "aca2bdfb644098575b560a9e3080aa75fb4483adafd518a4a9f601c96523e3c1",
+    "ingress-restore/complete.json": "28064e2143cffdc8abcc6495ac4ae030cf830eaf27fddd1656ece3c21ae02531",
+    "maintenance-compare-begin/after.json": "dd97b59101a6a90c97bbf43387433b93c69d532df675a6e5d861ef3948de6951",
+    "maintenance-compare-end/after.json": "f20cb69b0edd83ef424f0e6f904e1677e13f14fa882c93d82f45a5bd95c471ed",
+    "maintenance-postsave-begin/after.json": "fd8740984378282ddbebd6a3c804e67178e04601b8e3e24925b17a36e477fe02",
+    "maintenance-postsave-end/after.json": "469979d66d01fdc0b5ab1fc3cb697171d58536ed41bf7e6eaee89d1816704ea3",
+    "notification-review-compare.json": "0bd9cb9e6fc7f958b9d24aa57e487df3cef3204f681cfb1335fbe913aaa97dbd",
+    "notification-review-postsave.json": "ec88aecf8b465ca61365c0f3f38bae18b75c31eb65f57eaba7ad1a63cf345f3f",
+    "original-start-workflow/history.json": "86ea84528e512bfdcc8283d4b08aad446ba2d41c01e83113e53deeeff0509bb2",
+    "original-stop-workflow/history.json": "ade4783f55f23048deccd05b70c44f7e7e83fd4aaf4712277b8da3f0c1fe0ce8"
+  },
+  "world_comparison": {
+    "after_files": {
+      "count": 1541,
+      "names_sha256": "1d64ec2d0ed3c03b9b2ba95f3a83187a14825aaead2118cc0137313fd0ee5270",
+      "sha256": "21dc12c95bb688622676434626f86e786ac9ed0b652addf54b7d4c405dd83f49",
+      "state": "read"
+    },
+    "after_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/worlds/op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42/server/wishinkaiwai",
+    "before_files": {
+      "count": 1541,
+      "names_sha256": "1d64ec2d0ed3c03b9b2ba95f3a83187a14825aaead2118cc0137313fd0ee5270",
+      "sha256": "cdcddcc9b6188d4f7bef8b442b2f8541735e95368dca021932f9f1efad865085",
+      "state": "read"
+    },
+    "before_path": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server/wishinkaiwai",
+    "difference": {
+      "added": {},
+      "changed": {
+        "dimensions/minecraft/overworld/data/minecraft/raids.dat": {
+          "after": {
+            "sha256": "db70e8dc4355ac0607757494e0e3ce3945bd49943768f9efb39e2abbc49c7538",
+            "size": 74,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "84ec358342608944875d1f69d93a5f6698578e5f2aacebe0a89d40eb8cb9b6e2",
+            "size": 74,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/overworld/data/minecraft/weather.dat": {
+          "after": {
+            "sha256": "d4b4ee770ad308a2d1169cc513f11d2f2a69194851972e85b5bfcddaec260e4e",
+            "size": 108,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "16b6f7dcc96120824e5eedac12ca24762dc4d660daac2fd4e6dec17efcfd42da",
+            "size": 108,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/overworld/data/minecraft/world_clocks.dat": {
+          "after": {
+            "sha256": "f9880a58d1ea7bea45f180760dd16dbfd6c8f7e92cf4f9bcce817ed338655621",
+            "size": 107,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "21fc56f7321910aa4cff88f84cc90a007ac804e8167431935ec9e8e67e63cdc3",
+            "size": 107,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/overworld/data/paper/level_overrides.dat": {
+          "after": {
+            "sha256": "2ca8bea4fd9c21a022e348c54f9da5a7d8dcf0b73579d232b5f242aa6794816e",
+            "size": 169,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "1fd19cb07a44163c0d81fa285cfad5e20fbada66558d5dda8a3df20da5d99863",
+            "size": 165,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_end/data/minecraft/raids.dat": {
+          "after": {
+            "sha256": "00455fae1047c17bf8101940aa241088e112a5295c2c2e4934436337e5ed3ccb",
+            "size": 74,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "dcccb794465f8db6722a99c625a106a5e80f27434b99b50d2aae63bdbbed7c68",
+            "size": 74,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_end/data/minecraft/world_clocks.dat": {
+          "after": {
+            "sha256": "87c8e2d55c6ed068284dd8a3ec55a433a0f1eef130b23edaf1f65a0386ef0d4c",
+            "size": 109,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "bf143202ac5c8262f97fb43ed5eebe39b8d438cd58a701bffd98645b6142b2ee",
+            "size": 109,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_end/data/paper/level_overrides.dat": {
+          "after": {
+            "sha256": "06b47de54451e872d7e059bb513072202154ced1eba9c43fd9691e987601ea41",
+            "size": 167,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "f7f8602c1e647c45e93262b5eb5198874d43313e81960a9d90db64894be7b7dd",
+            "size": 163,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_nether/data/minecraft/raids.dat": {
+          "after": {
+            "sha256": "00455fae1047c17bf8101940aa241088e112a5295c2c2e4934436337e5ed3ccb",
+            "size": 74,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "dcccb794465f8db6722a99c625a106a5e80f27434b99b50d2aae63bdbbed7c68",
+            "size": 74,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_nether/data/minecraft/world_clocks.dat": {
+          "after": {
+            "sha256": "87c8e2d55c6ed068284dd8a3ec55a433a0f1eef130b23edaf1f65a0386ef0d4c",
+            "size": 109,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "bf143202ac5c8262f97fb43ed5eebe39b8d438cd58a701bffd98645b6142b2ee",
+            "size": 109,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_nether/data/paper/level_overrides.dat": {
+          "after": {
+            "sha256": "06b47de54451e872d7e059bb513072202154ced1eba9c43fd9691e987601ea41",
+            "size": 167,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "f7f8602c1e647c45e93262b5eb5198874d43313e81960a9d90db64894be7b7dd",
+            "size": 163,
+            "state": "read"
+          }
+        },
+        "level.dat": {
+          "after": {
+            "sha256": "1ec0ea4b334fee6f58f4c2d5a755a60d79c8179c8ccc9314745256e5dff5d520",
+            "size": 480,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "afe37041343cb1d72cbcad33b7b3546ab40edcf399379ea42c2f0801ea8e5736",
+            "size": 476,
+            "state": "read"
+          }
+        },
+        "level.dat_old": {
+          "after": {
+            "sha256": "4ee90f89cd4d8fff30cb36a35cfc23249fb8a5d49effd385dccf0cab51a57bb0",
+            "size": 480,
+            "state": "read"
+          },
+          "before": {
+            "sha256": "88ac544c2186103dacf9f02a16fbece7e083276987aabb33237d5db5690935d7",
+            "size": 477,
+            "state": "read"
+          }
+        }
+      },
+      "deleted": {},
+      "unchanged": 1529
+    },
+    "stable": true
+  },
+  "metadata": {
+    "before": {
+      "count": 33,
+      "names_sha256": "259e9180ed1347fe9ab3121011bbb24ab410722ab880643f7c86f997a14e903e",
+      "sha256": "b35cb28b5de9306e317c4c0a973b4089a59a08d1cbc05a66f57fc052b05572cb",
+      "state": "read"
+    },
+    "after": {
+      "count": 33,
+      "names_sha256": "259e9180ed1347fe9ab3121011bbb24ab410722ab880643f7c86f997a14e903e",
+      "sha256": "238895a8fd0e5f86b6d8a92408dcc5e574049f3f45b36185ada2cb9ace98d1f1",
+      "state": "read"
+    },
+    "changed_files": {
+      "dimensions/minecraft/overworld/data/minecraft/raids.dat": {
+        "before": {
+          "sha256": "84ec358342608944875d1f69d93a5f6698578e5f2aacebe0a89d40eb8cb9b6e2",
+          "size": 74,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "db70e8dc4355ac0607757494e0e3ce3945bd49943768f9efb39e2abbc49c7538",
+          "size": 74,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/overworld/data/minecraft/weather.dat": {
+        "before": {
+          "sha256": "16b6f7dcc96120824e5eedac12ca24762dc4d660daac2fd4e6dec17efcfd42da",
+          "size": 108,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "d4b4ee770ad308a2d1169cc513f11d2f2a69194851972e85b5bfcddaec260e4e",
+          "size": 108,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/overworld/data/minecraft/world_clocks.dat": {
+        "before": {
+          "sha256": "21fc56f7321910aa4cff88f84cc90a007ac804e8167431935ec9e8e67e63cdc3",
+          "size": 107,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "f9880a58d1ea7bea45f180760dd16dbfd6c8f7e92cf4f9bcce817ed338655621",
+          "size": 107,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_end/data/minecraft/raids.dat": {
+        "before": {
+          "sha256": "dcccb794465f8db6722a99c625a106a5e80f27434b99b50d2aae63bdbbed7c68",
+          "size": 74,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "00455fae1047c17bf8101940aa241088e112a5295c2c2e4934436337e5ed3ccb",
+          "size": 74,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_end/data/minecraft/world_clocks.dat": {
+        "before": {
+          "sha256": "bf143202ac5c8262f97fb43ed5eebe39b8d438cd58a701bffd98645b6142b2ee",
+          "size": 109,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "87c8e2d55c6ed068284dd8a3ec55a433a0f1eef130b23edaf1f65a0386ef0d4c",
+          "size": 109,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/raids.dat": {
+        "before": {
+          "sha256": "dcccb794465f8db6722a99c625a106a5e80f27434b99b50d2aae63bdbbed7c68",
+          "size": 74,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "00455fae1047c17bf8101940aa241088e112a5295c2c2e4934436337e5ed3ccb",
+          "size": 74,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/world_clocks.dat": {
+        "before": {
+          "sha256": "bf143202ac5c8262f97fb43ed5eebe39b8d438cd58a701bffd98645b6142b2ee",
+          "size": 109,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "87c8e2d55c6ed068284dd8a3ec55a433a0f1eef130b23edaf1f65a0386ef0d4c",
+          "size": 109,
+          "state": "read"
+        }
+      }
+    },
+    "unchanged": 26,
+    "added": {},
+    "deleted": {},
+    "details": {
+      "dimensions/minecraft/overworld/data/minecraft/raids.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "tick"
+            ],
+            "before": [
+              3,
+              "30367734"
+            ],
+            "after": [
+              3,
+              "30378346"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/overworld/data/minecraft/weather.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "rain_time"
+            ],
+            "before": [
+              3,
+              "11827"
+            ],
+            "after": [
+              3,
+              "1212"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "data",
+              "thunder_time"
+            ],
+            "before": [
+              3,
+              "143371"
+            ],
+            "after": [
+              3,
+              "132756"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/overworld/data/minecraft/world_clocks.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:overworld",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "16406999"
+            ],
+            "after": [
+              4,
+              "16417614"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:the_end",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "606997"
+            ],
+            "after": [
+              4,
+              "617612"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_end/data/minecraft/raids.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "tick"
+            ],
+            "before": [
+              3,
+              "30367734"
+            ],
+            "after": [
+              3,
+              "30378346"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_end/data/minecraft/world_clocks.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:overworld",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "30367857"
+            ],
+            "after": [
+              4,
+              "30378472"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:the_end",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "606997"
+            ],
+            "after": [
+              4,
+              "617612"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/raids.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "tick"
+            ],
+            "before": [
+              3,
+              "30367734"
+            ],
+            "after": [
+              3,
+              "30378346"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/world_clocks.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:overworld",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "30367857"
+            ],
+            "after": [
+              4,
+              "30378472"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:the_end",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "606997"
+            ],
+            "after": [
+              4,
+              "617612"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "levels": {
+    "level_dat": {
+      "comparison": {
+        "classification": "typed_values_changed",
+        "requires_explanation": true
+      },
+      "fields": [
+        {
+          "path": [
+            "root",
+            "Data",
+            "LastPlayed"
+          ],
+          "before": [
+            4,
+            "1790248451333"
+          ],
+          "after": [
+            4,
+            "1790327494227"
+          ]
+        },
+        {
+          "path": [
+            "root",
+            "Data",
+            "Time"
+          ],
+          "before": [
+            4,
+            "30367857"
+          ],
+          "after": [
+            4,
+            "30378472"
+          ]
+        }
+      ]
+    },
+    "level_dat_old": {
+      "comparison": {
+        "classification": "typed_values_changed",
+        "requires_explanation": true
+      },
+      "fields": [
+        {
+          "path": [
+            "root",
+            "Data",
+            "LastPlayed"
+          ],
+          "before": [
+            4,
+            "1790248451051"
+          ],
+          "after": [
+            4,
+            "1790327493971"
+          ]
+        },
+        {
+          "path": [
+            "root",
+            "Data",
+            "Time"
+          ],
+          "before": [
+            4,
+            "30367854"
+          ],
+          "after": [
+            4,
+            "30378469"
+          ]
+        }
+      ]
+    }
+  },
+  "other_game_and_retained_vanilla_protection": true,
+  "original_start_performed": true,
+  "original_stop_performed": true,
+  "post_save_comparison_performed": true,
+  "final_state": {
+    "alarm_count": 51,
+    "all_alarms_naturally_ok": true,
+    "all_51_alarm_configurations_unchanged": true,
+    "all_lambda_concurrency_restored": true,
+    "host_iam_unchanged": true,
+    "all_restore_journals_unchanged": true,
+    "data_volume_attachment_unchanged": true,
+    "desired_revision": 77,
+    "final_state": {
+      "desired": "STOPPED",
+      "health": "HEALTHY",
+      "ec2": "stopped",
+      "maintenance": "ENDED",
+      "dns": "absent",
+      "no_external_work": true,
+      "lock_absent": true,
+      "queues": {
+        "DiscordMessageDlqD31D21DD": {
+          "QueueArn": "arn:aws:sqs:ap-northeast-1:385526546525:wc-dev-discord-message-dlq",
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        },
+        "DiscordMessageRetryQueue4EAB3A83": {
+          "QueueArn": "arn:aws:sqs:ap-northeast-1:385526546525:wc-dev-discord-message-retry",
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        },
+        "StatusExecutorDlqD0B32ADE": {
+          "QueueArn": "arn:aws:sqs:ap-northeast-1:385526546525:wc-dev-status-executor-dlq",
+          "ApproximateNumberOfMessages": "0",
+          "ApproximateNumberOfMessagesNotVisible": "0",
+          "ApproximateNumberOfMessagesDelayed": "0"
+        }
+      }
+    },
+    "at": "2026-09-25T16:09:00.155042+00:00"
+  },
+  "supplementary_payload_sha256": "5fc0937cc875313bbc51fc034a5d703981493ab12e23dbf58f69f2c23da325eb",
+  "supplementary_before_comparison": {
+    "dimensions/minecraft/overworld/data/paper/level_overrides.dat": {
+      "comparison": {
+        "classification": "typed_values_changed",
+        "requires_explanation": true
+      },
+      "fields": [
+        {
+          "path": [
+            "root",
+            "data",
+            "game_time"
+          ],
+          "before": [
+            4,
+            "30367857"
+          ],
+          "after": [
+            4,
+            "30378472"
+          ]
+        }
+      ]
+    },
+    "dimensions/minecraft/the_end/data/paper/level_overrides.dat": {
+      "comparison": {
+        "classification": "typed_values_changed",
+        "requires_explanation": true
+      },
+      "fields": [
+        {
+          "path": [
+            "root",
+            "data",
+            "game_time"
+          ],
+          "before": [
+            4,
+            "30367857"
+          ],
+          "after": [
+            4,
+            "30378472"
+          ]
+        }
+      ]
+    },
+    "dimensions/minecraft/the_nether/data/paper/level_overrides.dat": {
+      "comparison": {
+        "classification": "typed_values_changed",
+        "requires_explanation": true
+      },
+      "fields": [
+        {
+          "path": [
+            "root",
+            "data",
+            "game_time"
+          ],
+          "before": [
+            4,
+            "30367857"
+          ],
+          "after": [
+            4,
+            "30378472"
+          ]
+        }
+      ]
+    }
+  },
+  "prestart_gate": {
+    "conditions_met": true,
+    "at": "2026-09-25T15:25:04.583849+00:00",
+    "implementation_commit": "fe116d870bf015672f9bbb44f00ce8c8fe4a1205",
+    "supplementary_commit": "08455f6c43800d944a9f9e62b123c8d407e301a6",
+    "restore_operation_id": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+    "qualification": "All 12 changed world files attributed. 7 Minecraft metadata and 2 level files explained using exact-version saved-data writers; 3 separate Paper files contain only LONG game_time +10615, matching setGameTime dirty-save behavior. All other typed values unchanged; no added/deleted files; 1529 unchanged. Retained original matches formal baseline; other Games/retained Vanilla, package, policy and owner/receipt protected. Per-file typed snapshots fixed before original START.",
+    "remaining_unexplained_changes": [],
+    "private_evidence_sha256": {
+      "before-comparison-v1/private-snapshots.json": "d75ae8d11eaa2eeaf19afe68a0f7adf7281bb27bb31f6e289c3515b0b8770aa2",
+      "before-comparison-v1/private-delta.json": "520b7d27470418c57e62f46fb6a2f208e698183e413abd6ab9b7a1f4399ac0f3",
+      "before-comparison-v1/content.json": "971e390282dc310bdecd0f57739f6de88d0fd0a7ac604bd2aa2cee50e0f13661",
+      "paper-extra-before/private-snapshot.json": "3e369bde238744ac2e9bfb2d0652ade7e0cb5ca0abd447d2a208768778e0229b",
+      "paper-extra-before/private-delta.json": "e293b9745522b80dfeafcee583ea44e8ef19e12c9bd06d3558a2ec75741a8002",
+      "paper-extra-before/preflight.json": "5751e89274fb97b81e98eaec20763b3bdf4e8b3e27d6186d469fa69c120a0cef",
+      "semantic-review-partial-v1.json": "a14a89e6607d1127bed6d320ce46a6f986e0b9ba22bd4a7a940ff0d34cb05c21",
+      "operations/before-protection-collect-1/parsed.json": "7c69dd47beb0881e2046cf5a84899d6bc124ffeda1a427a32f95d54c2b88bfc6",
+      "retained-baseline-confirmed.json": "c192d2693f2b26efc9c702304c6dbf739a0be194f6d0fc9aa260a7b9422063b5"
+    }
+  },
+  "original_start_operation": "op-cca5d0f4-bce2-4dcd-8968-dc3d25bf0628",
+  "original_stop_operation": "op-0d5594ea-76a0-4ae8-8575-e2c1e3236e0d",
+  "original_live_verification": {
+    "binding_original": true,
+    "same_config_digest_and_image": true,
+    "players_configs_datapacks_saved_metadata_dimension_checks_equal": true,
+    "restored_trees_unchanged": true,
+    "owner_receipts_unchanged": true,
+    "policy_file_hashes_unchanged": true,
+    "source_invocation": "97d96e86-fa18-47fe-916a-e9e5c7425870",
+    "at": "2026-09-25T15:40:24.447Z",
+    "live_original_full_world_hash_equality_required": false,
+    "private_result_sha256": "1a727f59a33d295f62b8289bbee36ab899d394563ada05f8f3c05755c3e1e9b5"
+  },
+  "original_stop_verification": {
+    "formal_ssm_success": true,
+    "stopped_receipt_phase": "stopped",
+    "process_absent": true,
+    "container_absent": true,
+    "minecraft_service_not_running": true,
+    "observation_at": "2026-09-25T15:41:41.520862Z",
+    "source": "original-stop-workflow/runtime-stopped-input.json",
+    "subsequent_ec2_stopped_dns_absent": "operations/original-stopped-state/result.json"
+  },
+  "notification_first_maintenance": {
+    "classification": "planned idle-host stop convergence; suppression became ineligible before both child alarms recovered",
+    "host_normal_stop_at": "2026-09-25T15:25:26Z",
+    "formal_end_at": "2026-09-25T15:27:27Z",
+    "all_51_ok_observed": true,
+    "user_email_receipt_confirmed": true,
+    "monitoring_changed": false,
+    "permanent_resolution_claimed": false,
+    "events": [
+      {
+        "alarm": "wc-dev-maintenance-suppressor",
+        "at": "2026-09-25T14:46:46.655000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm",
+        "at": "2026-09-25T14:51:25.883000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "at": "2026-09-25T14:51:25.883000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "at": "2026-09-25T14:51:25.908000+00:00",
+        "type": "Action",
+        "summary": "Successfully suppressed (by Alarm) action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm",
+        "at": "2026-09-25T14:56:49.691000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T14:56:49.691000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T14:56:49.716000+00:00",
+        "type": "Action",
+        "summary": "Successfully suppressed (by Alarm) action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm",
+        "at": "2026-09-25T15:01:31.462000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T15:01:31.462000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T15:01:31.487000+00:00",
+        "type": "Action",
+        "summary": "Successfully suppressed (by Alarm) action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm",
+        "at": "2026-09-25T15:26:25.883000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "at": "2026-09-25T15:26:25.883000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-maintenance-suppressor",
+        "at": "2026-09-25T15:26:46.652000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T15:26:46.652000+00:00",
+        "type": "StateUpdate",
+        "summary": "Actions not suppressed"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "at": "2026-09-25T15:26:46.652000+00:00",
+        "type": "StateUpdate",
+        "summary": "Actions not suppressed"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T15:26:46.652000+00:00",
+        "type": "StateUpdate",
+        "summary": "Actions not suppressed"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T15:26:46.737000+00:00",
+        "type": "Action",
+        "summary": "Successfully executed action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T15:26:46.743000+00:00",
+        "type": "Action",
+        "summary": "Successfully executed action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm",
+        "at": "2026-09-25T15:26:49.692000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T15:26:49.692000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm",
+        "at": "2026-09-25T15:31:31.460000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T15:31:31.460000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      }
+    ]
+  },
+  "postsave_review": {
+    "at": "2026-09-25T16:01:02.770111+00:00",
+    "postsave_comparison_passed": true,
+    "normal_original_start_stop_passed": true,
+    "remaining_unexplained_changes": [],
+    "world_changed_files": 12,
+    "unchanged_files": 1529,
+    "added": 0,
+    "deleted": 0,
+    "minecraft_metadata_changed": 7,
+    "minecraft_metadata_unchanged": 26,
+    "classification": "Typed saved values: clocks and game time +8237; positive weather countdowns -8237; independent raid ticks +8234; LastPlayed save epochs. Exact-version writers support these ordinary-save changes. No compression-only or broad time-field exclusion used. Other typed values unchanged.",
+    "retained_restored_and_other_game_trees_unchanged": true,
+    "paper_extra_invocations": 2,
+    "display_retry_invocations": 0,
+    "private_evidence_sha256": {
+      "after-comparison-v1/private-snapshots.json": "30b54cdad944fc9528c111405b72cdbf22a00f05302e8bc7607ab557112e2083",
+      "after-comparison-v1/private-delta.json": "2622e40e8f215755162690bf4b3749311f4177a3d2320b05f0e440850c323882",
+      "after-comparison-v1/content.json": "afa824fde99d3da1b8f95b2c7c993ded288c8f781f5ace3f6f863a70be1cfcc0",
+      "paper-extra-after/private-snapshot.json": "415680a28ba9ae595d37b42dc451c484d2b6cfcb8467f940c7314f253928e8e2",
+      "paper-extra-after/private-delta.json": "0f586331a7582d2bfcaf25154ea870200ced7205dd1ef6e30ed8a2140d0dde5a",
+      "after-world-changes-private.json": "19bf7ea955cedb09b3d491ef4830b3c8b3d0ec6c9a4671aef5437c1c0291da43",
+      "operations/after-protection-collect-1/parsed.json": "7c69dd47beb0881e2046cf5a84899d6bc124ffeda1a427a32f95d54c2b88bfc6"
+    }
+  },
+  "postsave_metadata": {
+    "changed": {
+      "added": {},
+      "deleted": {},
+      "changed": {
+        "dimensions/minecraft/overworld/data/minecraft/raids.dat": {
+          "before": {
+            "sha256": "84ec358342608944875d1f69d93a5f6698578e5f2aacebe0a89d40eb8cb9b6e2",
+            "size": 74,
+            "state": "read"
+          },
+          "after": {
+            "sha256": "14b944aef89a24682d4bdd86a622047314da92f24a77e03b7a90ded245f08b62",
+            "size": 74,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/overworld/data/minecraft/weather.dat": {
+          "before": {
+            "sha256": "16b6f7dcc96120824e5eedac12ca24762dc4d660daac2fd4e6dec17efcfd42da",
+            "size": 108,
+            "state": "read"
+          },
+          "after": {
+            "sha256": "3ff8c588b9e0f20474f643c98d21af46ad5e1e66b701d2cb67f4a48d65e47b1e",
+            "size": 108,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/overworld/data/minecraft/world_clocks.dat": {
+          "before": {
+            "sha256": "21fc56f7321910aa4cff88f84cc90a007ac804e8167431935ec9e8e67e63cdc3",
+            "size": 107,
+            "state": "read"
+          },
+          "after": {
+            "sha256": "699126c32261d4ee956e443713c008bc1c849e109879e2657940acbe40d781fa",
+            "size": 107,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_end/data/minecraft/raids.dat": {
+          "before": {
+            "sha256": "dcccb794465f8db6722a99c625a106a5e80f27434b99b50d2aae63bdbbed7c68",
+            "size": 74,
+            "state": "read"
+          },
+          "after": {
+            "sha256": "894c82aa3b2ebe2693860c0f148ba3a3484844cf9d3ed9193dafdf360439fe5c",
+            "size": 74,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_end/data/minecraft/world_clocks.dat": {
+          "before": {
+            "sha256": "bf143202ac5c8262f97fb43ed5eebe39b8d438cd58a701bffd98645b6142b2ee",
+            "size": 109,
+            "state": "read"
+          },
+          "after": {
+            "sha256": "31bd22b28db0d17df23c3dcc0d5b438ca523ecf1c3d99eb9e4a483552150505b",
+            "size": 109,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_nether/data/minecraft/raids.dat": {
+          "before": {
+            "sha256": "dcccb794465f8db6722a99c625a106a5e80f27434b99b50d2aae63bdbbed7c68",
+            "size": 74,
+            "state": "read"
+          },
+          "after": {
+            "sha256": "894c82aa3b2ebe2693860c0f148ba3a3484844cf9d3ed9193dafdf360439fe5c",
+            "size": 74,
+            "state": "read"
+          }
+        },
+        "dimensions/minecraft/the_nether/data/minecraft/world_clocks.dat": {
+          "before": {
+            "sha256": "bf143202ac5c8262f97fb43ed5eebe39b8d438cd58a701bffd98645b6142b2ee",
+            "size": 109,
+            "state": "read"
+          },
+          "after": {
+            "sha256": "31bd22b28db0d17df23c3dcc0d5b438ca523ecf1c3d99eb9e4a483552150505b",
+            "size": 109,
+            "state": "read"
+          }
+        }
+      },
+      "unchanged": 26
+    },
+    "details": {
+      "dimensions/minecraft/overworld/data/minecraft/raids.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "tick"
+            ],
+            "before": [
+              3,
+              "30367734"
+            ],
+            "after": [
+              3,
+              "30375968"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/overworld/data/minecraft/weather.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "rain_time"
+            ],
+            "before": [
+              3,
+              "11827"
+            ],
+            "after": [
+              3,
+              "3590"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "data",
+              "thunder_time"
+            ],
+            "before": [
+              3,
+              "143371"
+            ],
+            "after": [
+              3,
+              "135134"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/overworld/data/minecraft/world_clocks.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:overworld",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "16406999"
+            ],
+            "after": [
+              4,
+              "16415236"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:the_end",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "606997"
+            ],
+            "after": [
+              4,
+              "615234"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_end/data/minecraft/raids.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "tick"
+            ],
+            "before": [
+              3,
+              "30367734"
+            ],
+            "after": [
+              3,
+              "30375968"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_end/data/minecraft/world_clocks.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:overworld",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "30367857"
+            ],
+            "after": [
+              4,
+              "30376094"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:the_end",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "606997"
+            ],
+            "after": [
+              4,
+              "615234"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/raids.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "tick"
+            ],
+            "before": [
+              3,
+              "30367734"
+            ],
+            "after": [
+              3,
+              "30375968"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/world_clocks.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:overworld",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "30367857"
+            ],
+            "after": [
+              4,
+              "30376094"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "data",
+              "minecraft:the_end",
+              "total_ticks"
+            ],
+            "before": [
+              4,
+              "606997"
+            ],
+            "after": [
+              4,
+              "615234"
+            ]
+          }
+        ]
+      }
+    },
+    "levels": {
+      "level_dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "Data",
+              "LastPlayed"
+            ],
+            "before": [
+              4,
+              "1790248451333"
+            ],
+            "after": [
+              4,
+              "1790350890317"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "Data",
+              "Time"
+            ],
+            "before": [
+              4,
+              "30367857"
+            ],
+            "after": [
+              4,
+              "30376094"
+            ]
+          }
+        ]
+      },
+      "level_dat_old": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "Data",
+              "LastPlayed"
+            ],
+            "before": [
+              4,
+              "1790248451051"
+            ],
+            "after": [
+              4,
+              "1790350890060"
+            ]
+          },
+          {
+            "path": [
+              "root",
+              "Data",
+              "Time"
+            ],
+            "before": [
+              4,
+              "30367854"
+            ],
+            "after": [
+              4,
+              "30376091"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "postsave_world_changes": {
+    "method": "Two per-file pair comparisons joined through unchanged retained restored tree and aggregate; no aggregate inversion",
+    "world_changes": {
+      "dimensions/minecraft/overworld/data/minecraft/raids.dat": {
+        "before": {
+          "sha256": "84ec358342608944875d1f69d93a5f6698578e5f2aacebe0a89d40eb8cb9b6e2",
+          "size": 74,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "14b944aef89a24682d4bdd86a622047314da92f24a77e03b7a90ded245f08b62",
+          "size": 74,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/overworld/data/minecraft/weather.dat": {
+        "before": {
+          "sha256": "16b6f7dcc96120824e5eedac12ca24762dc4d660daac2fd4e6dec17efcfd42da",
+          "size": 108,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "3ff8c588b9e0f20474f643c98d21af46ad5e1e66b701d2cb67f4a48d65e47b1e",
+          "size": 108,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/overworld/data/minecraft/world_clocks.dat": {
+        "before": {
+          "sha256": "21fc56f7321910aa4cff88f84cc90a007ac804e8167431935ec9e8e67e63cdc3",
+          "size": 107,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "699126c32261d4ee956e443713c008bc1c849e109879e2657940acbe40d781fa",
+          "size": 107,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/overworld/data/paper/level_overrides.dat": {
+        "before": {
+          "sha256": "1fd19cb07a44163c0d81fa285cfad5e20fbada66558d5dda8a3df20da5d99863",
+          "size": 165,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "4e95dd0d4ab8bff26897293d348e5cf0826f736f6e1703b529e7951fa94366e8",
+          "size": 167,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_end/data/minecraft/raids.dat": {
+        "before": {
+          "sha256": "dcccb794465f8db6722a99c625a106a5e80f27434b99b50d2aae63bdbbed7c68",
+          "size": 74,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "894c82aa3b2ebe2693860c0f148ba3a3484844cf9d3ed9193dafdf360439fe5c",
+          "size": 74,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_end/data/minecraft/world_clocks.dat": {
+        "before": {
+          "sha256": "bf143202ac5c8262f97fb43ed5eebe39b8d438cd58a701bffd98645b6142b2ee",
+          "size": 109,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "31bd22b28db0d17df23c3dcc0d5b438ca523ecf1c3d99eb9e4a483552150505b",
+          "size": 109,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_end/data/paper/level_overrides.dat": {
+        "before": {
+          "sha256": "f7f8602c1e647c45e93262b5eb5198874d43313e81960a9d90db64894be7b7dd",
+          "size": 163,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "1144c8ed5d6e7e65e25259ce68b97709371c60bccb0408272e043507bb9a038c",
+          "size": 165,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/raids.dat": {
+        "before": {
+          "sha256": "dcccb794465f8db6722a99c625a106a5e80f27434b99b50d2aae63bdbbed7c68",
+          "size": 74,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "894c82aa3b2ebe2693860c0f148ba3a3484844cf9d3ed9193dafdf360439fe5c",
+          "size": 74,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_nether/data/minecraft/world_clocks.dat": {
+        "before": {
+          "sha256": "bf143202ac5c8262f97fb43ed5eebe39b8d438cd58a701bffd98645b6142b2ee",
+          "size": 109,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "31bd22b28db0d17df23c3dcc0d5b438ca523ecf1c3d99eb9e4a483552150505b",
+          "size": 109,
+          "state": "read"
+        }
+      },
+      "dimensions/minecraft/the_nether/data/paper/level_overrides.dat": {
+        "before": {
+          "sha256": "f7f8602c1e647c45e93262b5eb5198874d43313e81960a9d90db64894be7b7dd",
+          "size": 163,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "1144c8ed5d6e7e65e25259ce68b97709371c60bccb0408272e043507bb9a038c",
+          "size": 165,
+          "state": "read"
+        }
+      },
+      "level.dat": {
+        "before": {
+          "sha256": "afe37041343cb1d72cbcad33b7b3546ab40edcf399379ea42c2f0801ea8e5736",
+          "size": 476,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "bc380f727c1ac3b0891c3883e7e2c42be2a997964ee90570596e9eb6b52a8eb3",
+          "size": 477,
+          "state": "read"
+        }
+      },
+      "level.dat_old": {
+        "before": {
+          "sha256": "88ac544c2186103dacf9f02a16fbece7e083276987aabb33237d5db5690935d7",
+          "size": 477,
+          "state": "read"
+        },
+        "after": {
+          "sha256": "e74231b427ebbaf74c9589d1e5bab0e696d5f87f7c395582ab9e6136ef0329f0",
+          "size": 478,
+          "state": "read"
+        }
+      }
+    },
+    "paper_details": {
+      "dimensions/minecraft/overworld/data/paper/level_overrides.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "game_time"
+            ],
+            "before": [
+              4,
+              "30367857"
+            ],
+            "after": [
+              4,
+              "30376094"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_end/data/paper/level_overrides.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "game_time"
+            ],
+            "before": [
+              4,
+              "30367857"
+            ],
+            "after": [
+              4,
+              "30376094"
+            ]
+          }
+        ]
+      },
+      "dimensions/minecraft/the_nether/data/paper/level_overrides.dat": {
+        "comparison": {
+          "classification": "typed_values_changed",
+          "requires_explanation": true
+        },
+        "fields": [
+          {
+            "path": [
+              "root",
+              "data",
+              "game_time"
+            ],
+            "before": [
+              4,
+              "30367857"
+            ],
+            "after": [
+              4,
+              "30376094"
+            ]
+          }
+        ]
+      }
+    },
+    "semantic_gate": "REVIEWED_PASSED",
+    "review_evidence": "semantic-review-final-v1.json"
+  },
+  "snapshots_retained": true,
+  "qualification": {
+    "local_full_tests": 1839,
+    "ruff": "passed",
+    "format": "passed",
+    "mypy": "passed",
+    "python_payload_roundtrip": [
+      "3.9.6",
+      "3.12.4"
+    ],
+    "host_python": "3.9.25",
+    "ci_execution_fe116d8": [
+      36147498797,
+      36147498778,
+      36147498821
+    ],
+    "ci_supplementary_08455f6": [
+      36151680691,
+      36151680622,
+      36151680672
+    ],
+    "ci_checks": "full tests, Ruff, format, mypy, configured Control Plane and independent Web synth, host integration, Paper IMPORT and NeoForge integration",
+    "initial_environment_failure": "online CDK bundling could not resolve PyPI; retained failures, reran using existing offline uv cache successfully",
+    "aws_deploy_performed": false
+  },
+  "supplementary_reads": [
+    {
+      "CommandId": "03d1ae2d-c6af-4780-bbc2-bc17be0f9a0c",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:23:53.035Z",
+      "ExecutionEndDateTime": "2026-09-25T15:23:53.035Z"
+    },
+    {
+      "CommandId": "55d9414b-0abe-4243-9069-e3914c8a478a",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:59:54.066Z",
+      "ExecutionEndDateTime": "2026-09-25T15:59:54.066Z"
+    }
+  ],
+  "notification_second_maintenance": {
+    "classification": "planned idle-host stop convergence; suppressor cleared before RuntimeObservationUnknown child",
+    "host_normal_stop_at": "2026-09-25T16:01:26Z",
+    "formal_end_at": "2026-09-25T16:03:32+00:00",
+    "all_51_ok_observed": true,
+    "user_email_receipt_confirmed": true,
+    "sns_success_count": 1,
+    "monitoring_changed": false,
+    "permanent_resolution_claimed": false,
+    "events": [
+      {
+        "alarm": "wc-dev-maintenance-suppressor",
+        "at": "2026-09-25T15:46:46.653000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm",
+        "at": "2026-09-25T15:56:49.692000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T15:56:49.692000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T15:56:49.716000+00:00",
+        "type": "Action",
+        "summary": "Successfully suppressed (by Alarm) action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm",
+        "at": "2026-09-25T16:01:25.881000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "at": "2026-09-25T16:01:25.881000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "at": "2026-09-25T16:01:25.903000+00:00",
+        "type": "Action",
+        "summary": "Successfully suppressed (by Alarm) action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm",
+        "at": "2026-09-25T16:01:31.462000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T16:01:31.462000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T16:01:31.485000+00:00",
+        "type": "Action",
+        "summary": "Successfully suppressed (by Alarm) action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm",
+        "at": "2026-09-25T16:06:25.882000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "at": "2026-09-25T16:06:25.882000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm",
+        "at": "2026-09-25T16:06:31.461000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T16:06:31.461000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK. Actions suppressed by Alarm"
+      },
+      {
+        "alarm": "wc-dev-maintenance-suppressor",
+        "at": "2026-09-25T16:06:46.651000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-desiredactualdivergencealarm-notification",
+        "at": "2026-09-25T16:06:46.651000+00:00",
+        "type": "StateUpdate",
+        "summary": "Actions not suppressed"
+      },
+      {
+        "alarm": "wc-dev-desiredstoppedec2runningalarm-notification",
+        "at": "2026-09-25T16:06:46.651000+00:00",
+        "type": "StateUpdate",
+        "summary": "Actions not suppressed"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T16:06:46.651000+00:00",
+        "type": "StateUpdate",
+        "summary": "Actions not suppressed"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T16:06:46.734000+00:00",
+        "type": "Action",
+        "summary": "Successfully executed action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm",
+        "at": "2026-09-25T16:06:49.692000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      },
+      {
+        "alarm": "wc-dev-runtimeobservationunknownalarm-notification",
+        "at": "2026-09-25T16:06:49.692000+00:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+      }
+    ]
+  },
+  "notifications": {
+    "sns_actions_succeeded": 3,
+    "user_confirmed_email_receipts": 3,
+    "maintenance_race_fixed": false
+  },
+  "postsave_reads": [
+    {
+      "selection": "content",
+      "CommandId": "e4fe97af-5f20-4b72-a31b-1c533dc41ecd",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:49:24.950Z",
+      "ExecutionEndDateTime": "2026-09-25T15:50:22.950Z"
+    },
+    {
+      "selection": "compare",
+      "CommandId": "d9250c11-3159-43f3-aaa0-895e84aa77d2",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:52:10.578Z",
+      "ExecutionEndDateTime": "2026-09-25T15:52:17.578Z"
+    },
+    {
+      "selection": "protection",
+      "CommandId": "f9d7d2ff-96f3-4cd9-9275-0e27e6afc702",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:58:46.047Z",
+      "ExecutionEndDateTime": "2026-09-25T15:58:51.047Z"
+    },
+    {
+      "selection": "metadata-0",
+      "CommandId": "f3292048-e1bf-4c7b-bd29-e34efeae64b6",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:53:54.182Z",
+      "ExecutionEndDateTime": "2026-09-25T15:54:01.182Z"
+    },
+    {
+      "selection": "metadata-1",
+      "CommandId": "7e1a5ee3-26de-4b9a-82d4-54f9700aca83",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:55:27.306Z",
+      "ExecutionEndDateTime": "2026-09-25T15:55:34.306Z"
+    },
+    {
+      "selection": "metadata-2",
+      "CommandId": "3c93fa57-fb7a-4fd1-a364-83bbc7452ce1",
+      "Status": "Success",
+      "ResponseCode": 0,
+      "ExecutionStartDateTime": "2026-09-25T15:57:07.913Z",
+      "ExecutionEndDateTime": "2026-09-25T15:57:14.913Z"
+    }
+  ],
+  "private_evidence_root": "/private/var/folders/8l/yptb5b71055c5cqxbzn5qw300000gn/T/wishicraft-paper-remaining-20260925-id2ocgnl",
+  "execution_worktrees": {
+    "base": "/private/tmp/wishicraft-paper-remaining-fe116d8",
+    "supplementary": "/private/tmp/wishicraft-paper-overrides-08455f6",
+    "clean_at_execution": true,
+    "primary_tree_has_preserved_unrelated_changes": true
+  },
+  "retained": {
+    "original_world": true,
+    "restored_world": true,
+    "source_snapshot": "snap-0aac363f3ce09e05a",
+    "protection_snapshot": "snap-0e5941ab3b8e0e6ff",
+    "no_new_backup_restore_or_clone": true,
+    "no_vps_or_other_game_operation": true
+  },
+  "limitations": [
+    "No real client play/load/exploration",
+    "No NeoForge RESTORE or arbitrary plugins/build/version upgrade proof",
+    "No all-failure or total-loss disaster recovery proof",
+    "No automated backup operational rollout",
+    "Maintenance notification race remains unresolved; this run did not change monitoring",
+    "Original world bytes legitimately changed during its own normal START/STOP; original was invariant only before that START"
+  ]
+}

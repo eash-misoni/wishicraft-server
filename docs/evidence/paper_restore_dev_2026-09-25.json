@@ -619,5 +619,10 @@
     "notification-investigation-summary.json": "19627283959211ea3e1a962c868fe7c9d395fe0710cec4ab2a3211f27c0f44a7",
     "ingress-close/original.json": "6f36c738155bd26dae221b0dcdb2f2956bed2077143e521cb50c70aaa243bd67",
     "ingress-restore/complete.json": "28064e2143cffdc8abcc6495ac4ae030cf830eaf27fddd1656ece3c21ae02531"
+  },
+  "continuation_evidence": {
+    "markdown": "paper_restore_remaining_2026-09-25.md",
+    "json": "paper_restore_remaining_2026-09-25.json",
+    "relationship": "Separately authorized later work; original PARTIAL result unchanged"
   }
 }
