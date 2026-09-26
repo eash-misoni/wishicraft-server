@@ -54,7 +54,13 @@ def _action_list(value: object) -> list[str]:
 
 
 def test_control_plane_stack_adds_phase_six_stop_without_target_resources() -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=6, deployment="control-plane")
+    app = build_app(
+        REPOSITORY_ROOT,
+        "dev",
+        phase=6,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+    )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
 
@@ -255,7 +261,13 @@ def test_dev_stack_is_empty_and_environment_agnostic() -> None:
 def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=8, deployment="control-plane")
+    app = build_app(
+        REPOSITORY_ROOT,
+        "dev",
+        phase=8,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+    )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
     functions = template.find_resources("AWS::Lambda::Function")
@@ -414,7 +426,13 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam(
 
 
 def test_phase_eight_retention_is_standard_dry_run_only_with_read_only_aws_iam() -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=8, deployment="control-plane")
+    app = build_app(
+        REPOSITORY_ROOT,
+        "dev",
+        phase=8,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+    )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
     functions = template.find_resources("AWS::Lambda::Function")
@@ -450,7 +468,13 @@ def test_phase_eight_retention_is_standard_dry_run_only_with_read_only_aws_iam()
 
 
 def test_phase_eight_auto_stop_has_durable_intents_minimal_evaluator_and_commit_gate() -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=8, deployment="control-plane")
+    app = build_app(
+        REPOSITORY_ROOT,
+        "dev",
+        phase=8,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+    )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
     tables = template.find_resources("AWS::DynamoDB::Table")
@@ -645,7 +669,13 @@ def test_phase_one_network_allows_only_configured_minecraft_tcp_ingress() -> Non
 
 
 def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions() -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=7, deployment="control-plane")
+    app = build_app(
+        REPOSITORY_ROOT,
+        "dev",
+        phase=7,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+    )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
 
@@ -844,7 +874,13 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
 
 
 def test_phase_seven_release_monitoring_is_complete_and_read_only() -> None:
-    app = build_app(REPOSITORY_ROOT, "dev", phase=7, deployment="control-plane")
+    app = build_app(
+        REPOSITORY_ROOT,
+        "dev",
+        phase=7,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+    )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
 

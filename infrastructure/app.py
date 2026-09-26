@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import sys
 from pathlib import Path
 
 from aws_cdk import App
@@ -29,8 +31,11 @@ def build_app(
     reset: bool = False,
     game_creation: bool = False,
     web_domain_phase: str = "canonical",
+    daily_backup_validation: str | None = None,
 ) -> App:
     """Build an environment-agnostic CDK app after phase-specific validation."""
+    if daily_backup_validation is not None and deployment != "control-plane":
+        raise ValueError("daily_backup_validation requires the control-plane")
     configuration = load_configuration(repository_root, stage)
     validate_stage_for_action(configuration.stage, phase=phase, action=action)
 
@@ -56,7 +61,9 @@ def build_app(
             project=configuration.project,
             secrets=configuration.secrets,
             phase=phase,
-            daily_backup=load_daily_backup_configuration(repository_root, stage),
+            daily_backup=daily_backup_input(
+                repository_root, stage, validation=daily_backup_validation, action=action
+            ),
             games=_games(repository_root, stage) if two_games else None,
             reset_policies=_reset_policies(repository_root, stage) if reset else None,
             game_creation=game_creation,
@@ -82,6 +89,13 @@ def main() -> None:
     phase_context = app.node.try_get_context("phase") or "0"
     validation_action = app.node.try_get_context("validation_action") or "synth"
     deployment = app.node.try_get_context("deployment") or "phase1"
+    daily_validation = app.node.try_get_context("daily_backup_validation")
+    if daily_validation is not None and (
+        app.node.try_get_context("validation_action") != "synth" or deployment != "control-plane"
+    ):
+        raise ValueError(
+            "daily_backup_validation requires explicit validation_action=synth control-plane"
+        )
     if app.node.try_get_context("reset") == "true" and (
         app.node.try_get_context("two_games") != "true" or deployment != "control-plane"
     ):
@@ -113,7 +127,9 @@ def main() -> None:
             project=configuration.project,
             secrets=configuration.secrets,
             phase=phase,
-            daily_backup=load_daily_backup_configuration(repository_root, stage),
+            daily_backup=daily_backup_input(
+                repository_root, stage, validation=daily_validation, action=validation_action
+            ),
             games=_games(repository_root, stage)
             if app.node.try_get_context("two_games") == "true"
             else None,
@@ -134,6 +150,24 @@ def main() -> None:
     else:
         raise ValueError("CDK context deployment must be phase1, target, control-plane, or web")
     app.synth()
+
+
+def daily_backup_input(
+    root: Path, stage: str, *, validation: str | None = None, action: str = "synth"
+) -> dict[str, bool]:
+    """Select canonical deployment input or an explicit synth-only regression scenario."""
+    if validation is None:
+        flags = load_daily_backup_configuration(root, stage)
+        path = root / "config" / f"daily-backup-{stage}.json"
+        source = str(path) if path.exists() else "missing-stage-supplement:default-disabled"
+    else:
+        if action != "synth" or validation not in {"legacy", "enabled"}:
+            raise ValueError("daily BACKUP validation must be synth-only legacy or enabled")
+        flags = {"provision": validation == "enabled", "enabled": validation == "enabled"}
+        source = f"validation-only:{validation}"
+    # Only public configuration provenance; no environment dump or secret values.
+    print(json.dumps({"daily_backup_input": source, **flags}, sort_keys=True), file=sys.stderr)
+    return flags
 
 
 def _reset_policies(root: Path, stage: str) -> dict[str, dict[str, int]]:

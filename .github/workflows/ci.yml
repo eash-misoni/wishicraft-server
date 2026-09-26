@@ -35,29 +35,45 @@ jobs:
       - run: >-
           tools/dev-env run npx --no-install cdk synth MinecraftTargetStack-dev
           --context stage=dev --context deployment=target
-      - run: >-
+      - name: Legacy Control Plane regression
+        run: >-
           tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
-      - run: >-
+          --context validation_action=synth --context daily_backup_validation=legacy
+      - name: Legacy Control Plane regression
+        run: >-
           tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
           --context two_games=true
-      - run: >-
+          --context validation_action=synth --context daily_backup_validation=legacy
+      - name: Legacy Control Plane regression
+        run: >-
           tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
           --context two_games=true --context reset=true --context game_creation=true
-      - run: >-
+          --context validation_action=synth --context daily_backup_validation=legacy
+      - name: Canonical stage Control Plane (current release context)
+        run: >-
           tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
           --context two_games=true --context reset=true --context game_creation=true
           --context whitelist_management=true --context game_packages=true
+      - name: Enabled daily BACKUP validation (stage B)
+        run: >-
+          tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev
+          --context stage=dev --context phase=8 --context deployment=control-plane
+          --context two_games=true --context reset=true --context game_creation=true
+          --context whitelist_management=true --context game_packages=true
+          --context validation_action=synth --context daily_backup_validation=enabled
       - run: >-
           tools/dev-env run -- npx --no-install cdk synth WishicraftWebStack-dev
           --context stage=dev --context phase=8 --context deployment=web
-      - run: >-
+      - name: Legacy Control Plane regression
+        run: >-
           tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
           --context two_games=true --context reset=true --context game_creation=true --context whitelist_management=true
+          --context validation_action=synth --context daily_backup_validation=legacy
       - run: >-
           tools/dev-env run -- npx --no-install cdk synth WishicraftWebStack-dev
           --context stage=dev --context phase=8 --context deployment=web

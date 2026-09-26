@@ -45,6 +45,7 @@ def test_unset_or_disabled_does_not_add_evaluator_resources(flags: dict[str, boo
 def test_opt_in_schedule_alarms_and_least_privilege(enabled: bool) -> None:
     resources = template({"provision": True, "enabled": enabled})
     daily = {k: v for k, v in resources.items() if k.startswith("DailyBackup")}
+    assert len(daily) == 15
     functions = [v for v in daily.values() if v["Type"] == "AWS::Lambda::Function"]
     assert len(functions) == 2
     assert not any(
@@ -144,3 +145,33 @@ def test_full_package_configuration_with_enabled_daily_backup() -> None:
             variables = resource["Properties"].get("Environment", {}).get("Variables", {})
             assert sum(len(k) + len(str(v)) for k, v in variables.items()) < 4096
     assert any(key.startswith("DailyBackupEvaluator") for key in resources)
+
+
+def test_stage_b_changes_only_enablement_properties() -> None:
+    from copy import deepcopy
+
+    stage_a = template({"provision": True, "enabled": False})
+    stage_b = template({"provision": True, "enabled": True})
+    expected = deepcopy(stage_a)
+    changes = 0
+    for key, resource in expected.items():
+        if not key.startswith("DailyBackup"):
+            continue
+        properties = resource["Properties"]
+        if resource["Type"] == "AWS::Lambda::Function":
+            assert properties["Environment"]["Variables"]["DAILY_BACKUP_ENABLED"] == "0"
+            properties["Environment"]["Variables"]["DAILY_BACKUP_ENABLED"] = "1"
+            changes += 1
+        elif resource["Type"] == "AWS::Events::Rule":
+            assert properties["State"] == "DISABLED"
+            properties["State"] = "ENABLED"
+            changes += 1
+        elif resource["Type"] == "AWS::CloudWatch::Alarm":
+            assert properties["ActionsEnabled"] is False
+            properties["ActionsEnabled"] = True
+            if properties["MetricName"] == "DailyBackupHeartbeat":
+                assert properties["TreatMissingData"] == "notBreaching"
+                properties["TreatMissingData"] = "breaching"
+            changes += 1
+    assert changes == 8
+    assert stage_b == expected
