@@ -318,5 +318,9 @@
     "No stage B commit/assembly because stage A validation failed",
     "Existing PLANNED and ROLLED_BACK RESTORE journals preserved; no hold completeness certification",
     "Snapshot inventory/provenance captured read-only; no new snapshot or provenance created"
-  ]
+  ],
+  "repository_follow_up": {
+    "record": "docs/evidence/daily_backup_input_separation_2026-09-26.json",
+    "scope": "Repository input separation only; historical failures unchanged; no AWS access or release resumption; PR #2 unmerged"
+  }
 }

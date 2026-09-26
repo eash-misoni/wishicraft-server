@@ -155,3 +155,98 @@ were corrected to use the existing Lock `owner_operation_id` and CDK `Fn::GetAtt
 no production contract was changed to satisfy those assertions. Final results are from a fresh
 validation root. Docker/shellcheck remain unavailable locally; final-HEAD normal/NeoForge/Paper CI
 results are linked in the PR handoff. Live IAM, notifications and AWS operations remain unverified.
+
+
+## Authorized dev release sequence (2026-09-26)
+
+The subsequent user authorization fixes the first proof order to **provision disabled → one formal
+vps-survival START/STOP → enable → one natural scheduled BACKUP → at least two natural PROTECTED
+evaluations**. This supersedes only the earlier proposed ordering, not its historical record.
+No manual baseline BACKUP is allowed. The disabled stage ensures the normal-use boundary and
+normal full-STOP proof exist before the scheduler can acquire a snapshot. Successful closeout
+leaves dev enabled for future normal use; retention deletion stays independently disabled.
+
+Stage A sets only dev provision=true/enabled=false. Stage B may set enabled=true only after
+validated tracking and normal STOP. Both immutable assemblies, differences and disablement plan
+must be prepared before the START/STOP pair. Every Case D condition is required anew; the old
+monitoring ChangeSet exception cannot authorize this release. New implementation/IAM failures
+stop the slice without code repair, permission expansion or repeated START/BACKUP.
+
+## Configuration input separation (PR #2 correction; repository only)
+
+The held [stage A attempt](../evidence/daily_backup_dev_preflight_2026-09-26.md) exposed two
+validation problems: ten tests inherited provision=true in single-Game scenarios and correctly
+hit the shared-runtime guard; one shared legacy test inherited two new Lambdas while asserting
+its historical eleven. Both `build_app()` and the CLI unconditionally loaded the canonical daily
+supplement for Control Plane, so changing dev deployment settings changed unrelated test inputs.
+The rejected combination was not a reason to weaken the guard or increase every expected count.
+
+`infrastructure.app.daily_backup_input()` now selects the following small, explicit input contract.
+The production loader and `ControlPlaneStack` safety validation are unchanged. No runtime code,
+protection boundary, retry, IAM, retention, monitoring, Game or package definition changes here.
+
+| Use | Python `build_app()` | CLI contexts | Effective daily flags |
+|---|---|---|---|
+| Canonical deployment/current shared validation | omit `daily_backup_validation` | omit `daily_backup_validation` | Read `config/daily-backup-<stage>.json`; PR #2 is true/false |
+| Historical regression, single/shared Game | `daily_backup_validation="legacy"` | `validation_action=synth`, `daily_backup_validation=legacy` | false/false, independent of stage supplement |
+| Stage B validation, shared Game required | `daily_backup_validation="enabled"` | `validation_action=synth`, `daily_backup_validation=enabled` | true/true, independent of stage supplement |
+
+The CLI override requires an **explicit** synth action and Control Plane deployment; unknown
+scenarios and deploy action are rejected. Validation scenarios do not edit the tracked supplement,
+change process-global environment, or implicitly downgrade unsupported configurations. The
+canonical entrypoint still rejects provision=true without shared runtime. Missing supplements
+remain false/false; malformed canonical flags and enabled=true/provision=false remain rejected.
+Each Control Plane selection prints JSON to stderr containing only input source and effective
+`provision`/`enabled`. This is configuration provenance, not an environment/secret dump. A
+validation assembly is not a release assembly: future deployment must omit validation overrides,
+use the canonical committed stage settings and existing release guard/ChangeSet review.
+
+CI keeps every old synth scenario and requires both canonical current-stage and enabled-stage-B
+shared synths. The old tests preserve resource, role, handler and eleven-Lambda assertions with
+explicit legacy input. Daily tests independently assert fifteen added resources/two Lambdas,
+limited IAM, disabled/enabled rule, Admission/evaluator flags and five alarm actions. The exact
+A→B resource comparison allows only two enabled environment values, schedule State, five
+ActionsEnabled values and heartbeat TreatMissingData; all other resource fields stay equal.
+
+The canonical shared command (stage A at the current PR #2 supplement) is:
+
+```sh
+tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev \
+  --context stage=dev --context phase=8 --context deployment=control-plane \
+  --context two_games=true --context reset=true --context game_creation=true \
+  --context whitelist_management=true --context game_packages=true
+```
+
+For stage B **validation only**, append `--context validation_action=synth
+--context daily_backup_validation=enabled` to that command. For legacy regression append
+`--context validation_action=synth --context daily_backup_validation=legacy` to each historical
+Control Plane scenario. Phase 1, Target and both independent Web synth commands have no daily
+override and remain unchanged. CI contains the exact required commands. Child-process CLI tests
+also exercise canonical/legacy/enabled selection and reject an implicit synth override, deploy
+override, and explicit enabled single-Game scenario.
+
+Temporary config-copy fixtures cover real-supplement false/false, true/false and true/true, proving
+that legacy single/shared tests remain eleven Lambdas while canonical shared selection follows
+its actual file. No fixture overwrites a tracked stage file. This establishes that changing dev to
+stage B later does not reintroduce these validation failures; it does not authorize that change.
+
+The release remains held and PR #2 stays unmerged. No AWS access/change, release resumption,
+START/STOP or snapshot operation is part of this correction. The later approved plan remains
+**disabled deployment → formal START/STOP → enable → one automatic BACKUP → at least two natural
+protected evaluations**, subject to renewed review of these corrected repository inputs.
+
+### Correction validation evidence
+
+Implementation commit `59eb704` includes the actual PR #2 dev supplement true/false; main's
+false/false success is not substituted. Full suite: **1961 passed** (136.96 seconds), Ruff lint
+and format passed (364 files), mypy passed (268 source files), all ten CI CLI synth configurations
+passed. Local Docker and shellcheck are unavailable; final normal/NeoForge/Paper CI checks on
+this PR's finalized HEAD are the remote integration authority and are recorded in PR #2.
+
+The saved successful stage-A template from `92df534` and the corrected canonical shared template
+are **byte-identical**, SHA-256 `d5a59b7774887415720c49bcef578b247f43ec04b3600eebd7fcaffb3c552a63`.
+All Lambda Code assets are identical; this change touches infrastructure input selection and tests,
+not shared `src/`. No deployable resource Properties changed. Stage B differs in exactly nine
+property paths across eight daily resources, with no additional resource, IAM or code change.
+[Structured comparison, commands and local validation](../evidence/daily_backup_input_separation_2026-09-26.json).
+The saved old failure logs/evidence remain valid historical records; no AWS state was reread or mutated.
