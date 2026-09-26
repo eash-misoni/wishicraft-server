@@ -153,3 +153,19 @@ were corrected to use the existing Lock `owner_operation_id` and CDK `Fn::GetAtt
 no production contract was changed to satisfy those assertions. Final results are from a fresh
 validation root. Docker/shellcheck remain unavailable locally; final-HEAD normal/NeoForge/Paper CI
 results are linked in the PR handoff. Live IAM, notifications and AWS operations remain unverified.
+
+
+## Authorized dev release sequence (2026-09-26)
+
+The subsequent user authorization fixes the first proof order to **provision disabled → one formal
+vps-survival START/STOP → enable → one natural scheduled BACKUP → at least two natural PROTECTED
+evaluations**. This supersedes only the earlier proposed ordering, not its historical record.
+No manual baseline BACKUP is allowed. The disabled stage ensures the normal-use boundary and
+normal full-STOP proof exist before the scheduler can acquire a snapshot. Successful closeout
+leaves dev enabled for future normal use; retention deletion stays independently disabled.
+
+Stage A sets only dev provision=true/enabled=false. Stage B may set enabled=true only after
+validated tracking and normal STOP. Both immutable assemblies, differences and disablement plan
+must be prepared before the START/STOP pair. Every Case D condition is required anew; the old
+monitoring ChangeSet exception cannot authorize this release. New implementation/IAM failures
+stop the slice without code repair, permission expansion or repeated START/BACKUP.
