@@ -112,6 +112,10 @@ def transition(
         "ConditionExpression": condition,
         "ExpressionAttributeValues": encode(values),
     }
+    if event in {"begin", "recover-restore"} and state.get("backup_protection"):
+        from wishicraft.daily_backup import attach, dirty
+
+        attach(update, state, dirty(state["backup_protection"], now, unknown=True))
     if names:
         update["ExpressionAttributeNames"] = names
     transaction = [

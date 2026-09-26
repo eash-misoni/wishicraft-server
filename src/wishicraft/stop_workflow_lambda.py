@@ -287,7 +287,7 @@ def handler(event: object, context: object) -> dict[str, object]:
         if desired.desired_state.value != "STOPPED" or not observation.ready_for_success():
             raise StopWorkflowError(StopErrorCode.OBSERVATION_FAILED)
         runtime.operations.complete_owned(
-            proof=proof, status=OperationStatus.SUCCEEDED, completed_at=now
+            proof=proof, status=OperationStatus.SUCCEEDED, completed_at=now, normal_stop=True
         )
         return {"status": "SUCCEEDED"}
     if action == "fail":

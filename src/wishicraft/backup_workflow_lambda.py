@@ -245,6 +245,7 @@ def handler(event: object, context: object) -> dict[str, object]:
                 completed_at=now,
                 result=result,
                 additional_writes=runtime.provenance.transactional_puts(provenance),
+                backup_acquired_at=record.start_time.isoformat().replace("+00:00", "Z"),
             )
         except Exception:
             if not (
