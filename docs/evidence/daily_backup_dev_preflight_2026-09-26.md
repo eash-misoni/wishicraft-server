@@ -98,3 +98,10 @@ expectations. No implementation fix or further AWS execution is inferred from th
 Original primary-checkout Terralith changes remain untouched. The stage A execution worktree and
 the separate docs-only closeout worktree are distinct; only the latter is merged for closeout.
 Final closeout HEAD/CI and learning-Wiki synchronization are reported in the handoff/PR.
+
+
+## Follow-up: repository input-separation correction
+
+The original failure and stopped release above remain unchanged. PR #2 now contains the separate
+[configuration-input correction and regression evidence](../runbooks/daily_shared_backup.md#configuration-input-separation-pr-2-correction-repository-only).
+This follow-up does not merge PR #2, resume stage A/B or establish any new AWS qualification.
