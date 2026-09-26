@@ -79,6 +79,31 @@ def test_opt_in_schedule_alarms_and_least_privilege(enabled: bool) -> None:
         if key.startswith("MonitoringObserver"):
             assert "lambda:InvokeFunction" not in text and "states:StartExecution" not in text
     assert all("ec2:DeleteSnapshot" not in str(v) for v in daily.values())
+    policy = next(
+        v["Properties"]["PolicyDocument"]["Statement"]
+        for k, v in daily.items()
+        if k.startswith("DailyBackupAdmission") and v["Type"] == "AWS::IAM::Policy"
+    )
+    describe = next(s for s in policy if s["Action"] == "states:DescribeExecution")
+    # The deployed template must target this account/region, only BACKUP op-* executions.
+    assert describe["Resource"] == {
+        "Fn::Join": [
+            "",
+            [
+                "arn:",
+                {"Ref": "AWS::Partition"},
+                ":states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-*",
+            ],
+        ]
+    }
+    start = next(s for s in policy if s["Action"] == "states:StartExecution")
+    backup_id = next(
+        k
+        for k, v in resources.items()
+        if v["Type"] == "AWS::StepFunctions::StateMachine"
+        and v["Properties"]["StateMachineName"] == "wc-dev-backup"
+    )
+    assert start["Resource"] == {"Fn::GetAtt": [backup_id, "Arn"]}
 
 
 def test_stage_supplement_missing_is_disabled_and_invalid_enablement_rejected(

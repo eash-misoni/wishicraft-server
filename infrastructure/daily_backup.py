@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from aws_cdk import Duration, RemovalPolicy, Stack
+from aws_cdk import ArnFormat, Duration, RemovalPolicy, Stack
 from aws_cdk import aws_cloudwatch as cw
 from aws_cdk import aws_cloudwatch_actions as actions
 from aws_cdk import aws_dynamodb as ddb
@@ -112,6 +112,7 @@ def add(
                 stack.format_arn(
                     service="states",
                     resource="execution",
+                    arn_format=ArnFormat.COLON_RESOURCE_NAME,
                     resource_name=resource_name(project.resource_prefix, stage.stage, "backup")
                     + ":op-*",
                 )

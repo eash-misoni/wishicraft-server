@@ -162,8 +162,13 @@ def status(
         stopped_warning=enabled and unprotected and waiting >= 1800,
         interval_warning=enabled and unprotected and oldest >= 86400,
         history_unknown=p.get("unknown_since") is not None,
-        needs_operator=reason
-        in {"FAILED", "RECONCILIATION_REQUIRED", "OBSERVATION_UNKNOWN", "NORMAL_STOP_REQUIRED"},
+        needs_operator=(
+            reason in {"RECONCILIATION_REQUIRED", "OBSERVATION_UNKNOWN", "NORMAL_STOP_REQUIRED"}
+            or (
+                reason == "FAILED"
+                and (not intent.get("safe_retry") or p["attempts"] >= MAX_ATTEMPTS)
+            )
+        ),
     )
 
 

@@ -134,16 +134,9 @@ def evaluate(ddb: Any, ec2: Any, lambdas: Any, cw: Any, *, now: datetime) -> dic
         "DailyBackupIntervalOverdue": int(result["interval_warning"]),
         "DailyBackupNeedsOperator": int(
             enabled
-            and (
-                reason == "RECONCILIATION_REQUIRED"
-                or (
-                    reason == "FAILED"
-                    and (
-                        not (p.get("intent") or {}).get("safe_retry")
-                        or p["attempts"] >= domain.MAX_ATTEMPTS
-                    )
-                )
-            )
+            and result["needs_operator"]
+            # Observation failures keep their existing dedicated alarm.
+            and reason != "OBSERVATION_UNKNOWN"
         ),
         "DailyBackupObservationUnknown": int(enabled and reason == "OBSERVATION_UNKNOWN"),
     }

@@ -127,9 +127,31 @@ three suppressed notifications. Five-minute evaluator metrics include real zero 
 |---|---|
 | DailyBackupStoppedOverdue | >=1 after >=1800 seconds from saved normal STOP while still unprotected; running/failed/unknown/competition/maintenance reason is in status and structured evaluator log |
 | DailyBackupIntervalOverdue | >=1 after >=86400 seconds from oldest dirty or known start of unknown interval, including continuous running; no forced stop |
-| DailyBackupNeedsOperator | >=1 for unresolved result or failed/non-retryable/exhausted attempts; existing workflow alarm covers transient safe-retry failure |
+| DailyBackupNeedsOperator | >=1 for NORMAL_STOP_REQUIRED, unresolved result or failed/non-retryable/exhausted attempts; existing workflow alarm covers transient safe-retry failure |
 | DailyBackupObservationUnknown | >=1 when the evaluator completes but required state is not fresh/safe |
 | DailyBackupHeartbeat | Minimum <1, three missing five-minute periods, missing=breaching only while enabled |
+
+Status and intervention metrics share the domain `needs_operator` decision. Observation failure
+keeps its dedicated `DailyBackupObservationUnknown` alarm rather than duplicating NeedsOperator.
+
+| Status reason | needs_operator | NeedsOperator / ObservationUnknown | Other warning clocks |
+|---|---|---|---|
+| NORMAL_STOP_REQUIRED | true | 1 / 0 | No stopped clock is invented; interval warning still starts at its recorded lower bound |
+| RECONCILIATION_REQUIRED | true | 1 / 0 | Existing unprotected clocks remain |
+| FAILED, non-retryable or attempts exhausted | true | 1 / 0 | Existing workflow failure and overdue alarms remain |
+| FAILED, proven safe retry with attempts remaining | false | 0 / 0 | Backoff is ordinary retry waiting; overdue warnings remain independent |
+| OBSERVATION_UNKNOWN | true | 0 / 1 | No healthy protection is inferred |
+| RUNNING / MAINTENANCE / OTHER_OPERATION / AVAILABLE / BACKUP_RUNNING / PROTECTED | false | 0 / 0 | Thirty-minute/24-hour predicates still apply where unprotected |
+| DISABLED | false | 0 / 0 | Both overdue signals are 0; history is preserved, scheduled invocation/actions are disabled |
+
+At first enablement, absent, expired or unusable last-STOP evidence does not create `stopped_at`.
+NORMAL_STOP_REQUIRED therefore raises an intervention signal on the first successful evaluation,
+without waiting thirty minutes or twenty-four hours. An old snapshot is not a normal-STOP proof.
+Repeating evaluation preserves `unknown_since`; after twenty-four hours the independent interval
+warning also becomes 1. A proven normal STOP changes the reason to AVAILABLE and NeedsOperator to 0,
+while unprotected clocks remain until successful protection. This does not force a START/STOP or
+create a snapshot: the operator follows the separately approved normal-use or explicit BACKUP plan.
+Returning a signal to 0 allows the existing alarm evaluation to clear it; SNS still uses transitions.
 
 Heartbeat is emitted only after reads, required protection persistence, eligible Admission response
 validation and metric publication succeed. Exceptions produce no healthy signal. An observed
@@ -157,6 +179,11 @@ Evaluator: GetItem on state/lock/Operation, system-key/backup_protection-attribu
 namespace-limited metric publication, invocation of only internal Admission. Internal Admission:
 operation-specific table actions (Get on state/Operation/idempotency/Lock/Games, Put on Operation/idempotency/Lock, Update on state/Operation), Games condition check, Lock DeleteItem for
 existing startup-failure cleanup, DescribeInstances, only BACKUP StartExecution/DescribeExecution.
+DescribeExecution uses explicit colon resource formatting: `arn:${Partition}:states:<region>:<account>:execution:<backup-state-machine>:op-*`.
+The account/region and BACKUP machine remain scoped; Resource `*` is not used for this action.
+The existing WorkflowLauncher records the deterministic Operation execution ARN before starting.
+If StartExecution loses its response or reports ExecutionAlreadyExists, it describes that same ARN;
+a confirmed existing execution keeps the same Operation/Lock and is not relaunched as a new request.
 No Observer role expansion, snapshot rights, secret reads, host/EC2 mutations or deletion rights.
 
 Tests use fixed clocks and serializer/repository/handler boundaries. Synth proves templates,

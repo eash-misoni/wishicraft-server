@@ -111,3 +111,45 @@ and limits evaluator UpdateItem to `system_id` / `backup_protection` attributes 
 system key. Six focused infrastructure/synth cases, targeted mypy, full lint/format passed after
 that restriction. Resource counts and unchanged existing-resource contracts remain the same;
 the exact final HEAD is covered by the subsequent PR CI, not inferred from the earlier local run.
+
+
+## PR #1 local review corrections (2026-09-26)
+
+Review baseline: `a8e25a9705cf128324807d0fc06690ce64d9eab9`. This follow-up only corrects
+execution ARN formatting and the status/intervention signal mapping. Defaults remain disabled;
+no AWS changes, merge, retention collector/deletion or dev release is included.
+
+Generated dev DescribeExecution resource before:
+`arn:${AWS::Partition}:states:ap-northeast-1:385526546525:execution/wc-dev-backup:op-*`
+
+After explicit `ArnFormat.COLON_RESOURCE_NAME`:
+`arn:${AWS::Partition}:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-*`
+
+Both provisioned-disabled and enabled template tests assert the entire ARN expression and the
+StartExecution reference to the BACKUP State Machine. No wildcard account/region/machine is added.
+Actual internal Admission plus WorkflowLauncher tests simulate lost StartExecution response and
+ExecutionAlreadyExists, observe DescribeExecution on the registered `...:execution:wc-dev-backup:op-test`,
+and verify one Operation, one start request, the retained Lock and same durable intent on repeated
+Admission after idempotency expiry/selected-Game change. These are local API fixtures, not live IAM proof.
+
+NORMAL_STOP_REQUIRED now reports `needs_operator=true` and publishes DailyBackupNeedsOperator=1.
+Without normal-STOP evidence, `stopped_at` remains absent and DailyBackupStoppedOverdue=0.
+DailyBackupIntervalOverdue independently becomes 1 at twenty-four hours from recorded unknown/dirty
+history; initial historical duration is still unknown. Disabled evaluation emits intervention and
+overdue signals as 0, preserving history for reenablement. Normal STOP clears intervention, not
+unprotected progress; RUNNING/maintenance/other-operation and safe retry waiting do not require
+intervention merely because they are waiting. Existing BACKUP failure and overdue alarms remain.
+See the [status/metric table](../reviews/daily_shared_backup.md#monitoring) for the complete mapping.
+
+Regression coverage fixes the clock for first enablement, missing/expired/failed/non-STOP history,
+disable/reenable, valid STOP bootstrap/completion, safe retry versus exhaustion and normal waiting.
+It asserts the actual PutMetricData payload rather than only checking status flags.
+
+Follow-up validation: **1942 full tests passed**, Ruff lint/format (**362 files**) and mypy
+(**267 source files**) passed. All nine CLI synth configurations passed; full-suite template
+checks also cover provisioned-disabled/enabled daily BACKUP and the enabled package configuration.
+Pre-fix tests reproduced the slash ARN and missing intervention signal. Test-fixture assertions
+were corrected to use the existing Lock `owner_operation_id` and CDK `Fn::GetAtt` representation;
+no production contract was changed to satisfy those assertions. Final results are from a fresh
+validation root. Docker/shellcheck remain unavailable locally; final-HEAD normal/NeoForge/Paper CI
+results are linked in the PR handoff. Live IAM, notifications and AWS operations remain unverified.
