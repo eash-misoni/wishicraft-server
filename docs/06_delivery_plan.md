@@ -1,5 +1,8 @@
 # 06. Delivery Plan
 
+> D-114 dev release attempt (2026-09-26): PR #1 is merged, but stage A configuration validation failed before any AWS mutation. Dev automatic BACKUP is **not enabled**; the candidate remains unmerged. [Baseline, exact commits and stop boundary](evidence/daily_backup_dev_preflight_2026-09-26.md).
+
+
 > D-114/D-115 repository preparation (2026-09-26): [shared-volume daily BACKUP authority, periodic Admission and monitoring](reviews/daily_shared_backup.md); [independent 14-day OR newest-seven dry-run](reviews/daily_backup_retention.md). All Games are covered; SWITCH/RESET do not wait for BACKUP. Stage flags default disabled; existing deployed newest-seven and snapshot deletion gate remain separate. [Dev release plan and validation limits](runbooks/daily_shared_backup.md). No AWS application or execution in this slice.
 
 

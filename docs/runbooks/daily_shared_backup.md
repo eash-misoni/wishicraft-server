@@ -1,5 +1,7 @@
 # Daily shared BACKUP: repository handoff and separate dev release
 
+> Subsequent authorized dev attempt: [PR #1 merged; stage A validation held before AWS mutation](../evidence/daily_backup_dev_preflight_2026-09-26.md). The fixed order is disabled provisioning → formal START/STOP → enable → natural BACKUP. The earlier proposal below is retained as history. Dev is not enabled.
+
 Canonical contracts: [D-114](../reviews/daily_shared_backup.md),
 [independent D-115 retention dry-run](../reviews/daily_backup_retention.md).
 Baseline: `29c3231aa3052d26cce6a153a8c02d04fdc02ebb`, fetched origin/main matched on 2026-09-26.

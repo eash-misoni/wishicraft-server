@@ -1,0 +1,322 @@
+{
+  "reviewed_head": "34d9d50135550ff84f4747e862ed9d2be49f5bd4",
+  "pr_test_merge": "255f87d79ae86bac990328e3c0f164f71c62400e",
+  "actual_merge": "01496a09b8332aab074de9a9c354fd47ff7e70fe",
+  "same_tree": "fc6a2bc67bf92e6d8ae46fcd03c9717c313e8315",
+  "stage_a_candidate": "92df5340afa84ce7bb760bd2cace09b530329cfb",
+  "stage_a_merged": false,
+  "stage_b_commit": null,
+  "deployment": null,
+  "changesets": [],
+  "aws_mutations": [],
+  "start_stop_pairs": 0,
+  "snapshots_created": 0,
+  "baseline": {
+    "at": {
+      "completed_at": "2026-09-26T08:37:51.760388+00:00"
+    },
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "profile": "wishicraft-dev",
+    "system": "wishicraft-main",
+    "state": "STOPPED/HEALTHY",
+    "instance": "i-04fc0629dc4ea466e",
+    "ec2_state": "stopped",
+    "volume": "vol-03ac9f534326c345c",
+    "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+    "game_world": {
+      "difficulty": null,
+      "generation": "1",
+      "seed": "-3498469689692331574",
+      "generation_counter": "2",
+      "hardcore": null
+    },
+    "package": {
+      "definition": {
+        "mods": [],
+        "package_id": "vps-survival",
+        "package_version": "1",
+        "minecraft_version": "26.1.2",
+        "loader": {
+          "commit": "39a1aa5c7fa9742accf82c247a0ea18014788b5f",
+          "server": {
+            "filename": "paper-26.1.2-53.jar",
+            "size": "52926064",
+            "sha256": "6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf",
+            "url": "https://fill-data.papermc.io/v1/objects/6934188878fc351e1be5bfba5f2b8c4591224886e4b34e3de09dbec68a351caf/paper-26.1.2-53.jar"
+          },
+          "level_name": "wishinkaiwai",
+          "type": "paper",
+          "build": "53"
+        }
+      },
+      "package_id": "vps-survival",
+      "package_version": "1"
+    },
+    "creation_digest": "0aa138990a89bad00ccdeeb339ded8e90680c8745ef1a82c9b882abc0c130c1a",
+    "package_digest": "c2a1aa734412ae6a8a0327b8a82611e69b342fd2f0e55514cd4fc803055e287a",
+    "backup_protection_present": false,
+    "snapshot_count": 13,
+    "lock_count": 0,
+    "unfinished_operations": 0,
+    "running_workflows": 0,
+    "active_ssm": 0,
+    "dns": false,
+    "queues_empty": 3,
+    "alarms_ok": 51,
+    "restore_journals": [
+      {
+        "system_id": "restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+        "record_type": "RESTORE",
+        "status": null,
+        "phase": "ROLLED_BACK",
+        "operation_id": null,
+        "revision": "20"
+      },
+      {
+        "system_id": "restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+        "record_type": "RESTORE",
+        "status": null,
+        "phase": "ROLLED_BACK",
+        "operation_id": null,
+        "revision": "18"
+      },
+      {
+        "system_id": "restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd",
+        "record_type": "RESTORE",
+        "status": null,
+        "phase": "PLANNED",
+        "operation_id": null,
+        "revision": "1"
+      }
+    ]
+  },
+  "stage_a_template": {
+    "sha256": "d5a59b7774887415720c49bcef578b247f43ec04b3600eebd7fcaffb3c552a63",
+    "added": {
+      "DailyBackupAdmissionLogGroup0A6BBBF5": "AWS::Logs::LogGroup",
+      "DailyBackupAdmissionFunctionServiceRoleC812FABF": "AWS::IAM::Role",
+      "DailyBackupAdmissionFunctionServiceRoleDefaultPolicy98A97BA3": "AWS::IAM::Policy",
+      "DailyBackupAdmissionFunctionBFD7AF72": "AWS::Lambda::Function",
+      "DailyBackupEvaluatorLogGroupC41BB5D3": "AWS::Logs::LogGroup",
+      "DailyBackupEvaluatorFunctionServiceRole282E8321": "AWS::IAM::Role",
+      "DailyBackupEvaluatorFunctionServiceRoleDefaultPolicy0FC7D9CD": "AWS::IAM::Policy",
+      "DailyBackupEvaluatorFunction2CAEBD5D": "AWS::Lambda::Function",
+      "DailyBackupSchedule973769C0": "AWS::Events::Rule",
+      "DailyBackupScheduleAllowEventRuleWishicraftControlPlaneStackdevDailyBackupEvaluatorFunction8B3333D00099FBAB": "AWS::Lambda::Permission",
+      "DailyBackupHeartbeatAlarm7AC73BA7": "AWS::CloudWatch::Alarm",
+      "DailyBackupStoppedOverdueAlarm3172A117": "AWS::CloudWatch::Alarm",
+      "DailyBackupIntervalOverdueAlarm2205A737": "AWS::CloudWatch::Alarm",
+      "DailyBackupNeedsOperatorAlarm098A6CF7": "AWS::CloudWatch::Alarm",
+      "DailyBackupObservationUnknownAlarm188D678F": "AWS::CloudWatch::Alarm"
+    },
+    "removed": [],
+    "modified_properties": {
+      "StartTaskFunction8C564C4A": [
+        "Code"
+      ],
+      "DiscordCommandFunction7D25102A": [
+        "Code"
+      ],
+      "MonitoringObserverFunction584DA7C7": [
+        "Code"
+      ],
+      "RetentionTaskFunction9F285CE4": [
+        "Code"
+      ],
+      "ReconcileFunction30829CB6": [
+        "Code"
+      ],
+      "AdmissionFunction23082B67": [
+        "Code",
+        "Environment"
+      ],
+      "DiscordMessageFunction78FA388B": [
+        "Code"
+      ],
+      "BackupTaskFunctionA44639DC": [
+        "Code",
+        "Environment"
+      ],
+      "StopTaskFunction11473A8C": [
+        "Code",
+        "Environment"
+      ],
+      "StatusExecutorFunction6E5C9869": [
+        "Code"
+      ],
+      "AutoStopEvaluatorFunctionF85F8B50": [
+        "Code"
+      ]
+    },
+    "deployment_review_complete": false
+  },
+  "blocker": {
+    "command": "cdk synth WishicraftControlPlaneStack-dev --context stage=dev --context phase=8 --context deployment=control-plane",
+    "error": "ValueError: daily BACKUP requires the shared runtime contract",
+    "boundary": "existing required CI base synth; no code/CI repair authorized",
+    "shared_current_synth_passed": true
+  },
+  "evidence_root": "/private/tmp/wishicraft-d114-release.eCZWiw",
+  "baseline_file_sha256": {
+    "BackupStateMachine-definition.json": "06e144e5487c5f357b2d213baab1ed9b5586665d04abb6ec58e6e64079df2220",
+    "wc-dev-reconcile-concurrency.json": "d048dae4d49e919b0f66c96d936c52634eacc8dec7ab7adc32163f9630b25be5",
+    "MonitoringNotificationKey188D2CE5-key-policy.json": "6ea8a0635c0e3afa230d793a437da79403e7785005878370cdc8de14dea17e11",
+    "StopStateMachine-definition.json": "1f93138fccb90cf20a71c6198d4b0039cc7beffcecfeeb2313001addfb5fad43",
+    "volume.json": "535137ff993118ff4f7ccec3dd6d5ded9a9b95801d5ea11a8225f00f1edaee9d",
+    "SwitchWorkflow-running.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "wc-dev-retention-task-config.json": "d8b269d941e414119e91eb4a06351e6b9c61b4653c2a9a9a0d56608868dcff81",
+    "sessions.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "wc-dev-backup-task-config.json": "e15e224ed149020b6832af8dbad0e4e83843602fa49b04f57432bbe21057217f",
+    "wc-dev-backups.json": "b76593f68e9a449c06037d0ed31494ec010a0c432702fe49141bd6e77bfc2c3f",
+    "wc-dev-admission-config.json": "7db85b7cbb54292cbb5bfb02669ca1cbd873138d4038617a61c826b225df5870",
+    "ResetWorkflow-running.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "wc-dev-auto-stop-evaluator-concurrency.json": "1b68988359b63c829ea75b555a82c9692d6a898f96fd1b97eb8127cf0c0a5899",
+    "wc-dev-games.json": "3f195fbfc0271839de20b648f3c7ab0db3b58d09e0c1d144c44fa41f51b0060d",
+    "wc-dev-stop-task-role.json": "cd60e48ad61b6e6354c7f4306f3cea38a5cbc323532d7ce345f166787c3bc769",
+    "RetentionStateMachine-running.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd-config.json": "c4c33d789286920bb20acd172a06c3719e9fa8df08e93ca9613c3da9ae13236f",
+    "wc-dev-reconcile-config.json": "1a0411a5b28d30824409dc66ba4cf163ceeec13ac36714914069db2d9430ad34",
+    "caller.json": "a07ccc85d6bccf0141a8e5e5407ab8937a300b58750c86229dfa73ac62e2062d",
+    "wc-dev-reconcile-role.json": "1d1412f076089599cf2afc4fcce97c73e9f0e899a9f9725dcc81870ebedbd427",
+    "snapshots.json": "f825f73ea7b41e354237b84a0b56941cae8d0c4e46d0cec7b5a3e9eef3acc13b",
+    "instance.json": "c2168e43a2e3a210b1a0f096b76729c7382817cf2dfbc31922d7b9d77cf69369",
+    "wc-dev-retention-task-role.json": "86f0df1dfd5b4ac574616ebd78c765597b16432b1893eac4c65440919985fddb",
+    "wc-dev-discord-command-config.json": "094195a01316e4eb5ed62d32d17b65f0c562d1d7dccdb0599f560a24f6f37743",
+    "RetentionStateMachine-definition.json": "179cb96f6e8c91f173f91c488bee2b616ab63878d2d8691df5edf32e14c22183",
+    "DiscordMessageDlqD31D21DD-queue.json": "dae6eb177e6f4d963d1368d2a5168cf3d29dafec66570081c8f9e400cf7b3b33",
+    "MonitoringTopic4105FA01-topic.json": "df387e12eca289bc71d0954117e1ba8b3cb4ec4fe8e4014ec7d4f1e6afcebca3",
+    "WishicraftControlPlaneStack-dev-template.json": "230ed3859048a85760fa0f6fe17f8569eed35fd8ff80e1cdfc85e709bc49fa8f",
+    "dns.json": "9d1dd66683bc9b496262d9f6c90dd55330bf963d37be20bba5143658200a6e7e",
+    "wc-dev-monitoring-observer-role.json": "73dbd570811ef071bbe5e6fe0841a6e45e7928202dc61cb4299a723e28a870fe",
+    "MinecraftTargetStack-dev.json": "77196d79b10cbf4882a594d1005022e1e04dc48bdd63ab474921a4071c894873",
+    "SwitchWorkflow-definition.json": "3f3ef22a44a66e7a29fca0ea7cdb3180d4ab60f77de214866fcc58a87a19d5f9",
+    "wc-dev-discord-command-concurrency.json": "09c1318ee0f1bffb77843cd9ba98bc4a8ff674835e1cc5d8e5bf946473c4c564",
+    "MinecraftTargetStack-dev-template.json": "998562a74fb79decd993abbe71ed6fe94e78bd17a44e3dd5378acf29bb387f90",
+    "wc-dev-locks.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "wc-dev-admission-role.json": "752302b8a7c97fbb38d3533e61f17d833939e123bbb806b5af455edaaef73864",
+    "ResetWorkflow-definition.json": "9ef04e3b323a80de4dec8e7aee69cb8245e5d8fcc6ffa56527c752be8402e978",
+    "StartStateMachine-running.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "commands.json": "edb7119334f3da9faf113b18f41a3d2f4d57e754f5ac4fa7d2ee2207eee8fe8b",
+    "WishicraftWebStack-dev-template.json": "95d0b9a8a6099a041d3b840a27b722bebea1d0ba927a1896f172dc01d482c82f",
+    "StartStateMachine-definition.json": "e4ea0a1a4214c7dc1830047de4f18fa105c4b77326da7ba6fbdccecab528fa30",
+    "DiscordMessageRetryQueue4EAB3A83-queue.json": "ecdd1010cc8c8aee923da329ed10c5ed39a5059d3de8c7076b32ded0830469a0",
+    "wc-dev-discord-message-concurrency.json": "e23f38bb8ebe1d74485a10ad0550efa30cb4620c9b50ca12735ab3cffa235c80",
+    "wc-dev-start-task-concurrency.json": "2865a81f5c5674c73a6e0572b8c2186a35a318637929cbf002bc5f1e66df685a",
+    "wc-dev-start-task-role.json": "7f26371037e18bf6a15f50c0c8a2046d0c009345787b0092cabe6cb3365376c1",
+    "WishicraftControlPlaneStack-dev.json": "5c9ce3b70a219df602dafac2e1d193102b66b4fdfbb453526e41976446ce5ff4",
+    "wc-dev-system-state.json": "25bdb64de224309da47093102a6eda9dc0e5bed3f143387ecfcb0e96946e1eb9",
+    "wc-dev-discord-command-role.json": "b8530ae75c1552986886d556ad6d64d2f6cc704f87d0b529e19ab32b9fa63c46",
+    "MonitoringNotificationKey188D2CE5-key.json": "a948d400ba08efdf7a11de724f3c5489e51e1cad6675fb07cac73c451a2e7678",
+    "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd-concurrency.json": "9fc5343700a0a179737aba8dce80d4647256ff068a6a981fbb5fb91003e1c791",
+    "wc-dev-start-task-config.json": "afb0ec8d224f1fbde1c6f8175e0104678ce4151b8e45791890f695c74f4b087f",
+    "wc-dev-status-executor-role.json": "e799561901d70aa03e21be68ecb91df1128509a4cdb4304f11efaaaa7ed0805f",
+    "wc-dev-discord-message-config.json": "523624ab2ad7cd423dc2fa7cf005b8ae25953eede0783e6e960f6d74a39170e6",
+    "wc-dev-backup-task-concurrency.json": "fb37cda8ea409ecfeb0b4e46720eb11bab59560b3218364f3663f17b1276f73f",
+    "MinecraftTargetStack-dev-resources.json": "6a2f5ddf920a7a0f3a3fc3aa0569c366ed8cead1ac72b9111f84984d69482073",
+    "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd-role.json": "d39fa1ddc7c2794f6a9e37d02e02aa1b761832b367ba4fa660f22262f2c6758b",
+    "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp-concurrency.json": "d0caac0702cee614e7a6c7161accf6b3a1ea9f62fe02b5940d50fce78f671690",
+    "wc-dev-auto-stop-evaluator-config.json": "66fdfa8edb8e515dcf0034510a108a3a3a6853ddc5885e2c12b2e734b4881601",
+    "wc-dev-stop-task-config.json": "aecc10edb74b4a459281bc14f6db9020ed70efea4ff2939663d4360647a8922a",
+    "wc-dev-backup-task-role.json": "3861226b76fbd6d715c3df27619f4f22a6771d986e8bebe7e0c62d14f45fe365",
+    "wc-dev-status-executor-concurrency.json": "ea48642c41aee14755d8d92c26cd3725676d648da8a14ae2ff810a96368f4101",
+    "alarms.json": "692f5528cd9e60752a5f4de75ee2d50ef7184a255448e390d49ddde6f348902c",
+    "wc-dev-stop-task-concurrency.json": "59b5052d28ee435a1fece7ca45742262b5c6ba08249be0a8cb07b7d88d1b80aa",
+    "wc-dev-admission-concurrency.json": "9ebd13e6cfcf5532c9e4e591ca6dd3c3bca555d9bdccd0b2f8584069f2609cfc",
+    "timestamp.json": "90ab0a54655ac69dd484a160220341a29488049acd76d3829638f042d45f0dc1",
+    "wc-dev-retention-task-concurrency.json": "e634853b1a62a67af8f5a27e2ffc7827bce1a63eec8515b978b372442a917dce",
+    "StatusExecutorDlqD0B32ADE-queue.json": "47ab29dd7be48ad5fb042fd38eb25b6b4feb6e7009583f7e7486b9796b0609fe",
+    "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp-config.json": "c4257f42e06e430c104bc0da9d63c6f4703f446d6415328201d2d04b6e1b2fba",
+    "wc-dev-monitoring-observer-config.json": "5cd138ed3ec48f15c7a3e5cc90529de315bdf91d5eb949d7b028f28935431c06",
+    "wc-dev-discord-message-role.json": "d12239ef22d9071b79722f662b695ff777b82e5f1bb0d286a1bd02bed6962f23",
+    "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp-role.json": "36390701cde9696e85e2cf3d3bf3798e7013e87fc609ba1ef29c8786aab233cb",
+    "StopStateMachine-running.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "BackupStateMachine-running.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "wc-dev-monitoring-observer-concurrency.json": "0ccb6d213367a8252a86174858383799f72d8e47a7668a3cf8654a1257cdb57f",
+    "wc-dev-auto-stop-evaluator-role.json": "383c1aec09f2e20950a0084bc02563b16d3c0062df1d379b932ff4d9a0e30665",
+    "unfinished-operations.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "WishicraftControlPlaneStack-dev-resources.json": "8c6c1f1d9f19778afcc908270ded0219beb48fe4cd90869e6a5c728f7248b233",
+    "WishicraftWebStack-dev.json": "927b1a9430992aa619ce498b466f5bf40fb8dbda9460fd7ce5af395bf5927d14",
+    "wc-dev-status-executor-config.json": "e3c245d452931d7fdc4731f7e6c5e3ee443a8529ec70eb861cf178a41720d420",
+    "WishicraftWebStack-dev-resources.json": "c194ae07257753634e67624eb2ca23f9abe5656f29629fc3a6e7872496a41e24"
+  },
+  "asset_manifest": {
+    "version": "54.0.0",
+    "files": {
+      "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e": {
+        "displayName": "ReconcileFunction/Code",
+        "source": {
+          "path": "asset.0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e",
+          "packaging": "zip"
+        },
+        "destinations": {
+          "385526546525-ap-northeast-1-2120ca77": {
+            "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+            "objectKey": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip",
+            "region": "ap-northeast-1",
+            "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+          }
+        }
+      },
+      "fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549": {
+        "displayName": "DiscordCommandFunction/Code",
+        "source": {
+          "path": "asset.fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549",
+          "packaging": "zip"
+        },
+        "destinations": {
+          "385526546525-ap-northeast-1-ad7c7ded": {
+            "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+            "objectKey": "fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549.zip",
+            "region": "ap-northeast-1",
+            "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+          }
+        }
+      },
+      "d5a59b7774887415720c49bcef578b247f43ec04b3600eebd7fcaffb3c552a63": {
+        "displayName": "WishicraftControlPlaneStack-dev Template",
+        "source": {
+          "path": "WishicraftControlPlaneStack-dev.template.json",
+          "packaging": "file"
+        },
+        "destinations": {
+          "385526546525-ap-northeast-1-a6f212dd": {
+            "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+            "objectKey": "d5a59b7774887415720c49bcef578b247f43ec04b3600eebd7fcaffb3c552a63.json",
+            "region": "ap-northeast-1",
+            "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+          }
+        }
+      }
+    },
+    "dockerImages": {}
+  },
+  "validation": {
+    "stage_a_full_tests": {
+      "passed": 1931,
+      "failed": 11,
+      "seconds": 102.12,
+      "failures": {
+        "shared_runtime_required": 10,
+        "historical_eleven_lambda_expectation_actual_thirteen": 1
+      }
+    },
+    "stage_a_current_shared_synth": "passed",
+    "stage_a_base_synth": "failed",
+    "prior_reviewed_code_tests": 1942,
+    "prior_reviewed_lint_format_type_synth": "passed",
+    "pr_2": "https://github.com/eash-misoni/wishicraft-server/pull/2",
+    "pr_2_ci": "https://github.com/eash-misoni/wishicraft-server/actions/runs/36230516002",
+    "stage_a_test_log_sha256": "1996a958406396ac70a72d4835d0f8cc5063fbaefadeb6c1f58ab0452f883201",
+    "stage_a_base_log_sha256": "621192912b4d78da56522719533f991c24cc9d770c0fb2f56000108e84e06e7a"
+  },
+  "limitations": [
+    "No ChangeSet or Case D assessment performed",
+    "No deployed ZIP/candidate file-level comparison completed",
+    "No deployment, intake change, START/STOP, BACKUP or AWS mutation",
+    "No schedule enablement or new metric/alarm evidence",
+    "No stage B commit/assembly because stage A validation failed",
+    "Existing PLANNED and ROLLED_BACK RESTORE journals preserved; no hold completeness certification",
+    "Snapshot inventory/provenance captured read-only; no new snapshot or provenance created"
+  ]
+}
