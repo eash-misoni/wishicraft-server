@@ -153,12 +153,14 @@ A long run or repeated short stops can postpone a usable external recovery point
 Existing three Lambda environments gain `PROTECTION_VOLUME_ID`; their asset changes include the
 shared Python package. Optional resources: two Lambda functions, two log groups/roles/policies,
 one EventBridge rule and invoke permission, five CloudWatch alarms. No new workflow/table/queue.
-Evaluator: GetItem on state/lock/Operation, system-key-limited state UpdateItem, EC2 DescribeInstances,
+Evaluator: GetItem on state/lock/Operation, system-key/backup_protection-attribute-limited state UpdateItem, EC2 DescribeInstances,
 namespace-limited metric publication, invocation of only internal Admission. Internal Admission:
-existing admission table transaction actions, Games read/condition check, Lock DeleteItem for
+operation-specific table actions (Get on state/Operation/idempotency/Lock/Games, Put on Operation/idempotency/Lock, Update on state/Operation), Games condition check, Lock DeleteItem for
 existing startup-failure cleanup, DescribeInstances, only BACKUP StartExecution/DescribeExecution.
 No Observer role expansion, snapshot rights, secret reads, host/EC2 mutations or deletion rights.
 
 Tests use fixed clocks and serializer/repository/handler boundaries. Synth proves templates,
 not real IAM, scheduler cadence, SNS delivery or live 30-minute/24-hour observation.
 Validation results and exact release plan are in [the runbook](../runbooks/daily_shared_backup.md).
+
+Attribute-level IAM follows [AWS DynamoDB fine-grained conditions](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/specifying-conditions.html); real policy behavior remains a separate dev proof.

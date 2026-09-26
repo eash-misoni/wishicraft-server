@@ -66,6 +66,7 @@ def test_opt_in_schedule_alarms_and_least_privilege(enabled: bool) -> None:
         text = str(resource)
         if key.startswith("DailyBackupEvaluator"):
             assert "lambda:InvokeFunction" in text and "cloudwatch:PutMetricData" in text
+            assert "dynamodb:Attributes" in text and "backup_protection" in text
             assert all(
                 action not in text
                 for action in (

@@ -104,3 +104,10 @@ its exact HEAD and normal/NeoForge/Paper CI URLs are supplied in the final hando
 The earlier failed full run and the stage-byte migration regression were diagnosed; the fixed
 stage supplement preserves historical migration checks. Subsequent full-suite success above is
 from a new validation root. No skip/fallback is counted as implementation success.
+
+
+Final IAM review additionally splits internal Admission DynamoDB actions by their actual tables
+and limits evaluator UpdateItem to `system_id` / `backup_protection` attributes on the canonical
+system key. Six focused infrastructure/synth cases, targeted mypy, full lint/format passed after
+that restriction. Resource counts and unchanged existing-resource contracts remain the same;
+the exact final HEAD is covered by the subsequent PR CI, not inferred from the earlier local run.

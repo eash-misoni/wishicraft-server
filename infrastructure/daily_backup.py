@@ -93,34 +93,15 @@ def add(
             },
         },
     )
-    admission.add_to_role_policy(
-        iam.PolicyStatement(
-            actions=[
-                "dynamodb:GetItem",
-                "dynamodb:PutItem",
-                "dynamodb:UpdateItem",
-                "dynamodb:ConditionCheckItem",
-            ],
-            resources=[
-                states.table_arn,
-                operations.table_arn,
-                idempotency.table_arn,
-                locks.table_arn,
-            ],
-        )
-    )
-    admission.add_to_role_policy(
-        iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[games_table.table_arn])
-    )
-    if creation:
+    for action, tables in (
+        ("dynamodb:GetItem", [states, operations, idempotency, locks, games_table]),
+        ("dynamodb:PutItem", [operations, idempotency, locks]),
+        ("dynamodb:UpdateItem", [states, operations]),
+        ("dynamodb:ConditionCheckItem", [games_table]),
+    ):
         admission.add_to_role_policy(
-            iam.PolicyStatement(actions=["dynamodb:GetItem"], resources=[games_table.table_arn])
+            iam.PolicyStatement(actions=[action], resources=[table.table_arn for table in tables])
         )
-    admission.add_to_role_policy(
-        iam.PolicyStatement(
-            actions=["dynamodb:ConditionCheckItem"], resources=[games_table.table_arn]
-        )
-    )
     admission.add_to_role_policy(
         iam.PolicyStatement(actions=["states:StartExecution"], resources=[backup.attr_arn])
     )
@@ -160,7 +141,12 @@ def add(
         iam.PolicyStatement(
             actions=["dynamodb:UpdateItem"],
             resources=[states.table_arn],
-            conditions={"ForAllValues:StringEquals": {"dynamodb:LeadingKeys": [project.system_id]}},
+            conditions={
+                "ForAllValues:StringEquals": {
+                    "dynamodb:LeadingKeys": [project.system_id],
+                    "dynamodb:Attributes": ["system_id", "backup_protection"],
+                }
+            },
         )
     )
     evaluator.add_to_role_policy(
