@@ -1,5 +1,8 @@
 # 04. Domain and State Model
 
+> D-114/D-115 repository preparation (2026-09-26): [shared-volume daily BACKUP authority, periodic Admission and monitoring](reviews/daily_shared_backup.md); [independent 14-day OR newest-seven dry-run](reviews/daily_backup_retention.md). All Games are covered; SWITCH/RESET do not wait for BACKUP. Stage flags default disabled; existing deployed newest-seven and snapshot deletion gate remain separate. [Dev release plan and validation limits](runbooks/daily_shared_backup.md). No AWS application or execution in this slice.
+
+
 > D-113 RESTORE candidate: [maintenance-admin journal、prepared/committed境界、N+1採番と明示rollback](reviews/game_restore.md)。通常Operation enum/state machineへ混入せず、既存START/STOPとmaintenance fenceを使用する。実環境適用済み契約とは区別する。
 
 > D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](reviews/game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.

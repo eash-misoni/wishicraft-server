@@ -1,5 +1,8 @@
 # 05. Data and Interface Contracts
 
+> D-114/D-115 repository preparation (2026-09-26): [shared-volume daily BACKUP authority, periodic Admission and monitoring](reviews/daily_shared_backup.md); [independent 14-day OR newest-seven dry-run](reviews/daily_backup_retention.md). All Games are covered; SWITCH/RESET do not wait for BACKUP. Stage flags default disabled; existing deployed newest-seven and snapshot deletion gate remain separate. [Dev release plan and validation limits](runbooks/daily_shared_backup.md). No AWS application or execution in this slice.
+
+
 > D-113 RESTORE candidate: [schemaとauthority](reviews/game_restore.md)、[operator checkpoint/runbook](runbooks/game_restore.md)。既存SystemState audit領域の`restore#<operation>`、Game world参照の条件付き更新、rollback後も再利用しないgeneration_counter、root-owned prepared ownerを追加。BACKUP provenanceやpackage/access authorityは書換えない。実環境qualificationは未完了。
 
 > D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](reviews/game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.

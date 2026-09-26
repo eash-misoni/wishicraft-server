@@ -1,5 +1,8 @@
 # 07. Operations, Security, and Cost
 
+> D-114/D-115 repository preparation (2026-09-26): [shared-volume daily BACKUP authority, periodic Admission and monitoring](reviews/daily_shared_backup.md); [independent 14-day OR newest-seven dry-run](reviews/daily_backup_retention.md). All Games are covered; SWITCH/RESET do not wait for BACKUP. Stage flags default disabled; existing deployed newest-seven and snapshot deletion gate remain separate. [Dev release plan and validation limits](runbooks/daily_shared_backup.md). No AWS application or execution in this slice.
+
+
 > Dynamic Game BACKUP IAM: [限定条件・application authority・dev release gate](runbooks/dynamic_game_backup.md)。CREATE有効時だけ固定Game一覧依存を解消する。自動BACKUP運用・retention実削除は別範囲。
 
 > D-113 RESTORE candidate: [一時EBS・read-only抽出・事前BACKUP・cleanup/rollback契約](reviews/game_restore.md)。既存operator AWS credentialsを使い、application IAM／永続AWS resource／snapshot retention削除権限を追加しない。正式maintenance内で実行し、元Data EBSは置換しない。実環境qualificationは未完了。
