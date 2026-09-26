@@ -1,0 +1,76 @@
+{
+  "normalization": "CDK diagnostic Metadata only removed; Properties/IAM/workflows/alarms unchanged",
+  "default_added": [],
+  "default_removed": [],
+  "default_changed": {
+    "StartTaskFunction8C564C4A": [
+      "Code"
+    ],
+    "RetentionTaskFunction9F285CE4": [
+      "Code"
+    ],
+    "StopTaskFunction11473A8C": [
+      "Code",
+      "Environment"
+    ],
+    "DiscordMessageFunction78FA388B": [
+      "Code"
+    ],
+    "StatusExecutorFunction6E5C9869": [
+      "Code"
+    ],
+    "AdmissionFunction23082B67": [
+      "Code",
+      "Environment"
+    ],
+    "DiscordCommandFunction7D25102A": [
+      "Code"
+    ],
+    "ReconcileFunction30829CB6": [
+      "Code"
+    ],
+    "MonitoringObserverFunction584DA7C7": [
+      "Code"
+    ],
+    "BackupTaskFunctionA44639DC": [
+      "Code",
+      "Environment"
+    ],
+    "AutoStopEvaluatorFunctionF85F8B50": [
+      "Code"
+    ]
+  },
+  "enabled_added": {
+    "DailyBackupEvaluatorFunctionServiceRoleDefaultPolicy0FC7D9CD": "AWS::IAM::Policy",
+    "DailyBackupEvaluatorLogGroupC41BB5D3": "AWS::Logs::LogGroup",
+    "DailyBackupSchedule973769C0": "AWS::Events::Rule",
+    "DailyBackupStoppedOverdueAlarm3172A117": "AWS::CloudWatch::Alarm",
+    "DailyBackupHeartbeatAlarm7AC73BA7": "AWS::CloudWatch::Alarm",
+    "DailyBackupEvaluatorFunctionServiceRole282E8321": "AWS::IAM::Role",
+    "DailyBackupNeedsOperatorAlarm098A6CF7": "AWS::CloudWatch::Alarm",
+    "DailyBackupAdmissionFunctionBFD7AF72": "AWS::Lambda::Function",
+    "DailyBackupObservationUnknownAlarm188D678F": "AWS::CloudWatch::Alarm",
+    "DailyBackupEvaluatorFunction2CAEBD5D": "AWS::Lambda::Function",
+    "DailyBackupIntervalOverdueAlarm2205A737": "AWS::CloudWatch::Alarm",
+    "DailyBackupAdmissionFunctionServiceRoleDefaultPolicy98A97BA3": "AWS::IAM::Policy",
+    "DailyBackupScheduleAllowEventRuleWishicraftControlPlaneStackdevDailyBackupEvaluatorFunction8B3333D00099FBAB": "AWS::Lambda::Permission",
+    "DailyBackupAdmissionLogGroup0A6BBBF5": "AWS::Logs::LogGroup",
+    "DailyBackupAdmissionFunctionServiceRoleC812FABF": "AWS::IAM::Role"
+  },
+  "enabled_existing_changed": [],
+  "enabled_removed": [],
+  "schema_version": 1,
+  "baseline": "29c3231aa3052d26cce6a153a8c02d04fdc02ebb",
+  "validation": {
+    "unit_tests": 1925,
+    "full_tests": "passed",
+    "ruff": "passed",
+    "format": "passed",
+    "mypy": "passed (266 source files)",
+    "synth": "9 standard configurations plus full enabled configuration",
+    "ci": "See final commit PR checks; not a live AWS proof",
+    "aws_inventory": "not acquired",
+    "aws_mutations": 0,
+    "local_docker": "unavailable; CI integration required"
+  }
+}

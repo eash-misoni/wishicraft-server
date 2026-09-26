@@ -1,5 +1,8 @@
 # 02. Requirements
 
+> D-114/D-115 repository preparation (2026-09-26): [shared-volume daily BACKUP authority, periodic Admission and monitoring](reviews/daily_shared_backup.md); [independent 14-day OR newest-seven dry-run](reviews/daily_backup_retention.md). All Games are covered; SWITCH/RESET do not wait for BACKUP. Stage flags default disabled; existing deployed newest-seven and snapshot deletion gate remain separate. [Dev release plan and validation limits](runbooks/daily_shared_backup.md). No AWS application or execution in this slice.
+
+
 > D-113 RESTORE implementation candidate: [同一Game/packageのsnapshot内容から新世代を準備するoperator契約](reviews/game_restore.md)。BAK-004の正式復元経路を追加し、current／他Gameのin-place rollbackを禁止する。RESET enablementとは独立した管理操作。実環境qualificationは未完了。
 
 > D-112 current discovery contract: [Games registry-backed Discord autocomplete and public Game list](reviews/game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
@@ -420,7 +423,7 @@ SnapshotにはGame ID、source volume ID、category、Operation ID、作成日�
 
 ### BAK-005 停止中の不要起動禁止 `SHOULD`
 
-BACKUPは停止中だけ許可し、RUNNING/STARTING/STOPPING/unknown/degradedをfail closedで拒否する。BACKUP自身はEC2やMinecraftを停止・起動しない。scheduled backup、STOP連動backup、RUNNING backupはMVP対象外とする。
+BACKUPは停止中だけ許可し、RUNNING/STARTING/STOPPING/unknown/degradedをfail closedで拒否する。BACKUP自身はEC2やMinecraftを停止・起動しない。当時のMVPではscheduled backup、STOP連動backup、RUNNING backupは対象外だった。D-114では通常の全体STOP後の定期判定・正式BACKUP受付をrepository実装する。RUNNING backupは引き続き対象外。
 
 ### BAK-006 Retentionと分類 `MUST`
 

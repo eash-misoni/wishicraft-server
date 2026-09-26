@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import StrEnum
-from typing import Protocol
+from typing import Any, Protocol, cast
 
 from wishicraft.progress_display import MILESTONE_STEPS
 from wishicraft.system_state import utc_timestamp
@@ -97,8 +98,18 @@ class OperationRequest:
     discord: DiscordOperationContext | None = None
     reset_seed_mode: str | None = None
     web: WebOperationContext | None = None
+    daily_boundary: int | None = None
 
     def __post_init__(self) -> None:
+        if self.daily_boundary is not None and (
+            type(self.daily_boundary) is not int
+            or self.daily_boundary <= 0
+            or self.operation_type is not OperationType.BACKUP
+            or self.requested_by is not RequestSource.SCHEDULE
+            or self.discord is not None
+            or self.web is not None
+        ):
+            raise ValueError("invalid internal daily BACKUP boundary")
         if (self.web is not None) != (self.requested_by is RequestSource.WEB):
             raise ValueError("Web actor required exclusively for Web operations")
         _validate_identifier(self.operation_id, "operation")
@@ -202,6 +213,10 @@ class OperationAdmissionRepository:
             transaction.append(self._game_condition(request.target_game_id))
         if lease_id is not None:
             transaction.extend(self._ownership_transaction(request, lease_id))
+        if os.environ.get("PROTECTION_VOLUME_ID") and request.operation_type.requires_lock:
+            from wishicraft.daily_backup import admission
+
+            admission(self, request, transaction, os.environ["PROTECTION_VOLUME_ID"])
         try:
             self._api.transact_write_items(
                 TransactItems=transaction,
@@ -486,6 +501,7 @@ class OperationAdmissionService:
         target_game_id: str | None = None,
         reset_seed_mode: str | None = None,
         web: WebOperationContext | None = None,
+        daily_boundary: int | None = None,
     ) -> AdmissionResult:
         if (operation_type is OperationType.RESET and reset_seed_mode not in {"fixed", "new"}) or (
             operation_type is not OperationType.RESET and reset_seed_mode is not None
@@ -519,6 +535,7 @@ class OperationAdmissionService:
             discord=discord,
             reset_seed_mode=reset_seed_mode,
             web=web,
+            daily_boundary=daily_boundary,
         )
         return self._repository.admit(request)
 
@@ -749,6 +766,8 @@ class OperationRepository:
         error_code: str | None = None,
         result: dict[str, object] | None = None,
         additional_writes: tuple[dict[str, object], ...] = (),
+        normal_stop: bool = False,
+        backup_acquired_at: str | None = None,
     ) -> None:
         if status not in {
             OperationStatus.SUCCEEDED,
@@ -757,6 +776,21 @@ class OperationRepository:
         }:
             raise ValueError("owned completion must be SUCCEEDED, FAILED, or CANCELLED")
         now_epoch = int(completed_at.timestamp())
+        state_update = self._current_operation_remove(proof.owner_operation_id)
+        if os.environ.get("PROTECTION_VOLUME_ID"):
+            from wishicraft.daily_backup import completion
+
+            completion(
+                self,
+                cast(dict[str, Any], state_update["Update"]),
+                operation=proof.owner_operation_id,
+                result=result if status is OperationStatus.SUCCEEDED else None,
+                now=completed_at,
+                normal_stop=normal_stop and status is OperationStatus.SUCCEEDED,
+                acquired_at=backup_acquired_at,
+                error=error_code,
+                volume=os.environ["PROTECTION_VOLUME_ID"],
+            )
         self._api.transact_write_items(
             TransactItems=[
                 self._terminal_update(
@@ -769,7 +803,7 @@ class OperationRepository:
                 ),
                 *additional_writes,
                 self._lock_delete(proof, require_unexpired_at=now_epoch),
-                self._current_operation_remove(proof.owner_operation_id),
+                state_update,
             ],
         )
 

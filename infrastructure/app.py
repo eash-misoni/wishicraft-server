@@ -10,7 +10,11 @@ from infrastructure.stacks.control_plane_stack import ControlPlaneStack
 from infrastructure.stacks.minecraft_stack import MinecraftStack
 from infrastructure.stacks.minecraft_target_stack import MinecraftTargetStack
 from infrastructure.stacks.web_foundation_stack import WebFoundationStack
-from wishicraft.config import load_configuration, validate_stage_for_action
+from wishicraft.config import (
+    load_configuration,
+    load_daily_backup_configuration,
+    validate_stage_for_action,
+)
 from wishicraft.runtime_catalog import RuntimeCatalog
 
 
@@ -52,6 +56,7 @@ def build_app(
             project=configuration.project,
             secrets=configuration.secrets,
             phase=phase,
+            daily_backup=load_daily_backup_configuration(repository_root, stage),
             games=_games(repository_root, stage) if two_games else None,
             reset_policies=_reset_policies(repository_root, stage) if reset else None,
             game_creation=game_creation,
@@ -108,6 +113,7 @@ def main() -> None:
             project=configuration.project,
             secrets=configuration.secrets,
             phase=phase,
+            daily_backup=load_daily_backup_configuration(repository_root, stage),
             games=_games(repository_root, stage)
             if app.node.try_get_context("two_games") == "true"
             else None,

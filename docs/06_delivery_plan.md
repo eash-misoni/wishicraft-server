@@ -1,5 +1,8 @@
 # 06. Delivery Plan
 
+> D-114/D-115 repository preparation (2026-09-26): [shared-volume daily BACKUP authority, periodic Admission and monitoring](reviews/daily_shared_backup.md); [independent 14-day OR newest-seven dry-run](reviews/daily_backup_retention.md). All Games are covered; SWITCH/RESET do not wait for BACKUP. Stage flags default disabled; existing deployed newest-seven and snapshot deletion gate remain separate. [Dev release plan and validation limits](runbooks/daily_shared_backup.md). No AWS application or execution in this slice.
+
+
 > 2026-09-24 D-105 follow-up完了: [dynamic Game BACKUP IAM修正・限定dev release/proof](evidence/dynamic_game_backup_2026-09-24.md)。正式vps-survival選択→停止中BACKUP→completed/provenance→同一request再送を実証。snapshot 1件保持、最終STOPPED/HEALTHY・49 alarms正常・受付復帰。自動BACKUP運用・retention削除・Paper RESTOREは対象外。
 
 > D-112 dev discovery and cold-start correction qualified; actual START/RESET picker confirmed: [Games registry-backed Discord autocomplete and public Game list](reviews/game_discovery.md). Minimal ACTIVE Game listing now follows CREATE automatically; older A/B-only or explicit-publication statements below are historical for this listing. Runtime, authored detail pages and private metadata contracts remain separate.
