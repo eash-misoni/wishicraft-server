@@ -901,3 +901,25 @@ def _find_null_paths(value: ConfigValue, prefix: str = "") -> list[str]:
 
 def _join_path(prefix: str, name: str) -> str:
     return f"{prefix}.{name}" if prefix else name
+
+
+def load_daily_backup_configuration(root: Path, stage: str) -> dict[str, bool]:
+    """Independent stage supplement; preserve historical stage-byte migration guards."""
+    import json
+
+    if stage not in {"dev", "prod"}:
+        raise ValueError("unknown stage")
+    path = root / "config" / f"daily-backup-{stage}.json"
+    if not path.exists():
+        return {"provision": False, "enabled": False}
+    value = json.loads(path.read_text())
+    if (
+        not isinstance(value, dict)
+        or set(value) != {"schema_version", "provision", "enabled"}
+        or value["schema_version"] != 1
+        or type(value["provision"]) is not bool
+        or type(value["enabled"]) is not bool
+        or (value["enabled"] and not value["provision"])
+    ):
+        raise ValueError("invalid daily BACKUP stage supplement")
+    return {"provision": value["provision"], "enabled": value["enabled"]}

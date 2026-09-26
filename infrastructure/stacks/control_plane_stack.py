@@ -48,6 +48,7 @@ class ControlPlaneStack(Stack):
         games: tuple[str, ...] | None = None,
         reset_policies: dict[str, dict[str, int]] | None = None,
         game_creation: bool = False,
+        daily_backup: dict[str, bool] | None = None,
     ) -> None:
         super().__init__(
             scope,
@@ -1249,6 +1250,45 @@ class ControlPlaneStack(Stack):
                     treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
                 )
                 reset_alarm.add_alarm_action(cloudwatch_actions.SnsAction(topic))
+
+        if phase >= 8:
+            # Tracking continues with automation disabled; no new snapshot permissions.
+            volume = str(stage.host_runtime_value("target_host.existing_data_volume_id"))
+            assert backup_task is not None and backup_workflow is not None
+            for tracked in (admission, stop_task, backup_task):
+                tracked.add_environment("PROTECTION_VOLUME_ID", volume)
+            daily = daily_backup or {}
+            if not isinstance(daily, dict) or set(daily) - {"enabled", "provision"}:
+                raise ValueError("invalid daily_backup configuration")
+            enabled = daily.get("enabled", False)
+            provision = daily.get("provision", False)
+            if (
+                type(enabled) is not bool
+                or type(provision) is not bool
+                or (enabled and not provision)
+            ):
+                raise ValueError(
+                    "daily_backup flags must be explicit booleans; enabled requires provision"
+                )
+            if provision:
+                if games is None:
+                    raise ValueError("daily BACKUP requires the shared runtime contract")
+                from infrastructure.daily_backup import add as add_daily_backup
+
+                add_daily_backup(
+                    self,
+                    project=project,
+                    stage=stage,
+                    states=table,
+                    operations=operations_table,
+                    locks=locks_table,
+                    games_table=games_table,
+                    idempotency=idempotency_table,
+                    backup=backup_workflow,
+                    games=games,
+                    creation=game_creation,
+                    enabled=enabled,
+                )
 
 
 def _add_discord_ingress(

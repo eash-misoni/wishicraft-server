@@ -448,6 +448,8 @@ def _parse_event(
         else:
             raise ValueError("invalid Discord admission metadata")
         parsed_type = OperationType(operation_type)
+        if parsed_type is OperationType.BACKUP and source is RequestSource.SCHEDULE:
+            raise ValueError("scheduled BACKUP requires the dedicated internal Admission")
         auto_stop_intent_id = event.get("auto_stop_intent_id")
         if auto_stop_intent_id is not None and (
             parsed_type is not OperationType.STOP
