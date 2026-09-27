@@ -35,10 +35,13 @@ def sanitize(value: object) -> object:
                 return REDACTED
             return value
         if isinstance(parsed, (dict, list, str)):
-            return json.dumps(sanitize(parsed), ensure_ascii=False)
+            cleaned = sanitize(parsed)
+            # Immutable provenance JSON and policy strings must retain their bytes
+            # when no environment value was removed.
+            return value if cleaned == parsed else json.dumps(cleaned, ensure_ascii=False)
         return value
     if isinstance(value, Mapping):
-        target = value.get("Target", {})
+        target = value.get("Target", value)
         path = str(target.get("Path", "")) if isinstance(target, Mapping) else ""
         environment_path = "/environment" in path.lower() or (
             isinstance(target, Mapping) and target.get("Name") == "Environment"
@@ -46,7 +49,11 @@ def sanitize(value: object) -> object:
         result: dict[str, object] = {}
         for key, item in value.items():
             name = str(key)
-            if name.lower() == "variables":
+            if name in ("runtime_env", "runtime_env_sha256", "compose_yaml"):
+                # Recovery provenance is verified in memory; its host environment
+                # and Compose environment projection are not release evidence.
+                result[name] = REDACTED
+            elif name.lower() == "variables":
                 result[name] = _variables(item)
             elif name == "Environment" or (
                 name.lower() == "environment" and isinstance(item, Mapping) and "Variables" in item

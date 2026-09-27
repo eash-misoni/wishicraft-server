@@ -1,5 +1,7 @@
 # 06. Delivery Plan
 
+> 2026-09-27 D-114 limited dev release **completed**: inherited disabled stage A, one formal original-world START/STOP, separately authorized stage B, one completed automatic BACKUP and at least two natural PROTECTED evaluations. Dev daily BACKUP remains enabled; intake restored. Case D condition 3 remains false; the separate approval applies only to the recorded ARN. Retention deletion remains disabled. [Execution and notification classification](evidence/daily_backup_dev_stage_b_2026-09-27.md). Earlier partial records below are historical.
+
 > 2026-09-27 D-114 partial dev release: disabled stage A deployed/read back; stage B held by Case D condition 3 before START/STOP. Daily automation remains disabled, intake restored, no new snapshot. [Exact release and stop evidence](evidence/daily_backup_dev_stage_a_2026-09-27.md).
 
 > D-114 dev release attempt (2026-09-26): PR #1 is merged, but stage A configuration validation failed before any AWS mutation. Dev automatic BACKUP is **not enabled**; the candidate remains unmerged. [Baseline, exact commits and stop boundary](evidence/daily_backup_dev_preflight_2026-09-26.md).

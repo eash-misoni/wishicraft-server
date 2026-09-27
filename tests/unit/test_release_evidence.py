@@ -12,6 +12,31 @@ def test_domain_stage_environment_is_not_lambda_configuration() -> None:
     assert sanitize(state) == state
 
 
+def test_non_environment_json_strings_keep_exact_provenance_bytes() -> None:
+    recovery = '{"schema_version":2,"scope":"shared-volume","games":[]}'
+    record = {"recovery_json": recovery, "Policy": '{"Statement": []}'}
+    assert sanitize(record) == record
+    assert sanitize(json.dumps(record)) == json.dumps(record)
+
+
+def test_embedded_recovery_host_environment_is_removed(tmp_path: Path) -> None:
+    recovery = {
+        "games": {"game-original": {"world": {"generation": 1}}},
+        "runtime": {
+            "runtime_env": "PUBLIC=mock-host-value\n",
+            "compose_yaml": "environment: {PUBLIC: mock-compose-value}",
+            "manifest_json": '{"runtime_env_sha256":"mock-environment-hash"}',
+        },
+    }
+    save_evidence(tmp_path / "recovery.json", {"recovery_json": {"S": json.dumps(recovery)}})
+    stored = (tmp_path / "recovery.json").read_text()
+    assert all(
+        value not in stored
+        for value in ("mock-host-value", "mock-compose-value", "mock-environment-hash")
+    )
+    assert "game-original" in stored and "generation" in stored
+
+
 def test_embedded_contexts_and_lambda_values_removed_before_write(tmp_path: Path) -> None:
     variables = {
         "SECRET": "mock-sensitive-123",
@@ -64,6 +89,25 @@ def test_only_explicit_daily_flag_values_are_retained() -> None:
         "AfterValue": "1",
     }
     assert sanitize(detail) == detail
+
+
+def test_actual_changeset_target_contains_property_values(tmp_path: Path) -> None:
+    detail = {
+        "Target": {
+            "Name": "Environment",
+            "Path": "/Properties/Environment/Variables/SECRET",
+            "BeforeValue": "mock-before-secret",
+            "AfterValue": "mock-after-secret",
+            "RequiresRecreation": "Never",
+        },
+        "Evaluation": "Static",
+    }
+    save_evidence(tmp_path / "actual-shape.json", detail)
+    result = json.loads((tmp_path / "actual-shape.json").read_text())
+    assert result["Target"]["BeforeValue"] == REDACTED
+    assert result["Target"]["AfterValue"] == REDACTED
+    assert result["Target"]["Path"] == "/Properties/Environment/Variables/SECRET"
+    assert result["Evaluation"] == "Static"
 
 
 def test_exception_output_and_failed_serialization_do_not_leak(
