@@ -36,6 +36,83 @@ ERRORS = {
 }
 
 
+def match_create_snapshot_event(
+    raw: object, *, operation_id: str, volume_id: str, account: str, region: str
+) -> dict[str, Any]:
+    """Match the observed EC2 CloudTrail shape, never opaque request text."""
+    result: dict[str, Any] = dict(
+        comparison_method="create-snapshot-fields-v1",
+        account_region_matches=False,
+        event_source_name_matches=False,
+        source_volume_matches=False,
+        operation_tag_matches=False,
+        target_matches=False,
+        match_issues=[],
+    )
+    issues = result["match_issues"]
+    if not isinstance(raw, dict):
+        issues.append("invalid-event-structure")
+        return result
+    result["account_region_matches"] = (
+        raw.get("recipientAccountId") == account and raw.get("awsRegion") == region
+    )
+    result["event_source_name_matches"] = (
+        raw.get("eventSource") == "ec2.amazonaws.com" and raw.get("eventName") == "CreateSnapshot"
+    )
+    if not result["account_region_matches"]:
+        issues.append("account-or-region-mismatch")
+    if not result["event_source_name_matches"]:
+        issues.append("event-source-or-name-mismatch")
+    request = raw.get("requestParameters")
+    if not isinstance(request, dict):
+        issues.append("invalid-request-structure")
+        return result
+    volume = request.get("volumeId")
+    if not isinstance(volume, str):
+        issues.append("missing-or-invalid-volume-id")
+    elif volume != volume_id:
+        issues.append("source-volume-mismatch")
+    else:
+        result["source_volume_matches"] = True
+    specifications = request.get("tagSpecificationSet")
+    items = specifications.get("items") if isinstance(specifications, dict) else None
+    if (
+        not isinstance(items, list)
+        or len(items) != 1
+        or not isinstance(items[0], dict)
+        or items[0].get("resourceType") != "snapshot"
+    ):
+        issues.append("missing-invalid-or-ambiguous-snapshot-specification")
+        return result
+    tags = items[0].get("tags")
+    if not isinstance(tags, list):
+        issues.append("missing-or-invalid-snapshot-tags")
+        return result
+    values: dict[str, str] = {}
+    for tag in tags:
+        if (
+            not isinstance(tag, dict)
+            or set(tag) != {"key", "value"}
+            or not isinstance(tag["key"], str)
+            or not tag["key"]
+            or not isinstance(tag["value"], str)
+        ):
+            issues.append("invalid-snapshot-tag")
+            return result
+        if tag["key"] in values:
+            issues.append("duplicate-snapshot-tag-key")
+            return result
+        values[tag["key"]] = tag["value"]
+    if "WishicraftOperationId" not in values:
+        issues.append("missing-operation-tag")
+    elif values["WishicraftOperationId"] != operation_id:
+        issues.append("operation-tag-mismatch")
+    else:
+        result["operation_tag_matches"] = True
+    result["target_matches"] = not issues
+    return result
+
+
 def project(value: Any) -> dict[str, Any]:
     """Only enumerated evidence crosses storage; opaque payloads stay in memory."""
     out: dict[str, Any] = {"errors": [], "snapshot_ids": [], "facts": [], "states": []}
@@ -239,20 +316,35 @@ def collect(session: Any, root: Path) -> dict[str, Any]:
                             )
                             .astimezone(UTC)
                             .isoformat(),
-                            account_region_matches=raw.get("recipientAccountId") == account
-                            and raw.get("awsRegion") == region,
-                            operation_tag_matches=record["operation_id"]
-                            in json.dumps(raw.get("requestParameters")),
+                            **(
+                                match_create_snapshot_event(
+                                    raw,
+                                    operation_id=record["operation_id"],
+                                    volume_id=cast(Any, cfg.stage.values)["host_runtime"][
+                                        "target_host"
+                                    ]["existing_data_volume_id"],
+                                    account=account,
+                                    region=region,
+                                )
+                                if event_name == "CreateSnapshot"
+                                else dict(
+                                    account_region_matches=raw.get("recipientAccountId") == account
+                                    and raw.get("awsRegion") == region,
+                                    event_source_name_matches=raw.get("eventSource")
+                                    == "ec2.amazonaws.com"
+                                    and raw.get("eventName") == event_name,
+                                    operation_tag_matches=False,
+                                    source_volume_matches=False,
+                                    target_matches=False,
+                                    match_issues=["create-snapshot-target-match-not-applicable"],
+                                )
+                            ),
                             explicit_denial=raw.get("errorCode")
                             in {
                                 "Client.UnauthorizedOperation",
                                 "UnauthorizedOperation",
                                 "AccessDenied",
                             },
-                            source_volume_matches=cast(Any, cfg.stage.values)["host_runtime"][
-                                "target_host"
-                            ]["existing_data_volume_id"]
-                            in json.dumps(raw.get("requestParameters")),
                             **project(raw),
                         )
                     )
