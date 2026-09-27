@@ -1,0 +1,1672 @@
+{
+  "schema_version": 1,
+  "status": "SUCCESS_LIMITED_DEV_NORMAL_PATH",
+  "source": {
+    "source_commit": "c3a2cbf514f9c8a64ae532e6fc5757c7e699fd93",
+    "source_tree": "fa7ff60ffce8fecd6d9e8b2152cf80df5ae26195",
+    "template_sha256": "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb",
+    "change_set_name": "d114-stage-b-approved-c3a2cbf-20260927",
+    "assets": {
+      "version": "54.0.0",
+      "files": {
+        "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e": {
+          "displayName": "ReconcileFunction/Code",
+          "source": {
+            "path": "asset.0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e",
+            "packaging": "zip"
+          },
+          "destinations": {
+            "385526546525-ap-northeast-1-2120ca77": {
+              "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+              "objectKey": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip",
+              "region": "ap-northeast-1",
+              "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+            }
+          }
+        },
+        "fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549": {
+          "displayName": "DiscordCommandFunction/Code",
+          "source": {
+            "path": "asset.fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549",
+            "packaging": "zip"
+          },
+          "destinations": {
+            "385526546525-ap-northeast-1-ad7c7ded": {
+              "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+              "objectKey": "fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549.zip",
+              "region": "ap-northeast-1",
+              "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+            }
+          }
+        },
+        "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb": {
+          "displayName": "WishicraftControlPlaneStack-dev Template",
+          "source": {
+            "path": "WishicraftControlPlaneStack-dev.template.json",
+            "packaging": "file"
+          },
+          "destinations": {
+            "385526546525-ap-northeast-1-19352d9b": {
+              "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+              "objectKey": "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb.json",
+              "region": "ap-northeast-1",
+              "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+            }
+          }
+        }
+      },
+      "dockerImages": {}
+    }
+  },
+  "candidate_head": "fe3a6d37223845bfc538e3ed2f48806dfb2847a6",
+  "ci_test_merge": "1349510be9dc580d1340a270a8f24539c765b3e7",
+  "main_ci_runs": [
+    36295811804,
+    36295811788,
+    36295811837
+  ],
+  "change_set_arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d114-stage-b-approved-c3a2cbf-20260927/5bb7e41d-3f65-470e-a999-7777aab56e76",
+  "parameters": [
+    {
+      "ParameterKey": "BootstrapVersion",
+      "ParameterValue": "/cdk-bootstrap/hnb659fds/version",
+      "ResolvedValue": "32"
+    }
+  ],
+  "case_d_condition3": false,
+  "case_d_pass": false,
+  "separate_approval": "2026-09-27 user D-114 stage-B-specific separate approval",
+  "independent_comparison": {
+    "at": "2026-09-27T05:05:12.771034+00:00",
+    "pass": true,
+    "stage_a_inherited": true,
+    "expected_property_paths": [
+      [
+        "DailyBackupAdmissionFunctionBFD7AF72",
+        "Properties",
+        "Environment",
+        "Variables",
+        "DAILY_BACKUP_ENABLED"
+      ],
+      [
+        "DailyBackupEvaluatorFunction2CAEBD5D",
+        "Properties",
+        "Environment",
+        "Variables",
+        "DAILY_BACKUP_ENABLED"
+      ],
+      [
+        "DailyBackupHeartbeatAlarm7AC73BA7",
+        "Properties",
+        "ActionsEnabled"
+      ],
+      [
+        "DailyBackupHeartbeatAlarm7AC73BA7",
+        "Properties",
+        "TreatMissingData"
+      ],
+      [
+        "DailyBackupIntervalOverdueAlarm2205A737",
+        "Properties",
+        "ActionsEnabled"
+      ],
+      [
+        "DailyBackupNeedsOperatorAlarm098A6CF7",
+        "Properties",
+        "ActionsEnabled"
+      ],
+      [
+        "DailyBackupObservationUnknownAlarm188D678F",
+        "Properties",
+        "ActionsEnabled"
+      ],
+      [
+        "DailyBackupSchedule973769C0",
+        "Properties",
+        "State"
+      ],
+      [
+        "DailyBackupStoppedOverdueAlarm3172A117",
+        "Properties",
+        "ActionsEnabled"
+      ]
+    ],
+    "machines": {
+      "StartStateMachine": {
+        "state_machine_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "live_asl_equal": true,
+        "canonical_asl_sha256": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8",
+        "configuration_equal": true,
+        "role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-StartWorkflowRoleA360C95C-5Gthd08pXog9",
+        "tags": [
+          {
+            "key": "Project",
+            "value": "wishicraft"
+          },
+          {
+            "key": "aws:cloudformation:stack-name",
+            "value": "WishicraftControlPlaneStack-dev"
+          },
+          {
+            "key": "Owner",
+            "value": "project-owner"
+          },
+          {
+            "key": "ManagedBy",
+            "value": "cdk"
+          },
+          {
+            "key": "aws:cloudformation:stack-id",
+            "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+          },
+          {
+            "key": "Stage",
+            "value": "dev"
+          },
+          {
+            "key": "aws:cloudformation:logical-id",
+            "value": "StartStateMachine"
+          }
+        ],
+        "revision_id": null,
+        "creation_date": "2026-08-29 13:27:55.524000+09:00"
+      },
+      "StopStateMachine": {
+        "state_machine_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "live_asl_equal": true,
+        "canonical_asl_sha256": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f",
+        "configuration_equal": true,
+        "role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneStac-StopWorkflowRole2C1543AC-mkRlbbJIBLjV",
+        "tags": [
+          {
+            "key": "Project",
+            "value": "wishicraft"
+          },
+          {
+            "key": "aws:cloudformation:stack-name",
+            "value": "WishicraftControlPlaneStack-dev"
+          },
+          {
+            "key": "Owner",
+            "value": "project-owner"
+          },
+          {
+            "key": "ManagedBy",
+            "value": "cdk"
+          },
+          {
+            "key": "aws:cloudformation:stack-id",
+            "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+          },
+          {
+            "key": "Stage",
+            "value": "dev"
+          },
+          {
+            "key": "aws:cloudformation:logical-id",
+            "value": "StopStateMachine"
+          }
+        ],
+        "revision_id": "1c2ff03e-9c99-4268-8592-e621c9709308",
+        "creation_date": "2026-08-29 23:42:22.539000+09:00"
+      },
+      "BackupStateMachine": {
+        "state_machine_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "live_asl_equal": true,
+        "canonical_asl_sha256": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213",
+        "configuration_equal": true,
+        "role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-BackupWorkflowRoleD9C2948-9xDR3CHieV10",
+        "tags": [
+          {
+            "key": "Project",
+            "value": "wishicraft"
+          },
+          {
+            "key": "aws:cloudformation:stack-name",
+            "value": "WishicraftControlPlaneStack-dev"
+          },
+          {
+            "key": "Owner",
+            "value": "project-owner"
+          },
+          {
+            "key": "ManagedBy",
+            "value": "cdk"
+          },
+          {
+            "key": "aws:cloudformation:stack-id",
+            "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+          },
+          {
+            "key": "Stage",
+            "value": "dev"
+          },
+          {
+            "key": "aws:cloudformation:logical-id",
+            "value": "BackupStateMachine"
+          }
+        ],
+        "revision_id": "abd31155-2ef5-46b7-8473-76c160542e4d",
+        "creation_date": "2026-09-07 17:34:40.186000+09:00"
+      },
+      "RetentionStateMachine": {
+        "state_machine_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "live_asl_equal": true,
+        "canonical_asl_sha256": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e",
+        "configuration_equal": true,
+        "role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-RetentionWorkflowRole90B8-3nnywDAwMfE9",
+        "tags": [
+          {
+            "key": "Project",
+            "value": "wishicraft"
+          },
+          {
+            "key": "aws:cloudformation:stack-name",
+            "value": "WishicraftControlPlaneStack-dev"
+          },
+          {
+            "key": "Owner",
+            "value": "project-owner"
+          },
+          {
+            "key": "ManagedBy",
+            "value": "cdk"
+          },
+          {
+            "key": "aws:cloudformation:stack-id",
+            "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+          },
+          {
+            "key": "Stage",
+            "value": "dev"
+          },
+          {
+            "key": "aws:cloudformation:logical-id",
+            "value": "RetentionStateMachine"
+          }
+        ],
+        "revision_id": null,
+        "creation_date": "2026-09-08 22:12:05.690000+09:00"
+      },
+      "SwitchWorkflow": {
+        "state_machine_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "live_asl_equal": true,
+        "canonical_asl_sha256": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2",
+        "configuration_equal": true,
+        "role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6",
+        "tags": [
+          {
+            "key": "Project",
+            "value": "wishicraft"
+          },
+          {
+            "key": "aws:cloudformation:stack-name",
+            "value": "WishicraftControlPlaneStack-dev"
+          },
+          {
+            "key": "Owner",
+            "value": "project-owner"
+          },
+          {
+            "key": "ManagedBy",
+            "value": "cdk"
+          },
+          {
+            "key": "aws:cloudformation:stack-id",
+            "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+          },
+          {
+            "key": "Stage",
+            "value": "dev"
+          },
+          {
+            "key": "aws:cloudformation:logical-id",
+            "value": "SwitchWorkflow"
+          }
+        ],
+        "revision_id": null,
+        "creation_date": "2026-09-12 12:01:31.900000+09:00"
+      },
+      "ResetWorkflow": {
+        "state_machine_arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "live_asl_equal": true,
+        "canonical_asl_sha256": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce",
+        "configuration_equal": true,
+        "role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6",
+        "tags": [
+          {
+            "key": "Project",
+            "value": "wishicraft"
+          },
+          {
+            "key": "aws:cloudformation:stack-name",
+            "value": "WishicraftControlPlaneStack-dev"
+          },
+          {
+            "key": "Owner",
+            "value": "project-owner"
+          },
+          {
+            "key": "ManagedBy",
+            "value": "cdk"
+          },
+          {
+            "key": "aws:cloudformation:stack-id",
+            "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+          },
+          {
+            "key": "Stage",
+            "value": "dev"
+          },
+          {
+            "key": "aws:cloudformation:logical-id",
+            "value": "ResetWorkflow"
+          }
+        ],
+        "revision_id": null,
+        "creation_date": "2026-09-12 20:26:55.533000+09:00"
+      }
+    },
+    "lambda_code_configuration_equal": true,
+    "iam_sns_kms_queues_existing_alarms_equal": true,
+    "functions": {
+      "ReconcileFunction30829CB6": {
+        "FunctionName": "wc-dev-reconcile",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.reconcile_lambda.handler",
+        "environment_matches_template": true
+      },
+      "StartTaskFunction8C564C4A": {
+        "FunctionName": "wc-dev-start-task",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.start_workflow_lambda.handler",
+        "environment_matches_template": true
+      },
+      "StopTaskFunction11473A8C": {
+        "FunctionName": "wc-dev-stop-task",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.stop_workflow_lambda.handler",
+        "environment_matches_template": true
+      },
+      "BackupTaskFunctionA44639DC": {
+        "FunctionName": "wc-dev-backup-task",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.backup_workflow_lambda.handler",
+        "environment_matches_template": true
+      },
+      "RetentionTaskFunction9F285CE4": {
+        "FunctionName": "wc-dev-retention-task",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.retention_workflow_lambda.handler",
+        "environment_matches_template": true
+      },
+      "AdmissionFunction23082B67": {
+        "FunctionName": "wc-dev-admission",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-admission",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.admission_lambda.handler",
+        "environment_matches_template": true
+      },
+      "DiscordCommandFunction7D25102A": {
+        "FunctionName": "wc-dev-discord-command",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-command",
+        "CodeSha256": "WjoQoaarK2S3yxHLUzd+r/x3mpLFd1kOFqK8QxI6Bwo=",
+        "Handler": "wishicraft.discord_command_lambda.handler",
+        "environment_matches_template": true
+      },
+      "StatusExecutorFunction6E5C9869": {
+        "FunctionName": "wc-dev-status-executor",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-status-executor",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.status_executor_lambda.handler",
+        "environment_matches_template": true
+      },
+      "DiscordMessageFunction78FA388B": {
+        "FunctionName": "wc-dev-discord-message",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-message",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.discord_message_lambda.handler",
+        "environment_matches_template": true
+      },
+      "AutoStopEvaluatorFunctionF85F8B50": {
+        "FunctionName": "wc-dev-auto-stop-evaluator",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-auto-stop-evaluator",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.auto_stop_evaluator_lambda.handler",
+        "environment_matches_template": true
+      },
+      "MonitoringObserverFunction584DA7C7": {
+        "FunctionName": "wc-dev-monitoring-observer",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-monitoring-observer",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.monitoring_lambda.handler",
+        "environment_matches_template": true
+      },
+      "DailyBackupAdmissionFunctionBFD7AF72": {
+        "FunctionName": "wc-dev-daily-backup-admission",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-daily-backup-admission",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.daily_backup_lambda.admit",
+        "environment_matches_template": true
+      },
+      "DailyBackupEvaluatorFunction2CAEBD5D": {
+        "FunctionName": "wc-dev-daily-backup-evaluator",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-daily-backup-evaluator",
+        "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+        "Handler": "wishicraft.daily_backup_lambda.handler",
+        "environment_matches_template": true
+      }
+    },
+    "stack_id": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd",
+    "stack_last_updated": "2026-09-27 03:20:27.536000+00:00",
+    "candidate_template_sha256": "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb"
+  },
+  "post_workflow_identity": {
+    "BackupStateMachine": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+      "old_revision": "abd31155-2ef5-46b7-8473-76c160542e4d",
+      "current_revision": "abd31155-2ef5-46b7-8473-76c160542e4d",
+      "definition_equal": true,
+      "role_and_config_equal": true,
+      "template_tags_match": true,
+      "tags": [
+        {
+          "key": "Project",
+          "value": "wishicraft"
+        },
+        {
+          "key": "aws:cloudformation:stack-name",
+          "value": "WishicraftControlPlaneStack-dev"
+        },
+        {
+          "key": "Owner",
+          "value": "project-owner"
+        },
+        {
+          "key": "ManagedBy",
+          "value": "cdk"
+        },
+        {
+          "key": "aws:cloudformation:stack-id",
+          "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+        },
+        {
+          "key": "Stage",
+          "value": "dev"
+        },
+        {
+          "key": "aws:cloudformation:logical-id",
+          "value": "BackupStateMachine"
+        }
+      ]
+    },
+    "ResetWorkflow": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+      "old_revision": null,
+      "current_revision": null,
+      "definition_equal": true,
+      "role_and_config_equal": true,
+      "template_tags_match": true,
+      "tags": [
+        {
+          "key": "Project",
+          "value": "wishicraft"
+        },
+        {
+          "key": "aws:cloudformation:stack-name",
+          "value": "WishicraftControlPlaneStack-dev"
+        },
+        {
+          "key": "Owner",
+          "value": "project-owner"
+        },
+        {
+          "key": "ManagedBy",
+          "value": "cdk"
+        },
+        {
+          "key": "aws:cloudformation:stack-id",
+          "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+        },
+        {
+          "key": "Stage",
+          "value": "dev"
+        },
+        {
+          "key": "aws:cloudformation:logical-id",
+          "value": "ResetWorkflow"
+        }
+      ]
+    },
+    "RetentionStateMachine": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+      "old_revision": null,
+      "current_revision": null,
+      "definition_equal": true,
+      "role_and_config_equal": true,
+      "template_tags_match": true,
+      "tags": [
+        {
+          "key": "Project",
+          "value": "wishicraft"
+        },
+        {
+          "key": "aws:cloudformation:stack-name",
+          "value": "WishicraftControlPlaneStack-dev"
+        },
+        {
+          "key": "Owner",
+          "value": "project-owner"
+        },
+        {
+          "key": "ManagedBy",
+          "value": "cdk"
+        },
+        {
+          "key": "aws:cloudformation:stack-id",
+          "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+        },
+        {
+          "key": "Stage",
+          "value": "dev"
+        },
+        {
+          "key": "aws:cloudformation:logical-id",
+          "value": "RetentionStateMachine"
+        }
+      ]
+    },
+    "StartStateMachine": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+      "old_revision": null,
+      "current_revision": null,
+      "definition_equal": true,
+      "role_and_config_equal": true,
+      "template_tags_match": true,
+      "tags": [
+        {
+          "key": "Project",
+          "value": "wishicraft"
+        },
+        {
+          "key": "aws:cloudformation:stack-name",
+          "value": "WishicraftControlPlaneStack-dev"
+        },
+        {
+          "key": "Owner",
+          "value": "project-owner"
+        },
+        {
+          "key": "ManagedBy",
+          "value": "cdk"
+        },
+        {
+          "key": "aws:cloudformation:stack-id",
+          "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+        },
+        {
+          "key": "Stage",
+          "value": "dev"
+        },
+        {
+          "key": "aws:cloudformation:logical-id",
+          "value": "StartStateMachine"
+        }
+      ]
+    },
+    "StopStateMachine": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+      "old_revision": "1c2ff03e-9c99-4268-8592-e621c9709308",
+      "current_revision": "1c2ff03e-9c99-4268-8592-e621c9709308",
+      "definition_equal": true,
+      "role_and_config_equal": true,
+      "template_tags_match": true,
+      "tags": [
+        {
+          "key": "Project",
+          "value": "wishicraft"
+        },
+        {
+          "key": "aws:cloudformation:stack-name",
+          "value": "WishicraftControlPlaneStack-dev"
+        },
+        {
+          "key": "Owner",
+          "value": "project-owner"
+        },
+        {
+          "key": "ManagedBy",
+          "value": "cdk"
+        },
+        {
+          "key": "aws:cloudformation:stack-id",
+          "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+        },
+        {
+          "key": "Stage",
+          "value": "dev"
+        },
+        {
+          "key": "aws:cloudformation:logical-id",
+          "value": "StopStateMachine"
+        }
+      ]
+    },
+    "SwitchWorkflow": {
+      "arn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+      "old_revision": null,
+      "current_revision": null,
+      "definition_equal": true,
+      "role_and_config_equal": true,
+      "template_tags_match": true,
+      "tags": [
+        {
+          "key": "Project",
+          "value": "wishicraft"
+        },
+        {
+          "key": "aws:cloudformation:stack-name",
+          "value": "WishicraftControlPlaneStack-dev"
+        },
+        {
+          "key": "Owner",
+          "value": "project-owner"
+        },
+        {
+          "key": "ManagedBy",
+          "value": "cdk"
+        },
+        {
+          "key": "aws:cloudformation:stack-id",
+          "value": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd"
+        },
+        {
+          "key": "Stage",
+          "value": "dev"
+        },
+        {
+          "key": "aws:cloudformation:logical-id",
+          "value": "SwitchWorkflow"
+        }
+      ]
+    }
+  },
+  "execute": {
+    "at": "2026-09-27T05:19:33.985411+00:00",
+    "change_set_arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d114-stage-b-approved-c3a2cbf-20260927/5bb7e41d-3f65-470e-a999-7777aab56e76",
+    "binding": {
+      "source_commit": "c3a2cbf514f9c8a64ae532e6fc5757c7e699fd93",
+      "source_tree": "fa7ff60ffce8fecd6d9e8b2152cf80df5ae26195",
+      "template_sha256": "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb",
+      "change_set_name": "d114-stage-b-approved-c3a2cbf-20260927",
+      "assets": {
+        "version": "54.0.0",
+        "files": {
+          "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e": {
+            "displayName": "ReconcileFunction/Code",
+            "source": {
+              "path": "asset.0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e",
+              "packaging": "zip"
+            },
+            "destinations": {
+              "385526546525-ap-northeast-1-2120ca77": {
+                "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+                "objectKey": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip",
+                "region": "ap-northeast-1",
+                "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+              }
+            }
+          },
+          "fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549": {
+            "displayName": "DiscordCommandFunction/Code",
+            "source": {
+              "path": "asset.fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549",
+              "packaging": "zip"
+            },
+            "destinations": {
+              "385526546525-ap-northeast-1-ad7c7ded": {
+                "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+                "objectKey": "fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549.zip",
+                "region": "ap-northeast-1",
+                "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+              }
+            }
+          },
+          "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb": {
+            "displayName": "WishicraftControlPlaneStack-dev Template",
+            "source": {
+              "path": "WishicraftControlPlaneStack-dev.template.json",
+              "packaging": "file"
+            },
+            "destinations": {
+              "385526546525-ap-northeast-1-19352d9b": {
+                "bucketName": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+                "objectKey": "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb.json",
+                "region": "ap-northeast-1",
+                "assumeRoleArn": "arn:${AWS::Partition}:iam::385526546525:role/cdk-hnb659fds-file-publishing-role-385526546525-ap-northeast-1"
+              }
+            }
+          }
+        },
+        "dockerImages": {}
+      }
+    },
+    "stop_operation": "op-ea11b645-d5b9-46e9-a68f-317add715511",
+    "client_request_token": "d114-stageb-enable-c3a2cbf-20260927",
+    "case_d_condition3": false,
+    "separate_approval": true
+  },
+  "stack_completed_at": "2026-09-27T05:22:02.295Z",
+  "start": {
+    "operation_id": "op-db5654b2-f467-4ea9-86ce-181266088ba9",
+    "admitted_at": "2026-09-27T05:09:28.411734Z",
+    "succeeded_at": "2026-09-27T05:13:43.478Z",
+    "ready_fresh_binding": true,
+    "boundary": 2,
+    "protected_boundary": 0,
+    "unknown_since": "2026-09-27T05:09:27.681321Z"
+  },
+  "stop": {
+    "operation_id": "op-ea11b645-d5b9-46e9-a68f-317add715511",
+    "status": "SUCCEEDED",
+    "stopped_at": "2026-09-27T05:16:31.157536Z",
+    "boundary": 2,
+    "protected_boundary": 0,
+    "snapshot_additions": 0
+  },
+  "backup": {
+    "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+    "operation_type": "BACKUP",
+    "requested_by": {
+      "display_name": null,
+      "source": "SCHEDULE",
+      "discord_user_id": null
+    },
+    "idempotency_key": "daily-backup:vol-03ac9f534326c345c:2:1",
+    "target_game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+    "backup_boundary": "2",
+    "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+    "status": "SUCCEEDED",
+    "result": {
+      "backup_id": "backup-80573487-0ca4-450d-b57a-e9160a3b17f9",
+      "snapshot_id": "snap-0212d6f8613b684ac",
+      "kind": "BACKUP",
+      "scope": "shared-volume",
+      "category": "backup",
+      "recovery_digest": "63843d3ad9e9171abb260194e3d31755d8a027d0eb5e3d35cf7d060a48030f9f",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21"
+    }
+  },
+  "snapshot": {
+    "Tags": [
+      {
+        "Key": "Project",
+        "Value": "wishicraft"
+      },
+      {
+        "Key": "WishicraftProtected",
+        "Value": "false"
+      },
+      {
+        "Key": "Stage",
+        "Value": "dev"
+      },
+      {
+        "Key": "WishicraftSourceVolumeId",
+        "Value": "vol-03ac9f534326c345c"
+      },
+      {
+        "Key": "WishicraftCreatedAt",
+        "Value": "2026-09-27T05:27:19.748781Z"
+      },
+      {
+        "Key": "WishicraftOperationId",
+        "Value": "op-80573487-0ca4-450d-b57a-e9160a3b17f9"
+      },
+      {
+        "Key": "WishicraftCategory",
+        "Value": "backup"
+      },
+      {
+        "Key": "WishicraftBackupScope",
+        "Value": "shared-volume"
+      },
+      {
+        "Key": "WishicraftGameId",
+        "Value": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21"
+      },
+      {
+        "Key": "WishicraftSchemaVersion",
+        "Value": "2"
+      },
+      {
+        "Key": "WishicraftRecoveryDigest",
+        "Value": "63843d3ad9e9171abb260194e3d31755d8a027d0eb5e3d35cf7d060a48030f9f"
+      }
+    ],
+    "StorageTier": "standard",
+    "TransferType": "standard",
+    "CompletionTime": "2026-09-27 05:30:59.444000+00:00",
+    "FullSnapshotSizeInBytes": 13699121152,
+    "SnapshotId": "snap-0212d6f8613b684ac",
+    "VolumeId": "vol-03ac9f534326c345c",
+    "State": "completed",
+    "StartTime": "2026-09-27 05:27:20.322000+00:00",
+    "Progress": "100%",
+    "OwnerId": "385526546525",
+    "Description": "Wishicraft backup op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+    "VolumeSize": 30,
+    "Encrypted": true,
+    "KmsKeyId": "arn:aws:kms:ap-northeast-1:385526546525:key/56878db9-a185-4940-a371-eb06b02d1b5c"
+  },
+  "provenance": {
+    "snapshot_key": "SNAPSHOT#snap-0212d6f8613b684ac",
+    "operation_key": "OPERATION#op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+    "recorded_at": "2026-09-27T05:31:22.833615Z",
+    "recovery_digest": "63843d3ad9e9171abb260194e3d31755d8a027d0eb5e3d35cf7d060a48030f9f",
+    "exact_pair": true,
+    "all_game_ids": [
+      "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+      "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+      "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+      "game-vanilla-main",
+      "game-vanilla-secondary"
+    ],
+    "raw_recovery_verified_in_memory_not_persisted": true
+  },
+  "cloudtrail": {
+    "at": "2026-09-27 05:30:51.587037+00:00",
+    "expected_backup_role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-BackupTaskFunctionService-CVjc1TALn08x",
+    "events": [
+      {
+        "event_id": "bb2b601f-47ab-401e-88d0-adc03107b719",
+        "at": "2026-09-27T05:27:20Z",
+        "region": "ap-northeast-1",
+        "volume_id": "vol-03ac9f534326c345c",
+        "snapshot_id": "snap-0212d6f8613b684ac",
+        "principal_type": "AssumedRole",
+        "assumed_role_arn": "arn:aws:sts::385526546525:assumed-role/WishicraftControlPlaneSta-BackupTaskFunctionService-CVjc1TALn08x/wc-dev-backup-task",
+        "issuer_role_arn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-BackupTaskFunctionService-CVjc1TALn08x",
+        "error_code": null
+      }
+    ],
+    "snapshot_create_role_matches": true
+  },
+  "protected_evaluations": [
+    {
+      "timestamp": 1790487126859,
+      "event_id": "39929197197331734979379750842322404074444717984457818113",
+      "evaluation": {
+        "reason": "PROTECTED",
+        "unprotected": false,
+        "stopped_warning": false,
+        "interval_warning": false
+      }
+    },
+    {
+      "timestamp": 1790487427113,
+      "event_id": "39929203893219683818993471943690105978978299826294161409",
+      "evaluation": {
+        "reason": "PROTECTED",
+        "unprotected": false,
+        "stopped_warning": false,
+        "interval_warning": false
+      }
+    }
+  ],
+  "last_success": {
+    "boundary": "2",
+    "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+    "snapshot_id": "snap-0212d6f8613b684ac",
+    "acquired_at": "2026-09-27T05:27:20.322000Z",
+    "verified_at": "2026-09-27T05:31:22.833615Z"
+  },
+  "metrics": {
+    "DailyBackupHeartbeat": [
+      {
+        "Timestamp": "2026-09-27 14:37:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 1.0,
+        "Maximum": 1.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:32:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 1.0,
+        "Maximum": 1.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:27:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 1.0,
+        "Maximum": 1.0,
+        "Unit": "Count"
+      }
+    ],
+    "DailyBackupStoppedOverdue": [
+      {
+        "Timestamp": "2026-09-27 14:37:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:32:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:27:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      }
+    ],
+    "DailyBackupIntervalOverdue": [
+      {
+        "Timestamp": "2026-09-27 14:37:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:32:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:27:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      }
+    ],
+    "DailyBackupNeedsOperator": [
+      {
+        "Timestamp": "2026-09-27 14:37:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:32:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:27:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      }
+    ],
+    "DailyBackupObservationUnknown": [
+      {
+        "Timestamp": "2026-09-27 14:37:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:32:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      },
+      {
+        "Timestamp": "2026-09-27 14:27:00+09:00",
+        "SampleCount": 1.0,
+        "Minimum": 0.0,
+        "Maximum": 0.0,
+        "Unit": "Count"
+      }
+    ]
+  },
+  "alarm_history": {
+    "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2": [
+      {
+        "AlarmName": "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-27 14:28:23.717000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from ALARM to OK",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: no datapoints were received for 3 periods and 3 missing datapoints were treated as [Breaching].\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-27T05:20:23.717+0000\",\"statistic\":\"Minimum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-27T05:15:00.000+0000\"},{\"timestamp\":\"2026-09-27T05:10:00.000+0000\"},{\"timestamp\":\"2026-09-27T05:05:00.000+0000\"}]}},\"newState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: 1 datapoint [1.0 (27/09/26 05:23:00)] was not less than the threshold (1.0) and 2 missing datapoints were treated as [Breaching].\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-27T05:28:23.715+0000\",\"startDate\":\"2026-09-27T05:23:00.000+0000\",\"statistic\":\"Minimum\",\"period\":300,\"recentDatapoints\":[1.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-27T05:23:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}}}"
+      },
+      {
+        "AlarmName": "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-27 14:20:23.796000+09:00",
+        "HistoryItemType": "Action",
+        "HistorySummary": "Successfully executed action arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring",
+        "HistoryData": "{\"actionState\":\"Succeeded\",\"stateUpdateTimestamp\":1790486423718,\"notificationResource\":\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\",\"publishedMessage\":\"{\\\"default\\\":\\\"{\\\\\\\"AlarmName\\\\\\\":\\\\\\\"WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\\\\\\\",\\\\\\\"AlarmDescription\\\\\\\":\\\\\\\"Daily BACKUP Heartbeat; inspect read-only daily status for reason\\\\\\\",\\\\\\\"AWSAccountId\\\\\\\":\\\\\\\"385526546525\\\\\\\",\\\\\\\"AlarmConfigurationUpdatedTimestamp\\\\\\\":\\\\\\\"2026-09-27T05:19:40.123+0000\\\\\\\",\\\\\\\"NewStateValue\\\\\\\":\\\\\\\"ALARM\\\\\\\",\\\\\\\"NewStateReason\\\\\\\":\\\\\\\"Threshold Crossed: no datapoints were received for 3 periods and 3 missing datapoints were treated as [Breaching].\\\\\\\",\\\\\\\"StateChangeTime\\\\\\\":\\\\\\\"2026-09-27T05:20:23.718+0000\\\\\\\",\\\\\\\"Region\\\\\\\":\\\\\\\"Asia Pacific (Tokyo)\\\\\\\",\\\\\\\"AlarmArn\\\\\\\":\\\\\\\"arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\\\\\\\",\\\\\\\"OldStateValue\\\\\\\":\\\\\\\"OK\\\\\\\",\\\\\\\"ActionExecutedAfterMuteWindow\\\\\\\":false,\\\\\\\"OKActions\\\\\\\":[],\\\\\\\"AlarmActions\\\\\\\":[\\\\\\\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\\\\\\\"],\\\\\\\"InsufficientDataActions\\\\\\\":[],\\\\\\\"Trigger\\\\\\\":{\\\\\\\"MetricName\\\\\\\":\\\\\\\"DailyBackupHeartbeat\\\\\\\",\\\\\\\"Namespace\\\\\\\":\\\\\\\"Wishicraft/ControlPlane\\\\\\\",\\\\\\\"StatisticType\\\\\\\":\\\\\\\"Statistic\\\\\\\",\\\\\\\"Statistic\\\\\\\":\\\\\\\"MINIMUM\\\\\\\",\\\\\\\"Unit\\\\\\\":null,\\\\\\\"Dimensions\\\\\\\":[{\\\\\\\"value\\\\\\\":\\\\\\\"dev\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Stage\\\\\\\"},{\\\\\\\"value\\\\\\\":\\\\\\\"wishicraft-main\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"SystemId\\\\\\\"}],\\\\\\\"Period\\\\\\\":300,\\\\\\\"EvaluationPeriods\\\\\\\":3,\\\\\\\"ComparisonOperator\\\\\\\":\\\\\\\"LessThanThreshold\\\\\\\",\\\\\\\"Threshold\\\\\\\":1.0,\\\\\\\"TreatMissingData\\\\\\\":\\\\\\\"breaching\\\\\\\",\\\\\\\"EvaluateLowSampleCountPercentile\\\\\\\":\\\\\\\"\\\\\\\"}}\\\",\\\"sms\\\":\\\"ALARM: \\\\\\\"WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\\\\\\\" in Asia Pacific (Tokyo)\\\",\\\"email\\\":\\\"You are receiving this email because your Amazon CloudWatch Alarm \\\\\\\"WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\\\\\\\" in the Asia Pacific (Tokyo) region has entered the ALARM state, because \\\\\\\"Threshold Crossed: no datapoints were received for 3 periods and 3 missing datapoints were treated as [Breaching].\\\\\\\" at \\\\\\\"Sunday 27 September, 2026 05:20:23 UTC\\\\\\\".\\\\n\\\\nView this alarm in the AWS Management Console:\\\\nhttps://ap-northeast-1.console.aws.amazon.com/cloudwatch/deeplink.js?region=ap-northeast-1#alarmsV2:alarm/WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\\\\n\\\\nAlarm Details:\\\\n- Name:                       WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\\\\n- Description:                Daily BACKUP Heartbeat; inspect read-only daily status for reason\\\\n- State Change:               OK -> ALARM\\\\n- Reason for State Change:    Threshold Crossed: no datapoints were received for 3 periods and 3 missing datapoints were treated as [Breaching].\\\\n- Timestamp:                  Sunday 27 September, 2026 05:20:23 UTC\\\\n- AWS Account:                385526546525\\\\n- Alarm Arn:                  arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\\\\n\\\\nThreshold:\\\\n- The alarm is in the ALARM state when the metric is LessThanThreshold 1.0 for at least 3 of the last 3 period(s) of 300 seconds. \\\\n\\\\nMonitored Metric:\\\\n- MetricNamespace:                     Wishicraft/ControlPlane\\\\n- MetricName:                          DailyBackupHeartbeat\\\\n- Dimensions:                          [Stage = dev] [SystemId = wishicraft-main]\\\\n- Period:                              300 seconds\\\\n- Statistic:                           Minimum\\\\n- Unit:                                not specified\\\\n- TreatMissingData:                    breaching\\\\n\\\\n\\\\nState Change Actions:\\\\n- OK: \\\\n- ALARM: [arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring]\\\\n- INSUFFICIENT_DATA: \\\\n\\\"}\",\"error\":null,\"muteWindowEndTimestamp\":null}"
+      },
+      {
+        "AlarmName": "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-27 14:20:23.718000+09:00",
+        "HistoryItemType": "StateUpdate",
+        "HistorySummary": "Alarm updated from OK to ALARM",
+        "HistoryData": "{\"version\":\"1.0\",\"oldState\":{\"stateValue\":\"OK\",\"stateReason\":\"Threshold Crossed: no datapoints were received for 3 periods and 3 missing datapoints were treated as [NonBreaching].\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-27T03:21:15.195+0000\",\"statistic\":\"Minimum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-27T03:16:00.000+0000\"}]}},\"newState\":{\"stateValue\":\"ALARM\",\"stateReason\":\"Threshold Crossed: no datapoints were received for 3 periods and 3 missing datapoints were treated as [Breaching].\",\"stateReasonData\":{\"version\":\"1.0\",\"queryDate\":\"2026-09-27T05:20:23.717+0000\",\"statistic\":\"Minimum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-27T05:15:00.000+0000\"},{\"timestamp\":\"2026-09-27T05:10:00.000+0000\"},{\"timestamp\":\"2026-09-27T05:05:00.000+0000\"}]}}}"
+      },
+      {
+        "AlarmName": "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-27 14:19:40.123000+09:00",
+        "HistoryItemType": "ConfigurationUpdate",
+        "HistorySummary": "Alarm \"WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\" updated",
+        "HistoryData": "{\"version\":\"1.0\",\"type\":\"Update\",\"updatedAlarm\":{\"alarmName\":\"WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\",\"alarmDescription\":\"Daily BACKUP Heartbeat; inspect read-only daily status for reason\",\"alarmArn\":\"arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2\",\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T05:19:40.123+0000\",\"namespace\":\"Wishicraft/ControlPlane\",\"metricName\":\"DailyBackupHeartbeat\",\"extendedStatistic\":\"MINIMUM\",\"period\":300,\"dimensions\":[{\"value\":\"dev\",\"name\":\"Stage\"},{\"value\":\"wishicraft-main\",\"name\":\"SystemId\"}],\"threshold\":1.0,\"comparisonOperator\":\"LessThanThreshold\",\"evaluationPeriods\":3,\"treatMissingData\":\"breaching\",\"stateValue\":\"OK\",\"stateUpdatedTimestamp\":\"2026-09-27T03:21:15.199+0000\",\"actionsEnabled\":true,\"alarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"insufficientDataActions\":[],\"okactions\":[]},\"originalUpdatedFields\":{\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T03:20:34.063+0000\",\"treatMissingData\":\"notBreaching\",\"actionsEnabled\":false}}"
+      }
+    ],
+    "WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0": [
+      {
+        "AlarmName": "WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-27 14:19:40.245000+09:00",
+        "HistoryItemType": "ConfigurationUpdate",
+        "HistorySummary": "Alarm \"WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0\" updated",
+        "HistoryData": "{\"version\":\"1.0\",\"type\":\"Update\",\"updatedAlarm\":{\"alarmName\":\"WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0\",\"alarmDescription\":\"Daily BACKUP IntervalOverdue; inspect read-only daily status for reason\",\"alarmArn\":\"arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0\",\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T05:19:40.245+0000\",\"namespace\":\"Wishicraft/ControlPlane\",\"metricName\":\"DailyBackupIntervalOverdue\",\"extendedStatistic\":\"MAXIMUM\",\"period\":300,\"dimensions\":[{\"value\":\"dev\",\"name\":\"Stage\"},{\"value\":\"wishicraft-main\",\"name\":\"SystemId\"}],\"threshold\":1.0,\"comparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"evaluationPeriods\":1,\"treatMissingData\":\"notBreaching\",\"stateValue\":\"OK\",\"stateUpdatedTimestamp\":\"2026-09-27T03:21:05.602+0000\",\"actionsEnabled\":true,\"alarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"insufficientDataActions\":[],\"okactions\":[]},\"originalUpdatedFields\":{\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T03:20:34.023+0000\",\"actionsEnabled\":false}}"
+      }
+    ],
+    "WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X": [
+      {
+        "AlarmName": "WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-27 14:19:40.192000+09:00",
+        "HistoryItemType": "ConfigurationUpdate",
+        "HistorySummary": "Alarm \"WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X\" updated",
+        "HistoryData": "{\"version\":\"1.0\",\"type\":\"Update\",\"updatedAlarm\":{\"alarmName\":\"WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X\",\"alarmDescription\":\"Daily BACKUP NeedsOperator; inspect read-only daily status for reason\",\"alarmArn\":\"arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X\",\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T05:19:40.192+0000\",\"namespace\":\"Wishicraft/ControlPlane\",\"metricName\":\"DailyBackupNeedsOperator\",\"extendedStatistic\":\"MAXIMUM\",\"period\":300,\"dimensions\":[{\"value\":\"dev\",\"name\":\"Stage\"},{\"value\":\"wishicraft-main\",\"name\":\"SystemId\"}],\"threshold\":1.0,\"comparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"evaluationPeriods\":1,\"treatMissingData\":\"notBreaching\",\"stateValue\":\"OK\",\"stateUpdatedTimestamp\":\"2026-09-27T03:21:48.948+0000\",\"actionsEnabled\":true,\"alarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"insufficientDataActions\":[],\"okactions\":[]},\"originalUpdatedFields\":{\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T03:20:34.105+0000\",\"actionsEnabled\":false}}"
+      }
+    ],
+    "WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ": [
+      {
+        "AlarmName": "WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-27 14:19:40.129000+09:00",
+        "HistoryItemType": "ConfigurationUpdate",
+        "HistorySummary": "Alarm \"WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ\" updated",
+        "HistoryData": "{\"version\":\"1.0\",\"type\":\"Update\",\"updatedAlarm\":{\"alarmName\":\"WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ\",\"alarmDescription\":\"Daily BACKUP ObservationUnknown; inspect read-only daily status for reason\",\"alarmArn\":\"arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ\",\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T05:19:40.129+0000\",\"namespace\":\"Wishicraft/ControlPlane\",\"metricName\":\"DailyBackupObservationUnknown\",\"extendedStatistic\":\"MAXIMUM\",\"period\":300,\"dimensions\":[{\"value\":\"dev\",\"name\":\"Stage\"},{\"value\":\"wishicraft-main\",\"name\":\"SystemId\"}],\"threshold\":1.0,\"comparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"evaluationPeriods\":1,\"treatMissingData\":\"notBreaching\",\"stateValue\":\"OK\",\"stateUpdatedTimestamp\":\"2026-09-27T03:21:14.482+0000\",\"actionsEnabled\":true,\"alarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"insufficientDataActions\":[],\"okactions\":[]},\"originalUpdatedFields\":{\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T03:20:34.107+0000\",\"actionsEnabled\":false}}"
+      }
+    ],
+    "WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1": [
+      {
+        "AlarmName": "WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1",
+        "AlarmType": "MetricAlarm",
+        "Timestamp": "2026-09-27 14:19:40.335000+09:00",
+        "HistoryItemType": "ConfigurationUpdate",
+        "HistorySummary": "Alarm \"WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1\" updated",
+        "HistoryData": "{\"version\":\"1.0\",\"type\":\"Update\",\"updatedAlarm\":{\"alarmName\":\"WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1\",\"alarmDescription\":\"Daily BACKUP StoppedOverdue; inspect read-only daily status for reason\",\"alarmArn\":\"arn:aws:cloudwatch:ap-northeast-1:385526546525:alarm:WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1\",\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T05:19:40.335+0000\",\"namespace\":\"Wishicraft/ControlPlane\",\"metricName\":\"DailyBackupStoppedOverdue\",\"extendedStatistic\":\"MAXIMUM\",\"period\":300,\"dimensions\":[{\"value\":\"dev\",\"name\":\"Stage\"},{\"value\":\"wishicraft-main\",\"name\":\"SystemId\"}],\"threshold\":1.0,\"comparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"evaluationPeriods\":1,\"treatMissingData\":\"notBreaching\",\"stateValue\":\"OK\",\"stateUpdatedTimestamp\":\"2026-09-27T03:21:19.823+0000\",\"actionsEnabled\":true,\"alarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"insufficientDataActions\":[],\"okactions\":[]},\"originalUpdatedFields\":{\"alarmConfigurationUpdatedTimestamp\":\"2026-09-27T03:20:33.921+0000\",\"actionsEnabled\":false}}"
+      }
+    ]
+  },
+  "notification_classification": "Heartbeat missing data during deployment transition; real heartbeat later restored OK",
+  "qualification_at": "2026-09-27 05:38:48.083492+00:00",
+  "final_checks": {
+    "new_backup_operation_count": 1,
+    "new_snapshot_count": 1,
+    "snapshot_total": 14,
+    "all_alarms_ok": 56,
+    "existing_provenance_preserved": true,
+    "existing_games_and_journals_preserved": true,
+    "flags": {
+      "wc-dev-daily-backup-evaluator": "1",
+      "wc-dev-daily-backup-admission": "1"
+    }
+  },
+  "intake_restored": {
+    "at": "2026-09-27 05:39:26.263787+00:00",
+    "actual": {
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null,
+      "wc-dev-admission": null
+    },
+    "matches_original": true
+  },
+  "collector_incident": {
+    "at": "2026-09-27T05:03:47.997362+00:00",
+    "scope": "Public host runtime/Compose recovery metadata inadvertently retained by legacy collector; removed as corrective action, not the collection design. No Lambda environment value hashes were collected. Immutable assemblies and Git sources untouched. Future writes sanitize first.",
+    "affected_evidence_files": [
+      "baseline-v1/wc-dev-backups.json",
+      "baseline-v2/wc-dev-backups.json",
+      "baseline-v3/wc-dev-backups.json"
+    ],
+    "raw_api_originals_retained": false,
+    "offline_tests": 10
+  },
+  "validation": {
+    "full_pytest_passed": 1972,
+    "collector_cases": 11,
+    "ruff_check": "PASS",
+    "ruff_format": "PASS (368 files)",
+    "mypy": "PASS (269 files)",
+    "canonical_synth": "PASS; exact reviewed B template/assets"
+  },
+  "not_qualified": [
+    "response-loss DescribeExecution IAM from Lambda",
+    "retry/failure/TTL/races",
+    "30-minute/24-hour warning thresholds",
+    "forced evaluator outage",
+    "RESTORE/mount/world hash comparison",
+    "unattended STOP live waiting",
+    "retention collector completeness/deletion safety",
+    "storage cost"
+  ],
+  "evaluated_changes": [
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "BackupStateMachine",
+      "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):5b7cc89d4320f4f97d78d0c113c16e7b6e63870b19cd6ce6d2c5a740b3154b84",
+            "AfterValue": "(Truncated-Signature):aff3c98da726dd3dbb8d35b7f1e36310c5b7bd8bfcc2914242dcd13cf6a801b0",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):5b7cc89d4320f4f97d78d0c113c16e7b6e63870b19cd6ce6d2c5a740b3154b84\",\"StateMachineName\":\"wc-dev-backup\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-BackupWorkflowRoleD9C2948-9xDR3CHieV10\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"StateMachineType\":\"STANDARD\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/BackupStateMachine\"}}",
+      "AfterContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):aff3c98da726dd3dbb8d35b7f1e36310c5b7bd8bfcc2914242dcd13cf6a801b0\",\"StateMachineName\":\"wc-dev-backup\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-BackupWorkflowRoleD9C2948-9xDR3CHieV10\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"StateMachineType\":\"STANDARD\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/BackupStateMachine\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "DailyBackupAdmissionFunctionBFD7AF72",
+      "PhysicalResourceId": "wc-dev-daily-backup-admission",
+      "ResourceType": "AWS::Lambda::Function",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Environment",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Environment/Variables/DAILY_BACKUP_ENABLED",
+            "BeforeValue": "0",
+            "AfterValue": "1",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\": {\"Role\": \"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-DailyBackupAdmissionFunct-xLgD2Mg12EQF\", \"FunctionName\": \"wc-dev-daily-backup-admission\", \"MemorySize\": \"256\", \"Runtime\": \"python3.12\", \"Timeout\": \"60\", \"LoggingConfig\": {\"LogGroup\": \"/aws/lambda/wc-dev-daily-backup-admission\"}, \"Environment\": {\"Variables\": {\"DAILY_BACKUP_ENABLED\": \"0\", \"BACKUP_STATE_MACHINE_ARN\": \"<environment value removed>\", \"SWITCH_TIMEOUT_SECONDS\": \"<environment value removed>\", \"START_TIMEOUT_SECONDS\": \"<environment value removed>\", \"RETENTION_TIMEOUT_SECONDS\": \"<environment value removed>\", \"STAGE\": \"<environment value removed>\", \"LOCK_LEASE_SECONDS\": \"<environment value removed>\", \"LOCKS_TABLE\": \"<environment value removed>\", \"GAMES_TABLE\": \"<environment value removed>\", \"GAME_ID\": \"<environment value removed>\", \"SYSTEM_ID\": \"<environment value removed>\", \"IDEMPOTENCY_TABLE\": \"<environment value removed>\", \"RUNTIME_GAMES\": \"<environment value removed>\", \"STOP_TIMEOUT_SECONDS\": \"<environment value removed>\", \"BACKUP_TIMEOUT_SECONDS\": \"<environment value removed>\", \"GLOBAL_LOCK_NAME\": \"<environment value removed>\", \"SYSTEM_STATE_TABLE\": \"<environment value removed>\", \"PROTECTION_VOLUME_ID\": \"<environment value removed>\", \"STATUS_TIMEOUT_SECONDS\": \"<environment value removed>\", \"OPERATIONS_TABLE\": \"<environment value removed>\", \"GAME_CREATION\": \"<environment value removed>\"}}, \"Handler\": \"wishicraft.daily_backup_lambda.admit\", \"Code\": {\"S3Bucket\": \"cdk-hnb659fds-assets-385526546525-ap-northeast-1\", \"S3Key\": \"0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip\"}, \"Tags\": [{\"Value\": \"cdk\", \"Key\": \"ManagedBy\"}, {\"Value\": \"project-owner\", \"Key\": \"Owner\"}, {\"Value\": \"wishicraft\", \"Key\": \"Project\"}, {\"Value\": \"dev\", \"Key\": \"Stage\"}], \"Architectures\": [\"x86_64\"]}, \"Metadata\": {\"aws:asset:property\": \"Code\", \"aws:asset:path\": \"asset.0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e\", \"aws:asset:is-bundled\": \"false\", \"aws:cdk:path\": \"WishicraftControlPlaneStack-dev/DailyBackupAdmissionFunction/Resource\"}}",
+      "AfterContext": "{\"Properties\": {\"Role\": \"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-DailyBackupAdmissionFunct-xLgD2Mg12EQF\", \"FunctionName\": \"wc-dev-daily-backup-admission\", \"MemorySize\": \"256\", \"Runtime\": \"python3.12\", \"Timeout\": \"60\", \"LoggingConfig\": {\"LogGroup\": \"/aws/lambda/wc-dev-daily-backup-admission\"}, \"Environment\": {\"Variables\": {\"DAILY_BACKUP_ENABLED\": \"1\", \"BACKUP_STATE_MACHINE_ARN\": \"<environment value removed>\", \"SWITCH_TIMEOUT_SECONDS\": \"<environment value removed>\", \"START_TIMEOUT_SECONDS\": \"<environment value removed>\", \"RETENTION_TIMEOUT_SECONDS\": \"<environment value removed>\", \"STAGE\": \"<environment value removed>\", \"LOCK_LEASE_SECONDS\": \"<environment value removed>\", \"LOCKS_TABLE\": \"<environment value removed>\", \"GAMES_TABLE\": \"<environment value removed>\", \"GAME_ID\": \"<environment value removed>\", \"SYSTEM_ID\": \"<environment value removed>\", \"IDEMPOTENCY_TABLE\": \"<environment value removed>\", \"RUNTIME_GAMES\": \"<environment value removed>\", \"STOP_TIMEOUT_SECONDS\": \"<environment value removed>\", \"BACKUP_TIMEOUT_SECONDS\": \"<environment value removed>\", \"GLOBAL_LOCK_NAME\": \"<environment value removed>\", \"SYSTEM_STATE_TABLE\": \"<environment value removed>\", \"PROTECTION_VOLUME_ID\": \"<environment value removed>\", \"STATUS_TIMEOUT_SECONDS\": \"<environment value removed>\", \"OPERATIONS_TABLE\": \"<environment value removed>\", \"GAME_CREATION\": \"<environment value removed>\"}}, \"Handler\": \"wishicraft.daily_backup_lambda.admit\", \"Code\": {\"S3Bucket\": \"cdk-hnb659fds-assets-385526546525-ap-northeast-1\", \"S3Key\": \"0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip\"}, \"Tags\": [{\"Value\": \"cdk\", \"Key\": \"ManagedBy\"}, {\"Value\": \"project-owner\", \"Key\": \"Owner\"}, {\"Value\": \"wishicraft\", \"Key\": \"Project\"}, {\"Value\": \"dev\", \"Key\": \"Stage\"}], \"Architectures\": [\"x86_64\"]}, \"Metadata\": {\"aws:asset:property\": \"Code\", \"aws:asset:path\": \"asset.0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e\", \"aws:asset:is-bundled\": \"false\", \"aws:cdk:path\": \"WishicraftControlPlaneStack-dev/DailyBackupAdmissionFunction/Resource\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "DailyBackupEvaluatorFunction2CAEBD5D",
+      "PhysicalResourceId": "wc-dev-daily-backup-evaluator",
+      "ResourceType": "AWS::Lambda::Function",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Environment",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Environment/Variables/DAILY_BACKUP_ENABLED",
+            "BeforeValue": "0",
+            "AfterValue": "1",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\": {\"Role\": \"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-DailyBackupEvaluatorFunct-rnwzh04Mocv3\", \"FunctionName\": \"wc-dev-daily-backup-evaluator\", \"MemorySize\": \"256\", \"Runtime\": \"python3.12\", \"Timeout\": \"60\", \"LoggingConfig\": {\"LogGroup\": \"/aws/lambda/wc-dev-daily-backup-evaluator\"}, \"Environment\": {\"Variables\": {\"DAILY_BACKUP_ENABLED\": \"0\", \"DAILY_BACKUP_ADMISSION_FUNCTION\": \"<environment value removed>\", \"STAGE\": \"<environment value removed>\", \"LOCKS_TABLE\": \"<environment value removed>\", \"GLOBAL_LOCK_NAME\": \"<environment value removed>\", \"SYSTEM_STATE_TABLE\": \"<environment value removed>\", \"PROTECTION_VOLUME_ID\": \"<environment value removed>\", \"SYSTEM_ID\": \"<environment value removed>\", \"OPERATIONS_TABLE\": \"<environment value removed>\"}}, \"Handler\": \"wishicraft.daily_backup_lambda.handler\", \"Code\": {\"S3Bucket\": \"cdk-hnb659fds-assets-385526546525-ap-northeast-1\", \"S3Key\": \"0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip\"}, \"Tags\": [{\"Value\": \"cdk\", \"Key\": \"ManagedBy\"}, {\"Value\": \"project-owner\", \"Key\": \"Owner\"}, {\"Value\": \"wishicraft\", \"Key\": \"Project\"}, {\"Value\": \"dev\", \"Key\": \"Stage\"}], \"Architectures\": [\"x86_64\"]}, \"Metadata\": {\"aws:asset:property\": \"Code\", \"aws:asset:path\": \"asset.0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e\", \"aws:asset:is-bundled\": \"false\", \"aws:cdk:path\": \"WishicraftControlPlaneStack-dev/DailyBackupEvaluatorFunction/Resource\"}}",
+      "AfterContext": "{\"Properties\": {\"Role\": \"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-DailyBackupEvaluatorFunct-rnwzh04Mocv3\", \"FunctionName\": \"wc-dev-daily-backup-evaluator\", \"MemorySize\": \"256\", \"Runtime\": \"python3.12\", \"Timeout\": \"60\", \"LoggingConfig\": {\"LogGroup\": \"/aws/lambda/wc-dev-daily-backup-evaluator\"}, \"Environment\": {\"Variables\": {\"DAILY_BACKUP_ENABLED\": \"1\", \"DAILY_BACKUP_ADMISSION_FUNCTION\": \"<environment value removed>\", \"STAGE\": \"<environment value removed>\", \"LOCKS_TABLE\": \"<environment value removed>\", \"GLOBAL_LOCK_NAME\": \"<environment value removed>\", \"SYSTEM_STATE_TABLE\": \"<environment value removed>\", \"PROTECTION_VOLUME_ID\": \"<environment value removed>\", \"SYSTEM_ID\": \"<environment value removed>\", \"OPERATIONS_TABLE\": \"<environment value removed>\"}}, \"Handler\": \"wishicraft.daily_backup_lambda.handler\", \"Code\": {\"S3Bucket\": \"cdk-hnb659fds-assets-385526546525-ap-northeast-1\", \"S3Key\": \"0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip\"}, \"Tags\": [{\"Value\": \"cdk\", \"Key\": \"ManagedBy\"}, {\"Value\": \"project-owner\", \"Key\": \"Owner\"}, {\"Value\": \"wishicraft\", \"Key\": \"Project\"}, {\"Value\": \"dev\", \"Key\": \"Stage\"}], \"Architectures\": [\"x86_64\"]}, \"Metadata\": {\"aws:asset:property\": \"Code\", \"aws:asset:path\": \"asset.0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e\", \"aws:asset:is-bundled\": \"false\", \"aws:cdk:path\": \"WishicraftControlPlaneStack-dev/DailyBackupEvaluatorFunction/Resource\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "DailyBackupHeartbeatAlarm7AC73BA7",
+      "PhysicalResourceId": "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2",
+      "ResourceType": "AWS::CloudWatch::Alarm",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "ActionsEnabled",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/ActionsEnabled",
+            "BeforeValue": "false",
+            "AfterValue": "true",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        },
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "TreatMissingData",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/TreatMissingData",
+            "BeforeValue": "notBreaching",
+            "AfterValue": "breaching",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"ComparisonOperator\":\"LessThanThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"3\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupHeartbeat\",\"ActionsEnabled\":\"false\",\"AlarmDescription\":\"Daily BACKUP Heartbeat; inspect read-only daily status for reason\",\"Statistic\":\"Minimum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupHeartbeatAlarm/Resource\"}}",
+      "AfterContext": "{\"Properties\":{\"ComparisonOperator\":\"LessThanThreshold\",\"TreatMissingData\":\"breaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"3\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupHeartbeat\",\"ActionsEnabled\":\"true\",\"AlarmDescription\":\"Daily BACKUP Heartbeat; inspect read-only daily status for reason\",\"Statistic\":\"Minimum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupHeartbeatAlarm/Resource\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "DailyBackupIntervalOverdueAlarm2205A737",
+      "PhysicalResourceId": "WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0",
+      "ResourceType": "AWS::CloudWatch::Alarm",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "ActionsEnabled",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/ActionsEnabled",
+            "BeforeValue": "false",
+            "AfterValue": "true",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"1\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupIntervalOverdue\",\"ActionsEnabled\":\"false\",\"AlarmDescription\":\"Daily BACKUP IntervalOverdue; inspect read-only daily status for reason\",\"Statistic\":\"Maximum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupIntervalOverdueAlarm/Resource\"}}",
+      "AfterContext": "{\"Properties\":{\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"1\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupIntervalOverdue\",\"ActionsEnabled\":\"true\",\"AlarmDescription\":\"Daily BACKUP IntervalOverdue; inspect read-only daily status for reason\",\"Statistic\":\"Maximum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupIntervalOverdueAlarm/Resource\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "DailyBackupNeedsOperatorAlarm098A6CF7",
+      "PhysicalResourceId": "WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X",
+      "ResourceType": "AWS::CloudWatch::Alarm",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "ActionsEnabled",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/ActionsEnabled",
+            "BeforeValue": "false",
+            "AfterValue": "true",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"1\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupNeedsOperator\",\"ActionsEnabled\":\"false\",\"AlarmDescription\":\"Daily BACKUP NeedsOperator; inspect read-only daily status for reason\",\"Statistic\":\"Maximum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupNeedsOperatorAlarm/Resource\"}}",
+      "AfterContext": "{\"Properties\":{\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"1\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupNeedsOperator\",\"ActionsEnabled\":\"true\",\"AlarmDescription\":\"Daily BACKUP NeedsOperator; inspect read-only daily status for reason\",\"Statistic\":\"Maximum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupNeedsOperatorAlarm/Resource\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "DailyBackupObservationUnknownAlarm188D678F",
+      "PhysicalResourceId": "WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ",
+      "ResourceType": "AWS::CloudWatch::Alarm",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "ActionsEnabled",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/ActionsEnabled",
+            "BeforeValue": "false",
+            "AfterValue": "true",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"1\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupObservationUnknown\",\"ActionsEnabled\":\"false\",\"AlarmDescription\":\"Daily BACKUP ObservationUnknown; inspect read-only daily status for reason\",\"Statistic\":\"Maximum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupObservationUnknownAlarm/Resource\"}}",
+      "AfterContext": "{\"Properties\":{\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"1\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupObservationUnknown\",\"ActionsEnabled\":\"true\",\"AlarmDescription\":\"Daily BACKUP ObservationUnknown; inspect read-only daily status for reason\",\"Statistic\":\"Maximum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupObservationUnknownAlarm/Resource\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "DailyBackupSchedule973769C0",
+      "PhysicalResourceId": "WishicraftControlPlaneSta-DailyBackupSchedule973769-7u63rPY2dzwb",
+      "ResourceType": "AWS::Events::Rule",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "State",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/State",
+            "BeforeValue": "DISABLED",
+            "AfterValue": "ENABLED",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"ScheduleExpression\":\"rate(5 minutes)\",\"Targets\":[{\"Input\":\"{\\\"schema_version\\\":1,\\\"operation\\\":\\\"evaluate_daily_backup\\\"}\",\"Id\":\"Target0\",\"Arn\":\"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-daily-backup-evaluator\",\"RetryPolicy\":{\"MaximumRetryAttempts\":\"0\"}}],\"State\":\"DISABLED\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupSchedule/Resource\"}}",
+      "AfterContext": "{\"Properties\":{\"ScheduleExpression\":\"rate(5 minutes)\",\"Targets\":[{\"Input\":\"{\\\"schema_version\\\":1,\\\"operation\\\":\\\"evaluate_daily_backup\\\"}\",\"Id\":\"Target0\",\"Arn\":\"arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-daily-backup-evaluator\",\"RetryPolicy\":{\"MaximumRetryAttempts\":\"0\"}}],\"State\":\"ENABLED\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupSchedule/Resource\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "DailyBackupStoppedOverdueAlarm3172A117",
+      "PhysicalResourceId": "WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1",
+      "ResourceType": "AWS::CloudWatch::Alarm",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "ActionsEnabled",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/ActionsEnabled",
+            "BeforeValue": "false",
+            "AfterValue": "true",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"1\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupStoppedOverdue\",\"ActionsEnabled\":\"false\",\"AlarmDescription\":\"Daily BACKUP StoppedOverdue; inspect read-only daily status for reason\",\"Statistic\":\"Maximum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupStoppedOverdueAlarm/Resource\"}}",
+      "AfterContext": "{\"Properties\":{\"ComparisonOperator\":\"GreaterThanOrEqualToThreshold\",\"TreatMissingData\":\"notBreaching\",\"Dimensions\":[{\"Value\":\"dev\",\"Name\":\"Stage\"},{\"Value\":\"wishicraft-main\",\"Name\":\"SystemId\"}],\"Period\":\"300\",\"EvaluationPeriods\":\"1\",\"Namespace\":\"Wishicraft/ControlPlane\",\"AlarmActions\":[\"arn:aws:sns:ap-northeast-1:385526546525:wc-dev-monitoring\"],\"MetricName\":\"DailyBackupStoppedOverdue\",\"ActionsEnabled\":\"true\",\"AlarmDescription\":\"Daily BACKUP StoppedOverdue; inspect read-only daily status for reason\",\"Statistic\":\"Maximum\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"Threshold\":\"1\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/DailyBackupStoppedOverdueAlarm/Resource\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "ResetWorkflow",
+      "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):59df8b6ae1a9a4a48a9d7243c4e7a4f7f6d0ca9665d0c98d5181c661ecf002f2",
+            "AfterValue": "(Truncated-Signature):7e58208977655022b33755ffb9dc7c95b5cb2f65c532412cdebdd9d96d4a28c1",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):59df8b6ae1a9a4a48a9d7243c4e7a4f7f6d0ca9665d0c98d5181c661ecf002f2\",\"StateMachineName\":\"wc-dev-reset\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/ResetWorkflow\"}}",
+      "AfterContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):7e58208977655022b33755ffb9dc7c95b5cb2f65c532412cdebdd9d96d4a28c1\",\"StateMachineName\":\"wc-dev-reset\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/ResetWorkflow\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "StartStateMachine",
+      "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):755ba278fc39b725da29942f4c368325268a298cbebe550b4c4086f9bdc1eb5e",
+            "AfterValue": "(Truncated-Signature):19467bf9cbbd118e92fa5e04a48521b327f594f45689bb4a9165b1048c89b2b1",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):755ba278fc39b725da29942f4c368325268a298cbebe550b4c4086f9bdc1eb5e\",\"StateMachineName\":\"wc-dev-start\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-StartWorkflowRoleA360C95C-5Gthd08pXog9\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"StateMachineType\":\"STANDARD\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/StartStateMachine\"}}",
+      "AfterContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):19467bf9cbbd118e92fa5e04a48521b327f594f45689bb4a9165b1048c89b2b1\",\"StateMachineName\":\"wc-dev-start\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-StartWorkflowRoleA360C95C-5Gthd08pXog9\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"StateMachineType\":\"STANDARD\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/StartStateMachine\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "StopStateMachine",
+      "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):91036fd7e32e1ee34ae81a4e8cb7b7dfe761b16832dda32cb8a17edfd99897b2",
+            "AfterValue": "(Truncated-Signature):9ce308a68b3146ab4f4c782855635bf978e950efcb296c0d5b202adfa79c73d6",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):91036fd7e32e1ee34ae81a4e8cb7b7dfe761b16832dda32cb8a17edfd99897b2\",\"StateMachineName\":\"wc-dev-stop\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneStac-StopWorkflowRole2C1543AC-mkRlbbJIBLjV\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"StateMachineType\":\"STANDARD\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/StopStateMachine\"}}",
+      "AfterContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):9ce308a68b3146ab4f4c782855635bf978e950efcb296c0d5b202adfa79c73d6\",\"StateMachineName\":\"wc-dev-stop\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneStac-StopWorkflowRole2C1543AC-mkRlbbJIBLjV\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}],\"StateMachineType\":\"STANDARD\"},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/StopStateMachine\"}}"
+    },
+    {
+      "Action": "Modify",
+      "LogicalResourceId": "SwitchWorkflow",
+      "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+      "ResourceType": "AWS::StepFunctions::StateMachine",
+      "Replacement": "False",
+      "Scope": [
+        "Properties"
+      ],
+      "Details": [
+        {
+          "Target": {
+            "Attribute": "Properties",
+            "Name": "Definition",
+            "RequiresRecreation": "Never",
+            "Path": "/Properties/Definition",
+            "BeforeValue": "(Truncated-Signature):24b0c935d0564d3d6ab1f63185bbe262b39cbf16fca63f0b90f621752b442bd2",
+            "AfterValue": "(Truncated-Signature):6636bf80dc1948df2d50d6d4a5f2108224c4332b7becd02cc29ab1771d95866b",
+            "AttributeChangeType": "Modify"
+          },
+          "Evaluation": "Static",
+          "ChangeSource": "DirectModification"
+        }
+      ],
+      "BeforeContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):24b0c935d0564d3d6ab1f63185bbe262b39cbf16fca63f0b90f621752b442bd2\",\"StateMachineName\":\"wc-dev-switch\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/SwitchWorkflow\"}}",
+      "AfterContext": "{\"Properties\":{\"Definition\":\"(Truncated-Signature):6636bf80dc1948df2d50d6d4a5f2108224c4332b7becd02cc29ab1771d95866b\",\"StateMachineName\":\"wc-dev-switch\",\"RoleArn\":\"arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6\",\"Tags\":[{\"Value\":\"cdk\",\"Key\":\"ManagedBy\"},{\"Value\":\"project-owner\",\"Key\":\"Owner\"},{\"Value\":\"wishicraft\",\"Key\":\"Project\"},{\"Value\":\"dev\",\"Key\":\"Stage\"}]},\"Metadata\":{\"aws:cdk:path\":\"WishicraftControlPlaneStack-dev/SwitchWorkflow\"}}"
+    }
+  ],
+  "post_intake_final": {
+    "at": "2026-09-27T05:40:17.562138+00:00",
+    "desired_state": "STOPPED",
+    "health": "HEALTHY",
+    "ec2_state": "stopped",
+    "current_operation_id": null,
+    "lock_absent": true,
+    "running_workflows": 0,
+    "active_ssm_commands": 0,
+    "active_sessions": 0,
+    "dns_records": 0,
+    "queue_counts": {
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-discord-message-retry": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      },
+      "https://sqs.ap-northeast-1.amazonaws.com/385526546525/wc-dev-status-executor-dlq": {
+        "ApproximateNumberOfMessages": "0",
+        "ApproximateNumberOfMessagesNotVisible": "0",
+        "ApproximateNumberOfMessagesDelayed": "0"
+      }
+    },
+    "intake": {
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null,
+      "wc-dev-admission": null
+    },
+    "snapshot_count": 14,
+    "alarm_states": {
+      "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2": "OK",
+      "WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0": "OK",
+      "WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X": "OK",
+      "WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ": "OK",
+      "WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1": "OK",
+      "WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT": "OK",
+      "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj": "OK",
+      "wc-dev-admissionfunctionerrorsalarm": "OK",
+      "wc-dev-admissionfunctionthrottlesalarm": "OK",
+      "wc-dev-auto-stop-evaluator-silence": "OK",
+      "wc-dev-autostopevaluatorfunctionerrorsalarm": "OK",
+      "wc-dev-autostopevaluatorfunctionthrottlesalarm": "OK",
+      "wc-dev-autostopwarningblockedalarm": "OK",
+      "wc-dev-backuptaskfunctionerrorsalarm": "OK",
+      "wc-dev-backuptaskfunctionthrottlesalarm": "OK",
+      "wc-dev-backupworkflowfailurealarm": "OK",
+      "wc-dev-datafilesystemobservationunknownalarm": "OK",
+      "wc-dev-datafilesystemusagehighalarm": "OK",
+      "wc-dev-desiredactualdivergencealarm": "OK",
+      "wc-dev-desiredrunningnotreadyalarm": "OK",
+      "wc-dev-desiredstoppedec2runningalarm": "OK",
+      "wc-dev-discordcommandfunctionerrorsalarm": "OK",
+      "wc-dev-discordcommandfunctionthrottlesalarm": "OK",
+      "wc-dev-discordmessagedlqvisiblealarm": "OK",
+      "wc-dev-discordmessagefunctionerrorsalarm": "OK",
+      "wc-dev-discordmessagefunctionthrottlesalarm": "OK",
+      "wc-dev-expiredoperationlockalarm": "OK",
+      "wc-dev-maintenance-suppressor": "OK",
+      "wc-dev-monitoringobservationunknownalarm": "OK",
+      "wc-dev-monitoringobserverfunctionerrorsalarm": "OK",
+      "wc-dev-monitoringobserverfunctionthrottlesalarm": "OK",
+      "wc-dev-reconcilefunctionerrorsalarm": "OK",
+      "wc-dev-reconcilefunctionthrottlesalarm": "OK",
+      "wc-dev-resetworkflowfailurealarm": "OK",
+      "wc-dev-retentiontaskfunctionerrorsalarm": "OK",
+      "wc-dev-retentiontaskfunctionthrottlesalarm": "OK",
+      "wc-dev-retentionworkflowfailurealarm": "OK",
+      "wc-dev-runtimeheartbeatunavailablealarm": "OK",
+      "wc-dev-runtimeidentitymismatchalarm": "OK",
+      "wc-dev-runtimeobservationunknownalarm": "OK",
+      "wc-dev-scheduledstopcancelledalarm": "OK",
+      "wc-dev-starttaskfunctionerrorsalarm": "OK",
+      "wc-dev-starttaskfunctionthrottlesalarm": "OK",
+      "wc-dev-startworkflowfailurealarm": "OK",
+      "wc-dev-statusexecutordlqvisiblealarm": "OK",
+      "wc-dev-statusexecutorfunctionerrorsalarm": "OK",
+      "wc-dev-statusexecutorfunctionthrottlesalarm": "OK",
+      "wc-dev-stoptaskfunctionerrorsalarm": "OK",
+      "wc-dev-stoptaskfunctionthrottlesalarm": "OK",
+      "wc-dev-stopworkflowfailurealarm": "OK",
+      "wc-dev-switchworkflowfailurealarm": "OK",
+      "wc-dev-systemstateobservationstalealarm": "OK",
+      "wc-dev-targetrunningtoolongalarm": "OK",
+      "wc-dev-desiredactualdivergencealarm-notification": "OK",
+      "wc-dev-desiredstoppedec2runningalarm-notification": "OK",
+      "wc-dev-runtimeobservationunknownalarm-notification": "OK"
+    }
+  },
+  "changeset_review": {
+    "expected_daily_resources": [
+      "DailyBackupAdmissionFunctionBFD7AF72",
+      "DailyBackupEvaluatorFunction2CAEBD5D",
+      "DailyBackupHeartbeatAlarm7AC73BA7",
+      "DailyBackupIntervalOverdueAlarm2205A737",
+      "DailyBackupNeedsOperatorAlarm098A6CF7",
+      "DailyBackupObservationUnknownAlarm188D678F",
+      "DailyBackupSchedule973769C0",
+      "DailyBackupStoppedOverdueAlarm3172A117"
+    ],
+    "expected_property_path_count": 9,
+    "additional_definition_displays": [
+      "BackupStateMachine",
+      "ResetWorkflow",
+      "StartStateMachine",
+      "StopStateMachine",
+      "SwitchWorkflow"
+    ],
+    "raw_state_machine_entries": 0,
+    "raw_dependency_only_ids": [
+      "DailyBackupEvaluatorFunctionServiceRoleDefaultPolicy0FC7D9CD",
+      "DailyBackupScheduleAllowEventRuleWishicraftControlPlaneStackdevDailyBackupEvaluatorFunction8B3333D00099FBAB"
+    ],
+    "separate_approval_conditions_pass": true
+  }
+}

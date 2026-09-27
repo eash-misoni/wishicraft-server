@@ -1,5 +1,7 @@
 # Daily shared BACKUP: repository handoff and separate dev release
 
+> Current dev outcome (2026-09-27): [stage B limited normal-path qualification completed](../evidence/daily_backup_dev_stage_b_2026-09-27.md). Dev provision=true/enabled=true; one automatic snapshot and two natural PROTECTED evaluations qualified. Earlier preparation/partial statements below remain historical. Retention deletion is not enabled.
+
 > Subsequent authorized dev attempt: [PR #1 merged; stage A validation held before AWS mutation](../evidence/daily_backup_dev_preflight_2026-09-26.md). The fixed order is disabled provisioning → formal START/STOP → enable → natural BACKUP. The earlier proposal below is retained as history. Dev is not enabled.
 
 Canonical contracts: [D-114](../reviews/daily_shared_backup.md),
@@ -279,3 +281,16 @@ All six workflow definitions/configurations/identities must independently match,
 the eight daily resources' nine enablement paths may change deployable Properties.
 Stage A is inherited without redeployment. Do not infer runtime qualification from this
 approval or from a repository enabled=true setting; read the subsequent execution evidence.
+
+## Operational result and notification caveat
+
+The limited release observed the Heartbeat alarm entering ALARM before the schedule enabled.
+Classify such a notification from actual configuration/event/log/metric timestamps: do not
+assume every initial notification is harmless. In this run, the first natural evaluation emitted
+a real heartbeat and cleared the missing-data alarm; no fake datapoint or threshold change
+was used. This does not change the alarm contract or authorize future unexplained alarms.
+
+Collector boundaries also cover nested `Details.Target` values and recovery runtime/Compose
+content. Keep raw recovery verification in memory and record equality, identities and digest
+results separately from value-removed evidence. The documented local collection incident
+is preserved in the execution record. Collector fixes do not change Lambda assets.
