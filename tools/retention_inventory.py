@@ -128,6 +128,7 @@ class Reader:
             )
         finally:
             audit["ended_at"] = utc()
+            audit["item_count"] = len(result)
         return result
 
 
@@ -239,6 +240,14 @@ STATE_KEYS = {
 }
 
 
+def needs_operation_review(row: dict[str, Any]) -> bool:
+    if row.get("status") == "SUCCEEDED":
+        return False
+    if row.get("status") in {"FAILED", "TIMED_OUT", "REJECTED", "CANCELLED"}:
+        return row.get("operation_type") in {"BACKUP", "RESTORE", "IMPORT", "RETENTION"}
+    return True
+
+
 def stability_view(data: dict[str, Any]) -> dict[str, Any]:
     issues: list[str] = []
     state = decoded(data["state"], issues)
@@ -264,11 +273,7 @@ def stability_view(data: dict[str, Any]) -> dict[str, Any]:
             key=lambda r: str(r.get("system_id")),
         ),
         operations=sorted(
-            [
-                r
-                for r in operations
-                if r.get("status") not in {"SUCCEEDED", "FAILED", "REJECTED", "CANCELLED"}
-            ],
+            [r for r in operations if needs_operation_review(r)],
             key=lambda r: str(r.get("operation_id")),
         ),
         issues=issues,
@@ -362,10 +367,18 @@ def report(
         issues.append("invalid-protection-authority")
     unresolved = []
     for op in operations:
-        if op.get("status") in {"SUCCEEDED", "FAILED", "REJECTED", "CANCELLED"}:
+        if not needs_operation_review(op):
             continue
         oid = identifier(op.get("operation_id"), OPERATION)
-        unresolved.append(dict(operation_id=oid, unresolved=True))
+        unresolved.append(
+            dict(
+                operation_id=oid,
+                unresolved=True,
+                status=op.get("status")
+                if op.get("status") in {"PENDING", "RUNNING", "FAILED", "TIMED_OUT", "CANCELLED"}
+                else "UNKNOWN",
+            )
+        )
         issues.append("unresolved-management-or-other-operation")
         for field in ("backup_snapshot_id", "source_snapshot_id", "snapshot_id"):
             sid = identifier(op.get(field), SNAPSHOT)
@@ -381,6 +394,15 @@ def report(
             for proof_id, prov in provenances.items():
                 if prov.operation_id == opid:
                     holds.setdefault(proof_id, []).append("backup_protection." + field)
+    last = protection.get("last_success", {})
+    if last.get("snapshot_id"):
+        proof = provenances.get(last["snapshot_id"])
+        if (
+            proof is None
+            or proof.operation_id != last.get("operation_id")
+            or proof.snapshot_start_time.isoformat() != last.get("acquired_at")
+        ):
+            issues.append("last-success-provenance-mismatch")
     present = {r.get("SnapshotId") for r in data["snapshots"]}
     absent_refs = sorted(set(holds) - present)
     issues.extend("referenced-snapshot-not-in-active-inventory:" + sid for sid in absent_refs)
@@ -434,6 +456,7 @@ def report(
         if not event["final_page"] or event["issues"]:
             issues.append("incomplete-or-invalid-read:" + event["api"])
     for row in rows:
+        row["holds"] = sorted(set(row["holds"]))
         if row["integrity_issues"]:
             issues.append("snapshot-integrity:" + (row["snapshot_id"] or "invalid-id"))
     projection = policy_projection(rows, now)

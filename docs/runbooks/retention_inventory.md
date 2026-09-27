@@ -90,3 +90,16 @@ AWS dependency checks, authorize specific snapshot deletion and its adapter/perm
 No such adapter, IAM, schedule or approval is included. Fourteen-day retention has no count
 cap; changed blocks affect incremental storage. Cost is not measured as snapshot count ×
 volume size and is not measured by this investigation.
+
+## Collector schema qualification during D-115
+
+The first live projection (3dfdc20) conservatively reported Games helper rows and one
+historical TIMED_OUT Operation as unresolved. Read-only field-name/known-enum inspection
+identified formal Whitelist policy/registry records and `op-phase4-integration-stale-20260829`.
+The local parser now validates registry and Whitelist schemas without persisting members,
+uses `world.generation_counter` and `creation.import`, and retains non-UUID operation IDs.
+TIMED_OUT is a formal terminal status; terminal lifecycle records are not unresolved BACKUPs.
+Failed/timed-out BACKUP/RESTORE/IMPORT/RETENTION still require review. Tests reproduce these
+shapes; the initial projection is retained and is not rewritten as a successful final result.
+Original shared recovery contents and hashes are checked before omission, including pair
+identity and exact immutable record reconstruction. No runtime schema/validator was relaxed.

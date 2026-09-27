@@ -7,6 +7,7 @@ from datetime import UTC, datetime, timedelta, timezone
 from typing import Any, cast
 
 from tools.retention_references import OPERATION, SNAPSHOT, identifier
+from wishicraft.backup_provenance import BackupProvenanceRecord
 from wishicraft.retention import (
     BackupProvenance,
     RetentionContext,
@@ -71,6 +72,27 @@ def provenance_pairs(
             parsed = _load_complete_provenance(
                 cast(Any, CapturedProvenance([wire[i], wire[j]])), "captured", context
             )
+            proof = parsed[sid]
+            record = BackupProvenanceRecord(
+                sid,
+                op,
+                proof.game_id,
+                context.source_volume_id,
+                context.stage,
+                context.project,
+                "backup",
+                False,
+                proof.snapshot_start_time,
+                proof.operation_requested_at,
+                proof.wishicraft_created_at,
+                proof.provenance_recorded_at,
+                context.owner_id,
+                row["metadata"],
+                schema_version=proof.schema_version,
+                recovery_json=row.get("recovery_json"),
+            )
+            if row != record.snapshot_item():
+                raise ValueError("snapshot provenance identity or evidence mismatch")
             result.update(parsed)
             valid = True
             used.add(j)
@@ -233,7 +255,9 @@ def policy_projection(rows: list[dict[str, Any]], now: datetime) -> dict[str, An
     for row in rows:
         row.update(
             normal_rank=None,
-            within_14_days=None,
+            within_14_days=(0 <= row["age_seconds"] <= 14 * 86400)
+            if isinstance(row.get("age_seconds"), (int, float))
+            else None,
             newest_seven=None,
             old_policy_projection="NOT_NORMAL",
             new_policy_projection="NOT_NORMAL",

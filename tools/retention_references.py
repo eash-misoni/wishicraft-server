@@ -8,7 +8,7 @@ from typing import Any
 from wishicraft.restore_source import request_operation
 
 SNAPSHOT = r"snap-[0-9a-f]{8,17}"
-OPERATION = r"op-(?:[0-9a-f]{64}|[0-9a-f-]{36})"
+OPERATION = r"op-[A-Za-z0-9._:-]{1,124}"
 GAME = r"game-[a-z0-9-]{1,100}"
 
 
@@ -176,10 +176,47 @@ def protection_references(state: dict[str, Any]) -> tuple[dict[str, list[str]], 
 
 def game_references(records: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
     """Preserve current world identity, not player/access/runtime payloads or archive hashes."""
+    import json
+
+    from wishicraft.artifacts import whitelist_policy
+    from wishicraft.game_creation import REGISTRY_KEY
     from wishicraft.world_reference import data_source
 
-    output, issues = [], []
+    output: list[dict[str, Any]] = []
+    issues: list[str] = []
     for row in records:
+        key = row.get("game_id")
+        if key == REGISTRY_KEY:
+            ids = row.get("registered_ids")
+            if (
+                set(row) != {"game_id", "registered_ids"}
+                or not isinstance(ids, list)
+                or not ids
+                or any(identifier(g, r"game-[0-9a-f]{64}") is None for g in ids)
+            ):
+                issues.append("invalid-game-registry")
+            else:
+                output.append(dict(record_kind="registry", registered_ids=ids))
+            continue
+        if isinstance(key, str) and (
+            key == whitelist_policy.COMMON or key.startswith("policy-whitelist-game-v1:")
+        ):
+            try:
+                target = None if key == whitelist_policy.COMMON else key.split(":", 1)[1]
+                if key != whitelist_policy.policy_key(target) or set(row) != {
+                    "game_id",
+                    "policy_json",
+                }:
+                    raise ValueError("policy identity")
+                policy = whitelist_policy.policy(json.loads(row["policy_json"]))
+                output.append(
+                    dict(
+                        record_kind="whitelist-policy", game_id=target, revision=policy["revision"]
+                    )
+                )
+            except (ValueError, TypeError, KeyError):
+                issues.append("invalid-whitelist-policy-record")
+            continue
         game = identifier(row.get("game_id"), GAME)
         world = row.get("world", {})
         if not game or not isinstance(world, dict):
@@ -194,9 +231,12 @@ def game_references(records: list[dict[str, Any]]) -> tuple[list[dict[str, Any]]
             current_world=identifier(current, OPERATION),
             data_source=data_source(game, current) if valid_current else None,
             generation=world.get("generation") if type(world.get("generation")) is int else None,
-            counter=world.get("counter") if type(world.get("counter")) is int else None,
+            counter=world.get("generation_counter")
+            if type(world.get("generation_counter")) is int
+            else None,
             creation_record_present=isinstance(row.get("creation"), dict),
-            import_record_present=isinstance(row.get("import"), dict),
+            import_record_present=isinstance(row.get("creation"), dict)
+            and isinstance(row["creation"].get("import"), dict),
             snapshot_reference_policy="archive paths and hashes are not snapshot references",
         )
         output.append(projection)

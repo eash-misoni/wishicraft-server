@@ -506,3 +506,84 @@ def test_rule_metadata_request_id_does_not_fake_reference_change() -> None:
     assert stability_view(a) == stability_view(b)
     b["rules"][0]["Status"] = "pending"
     assert stability_view(a) != stability_view(b)
+
+
+def test_games_registry_policy_and_import_are_not_malformed_games() -> None:
+    from tools.retention_references import game_references
+
+    gid = "game-" + "a" * 64
+    rows: list[dict[str, Any]] = [
+        dict(game_id="registry-game-creation-v1", registered_ids=[gid]),
+        dict(game_id="policy-whitelist-common-v1", policy_json='{"revision":2,"members":{}}'),
+        dict(
+            game_id=gid,
+            world=dict(generation=1, generation_counter=2),
+            creation={"import": {"archive": CANARY}},
+        ),
+    ]
+    projection, issues = game_references(rows)
+    assert not issues and projection[-1]["counter"] == 2
+    assert projection[-1]["import_record_present"]
+    assert CANARY not in json.dumps(projection)
+    rows[0]["registered_ids"] = ["bad"]
+    assert game_references(rows)[1] == ["invalid-game-registry"]
+
+
+def test_old_terminal_start_is_not_unresolved_backup_but_backup_timeout_is() -> None:
+    from tools.retention_inventory import needs_operation_review
+    from tools.retention_references import OPERATION, identifier
+
+    assert identifier("op-phase4-integration-stale-20260829", OPERATION)
+    assert not needs_operation_review(dict(operation_type="START", status="TIMED_OUT"))
+    assert needs_operation_review(dict(operation_type="BACKUP", status="TIMED_OUT"))
+    assert needs_operation_review(dict(operation_type="BACKUP", status="FAILED"))
+
+
+def test_valid_shared_recovery_checks_original_then_removes_payload_and_hashes(
+    tmp_path: Path,
+) -> None:
+    import hashlib
+    from dataclasses import replace
+
+    from wishicraft.backup_recovery import shared_tags
+
+    p = proof()
+    env_hash = hashlib.sha256(CANARY.encode()).hexdigest()
+    recovery = json.dumps(
+        dict(
+            schema_version=1,
+            source_volume_id=VOLUME,
+            games={
+                "game-vanilla-main": dict(
+                    game_id="game-vanilla-main",
+                    data_source="/srv/minecraft/games/game-vanilla-main/server",
+                )
+            },
+            runtime=dict(
+                runtime_env=CANARY,
+                compose_yaml=CANARY,
+                manifest_json=json.dumps(
+                    dict(
+                        games=["game-vanilla-main"],
+                        compose_sha256=env_hash,
+                        runtime_env_sha256=env_hash,
+                    )
+                ),
+            ),
+        )
+    )
+    p = replace(
+        p,
+        schema_version=2,
+        recovery_json=recovery,
+        metadata=shared_tags({**p.metadata, "WishicraftSchemaVersion": "2"}, recovery),
+    )
+    pair = [p.snapshot_item(), p.operation_item()]
+    parsed, projection, issues = provenance_pairs([wire(r) for r in pair], pair, CONTEXT)
+    assert not issues and SID in parsed
+    path = tmp_path / "projection.json"
+    save(path, {"provenance": projection})
+    assert CANARY not in path.read_text() and env_hash not in path.read_text()
+    bad = deepcopy(pair)
+    bad[0]["recovery_json"] = recovery.replace(CANARY, "different")
+    assert provenance_pairs([wire(r) for r in bad], bad, CONTEXT)[2]
