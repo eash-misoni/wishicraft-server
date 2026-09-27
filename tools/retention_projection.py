@@ -7,7 +7,9 @@ from datetime import UTC, datetime, timedelta, timezone
 from typing import Any, cast
 
 from tools.retention_references import OPERATION, SNAPSHOT, identifier
+from wishicraft.backup import REQUIRED_TAG_KEYS
 from wishicraft.backup_provenance import BackupProvenanceRecord
+from wishicraft.backup_recovery import SHARED_TAG_KEYS
 from wishicraft.retention import (
     BackupProvenance,
     RetentionContext,
@@ -185,7 +187,22 @@ def project_snapshots(
             )
             prov = provenances.get(sid or "")
             if prov and (
-                prov.snapshot_start_time != item.start_time
+                set(tags)
+                != (
+                    REQUIRED_TAG_KEYS | SHARED_TAG_KEYS
+                    if prov.schema_version == 2
+                    else REQUIRED_TAG_KEYS
+                )
+                or tags.get("WishicraftProtected") != "false"
+                or tags.get("Project") != context.project
+                or tags.get("WishicraftCategory") != "backup"
+                or tags.get("WishicraftSchemaVersion") != str(prov.schema_version)
+                or timestamp(tags.get("WishicraftCreatedAt"))
+                != prov.wishicraft_created_at.isoformat()
+                or item.state != "completed"
+                or not row["description_matches_operation"]
+                or item.owner_id != context.owner_id
+                or prov.snapshot_start_time != item.start_time
                 or prov.operation_id != tags.get("WishicraftOperationId")
                 or prov.source_volume_id != volume
                 or prov.stage != tags.get("Stage")

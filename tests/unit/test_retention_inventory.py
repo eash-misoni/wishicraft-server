@@ -587,3 +587,71 @@ def test_valid_shared_recovery_checks_original_then_removes_payload_and_hashes(
     bad = deepcopy(pair)
     bad[0]["recovery_json"] = recovery.replace(CANARY, "different")
     assert provenance_pairs([wire(r) for r in bad], bad, CONTEXT)[2]
+
+
+def test_invalid_protection_with_pending_operation_is_reported_not_aborted() -> None:
+    payload = data()
+    payload["state"] = [
+        wire(dict(system_id="wishicraft-main", backup_protection={"schema_version": 99}))
+    ]
+    payload["operations"] = [
+        wire(
+            dict(
+                operation_id=OP,
+                operation_type="BACKUP",
+                status="PENDING",
+                requested_at=NOW.isoformat(),
+            )
+        )
+    ]
+    r = report(
+        payload,
+        context=CONTEXT,
+        region="ap-northeast-1",
+        system="wishicraft-main",
+        manifest=manifest(),
+        now=NOW,
+        audit=[],
+        comparisons=[{"equal": True}],
+    )
+    assert "invalid-protection-authority" in r["missing_checks"]
+    assert r["unresolved_operations"][0]["operation_id"] == OP
+    assert r["status"] == "NO_DELETE"
+
+
+def test_malformed_journal_phase_preserves_references() -> None:
+    r = journal()
+    r["phase"] = {"unexpected": CANARY}
+    holds, projection, issues = journal_references(
+        [r],
+        system="wishicraft-main",
+        stage="dev",
+        project="wishicraft",
+        volume=VOLUME,
+        games={"game-vanilla-main"},
+    )
+    assert issues and holds[SID] and projection[0]["phase"] == "UNKNOWN"
+    assert CANARY not in json.dumps(projection)
+
+
+def test_protected_tag_does_not_skip_snapshot_metadata_integrity() -> None:
+    p = proof()
+    pair = [p.snapshot_item(), p.operation_item()]
+    parsed, _, _ = provenance_pairs([wire(r) for r in pair], pair, CONTEXT)
+    raw = dict(
+        SnapshotId=SID,
+        VolumeId=VOLUME,
+        OwnerId=ACCOUNT,
+        State="completed",
+        StartTime=NOW,
+        Encrypted=True,
+        Description="Wishicraft backup " + OP,
+        Tags=[
+            dict(Key=k, Value=v) for k, v in {**p.metadata, "WishicraftProtected": "true"}.items()
+        ],
+    )
+    rows = project_snapshots(
+        [raw], parsed, context=CONTEXT, region="ap-northeast-1", now=NOW, holds={}, locks={}
+    )
+    assert rows[0]["holds"] == ["explicit-protected-tag"]
+    assert "actual-snapshot-provenance-mismatch" in rows[0]["integrity_issues"]

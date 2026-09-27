@@ -11,7 +11,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
-from tools.retention_projection import policy_projection, project_snapshots, provenance_pairs
+from tools.retention_projection import (
+    policy_projection,
+    project_snapshots,
+    provenance_pairs,
+    timestamp,
+)
 from tools.retention_references import (
     GAME,
     OPERATION,
@@ -348,7 +353,6 @@ def report(
     try:
         p = read_protection(state, context.source_volume_id, now)
         protection = {k: p[k] for k in ("boundary", "protected_boundary", "attempts")}
-        from tools.retention_projection import timestamp
 
         for k in ("oldest_at", "unknown_since", "stopped_at"):
             protection[k] = timestamp(p.get(k))

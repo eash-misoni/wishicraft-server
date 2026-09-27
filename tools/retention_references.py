@@ -35,7 +35,7 @@ def journal_references(
         plan = row.get("plan")
         plan = plan if isinstance(plan, dict) else {}
         op = identifier(plan.get("operation_id"), OPERATION)
-        phase = row.get("phase")
+        phase = row.get("phase") if isinstance(row.get("phase"), str) else "UNKNOWN"
         source = identifier(plan.get("source_snapshot_id"), SNAPSHOT)
         protection = row.get("pre_restore_backup")
         protection = protection if isinstance(protection, dict) else {}
@@ -52,7 +52,7 @@ def journal_references(
             and plan.get("stage") == stage
             and plan.get("project") == project
             and plan.get("source_volume_id") == volume
-            and plan.get("game_id") in games
+            and identifier(plan.get("game_id"), GAME) in games
             and source is not None
             and pre is not None
             and type(row.get("revision")) is int
