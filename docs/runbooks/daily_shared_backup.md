@@ -250,3 +250,21 @@ not shared `src/`. No deployable resource Properties changed. Stage B differs in
 property paths across eight daily resources, with no additional resource, IAM or code change.
 [Structured comparison, commands and local validation](../evidence/daily_backup_input_separation_2026-09-26.json).
 The saved old failure logs/evidence remain valid historical records; no AWS state was reread or mutated.
+
+
+## Resumed dev checkpoint (2026-09-27): stage A only
+
+[Stage A execution, stage B rejection and safe closeout](../evidence/daily_backup_dev_stage_a_2026-09-27.md)
+are now the latest deployment evidence. PR #2 was normally merged and the disabled stage A was
+successfully deployed/read back. Stage B's enabled-only PR #4 also passed CI and merged, but its
+prepared ChangeSet unexpectedly listed five State Machine Definition modifications. The raw
+change response had no corresponding State Machine dependency entries; Case D condition 3 did
+not hold. Equal A/B template Properties alone do not permit that preview's execution.
+
+Stage B was deleted **unexecuted**, before submitting any formal START/STOP. Dev remains
+provision=true/enabled=false; the closeout restores the same canonical setting in repository.
+All 56 alarms were OK with the new five actions disabled, original intake restored, and existing
+13 snapshots/provenance/Game/world/journals retained. New snapshots and automatic Operations: 0.
+This is a deployed preparation, not successful daily BACKUP operation. No retry/body/IAM fix or
+Case D exception is included. Review the exact stage-B safety gate before resuming the unchanged
+one-pair/one-snapshot/natural-evaluation plan. Acquisition and retention deletion remain separate.
