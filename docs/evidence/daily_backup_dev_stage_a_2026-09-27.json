@@ -1,0 +1,970 @@
+{
+  "status": "PARTIAL_STAGE_A_DEPLOYED_STAGE_B_HELD",
+  "date": "2026-09-27",
+  "environment": {
+    "stage": "dev",
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "profile": "wishicraft-dev",
+    "system": "wishicraft-main",
+    "stack": "WishicraftControlPlaneStack-dev",
+    "instance": "i-04fc0629dc4ea466e",
+    "data_volume": "vol-03ac9f534326c345c"
+  },
+  "github": {
+    "reviewed_pr2_head": "c22f408d3d950310b8fa5dbc15f3f8d5c1da6393",
+    "reviewed_base": "9f8bdf054077cce933b30f8af0498b184e0df2f0",
+    "pr2_test_merge": "fe15d6da2d1a498958a598c7dd3806f9f7a3ad46",
+    "pr2_actual_merge": {
+      "headRefOid": "c22f408d3d950310b8fa5dbc15f3f8d5c1da6393",
+      "mergeCommit": {
+        "oid": "f17f5c9bc8f907b62803708ca0d689aff89a119a"
+      },
+      "mergedAt": "2026-09-27T03:06:45Z",
+      "state": "MERGED"
+    },
+    "stage_a_tree": "78d9cf21d23a0c342ff4fc4771f96326d99f0fb9",
+    "stage_b_configuration_commit": "9f862bfe3856d3ec8d20b029a687361e1839c171",
+    "pr4_test_merge": {
+      "parents": [
+        "f17f5c9bc8f907b62803708ca0d689aff89a119a",
+        "9f862bfe3856d3ec8d20b029a687361e1839c171"
+      ],
+      "sha": "fbd22020c5e943bc6e01e586913043bd839e3bfe",
+      "tree": "f3955856b80344fcbbb3e5b35bfc54a9ca93cec1"
+    },
+    "pr4_actual_merge": {
+      "headRefOid": "9f862bfe3856d3ec8d20b029a687361e1839c171",
+      "mergeCommit": {
+        "oid": "4576098a6aca172b045c509e150293d694348da3"
+      },
+      "mergedAt": "2026-09-27T03:26:26Z",
+      "state": "MERGED"
+    },
+    "stage_b_tree": "f3955856b80344fcbbb3e5b35bfc54a9ca93cec1",
+    "stage_a_ci": [
+      {
+        "name": "CI",
+        "run": 36290464564,
+        "conclusion": "success"
+      },
+      {
+        "name": "NeoForge",
+        "run": 36290464552,
+        "conclusion": "success"
+      },
+      {
+        "name": "Paper",
+        "run": 36290464570,
+        "conclusion": "success"
+      }
+    ],
+    "stage_b_ci": [
+      {
+        "name": "CI",
+        "run": 36290568101,
+        "conclusion": "success"
+      },
+      {
+        "name": "NeoForge",
+        "run": 36290568143,
+        "conclusion": "success"
+      },
+      {
+        "name": "Paper",
+        "run": 36290568118,
+        "conclusion": "success"
+      }
+    ]
+  },
+  "baseline": {
+    "timestamp": {
+      "completed_at": "2026-09-27T03:09:56.176409+00:00"
+    },
+    "state": "STOPPED/HEALTHY",
+    "instance": "stopped",
+    "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+    "world": {
+      "difficulty": null,
+      "generation": "1",
+      "seed": "-3498469689692331574",
+      "generation_counter": "2",
+      "hardcore": null
+    },
+    "game_records_equal_prior_baseline": true,
+    "backup_protection": null,
+    "current_operation": null,
+    "locks": 0,
+    "running_workflows": 0,
+    "active_ssm": 0,
+    "active_sessions": 0,
+    "queues_empty": 3,
+    "dns_present": false,
+    "alarms": {
+      "count": 51,
+      "all_ok": true
+    },
+    "snapshots": 13,
+    "concurrency": {
+      "wc-dev-reconcile-concurrency": "UNSET",
+      "wc-dev-auto-stop-evaluator-concurrency": "UNSET",
+      "wc-dev-discord-command-concurrency": "UNSET",
+      "wc-dev-discord-message-concurrency": "UNSET",
+      "wc-dev-start-task-concurrency": "UNSET",
+      "WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd-concurrency": "UNSET",
+      "wc-dev-backup-task-concurrency": "UNSET",
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp-concurrency": "UNSET",
+      "wc-dev-status-executor-concurrency": "UNSET",
+      "wc-dev-stop-task-concurrency": "UNSET",
+      "wc-dev-admission-concurrency": "UNSET",
+      "wc-dev-retention-task-concurrency": "UNSET",
+      "wc-dev-monitoring-observer-concurrency": "UNSET"
+    }
+  },
+  "stage_a": {
+    "assembly": "assembly-a",
+    "template_sha256": "d5a59b7774887415720c49bcef578b247f43ec04b3600eebd7fcaffb3c552a63",
+    "change_set": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d114-stage-a-f17f5c9-20260927/78fc6b12-15fe-4dd4-9c31-b1c4086d846c",
+    "executed": true,
+    "update_complete_at": "2026-09-27T03:22:59.308Z",
+    "case_d": {
+      "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d114-stage-a-f17f5c9-20260927/78fc6b12-15fe-4dd4-9c31-b1c4086d846c",
+      "template_sha256": "d5a59b7774887415720c49bcef578b247f43ec04b3600eebd7fcaffb3c552a63",
+      "changes": [
+        {
+          "logical_id": "AdmissionFunction23082B67",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "BackupStateMachine",
+          "action": "Modify",
+          "type": "AWS::StepFunctions::StateMachine",
+          "updated_dependency_intrinsics": [
+            "ReconcileFunction30829CB6.Arn",
+            "BackupTaskFunctionA44639DC.Arn"
+          ],
+          "raw_definition_properties_equal": true,
+          "resolved_asl_equal": true
+        },
+        {
+          "logical_id": "BackupTaskFunctionA44639DC",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "DailyBackupAdmissionFunctionBFD7AF72",
+          "action": "Add",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "DailyBackupAdmissionFunctionServiceRoleC812FABF",
+          "action": "Add",
+          "type": "AWS::IAM::Role"
+        },
+        {
+          "logical_id": "DailyBackupAdmissionFunctionServiceRoleDefaultPolicy98A97BA3",
+          "action": "Add",
+          "type": "AWS::IAM::Policy"
+        },
+        {
+          "logical_id": "DailyBackupAdmissionLogGroup0A6BBBF5",
+          "action": "Add",
+          "type": "AWS::Logs::LogGroup"
+        },
+        {
+          "logical_id": "DailyBackupEvaluatorFunction2CAEBD5D",
+          "action": "Add",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "DailyBackupEvaluatorFunctionServiceRole282E8321",
+          "action": "Add",
+          "type": "AWS::IAM::Role"
+        },
+        {
+          "logical_id": "DailyBackupEvaluatorFunctionServiceRoleDefaultPolicy0FC7D9CD",
+          "action": "Add",
+          "type": "AWS::IAM::Policy"
+        },
+        {
+          "logical_id": "DailyBackupEvaluatorLogGroupC41BB5D3",
+          "action": "Add",
+          "type": "AWS::Logs::LogGroup"
+        },
+        {
+          "logical_id": "DailyBackupHeartbeatAlarm7AC73BA7",
+          "action": "Add",
+          "type": "AWS::CloudWatch::Alarm"
+        },
+        {
+          "logical_id": "DailyBackupIntervalOverdueAlarm2205A737",
+          "action": "Add",
+          "type": "AWS::CloudWatch::Alarm"
+        },
+        {
+          "logical_id": "DailyBackupNeedsOperatorAlarm098A6CF7",
+          "action": "Add",
+          "type": "AWS::CloudWatch::Alarm"
+        },
+        {
+          "logical_id": "DailyBackupObservationUnknownAlarm188D678F",
+          "action": "Add",
+          "type": "AWS::CloudWatch::Alarm"
+        },
+        {
+          "logical_id": "DailyBackupSchedule973769C0",
+          "action": "Add",
+          "type": "AWS::Events::Rule"
+        },
+        {
+          "logical_id": "DailyBackupScheduleAllowEventRuleWishicraftControlPlaneStackdevDailyBackupEvaluatorFunction8B3333D00099FBAB",
+          "action": "Add",
+          "type": "AWS::Lambda::Permission"
+        },
+        {
+          "logical_id": "DailyBackupStoppedOverdueAlarm3172A117",
+          "action": "Add",
+          "type": "AWS::CloudWatch::Alarm"
+        },
+        {
+          "logical_id": "DiscordCommandFunction7D25102A",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "DiscordMessageFunction78FA388B",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "MonitoringObserverFunction584DA7C7",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "ReconcileFunction30829CB6",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "ResetWorkflow",
+          "action": "Modify",
+          "type": "AWS::StepFunctions::StateMachine",
+          "updated_dependency_intrinsics": [
+            "StopTaskFunction11473A8C.Arn",
+            "ReconcileFunction30829CB6.Arn",
+            "StartTaskFunction8C564C4A.Arn"
+          ],
+          "raw_definition_properties_equal": true,
+          "resolved_asl_equal": true
+        },
+        {
+          "logical_id": "RetentionTaskFunction9F285CE4",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "StartStateMachine",
+          "action": "Modify",
+          "type": "AWS::StepFunctions::StateMachine",
+          "updated_dependency_intrinsics": [
+            "ReconcileFunction30829CB6.Arn",
+            "StartTaskFunction8C564C4A.Arn"
+          ],
+          "raw_definition_properties_equal": true,
+          "resolved_asl_equal": true
+        },
+        {
+          "logical_id": "StartTaskFunction8C564C4A",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "StatusExecutorFunction6E5C9869",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "StopStateMachine",
+          "action": "Modify",
+          "type": "AWS::StepFunctions::StateMachine",
+          "updated_dependency_intrinsics": [
+            "StopTaskFunction11473A8C.Arn",
+            "ReconcileFunction30829CB6.Arn"
+          ],
+          "raw_definition_properties_equal": true,
+          "resolved_asl_equal": true
+        },
+        {
+          "logical_id": "StopTaskFunction11473A8C",
+          "action": "Modify",
+          "type": "AWS::Lambda::Function"
+        },
+        {
+          "logical_id": "SwitchWorkflow",
+          "action": "Modify",
+          "type": "AWS::StepFunctions::StateMachine",
+          "updated_dependency_intrinsics": [
+            "StopTaskFunction11473A8C.Arn",
+            "ReconcileFunction30829CB6.Arn",
+            "StartTaskFunction8C564C4A.Arn"
+          ],
+          "raw_definition_properties_equal": true,
+          "resolved_asl_equal": true
+        }
+      ],
+      "errors": [],
+      "pass": true
+    },
+    "readback": {
+      "at": "2026-09-27T03:25:14.976732+00:00",
+      "rule": "WishicraftControlPlaneSta-DailyBackupSchedule973769-7u63rPY2dzwb",
+      "lambda_environment_matches": true,
+      "functions": {
+        "ReconcileFunction30829CB6": {
+          "FunctionName": "wc-dev-reconcile",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.reconcile_lambda.handler",
+          "environment_matches_template": true
+        },
+        "StartTaskFunction8C564C4A": {
+          "FunctionName": "wc-dev-start-task",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.start_workflow_lambda.handler",
+          "environment_matches_template": true
+        },
+        "StopTaskFunction11473A8C": {
+          "FunctionName": "wc-dev-stop-task",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.stop_workflow_lambda.handler",
+          "environment_matches_template": true
+        },
+        "BackupTaskFunctionA44639DC": {
+          "FunctionName": "wc-dev-backup-task",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.backup_workflow_lambda.handler",
+          "environment_matches_template": true
+        },
+        "RetentionTaskFunction9F285CE4": {
+          "FunctionName": "wc-dev-retention-task",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.retention_workflow_lambda.handler",
+          "environment_matches_template": true
+        },
+        "AdmissionFunction23082B67": {
+          "FunctionName": "wc-dev-admission",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-admission",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.admission_lambda.handler",
+          "environment_matches_template": true
+        },
+        "DiscordCommandFunction7D25102A": {
+          "FunctionName": "wc-dev-discord-command",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-command",
+          "CodeSha256": "WjoQoaarK2S3yxHLUzd+r/x3mpLFd1kOFqK8QxI6Bwo=",
+          "Handler": "wishicraft.discord_command_lambda.handler",
+          "environment_matches_template": true
+        },
+        "StatusExecutorFunction6E5C9869": {
+          "FunctionName": "wc-dev-status-executor",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-status-executor",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.status_executor_lambda.handler",
+          "environment_matches_template": true
+        },
+        "DiscordMessageFunction78FA388B": {
+          "FunctionName": "wc-dev-discord-message",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-message",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.discord_message_lambda.handler",
+          "environment_matches_template": true
+        },
+        "AutoStopEvaluatorFunctionF85F8B50": {
+          "FunctionName": "wc-dev-auto-stop-evaluator",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-auto-stop-evaluator",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.auto_stop_evaluator_lambda.handler",
+          "environment_matches_template": true
+        },
+        "MonitoringObserverFunction584DA7C7": {
+          "FunctionName": "wc-dev-monitoring-observer",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-monitoring-observer",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.monitoring_lambda.handler",
+          "environment_matches_template": true
+        },
+        "DailyBackupAdmissionFunctionBFD7AF72": {
+          "FunctionName": "wc-dev-daily-backup-admission",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-daily-backup-admission",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.daily_backup_lambda.admit",
+          "environment_matches_template": true
+        },
+        "DailyBackupEvaluatorFunction2CAEBD5D": {
+          "FunctionName": "wc-dev-daily-backup-evaluator",
+          "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-daily-backup-evaluator",
+          "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8=",
+          "Handler": "wishicraft.daily_backup_lambda.handler",
+          "environment_matches_template": true
+        }
+      },
+      "alarms": {
+        "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2": "OK",
+        "WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0": "OK",
+        "WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X": "OK",
+        "WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ": "OK",
+        "WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1": "OK"
+      },
+      "snapshot_count": 13,
+      "backup_protection": null
+    },
+    "source_review": {
+      "additions": [
+        "DailyBackupAdmissionFunctionBFD7AF72",
+        "DailyBackupAdmissionFunctionServiceRoleC812FABF",
+        "DailyBackupAdmissionFunctionServiceRoleDefaultPolicy98A97BA3",
+        "DailyBackupAdmissionLogGroup0A6BBBF5",
+        "DailyBackupEvaluatorFunction2CAEBD5D",
+        "DailyBackupEvaluatorFunctionServiceRole282E8321",
+        "DailyBackupEvaluatorFunctionServiceRoleDefaultPolicy0FC7D9CD",
+        "DailyBackupEvaluatorLogGroupC41BB5D3",
+        "DailyBackupHeartbeatAlarm7AC73BA7",
+        "DailyBackupIntervalOverdueAlarm2205A737",
+        "DailyBackupNeedsOperatorAlarm098A6CF7",
+        "DailyBackupObservationUnknownAlarm188D678F",
+        "DailyBackupSchedule973769C0",
+        "DailyBackupScheduleAllowEventRuleWishicraftControlPlaneStackdevDailyBackupEvaluatorFunction8B3333D00099FBAB",
+        "DailyBackupStoppedOverdueAlarm3172A117"
+      ],
+      "changed_existing_properties": {
+        "ReconcileFunction30829CB6": [
+          "Code"
+        ],
+        "StartTaskFunction8C564C4A": [
+          "Code"
+        ],
+        "StopTaskFunction11473A8C": [
+          "Code",
+          "Environment"
+        ],
+        "BackupTaskFunctionA44639DC": [
+          "Code",
+          "Environment"
+        ],
+        "RetentionTaskFunction9F285CE4": [
+          "Code"
+        ],
+        "AdmissionFunction23082B67": [
+          "Code",
+          "Environment"
+        ],
+        "DiscordCommandFunction7D25102A": [
+          "Code"
+        ],
+        "StatusExecutorFunction6E5C9869": [
+          "Code"
+        ],
+        "DiscordMessageFunction78FA388B": [
+          "Code"
+        ],
+        "AutoStopEvaluatorFunctionF85F8B50": [
+          "Code"
+        ],
+        "MonitoringObserverFunction584DA7C7": [
+          "Code"
+        ]
+      },
+      "deployed_zip_review": {
+        "ReconcileFunction30829CB6": {
+          "function": "wc-dev-reconcile",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "StartTaskFunction8C564C4A": {
+          "function": "wc-dev-start-task",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "StopTaskFunction11473A8C": {
+          "function": "wc-dev-stop-task",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "BackupTaskFunctionA44639DC": {
+          "function": "wc-dev-backup-task",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "RetentionTaskFunction9F285CE4": {
+          "function": "wc-dev-retention-task",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "AdmissionFunction23082B67": {
+          "function": "wc-dev-admission",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "DiscordCommandFunction7D25102A": {
+          "function": "wc-dev-discord-command",
+          "CodeSha256": "pyUX6M0HRdgFInIKkoCV6fJ6F9fkbY1pqEm6gYGR91o=",
+          "source": {
+            "zip_file": "a72517e8cd0745d80522720a928095e9f27a17d7e46d8d69a849ba818191f75a.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "StatusExecutorFunction6E5C9869": {
+          "function": "wc-dev-status-executor",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "DiscordMessageFunction78FA388B": {
+          "function": "wc-dev-discord-message",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "AutoStopEvaluatorFunctionF85F8B50": {
+          "function": "wc-dev-auto-stop-evaluator",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        },
+        "MonitoringObserverFunction584DA7C7": {
+          "function": "wc-dev-monitoring-observer",
+          "CodeSha256": "R5xcDpD6l4UFO3LPgrmiMaMAUiuyz/d5BdfXYIXOGDc=",
+          "source": {
+            "zip_file": "479c5c0e90fa9785053b72cf82b9a231a300522bb2cff77905d7d76085ce1837.zip",
+            "reviewed_baseline": "e233e9f",
+            "source_files_compared": 108,
+            "bytecode_files": 0
+          }
+        }
+      },
+      "reviewed_source_delta": " src/wishicraft/admission_lambda.py          |   2 +\n src/wishicraft/artifacts/restore_compare.py | 239 +++++++++++++++++++++\n src/wishicraft/artifacts/restore_reader.py  | 163 +++++++++++++-\n src/wishicraft/backup_workflow_lambda.py    |   1 +\n src/wishicraft/config.py                    |  22 ++\n src/wishicraft/daily_backup.py              | 321 ++++++++++++++++++++++++++++\n src/wishicraft/daily_backup_lambda.py       | 244 +++++++++++++++++++++\n src/wishicraft/daily_backup_status.py       |  56 +++++\n src/wishicraft/maintenance_repository.py    |   4 +\n src/wishicraft/operation.py                 |  38 +++-\n src/wishicraft/restore_compare_payload.py   | 113 ++++++++++\n src/wishicraft/retention_daily.py           | 123 +++++++++++\n src/wishicraft/retention_daily_operator.py  |  73 +++++++\n src/wishicraft/stop_workflow_lambda.py      |   2 +-\n 14 files changed, 1391 insertions(+), 10 deletions(-)\n"
+    }
+  },
+  "stage_b": {
+    "assembly": "assembly-b-release",
+    "template_sha256": "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb",
+    "expected_template_difference": [
+      {
+        "path": "/Resources/DailyBackupAdmissionFunctionBFD7AF72/Properties/Environment/Variables/DAILY_BACKUP_ENABLED",
+        "before": "0",
+        "after": "1"
+      },
+      {
+        "path": "/Resources/DailyBackupEvaluatorFunction2CAEBD5D/Properties/Environment/Variables/DAILY_BACKUP_ENABLED",
+        "before": "0",
+        "after": "1"
+      },
+      {
+        "path": "/Resources/DailyBackupSchedule973769C0/Properties/State",
+        "before": "DISABLED",
+        "after": "ENABLED"
+      },
+      {
+        "path": "/Resources/DailyBackupHeartbeatAlarm7AC73BA7/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "/Resources/DailyBackupHeartbeatAlarm7AC73BA7/Properties/TreatMissingData",
+        "before": "notBreaching",
+        "after": "breaching"
+      },
+      {
+        "path": "/Resources/DailyBackupStoppedOverdueAlarm3172A117/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "/Resources/DailyBackupIntervalOverdueAlarm2205A737/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "/Resources/DailyBackupNeedsOperatorAlarm098A6CF7/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "/Resources/DailyBackupObservationUnknownAlarm188D678F/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      }
+    ],
+    "stop": {
+      "status": "STOPPED_BEFORE_START_AND_STAGE_B_EXECUTION",
+      "reason": "Five unexpected State Machine Definition changes in stage B; no updated referenced dependency satisfies Case D condition 3",
+      "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d114-stage-b-4576098-20260927/abab1d8e-de95-420c-8071-a26bbd20aefe",
+      "expected_modified_resources": 8,
+      "observed_modified_resources": 13,
+      "raw_state_machine_details": [],
+      "stage_b_executed": false,
+      "formal_start_stop_count": 0,
+      "new_snapshot_count": 0
+    },
+    "change_set_deleted_unexecuted": true,
+    "actual_aws_enablement": false
+  },
+  "final": {
+    "at": "2026-09-27T03:31:23.160014+00:00",
+    "state_evidence": "/private/tmp/wishicraft-d114-resume-20260927.CluERA/final-live-state-20260927T033121-db2810.json",
+    "status": "STAGE_A_DEPLOYED_STAGE_B_HELD",
+    "enabled": false,
+    "rule": "DISABLED",
+    "formal_start_stop_count": 0,
+    "new_snapshot_count": 0,
+    "snapshot_count": 13,
+    "provenance_unchanged": true,
+    "games_unchanged": true,
+    "alarms": {
+      "WishicraftControlPlaneStack-dev-DailyBackupHeartbeatAlarm7AC73BA7-sOCLHsT8l6v2": {
+        "state": "OK",
+        "actions": false
+      },
+      "WishicraftControlPlaneStack-dev-DailyBackupIntervalOverdueAlarm2205A737-PeQjVo8QjcS0": {
+        "state": "OK",
+        "actions": false
+      },
+      "WishicraftControlPlaneStack-dev-DailyBackupNeedsOperatorAlarm098A6CF7-nbKHwkUzBs9X": {
+        "state": "OK",
+        "actions": false
+      },
+      "WishicraftControlPlaneStack-dev-DailyBackupObservationUnknownAlarm188D678F-144Ndsx4GOhQ": {
+        "state": "OK",
+        "actions": false
+      },
+      "WishicraftControlPlaneStack-dev-DailyBackupStoppedOverdueAlarm3172A117-4zGyRyIGJvf1": {
+        "state": "OK",
+        "actions": false
+      },
+      "WishicraftWebStack-dev-AuthErrors8D0EDC3D-7sFK2J7cGupT": {
+        "state": "OK",
+        "actions": true
+      },
+      "WishicraftWebStack-dev-WebErrorsC4BB781A-MQwCfef3vtzj": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-admissionfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-admissionfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-auto-stop-evaluator-silence": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-autostopevaluatorfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-autostopevaluatorfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-autostopwarningblockedalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-backuptaskfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-backuptaskfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-backupworkflowfailurealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-datafilesystemobservationunknownalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-datafilesystemusagehighalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-desiredactualdivergencealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-desiredrunningnotreadyalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-desiredstoppedec2runningalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-discordcommandfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-discordcommandfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-discordmessagedlqvisiblealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-discordmessagefunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-discordmessagefunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-expiredoperationlockalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-maintenance-suppressor": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-monitoringobservationunknownalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-monitoringobserverfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-monitoringobserverfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-reconcilefunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-reconcilefunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-resetworkflowfailurealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-retentiontaskfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-retentiontaskfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-retentionworkflowfailurealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-runtimeheartbeatunavailablealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-runtimeidentitymismatchalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-runtimeobservationunknownalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-scheduledstopcancelledalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-starttaskfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-starttaskfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-startworkflowfailurealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-statusexecutordlqvisiblealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-statusexecutorfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-statusexecutorfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-stoptaskfunctionerrorsalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-stoptaskfunctionthrottlesalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-stopworkflowfailurealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-switchworkflowfailurealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-systemstateobservationstalealarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-targetrunningtoolongalarm": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-desiredactualdivergencealarm-notification": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-desiredstoppedec2runningalarm-notification": {
+        "state": "OK",
+        "actions": true
+      },
+      "wc-dev-runtimeobservationunknownalarm-notification": {
+        "state": "OK",
+        "actions": true
+      }
+    },
+    "ingress": {
+      "wc-dev-discord-command": null,
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": null,
+      "wc-dev-admission": null
+    },
+    "unexecuted_changesets": 0,
+    "daily_invocations_observed": 0
+  },
+  "validation": {
+    "stage_b_actual_canonical_full_tests": {
+      "passed": 1961,
+      "seconds": 121.89
+    },
+    "stage_a_reviewed_tree_tests": 1961,
+    "ci_quality": "full tests, lint, format, mypy, historical and canonical CLI synths passed",
+    "source_inputs": "No daily_backup_validation context in release assemblies; committed clean worktrees; temporary dependency links removed",
+    "local_harness_diagnostics": [
+      "Initial SSO expired before caller identity; user renewed canonical session",
+      "Initial ZIP comparison used repository base rather than actual deployed e233e9f; new read-only comparison verified all eleven functions against actual deployed source",
+      "Local ASL postprocessor initially expected DefinitionString; corrected from saved JSON to existing Definition object without AWS mutation",
+      "Read-back resolver initially omitted DynamoDB StreamArn; new read-only version resolved the actual stream ARN; no deployment was repeated"
+    ]
+  },
+  "unperformed": [
+    "formal START/STOP",
+    "dirty boundary tracking under real use",
+    "scheduled automatic BACKUP",
+    "new snapshot/provenance",
+    "two natural PROTECTED evaluations",
+    "live DescribeExecution response-loss path",
+    "retry/failure/race/TTL proof",
+    "30-minute/24-hour/missing-heartbeat notification proof",
+    "snapshot mount/world-content/RESTORE verification",
+    "idle STOP proof",
+    "retention deletion"
+  ],
+  "safety": {
+    "forced_operations": false,
+    "manual_backup_or_evaluator_invoke": false,
+    "fake_metrics_or_alarm_state": false,
+    "host_helpers_or_adhoc_ssm": false,
+    "snapshot_mutation": false,
+    "target_data_web_deploy": false,
+    "past_evidence_modified": false,
+    "final_canonical_flags": {
+      "schema_version": 1,
+      "provision": true,
+      "enabled": false
+    },
+    "rollback_aws_needed": false,
+    "emergency_disable_rule_used": false
+  },
+  "evidence_root": "/private/tmp/wishicraft-d114-resume-20260927.CluERA",
+  "cost": "Unmeasured; no new snapshot storage in this attempt; fifteen provisioned daily resources remain disabled",
+  "environment_evidence": {
+    "contexts_redacted": {
+      "a": 24,
+      "b": 4
+    },
+    "note": "Initial ChangeSet capture included resolved public template environment maps in BeforeContext/AfterContext; removed during closeout. get_function_configuration environment values were compared only in memory and never saved. No environment-value hashes were created."
+  },
+  "alarm_history": {
+    "entries": 10,
+    "alarm_transitions": 0,
+    "notification_actions": 0
+  }
+}
