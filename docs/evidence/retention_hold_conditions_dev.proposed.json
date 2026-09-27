@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "review_status": "PROPOSED",
+  "account_id": "385526546525",
+  "region": "ap-northeast-1",
+  "system_id": "wishicraft-main",
+  "observed_at": "2026-09-27T10:15:18.915128+00:00",
+  "categories": {
+    "A": "Historical non-deletion only",
+    "B": "Explicit retention commitment",
+    "C": "Current reference",
+    "D": "Ownership/provenance only",
+    "E": "Uncertain release terms / provisional hold"
+  },
+  "holds": [
+    {
+      "snapshot_id": "snap-0b1d9536e9c476c0f",
+      "categories": [
+        "B"
+      ],
+      "recommendation": "CONTINUE",
+      "purpose": "Original migration rollback anchor; explicit never-use-for-cleanup commitment",
+      "release_conditions": [
+        "Explicit separate decision to retire this migration rollback purpose",
+        "Assess whether replacement evidence covers original migration state; newer snapshot alone is insufficient",
+        "Amend commitment through reviewed approval retaining history; independent references and deletion reviewed separately"
+      ],
+      "currently_released": false,
+      "evidence": {
+        "commit": "a182a2953830fdb675926011149cd449c8664afb",
+        "path": "docs/runbooks/backup_safety_isolated_restore.md",
+        "section": "Protected migration history table"
+      }
+    },
+    {
+      "snapshot_id": "snap-0be8e05ab05d70e84",
+      "journal_key": "restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "journal_revision": 20,
+      "phase": "ROLLED_BACK",
+      "role": "source",
+      "categories": [
+        "A",
+        "C",
+        "E"
+      ],
+      "recommendation": "CONTINUE",
+      "purpose": "Retain the exact restore source and pre-restore recovery point until this recovery experiment is explicitly retired",
+      "release_conditions": [
+        "Owner explicitly decides this exact plan must never resume; retain plan/revision/audit unchanged",
+        "Separately review an enforceable retirement gate for every formal resume entry before removing the journal hold (not implemented here)",
+        "Confirm successor proof accepted, no open recovery/rollback requirement and all independent references checked",
+        "Separate hold-release approval; later separate fresh deletion decision"
+      ],
+      "currently_released": false,
+      "evidence": {
+        "commit": "a182a2953830fdb675926011149cd449c8664afb",
+        "path": "docs/evidence/game_restore_resumed_2026-09-24.md"
+      }
+    },
+    {
+      "snapshot_id": "snap-0d2407a5af78afa82",
+      "journal_key": "restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "journal_revision": 20,
+      "phase": "ROLLED_BACK",
+      "role": "protection",
+      "categories": [
+        "A",
+        "C",
+        "E"
+      ],
+      "recommendation": "CONTINUE",
+      "purpose": "Retain the exact restore source and pre-restore recovery point until this recovery experiment is explicitly retired",
+      "release_conditions": [
+        "Owner explicitly decides this exact plan must never resume; retain plan/revision/audit unchanged",
+        "Separately review an enforceable retirement gate for every formal resume entry before removing the journal hold (not implemented here)",
+        "Confirm successor proof accepted, no open recovery/rollback requirement and all independent references checked",
+        "Separate hold-release approval; later separate fresh deletion decision"
+      ],
+      "currently_released": false,
+      "evidence": {
+        "commit": "a182a2953830fdb675926011149cd449c8664afb",
+        "path": "docs/evidence/game_restore_resumed_2026-09-24.md"
+      }
+    },
+    {
+      "snapshot_id": "snap-0aac363f3ce09e05a",
+      "journal_key": "restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+      "journal_revision": 18,
+      "phase": "ROLLED_BACK",
+      "role": "source",
+      "categories": [
+        "A",
+        "B",
+        "C"
+      ],
+      "recommendation": "CONTINUE",
+      "purpose": "Retain the exact restore source and pre-restore recovery point until this recovery experiment is explicitly retired",
+      "release_conditions": [
+        "Owner explicitly decides this exact plan must never resume; retain plan/revision/audit unchanged",
+        "Separately review an enforceable retirement gate for every formal resume entry before removing the journal hold (not implemented here)",
+        "Confirm successor proof accepted, no open recovery/rollback requirement and all independent references checked",
+        "Separate hold-release approval; later separate fresh deletion decision"
+      ],
+      "currently_released": false,
+      "evidence": {
+        "commit": "a182a2953830fdb675926011149cd449c8664afb",
+        "path": "docs/runbooks/paper_restore_dev.md"
+      }
+    },
+    {
+      "snapshot_id": "snap-0e5941ab3b8e0e6ff",
+      "journal_key": "restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+      "journal_revision": 18,
+      "phase": "ROLLED_BACK",
+      "role": "protection",
+      "categories": [
+        "A",
+        "B",
+        "C"
+      ],
+      "recommendation": "CONTINUE",
+      "purpose": "Retain the exact restore source and pre-restore recovery point until this recovery experiment is explicitly retired",
+      "release_conditions": [
+        "Owner explicitly decides this exact plan must never resume; retain plan/revision/audit unchanged",
+        "Separately review an enforceable retirement gate for every formal resume entry before removing the journal hold (not implemented here)",
+        "Confirm successor proof accepted, no open recovery/rollback requirement and all independent references checked",
+        "Separate hold-release approval; later separate fresh deletion decision"
+      ],
+      "currently_released": false,
+      "evidence": {
+        "commit": "a182a2953830fdb675926011149cd449c8664afb",
+        "path": "docs/runbooks/paper_restore_dev.md"
+      }
+    },
+    {
+      "snapshot_id": "snap-0be8e05ab05d70e84",
+      "journal_key": "restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd",
+      "journal_revision": 1,
+      "phase": "PLANNED",
+      "role": "source",
+      "categories": [
+        "A",
+        "C",
+        "E"
+      ],
+      "recommendation": "CONSIDER_RELEASE_WITH_SEPARATE_APPROVAL",
+      "purpose": "Unused initial Vanilla restore plan; successor completed validation and rollback",
+      "release_conditions": [
+        "Owner explicitly decides this exact plan must never resume; retain plan/revision/audit unchanged",
+        "Separately review an enforceable retirement gate for every formal resume entry before removing the journal hold (not implemented here)",
+        "Confirm successor proof accepted, no open recovery/rollback requirement and all independent references checked",
+        "Separate hold-release approval; later separate fresh deletion decision"
+      ],
+      "currently_released": false,
+      "evidence": {
+        "commit": "a182a2953830fdb675926011149cd449c8664afb",
+        "path": "docs/evidence/game_restore_pause_2026-09-23.md"
+      }
+    },
+    {
+      "snapshot_id": "snap-0a1da731e1fe40f44",
+      "journal_key": "restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd",
+      "journal_revision": 1,
+      "phase": "PLANNED",
+      "role": "protection",
+      "categories": [
+        "A",
+        "C",
+        "E"
+      ],
+      "recommendation": "CONSIDER_RELEASE_WITH_SEPARATE_APPROVAL",
+      "purpose": "Unused initial Vanilla restore plan; successor completed validation and rollback",
+      "release_conditions": [
+        "Owner explicitly decides this exact plan must never resume; retain plan/revision/audit unchanged",
+        "Separately review an enforceable retirement gate for every formal resume entry before removing the journal hold (not implemented here)",
+        "Confirm successor proof accepted, no open recovery/rollback requirement and all independent references checked",
+        "Separate hold-release approval; later separate fresh deletion decision"
+      ],
+      "currently_released": false,
+      "evidence": {
+        "commit": "a182a2953830fdb675926011149cd449c8664afb",
+        "path": "docs/evidence/game_restore_pause_2026-09-23.md"
+      }
+    },
+    {
+      "snapshot_id": "snap-0212d6f8613b684ac",
+      "categories": [
+        "C"
+      ],
+      "recommendation": "CONTINUE_DYNAMIC_REFERENCE",
+      "purpose": "Current last_success protects boundary 2; intent is the same successful Operation",
+      "release_conditions": [
+        "Resolve future current last_success/intent afresh; a superseded success is not automatically a permanent hold",
+        "Apply normal 14-day OR newest-seven and all other independent holds; do not edit live reference here"
+      ],
+      "currently_released": false,
+      "dynamic": true,
+      "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9"
+    }
+  ],
+  "legacy_policy": "Five legacy snapshots remain EXCLUDED; no normal cohort admission",
+  "hold_release_count": 0,
+  "status": "NO_DELETE",
+  "deletion_authorized": false,
+  "planned_delete_ids": [],
+  "delete_action_count": 0
+}

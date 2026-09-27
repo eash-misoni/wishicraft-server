@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "account_id": "385526546525",
+  "region": "ap-northeast-1",
+  "system_id": "wishicraft-main",
+  "volume_id": "vol-03ac9f534326c345c",
+  "review_status": "PROPOSED",
+  "collector_commit": "a90c982fe25cb211f96fc20cc26d678c31b05e35",
+  "operations": [
+    {
+      "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "operation_type": "BACKUP",
+      "target_game_id": "game-vanilla-main",
+      "requested_at": "2026-09-07T08:38:29.797365+00:00",
+      "completed_at": "2026-09-07T08:38:35.736752+00:00",
+      "terminal_status": "FAILED",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "observed_history_events": 25,
+      "failure_stage": "CreateSnapshotOnce / explicit EC2 rejection",
+      "failure_reason": "UnauthorizedOperation; historical snapshot ARN account qualification mismatch",
+      "snapshot_ids": [],
+      "provenance_ids": [],
+      "backup_create_intent_present": false,
+      "conclusion": "CONFIRMED_HISTORICAL_FAILURE_NO_SNAPSHOT_MUTATION",
+      "review_status": "PROPOSED",
+      "snapshot_side_effect": "No snapshot created",
+      "other_effects": "Admission/Lock/Operation/workflow lifecycle occurred; terminal FAILED retained. No claim of zero control-plane writes during historical execution.",
+      "evidence": [
+        {
+          "path": "docs/evidence/retention_failed_operations_dev_2026-09-27.reads.json",
+          "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+          "task_failed_event_id": 15
+        },
+        {
+          "commit": "a182a2953830fdb675926011149cd449c8664afb",
+          "path": "docs/06_delivery_plan.md",
+          "section": "Phase 8B first attempt"
+        }
+      ],
+      "historical_source_commit": null,
+      "limitations": [
+        "Historical Lambda ZIP / then-effective IAM not independently re-fetched; historical source/closeout is separate from current code.",
+        "CloudTrail is bounded to recorded request/end \u00b160 seconds; absent events alone are not proof.",
+        "No automatic collector suppression; exact terminal/reference binding and judgment require review.",
+        "Exact initial deployed source commit was not independently recovered; use historical closeout plus execution and positive EC2 rejection records."
+      ],
+      "reconciled_at": "2026-09-27T10:20:03.187106+00:00",
+      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure."
+    },
+    {
+      "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "operation_type": "RETENTION",
+      "target_game_id": "game-vanilla-main",
+      "requested_at": "2026-09-08T13:14:55.289968+00:00",
+      "completed_at": "2026-09-08T13:15:06.307775+00:00",
+      "terminal_status": "FAILED",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "observed_history_events": 20,
+      "failure_stage": "RunRetentionDryRun / terminal result serialization",
+      "failure_reason": "TypeError: unsupported operation value; list-valued result rejected by historical DynamoDB serializer",
+      "snapshot_ids": [],
+      "provenance_ids": [],
+      "backup_create_intent_present": false,
+      "conclusion": "CONFIRMED_HISTORICAL_FAILURE_NO_SNAPSHOT_MUTATION",
+      "review_status": "PROPOSED",
+      "snapshot_side_effect": "No DeleteSnapshot request / deletion",
+      "other_effects": "Admission/Lock/Operation/workflow lifecycle occurred; terminal FAILED retained. No claim of zero control-plane writes during historical execution.",
+      "evidence": [
+        {
+          "path": "docs/evidence/retention_failed_operations_dev_2026-09-27.reads.json",
+          "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+          "task_failed_event_id": 10
+        },
+        {
+          "commit": "a182a2953830fdb675926011149cd449c8664afb",
+          "path": "docs/09_decisions_and_backlog.md",
+          "section": "D-091 dry-run workflow dev evidence"
+        }
+      ],
+      "historical_source_commit": "40651ba8b211676c1a5a1b5864f225b077debbc4",
+      "limitations": [
+        "Historical Lambda ZIP / then-effective IAM not independently re-fetched; historical source/closeout is separate from current code.",
+        "CloudTrail is bounded to recorded request/end \u00b160 seconds; absent events alone are not proof.",
+        "No automatic collector suppression; exact terminal/reference binding and judgment require review."
+      ],
+      "reconciled_at": "2026-09-27T10:20:03.187106+00:00",
+      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure."
+    },
+    {
+      "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "operation_type": "BACKUP",
+      "target_game_id": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+      "requested_at": "2026-09-22T16:20:11.302008+00:00",
+      "completed_at": "2026-09-22T16:20:23.148398+00:00",
+      "terminal_status": "FAILED",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "observed_history_events": 25,
+      "failure_stage": "CreateSnapshotOnce / explicit EC2 rejection",
+      "failure_reason": "BackupCreateRejected; historical dynamic Game request-tag not allowed by A/B-only IAM",
+      "snapshot_ids": [],
+      "provenance_ids": [],
+      "backup_create_intent_present": true,
+      "conclusion": "CONFIRMED_HISTORICAL_FAILURE_NO_SNAPSHOT_MUTATION",
+      "review_status": "PROPOSED",
+      "snapshot_side_effect": "No snapshot created",
+      "other_effects": "Admission/Lock/Operation/workflow lifecycle occurred; terminal FAILED retained. No claim of zero control-plane writes during historical execution.",
+      "evidence": [
+        {
+          "path": "docs/evidence/retention_failed_operations_dev_2026-09-27.reads.json",
+          "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+          "task_failed_event_id": 15
+        },
+        {
+          "commit": "a182a2953830fdb675926011149cd449c8664afb",
+          "path": "docs/evidence/game_restore_pause_2026-09-23.md",
+          "section": "Real dev work completed 1\u20132"
+        }
+      ],
+      "historical_source_commit": "569504933fda8220342a38d5daf5cbe833256bd0",
+      "limitations": [
+        "Historical Lambda ZIP / then-effective IAM not independently re-fetched; historical source/closeout is separate from current code.",
+        "CloudTrail is bounded to recorded request/end \u00b160 seconds; absent events alone are not proof.",
+        "No automatic collector suppression; exact terminal/reference binding and judgment require review."
+      ],
+      "reconciled_at": "2026-09-27T10:20:03.187106+00:00",
+      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure."
+    }
+  ],
+  "status": "NO_DELETE",
+  "deletion_authorized": false,
+  "planned_delete_ids": [],
+  "delete_action_count": 0,
+  "original_records_modified": false,
+  "collector_suppression_implemented": false
+}
