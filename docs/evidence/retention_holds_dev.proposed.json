@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "review_status": "PROPOSED",
+  "account_id": "385526546525",
+  "region": "ap-northeast-1",
+  "entries": [
+    {
+      "snapshot_id": "snap-0b1d9536e9c476c0f",
+      "kind": "explicit-retention",
+      "reason": "Migration anchor: never use for cleanup",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/runbooks/backup_safety_isolated_restore.md",
+        "section": "Protected migration history table"
+      },
+      "related_operation": null,
+      "release_condition": "No expiry or release recorded; separate review required",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-0aac363f3ce09e05a",
+      "kind": "explicit-retention",
+      "reason": "Paper RESTORE source / pre-restore protection: keep snapshots and both worlds",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/runbooks/paper_restore_dev.md",
+        "section": "Approved execution sequence step 6; identities in docs/evidence/paper_restore_remaining_2026-09-25.md"
+      },
+      "related_operation": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+      "release_condition": "No expiry or snapshot release recorded; ROLLED_BACK/temporary cleanup is not release",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-0e5941ab3b8e0e6ff",
+      "kind": "explicit-retention",
+      "reason": "Paper RESTORE source / pre-restore protection: keep snapshots and both worlds",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/runbooks/paper_restore_dev.md",
+        "section": "Approved execution sequence step 6; identities in docs/evidence/paper_restore_remaining_2026-09-25.md"
+      },
+      "related_operation": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+      "release_condition": "No expiry or snapshot release recorded; ROLLED_BACK/temporary cleanup is not release",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-0be8e05ab05d70e84",
+      "kind": "provisional-review",
+      "reason": "Vanilla RESTORE source/protection retained; ongoing obligation and live journal to review",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/evidence/game_restore_resumed_2026-09-24.md",
+        "section": "Source/protection identities and final retention"
+      },
+      "related_operation": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "release_condition": "No explicit expiry found; do not infer release from rollback",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-0d2407a5af78afa82",
+      "kind": "provisional-review",
+      "reason": "Vanilla RESTORE source/protection retained; ongoing obligation and live journal to review",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/evidence/game_restore_resumed_2026-09-24.md",
+        "section": "Source/protection identities and final retention"
+      },
+      "related_operation": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "release_condition": "No explicit expiry found; do not infer release from rollback",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-0a1da731e1fe40f44",
+      "kind": "provisional-review",
+      "reason": "Unused PLANNED RESTORE protection retained; no journal release",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/evidence/game_restore_pause_2026-09-23.md",
+        "section": "Old PLANNED request and protection"
+      },
+      "related_operation": "op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd",
+      "release_condition": "No release recorded; live PLANNED reference remains independently protected",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-0bc776ec580afd4ac",
+      "kind": "ownership-only",
+      "reason": "Migration closeout records creation/provenance; snapshot mention alone is not permanent hold",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/runbooks/two_game_switch_migration.md",
+        "section": "Production closeout (2026-09-12)"
+      },
+      "related_operation": null,
+      "release_condition": "Not an additional hold; legacy scope and current references evaluated separately",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-021079b3e3843652f",
+      "kind": "ownership-only",
+      "reason": "Migration closeout records creation/provenance; snapshot mention alone is not permanent hold",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/runbooks/two_game_switch_migration.md",
+        "section": "Production closeout (2026-09-12)"
+      },
+      "related_operation": null,
+      "release_condition": "Not an additional hold; legacy scope and current references evaluated separately",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-0989e090822d69d1e",
+      "kind": "historical-non-deletion",
+      "reason": "Isolated restore used existing source without snapshot changes; historical non-deletion is not perpetual promise",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/runbooks/backup_safety_isolated_restore.md",
+        "section": "First-choice source table"
+      },
+      "related_operation": null,
+      "release_condition": "Not an additional hold; legacy scope remains separately excluded",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    },
+    {
+      "snapshot_id": "snap-0212d6f8613b684ac",
+      "kind": "historical-non-deletion",
+      "reason": "D-114 closeout retained successful snapshot; current last_success independently evaluated",
+      "evidence": {
+        "commit": "d3e04d6457073699fb553ac76ca12d177b847461",
+        "path": "docs/evidence/daily_backup_dev_stage_b_2026-09-27.md",
+        "section": "Successful automatic BACKUP"
+      },
+      "related_operation": null,
+      "release_condition": "Not a permanent manifest hold; current protection reference governs",
+      "judgment": "PROPOSED; source text checked, current references require live read; no user approval implied"
+    }
+  ]
+}
