@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "collector_commit": "45f58dd83fab5efb3b5684746c7b4547b574ed60",
+  "started_at": "2026-09-27T10:28:33.854406+00:00",
+  "ended_at": "2026-09-27T10:28:35.076855+00:00",
+  "account_id": "385526546525",
+  "region": "ap-northeast-1",
+  "system_id": "wishicraft-main",
+  "operations": [
+    {
+      "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "requested_at": "2026-09-07T08:38:29.797365+00:00",
+      "completed_at": "2026-09-07T08:38:35.736752+00:00",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "terminal_failed": true,
+      "operation_facts": {
+        "errors": [
+          "BACKUP_SNAPSHOT_CREATE_FAILED"
+        ],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "execution_facts": {
+        "errors": [],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "identity_matches": true,
+      "finished_at": "2026-09-27T10:28:34.302482+00:00"
+    },
+    {
+      "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "requested_at": "2026-09-08T13:14:55.289968+00:00",
+      "completed_at": "2026-09-08T13:15:06.307775+00:00",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "terminal_failed": true,
+      "operation_facts": {
+        "errors": [
+          "RETENTION_DRY_RUN_FAILED"
+        ],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "execution_facts": {
+        "errors": [
+          "RETENTION_WORKFLOW_FAILED"
+        ],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "identity_matches": true,
+      "finished_at": "2026-09-27T10:28:34.614041+00:00"
+    },
+    {
+      "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "requested_at": "2026-09-22T16:20:11.302008+00:00",
+      "completed_at": "2026-09-22T16:20:23.148398+00:00",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "terminal_failed": true,
+      "operation_facts": {
+        "errors": [
+          "BACKUP_SNAPSHOT_CREATE_FAILED"
+        ],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "execution_facts": {
+        "errors": [],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "identity_matches": true,
+      "finished_at": "2026-09-27T10:28:34.745498+00:00"
+    }
+  ],
+  "meaning": "Positive terminal-code supplement; v3 history preserved; no automatic resolution",
+  "status": "NO_DELETE",
+  "deletion_authorized": false,
+  "planned_delete_ids": [],
+  "delete_action_count": 0
+}

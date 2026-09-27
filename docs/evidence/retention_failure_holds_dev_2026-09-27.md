@@ -27,6 +27,7 @@ journals, snapshots and provenance are unchanged. D-114 automation was not pause
 Evidence (positive projections, **not raw AWS responses**):
 
 - [Exact historical reads](retention_failed_operations_dev_2026-09-27.reads.json)
+- [Terminal-code supplement](retention_failed_operations_dev_terminal_2026-09-27.json)
 - [Proposed reconciliation judgments](retention_failed_operations_dev.proposed.json)
 - [Fresh inventory and current references](retention_reconciliation_inventory_dev_2026-09-27.json)
 - [Proposed hold conditions, one entry per independent reason](retention_hold_conditions_dev.proposed.json)
@@ -44,6 +45,12 @@ visible. Absence of a current snapshot is corroboration, not the historical proo
 | `op-433438bf-d775-4799-8016-ff0bdcb361a7` | CreateSnapshotOnce, event 15: ClientError / explicit UnauthorizedOperation; historical IAM snapshot ARN was incorrectly account-qualified | No snapshot created. CloudTrail event `79df13b0-e4a9-4d98-b471-a8be51ea2c10` at 08:38:35Z is an explicit denial with exact Operation tag and source volume. One request in the execution interval ±60 seconds, no returned snapshot. [Historical Phase 8B](../06_delivery_plan.md) independently recorded zero creation. |
 | `op-7592d65c-3173-4b98-9036-a03a1ce8008a` | RunRetentionDryRun, event 10: TypeError, `unsupported operation value` | No DeleteSnapshot request/deletion. Historical implementation `40651ba8b211676c1a5a1b5864f225b077debbc4` passed list-valued plan evidence to the scalar/map serializer at terminal completion. It had a dry-run-only task, no delete path or attached delete permission. Historical [D-091 closeout](../09_decisions_and_backlog.md) and [delivery](../06_delivery_plan.md) explicitly record this deployment/failure and no mutation. Exact time-window CloudTrail DeleteSnapshot lookup completed with zero events; this absence is not the sole proof. |
 | `op-d0383b17-8783-43fd-a7aa-b47fcd299a2a` | CreateSnapshotOnce, event 15: BackupCreateRejected, explicit EC2 rejection | No snapshot created. CloudTrail event `2604ca5a-c8ba-40d2-9d74-9311a5471269` at 16:20:22Z is an explicit denial with exact Operation tag/source volume. One request, no returned snapshot. [Pause evidence](game_restore_pause_2026-09-23.md) records create-terralith versus then-A/B-only IAM; historical source `569504933fda8220342a38d5daf5cbe833256bd0` maps definitive 400/403 rejection to BackupCreateRejected. |
+
+A later read from collector commit `45f58dd` supplements exact terminal codes without
+replacing the v3 history: BACKUP_SNAPSHOT_CREATE_FAILED for both BACKUPs,
+RETENTION_DRY_RUN_FAILED for RETENTION (execution RETENTION_WORKFLOW_FAILED).
+Identity, request/end times, reservations and history lengths match the previous read.
+Supplement start/end are preserved in its JSON; no AWS mutation was retried.
 
 The later BACKUP has `backup_create_intent` present and no `backup_snapshot_id`.
 That reservation is preserved; it is not erased to make inventory appear clean.
@@ -136,7 +143,7 @@ Canonical enabled-stage Control Plane synth matches prior template SHA256
 `3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb` (155 resources).
 Lambda assets remain `0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e`
 and `fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549`.
-No runtime/IAM/stage/CI-selection changes. Local full tests: **2012 passed**; Ruff lint/format and mypy (271 source files plus
+No runtime/IAM/stage/CI-selection changes. Local full tests: **2013 passed**; Ruff lint/format and mypy (271 source files plus
 explicit tools check) passed. Canonical enabled Control Plane and independent Web synth
 succeeded. Final normal/NeoForge/Paper CI results are recorded in the
 continuation Draft PR; it remains unmerged. Primary checkout unrelated changes are preserved.

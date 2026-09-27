@@ -35,6 +35,10 @@
           "commit": "a182a2953830fdb675926011149cd449c8664afb",
           "path": "docs/06_delivery_plan.md",
           "section": "Phase 8B first attempt"
+        },
+        {
+          "path": "docs/evidence/retention_failed_operations_dev_terminal_2026-09-27.json",
+          "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7"
         }
       ],
       "historical_source_commit": null,
@@ -45,7 +49,10 @@
         "Exact initial deployed source commit was not independently recovered; use historical closeout plus execution and positive EC2 rejection records."
       ],
       "reconciled_at": "2026-09-27T10:20:03.187106+00:00",
-      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure."
+      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure.",
+      "terminal_error_codes": [
+        "BACKUP_SNAPSHOT_CREATE_FAILED"
+      ]
     },
     {
       "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
@@ -75,6 +82,10 @@
           "commit": "a182a2953830fdb675926011149cd449c8664afb",
           "path": "docs/09_decisions_and_backlog.md",
           "section": "D-091 dry-run workflow dev evidence"
+        },
+        {
+          "path": "docs/evidence/retention_failed_operations_dev_terminal_2026-09-27.json",
+          "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a"
         }
       ],
       "historical_source_commit": "40651ba8b211676c1a5a1b5864f225b077debbc4",
@@ -84,7 +95,10 @@
         "No automatic collector suppression; exact terminal/reference binding and judgment require review."
       ],
       "reconciled_at": "2026-09-27T10:20:03.187106+00:00",
-      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure."
+      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure.",
+      "terminal_error_codes": [
+        "RETENTION_DRY_RUN_FAILED"
+      ]
     },
     {
       "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
@@ -114,6 +128,10 @@
           "commit": "a182a2953830fdb675926011149cd449c8664afb",
           "path": "docs/evidence/game_restore_pause_2026-09-23.md",
           "section": "Real dev work completed 1\u20132"
+        },
+        {
+          "path": "docs/evidence/retention_failed_operations_dev_terminal_2026-09-27.json",
+          "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a"
         }
       ],
       "historical_source_commit": "569504933fda8220342a38d5daf5cbe833256bd0",
@@ -123,7 +141,10 @@
         "No automatic collector suppression; exact terminal/reference binding and judgment require review."
       ],
       "reconciled_at": "2026-09-27T10:20:03.187106+00:00",
-      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure."
+      "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure.",
+      "terminal_error_codes": [
+        "BACKUP_SNAPSHOT_CREATE_FAILED"
+      ]
     }
   ],
   "status": "NO_DELETE",
