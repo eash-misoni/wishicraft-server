@@ -268,3 +268,14 @@ All 56 alarms were OK with the new five actions disabled, original intake restor
 This is a deployed preparation, not successful daily BACKUP operation. No retry/body/IAM fix or
 Case D exception is included. Review the exact stage-B safety gate before resuming the unchanged
 one-pair/one-snapshot/natural-evaluation plan. Acquisition and retention deletion remain separate.
+
+## Separately authorized stage B continuation (2026-09-27)
+
+The user reviewed that partial closeout and authorized a new, narrowly scoped stage B
+ChangeSet despite the missing raw dependency evidence. [Exact approval, collector boundary
+and ordered proof](../evidence/daily_backup_dev_stage_b_2026-09-27.md). Case D condition 3
+remains unsatisfied; this is a separate approval for the one reviewed new ChangeSet only.
+All six workflow definitions/configurations/identities must independently match, and only
+the eight daily resources' nine enablement paths may change deployable Properties.
+Stage A is inherited without redeployment. Do not infer runtime qualification from this
+approval or from a repository enabled=true setting; read the subsequent execution evidence.
