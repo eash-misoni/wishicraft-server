@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from collections.abc import Callable
+from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
@@ -374,6 +375,23 @@ def report(
             dict(
                 operation_id=oid,
                 unresolved=True,
+                operation_type=op.get("operation_type")
+                if op.get("operation_type")
+                in {
+                    "START",
+                    "STOP",
+                    "BACKUP",
+                    "RETENTION",
+                    "RESTORE",
+                    "IMPORT",
+                    "RESET",
+                    "SWITCH",
+                    "CREATE",
+                    "STATUS",
+                }
+                else "UNKNOWN",
+                requested_at=timestamp(op.get("requested_at")),
+                completed_at=timestamp(op.get("completed_at")),
                 status=op.get("status")
                 if op.get("status") in {"PENDING", "RUNNING", "FAILED", "TIMED_OUT", "CANCELLED"}
                 else "UNKNOWN",
@@ -455,11 +473,36 @@ def report(
     for event in audit:
         if not event["final_page"] or event["issues"]:
             issues.append("incomplete-or-invalid-read:" + event["api"])
+    lock_reads = [a for a in audit if a["api"] == "ec2.describe_locked_snapshots"]
+    locks_confirmed = bool(lock_reads) and all(
+        a["final_page"] and not a["issues"] for a in lock_reads
+    )
     for row in rows:
+        row["missing_checks"] = ["collector/hold-manifest review and fresh deletion fencing"]
+        if not locks_confirmed:
+            row["lock_state"] = "UNKNOWN"
+            row["missing_checks"].append("snapshot-lock inventory unconfirmed")
         row["holds"] = sorted(set(row["holds"]))
         if row["integrity_issues"]:
             issues.append("snapshot-integrity:" + (row["snapshot_id"] or "invalid-id"))
     projection = policy_projection(rows, now)
+    historical_rows = deepcopy(rows)
+    for row in historical_rows:
+        row["normal_eligible"] = (
+            "retention-owned" in row["reasons"]
+            and row["target_volume"]
+            and row["provenance_pair_valid"]
+            and not row["integrity_issues"]
+            and row["lock_state"] == "none-observed"
+        )
+    historical_projection = policy_projection(historical_rows, now)
+    deployed_reference = dict(
+        label="HISTORICAL_DEPLOYED_NEWEST_SEVEN_ARITHMETIC_ONLY_NOT_AN_EXECUTION_PLAN",
+        normal_count=historical_projection["normal_count"],
+        outside_ids=historical_projection["old_newest_seven_outside_ids"],
+        boundary_tie=historical_projection["boundary_tie"],
+        limitation="old classifier predates journal/manifest holds; not deletion recommendations",
+    )
     return dict(
         schema_version=1,
         evaluated_at=now.isoformat(),
@@ -473,7 +516,7 @@ def report(
         delete_action_count=0,
         status="NO_DELETE",
         completeness=dict(
-            api_pages=all(a["final_page"] for a in audit),
+            api_pages=bool(audit) and all(a["final_page"] for a in audit),
             api_content_valid=all(not a["issues"] for a in audit),
             stable=bool(comparisons and comparisons[-1]["equal"]),
             provenance_pairs_valid=not prov_issues,
@@ -499,6 +542,7 @@ def report(
             identifier(r.get("SnapshotId"), SNAPSHOT) for r in data["recycle_bin"]
         ],
         policy_projection=projection,
+        deployed_old_policy_reference=deployed_reference,
         evidence_contract="original recovery verified in memory; persisted projections cannot "
         "revalidate recovery digests. Replay only arithmetic, never deletion authorization.",
     )

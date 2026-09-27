@@ -103,3 +103,11 @@ Failed/timed-out BACKUP/RESTORE/IMPORT/RETENTION still require review. Tests rep
 shapes; the initial projection is retained and is not rewritten as a successful final result.
 Original shared recovery contents and hashes are checked before omission, including pair
 identity and exact immutable record reconstruction. No runtime schema/validator was relaxed.
+
+`deployed_old_policy_reference` additionally shows the old classifier's normal cohort
+before new journal/manifest exclusions, solely to explain how the deployed historical
+seven-count arithmetic differs. Its outside IDs are not deletion recommendations; no
+`planned_delete_ids` from the old planner is copied. This is distinct from the like-for-like
+old/new arithmetic on the new hold-aware cohort. Failed management Operations include their
+known type/status/times for review; failure alone proves neither a snapshot exists nor that
+its outcome has been reconciled. The collector does not repair or close historical records.
