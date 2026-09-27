@@ -41,9 +41,9 @@ def test_control_plane_runtime_heartbeats_table_is_retained_ttl_enabled_and_mini
     template = Template.from_stack(
         cast(
             Stack,
-            build_app(ROOT, "dev", phase=8, deployment="control-plane").node.find_child(
-                "WishicraftControlPlaneStack-dev"
-            ),
+            build_app(
+                ROOT, "dev", phase=8, deployment="control-plane", daily_backup_validation="legacy"
+            ).node.find_child("WishicraftControlPlaneStack-dev"),
         )
     ).to_json()
     tables = [

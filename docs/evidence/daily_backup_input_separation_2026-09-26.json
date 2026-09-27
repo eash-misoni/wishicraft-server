@@ -1,0 +1,460 @@
+{
+  "scope": "D-114 configuration/validation separation; repository only",
+  "main_baseline": "9f8bdf054077cce933b30f8af0498b184e0df2f0",
+  "stage_a_candidate": "92df5340afa84ce7bb760bd2cace09b530329cfb",
+  "main_integration_commit": "8f69b3787f6c8e30f7a58cde2154e56ba60ba2c0",
+  "implementation_commit": "59eb7041d2eb23183fb542f0c28efa659db98a48",
+  "stage_flags": {
+    "schema_version": 1,
+    "provision": true,
+    "enabled": false
+  },
+  "original_failures": {
+    "shared_runtime_guard": 10,
+    "legacy_lambda_count": 1,
+    "record": "docs/evidence/daily_backup_dev_preflight_2026-09-26.json"
+  },
+  "validation": {
+    "full_tests": {
+      "passed": 1961,
+      "failed": 0,
+      "seconds": 136.96
+    },
+    "ruff_check": "passed",
+    "ruff_format": {
+      "status": "passed",
+      "files": 364
+    },
+    "mypy": {
+      "status": "passed",
+      "files": 268
+    },
+    "cli_synth": [
+      {
+        "number": 1,
+        "name": "existing non-Control-Plane scenario",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "MinecraftStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=1",
+          "--context",
+          "deployment=phase1",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-1"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-1"
+      },
+      {
+        "number": 2,
+        "name": "existing non-Control-Plane scenario",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "MinecraftTargetStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "deployment=target",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-2"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-2"
+      },
+      {
+        "number": 3,
+        "name": "Legacy Control Plane regression",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "WishicraftControlPlaneStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=8",
+          "--context",
+          "deployment=control-plane",
+          "--context",
+          "validation_action=synth",
+          "--context",
+          "daily_backup_validation=legacy",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-3"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-3"
+      },
+      {
+        "number": 4,
+        "name": "Legacy Control Plane regression",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "WishicraftControlPlaneStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=8",
+          "--context",
+          "deployment=control-plane",
+          "--context",
+          "two_games=true",
+          "--context",
+          "validation_action=synth",
+          "--context",
+          "daily_backup_validation=legacy",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-4"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-4"
+      },
+      {
+        "number": 5,
+        "name": "Legacy Control Plane regression",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "WishicraftControlPlaneStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=8",
+          "--context",
+          "deployment=control-plane",
+          "--context",
+          "two_games=true",
+          "--context",
+          "reset=true",
+          "--context",
+          "game_creation=true",
+          "--context",
+          "validation_action=synth",
+          "--context",
+          "daily_backup_validation=legacy",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-5"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-5"
+      },
+      {
+        "number": 6,
+        "name": "Canonical stage Control Plane (current release context)",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "--",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "WishicraftControlPlaneStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=8",
+          "--context",
+          "deployment=control-plane",
+          "--context",
+          "two_games=true",
+          "--context",
+          "reset=true",
+          "--context",
+          "game_creation=true",
+          "--context",
+          "whitelist_management=true",
+          "--context",
+          "game_packages=true",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-6"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-6"
+      },
+      {
+        "number": 7,
+        "name": "Enabled daily BACKUP validation (stage B)",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "--",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "WishicraftControlPlaneStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=8",
+          "--context",
+          "deployment=control-plane",
+          "--context",
+          "two_games=true",
+          "--context",
+          "reset=true",
+          "--context",
+          "game_creation=true",
+          "--context",
+          "whitelist_management=true",
+          "--context",
+          "game_packages=true",
+          "--context",
+          "validation_action=synth",
+          "--context",
+          "daily_backup_validation=enabled",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-7"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-7"
+      },
+      {
+        "number": 8,
+        "name": "existing non-Control-Plane scenario",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "--",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "WishicraftWebStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=8",
+          "--context",
+          "deployment=web",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-8"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-8"
+      },
+      {
+        "number": 9,
+        "name": "Legacy Control Plane regression",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "--",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "WishicraftControlPlaneStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=8",
+          "--context",
+          "deployment=control-plane",
+          "--context",
+          "two_games=true",
+          "--context",
+          "reset=true",
+          "--context",
+          "game_creation=true",
+          "--context",
+          "whitelist_management=true",
+          "--context",
+          "validation_action=synth",
+          "--context",
+          "daily_backup_validation=legacy",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-9"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-9"
+      },
+      {
+        "number": 10,
+        "name": "existing non-Control-Plane scenario",
+        "command": [
+          "tools/dev-env",
+          "run",
+          "--",
+          "npx",
+          "--no-install",
+          "cdk",
+          "synth",
+          "WishicraftWebStack-dev",
+          "--context",
+          "stage=dev",
+          "--context",
+          "phase=8",
+          "--context",
+          "deployment=web",
+          "--context",
+          "game_creation=true",
+          "--context",
+          "whitelist_management=true",
+          "--output",
+          "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-10"
+        ],
+        "exit_code": 0,
+        "assembly": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-10"
+      }
+    ],
+    "ci": "Finalized PR #2 HEAD normal/NeoForge/Paper results recorded in PR checks and handoff; local Docker/shellcheck unavailable"
+  },
+  "template_comparison": {
+    "reference": "/private/tmp/wishicraft-d114-release.eCZWiw/a-current/WishicraftControlPlaneStack-dev.template.json",
+    "stage_a": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-6/WishicraftControlPlaneStack-dev.template.json",
+    "stage_b": "/private/tmp/wishicraft-d114-input-separation.wUKvLw/cli-7/WishicraftControlPlaneStack-dev.template.json",
+    "sha256": {
+      "reference": "d5a59b7774887415720c49bcef578b247f43ec04b3600eebd7fcaffb3c552a63",
+      "stage_a": "d5a59b7774887415720c49bcef578b247f43ec04b3600eebd7fcaffb3c552a63",
+      "stage_b": "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb"
+    },
+    "stage_a_added": [],
+    "stage_a_removed": [],
+    "stage_a_changed_non_metadata_resources": [],
+    "stage_a_differences": [],
+    "stage_a_to_b": [
+      {
+        "path": "/DailyBackupAdmissionFunctionBFD7AF72/Properties/Environment/Variables/DAILY_BACKUP_ENABLED",
+        "before": "0",
+        "after": "1"
+      },
+      {
+        "path": "/DailyBackupEvaluatorFunction2CAEBD5D/Properties/Environment/Variables/DAILY_BACKUP_ENABLED",
+        "before": "0",
+        "after": "1"
+      },
+      {
+        "path": "/DailyBackupSchedule973769C0/Properties/State",
+        "before": "DISABLED",
+        "after": "ENABLED"
+      },
+      {
+        "path": "/DailyBackupHeartbeatAlarm7AC73BA7/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "/DailyBackupHeartbeatAlarm7AC73BA7/Properties/TreatMissingData",
+        "before": "notBreaching",
+        "after": "breaching"
+      },
+      {
+        "path": "/DailyBackupStoppedOverdueAlarm3172A117/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "/DailyBackupIntervalOverdueAlarm2205A737/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "/DailyBackupNeedsOperatorAlarm098A6CF7/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      },
+      {
+        "path": "/DailyBackupObservationUnknownAlarm188D678F/Properties/ActionsEnabled",
+        "before": false,
+        "after": true
+      }
+    ],
+    "stage_a_assets": {
+      "ReconcileFunction30829CB6": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "StartTaskFunction8C564C4A": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "StopTaskFunction11473A8C": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "BackupTaskFunctionA44639DC": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "RetentionTaskFunction9F285CE4": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "AdmissionFunction23082B67": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "DiscordCommandFunction7D25102A": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549.zip"
+      },
+      "StatusExecutorFunction6E5C9869": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "DiscordMessageFunction78FA388B": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "AutoStopEvaluatorFunctionF85F8B50": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "MonitoringObserverFunction584DA7C7": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "DailyBackupAdmissionFunctionBFD7AF72": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "DailyBackupEvaluatorFunction2CAEBD5D": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      }
+    },
+    "reference_assets_equal": true
+  },
+  "scope_assertions": {
+    "runtime_source_changes": false,
+    "canonical_loader_changes": false,
+    "stack_guard_changes": false,
+    "aws_access": false,
+    "aws_mutation": false,
+    "merge_pr_2": false,
+    "release_resumed": false
+  },
+  "evidence_root": "/private/tmp/wishicraft-d114-input-separation.wUKvLw",
+  "limitations": [
+    "No live IAM, schedule, notification, BACKUP or snapshot qualification",
+    "No retention collector/deletion change",
+    "Local full tests and synth use an isolated committed PR #2 worktree with bytecode disabled and prepared offline bundling cache; original primary differences retained"
+  ]
+}

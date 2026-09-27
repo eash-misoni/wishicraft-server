@@ -42,7 +42,14 @@ def wire(value: dict[str, Any]) -> dict[str, Any]:
 
 @pytest.fixture(scope="module")
 def configuration() -> dict[str, Any]:
-    app = build_app(ROOT, "dev", phase=8, deployment="control-plane", two_games=True)
+    app = build_app(
+        ROOT,
+        "dev",
+        phase=8,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+        two_games=True,
+    )
     return cast(
         dict[str, Any],
         Template.from_stack(

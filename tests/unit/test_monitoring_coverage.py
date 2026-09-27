@@ -14,7 +14,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def resources(deployment: str, phase: int = 8) -> dict[str, Any]:
-    app = build_app(ROOT, "dev", phase=phase, deployment=deployment)
+    app = build_app(
+        ROOT,
+        "dev",
+        phase=phase,
+        deployment=deployment,
+        daily_backup_validation="legacy" if deployment == "control-plane" else None,
+    )
     name = "WishicraftWebStack-dev" if deployment == "web" else "WishicraftControlPlaneStack-dev"
     return cast(
         dict[str, Any],

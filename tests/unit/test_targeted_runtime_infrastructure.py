@@ -23,7 +23,9 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_cdk_environment_initializes_both_real_handlers_and_renders_v2(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    app = build_app(ROOT, "dev", phase=8, deployment="control-plane")
+    app = build_app(
+        ROOT, "dev", phase=8, deployment="control-plane", daily_backup_validation="legacy"
+    )
     template = Template.from_stack(
         cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     ).to_json()

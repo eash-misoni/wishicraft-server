@@ -39,6 +39,7 @@ def test_generated_backup_policy_boundaries(two_games: bool, create: bool) -> No
         "dev",
         phase=8,
         deployment="control-plane",
+        daily_backup_validation="legacy",
         two_games=two_games,
         reset=create,
         game_creation=create,
