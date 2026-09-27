@@ -202,3 +202,12 @@ nlink 1, isolating the mismatch. A new system-user temporary root (GID 20) is us
 revalidation; the previously failing ownership checkpoint passes without any source or
 assertion change. Full-suite and final HEAD CI results are recorded in PR #9. Original
 failed fixtures/logs are retained; this is an environment failure, not waived coverage.
+
+
+## Subsequent investigation adoption
+
+On 2026-09-27 the user accepted the exact three historical snapshot-side-effect judgments
+and hold-use/release-condition analysis, including the stated limits. See the
+[dated adoption and investigation closeout](../runbooks/retention_inventory.md#investigation-closeout-2026-09-27).
+The candidate wording and PROPOSED JSON above retain their collection-time meaning;
+no original evidence, Operation, hold or collector finding is rewritten or suppressed.
