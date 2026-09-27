@@ -59,3 +59,31 @@ The original offline completeness boundary above is unchanged. A local, read-onl
 Fourteen snapshots were collected; normal policy projection has no outside-retention entries
 after separate holds. This is NO_DELETE, not collector/hold approval or a deletion release.
 Daily automatic BACKUP continues; runtime/IAM/stack and deletion capabilities are unchanged.
+
+
+## Next bounded implementation after investigation
+
+The [investigation closeout](../runbooks/retention_inventory.md#investigation-closeout-2026-09-27)
+adopts PR #8's collector and PR #9's limited historical conclusions, not deletion
+completeness. Earlier candidate/incomplete-acquisition statements above describe their
+preparation checkpoints; saved real inventory is now available, but not fresh deletion proof.
+
+Next candidate: prepare safe retention of **normal BACKUP snapshots only**, retaining all
+special holds and legacy exclusions. Keep **14 days OR newest seven**, shared-volume scope,
+verified acquisition time, separate protection outside the seven slots and safe tie handling.
+The next design/implementation must address:
+
+- Fresh snapshot/provenance/current-reference validation and necessary AWS constraints,
+  including AMI and sharing. Unchecked AWS behavior/state remains to be verified then.
+- Prevent new RESTORE or other protected references racing a previously prepared plan.
+- Reconcile uncertain delete responses and partial completion without blind repeat requests.
+- Preserve immutable provenance while distinguishing formally deleted snapshots from
+  unexplained absence; no such deletion record/protocol is implemented here.
+- Separate a limited first qualification from enabling routine deletion, with distinct approval.
+
+Zero eligible snapshots is a valid result. Do not manufacture candidates by creating
+snapshots, advancing time, reducing retention or releasing special holds. Old PLANNED
+retirement and wholesale legacy cleanup are not prerequisites for normal-group retention.
+Only if an additional retirement/release mechanism is actually needed should it become a
+separate reviewed task. No deletion adapter, authority, schedule or new hold judgment is
+introduced by this outline.

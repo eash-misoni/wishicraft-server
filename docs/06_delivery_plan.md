@@ -1,5 +1,11 @@
 # 06. Delivery Plan
 
+> 2026-09-27 D-115 investigation completed: collector adoption, saved inventory hold reasons,
+> exact historical FAILED reconciliation and CloudTrail correction are accepted. Existing holds,
+> legacy exclusions and NO_DELETE remain. Actual deletion qualification/operation is incomplete.
+> [Adoption, limits and next bounded task](runbooks/retention_inventory.md#investigation-closeout-2026-09-27).
+
+
 > 2026-09-27 D-114 limited dev release **completed**: inherited disabled stage A, one formal original-world START/STOP, separately authorized stage B, one completed automatic BACKUP and at least two natural PROTECTED evaluations. Dev daily BACKUP remains enabled; intake restored. Case D condition 3 remains false; the separate approval applies only to the recorded ARN. Retention deletion remains disabled. [Execution and notification classification](evidence/daily_backup_dev_stage_b_2026-09-27.md). Earlier partial records below are historical.
 
 > 2026-09-27 D-114 partial dev release: disabled stage A deployed/read back; stage B held by Case D condition 3 before START/STOP. Daily automation remains disabled, intake restored, no new snapshot. [Exact release and stop evidence](evidence/daily_backup_dev_stage_a_2026-09-27.md).

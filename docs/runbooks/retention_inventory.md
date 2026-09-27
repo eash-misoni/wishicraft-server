@@ -1,7 +1,8 @@
-# D-115: read-only retention inventory (review candidate)
+# D-115: read-only retention inventory
 
-This local collector is a **Draft review candidate**, not a deletion adapter or an
-approved completeness authority. D-114 automatic BACKUP continues unchanged.
+The read-only collector is adopted via PR #8. The investigation is closed under the
+[2026-09-27 adoption record](#investigation-closeout-2026-09-27); it is not a deletion
+adapter or an approved completeness authority. D-114 automatic BACKUP continues unchanged.
 The formal RETENTION workflow is not invoked: even its dry-run writes Operations/Locks.
 
 ## Run and evidence boundary
@@ -152,3 +153,64 @@ Do not rerun all inventory or management Operations for this check. The two-even
 [recheck evidence](../evidence/retention_cloudtrail_exact_match_dev_2026-09-27.json) supersedes
 the old substring comparison; original artifacts remain historical, not retroactively
 validated. NO_DELETE and independent hold/failed-operation findings are unchanged.
+
+
+## Investigation closeout 2026-09-27
+
+The user explicitly accepted the following exact historical reconciliation judgments,
+including their evidence limits, and authorized normal merge of PR #9. This instruction
+is the adoption authority; it is not a fabricated GitHub reviewer approval/action.
+Reviewed HEAD `671c9f6edc32eade6263b9b7ba3e287932b45ddc`, CI validation merge
+`a8a030e377793ec492023f2a214e4af992d25118`, and actual merge
+`a710ce56801cf9f1506be0b21f563c28ba797ac3` have the identical tree
+`b4259c34eac700ad2d36bb44475410ed639e4d1f`. Base was
+`a182a2953830fdb675926011149cd449c8664afb`; commit identity changed, content did not.
+Actual-merge CI is recorded separately from PR checks in the closeout PR/final report.
+
+For dev / account `385526546525` / region `ap-northeast-1` / system `wishicraft-main`:
+
+| Exact Operation | Adopted snapshot-side-effect judgment | Evidence and limits |
+|---|---|---|
+| `op-433438bf-d775-4799-8016-ff0bdcb361a7` / BACKUP | Explicit CreateSnapshot denial; this execution created/deleted no snapshot | Execution history, historical delivery record and exact-field rechecked CloudTrail event `79df13b0-e4a9-4d98-b471-a8be51ea2c10` |
+| `op-7592d65c-3173-4b98-9036-a03a1ce8008a` / RETENTION | Historical dry-run result conversion failure; no deletion request or snapshot mutation | Historical implementation/deployment record and execution history together; an empty CloudTrail search alone is not proof |
+| `op-d0383b17-8783-43fd-a7aa-b47fcd299a2a` / BACKUP | Explicit denial from the then-dynamic-Game IAM mismatch; this execution created/deleted no snapshot | Historical evidence and exact-field rechecked event `2604ca5a-c8ba-40d2-9d74-9311a5471269`; existing create reservation remains untouched |
+
+[Investigation and its evidence links](../evidence/retention_failure_holds_dev_2026-09-27.md)
+remain the detailed authority. Original Operations remain FAILED; failure is not success,
+and no snapshot mutation does not mean no Control Plane writes. Historical Lambda ZIPs
+and effective IAM were not independently reacquired. The judgment applies only to these
+exact executions and bounded evidence, not arbitrary requests or future safety.
+Original PROPOSED JSON, old substring observations, terminal supplement and exact-field
+recheck remain unchanged historical artifacts. This dated adoption supplements them;
+it does not retroactively rewrite their review status or observation method.
+
+The collector still detects all three raw FAILED findings. These exact findings now have
+reviewed explanatory judgments, but no automatic exclusion/resolution consumer exists.
+There is no ID-only allowlist, trusted `resolved=true`, completeness promotion or new
+execution exception. Absent contradictory new evidence, this investigation does not
+require collecting the same CloudTrail, execution or inventory again or retrying operations.
+
+All holds remain: migration anchor; Paper/Vanilla RESTORE source and protection; unused
+PLANNED references; each independent journal reason; and all five legacy exclusions.
+The old unused PLANNED record has retirement considerations only: no resume prevention,
+journal mutation or hold release is implemented. A separate journal's reference survives
+any future change to one reason. Current last_success/intent are dynamic references,
+not a permanent manifest of every historical success. Adoption of the documented uses
+and release considerations neither certifies release conditions fulfilled nor grants
+release/deletion or a new permanent-retention promise.
+
+**Investigation complete:** read-only collector adoption; saved real-inventory hold reasons;
+three historical failure reconciliations; exact CloudTrail matcher and two-event recheck;
+special-hold purposes and potential release conditions.
+**Deletion operation incomplete:** fresh references/AWS constraints at deletion time;
+concurrency prevention; deletion adapter/permissions/result reconciliation; limited real
+deletion qualification and routine enablement. D-115 is not automatic-retention completion.
+The [next bounded implementation candidate](../reviews/daily_backup_retention.md#next-bounded-implementation-after-investigation)
+keeps existing holds and legacy exclusions intact.
+
+The unconditional execution boundary remains `status=NO_DELETE`,
+`deletion_authorized=false`, `planned_delete_ids=[]`, `delete_action_count=0`.
+This closeout makes no AWS connection, recollection, configuration change, snapshot/hold
+operation or runtime change. D-114 configuration is untouched; its current live state is
+not newly observed here. Docs-only validation checks links, unchanged JSON evidence and
+content boundaries; ordinary CI also verifies tests, lint/format/types and synth scenarios.
