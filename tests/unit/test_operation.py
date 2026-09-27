@@ -533,7 +533,9 @@ def test_stale_recovery_requires_fresh_observation_and_exact_lease_cleanup() -> 
     assert "timeout_at = :timeout_at" in cast(str, operation_update["ConditionExpression"])
     lock_delete = cast(dict[str, object], items[1]["Delete"])
     assert lock_delete["ConditionExpression"] == (
-        "resource_id = :resource_id AND owner_operation_id = :operation_id AND lease_id = :lease_id"
+        "resource_id = :resource_id AND owner_operation_id = :operation_id "
+        "AND lease_id = :lease_id "
+        "AND attribute_not_exists(retention_delete_pending)"
     )
     current_update = cast(dict[str, object], items[2]["Update"])
     assert "observed_at = :reconciled_at" in cast(str, current_update["ConditionExpression"])

@@ -605,7 +605,7 @@ class LeaseRepository:
             ConditionExpression=(
                 "resource_id = :resource_id AND owner_operation_id = :operation_id "
                 "AND lease_id = :lease_id "
-                "AND lease_expires_at >= :now"
+                "AND lease_expires_at >= :now AND attribute_not_exists(retention_delete_pending)"
             ),
             ExpressionAttributeValues={
                 ":resource_id": {"S": proof.resource_id},
@@ -975,7 +975,7 @@ class OperationRepository:
         }
         condition = (
             "resource_id = :resource_id AND owner_operation_id = :operation_id "
-            "AND lease_id = :lease_id"
+            "AND lease_id = :lease_id AND attribute_not_exists(retention_delete_pending)"
         )
         if require_unexpired_at is not None:
             condition += " AND lease_expires_at >= :now"

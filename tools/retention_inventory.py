@@ -30,6 +30,7 @@ from tools.retention_references import (
 from wishicraft.config import load_configuration
 from wishicraft.daily_backup import read_protection
 from wishicraft.retention import RetentionContext
+from wishicraft.retention_deletion import classify_absence, split_deletion_records
 from wishicraft.retention_workflow_lambda import _rule_matches, _validate_recycle_bin_rule
 
 ALLOWED = {
@@ -406,8 +407,18 @@ def report(
             sid = identifier(op.get(field), SNAPSHOT)
             if sid:
                 holds.setdefault(sid, []).append("unresolved-operation:" + (oid or "invalid"))
+    try:
+        _, deletions = split_deletion_records(backup_rows)
+    except ValueError:
+        deletions = {}
+        issues.append("invalid-deletion-pair")
+    backup_pairs = [
+        (w, r)
+        for w, r in zip(data["backups"], backup_rows, strict=True)
+        if r.get("record_type") not in {"RETENTION_DELETION", "RETENTION_DELETION_UNIQUENESS"}
+    ]
     provenances, provenance_audit, prov_issues = provenance_pairs(
-        data["backups"], backup_rows, context
+        [w for w, _ in backup_pairs], [r for _, r in backup_pairs], context
     )
     issues.extend(prov_issues)
     for field in ("last_success", "intent"):
@@ -428,7 +439,38 @@ def report(
     present = {r.get("SnapshotId") for r in data["snapshots"]}
     absent_refs = sorted(set(holds) - present)
     issues.extend("referenced-snapshot-not-in-active-inventory:" + sid for sid in absent_refs)
-    orphan_provenance = sorted(set(provenances) - present)
+    deletion_history = []
+    formally_deleted = set()
+    for proof_id, proof in provenances.items():
+        record = deletions.get(proof_id)
+        classification = classify_absence(
+            proof,
+            record,
+            account=context.owner_id,
+            region=region,
+            system_id=system,
+            now=now,
+            referenced=proof_id in holds,
+            present=proof_id in present,
+        )
+        if record is not None:
+            deletion_history.append(
+                dict(
+                    snapshot_id=proof_id,
+                    retention_operation_id=record.retention_operation_id,
+                    classification=classification,
+                    request_outcome=record.request_outcome,
+                    reconciliation=record.reconciliation,
+                    confirmed_at=record.confirmed_at,
+                )
+            )
+        if classification == "FORMALLY_DELETED":
+            formally_deleted.add(proof_id)
+        elif classification in {"ANOMALY", "DELETION_OUTCOME_UNKNOWN"}:
+            issues.append("deletion-or-absence-unreconciled:" + proof_id)
+    if set(deletions) - set(provenances):
+        issues.append("deletion-without-valid-backup-pair")
+    orphan_provenance = sorted(set(provenances) - present - formally_deleted)
     issues.extend("provenance-without-active-snapshot:" + sid for sid in orphan_provenance)
     locks = {}
     for lock in data["locks"]:
@@ -536,6 +578,7 @@ def report(
         target_volume_count=sum(r["target_volume"] for r in rows),
         provenance=provenance_audit,
         orphan_provenance_ids=orphan_provenance,
+        deletion_history=deletion_history,
         games=game_view,
         journals=journals,
         protection=protection,
