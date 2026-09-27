@@ -1,0 +1,1103 @@
+{
+  "schema_version": 1,
+  "evaluated_at": "2026-09-27T07:33:53.381923+00:00",
+  "account_id": "385526546525",
+  "region": "ap-northeast-1",
+  "stage": "dev",
+  "system_id": "wishicraft-main",
+  "volume_id": "vol-03ac9f534326c345c",
+  "deletion_authorized": false,
+  "planned_delete_ids": [],
+  "delete_action_count": 0,
+  "status": "NO_DELETE",
+  "completeness": {
+    "api_pages": true,
+    "api_content_valid": true,
+    "stable": true,
+    "provenance_pairs_valid": true,
+    "journals_valid": true,
+    "hold_manifest_reviewed": false,
+    "deletion_safety_complete": false
+  },
+  "missing_checks": [
+    "additional-aws-deletion-references-not-assessed",
+    "collector-and-manifest-not-reviewed",
+    "future-deletion-requires-fresh-fenced-check",
+    "historical-hold-manifest-unreviewed",
+    "unresolved-management-or-other-operation"
+  ],
+  "api_audit": [
+    {
+      "api": "sts.get_caller_identity",
+      "started_at": "2026-09-27T07:33:50.579956+00:00",
+      "ended_at": "2026-09-27T07:33:51.386066+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {},
+      "consistent_read": false,
+      "item_count": 1
+    },
+    {
+      "api": "cloudformation.list_stack_resources",
+      "started_at": "2026-09-27T07:33:51.386079+00:00",
+      "ended_at": "2026-09-27T07:33:51.870114+00:00",
+      "pages": 2,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "StackName": "WishicraftControlPlaneStack-dev"
+      },
+      "consistent_read": false,
+      "item_count": 155
+    },
+    {
+      "api": "dynamodb.describe_table",
+      "started_at": "2026-09-27T07:33:51.870146+00:00",
+      "ended_at": "2026-09-27T07:33:52.099975+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-system-state"
+      },
+      "consistent_read": false,
+      "item_count": 1
+    },
+    {
+      "api": "dynamodb.describe_table",
+      "started_at": "2026-09-27T07:33:52.100018+00:00",
+      "ended_at": "2026-09-27T07:33:52.123513+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-games"
+      },
+      "consistent_read": false,
+      "item_count": 1
+    },
+    {
+      "api": "dynamodb.describe_table",
+      "started_at": "2026-09-27T07:33:52.123545+00:00",
+      "ended_at": "2026-09-27T07:33:52.146377+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-backups"
+      },
+      "consistent_read": false,
+      "item_count": 1
+    },
+    {
+      "api": "dynamodb.describe_table",
+      "started_at": "2026-09-27T07:33:52.146422+00:00",
+      "ended_at": "2026-09-27T07:33:52.168671+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-operations"
+      },
+      "consistent_read": false,
+      "item_count": 1
+    },
+    {
+      "api": "ec2.describe_volumes",
+      "started_at": "2026-09-27T07:33:52.168681+00:00",
+      "ended_at": "2026-09-27T07:33:52.386108+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "VolumeIds": [
+          "vol-03ac9f534326c345c"
+        ]
+      },
+      "consistent_read": false,
+      "item_count": 1
+    },
+    {
+      "api": "dynamodb.scan",
+      "started_at": "2026-09-27T07:33:52.386137+00:00",
+      "ended_at": "2026-09-27T07:33:52.489319+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-system-state"
+      },
+      "consistent_read": true,
+      "item_count": 27
+    },
+    {
+      "api": "dynamodb.scan",
+      "started_at": "2026-09-27T07:33:52.489329+00:00",
+      "ended_at": "2026-09-27T07:33:52.531822+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-games"
+      },
+      "consistent_read": true,
+      "item_count": 9
+    },
+    {
+      "api": "dynamodb.scan",
+      "started_at": "2026-09-27T07:33:52.531834+00:00",
+      "ended_at": "2026-09-27T07:33:52.588475+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-backups"
+      },
+      "consistent_read": true,
+      "item_count": 26
+    },
+    {
+      "api": "dynamodb.scan",
+      "started_at": "2026-09-27T07:33:52.588483+00:00",
+      "ended_at": "2026-09-27T07:33:52.690769+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-operations"
+      },
+      "consistent_read": true,
+      "item_count": 126
+    },
+    {
+      "api": "ec2.describe_snapshots",
+      "started_at": "2026-09-27T07:33:52.690785+00:00",
+      "ended_at": "2026-09-27T07:33:52.821500+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "OwnerIds": [
+          "385526546525"
+        ]
+      },
+      "consistent_read": false,
+      "item_count": 14
+    },
+    {
+      "api": "ec2.describe_locked_snapshots",
+      "started_at": "2026-09-27T07:33:52.821511+00:00",
+      "ended_at": "2026-09-27T07:33:52.850495+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {},
+      "consistent_read": false,
+      "item_count": 0
+    },
+    {
+      "api": "rbin.list_rules",
+      "started_at": "2026-09-27T07:33:52.850504+00:00",
+      "ended_at": "2026-09-27T07:33:52.965726+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "ResourceType": "EBS_SNAPSHOT"
+      },
+      "consistent_read": false,
+      "item_count": 0
+    },
+    {
+      "api": "ec2.list_snapshots_in_recycle_bin",
+      "started_at": "2026-09-27T07:33:52.965738+00:00",
+      "ended_at": "2026-09-27T07:33:53.006347+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {},
+      "consistent_read": false,
+      "item_count": 0
+    },
+    {
+      "api": "dynamodb.scan",
+      "started_at": "2026-09-27T07:33:53.006358+00:00",
+      "ended_at": "2026-09-27T07:33:53.032620+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-system-state"
+      },
+      "consistent_read": true,
+      "item_count": 27
+    },
+    {
+      "api": "dynamodb.scan",
+      "started_at": "2026-09-27T07:33:53.032627+00:00",
+      "ended_at": "2026-09-27T07:33:53.056094+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-games"
+      },
+      "consistent_read": true,
+      "item_count": 9
+    },
+    {
+      "api": "dynamodb.scan",
+      "started_at": "2026-09-27T07:33:53.056100+00:00",
+      "ended_at": "2026-09-27T07:33:53.085780+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-backups"
+      },
+      "consistent_read": true,
+      "item_count": 26
+    },
+    {
+      "api": "dynamodb.scan",
+      "started_at": "2026-09-27T07:33:53.085788+00:00",
+      "ended_at": "2026-09-27T07:33:53.147520+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "TableName": "wc-dev-operations"
+      },
+      "consistent_read": true,
+      "item_count": 126
+    },
+    {
+      "api": "ec2.describe_snapshots",
+      "started_at": "2026-09-27T07:33:53.147533+00:00",
+      "ended_at": "2026-09-27T07:33:53.211320+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "OwnerIds": [
+          "385526546525"
+        ]
+      },
+      "consistent_read": false,
+      "item_count": 14
+    },
+    {
+      "api": "ec2.describe_locked_snapshots",
+      "started_at": "2026-09-27T07:33:53.211326+00:00",
+      "ended_at": "2026-09-27T07:33:53.316759+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {},
+      "consistent_read": false,
+      "item_count": 0
+    },
+    {
+      "api": "rbin.list_rules",
+      "started_at": "2026-09-27T07:33:53.316768+00:00",
+      "ended_at": "2026-09-27T07:33:53.340874+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {
+        "ResourceType": "EBS_SNAPSHOT"
+      },
+      "consistent_read": false,
+      "item_count": 0
+    },
+    {
+      "api": "ec2.list_snapshots_in_recycle_bin",
+      "started_at": "2026-09-27T07:33:53.340881+00:00",
+      "ended_at": "2026-09-27T07:33:53.378523+00:00",
+      "pages": 1,
+      "final_page": true,
+      "issues": [],
+      "target": {},
+      "consistent_read": false,
+      "item_count": 0
+    }
+  ],
+  "comparisons": [
+    {
+      "attempt": 1,
+      "equal": true,
+      "changed_domains": []
+    }
+  ],
+  "snapshots": [
+    {
+      "snapshot_id": "snap-0212d6f8613b684ac",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-27T05:27:20.322000+00:00",
+      "acquired_at_jst": "2026-09-27T14:27:20.322000+09:00",
+      "age_seconds": 7593.059923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "shared-volume",
+      "provenance_pair_valid": true,
+      "holds": [
+        "backup_protection.intent",
+        "backup_protection.last_success"
+      ],
+      "integrity_issues": [],
+      "reasons": [
+        "retention-owned"
+      ],
+      "normal_eligible": false,
+      "classification": "PROTECTED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": true,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-0e5941ab3b8e0e6ff",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-25T08:21:18.683000+00:00",
+      "acquired_at_jst": "2026-09-25T17:21:18.683000+09:00",
+      "age_seconds": 169954.698923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "shared-volume",
+      "provenance_pair_valid": true,
+      "holds": [
+        "journal:restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42:pre-restore-protection",
+        "proposed-historical-hold:explicit-retention"
+      ],
+      "integrity_issues": [],
+      "reasons": [
+        "retention-owned"
+      ],
+      "normal_eligible": false,
+      "classification": "PROTECTED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": true,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-0aac363f3ce09e05a",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-24T11:17:26.669000+00:00",
+      "acquired_at_jst": "2026-09-24T20:17:26.669000+09:00",
+      "age_seconds": 245786.712923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "shared-volume",
+      "provenance_pair_valid": true,
+      "holds": [
+        "journal:restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42:source",
+        "proposed-historical-hold:explicit-retention"
+      ],
+      "integrity_issues": [],
+      "reasons": [
+        "retention-owned"
+      ],
+      "normal_eligible": false,
+      "classification": "PROTECTED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": true,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-0d2407a5af78afa82",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-23T08:38:21.444000+00:00",
+      "acquired_at_jst": "2026-09-23T17:38:21.444000+09:00",
+      "age_seconds": 341731.937923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "shared-volume",
+      "provenance_pair_valid": true,
+      "holds": [
+        "journal:restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730:pre-restore-protection",
+        "proposed-historical-hold:provisional-review"
+      ],
+      "integrity_issues": [],
+      "reasons": [
+        "retention-owned"
+      ],
+      "normal_eligible": false,
+      "classification": "PROTECTED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": true,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-0a1da731e1fe40f44",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-22T16:32:10.626000+00:00",
+      "acquired_at_jst": "2026-09-23T01:32:10.626000+09:00",
+      "age_seconds": 399702.755923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "shared-volume",
+      "provenance_pair_valid": true,
+      "holds": [
+        "journal:restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd:pre-restore-protection",
+        "proposed-historical-hold:provisional-review"
+      ],
+      "integrity_issues": [],
+      "reasons": [
+        "retention-owned"
+      ],
+      "normal_eligible": false,
+      "classification": "PROTECTED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": true,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-07106a22069868738",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-12T12:49:47.313000+00:00",
+      "acquired_at_jst": "2026-09-12T21:49:47.313000+09:00",
+      "age_seconds": 1277046.068923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "shared-volume",
+      "provenance_pair_valid": true,
+      "holds": [],
+      "integrity_issues": [],
+      "reasons": [
+        "retention-owned"
+      ],
+      "normal_eligible": true,
+      "classification": "KEEP",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": 1,
+      "within_14_days": false,
+      "newest_seven": true,
+      "old_policy_projection": "KEEP",
+      "new_policy_projection": "KEEP"
+    },
+    {
+      "snapshot_id": "snap-0be8e05ab05d70e84",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-12T10:31:35.625000+00:00",
+      "acquired_at_jst": "2026-09-12T19:31:35.625000+09:00",
+      "age_seconds": 1285337.756923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "shared-volume",
+      "provenance_pair_valid": true,
+      "holds": [
+        "journal:restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730:source",
+        "journal:restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd:source",
+        "proposed-historical-hold:provisional-review"
+      ],
+      "integrity_issues": [],
+      "reasons": [
+        "retention-owned"
+      ],
+      "normal_eligible": false,
+      "classification": "PROTECTED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": false,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-021079b3e3843652f",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-12T03:31:02.313000+00:00",
+      "acquired_at_jst": "2026-09-12T12:31:02.313000+09:00",
+      "age_seconds": 1310571.068923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "shared-volume",
+      "provenance_pair_valid": true,
+      "holds": [],
+      "integrity_issues": [],
+      "reasons": [
+        "retention-owned"
+      ],
+      "normal_eligible": true,
+      "classification": "KEEP",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": 2,
+      "within_14_days": false,
+      "newest_seven": true,
+      "old_policy_projection": "KEEP",
+      "new_policy_projection": "KEEP"
+    },
+    {
+      "snapshot_id": "snap-0bc776ec580afd4ac",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-12T02:38:39.124000+00:00",
+      "acquired_at_jst": "2026-09-12T11:38:39.124000+09:00",
+      "age_seconds": 1313714.257923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "legacy-or-unknown",
+      "provenance_pair_valid": true,
+      "holds": [],
+      "integrity_issues": [],
+      "reasons": [
+        "legacy-scope-protected"
+      ],
+      "normal_eligible": false,
+      "classification": "EXCLUDED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": false,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-005ce340d03a42340",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-11T10:16:48.543000+00:00",
+      "acquired_at_jst": "2026-09-11T19:16:48.543000+09:00",
+      "age_seconds": 1372624.838923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "legacy-or-unknown",
+      "provenance_pair_valid": true,
+      "holds": [],
+      "integrity_issues": [],
+      "reasons": [
+        "legacy-scope-protected"
+      ],
+      "normal_eligible": false,
+      "classification": "EXCLUDED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": false,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-0989e090822d69d1e",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-08T13:06:56.332000+00:00",
+      "acquired_at_jst": "2026-09-08T22:06:56.332000+09:00",
+      "age_seconds": 1621617.049923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "legacy-or-unknown",
+      "provenance_pair_valid": true,
+      "holds": [],
+      "integrity_issues": [],
+      "reasons": [
+        "legacy-scope-protected"
+      ],
+      "normal_eligible": false,
+      "classification": "EXCLUDED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": false,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-0762ec7637f489d5b",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-07T13:50:38.944000+00:00",
+      "acquired_at_jst": "2026-09-07T22:50:38.944000+09:00",
+      "age_seconds": 1705394.437923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "legacy-or-unknown",
+      "provenance_pair_valid": true,
+      "holds": [],
+      "integrity_issues": [],
+      "reasons": [
+        "legacy-scope-protected"
+      ],
+      "normal_eligible": false,
+      "classification": "EXCLUDED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": false,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-079c0aa0c06935d8f",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-09-07T08:49:24.460000+00:00",
+      "acquired_at_jst": "2026-09-07T17:49:24.460000+09:00",
+      "age_seconds": 1723468.921923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "backup",
+      "scope": "legacy-or-unknown",
+      "provenance_pair_valid": true,
+      "holds": [],
+      "integrity_issues": [],
+      "reasons": [
+        "legacy-scope-protected"
+      ],
+      "normal_eligible": false,
+      "classification": "EXCLUDED",
+      "description_matches_operation": true,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": false,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    },
+    {
+      "snapshot_id": "snap-0b1d9536e9c476c0f",
+      "owner_id": "385526546525",
+      "region": "ap-northeast-1",
+      "source_volume_id": "vol-03ac9f534326c345c",
+      "target_volume": true,
+      "acquired_at_utc": "2026-08-23T08:27:58.717000+00:00",
+      "acquired_at_jst": "2026-08-23T17:27:58.717000+09:00",
+      "age_seconds": 3020754.664923,
+      "encrypted": true,
+      "state": "completed",
+      "storage_tier": "standard",
+      "lock_state": "none-observed",
+      "category": "unclaimed-or-unknown",
+      "scope": "legacy-or-unknown",
+      "provenance_pair_valid": false,
+      "holds": [
+        "proposed-historical-hold:explicit-retention"
+      ],
+      "integrity_issues": [],
+      "reasons": [
+        "other-category",
+        "unclaimed-or-other-project-stage"
+      ],
+      "normal_eligible": false,
+      "classification": "PROTECTED",
+      "description_matches_operation": false,
+      "missing_checks": [
+        "collector/hold-manifest review and fresh deletion fencing"
+      ],
+      "normal_rank": null,
+      "within_14_days": false,
+      "newest_seven": null,
+      "old_policy_projection": "NOT_NORMAL",
+      "new_policy_projection": "NOT_NORMAL"
+    }
+  ],
+  "snapshot_count": 14,
+  "target_volume_count": 14,
+  "provenance": [
+    {
+      "snapshot_id": "snap-0a1da731e1fe40f44",
+      "operation_id": "op-ecd6c456-7db5-4766-94eb-0004fb4f92cc",
+      "pair_valid": true,
+      "schema_version": 2,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-021079b3e3843652f",
+      "operation_id": "op-2e906afa-e8bf-4e65-9205-66504ef29465",
+      "pair_valid": true,
+      "schema_version": 2,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-07106a22069868738",
+      "operation_id": "op-c242bb75-c311-44d5-8470-6fbb319573e1",
+      "pair_valid": true,
+      "schema_version": 2,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-0212d6f8613b684ac",
+      "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+      "pair_valid": true,
+      "schema_version": 2,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-0aac363f3ce09e05a",
+      "operation_id": "op-4236596e-a436-4c99-833b-33b39f89dab8",
+      "pair_valid": true,
+      "schema_version": 2,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-0d2407a5af78afa82",
+      "operation_id": "op-aa36d4ba-101b-47f1-bd6c-f393234b9509",
+      "pair_valid": true,
+      "schema_version": 2,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-005ce340d03a42340",
+      "operation_id": "op-22df4706-b2b1-4758-a86d-5dace4334f8a",
+      "pair_valid": true,
+      "schema_version": 1,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-079c0aa0c06935d8f",
+      "operation_id": "op-ff3a9c8e-32be-4640-b782-ae9e60686d94",
+      "pair_valid": true,
+      "schema_version": 1,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-0e5941ab3b8e0e6ff",
+      "operation_id": "op-3315c971-8f8a-40bd-9268-fd52a32305d9",
+      "pair_valid": true,
+      "schema_version": 2,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-0bc776ec580afd4ac",
+      "operation_id": "op-e69d7b47-f44d-48c8-84c3-8a463b901354",
+      "pair_valid": true,
+      "schema_version": 1,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-0be8e05ab05d70e84",
+      "operation_id": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e",
+      "pair_valid": true,
+      "schema_version": 2,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-0762ec7637f489d5b",
+      "operation_id": "op-eb1bd6d6-93cd-4832-9536-8282530eb6be",
+      "pair_valid": true,
+      "schema_version": 1,
+      "validation": "original values in memory; recovery not persisted"
+    },
+    {
+      "snapshot_id": "snap-0989e090822d69d1e",
+      "operation_id": "op-de3dd5bb-87c8-48ad-b9af-4631ec483f8d",
+      "pair_valid": true,
+      "schema_version": 1,
+      "validation": "original values in memory; recovery not persisted"
+    }
+  ],
+  "orphan_provenance_ids": [],
+  "games": [
+    {
+      "record_kind": "whitelist-policy",
+      "game_id": "game-vanilla-main",
+      "revision": 1
+    },
+    {
+      "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+      "current_world": null,
+      "data_source": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+      "generation": 1,
+      "counter": 2,
+      "creation_record_present": true,
+      "import_record_present": true,
+      "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+    },
+    {
+      "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+      "current_world": null,
+      "data_source": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+      "generation": 1,
+      "counter": null,
+      "creation_record_present": true,
+      "import_record_present": false,
+      "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+    },
+    {
+      "game_id": "game-vanilla-main",
+      "current_world": null,
+      "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+      "generation": 1,
+      "counter": null,
+      "creation_record_present": false,
+      "import_record_present": false,
+      "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+    },
+    {
+      "game_id": "game-vanilla-secondary",
+      "current_world": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+      "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+      "generation": 1,
+      "counter": 2,
+      "creation_record_present": false,
+      "import_record_present": false,
+      "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+    },
+    {
+      "record_kind": "whitelist-policy",
+      "game_id": "game-vanilla-secondary",
+      "revision": 1
+    },
+    {
+      "record_kind": "whitelist-policy",
+      "game_id": null,
+      "revision": 2
+    },
+    {
+      "record_kind": "registry",
+      "registered_ids": [
+        "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+        "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+        "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f"
+      ]
+    },
+    {
+      "game_id": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+      "current_world": null,
+      "data_source": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server",
+      "generation": 1,
+      "counter": null,
+      "creation_record_present": true,
+      "import_record_present": false,
+      "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+    }
+  ],
+  "journals": [
+    {
+      "journal_key": "restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+      "revision": 20,
+      "phase": "ROLLED_BACK",
+      "identity_valid": true,
+      "game_id": "game-vanilla-secondary",
+      "source_snapshot_id": "snap-0be8e05ab05d70e84",
+      "pre_restore_snapshot_id": "snap-0d2407a5af78afa82",
+      "release_condition": "no automatic release, including PLANNED and ROLLED_BACK"
+    },
+    {
+      "journal_key": "restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+      "operation_id": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+      "revision": 18,
+      "phase": "ROLLED_BACK",
+      "identity_valid": true,
+      "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+      "source_snapshot_id": "snap-0aac363f3ce09e05a",
+      "pre_restore_snapshot_id": "snap-0e5941ab3b8e0e6ff",
+      "release_condition": "no automatic release, including PLANNED and ROLLED_BACK"
+    },
+    {
+      "journal_key": "restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd",
+      "operation_id": "op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd",
+      "revision": 1,
+      "phase": "PLANNED",
+      "identity_valid": true,
+      "game_id": "game-vanilla-secondary",
+      "source_snapshot_id": "snap-0be8e05ab05d70e84",
+      "pre_restore_snapshot_id": "snap-0a1da731e1fe40f44",
+      "release_condition": "no automatic release, including PLANNED and ROLLED_BACK"
+    }
+  ],
+  "protection": {
+    "boundary": 2,
+    "protected_boundary": 2,
+    "attempts": 0,
+    "oldest_at": null,
+    "unknown_since": null,
+    "stopped_at": null,
+    "intent": {
+      "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+      "snapshot_id": null,
+      "boundary": 2,
+      "acquired_at": null,
+      "verified_at": null,
+      "status": "SUCCEEDED"
+    },
+    "last_success": {
+      "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+      "snapshot_id": "snap-0212d6f8613b684ac",
+      "boundary": 2,
+      "acquired_at": "2026-09-27T05:27:20.322000+00:00",
+      "verified_at": "2026-09-27T05:31:22.833615+00:00",
+      "status": null
+    }
+  },
+  "unresolved_operations": [
+    {
+      "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "unresolved": true,
+      "operation_type": "BACKUP",
+      "requested_at": "2026-09-07T08:38:29.797365+00:00",
+      "completed_at": "2026-09-07T08:38:35.736752+00:00",
+      "status": "FAILED"
+    },
+    {
+      "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "unresolved": true,
+      "operation_type": "RETENTION",
+      "requested_at": "2026-09-08T13:14:55.289968+00:00",
+      "completed_at": "2026-09-08T13:15:06.307775+00:00",
+      "status": "FAILED"
+    },
+    {
+      "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "unresolved": true,
+      "operation_type": "BACKUP",
+      "requested_at": "2026-09-22T16:20:11.302008+00:00",
+      "completed_at": "2026-09-22T16:20:23.148398+00:00",
+      "status": "FAILED"
+    }
+  ],
+  "absent_reference_ids": [],
+  "recycle_bin_rules": [],
+  "recycle_bin_snapshot_ids": [],
+  "policy_projection": {
+    "label": "UNAPPROVED_POLICY_PROJECTION_NOT_SAFE_DELETE_CANDIDATES",
+    "cohort": "validated normal shared-volume; separate holds do not consume seven",
+    "old_newest_seven_outside_ids": [],
+    "new_14d_or_seven_outside_ids": [],
+    "boundary_tie": false,
+    "normal_count": 2
+  },
+  "deployed_old_policy_reference": {
+    "label": "HISTORICAL_DEPLOYED_NEWEST_SEVEN_ARITHMETIC_ONLY_NOT_AN_EXECUTION_PLAN",
+    "normal_count": 8,
+    "outside_ids": [
+      "snap-021079b3e3843652f"
+    ],
+    "boundary_tie": false,
+    "limitation": "old classifier predates journal/manifest holds; not deletion recommendations"
+  },
+  "evidence_contract": "original recovery verified in memory; persisted projections cannot revalidate recovery digests. Replay only arithmetic, never deletion authorization.",
+  "tables": {
+    "state": "wc-dev-system-state",
+    "games": "wc-dev-games",
+    "backups": "wc-dev-backups",
+    "operations": "wc-dev-operations"
+  },
+  "volume_identity_confirmed": true
+}

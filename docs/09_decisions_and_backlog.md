@@ -1,5 +1,7 @@
 # 09. Decisions and Backlog
 
+> 2026-09-27 D-115 Draft review candidate: local read-only collector, proposed historical holds and [14-snapshot dev inventory](evidence/retention_inventory_dev_2026-09-27.md). NO_DELETE; no merge, AWS mutation or deletion authorization. D-114 automation continues.
+
 > 2026-09-27 D-114 limited dev release **completed**: inherited disabled stage A, one formal original-world START/STOP, separately authorized stage B, one completed automatic BACKUP and at least two natural PROTECTED evaluations. Dev daily BACKUP remains enabled; intake restored. Case D condition 3 remains false; the separate approval applies only to the recorded ARN. Retention deletion remains disabled. [Execution and notification classification](evidence/daily_backup_dev_stage_b_2026-09-27.md). Earlier partial records below are historical.
 
 > 2026-09-27 D-114 partial dev release: disabled stage A deployed/read back; stage B held by Case D condition 3 before START/STOP. Daily automation remains disabled, intake restored, no new snapshot. [Exact release and stop evidence](evidence/daily_backup_dev_stage_a_2026-09-27.md).

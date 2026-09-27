@@ -49,3 +49,13 @@ The deployed projection is historical-policy calculation only, never a deletion 
 
 Fourteen-day retention has no count ceiling. Incremental EBS snapshots can still accumulate
 substantial changed-block storage. No unmeasured storage charge or saving is asserted.
+
+## D-115 collector review candidate — 2026-09-27
+
+The original offline completeness boundary above is unchanged. A local, read-only
+[collector and replay contract](../runbooks/retention_inventory.md),
+[proposed historical hold manifest](../evidence/retention_holds_dev.proposed.json) and
+[actual dev inventory](../evidence/retention_inventory_dev_2026-09-27.md) now supplement it.
+Fourteen snapshots were collected; normal policy projection has no outside-retention entries
+after separate holds. This is NO_DELETE, not collector/hold approval or a deletion release.
+Daily automatic BACKUP continues; runtime/IAM/stack and deletion capabilities are unchanged.
