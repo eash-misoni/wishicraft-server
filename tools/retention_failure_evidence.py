@@ -27,6 +27,8 @@ ERRORS = {
     "States.TaskFailed",
     "BACKUP_SNAPSHOT_CREATE_FAILED",
     "RETENTION_FAILED",
+    "RETENTION_DRY_RUN_FAILED",
+    "RETENTION_WORKFLOW_FAILED",
     "BACKUP_FAILED",
     "RuntimeError",
     "BackupCreateRejected",

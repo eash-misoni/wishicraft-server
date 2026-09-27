@@ -174,3 +174,9 @@ def test_absent_history_is_not_proof_of_no_side_effects() -> None:
     result = collect(Empty(), ROOT)
     assert result["automatic_resolution"] is False
     assert all(item["history"] == [] for item in result["operations"])
+
+
+def test_terminal_retention_codes_remain_visible() -> None:
+    assert project({"error": {"code": "RETENTION_DRY_RUN_FAILED"}})["errors"] == [
+        "RETENTION_DRY_RUN_FAILED"
+    ]
