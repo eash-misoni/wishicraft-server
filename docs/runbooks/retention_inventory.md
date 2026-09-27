@@ -111,3 +111,44 @@ seven-count arithmetic differs. Its outside IDs are not deletion recommendations
 old/new arithmetic on the new hold-aware cohort. Failed management Operations include their
 known type/status/times for review; failure alone proves neither a snapshot exists nor that
 its outcome has been reconciled. The collector does not repair or close historical records.
+
+## Historical FAILED reconciliation after collector adoption
+
+PR #8 was normally merged as `a182a2953830fdb675926011149cd449c8664afb`.
+This adopts the collector, not deletion completeness or proposed hold judgments.
+[Continuation evidence and recommendations](../evidence/retention_failure_holds_dev_2026-09-27.md)
+keep the three raw FAILED findings alongside a separate **PROPOSED** judgment. No records
+or references are suppressed/closed, and NO_DELETE remains unconditional.
+
+For the exact three reviewed investigation targets only, the additive local helper uses
+strong GetItem, DescribeExecution, complete GetExecutionHistory and bounded CloudTrail
+CreateSnapshot/DeleteSnapshot lookup. It does not invoke either operation. Run mock tests
+before reads and use a new exclusive output path:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=.:src tools/dev-env run -- uv run pytest tests/unit/test_retention_failure_evidence.py
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=.:src tools/dev-env run -- uv run python -m tools.retention_failure_evidence --output /path/to/new-historical-evidence.json
+```
+
+Its fixed scope is canonical dev/profile wishicraft-dev. Output is positive-projected
+observation, never an automatic resolution. Empty/failed reads are not proof of no side
+effects. Historical Lambda artifacts/permissions require independent historical evidence;
+current code cannot prove old behavior. A future review-bound matching consumer is only a
+proposal in the linked evidence. The proposed hold-condition file is explanatory and is
+not fed back as an executable manifest or used to release any reference.
+
+
+### Exact CloudTrail CreateSnapshot matching (PR #9 review correction)
+
+Use `match_create_snapshot_event` on original event JSON in memory. It compares the actual
+`requestParameters.volumeId` and the unique snapshot specification's
+`WishicraftOperationId` tag by complete equality, plus event source/name/account/region.
+Never search description, unrelated tags or serialized request text for IDs. Missing,
+malformed or duplicate tag/specification data retains `match_issues`; do not interpret
+individual field booleans as a complete match without `target_matches`.
+For a historical target correction, look up the exact known EventId, verify both lookup
+and body identity and complete pagination, and save only non-secret comparison results.
+Do not rerun all inventory or management Operations for this check. The two-event
+[recheck evidence](../evidence/retention_cloudtrail_exact_match_dev_2026-09-27.json) supersedes
+the old substring comparison; original artifacts remain historical, not retroactively
+validated. NO_DELETE and independent hold/failed-operation findings are unchanged.

@@ -1,0 +1,894 @@
+{
+  "schema_version": 1,
+  "account_id": "385526546525",
+  "region": "ap-northeast-1",
+  "system_id": "wishicraft-main",
+  "started_at": "2026-09-27T10:20:01.907263+00:00",
+  "operations": [
+    {
+      "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "expected_type": "BACKUP",
+      "history": [
+        {
+          "id": 1,
+          "type": "ExecutionStarted",
+          "timestamp": "2026-09-07T08:38:30.421000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 2,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-07T08:38:30.447000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 3,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-07T08:38:30.447000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 4,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-07T08:38:30.502000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 5,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-07T08:38:31.010000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 6,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-07T08:38:31.026000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 7,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-07T08:38:31.026000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 8,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-07T08:38:31.026000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 9,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-07T08:38:31.089000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 10,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-07T08:38:35.259000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 11,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-07T08:38:35.276000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 12,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-07T08:38:35.276000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": [
+            "CreateSnapshotOnce"
+          ]
+        },
+        {
+          "id": 13,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-07T08:38:35.276000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 14,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-07T08:38:35.337000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 15,
+          "type": "TaskFailed",
+          "timestamp": "2026-09-07T08:38:35.582000+00:00",
+          "errors": [
+            "ClientError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial",
+            "unauthorized-error-present"
+          ],
+          "states": []
+        },
+        {
+          "id": 16,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-07T08:38:35.597000+00:00",
+          "errors": [
+            "ClientError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial",
+            "unauthorized-error-present"
+          ],
+          "states": [
+            "CreateSnapshotOnce"
+          ]
+        },
+        {
+          "id": 17,
+          "type": "PassStateEntered",
+          "timestamp": "2026-09-07T08:38:35.597000+00:00",
+          "errors": [
+            "ClientError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial",
+            "unauthorized-error-present"
+          ],
+          "states": []
+        },
+        {
+          "id": 18,
+          "type": "PassStateExited",
+          "timestamp": "2026-09-07T08:38:35.597000+00:00",
+          "errors": [
+            "BACKUP_SNAPSHOT_CREATE_FAILED",
+            "ClientError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial",
+            "unauthorized-error-present"
+          ],
+          "states": []
+        },
+        {
+          "id": 19,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-07T08:38:35.597000+00:00",
+          "errors": [
+            "BACKUP_SNAPSHOT_CREATE_FAILED",
+            "ClientError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial",
+            "unauthorized-error-present"
+          ],
+          "states": []
+        },
+        {
+          "id": 20,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-07T08:38:35.597000+00:00",
+          "errors": [
+            "BACKUP_SNAPSHOT_CREATE_FAILED"
+          ],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 21,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-07T08:38:35.667000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 22,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-07T08:38:35.800000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 23,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-07T08:38:35.821000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 24,
+          "type": "FailStateEntered",
+          "timestamp": "2026-09-07T08:38:35.821000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 25,
+          "type": "ExecutionFailed",
+          "timestamp": "2026-09-07T08:38:35.857000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        }
+      ],
+      "issues": [],
+      "identity_matches": true,
+      "terminal_failed": true,
+      "operation_facts": {
+        "errors": [
+          "BACKUP_SNAPSHOT_CREATE_FAILED"
+        ],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "backup_create_intent_present": false,
+      "backup_snapshot_field_present": false,
+      "target_game_id": "game-vanilla-main",
+      "requested_at": "2026-09-07T08:38:29.797365+00:00",
+      "completed_at": "2026-09-07T08:38:35.736752+00:00",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "execution_failed": true,
+      "execution_identity_matches": true,
+      "execution_facts": {
+        "errors": [],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "history_pages": 1,
+      "history_complete": true,
+      "finished_at": "2026-09-27T10:20:02.503123+00:00",
+      "cloudtrail": [
+        {
+          "event_name": "CreateSnapshot",
+          "start": "2026-09-07T08:37:29.797365+00:00",
+          "end": "2026-09-07T08:39:35.736752+00:00",
+          "complete": true,
+          "pages": 1,
+          "records": [
+            {
+              "event_id": "79df13b0-e4a9-4d98-b471-a8be51ea2c10",
+              "event_time": "2026-09-07T08:38:35+00:00",
+              "account_region_matches": true,
+              "operation_tag_matches": true,
+              "explicit_denial": true,
+              "source_volume_matches": true,
+              "errors": [],
+              "snapshot_ids": [],
+              "facts": [
+                "unauthorized-error-present"
+              ],
+              "states": []
+            }
+          ],
+          "issues": []
+        }
+      ]
+    },
+    {
+      "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "expected_type": "RETENTION",
+      "history": [
+        {
+          "id": 1,
+          "type": "ExecutionStarted",
+          "timestamp": "2026-09-08T13:14:55.923000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 2,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-08T13:14:55.956000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 3,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-08T13:14:55.956000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 4,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-08T13:14:56.020000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 5,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-08T13:15:01.191000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 6,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-08T13:15:01.213000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 7,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-08T13:15:01.213000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": [
+            "RunRetentionDryRun"
+          ]
+        },
+        {
+          "id": 8,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-08T13:15:01.213000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 9,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-08T13:15:01.285000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 10,
+          "type": "TaskFailed",
+          "timestamp": "2026-09-08T13:15:06.166000+00:00",
+          "errors": [
+            "TypeError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "unsupported-operation-value"
+          ],
+          "states": []
+        },
+        {
+          "id": 11,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-08T13:15:06.186000+00:00",
+          "errors": [
+            "TypeError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "unsupported-operation-value"
+          ],
+          "states": [
+            "RunRetentionDryRun"
+          ]
+        },
+        {
+          "id": 12,
+          "type": "PassStateEntered",
+          "timestamp": "2026-09-08T13:15:06.186000+00:00",
+          "errors": [
+            "TypeError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "unsupported-operation-value"
+          ],
+          "states": []
+        },
+        {
+          "id": 13,
+          "type": "PassStateExited",
+          "timestamp": "2026-09-08T13:15:06.186000+00:00",
+          "errors": [
+            "TypeError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "unsupported-operation-value"
+          ],
+          "states": []
+        },
+        {
+          "id": 14,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-08T13:15:06.186000+00:00",
+          "errors": [
+            "TypeError"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "unsupported-operation-value"
+          ],
+          "states": []
+        },
+        {
+          "id": 15,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-08T13:15:06.186000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 16,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-08T13:15:06.248000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 17,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-08T13:15:06.358000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 18,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-08T13:15:06.375000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 19,
+          "type": "FailStateEntered",
+          "timestamp": "2026-09-08T13:15:06.375000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 20,
+          "type": "ExecutionFailed",
+          "timestamp": "2026-09-08T13:15:06.408000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        }
+      ],
+      "issues": [],
+      "identity_matches": true,
+      "terminal_failed": true,
+      "operation_facts": {
+        "errors": [],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "backup_create_intent_present": false,
+      "backup_snapshot_field_present": false,
+      "target_game_id": "game-vanilla-main",
+      "requested_at": "2026-09-08T13:14:55.289968+00:00",
+      "completed_at": "2026-09-08T13:15:06.307775+00:00",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "execution_failed": true,
+      "execution_identity_matches": true,
+      "execution_facts": {
+        "errors": [],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "history_pages": 1,
+      "history_complete": true,
+      "finished_at": "2026-09-27T10:20:02.804367+00:00",
+      "cloudtrail": [
+        {
+          "event_name": "DeleteSnapshot",
+          "start": "2026-09-08T13:13:55.289968+00:00",
+          "end": "2026-09-08T13:16:06.307775+00:00",
+          "complete": true,
+          "pages": 1,
+          "records": [],
+          "issues": []
+        }
+      ]
+    },
+    {
+      "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "expected_type": "BACKUP",
+      "history": [
+        {
+          "id": 1,
+          "type": "ExecutionStarted",
+          "timestamp": "2026-09-22T16:20:11.877000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 2,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-22T16:20:11.906000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 3,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-22T16:20:11.906000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 4,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-22T16:20:11.967000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 5,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-22T16:20:18.109000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 6,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-22T16:20:18.124000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 7,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-22T16:20:18.124000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 8,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-22T16:20:18.124000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 9,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-22T16:20:18.177000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 10,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-22T16:20:22.319000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 11,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-22T16:20:22.334000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 12,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-22T16:20:22.334000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": [
+            "CreateSnapshotOnce"
+          ]
+        },
+        {
+          "id": 13,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-22T16:20:22.334000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 14,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-22T16:20:22.426000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 15,
+          "type": "TaskFailed",
+          "timestamp": "2026-09-22T16:20:23.013000+00:00",
+          "errors": [
+            "BackupCreateRejected"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial"
+          ],
+          "states": []
+        },
+        {
+          "id": 16,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-22T16:20:23.028000+00:00",
+          "errors": [
+            "BackupCreateRejected"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial"
+          ],
+          "states": [
+            "CreateSnapshotOnce"
+          ]
+        },
+        {
+          "id": 17,
+          "type": "PassStateEntered",
+          "timestamp": "2026-09-22T16:20:23.028000+00:00",
+          "errors": [
+            "BackupCreateRejected"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial"
+          ],
+          "states": []
+        },
+        {
+          "id": 18,
+          "type": "PassStateExited",
+          "timestamp": "2026-09-22T16:20:23.028000+00:00",
+          "errors": [
+            "BACKUP_SNAPSHOT_CREATE_FAILED",
+            "BackupCreateRejected"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial"
+          ],
+          "states": []
+        },
+        {
+          "id": 19,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-22T16:20:23.028000+00:00",
+          "errors": [
+            "BACKUP_SNAPSHOT_CREATE_FAILED",
+            "BackupCreateRejected"
+          ],
+          "snapshot_ids": [],
+          "facts": [
+            "create-explicit-denial"
+          ],
+          "states": []
+        },
+        {
+          "id": 20,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-22T16:20:23.028000+00:00",
+          "errors": [
+            "BACKUP_SNAPSHOT_CREATE_FAILED"
+          ],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 21,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-22T16:20:23.082000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 22,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-22T16:20:23.351000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 23,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-22T16:20:23.368000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 24,
+          "type": "FailStateEntered",
+          "timestamp": "2026-09-22T16:20:23.368000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        {
+          "id": 25,
+          "type": "ExecutionFailed",
+          "timestamp": "2026-09-22T16:20:23.403000+00:00",
+          "errors": [],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        }
+      ],
+      "issues": [],
+      "identity_matches": true,
+      "terminal_failed": true,
+      "operation_facts": {
+        "errors": [
+          "BACKUP_SNAPSHOT_CREATE_FAILED"
+        ],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "backup_create_intent_present": true,
+      "backup_snapshot_field_present": false,
+      "target_game_id": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+      "requested_at": "2026-09-22T16:20:11.302008+00:00",
+      "completed_at": "2026-09-22T16:20:23.148398+00:00",
+      "execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "execution_failed": true,
+      "execution_identity_matches": true,
+      "execution_facts": {
+        "errors": [],
+        "snapshot_ids": [],
+        "facts": [],
+        "states": []
+      },
+      "history_pages": 1,
+      "history_complete": true,
+      "finished_at": "2026-09-27T10:20:02.916383+00:00",
+      "cloudtrail": [
+        {
+          "event_name": "CreateSnapshot",
+          "start": "2026-09-22T16:19:11.302008+00:00",
+          "end": "2026-09-22T16:21:23.148398+00:00",
+          "complete": true,
+          "pages": 1,
+          "records": [
+            {
+              "event_id": "2604ca5a-c8ba-40d2-9d74-9311a5471269",
+              "event_time": "2026-09-22T16:20:22+00:00",
+              "account_region_matches": true,
+              "operation_tag_matches": true,
+              "explicit_denial": true,
+              "source_volume_matches": true,
+              "errors": [],
+              "snapshot_ids": [],
+              "facts": [
+                "unauthorized-error-present"
+              ],
+              "states": []
+            }
+          ],
+          "issues": []
+        }
+      ]
+    }
+  ],
+  "status": "NO_DELETE",
+  "deletion_authorized": false,
+  "planned_delete_ids": [],
+  "delete_action_count": 0,
+  "review_status": "PROPOSED",
+  "automatic_resolution": false,
+  "ended_at": "2026-09-27T10:20:03.187106+00:00"
+}

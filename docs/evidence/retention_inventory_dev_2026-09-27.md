@@ -174,3 +174,10 @@ Actual delete adapter/permissions/schedule and specific snapshot authorization a
 future work. Keep automation operating and every snapshot/reference intact. Primary checkout
 unrelated modifications remain separate from the dedicated execution worktree. Learning Wiki
 sync targets the finalized PR HEAD and explicitly distinguishes it from unmerged main.
+
+## Follow-up (original collection retained)
+
+PR #8 was adopted without authorizing deletion/hold release. See the separate
+[historical failure and hold-condition review](retention_failure_holds_dev_2026-09-27.md).
+The original raw FAILED findings and this collection are unchanged; new judgment is a
+review proposal, not a rewritten successful Operation or completeness certification.
