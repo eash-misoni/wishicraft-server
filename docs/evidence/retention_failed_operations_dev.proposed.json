@@ -52,7 +52,16 @@
       "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure.",
       "terminal_error_codes": [
         "BACKUP_SNAPSHOT_CREATE_FAILED"
-      ]
+      ],
+      "cloudtrail_target_recheck": {
+        "evidence_path": "docs/evidence/retention_cloudtrail_exact_match_dev_2026-09-27.json",
+        "event_id": "79df13b0-e4a9-4d98-b471-a8be51ea2c10",
+        "collector_commit": "48345b52638b638049f5adc873b909b18fb7621b",
+        "rechecked_at": "2026-09-27T11:01:07.356017+00:00",
+        "method": "create-snapshot-fields-v1",
+        "conclusion": "Prior judgment maintained after fresh exact-field comparison; old substring booleans are not proof",
+        "review_status": "PROPOSED"
+      }
     },
     {
       "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
@@ -144,7 +153,16 @@
       "operator_action": "Review this evidence; no retry/redrive required to reconcile this old failure.",
       "terminal_error_codes": [
         "BACKUP_SNAPSHOT_CREATE_FAILED"
-      ]
+      ],
+      "cloudtrail_target_recheck": {
+        "evidence_path": "docs/evidence/retention_cloudtrail_exact_match_dev_2026-09-27.json",
+        "event_id": "2604ca5a-c8ba-40d2-9d74-9311a5471269",
+        "collector_commit": "48345b52638b638049f5adc873b909b18fb7621b",
+        "rechecked_at": "2026-09-27T11:01:07.763907+00:00",
+        "method": "create-snapshot-fields-v1",
+        "conclusion": "Prior judgment maintained after fresh exact-field comparison; old substring booleans are not proof",
+        "review_status": "PROPOSED"
+      }
     }
   ],
   "status": "NO_DELETE",

@@ -136,3 +136,19 @@ effects. Historical Lambda artifacts/permissions require independent historical 
 current code cannot prove old behavior. A future review-bound matching consumer is only a
 proposal in the linked evidence. The proposed hold-condition file is explanatory and is
 not fed back as an executable manifest or used to release any reference.
+
+
+### Exact CloudTrail CreateSnapshot matching (PR #9 review correction)
+
+Use `match_create_snapshot_event` on original event JSON in memory. It compares the actual
+`requestParameters.volumeId` and the unique snapshot specification's
+`WishicraftOperationId` tag by complete equality, plus event source/name/account/region.
+Never search description, unrelated tags or serialized request text for IDs. Missing,
+malformed or duplicate tag/specification data retains `match_issues`; do not interpret
+individual field booleans as a complete match without `target_matches`.
+For a historical target correction, look up the exact known EventId, verify both lookup
+and body identity and complete pagination, and save only non-secret comparison results.
+Do not rerun all inventory or management Operations for this check. The two-event
+[recheck evidence](../evidence/retention_cloudtrail_exact_match_dev_2026-09-27.json) supersedes
+the old substring comparison; original artifacts remain historical, not retroactively
+validated. NO_DELETE and independent hold/failed-operation findings are unchanged.

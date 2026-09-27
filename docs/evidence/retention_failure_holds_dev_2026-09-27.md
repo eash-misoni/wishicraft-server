@@ -1,5 +1,7 @@
 # D-115 continuation: historical FAILED reconciliation and hold conditions
 
+> Review correction, 2026-09-27: the original CloudTrail match booleans used request-wide substring searches and were insufficient to prove exact target identity. The original read artifacts remain unchanged. The [fresh exact-field recheck](retention_cloudtrail_exact_match_dev_2026-09-27.json) and the appended correction below supersede that comparison method only.
+
 **Review candidate; no AWS mutation, hold release or deletion authorization.**
 PR #8 adopted the read-only collector and investigation, not the proposed manifest
 judgments or deletion completeness. Original FAILED Operations, create reservations,
@@ -153,3 +155,50 @@ fresh inventory/provenance/current references, AMI/sharing/other AWS dependency 
 concurrency fencing, separately reviewed deletion adapter/IAM and explicit snapshot-specific
 approval, followed by result reconciliation. None is implemented or authorized here. Cost
 was not measured; 14-day retention has no count cap.
+
+
+## PR #9 review correction: exact CloudTrail target fields
+
+Fix commit `48345b52638b638049f5adc873b909b18fb7621b` replaces request-wide
+`operation_id in json.dumps(requestParameters)` and volume substring checks.
+Observed CreateSnapshot requests both use `requestParameters.volumeId` and
+`requestParameters.tagSpecificationSet.items`, containing one `resourceType=snapshot`
+entry with a list of `{key,value}` tags. Only the exact `WishicraftOperationId` key and
+its exact value are accepted. Description, unrelated tags and other fields do not count.
+Unknown/missing structures have no fallback; duplicate specifications, duplicate tag keys
+(including identical duplicates), missing/invalid tag values and type errors leave reasons
+and cannot produce `target_matches=true`. Account/region and exact
+`eventSource=ec2.amazonaws.com` / `eventName=CreateSnapshot` are also required.
+Individual field booleans are diagnostic; only the aggregate target result represents a
+complete target match. DeleteSnapshot does not use this CreateSnapshot matcher.
+
+Fresh read-only EventId lookup, `2026-09-27T11:01:06.782321Z`–`11:01:07.763942Z`:
+
+| Event ID | Operation | Result |
+|---|---|---|
+| `79df13b0-e4a9-4d98-b471-a8be51ea2c10` | `op-433438bf-d775-4799-8016-ff0bdcb361a7` | One event, final page, envelope/body EventId exact; volume/tag/API/account/region exact; explicit denial; no unknown reason |
+| `2604ca5a-c8ba-40d2-9d74-9311a5471269` | `op-d0383b17-8783-43fd-a7aa-b47fcd299a2a` | One event, final page, envelope/body EventId exact; volume/tag/API/account/region exact; explicit denial; no unknown reason |
+
+[New positive-projected evidence](retention_cloudtrail_exact_match_dev_2026-09-27.json)
+records the fix commit, method and read times. Raw CloudTrail contents were compared in
+memory; no raw request/environment/credential/exception text was persisted. The old
+`.reads.json`, terminal supplement and inventory were not rewritten. Earlier matching
+booleans alone are not revalidation evidence. Both historical BACKUP conclusions remain
+PROPOSED and unchanged on the strengthened evidence; the historical artifact limitations
+above remain. RETENTION was not recollected or rerun; inventory was not recollected.
+
+Regression coverage includes correct fields, ID-only descriptions, wrong tag keys,
+wrong volume with matching text elsewhere, prefix/suffix values, missing/malformed/duplicate
+structures, API/account/region mismatches, collector integration and safe normal/exception
+persistence. Focused helper + existing inventory tests: 81 passed. Runtime, IAM, stage config,
+original FAILED records/reservations, journals, provenance, holds and raw collector findings
+are unchanged. AWS mutation/creation/deletion/hold release: zero; D-114 was not stopped.
+NO_DELETE / deletion_authorized=false / planned_delete_ids=[] / delete_action_count=0 remain.
+
+The correction's initial full-suite run used a new `/private/tmp` fixture root whose
+files inherited GID 0, while strict owner checks expected the caller's GID 20. It produced
+71 failures / 1982 passes. A retained failing record was UID 501 / GID 0 / mode 0600 /
+nlink 1, isolating the mismatch. A new system-user temporary root (GID 20) is used for
+revalidation; the previously failing ownership checkpoint passes without any source or
+assertion change. Full-suite and final HEAD CI results are recorded in PR #9. Original
+failed fixtures/logs are retained; this is an environment failure, not waived coverage.
