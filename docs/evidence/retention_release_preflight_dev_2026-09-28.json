@@ -1,0 +1,1625 @@
+{
+  "schema_version": 1,
+  "purpose": "BOUNDED_READ_ONLY_RELEASE_PREFLIGHT_NOT_DELETION_AUTHORITY",
+  "execution_commit": "29cff405d83efb25ef67fb98de8b03e7ee9568f6",
+  "status": "NO_DELETE",
+  "deletion_authorized": false,
+  "planned_delete_ids": [],
+  "delete_action_count": 0,
+  "inventory": {
+    "schema_version": 1,
+    "evaluated_at": "2026-09-28T10:30:52.024327+00:00",
+    "account_id": "385526546525",
+    "region": "ap-northeast-1",
+    "stage": "dev",
+    "system_id": "wishicraft-main",
+    "volume_id": "vol-03ac9f534326c345c",
+    "deletion_authorized": false,
+    "planned_delete_ids": [],
+    "delete_action_count": 0,
+    "status": "NO_DELETE",
+    "completeness": {
+      "api_pages": true,
+      "api_content_valid": true,
+      "stable": true,
+      "provenance_pairs_valid": true,
+      "journals_valid": true,
+      "hold_manifest_reviewed": false,
+      "deletion_safety_complete": false
+    },
+    "missing_checks": [
+      "additional-aws-deletion-references-not-assessed",
+      "collector-and-manifest-not-reviewed",
+      "future-deletion-requires-fresh-fenced-check",
+      "historical-hold-manifest-unreviewed",
+      "unresolved-management-or-other-operation"
+    ],
+    "api_audit": [
+      {
+        "api": "sts.get_caller_identity",
+        "started_at": "2026-09-28T10:30:48.550080+00:00",
+        "ended_at": "2026-09-28T10:30:49.515031+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {},
+        "consistent_read": false,
+        "item_count": 1
+      },
+      {
+        "api": "cloudformation.list_stack_resources",
+        "started_at": "2026-09-28T10:30:49.515076+00:00",
+        "ended_at": "2026-09-28T10:30:50.204761+00:00",
+        "pages": 2,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "StackName": "WishicraftControlPlaneStack-dev"
+        },
+        "consistent_read": false,
+        "item_count": 155
+      },
+      {
+        "api": "dynamodb.describe_table",
+        "started_at": "2026-09-28T10:30:50.204846+00:00",
+        "ended_at": "2026-09-28T10:30:50.473784+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-system-state"
+        },
+        "consistent_read": false,
+        "item_count": 1
+      },
+      {
+        "api": "dynamodb.describe_table",
+        "started_at": "2026-09-28T10:30:50.473919+00:00",
+        "ended_at": "2026-09-28T10:30:50.496986+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-games"
+        },
+        "consistent_read": false,
+        "item_count": 1
+      },
+      {
+        "api": "dynamodb.describe_table",
+        "started_at": "2026-09-28T10:30:50.497126+00:00",
+        "ended_at": "2026-09-28T10:30:50.523009+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-backups"
+        },
+        "consistent_read": false,
+        "item_count": 1
+      },
+      {
+        "api": "dynamodb.describe_table",
+        "started_at": "2026-09-28T10:30:50.523126+00:00",
+        "ended_at": "2026-09-28T10:30:50.547579+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-operations"
+        },
+        "consistent_read": false,
+        "item_count": 1
+      },
+      {
+        "api": "ec2.describe_volumes",
+        "started_at": "2026-09-28T10:30:50.547623+00:00",
+        "ended_at": "2026-09-28T10:30:50.801150+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "VolumeIds": [
+            "vol-03ac9f534326c345c"
+          ]
+        },
+        "consistent_read": false,
+        "item_count": 1
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T10:30:50.801212+00:00",
+        "ended_at": "2026-09-28T10:30:50.909914+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-system-state"
+        },
+        "consistent_read": true,
+        "item_count": 27
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T10:30:50.909943+00:00",
+        "ended_at": "2026-09-28T10:30:50.952290+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-games"
+        },
+        "consistent_read": true,
+        "item_count": 9
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T10:30:50.952321+00:00",
+        "ended_at": "2026-09-28T10:30:51.015167+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-backups"
+        },
+        "consistent_read": true,
+        "item_count": 26
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T10:30:51.015225+00:00",
+        "ended_at": "2026-09-28T10:30:51.153526+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-operations"
+        },
+        "consistent_read": true,
+        "item_count": 126
+      },
+      {
+        "api": "ec2.describe_snapshots",
+        "started_at": "2026-09-28T10:30:51.153549+00:00",
+        "ended_at": "2026-09-28T10:30:51.297023+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "OwnerIds": [
+            "385526546525"
+          ]
+        },
+        "consistent_read": false,
+        "item_count": 14
+      },
+      {
+        "api": "ec2.describe_locked_snapshots",
+        "started_at": "2026-09-28T10:30:51.297048+00:00",
+        "ended_at": "2026-09-28T10:30:51.333368+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {},
+        "consistent_read": false,
+        "item_count": 0
+      },
+      {
+        "api": "rbin.list_rules",
+        "started_at": "2026-09-28T10:30:51.333402+00:00",
+        "ended_at": "2026-09-28T10:30:51.573124+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "ResourceType": "EBS_SNAPSHOT"
+        },
+        "consistent_read": false,
+        "item_count": 0
+      },
+      {
+        "api": "ec2.list_snapshots_in_recycle_bin",
+        "started_at": "2026-09-28T10:30:51.573167+00:00",
+        "ended_at": "2026-09-28T10:30:51.620503+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {},
+        "consistent_read": false,
+        "item_count": 0
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T10:30:51.620546+00:00",
+        "ended_at": "2026-09-28T10:30:51.656364+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-system-state"
+        },
+        "consistent_read": true,
+        "item_count": 27
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T10:30:51.656437+00:00",
+        "ended_at": "2026-09-28T10:30:51.685061+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-games"
+        },
+        "consistent_read": true,
+        "item_count": 9
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T10:30:51.685098+00:00",
+        "ended_at": "2026-09-28T10:30:51.719855+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-backups"
+        },
+        "consistent_read": true,
+        "item_count": 26
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T10:30:51.719908+00:00",
+        "ended_at": "2026-09-28T10:30:51.803422+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-operations"
+        },
+        "consistent_read": true,
+        "item_count": 126
+      },
+      {
+        "api": "ec2.describe_snapshots",
+        "started_at": "2026-09-28T10:30:51.803456+00:00",
+        "ended_at": "2026-09-28T10:30:51.901340+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "OwnerIds": [
+            "385526546525"
+          ]
+        },
+        "consistent_read": false,
+        "item_count": 14
+      },
+      {
+        "api": "ec2.describe_locked_snapshots",
+        "started_at": "2026-09-28T10:30:51.901369+00:00",
+        "ended_at": "2026-09-28T10:30:51.935793+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {},
+        "consistent_read": false,
+        "item_count": 0
+      },
+      {
+        "api": "rbin.list_rules",
+        "started_at": "2026-09-28T10:30:51.935828+00:00",
+        "ended_at": "2026-09-28T10:30:51.959345+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "ResourceType": "EBS_SNAPSHOT"
+        },
+        "consistent_read": false,
+        "item_count": 0
+      },
+      {
+        "api": "ec2.list_snapshots_in_recycle_bin",
+        "started_at": "2026-09-28T10:30:51.959379+00:00",
+        "ended_at": "2026-09-28T10:30:52.007685+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {},
+        "consistent_read": false,
+        "item_count": 0
+      }
+    ],
+    "comparisons": [
+      {
+        "attempt": 1,
+        "equal": true,
+        "changed_domains": []
+      }
+    ],
+    "snapshots": [
+      {
+        "snapshot_id": "snap-0212d6f8613b684ac",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-27T05:27:20.322000+00:00",
+        "acquired_at_jst": "2026-09-27T14:27:20.322000+09:00",
+        "age_seconds": 104611.702327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "shared-volume",
+        "provenance_pair_valid": true,
+        "holds": [
+          "backup_protection.intent",
+          "backup_protection.last_success"
+        ],
+        "integrity_issues": [],
+        "reasons": [
+          "retention-owned"
+        ],
+        "normal_eligible": false,
+        "classification": "PROTECTED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": true,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-0e5941ab3b8e0e6ff",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-25T08:21:18.683000+00:00",
+        "acquired_at_jst": "2026-09-25T17:21:18.683000+09:00",
+        "age_seconds": 266973.341327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "shared-volume",
+        "provenance_pair_valid": true,
+        "holds": [
+          "journal:restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42:pre-restore-protection",
+          "proposed-historical-hold:explicit-retention"
+        ],
+        "integrity_issues": [],
+        "reasons": [
+          "retention-owned"
+        ],
+        "normal_eligible": false,
+        "classification": "PROTECTED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": true,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-0aac363f3ce09e05a",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-24T11:17:26.669000+00:00",
+        "acquired_at_jst": "2026-09-24T20:17:26.669000+09:00",
+        "age_seconds": 342805.355327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "shared-volume",
+        "provenance_pair_valid": true,
+        "holds": [
+          "journal:restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42:source",
+          "proposed-historical-hold:explicit-retention"
+        ],
+        "integrity_issues": [],
+        "reasons": [
+          "retention-owned"
+        ],
+        "normal_eligible": false,
+        "classification": "PROTECTED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": true,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-0d2407a5af78afa82",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-23T08:38:21.444000+00:00",
+        "acquired_at_jst": "2026-09-23T17:38:21.444000+09:00",
+        "age_seconds": 438750.580327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "shared-volume",
+        "provenance_pair_valid": true,
+        "holds": [
+          "journal:restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730:pre-restore-protection",
+          "proposed-historical-hold:provisional-review"
+        ],
+        "integrity_issues": [],
+        "reasons": [
+          "retention-owned"
+        ],
+        "normal_eligible": false,
+        "classification": "PROTECTED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": true,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-0a1da731e1fe40f44",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-22T16:32:10.626000+00:00",
+        "acquired_at_jst": "2026-09-23T01:32:10.626000+09:00",
+        "age_seconds": 496721.398327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "shared-volume",
+        "provenance_pair_valid": true,
+        "holds": [
+          "journal:restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd:pre-restore-protection",
+          "proposed-historical-hold:provisional-review"
+        ],
+        "integrity_issues": [],
+        "reasons": [
+          "retention-owned"
+        ],
+        "normal_eligible": false,
+        "classification": "PROTECTED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": true,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-07106a22069868738",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-12T12:49:47.313000+00:00",
+        "acquired_at_jst": "2026-09-12T21:49:47.313000+09:00",
+        "age_seconds": 1374064.711327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "shared-volume",
+        "provenance_pair_valid": true,
+        "holds": [],
+        "integrity_issues": [],
+        "reasons": [
+          "retention-owned"
+        ],
+        "normal_eligible": true,
+        "classification": "KEEP",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": 1,
+        "within_14_days": false,
+        "newest_seven": true,
+        "old_policy_projection": "KEEP",
+        "new_policy_projection": "KEEP"
+      },
+      {
+        "snapshot_id": "snap-0be8e05ab05d70e84",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-12T10:31:35.625000+00:00",
+        "acquired_at_jst": "2026-09-12T19:31:35.625000+09:00",
+        "age_seconds": 1382356.399327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "shared-volume",
+        "provenance_pair_valid": true,
+        "holds": [
+          "journal:restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730:source",
+          "journal:restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd:source",
+          "proposed-historical-hold:provisional-review"
+        ],
+        "integrity_issues": [],
+        "reasons": [
+          "retention-owned"
+        ],
+        "normal_eligible": false,
+        "classification": "PROTECTED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": false,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-021079b3e3843652f",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-12T03:31:02.313000+00:00",
+        "acquired_at_jst": "2026-09-12T12:31:02.313000+09:00",
+        "age_seconds": 1407589.711327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "shared-volume",
+        "provenance_pair_valid": true,
+        "holds": [],
+        "integrity_issues": [],
+        "reasons": [
+          "retention-owned"
+        ],
+        "normal_eligible": true,
+        "classification": "KEEP",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": 2,
+        "within_14_days": false,
+        "newest_seven": true,
+        "old_policy_projection": "KEEP",
+        "new_policy_projection": "KEEP"
+      },
+      {
+        "snapshot_id": "snap-0bc776ec580afd4ac",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-12T02:38:39.124000+00:00",
+        "acquired_at_jst": "2026-09-12T11:38:39.124000+09:00",
+        "age_seconds": 1410732.900327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "legacy-or-unknown",
+        "provenance_pair_valid": true,
+        "holds": [],
+        "integrity_issues": [],
+        "reasons": [
+          "legacy-scope-protected"
+        ],
+        "normal_eligible": false,
+        "classification": "EXCLUDED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": false,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-005ce340d03a42340",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-11T10:16:48.543000+00:00",
+        "acquired_at_jst": "2026-09-11T19:16:48.543000+09:00",
+        "age_seconds": 1469643.481327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "legacy-or-unknown",
+        "provenance_pair_valid": true,
+        "holds": [],
+        "integrity_issues": [],
+        "reasons": [
+          "legacy-scope-protected"
+        ],
+        "normal_eligible": false,
+        "classification": "EXCLUDED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": false,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-0989e090822d69d1e",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-08T13:06:56.332000+00:00",
+        "acquired_at_jst": "2026-09-08T22:06:56.332000+09:00",
+        "age_seconds": 1718635.692327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "legacy-or-unknown",
+        "provenance_pair_valid": true,
+        "holds": [],
+        "integrity_issues": [],
+        "reasons": [
+          "legacy-scope-protected"
+        ],
+        "normal_eligible": false,
+        "classification": "EXCLUDED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": false,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-0762ec7637f489d5b",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-07T13:50:38.944000+00:00",
+        "acquired_at_jst": "2026-09-07T22:50:38.944000+09:00",
+        "age_seconds": 1802413.080327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "legacy-or-unknown",
+        "provenance_pair_valid": true,
+        "holds": [],
+        "integrity_issues": [],
+        "reasons": [
+          "legacy-scope-protected"
+        ],
+        "normal_eligible": false,
+        "classification": "EXCLUDED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": false,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-079c0aa0c06935d8f",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-09-07T08:49:24.460000+00:00",
+        "acquired_at_jst": "2026-09-07T17:49:24.460000+09:00",
+        "age_seconds": 1820487.564327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "backup",
+        "scope": "legacy-or-unknown",
+        "provenance_pair_valid": true,
+        "holds": [],
+        "integrity_issues": [],
+        "reasons": [
+          "legacy-scope-protected"
+        ],
+        "normal_eligible": false,
+        "classification": "EXCLUDED",
+        "description_matches_operation": true,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": false,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      },
+      {
+        "snapshot_id": "snap-0b1d9536e9c476c0f",
+        "owner_id": "385526546525",
+        "region": "ap-northeast-1",
+        "source_volume_id": "vol-03ac9f534326c345c",
+        "target_volume": true,
+        "acquired_at_utc": "2026-08-23T08:27:58.717000+00:00",
+        "acquired_at_jst": "2026-08-23T17:27:58.717000+09:00",
+        "age_seconds": 3117773.307327,
+        "encrypted": true,
+        "state": "completed",
+        "storage_tier": "standard",
+        "lock_state": "none-observed",
+        "category": "unclaimed-or-unknown",
+        "scope": "legacy-or-unknown",
+        "provenance_pair_valid": false,
+        "holds": [
+          "proposed-historical-hold:explicit-retention"
+        ],
+        "integrity_issues": [],
+        "reasons": [
+          "other-category",
+          "unclaimed-or-other-project-stage"
+        ],
+        "normal_eligible": false,
+        "classification": "PROTECTED",
+        "description_matches_operation": false,
+        "missing_checks": [
+          "collector/hold-manifest review and fresh deletion fencing"
+        ],
+        "normal_rank": null,
+        "within_14_days": false,
+        "newest_seven": null,
+        "old_policy_projection": "NOT_NORMAL",
+        "new_policy_projection": "NOT_NORMAL"
+      }
+    ],
+    "snapshot_count": 14,
+    "target_volume_count": 14,
+    "provenance": [
+      {
+        "snapshot_id": "snap-0a1da731e1fe40f44",
+        "operation_id": "op-ecd6c456-7db5-4766-94eb-0004fb4f92cc",
+        "pair_valid": true,
+        "schema_version": 2,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-021079b3e3843652f",
+        "operation_id": "op-2e906afa-e8bf-4e65-9205-66504ef29465",
+        "pair_valid": true,
+        "schema_version": 2,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-07106a22069868738",
+        "operation_id": "op-c242bb75-c311-44d5-8470-6fbb319573e1",
+        "pair_valid": true,
+        "schema_version": 2,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-0212d6f8613b684ac",
+        "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+        "pair_valid": true,
+        "schema_version": 2,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-0aac363f3ce09e05a",
+        "operation_id": "op-4236596e-a436-4c99-833b-33b39f89dab8",
+        "pair_valid": true,
+        "schema_version": 2,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-0d2407a5af78afa82",
+        "operation_id": "op-aa36d4ba-101b-47f1-bd6c-f393234b9509",
+        "pair_valid": true,
+        "schema_version": 2,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-005ce340d03a42340",
+        "operation_id": "op-22df4706-b2b1-4758-a86d-5dace4334f8a",
+        "pair_valid": true,
+        "schema_version": 1,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-079c0aa0c06935d8f",
+        "operation_id": "op-ff3a9c8e-32be-4640-b782-ae9e60686d94",
+        "pair_valid": true,
+        "schema_version": 1,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-0e5941ab3b8e0e6ff",
+        "operation_id": "op-3315c971-8f8a-40bd-9268-fd52a32305d9",
+        "pair_valid": true,
+        "schema_version": 2,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-0bc776ec580afd4ac",
+        "operation_id": "op-e69d7b47-f44d-48c8-84c3-8a463b901354",
+        "pair_valid": true,
+        "schema_version": 1,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-0be8e05ab05d70e84",
+        "operation_id": "op-059abd53-92a6-469a-abb2-6eb8dfe5da8e",
+        "pair_valid": true,
+        "schema_version": 2,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-0762ec7637f489d5b",
+        "operation_id": "op-eb1bd6d6-93cd-4832-9536-8282530eb6be",
+        "pair_valid": true,
+        "schema_version": 1,
+        "validation": "original values in memory; recovery not persisted"
+      },
+      {
+        "snapshot_id": "snap-0989e090822d69d1e",
+        "operation_id": "op-de3dd5bb-87c8-48ad-b9af-4631ec483f8d",
+        "pair_valid": true,
+        "schema_version": 1,
+        "validation": "original values in memory; recovery not persisted"
+      }
+    ],
+    "orphan_provenance_ids": [],
+    "deletion_history": [],
+    "games": [
+      {
+        "record_kind": "whitelist-policy",
+        "game_id": "game-vanilla-main",
+        "revision": 1
+      },
+      {
+        "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+        "current_world": null,
+        "data_source": "/srv/minecraft/games/game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21/server",
+        "generation": 1,
+        "counter": 2,
+        "creation_record_present": true,
+        "import_record_present": true,
+        "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+      },
+      {
+        "game_id": "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f",
+        "current_world": null,
+        "data_source": "/srv/minecraft/games/game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f/server",
+        "generation": 1,
+        "counter": null,
+        "creation_record_present": true,
+        "import_record_present": false,
+        "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+      },
+      {
+        "game_id": "game-vanilla-main",
+        "current_world": null,
+        "data_source": "/srv/minecraft/games/game-vanilla-main/server",
+        "generation": 1,
+        "counter": null,
+        "creation_record_present": false,
+        "import_record_present": false,
+        "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+      },
+      {
+        "game_id": "game-vanilla-secondary",
+        "current_world": "op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf",
+        "data_source": "/srv/minecraft/games/game-vanilla-secondary/worlds/op-2fc1bd34-b2ab-45a4-b3f8-95a53d828dcf/server",
+        "generation": 1,
+        "counter": 2,
+        "creation_record_present": false,
+        "import_record_present": false,
+        "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+      },
+      {
+        "record_kind": "whitelist-policy",
+        "game_id": "game-vanilla-secondary",
+        "revision": 1
+      },
+      {
+        "record_kind": "whitelist-policy",
+        "game_id": null,
+        "revision": 2
+      },
+      {
+        "record_kind": "registry",
+        "registered_ids": [
+          "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+          "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+          "game-eb068843cb6ca81759cb6dd9544ee6b6bd228307a0e8d0e065d879bf19f3312f"
+        ]
+      },
+      {
+        "game_id": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+        "current_world": null,
+        "data_source": "/srv/minecraft/games/game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4/server",
+        "generation": 1,
+        "counter": null,
+        "creation_record_present": true,
+        "import_record_present": false,
+        "snapshot_reference_policy": "archive paths and hashes are not snapshot references"
+      }
+    ],
+    "journals": [
+      {
+        "journal_key": "restore#op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+        "operation_id": "op-8639e35589a158e5e45fc2ccf68fcec06681aac6e8eeaf2b1507495e35224730",
+        "revision": 20,
+        "phase": "ROLLED_BACK",
+        "identity_valid": true,
+        "game_id": "game-vanilla-secondary",
+        "source_snapshot_id": "snap-0be8e05ab05d70e84",
+        "pre_restore_snapshot_id": "snap-0d2407a5af78afa82",
+        "release_condition": "no automatic release, including PLANNED and ROLLED_BACK"
+      },
+      {
+        "journal_key": "restore#op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+        "operation_id": "op-a09fec85b92d5620351ef556b7d47d4dff6f6d62e0042fc0a3f0e5c28b519f42",
+        "revision": 18,
+        "phase": "ROLLED_BACK",
+        "identity_valid": true,
+        "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+        "source_snapshot_id": "snap-0aac363f3ce09e05a",
+        "pre_restore_snapshot_id": "snap-0e5941ab3b8e0e6ff",
+        "release_condition": "no automatic release, including PLANNED and ROLLED_BACK"
+      },
+      {
+        "journal_key": "restore#op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd",
+        "operation_id": "op-c049a9e8ca40dd4dda1fa71b246e484ff6164c1f16a00ca774ea8f5d95f7fdcd",
+        "revision": 1,
+        "phase": "PLANNED",
+        "identity_valid": true,
+        "game_id": "game-vanilla-secondary",
+        "source_snapshot_id": "snap-0be8e05ab05d70e84",
+        "pre_restore_snapshot_id": "snap-0a1da731e1fe40f44",
+        "release_condition": "no automatic release, including PLANNED and ROLLED_BACK"
+      }
+    ],
+    "protection": {
+      "boundary": 2,
+      "protected_boundary": 2,
+      "attempts": 0,
+      "oldest_at": null,
+      "unknown_since": null,
+      "stopped_at": null,
+      "intent": {
+        "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+        "snapshot_id": null,
+        "boundary": 2,
+        "acquired_at": null,
+        "verified_at": null,
+        "status": "SUCCEEDED"
+      },
+      "last_success": {
+        "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+        "snapshot_id": "snap-0212d6f8613b684ac",
+        "boundary": 2,
+        "acquired_at": "2026-09-27T05:27:20.322000+00:00",
+        "verified_at": "2026-09-27T05:31:22.833615+00:00",
+        "status": null
+      }
+    },
+    "unresolved_operations": [
+      {
+        "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+        "unresolved": true,
+        "operation_type": "BACKUP",
+        "requested_at": "2026-09-07T08:38:29.797365+00:00",
+        "completed_at": "2026-09-07T08:38:35.736752+00:00",
+        "status": "FAILED"
+      },
+      {
+        "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+        "unresolved": true,
+        "operation_type": "RETENTION",
+        "requested_at": "2026-09-08T13:14:55.289968+00:00",
+        "completed_at": "2026-09-08T13:15:06.307775+00:00",
+        "status": "FAILED"
+      },
+      {
+        "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+        "unresolved": true,
+        "operation_type": "BACKUP",
+        "requested_at": "2026-09-22T16:20:11.302008+00:00",
+        "completed_at": "2026-09-22T16:20:23.148398+00:00",
+        "status": "FAILED"
+      }
+    ],
+    "absent_reference_ids": [],
+    "recycle_bin_rules": [],
+    "recycle_bin_snapshot_ids": [],
+    "policy_projection": {
+      "label": "UNAPPROVED_POLICY_PROJECTION_NOT_SAFE_DELETE_CANDIDATES",
+      "cohort": "validated normal shared-volume; separate holds do not consume seven",
+      "old_newest_seven_outside_ids": [],
+      "new_14d_or_seven_outside_ids": [],
+      "boundary_tie": false,
+      "normal_count": 2
+    },
+    "deployed_old_policy_reference": {
+      "label": "HISTORICAL_DEPLOYED_NEWEST_SEVEN_ARITHMETIC_ONLY_NOT_AN_EXECUTION_PLAN",
+      "normal_count": 8,
+      "outside_ids": [
+        "snap-021079b3e3843652f"
+      ],
+      "boundary_tie": false,
+      "limitation": "old classifier predates journal/manifest holds; not deletion recommendations"
+    },
+    "evidence_contract": "original recovery verified in memory; persisted projections cannot revalidate recovery digests. Replay only arithmetic, never deletion authorization.",
+    "tables": {
+      "state": "wc-dev-system-state",
+      "games": "wc-dev-games",
+      "backups": "wc-dev-backups",
+      "operations": "wc-dev-operations"
+    },
+    "volume_identity_confirmed": true
+  },
+  "initial_runtime_and_candidate_reads": {
+    "started_at": "2026-09-28T10:36:05.242617+00:00",
+    "account": "385526546525",
+    "region": "ap-northeast-1",
+    "volume": "vol-03ac9f534326c345c",
+    "issues": [],
+    "operations": [
+      {
+        "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+        "present": true,
+        "terminal_failed": true,
+        "type_matches": true,
+        "execution_matches": true,
+        "facts": {
+          "errors": [
+            "BACKUP_SNAPSHOT_CREATE_FAILED"
+          ],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        "create_intent_present": false,
+        "create_intent_keys": []
+      },
+      {
+        "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+        "present": true,
+        "terminal_failed": true,
+        "type_matches": true,
+        "execution_matches": true,
+        "facts": {
+          "errors": [
+            "RETENTION_DRY_RUN_FAILED"
+          ],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        "create_intent_present": false,
+        "create_intent_keys": []
+      },
+      {
+        "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+        "present": true,
+        "terminal_failed": true,
+        "type_matches": true,
+        "execution_matches": true,
+        "facts": {
+          "errors": [
+            "BACKUP_SNAPSHOT_CREATE_FAILED"
+          ],
+          "snapshot_ids": [],
+          "facts": [],
+          "states": []
+        },
+        "create_intent_present": true,
+        "create_intent_keys": [
+          "Project",
+          "Stage",
+          "WishicraftBackupScope",
+          "WishicraftCategory",
+          "WishicraftCreatedAt",
+          "WishicraftGameId",
+          "WishicraftOperationId",
+          "WishicraftProtected",
+          "WishicraftRecoveryDigest",
+          "WishicraftSchemaVersion",
+          "WishicraftSourceVolumeId"
+        ]
+      }
+    ],
+    "snapshot_checks": [
+      {
+        "snapshot_id": "snap-0212d6f8613b684ac",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "17a6f058b718a9397c0bd3a0d07dd81cc2ab7d3d49774b65ed818cbffdcdaef7"
+      },
+      {
+        "snapshot_id": "snap-0e5941ab3b8e0e6ff",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "a7a144daa21b9920427890da83c753c4c323d22597487e97cb8b7695f80cf567"
+      },
+      {
+        "snapshot_id": "snap-0aac363f3ce09e05a",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "8f2404bb6b929f0c0206ac381ec714ad1f27136b3b9cc6eb583345060605da4a"
+      },
+      {
+        "snapshot_id": "snap-0d2407a5af78afa82",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "0278fcc0c0cfd8f9153c2ad6c33e66dfc451f79faa4519fd3a65d3155ef5f0d9"
+      },
+      {
+        "snapshot_id": "snap-0a1da731e1fe40f44",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "d9ffa0325ed6df8e0bbbd6c2ed0c1f1aa0d402bbe954f2ad034066e0dabaf4d1"
+      },
+      {
+        "snapshot_id": "snap-07106a22069868738",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "d6d2148543b1cae7651dee6dfbd68128f33816eb6f4725628a8fad8db45c1ac1"
+      },
+      {
+        "snapshot_id": "snap-0be8e05ab05d70e84",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "251c3a9cdd8807f1a2e2a52687a7bdb8040dc157855bc21bf1edc47c3e410ae5"
+      },
+      {
+        "snapshot_id": "snap-021079b3e3843652f",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "647035907380c58ab8fd30dc97b177bbfab8529963b5cff5861cc663beb75157"
+      },
+      {
+        "snapshot_id": "snap-0bc776ec580afd4ac",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "b1b5373dc43f552ba12eabc509a99d2e5d5b1a92b0815674f75d69fed3bac6ef"
+      },
+      {
+        "snapshot_id": "snap-005ce340d03a42340",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "caa2f7fbd83c1ebf1a0612c4151d47a1ee8d2c1b15c13f5dd36978ca29506611"
+      },
+      {
+        "snapshot_id": "snap-0989e090822d69d1e",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "d3828f8de3ab7b500d855d9fe47b5577260b600344af51e202c10406e9179240"
+      },
+      {
+        "snapshot_id": "snap-0762ec7637f489d5b",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "99e93ef7ce95fa4c7615d2e7db2b1ce5d5e0191c5d44bd3f4719427e87806716"
+      },
+      {
+        "snapshot_id": "snap-079c0aa0c06935d8f",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "95139f3e83cf5f7e9b32284b254b36615b40ebc71eda1a21355ecd7cbca27c21"
+      },
+      {
+        "snapshot_id": "snap-0b1d9536e9c476c0f",
+        "issues": [
+          "snapshot-lock-unknown",
+          "recycle-bin-unknown"
+        ],
+        "public_check_revision": "35dc6ad358b4bcb9d6906716034264d34a848dbf5d0c3909c88448234a769e04"
+      }
+    ],
+    "deletion_authorized": false,
+    "planned_delete_ids": [],
+    "delete_action_count": 0,
+    "status": "NO_DELETE",
+    "locks": {
+      "count": 0,
+      "final_page": true
+    },
+    "lambda": {
+      "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task",
+      "Runtime": "python3.12",
+      "Handler": "wishicraft.retention_workflow_lambda.handler",
+      "Timeout": 120,
+      "Version": "$LATEST",
+      "LastModified": "2026-09-27T03:20:35.000+0000",
+      "RevisionId": "82743639-9531-4111-8ed0-664b8e32bc70",
+      "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-RetentionTaskFunctionServ-zQhVIzoKts3N",
+      "CodeSha256": "d/S2ZWC7zLBqkNo6uCJ8DwmJ/JeOBbrDcx4m3BzVlK8="
+    },
+    "versions": [
+      "$LATEST"
+    ],
+    "aliases": [],
+    "lambda_lists_complete": true,
+    "workflow": {
+      "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+      "name": "wc-dev-retention",
+      "status": "ACTIVE",
+      "type": "STANDARD",
+      "roleArn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-RetentionWorkflowRole90B8-3nnywDAwMfE9",
+      "revisionId": null,
+      "timeout": 300,
+      "task_resources": [
+        {
+          "state": "ReconcileBeforeRetention",
+          "resource": "arn:aws:states:::lambda:invoke",
+          "retry_present": false,
+          "timeout": null
+        },
+        {
+          "state": "RecordFailure",
+          "resource": "arn:aws:states:::lambda:invoke",
+          "retry_present": false,
+          "timeout": null
+        },
+        {
+          "state": "RunRetentionDryRun",
+          "resource": "arn:aws:states:::lambda:invoke",
+          "retry_present": false,
+          "timeout": null
+        }
+      ]
+    },
+    "iam": {
+      "role": "WishicraftControlPlaneSta-RetentionTaskFunctionServ-zQhVIzoKts3N",
+      "inline": [
+        {
+          "name": "RetentionTaskFunctionServiceRoleDefaultPolicy8FD8FE69",
+          "statements": [
+            {
+              "effect": "Allow",
+              "actions": [
+                "ec2:DescribeLockedSnapshots",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeVolumes"
+              ],
+              "resources": "*",
+              "condition_keys": []
+            },
+            {
+              "effect": "Allow",
+              "actions": "rbin:ListRules",
+              "resources": "*",
+              "condition_keys": [
+                "rbin:Request/ResourceType"
+              ]
+            },
+            {
+              "effect": "Allow",
+              "actions": "rbin:GetRule",
+              "resources": "arn:aws:rbin:ap-northeast-1:385526546525:rule/*",
+              "condition_keys": [
+                "rbin:Attribute/ResourceType"
+              ]
+            },
+            {
+              "effect": "Allow",
+              "actions": "dynamodb:Scan",
+              "resources": "arn:aws:dynamodb:ap-northeast-1:385526546525:table/wc-dev-backups",
+              "condition_keys": []
+            },
+            {
+              "effect": "Allow",
+              "actions": [
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:TransactWriteItems"
+              ],
+              "resources": [
+                "arn:aws:dynamodb:ap-northeast-1:385526546525:table/wc-dev-system-state",
+                "arn:aws:dynamodb:ap-northeast-1:385526546525:table/wc-dev-operations",
+                "arn:aws:dynamodb:ap-northeast-1:385526546525:table/wc-dev-locks"
+              ],
+              "condition_keys": []
+            },
+            {
+              "effect": "Allow",
+              "actions": "dynamodb:GetItem",
+              "resources": "arn:aws:dynamodb:ap-northeast-1:385526546525:table/wc-dev-games",
+              "condition_keys": []
+            }
+          ]
+        }
+      ],
+      "attached_arns": [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      ],
+      "complete": true
+    },
+    "ended_at": "2026-09-28T10:36:15.092189+00:00"
+  },
+  "lock_bin_correction": {
+    "started_at": "2026-09-28T10:55:34.995189+00:00",
+    "supersedes_checks_only": "preflight-extra-v1.json: snapshot-lock/recycle-bin unknown",
+    "method": "owner-wide complete pagination; exact membership after successful final page; no NotFound inference",
+    "status": "NO_DELETE",
+    "deletion_authorized": false,
+    "planned_delete_ids": [],
+    "delete_action_count": 0,
+    "locks_count": 0,
+    "bin_count": 0,
+    "audit": [
+      {
+        "api": "ec2.describe_locked_snapshots",
+        "started_at": "2026-09-28T10:55:35.068581+00:00",
+        "ended_at": "2026-09-28T10:55:35.254096+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {},
+        "consistent_read": false,
+        "item_count": 0
+      },
+      {
+        "api": "ec2.list_snapshots_in_recycle_bin",
+        "started_at": "2026-09-28T10:55:35.254153+00:00",
+        "ended_at": "2026-09-28T10:55:35.305670+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {},
+        "consistent_read": false,
+        "item_count": 0
+      }
+    ],
+    "state": {
+      "system_matches": true,
+      "no_current_operation": true,
+      "maintenance_ended_or_absent": true,
+      "desired_stopped": true,
+      "healthy": true
+    },
+    "ended_at": "2026-09-28T10:55:35.563683+00:00"
+  },
+  "historical_current_identity": {
+    "observed_at": "2026-09-28T10:39:03.561769+00:00",
+    "operations": [
+      {
+        "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+        "error_code": "BACKUP_SNAPSHOT_CREATE_FAILED",
+        "error_auxiliary_all_null": true,
+        "operation_type": "BACKUP",
+        "status": "FAILED",
+        "system_id": null,
+        "resource_id": null,
+        "target_game_id": "game-vanilla-main",
+        "requested_at": "2026-09-07T08:38:29.797365Z",
+        "completed_at": "2026-09-07T08:38:35.736752Z",
+        "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-433438bf-d775-4799-8016-ff0bdcb361a7",
+        "backup_create_intent": null
+      },
+      {
+        "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+        "error_code": "RETENTION_DRY_RUN_FAILED",
+        "error_auxiliary_all_null": true,
+        "operation_type": "RETENTION",
+        "status": "FAILED",
+        "system_id": null,
+        "resource_id": null,
+        "target_game_id": "game-vanilla-main",
+        "requested_at": "2026-09-08T13:14:55.289968Z",
+        "completed_at": "2026-09-08T13:15:06.307775Z",
+        "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+        "backup_create_intent": null
+      },
+      {
+        "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+        "error_code": "BACKUP_SNAPSHOT_CREATE_FAILED",
+        "error_auxiliary_all_null": true,
+        "operation_type": "BACKUP",
+        "status": "FAILED",
+        "system_id": null,
+        "resource_id": null,
+        "target_game_id": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+        "requested_at": "2026-09-22T16:20:11.302008Z",
+        "completed_at": "2026-09-22T16:20:23.148398Z",
+        "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+        "backup_create_intent": {
+          "Project": "wishicraft",
+          "WishicraftGameId": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+          "WishicraftCreatedAt": "2026-09-22T16:20:22.488662Z",
+          "WishicraftOperationId": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+          "WishicraftRecoveryDigest": "725bf4357074b1f7769f289f91a3687ed8e9ff6f77bcf1aec706c15feb767d92",
+          "WishicraftSchemaVersion": "2",
+          "Stage": "dev",
+          "WishicraftSourceVolumeId": "vol-03ac9f534326c345c",
+          "WishicraftProtected": "false",
+          "WishicraftBackupScope": "shared-volume",
+          "WishicraftCategory": "backup"
+        }
+      }
+    ]
+  },
+  "proposed_authority_live_comparison": {
+    "observed_at": "2026-09-28T11:07:28.851222+00:00",
+    "proposed_runtime_authority_only": true,
+    "operations": [
+      {
+        "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+        "raw_failed": true,
+        "proposed_authority_matches": true
+      },
+      {
+        "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+        "raw_failed": true,
+        "proposed_authority_matches": true
+      },
+      {
+        "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+        "raw_failed": true,
+        "proposed_authority_matches": true
+      }
+    ],
+    "audit": [
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T11:07:28.411847+00:00",
+        "ended_at": "2026-09-28T11:07:28.509967+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-system-state"
+        },
+        "consistent_read": true,
+        "item_count": 27
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T11:07:28.533587+00:00",
+        "ended_at": "2026-09-28T11:07:28.587535+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-games"
+        },
+        "consistent_read": true,
+        "item_count": 9
+      },
+      {
+        "api": "dynamodb.scan",
+        "started_at": "2026-09-28T11:07:28.609866+00:00",
+        "ended_at": "2026-09-28T11:07:28.671222+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "TableName": "wc-dev-backups"
+        },
+        "consistent_read": true,
+        "item_count": 26
+      },
+      {
+        "api": "ec2.describe_snapshots",
+        "started_at": "2026-09-28T11:07:28.671326+00:00",
+        "ended_at": "2026-09-28T11:07:28.851215+00:00",
+        "pages": 1,
+        "final_page": true,
+        "issues": [],
+        "target": {
+          "OwnerIds": [
+            "385526546525"
+          ]
+        },
+        "consistent_read": false,
+        "item_count": 14
+      }
+    ],
+    "status": "NO_DELETE",
+    "deletion_authorized": false,
+    "planned_delete_ids": [],
+    "delete_action_count": 0,
+    "stack": {
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd",
+      "StackStatus": "UPDATE_COMPLETE",
+      "LastUpdatedTime": "2026-09-27 05:19:34.424000+00:00"
+    },
+    "retention_release_environment": {
+      "RETENTION_PROVISIONED": "ABSENT",
+      "RETENTION_DELETE_ENABLED": "ABSENT"
+    },
+    "attached_policy": {
+      "arn": "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+      "version": "v1",
+      "actions": [
+        [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+      ]
+    },
+    "ended_at": "2026-09-28T11:07:30.397466+00:00"
+  },
+  "proposed_authority_source_commit": "8a9fa60832f8d169ed8ffcb7672f1116e0c24021"
+}

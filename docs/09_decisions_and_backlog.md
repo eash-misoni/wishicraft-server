@@ -1,5 +1,8 @@
 # 09. Decisions and Backlog
 
+> 2026-09-28 D-115 release-preparation Draft: [authority, one-send adapter, two-stage flags and pending recovery](reviews/retention_release_gates.md) after PR #11 actual merge `29cff405`. Canonical dev remains false/false; bounded read-only preflight only. No deletion, deployment, hold release or D-114 pause. Future Stage A/B remain separately approved release work.
+
+
 > 2026-09-27 D-115 investigation completed: collector adoption, saved inventory hold reasons,
 > exact historical FAILED reconciliation and CloudTrail correction are accepted. Existing holds,
 > legacy exclusions and NO_DELETE remain. Actual deletion qualification/operation is incomplete.

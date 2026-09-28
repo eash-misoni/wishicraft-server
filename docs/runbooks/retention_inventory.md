@@ -223,3 +223,22 @@ deletion pair from unexplained absence; this is descriptive only. Its executable
 NO_DELETE / false / [] / 0, and this change creates no deletion records in AWS. Pending deletion
 records do not silently suppress orphan/protection anomalies. Do not use a captured JSON,
 proposed hold manifest, or historical FAILED explanation as deletion authority.
+
+## Release preparation after PR #11 (2026-09-28, not deployed)
+
+The disabled core was normally merged as `29cff405d83efb25ef67fb98de8b03e7ee9568f6`;
+no AWS deploy accompanied the merge. The next [release-gate design](../reviews/retention_release_gates.md)
+adds repository-only adapter/authority/two-stage binding and explicit pending recovery. Its Draft
+is not approval to enable DELETE_ONE. Canonical dev remains false/false and the offline collector
+retains NO_DELETE / deletion_authorized=false / planned_delete_ids=[] / delete_action_count=0.
+[New bounded preflight](../evidence/retention_release_preflight_dev_2026-09-28.json) found all three
+adopted historical FAILED records still present, 14 owned target-volume snapshots and zero policy
+candidates. These are time-bounded observations, not future inventory or deletion authorization.
+
+Future release order: review → canonical Stage A commit/CI → separately authorized deployment
+with deletes disabled → runtime/IAM/authority readback → separate Stage B and one-delete
+qualification approval. Validation-only `retention_validation=provisioned|enabled` assemblies
+are never deployment artifacts. No candidate is manufactured. Do not delete pending Locks or
+restart an unresolved request; use the exact-operation reconcile-only contract after quiescence
+is proved, or leave MANUAL_REVIEW_REQUIRED. All existing holds, journals and legacy exclusions
+remain; D-114 automation is unchanged. The investigation closeout above remains historical fact.
