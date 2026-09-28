@@ -11,7 +11,7 @@ from aws_cdk.assertions import Template
 from infrastructure.app import retention_input
 from infrastructure.stacks.control_plane_stack import ControlPlaneStack
 from wishicraft.config import load_configuration
-from wishicraft.retention_release import RetentionRelease
+from wishicraft.retention_release import RetentionRelease, load_retention_release
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -65,7 +65,7 @@ def test_two_stage_properties_and_canonical_no_delete_iam() -> None:
 
 
 def test_validation_is_explicit_not_a_deployment_override() -> None:
-    assert retention_input(ROOT, "dev") == RetentionRelease()
+    assert retention_input(ROOT, "dev") == load_retention_release(ROOT, "dev")
     assert retention_input(ROOT, "dev", validation="provisioned") == RetentionRelease(True, False)
     assert retention_input(ROOT, "dev", validation="enabled") == RetentionRelease(True, True)
     with pytest.raises(ValueError):

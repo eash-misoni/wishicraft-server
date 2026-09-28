@@ -265,7 +265,12 @@ def test_alarm_actions_are_one_to_one_and_only_three_are_suppressed(
         app_module, "App", lambda: App(context={"maintenance_notification_mode": mode})
     )
     app = build_app(
-        ROOT, "dev", phase=8, deployment="control-plane", daily_backup_validation="legacy"
+        ROOT,
+        "dev",
+        phase=8,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     template = Template.from_stack(
         cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))

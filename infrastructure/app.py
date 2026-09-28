@@ -202,7 +202,8 @@ def retention_input(
 ) -> RetentionRelease:
     if validation is None:
         flags = load_retention_release(root, stage)
-        source = f"config/retention-execution-{stage}.json"
+        path = root / "config" / f"retention-execution-{stage}.json"
+        source = str(path) if path.exists() else "missing-stage-supplement:default-disabled"
     else:
         if action != "synth" or validation not in {"disabled", "provisioned", "enabled"}:
             raise ValueError("invalid synth-only retention validation")

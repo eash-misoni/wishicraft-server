@@ -60,6 +60,7 @@ def test_control_plane_stack_adds_phase_six_stop_without_target_resources() -> N
         phase=6,
         deployment="control-plane",
         daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
@@ -267,6 +268,7 @@ def test_phase_eight_backup_is_data_volume_only_and_has_no_destructive_iam(
         phase=8,
         deployment="control-plane",
         daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
@@ -432,6 +434,7 @@ def test_phase_eight_retention_is_standard_dry_run_only_with_read_only_aws_iam()
         phase=8,
         deployment="control-plane",
         daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
@@ -474,6 +477,7 @@ def test_phase_eight_auto_stop_has_durable_intents_minimal_evaluator_and_commit_
         phase=8,
         deployment="control-plane",
         daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
@@ -675,6 +679,7 @@ def test_phase_seven_command_ingress_has_no_control_plane_or_secret_permissions(
         phase=7,
         deployment="control-plane",
         daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)
@@ -880,6 +885,7 @@ def test_phase_seven_release_monitoring_is_complete_and_read_only() -> None:
         phase=7,
         deployment="control-plane",
         daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     template = Template.from_stack(stack)

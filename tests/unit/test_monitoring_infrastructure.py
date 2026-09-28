@@ -21,7 +21,12 @@ def test_synthesized_environment_drives_actual_handler_and_all_new_alarms(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     app = build_app(
-        ROOT, "dev", phase=8, deployment="control-plane", daily_backup_validation="legacy"
+        ROOT,
+        "dev",
+        phase=8,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     template = Template.from_stack(
         cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))

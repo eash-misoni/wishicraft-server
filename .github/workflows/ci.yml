@@ -39,19 +39,19 @@ jobs:
         run: >-
           tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
-          --context validation_action=synth --context daily_backup_validation=legacy
+          --context validation_action=synth --context daily_backup_validation=legacy --context retention_validation=disabled
       - name: Legacy Control Plane regression
         run: >-
           tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
           --context two_games=true
-          --context validation_action=synth --context daily_backup_validation=legacy
+          --context validation_action=synth --context daily_backup_validation=legacy --context retention_validation=disabled
       - name: Legacy Control Plane regression
         run: >-
           tools/dev-env run npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
           --context two_games=true --context reset=true --context game_creation=true
-          --context validation_action=synth --context daily_backup_validation=legacy
+          --context validation_action=synth --context daily_backup_validation=legacy --context retention_validation=disabled
       - name: Canonical stage Control Plane (current release context)
         run: >-
           tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev
@@ -78,7 +78,7 @@ jobs:
           --context stage=dev --context phase=8 --context deployment=control-plane
           --context two_games=true --context reset=true --context game_creation=true
           --context whitelist_management=true --context game_packages=true
-          --context validation_action=synth --context daily_backup_validation=enabled
+          --context validation_action=synth --context daily_backup_validation=enabled --context retention_validation=disabled
       - run: >-
           tools/dev-env run -- npx --no-install cdk synth WishicraftWebStack-dev
           --context stage=dev --context phase=8 --context deployment=web
@@ -87,7 +87,7 @@ jobs:
           tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev
           --context stage=dev --context phase=8 --context deployment=control-plane
           --context two_games=true --context reset=true --context game_creation=true --context whitelist_management=true
-          --context validation_action=synth --context daily_backup_validation=legacy
+          --context validation_action=synth --context daily_backup_validation=legacy --context retention_validation=disabled
       - run: >-
           tools/dev-env run -- npx --no-install cdk synth WishicraftWebStack-dev
           --context stage=dev --context phase=8 --context deployment=web

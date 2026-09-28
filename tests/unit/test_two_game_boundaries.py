@@ -43,6 +43,7 @@ def test_actual_cdk_configuration_initializes_and_drives_both_handlers(
         phase=8,
         deployment="control-plane",
         daily_backup_validation="legacy",
+        retention_validation="disabled",
         two_games=True,
     )
     resources = Template.from_stack(

@@ -48,6 +48,7 @@ def configuration() -> dict[str, Any]:
         phase=8,
         deployment="control-plane",
         daily_backup_validation="legacy",
+        retention_validation="disabled",
         two_games=True,
     )
     return cast(

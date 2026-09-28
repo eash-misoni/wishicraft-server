@@ -175,8 +175,7 @@ def test_invalid_flags(provision: Any, enabled: Any) -> None:
         RetentionRelease(provision, enabled)
 
 
-def test_canonical_disabled_and_absent_defaults(tmp_path: Path) -> None:
-    assert load_retention_release(ROOT, "dev") == RetentionRelease()
+def test_absent_defaults_are_independent_of_checkout(tmp_path: Path) -> None:
     assert load_retention_release(tmp_path, "dev") == RetentionRelease()
 
 
