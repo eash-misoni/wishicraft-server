@@ -242,3 +242,30 @@ are never deployment artifacts. No candidate is manufactured. Do not delete pend
 restart an unresolved request; use the exact-operation reconcile-only contract after quiescence
 is proved, or leave MANUAL_REVIEW_REQUIRED. All existing holds, journals and legacy exclusions
 remain; D-114 automation is unchanged. The investigation closeout above remains historical fact.
+
+## PR #12 review correction: DynamoDB numbers and verification inputs (2026-09-28)
+
+Repository-only correction, not a release or new AWS observation. `dispatcher_timeout` now
+round-trips through DynamoDB N / TypeDeserializer's Decimal into an exact int after finite,
+integral and 1–900 validation. Historical records without dispatcher binding remain readable.
+The recovery reader normalizes only `lease_expires_at` at its boundary: exact integral Unix
+seconds 1–253402300799 (through UTC 9999-12-31 23:59:59). Fractions, bool, float, nonfinite,
+wrong types and out-of-range values are rejected, never truncated or replaced. Shared item()
+and LeaseProof semantics are unchanged; expiry, 960-second quiescence, ownership and reference
+checks remain prerequisites.
+
+Legacy build_app/CI synth scenarios explicitly select `retention_validation=disabled`, alongside
+`daily_backup_validation=legacy`. Canonical shared deployment uses **neither override** and reads
+the committed stage configuration. Future A/B override synths remain explicit validation only.
+Missing-stage defaults are tested against an independent empty fixture; canonical flag values
+are not hardcoded as false in regression assertions. Temporary configuration copies cover
+false/false, true/false and true/true via build_app and the real CLI. The CLI copy includes its
+infrastructure entrypoint so its canonical path resolves to the copied config, not the checkout.
+No tracked config is rewritten and no process-wide environment override is used.
+
+The actual dev file remains false/false; daily BACKUP configuration remains unchanged. A future
+canonical Stage A/B setting change must still pass the canonical shared synth **and** the
+independent legacy checks. Single-Game provision and false/true remain errors. See the
+[review correction evidence](../evidence/retention_release_review_2026-09-28.md) for wire-format
+reconcile/recovery tests and template comparison. This correction grants no deployment or
+snapshot permission; PR #12 stays Draft pending review.
