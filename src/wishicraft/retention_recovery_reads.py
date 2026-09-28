@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
 from wishicraft.maintenance_operator import item
@@ -155,7 +156,7 @@ def read_recovery(
             lock["resource_id"],
             lock["owner_operation_id"],
             lock["lease_id"],
-            lock["lease_expires_at"],
+            _lease_expiry(lock["lease_expires_at"]),
         )
         observation = reads.observe(record.snapshot_id)
         result = classify_absence(
@@ -186,3 +187,15 @@ def read_recovery(
         return read
     except Exception:
         raise ValueError("MANUAL_REVIEW_REQUIRED") from None
+
+
+def _lease_expiry(value: object) -> int:
+    """DynamoDB N is Decimal; retain exact integral Unix seconds within UTC's range."""
+    if isinstance(value, Decimal):
+        if not value.is_finite() or value != value.to_integral_value():
+            raise ValueError("INVALID_RECOVERY_LEASE_EXPIRY")
+    elif type(value) is not int:
+        raise ValueError("INVALID_RECOVERY_LEASE_EXPIRY")
+    if not 1 <= value <= 253402300799:
+        raise ValueError("INVALID_RECOVERY_LEASE_EXPIRY")
+    return int(value)

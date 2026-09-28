@@ -194,13 +194,15 @@ class DeletionRecord:
     def parse(cls, value: dict[str, Any]) -> DeletionRecord:
         try:
             fields = {k: v for k, v in value.items() if k not in {"record_type", "provenance_key"}}
-            for key in ("schema_version", "attempt", "revision"):
+            for key in ("schema_version", "attempt", "revision", "dispatcher_timeout"):
                 value_at_key = fields.get(key)
                 if (
                     isinstance(value_at_key, Decimal)
                     and value_at_key.is_finite()
                     and value_at_key == value_at_key.to_integral_value()
                 ):
+                    if key == "dispatcher_timeout" and not 1 <= value_at_key <= 900:
+                        raise ValueError("timeout range")
                     fields[key] = int(value_at_key)
             fields["phase"] = DeletionPhase(fields["phase"])
             result = cls(**fields)
