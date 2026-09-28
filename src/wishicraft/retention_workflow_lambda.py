@@ -89,6 +89,18 @@ _runtime: Runtime | None = None
 def handler(event: object, context: object) -> dict[str, object]:
     del context
     payload = _payload(event)
+    mode = payload.get("execution_mode", "DRY_RUN")
+    if mode == "DELETE_ONE":
+        # No deployed execution factory or AWS delete adapter exists. An event is not authority.
+        return {
+            "status": "NO_DELETE",
+            "reason": "DELETE_ONE_NOT_RELEASED",
+            "deletion_authorized": False,
+            "planned_delete_ids": [],
+            "delete_action_count": 0,
+        }
+    if mode != "DRY_RUN":
+        raise ValueError("invalid RETENTION execution mode")
     runtime = _get_runtime()
     now = datetime.now(UTC)
     proof = LeaseProof(

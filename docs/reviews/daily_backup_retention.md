@@ -87,3 +87,11 @@ retirement and wholesale legacy cleanup are not prerequisites for normal-group r
 Only if an additional retirement/release mechanism is actually needed should it become a
 separate reviewed task. No deletion adapter, authority, schedule or new hold judgment is
 introduced by this outline.
+
+## Repository execution preparation (following the investigation closeout)
+
+The [D-115 execution contract](retention_execution.md) now prepares a fake-qualified, disabled
+DELETE_ONE core, fresh readers, global-lock pending fence and separate durable deletion journal.
+The earlier “not implemented here” statements describe the investigation slice. Actual deletion
+adapter/IAM, runtime binding, release and qualification remain separate. Existing holds, legacy,
+14-day OR seven policy and public NO_DELETE outputs are unchanged.

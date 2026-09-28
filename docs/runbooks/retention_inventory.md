@@ -214,3 +214,12 @@ This closeout makes no AWS connection, recollection, configuration change, snaps
 operation or runtime change. D-114 configuration is untouched; its current live state is
 not newly observed here. Docs-only validation checks links, unchanged JSON evidence and
 content boundaries; ordinary CI also verifies tests, lint/format/types and synth scenarios.
+
+## Prepared execution contract (not released)
+
+See [normal BACKUP execution preparation](../reviews/retention_execution.md) for the disabled
+one-snapshot engine and tests. Collector `deletion_history` can distinguish an exact confirmed
+deletion pair from unexplained absence; this is descriptive only. Its executable output remains
+NO_DELETE / false / [] / 0, and this change creates no deletion records in AWS. Pending deletion
+records do not silently suppress orphan/protection anomalies. Do not use a captured JSON,
+proposed hold manifest, or historical FAILED explanation as deletion authority.

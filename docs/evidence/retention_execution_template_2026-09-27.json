@@ -1,0 +1,163 @@
+{
+  "baseline_commit": "328937ddd8037d0c297089c9ae782b1c730b4bc6",
+  "resource_count": 155,
+  "added_resources": [],
+  "removed_resources": [],
+  "changes": [
+    {
+      "logical_id": "ReconcileFunction30829CB6",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "StartTaskFunction8C564C4A",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "StopTaskFunction11473A8C",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "BackupTaskFunctionA44639DC",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "RetentionTaskFunction9F285CE4",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "AdmissionFunction23082B67",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "DiscordCommandFunction7D25102A",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "fa87978b04eb784c5b6b4cbc57c3995dde73af8833e981e023d0175a59218549.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f544b652e091b375a5737c8cef437a6bf4ae28f25833e9b02f9d3892cbc64e06.zip"
+      }
+    },
+    {
+      "logical_id": "StatusExecutorFunction6E5C9869",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "DiscordMessageFunction78FA388B",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "MonitoringObserverFunction584DA7C7",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "DailyBackupAdmissionFunctionBFD7AF72",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    },
+    {
+      "logical_id": "DailyBackupEvaluatorFunction2CAEBD5D",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "0ffe413b74738bd4a102eb4d72f892d29c5da1941c4d5b191b088f8705816a1e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "5366c24912a4e5e1c9c68298969898b4e0c19daff28b1132aae2f3423782d0ea.zip"
+      }
+    }
+  ],
+  "baseline_template_sha256": "3e06496b97d694a90018f4000d172778d6c0a5da910ca7aba2162ca1a9c3b8bb",
+  "candidate_template_sha256": "374ee130f6882283e814edd1f9b32fbda923052e05f1bec0fb22683f23aebc5b",
+  "only_lambda_code_and_asset_path_metadata_changed": true,
+  "delete_permission_present": false,
+  "implementation_commit": "e554403012a9a04765ee923f9dd9f4a2f0890b72",
+  "aws_connected": false,
+  "execution_state": {
+    "status": "NO_DELETE",
+    "deletion_authorized": false,
+    "planned_delete_ids": [],
+    "delete_action_count": 0
+  }
+}

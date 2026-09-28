@@ -87,7 +87,8 @@ class BoundaryDynamo(MemoryDynamo):
         assert terminal["ConditionExpression"] == "#status IN (:pending, :running)"
         assert delete["ConditionExpression"] == (
             "resource_id = :resource_id AND owner_operation_id = :operation_id "
-            "AND lease_id = :lease_id AND lease_expires_at >= :now"
+            "AND lease_id = :lease_id AND attribute_not_exists(retention_delete_pending) "
+            "AND lease_expires_at >= :now"
         )
         assert current["ConditionExpression"] == "current_operation_id = :operation_id"
         assert current["UpdateExpression"] == "REMOVE current_operation_id"
@@ -101,6 +102,7 @@ class BoundaryDynamo(MemoryDynamo):
         values = delete["ExpressionAttributeValues"]
         if (
             op["status"]["S"] not in {"PENDING", "RUNNING"}
+            or "retention_delete_pending" in lock
             or any(
                 lock.get(k) != values[v]
                 for k, v in {
@@ -310,3 +312,22 @@ def test_first_materialization_requires_exact_ready_before_commit(
         runtime.operations.complete_owned.assert_not_called()
     observation.ready_for_success.assert_called_once_with(GAMES[2])
     assert db.records["games", GAMES[2]] == before
+
+
+def test_pending_retention_request_prevents_formal_failure_cleanup(boundary: Any) -> None:
+    db, _ = boundary
+    request = admit(db, GAMES[2])
+    db.records["locks", "minecraft-control"]["retention_delete_pending"] = {"S": "snap-pending"}
+    before = copy.deepcopy(db.records)
+    with pytest.raises(TransactionCancelled):
+        start_workflow_lambda.handler(
+            dict(
+                schema_version=1,
+                action="fail",
+                operation_id=request.operation_id,
+                lease_id=request.lease_id,
+                error_code="START_PRECONDITION_FAILED",
+            ),
+            None,
+        )
+    assert db.records == before
