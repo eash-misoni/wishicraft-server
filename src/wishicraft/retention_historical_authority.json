@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "adoption_commit": "328937ddd8037d0c297089c9ae782b1c730b4bc6",
+  "account": "385526546525",
+  "region": "ap-northeast-1",
+  "system": "wishicraft-main",
+  "volume": "vol-03ac9f534326c345c",
+  "stage": "dev",
+  "evidence": {
+    "retention_failed_operations_dev.proposed.json": "e9365d868538342f34311a9e0d136db1f765581df4dba7e86353854a4dc5a50d",
+    "retention_failed_operations_dev_terminal_2026-09-27.json": "a832b901ce3ff322bc6011f4146ceded85b2359a4266e4420c4567fdf9274e44",
+    "retention_cloudtrail_exact_match_dev_2026-09-27.json": "d7b08f5fcc640eb9663fdd0d67f161ca74178ed8dfa10c75cda20f1030de6f1b"
+  },
+  "operations": [
+    {
+      "operation_id": "op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "error_code": "BACKUP_SNAPSHOT_CREATE_FAILED",
+      "operation_type": "BACKUP",
+      "status": "FAILED",
+      "target_game_id": "game-vanilla-main",
+      "requested_at": "2026-09-07T08:38:29.797365Z",
+      "completed_at": "2026-09-07T08:38:35.736752Z",
+      "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-433438bf-d775-4799-8016-ff0bdcb361a7",
+      "backup_create_intent": null
+    },
+    {
+      "operation_id": "op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "error_code": "RETENTION_DRY_RUN_FAILED",
+      "operation_type": "RETENTION",
+      "status": "FAILED",
+      "target_game_id": "game-vanilla-main",
+      "requested_at": "2026-09-08T13:14:55.289968Z",
+      "completed_at": "2026-09-08T13:15:06.307775Z",
+      "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-7592d65c-3173-4b98-9036-a03a1ce8008a",
+      "backup_create_intent": null
+    },
+    {
+      "operation_id": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "error_code": "BACKUP_SNAPSHOT_CREATE_FAILED",
+      "operation_type": "BACKUP",
+      "status": "FAILED",
+      "target_game_id": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+      "requested_at": "2026-09-22T16:20:11.302008Z",
+      "completed_at": "2026-09-22T16:20:23.148398Z",
+      "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-backup:op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+      "backup_create_intent": {
+        "Project": "wishicraft",
+        "WishicraftGameId": "game-0cd3c61636d7ba2acb3f99bc9d0edbf6b2fcffa63e64e9d4dde8372b569ef5b4",
+        "WishicraftCreatedAt": "2026-09-22T16:20:22.488662Z",
+        "WishicraftOperationId": "op-d0383b17-8783-43fd-a7aa-b47fcd299a2a",
+        "WishicraftRecoveryDigest": "725bf4357074b1f7769f289f91a3687ed8e9ff6f77bcf1aec706c15feb767d92",
+        "WishicraftSchemaVersion": "2",
+        "Stage": "dev",
+        "WishicraftSourceVolumeId": "vol-03ac9f534326c345c",
+        "WishicraftProtected": "false",
+        "WishicraftBackupScope": "shared-volume",
+        "WishicraftCategory": "backup"
+      }
+    }
+  ]
+}

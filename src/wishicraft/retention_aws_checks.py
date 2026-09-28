@@ -102,13 +102,13 @@ def inspect_candidate(
             ec2,
             "describe_locked_snapshots",
             {
-                "SnapshotIds": [snapshot_id],
                 "MaxResults": 1000,
             },
             "Snapshots",
             "SnapshotId",
         )
-        if any(r["SnapshotId"] != snapshot_id or r.get("LockState") != "expired" for r in locks):
+        locks = [r for r in locks if r["SnapshotId"] == snapshot_id]
+        if any(r.get("LockState") != "expired" for r in locks):
             issues.append("snapshot-locked-or-unknown")
         summary["expired_lock_count"] = len(locks)
     except Exception:
@@ -142,13 +142,12 @@ def inspect_candidate(
             ec2,
             "list_snapshots_in_recycle_bin",
             {
-                "SnapshotIds": [snapshot_id],
                 "MaxResults": 1000,
             },
             "Snapshots",
             "SnapshotId",
         )
-        if binned:
+        if any(r["SnapshotId"] == snapshot_id for r in binned):
             issues.append("candidate-already-in-recycle-bin")
         summary["rules"] = sorted(rule_view)
     except Exception:

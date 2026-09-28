@@ -90,7 +90,10 @@ def handler(event: object, context: object) -> dict[str, object]:
     del context
     payload = _payload(event)
     mode = payload.get("execution_mode", "DRY_RUN")
-    if mode == "DELETE_ONE":
+    from wishicraft.retention_runtime import environment_release
+
+    release = environment_release()
+    if mode == "DELETE_ONE" and not release.enabled:
         # No deployed execution factory or AWS delete adapter exists. An event is not authority.
         return {
             "status": "NO_DELETE",
@@ -99,7 +102,7 @@ def handler(event: object, context: object) -> dict[str, object]:
             "planned_delete_ids": [],
             "delete_action_count": 0,
         }
-    if mode != "DRY_RUN":
+    if mode not in {"DRY_RUN", "DELETE_ONE"}:
         raise ValueError("invalid RETENTION execution mode")
     runtime = _get_runtime()
     now = datetime.now(UTC)
@@ -134,6 +137,42 @@ def handler(event: object, context: object) -> dict[str, object]:
             status=OperationStatus.RUNNING,
             updated_at=now,
         )
+        if mode == "DELETE_ONE" and release.enabled:
+            # Server configuration selects mode; no caller flag grants authority.
+            import time
+
+            from wishicraft.retention_deletion import DeletionPhase
+            from wishicraft.retention_execution import ExecutionMode
+            from wishicraft.retention_runtime import bind
+
+            boto3 = importlib.import_module("boto3")
+            engine, actor = bind(runtime, proof, boto3)
+            execution_plan = engine.prepare(proof)
+            record = engine.execute(
+                execution_plan, proof, actor=actor, mode=ExecutionMode.DELETE_ONE
+            )
+            if record is not None and record.phase == DeletionPhase.RESPONSE_RECORDED:
+                engine.reconcile(proof)
+                time.sleep(11)
+                record = engine.reconcile(proof)
+            if record is not None and record.phase not in {
+                DeletionPhase.FORMALLY_DELETED,
+                DeletionPhase.NO_MUTATION,
+            }:
+                # Do not terminalize/release an unresolved request. Recovery is explicit.
+                return {"status": "MANUAL_REVIEW_REQUIRED", "reason": "RETENTION_DELETE_PENDING"}
+            success = record is None or record.phase == DeletionPhase.FORMALLY_DELETED
+            runtime.operations.complete_owned(
+                proof=proof,
+                status=OperationStatus.SUCCEEDED if success else OperationStatus.FAILED,
+                completed_at=datetime.now(UTC),
+                error_code=None if success else "RETENTION_DELETE_DENIED",
+                result={
+                    "kind": "RETENTION_DELETE_ONE",
+                    "delete_action_count": 0 if record is None else record.attempt,
+                },
+            )
+            return {"status": "SUCCEEDED" if success else "FAILED"}
         inventory = with_lock_states(
             load_complete_inventory(runtime.ec2, owner_id=runtime.context.owner_id),
             load_complete_snapshot_locks(runtime.ec2),

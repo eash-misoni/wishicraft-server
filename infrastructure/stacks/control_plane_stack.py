@@ -28,6 +28,7 @@ from wishicraft.artifacts.host_runtime_probe import EXPECTED_FILESYSTEM_UUID
 from wishicraft.config import ProjectConfig, SecretsExampleConfig, StageConfig, load_web_public_url
 from wishicraft.host_runtime import render_boot_time_artifacts
 from wishicraft.naming import resource_name, resource_tags
+from wishicraft.retention_release import RetentionRelease
 
 
 def _log_retention(stage: StageConfig) -> logs.RetentionDays:
@@ -49,6 +50,7 @@ class ControlPlaneStack(Stack):
         reset_policies: dict[str, dict[str, int]] | None = None,
         game_creation: bool = False,
         daily_backup: dict[str, bool] | None = None,
+        retention_release: RetentionRelease | None = None,
     ) -> None:
         super().__init__(
             scope,
@@ -59,6 +61,9 @@ class ControlPlaneStack(Stack):
         )
         if game_creation and (not games or reset_policies is None):
             raise ValueError("Game creation requires the current shared runtime and Reset contract")
+        retention_release = retention_release or RetentionRelease()
+        if retention_release.provision and (not games or phase < 8):
+            raise ValueError("retention provision requires shared runtime phase 8")
         package_support = self.node.try_get_context("game_packages") == "true"
         if package_support and not game_creation:
             raise ValueError("Game packages require CREATE and the shared runtime contract")
@@ -751,6 +756,20 @@ class ControlPlaneStack(Stack):
                     resources=[table.table_arn, operations_table.table_arn, locks_table.table_arn],
                 )
             )
+            from infrastructure.retention_release import bind as bind_retention
+
+            bind_retention(
+                self,
+                retention_task,
+                release=retention_release,
+                project=project,
+                stage=stage,
+                state=table,
+                games=games_table,
+                operations=operations_table,
+                backups=backups_table,
+                locks=locks_table,
+            )
             retention_workflow_role = iam.Role(
                 self,
                 "RetentionWorkflowRole",
@@ -769,6 +788,7 @@ class ControlPlaneStack(Stack):
                     reconcile_arn=function.function_arn,
                     retention_task_arn=retention_task.function_arn,
                     timeout_seconds=stage.operation_timeout_seconds("RETENTION"),
+                    delete_one=retention_release.enabled,
                 ),
             )
         function.add_to_role_policy(
@@ -3105,7 +3125,7 @@ def _backup_definition(
 
 
 def _retention_definition(
-    *, reconcile_arn: str, retention_task_arn: str, timeout_seconds: int
+    *, reconcile_arn: str, retention_task_arn: str, timeout_seconds: int, delete_one: bool = False
 ) -> dict[str, object]:
     """Build the D-091 Standard workflow with no delete state or retry."""
     invoke = {
@@ -3114,6 +3134,7 @@ def _retention_definition(
         "Parameters": {
             "FunctionName": retention_task_arn,
             "Payload": {
+                **({"execution_mode": "DELETE_ONE"} if delete_one else {}),
                 "schema_version": 1,
                 "action": "run",
                 "operation_id.$": "$.operation_id",
