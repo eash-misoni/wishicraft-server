@@ -105,3 +105,25 @@ dependency files are unchanged. No runtime dependency, layer, SDK or PyYAML is a
 Canonical retention remains true/false and D-114 true/true unchanged. The PR is Draft/unmerged.
 The deployed import failure remains until a separately approved corrected Code release and
 at-most-one disabled-gate qualification; no Stage B, snapshot deletion or live recovery is qualified.
+
+## Approved deployment continuation: qualified assembly preservation
+
+PR #15 was normally merged as `e7af67980d2243c080c94ded5aec1af4a0eb8cb5`, with the
+reviewed/synthetic/actual tree `dce2416c0b31f1a1c4e95fa899e48502f9f894bb`.
+The user subsequently approved Code deployment, disabled-gate qualification and formal
+RETENTION DRY_RUN; the earlier unmerged/undeployed statements describe that slice only.
+
+The local shared source asset matches CI exactly, but separately bundled Discord assets have
+different identities. The local bundle includes an installer-generated cffi command with the
+local Python shebang; local uv 0.12.0 also differs from CI 0.12.21. This is not evidence that the
+entire bundles are equivalent. No unqualified bundle has been published by this continuation.
+
+The artifact job now preserves its exact canonical Control Plane assembly **after all isolated
+probes pass**, as a tar archive (including modes/hidden files), with a SHA-256 transport checksum.
+A release can download the actual merge's artifact, verify its checksum and manifest/Code
+identities against that run's isolation evidence, and deploy that immutable assembly. This
+avoids regenerating a different bundle on the operator's host. No source/dependency/flag/IAM
+change or template editing is involved. It is an assembly generated in a clean CI checkout at
+the finalized commit with canonical stage configuration, without validation overrides.
+The archive is a build artifact, not an AWS response or live environment dump. CI has no AWS
+credentials; qualification and archive creation neither publish assets nor deploy a stack.
