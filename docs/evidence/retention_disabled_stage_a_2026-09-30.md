@@ -161,3 +161,7 @@ remain untouched; release and documentation work used separate worktrees.
 [Artifact import-boundary correction](retention_artifact_imports_2026-09-30.md) prepares a
 separately reviewed source fix and isolated artifact qualification. It does not change this
 PARTIAL result, repair the deployed code, or authorize another Invoke/deployment/Stage B.
+
+## Continued release and qualification (2026-09-30)
+
+The subsequently approved [Code deployment, disabled gate and formal DRY_RUN completed](retention_import_release_2026-09-30.md). This earlier record remains historical; no failure is rewritten as success. Stage B, deletion and live pending recovery remain unqualified.

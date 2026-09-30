@@ -127,3 +127,7 @@ change or template editing is involved. It is an assembly generated in a clean C
 the finalized commit with canonical stage configuration, without validation overrides.
 The archive is a build artifact, not an AWS response or live environment dump. CI has no AWS
 credentials; qualification and archive creation neither publish assets nor deploy a stack.
+
+## Continued release and qualification (2026-09-30)
+
+The subsequently approved [Code deployment, disabled gate and formal DRY_RUN completed](retention_import_release_2026-09-30.md). This earlier record remains historical; no failure is rewritten as success. Stage B, deletion and live pending recovery remain unqualified.

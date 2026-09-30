@@ -301,3 +301,22 @@ A passing developer-venv test or asset hash match alone does not qualify imports
 Canonical Stage A remains provision=true/enabled=false. Passing this repository review does not
 repair deployed code; a new Code release and at most one disabled-gate Invoke require separate
 approval. Do not move to Stage B, add PyYAML as a blanket workaround, or retry the live diagnostic.
+
+## Import correction deployed and formal DRY_RUN qualified (2026-09-30)
+
+[Continuation evidence](../evidence/retention_import_release_2026-09-30.md): PR #15 import fix and
+PR #16 exact qualified assembly preservation were normally merged; commit 601ba1f was deployed
+to the Control Plane with unchanged IAM/configuration. Disabled DELETE_ONE returned the exact
+NO_DELETE gate, and formal Admin Admission → RETENTION DRY_RUN succeeded (one candidate in the
+existing newest-seven reference calculation, zero deletions), releasing its normal Lock.
+D-114 naturally evaluated PROTECTED; intake was restored. Earlier PARTIAL/alarm records remain.
+
+For this release, the clean finalized commit's canonical CI assembly was downloaded unchanged
+after isolated artifact tests, with checksum, manifest and source correspondence checked. Do not
+substitute a locally rebuilt, differently hashed bundle for that artifact's qualification.
+The Docker/SDK qualification environment and actual Lambda read-back are distinct evidence.
+
+Retain provision=true / enabled=false. No DeleteSnapshot IAM, Stage B, actual deletion or live
+pending recovery was qualified. The old DRY_RUN's candidate/deletion-plan counts are not deletion
+authority and do not replace the future 14-day OR seven execution/reference checks. The next
+release boundary remains a separately reviewed and approved scope; do not manufacture candidates.
