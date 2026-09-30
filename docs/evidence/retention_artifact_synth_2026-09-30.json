@@ -1,0 +1,240 @@
+{
+  "baseline": "cfc48adfdf5f5ea3edbeb5c0c31302868a6f2bc2",
+  "baseline_assembly_commit": "51fa628179c43c2ca1559077d3b196e9797822e9",
+  "baseline_code_config_infra_identical": true,
+  "template_before": "458a778b5bc0b54e61defb2e377b8e4f6bcb7e5f9378f56dc7c9afa43c8c2c16",
+  "template_after": "60221673378748f3aac48532c1a9f5be14cd015828049454e6ad25366403f391",
+  "properties_changes": [
+    {
+      "logical_id": "ReconcileFunction30829CB6",
+      "handler": "wishicraft.reconcile_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "StartTaskFunction8C564C4A",
+      "handler": "wishicraft.start_workflow_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "StopTaskFunction11473A8C",
+      "handler": "wishicraft.stop_workflow_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "BackupTaskFunctionA44639DC",
+      "handler": "wishicraft.backup_workflow_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "RetentionTaskFunction9F285CE4",
+      "handler": "wishicraft.retention_workflow_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "AdmissionFunction23082B67",
+      "handler": "wishicraft.admission_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "DiscordCommandFunction7D25102A",
+      "handler": "wishicraft.discord_command_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "803300173a71d6bc2a141314eb421835ae857a9f54e902024178b0f6aac6306b.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "d8e6319fae90f5e431c014c59937580d6d381d2e69b144f24618d741c34a0457.zip"
+      }
+    },
+    {
+      "logical_id": "StatusExecutorFunction6E5C9869",
+      "handler": "wishicraft.status_executor_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "DiscordMessageFunction78FA388B",
+      "handler": "wishicraft.discord_message_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+      "handler": "wishicraft.auto_stop_evaluator_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "MonitoringObserverFunction584DA7C7",
+      "handler": "wishicraft.monitoring_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "DailyBackupAdmissionFunctionBFD7AF72",
+      "handler": "wishicraft.daily_backup_lambda.admit",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    },
+    {
+      "logical_id": "DailyBackupEvaluatorFunction2CAEBD5D",
+      "handler": "wishicraft.daily_backup_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip"
+      }
+    }
+  ],
+  "all_other_properties_identical": true,
+  "resource_identity_unchanged": true,
+  "web_properties_changes": [
+    {
+      "logical_id": "Web3C8945DB",
+      "handler": "wishicraft.web_lambda.handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "7b8b315cfb87e8fb958f22e65f5cdc3fe51ac825fa4ebf107482eed84bb92f0e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f0d6a1caff7d92ba02fd4b38467bef17a7587ec204a9eaee72a8385a0901a627.zip"
+      }
+    },
+    {
+      "logical_id": "AuthC256A5EC",
+      "handler": "wishicraft.web_lambda.auth_handler",
+      "before": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "7b8b315cfb87e8fb958f22e65f5cdc3fe51ac825fa4ebf107482eed84bb92f0e.zip"
+      },
+      "after": {
+        "S3Bucket": "cdk-hnb659fds-assets-385526546525-ap-northeast-1",
+        "S3Key": "f0d6a1caff7d92ba02fd4b38467bef17a7587ec204a9eaee72a8385a0901a627.zip"
+      }
+    }
+  ],
+  "packages": [
+    {
+      "display_name": "ReconcileFunction/Code",
+      "before": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c",
+      "after": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "changed_files": [
+        "wishicraft/dynamodb_read.py",
+        "wishicraft/maintenance_operator.py",
+        "wishicraft/retention_deletion_repository.py",
+        "wishicraft/retention_recovery_reads.py",
+        "wishicraft/retention_release.py",
+        "wishicraft/retention_runtime.py",
+        "wishicraft/retention_workflow_lambda.py"
+      ],
+      "external_dependency_files_unchanged": true
+    },
+    {
+      "display_name": "DiscordCommandFunction/Code",
+      "before": "803300173a71d6bc2a141314eb421835ae857a9f54e902024178b0f6aac6306b",
+      "after": "d8e6319fae90f5e431c014c59937580d6d381d2e69b144f24618d741c34a0457",
+      "changed_files": [
+        "wishicraft/dynamodb_read.py",
+        "wishicraft/maintenance_operator.py",
+        "wishicraft/retention_deletion_repository.py",
+        "wishicraft/retention_recovery_reads.py",
+        "wishicraft/retention_release.py",
+        "wishicraft/retention_runtime.py",
+        "wishicraft/retention_workflow_lambda.py"
+      ],
+      "external_dependency_files_unchanged": true
+    },
+    {
+      "display_name": "Web/Code",
+      "before": "7b8b315cfb87e8fb958f22e65f5cdc3fe51ac825fa4ebf107482eed84bb92f0e",
+      "after": "f0d6a1caff7d92ba02fd4b38467bef17a7587ec204a9eaee72a8385a0901a627",
+      "changed_files": [
+        "wishicraft/dynamodb_read.py",
+        "wishicraft/maintenance_operator.py",
+        "wishicraft/retention_deletion_repository.py",
+        "wishicraft/retention_recovery_reads.py",
+        "wishicraft/retention_release.py",
+        "wishicraft/retention_runtime.py",
+        "wishicraft/retention_workflow_lambda.py"
+      ],
+      "external_dependency_files_unchanged": true
+    }
+  ]
+}

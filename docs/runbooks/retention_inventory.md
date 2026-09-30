@@ -290,3 +290,14 @@ artifact-level test and separately approved release/qualification are next; no h
 FAILED re-investigation or hold change is needed. [Exact ChangeSet, diagnostic, notification,
 retained data and final intake state](../evidence/retention_disabled_stage_a_2026-09-30.md)
 are the current checkpoint. The original preparation/review evidence is retained.
+
+## Artifact import qualification before the next code release
+
+See [the import-boundary correction and isolation contract](../evidence/retention_artifact_imports_2026-09-30.md).
+The `lambda-artifact` CI job is mandatory alongside existing quality/runtime checks. It selects
+assets using actual canonical template/manifest identity and exercises them in networkless
+Python 3.12/Linux with SDK-only dependencies, including predecessor failure reproduction.
+A passing developer-venv test or asset hash match alone does not qualify imports.
+Canonical Stage A remains provision=true/enabled=false. Passing this repository review does not
+repair deployed code; a new Code release and at most one disabled-gate Invoke require separate
+approval. Do not move to Stage B, add PyYAML as a blanket workaround, or retry the live diagnostic.

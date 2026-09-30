@@ -1,0 +1,364 @@
+{
+  "base_image": "python@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f",
+  "local_runtime_image": "sha256:bda6940ce3eb7293bfc299d7ac710ae4e0674d3d2d8deb884bcfbc71a7300c99",
+  "base_platform": "amd64",
+  "sdk_requirements_sha256": "3f839a59b192cd6b99519fa8a152fcf3886aa6c60820c94baaf74200fe37faa9",
+  "old_origin": "regenerated CDK assembly of 51fa628179c43c2ca1559077d3b196e9797822e9; not downloaded ZIP",
+  "artifacts": [
+    {
+      "logical_id": "RetentionTaskFunction9F285CE4",
+      "handler": "wishicraft.retention_workflow_lambda.handler",
+      "asset_id": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c",
+      "template_sha256": "4d8c84377ec5902989a58d575ffe4a144618f5ef308b29b185af137d882398c1"
+    },
+    {
+      "logical_id": "ReconcileFunction30829CB6",
+      "handler": "wishicraft.reconcile_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "StartTaskFunction8C564C4A",
+      "handler": "wishicraft.start_workflow_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "StopTaskFunction11473A8C",
+      "handler": "wishicraft.stop_workflow_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "BackupTaskFunctionA44639DC",
+      "handler": "wishicraft.backup_workflow_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "RetentionTaskFunction9F285CE4",
+      "handler": "wishicraft.retention_workflow_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "AdmissionFunction23082B67",
+      "handler": "wishicraft.admission_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "DiscordCommandFunction7D25102A",
+      "handler": "wishicraft.discord_command_lambda.handler",
+      "asset_id": "546b16d99bffb11cb7cba79050cd8c6086e716b6ab50c8d46ebd6e8f4ae0f8a0",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "StatusExecutorFunction6E5C9869",
+      "handler": "wishicraft.status_executor_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "DiscordMessageFunction78FA388B",
+      "handler": "wishicraft.discord_message_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "AutoStopEvaluatorFunctionF85F8B50",
+      "handler": "wishicraft.auto_stop_evaluator_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "MonitoringObserverFunction584DA7C7",
+      "handler": "wishicraft.monitoring_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "DailyBackupAdmissionFunctionBFD7AF72",
+      "handler": "wishicraft.daily_backup_lambda.admit",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "DailyBackupEvaluatorFunction2CAEBD5D",
+      "handler": "wishicraft.daily_backup_lambda.handler",
+      "asset_id": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+    },
+    {
+      "logical_id": "Web3C8945DB",
+      "handler": "wishicraft.web_lambda.handler",
+      "asset_id": "f0d6a1caff7d92ba02fd4b38467bef17a7587ec204a9eaee72a8385a0901a627",
+      "template_sha256": "f0ab310030b25dd7335ec533aca1d1af2a354ddb3777db34850bb024e583391a"
+    },
+    {
+      "logical_id": "AuthC256A5EC",
+      "handler": "wishicraft.web_lambda.auth_handler",
+      "asset_id": "f0d6a1caff7d92ba02fd4b38467bef17a7587ec204a9eaee72a8385a0901a627",
+      "template_sha256": "f0ab310030b25dd7335ec533aca1d1af2a354ddb3777db34850bb024e583391a"
+    }
+  ],
+  "results": [
+    {
+      "asset": "f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c",
+      "handler": "wishicraft.retention_workflow_lambda.handler",
+      "scenario": "old",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.retention_workflow_lambda.handler",
+      "scenario": "disabled",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.retention_workflow_lambda.handler",
+      "scenario": "dry-run",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.retention_workflow_lambda.handler",
+      "scenario": "recovery",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.reconcile_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.start_workflow_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.stop_workflow_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.backup_workflow_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.retention_workflow_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.admission_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "546b16d99bffb11cb7cba79050cd8c6086e716b6ab50c8d46ebd6e8f4ae0f8a0",
+      "handler": "wishicraft.discord_command_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.status_executor_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.discord_message_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.auto_stop_evaluator_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.monitoring_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.daily_backup_lambda.admit",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "handler": "wishicraft.daily_backup_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "f0d6a1caff7d92ba02fd4b38467bef17a7587ec204a9eaee72a8385a0901a627",
+      "handler": "wishicraft.web_lambda.handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    },
+    {
+      "asset": "f0d6a1caff7d92ba02fd4b38467bef17a7587ec204a9eaee72a8385a0901a627",
+      "handler": "wishicraft.web_lambda.auth_handler",
+      "scenario": "imports",
+      "status": "PASS",
+      "python": "3.12.14",
+      "os": "Linux",
+      "architecture": "x86_64",
+      "boto3": "1.43.91",
+      "botocore": "1.43.91",
+      "sdk_source": "/usr/local/lib/python3.12/site-packages/boto3/__init__.py",
+      "network": "disabled"
+    }
+  ],
+  "aws_calls": 0,
+  "managed_lambda_identity_verified": false,
+  "ci_run": 36717871652,
+  "tested_head": "a64cf0b53c8b141fe2b302c0a99a3d562661f79c",
+  "initial_harness_failure": {
+    "run": 36717398066,
+    "stage": "artifact-origin assertion after recovery completed",
+    "cause": "resource namespace __file__ is None; now verify every namespace search location inside /asset",
+    "original_failure_retained": true
+  }
+}

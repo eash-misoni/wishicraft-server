@@ -157,3 +157,53 @@ jobs:
 
       - name: Verify Common and Game policy through real Reset generations
         run: sudo --preserve-env=CI python3 tests/integration/targeted_runtime_docker.py --whitelist-reset
+
+  lambda-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: tools/dev-env run -- uv sync --frozen --all-groups
+      - run: tools/dev-env run -- npm ci
+      - name: Synthesize actual canonical assets and historical deployed source
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: .:src
+          AWS_EC2_METADATA_DISABLED: "true"
+        run: |
+          ARTIFACT_ROOT=$(mktemp -d)
+          echo "ARTIFACT_ROOT=$ARTIFACT_ROOT" >> "$GITHUB_ENV"
+          tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev --output "$ARTIFACT_ROOT/current" --context stage=dev --context phase=8 --context deployment=control-plane --context two_games=true --context reset=true --context game_creation=true --context whitelist_management=true --context game_packages=true
+          tools/dev-env run -- npx --no-install cdk synth WishicraftWebStack-dev --output "$ARTIFACT_ROOT/web" --context stage=dev --context phase=8 --context deployment=web --context game_creation=true --context whitelist_management=true
+          tools/dev-env run -- uv run python -m tests.artifact.export_fixtures "$ARTIFACT_ROOT/recovery.json"
+          git worktree add --detach "$ARTIFACT_ROOT/old" 51fa628179c43c2ca1559077d3b196e9797822e9
+          ln -s "$GITHUB_WORKSPACE/.venv" "$ARTIFACT_ROOT/old/.venv"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$ARTIFACT_ROOT/old/node_modules"
+          cd "$ARTIFACT_ROOT/old"
+          tools/dev-env run -- npx --no-install cdk synth WishicraftControlPlaneStack-dev --output "$ARTIFACT_ROOT/previous" --context stage=dev --context phase=8 --context deployment=control-plane --context two_games=true --context reset=true --context game_creation=true --context whitelist_management=true --context game_packages=true
+      - name: Mandatory Python 3.12 Linux artifact isolation (no credentials or network)
+        run: >-
+          tools/dev-env run -- uv run python tests/artifact/run.py
+          --assembly "$ARTIFACT_ROOT/current" --assembly "$ARTIFACT_ROOT/web"
+          --old-assembly "$ARTIFACT_ROOT/previous" --fixture "$ARTIFACT_ROOT/recovery.json"
+          --output "$ARTIFACT_ROOT/results"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lambda-artifact-evidence
+          path: |
+            ${{ env.ARTIFACT_ROOT }}/results/evidence.json
+            ${{ env.ARTIFACT_ROOT }}/results/probe-*.jsonl
+          if-no-files-found: error

@@ -1,4 +1,4 @@
-"""Future server-owned formal RETENTION binding. Canonical release flags are both false."""
+"""Future server-owned formal RETENTION binding. Canonical deletion remains disabled."""
 
 from __future__ import annotations
 
@@ -6,21 +6,14 @@ import os
 from datetime import UTC, datetime
 from typing import Any
 
-from wishicraft.maintenance_operator import item
+from wishicraft.dynamodb_read import item
 from wishicraft.operation import LeaseProof
 from wishicraft.retention_authority import HOLD_REVISION, REVISION
 from wishicraft.retention_delete_adapter import Ec2DeleteAdapter, delete_client
 from wishicraft.retention_deletion_repository import DeletionRepository
 from wishicraft.retention_execution import RetentionExecution
 from wishicraft.retention_execution_reads import ExecutionReads
-from wishicraft.retention_release import RetentionRelease
-
-
-def environment_release() -> RetentionRelease:
-    values = [os.environ.get(k, "0") for k in ("RETENTION_PROVISIONED", "RETENTION_DELETE_ENABLED")]
-    if any(v not in {"0", "1"} for v in values):
-        raise ValueError("INVALID_RETENTION_RUNTIME_FLAGS")
-    return RetentionRelease(*(v == "1" for v in values))
+from wishicraft.retention_release import environment_release as environment_release
 
 
 def bind(runtime: Any, proof: LeaseProof, session: Any) -> tuple[RetentionExecution, str]:

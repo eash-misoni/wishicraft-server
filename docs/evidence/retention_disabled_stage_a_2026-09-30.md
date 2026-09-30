@@ -155,3 +155,9 @@ drift is restored. A full CloudFormation drift-detection job was not run; no unv
 no-drift claim is made. The docs-only closeout is not deployed and its actual final main/CI/Wiki
 identity is recorded on the closeout PR and handoff. The original checkout's unrelated changes
 remain untouched; release and documentation work used separate worktrees.
+
+## Subsequent repository correction candidate
+
+[Artifact import-boundary correction](retention_artifact_imports_2026-09-30.md) prepares a
+separately reviewed source fix and isolated artifact qualification. It does not change this
+PARTIAL result, repair the deployed code, or authorize another Invoke/deployment/Stage B.

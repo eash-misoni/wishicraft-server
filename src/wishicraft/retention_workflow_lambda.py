@@ -90,11 +90,11 @@ def handler(event: object, context: object) -> dict[str, object]:
     del context
     payload = _payload(event)
     mode = payload.get("execution_mode", "DRY_RUN")
-    from wishicraft.retention_runtime import environment_release
+    from wishicraft.retention_release import environment_release
 
     release = environment_release()
     if mode == "DELETE_ONE" and not release.enabled:
-        # No deployed execution factory or AWS delete adapter exists. An event is not authority.
+        # Server-owned disabled gate precedes runtime imports/clients; events are not authority.
         return {
             "status": "NO_DELETE",
             "reason": "DELETE_ONE_NOT_RELEASED",

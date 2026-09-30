@@ -7,7 +7,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
-from wishicraft.maintenance_operator import item
+from wishicraft.dynamodb_read import item
 from wishicraft.operation import LeaseProof
 from wishicraft.retention_deletion import DeletionRecord, classify_absence
 from wishicraft.retention_deletion_repository import DeletionRepository
