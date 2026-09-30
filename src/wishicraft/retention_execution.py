@@ -73,9 +73,11 @@ class RetentionExecution:
         journal: Journal,
         clock: Callable[[], datetime],
         adapter: SnapshotDeleteAdapter | None = None,
+        dispatcher: tuple[str, str, str, int] | None = None,
     ) -> None:
         self.reads, self.leases, self.journal = reads, leases, journal
         self.clock, self.adapter = clock, adapter
+        self.dispatcher = dispatcher
 
     def prepare(self, proof: LeaseProof) -> ExecutionPlan:
         self.leases.verify_owned(proof, now=self.clock())
@@ -147,6 +149,11 @@ class RetentionExecution:
             plan.predicate_id,
             self.clock().isoformat(),
             actor,
+            execution_arn=self.dispatcher[0] if self.dispatcher else None,
+            dispatcher_arn=self.dispatcher[1] if self.dispatcher else None,
+            dispatcher_revision=self.dispatcher[2] if self.dispatcher else None,
+            dispatcher_timeout=self.dispatcher[3] if self.dispatcher else None,
+            dispatcher_lease_id=proof.lease_id if self.dispatcher else None,
         )
         if not self.journal.claim(record, proof, self.clock()):
             return self.journal.read_operation(proof.owner_operation_id)

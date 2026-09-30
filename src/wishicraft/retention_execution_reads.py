@@ -35,12 +35,14 @@ class ExecutionReads:
         holds: dict[str, tuple[str, ...]],
         hold_revision: str,
         clock: Callable[[], datetime],
+        historical_authority: bool = False,
     ) -> None:
         if (
             set(tables) != {"state", "games", "backups", "operations"}
             or len(set(tables.values())) != 4
         ):
             raise ValueError("INVALID_RETENTION_TABLE_BINDING")
+        self.historical_authority = historical_authority
         self.ec2, self.rbin, self.ddb, self.sts = ec2, rbin, dynamodb, sts
         self.context, self.region, self.system = context, region, system_id
         self.operation, self.tables = operation_id, dict(tables)
@@ -52,7 +54,7 @@ class ExecutionReads:
         if any(api.meta.region_name != self.region for api in (self.ec2, self.rbin, self.ddb)):
             raise ValueError("REGION_MISMATCH")
 
-    def inventory(self) -> FreshInventory:
+    def inventory(self, *, recovery_snapshot_id: str | None = None) -> FreshInventory:
         try:
             started = self.clock()
             self._identity()
@@ -96,6 +98,7 @@ class ExecutionReads:
                 "SnapshotId",
             )
             # All owner pages are read. Other volumes are not deletion targets.
+            owned_snapshots = snapshots
             snapshots = [s for s in snapshots if s.get("VolumeId") == self.context.source_volume_id]
             inventory = validate_inventory(
                 context=self.context,
@@ -114,6 +117,9 @@ class ExecutionReads:
                 hold_revision=self.hold_revision,
                 aws_revision="PENDING",
                 read_issues=("aws-checks-pending",),
+                historical_authority=self.historical_authority,
+                recovery_snapshot_id=recovery_snapshot_id,
+                authority_snapshots=owned_snapshots,
             )
             # Protected/legacy assets are not deletion targets. Still validate their
             # records above, but their legitimate AMI/lock holds must not consume or
@@ -159,21 +165,18 @@ class ExecutionReads:
                 self.ec2,
                 "list_snapshots_in_recycle_bin",
                 {
-                    "SnapshotIds": [snapshot_id],
                     "MaxResults": 1000,
                 },
                 "Snapshots",
                 "SnapshotId",
             )
-            if any(r["SnapshotId"] != snapshot_id for r in binned):
-                raise ValueError("BIN_SCOPE_MISMATCH")
             return DeleteObservation(
                 snapshot_id,
                 self.context.owner_id,
                 self.region,
                 self.clock(),
                 any(r["SnapshotId"] == snapshot_id for r in active),
-                bool(binned),
+                any(r["SnapshotId"] == snapshot_id for r in binned),
             )
         except Exception:
             return DeleteObservation(

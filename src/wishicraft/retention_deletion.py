@@ -50,8 +50,41 @@ class DeletionRecord:
     revision: int = 1
     schema_version: int = 1
     policy: str = POLICY
+    execution_arn: str | None = None
+    dispatcher_arn: str | None = None
+    dispatcher_revision: str | None = None
+    dispatcher_timeout: int | None = None
+    dispatcher_lease_id: str | None = None
 
     def __post_init__(self) -> None:
+        binding = (
+            self.execution_arn,
+            self.dispatcher_arn,
+            self.dispatcher_revision,
+            self.dispatcher_timeout,
+            self.dispatcher_lease_id,
+        )
+        if any(v is not None for v in binding):
+            if (
+                not isinstance(self.execution_arn, str)
+                or not re.fullmatch(
+                    re.escape(f"arn:aws:states:{self.region}:{self.account}:execution:")
+                    + r"[A-Za-z0-9_-]+:"
+                    + re.escape(self.retention_operation_id),
+                    self.execution_arn,
+                )
+                or not isinstance(self.dispatcher_arn, str)
+                or not self.dispatcher_arn.startswith(
+                    f"arn:aws:lambda:{self.region}:{self.account}:function:"
+                )
+                or not isinstance(self.dispatcher_revision, str)
+                or not re.fullmatch(r"[A-Za-z0-9-]{1,128}", self.dispatcher_revision)
+                or not isinstance(self.dispatcher_lease_id, str)
+                or not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", self.dispatcher_lease_id)
+                or type(self.dispatcher_timeout) is not int
+                or not 1 <= self.dispatcher_timeout <= 900
+            ):
+                raise ValueError("INVALID_DISPATCHER_BINDING")
         patterns = {
             "account": r"[0-9]{12}",
             "region": r"[a-z]{2}(?:-[a-z]+)+-[0-9]",
@@ -123,8 +156,18 @@ class DeletionRecord:
             raise ValueError("UNCONFIRMED_NO_MUTATION")
 
     def item(self) -> dict[str, Any]:
+        values = asdict(self)
+        if self.execution_arn is None:
+            for key in (
+                "execution_arn",
+                "dispatcher_arn",
+                "dispatcher_revision",
+                "dispatcher_timeout",
+                "dispatcher_lease_id",
+            ):
+                values.pop(key)
         return {
-            **asdict(self),
+            **values,
             "phase": self.phase.value,
             "provenance_key": "DELETION#" + self.snapshot_id,
             "record_type": "RETENTION_DELETION",
@@ -151,13 +194,15 @@ class DeletionRecord:
     def parse(cls, value: dict[str, Any]) -> DeletionRecord:
         try:
             fields = {k: v for k, v in value.items() if k not in {"record_type", "provenance_key"}}
-            for key in ("schema_version", "attempt", "revision"):
+            for key in ("schema_version", "attempt", "revision", "dispatcher_timeout"):
                 value_at_key = fields.get(key)
                 if (
                     isinstance(value_at_key, Decimal)
                     and value_at_key.is_finite()
                     and value_at_key == value_at_key.to_integral_value()
                 ):
+                    if key == "dispatcher_timeout" and not 1 <= value_at_key <= 900:
+                        raise ValueError("timeout range")
                     fields[key] = int(value_at_key)
             fields["phase"] = DeletionPhase(fields["phase"])
             result = cls(**fields)

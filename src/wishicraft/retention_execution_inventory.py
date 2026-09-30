@@ -50,6 +50,7 @@ class FreshInventory:
     reference_revision: str
     aws_revision: str
     issues: tuple[str, ...]
+    management_findings: tuple[tuple[str | None, str, bool], ...] = ()
 
     def policy(self, now: datetime) -> DailyRetentionPlan:
         return plan(
@@ -129,6 +130,9 @@ def validate_inventory(
     hold_revision: str,
     aws_revision: str,
     read_issues: tuple[str, ...],
+    historical_authority: bool = False,
+    recovery_snapshot_id: str | None = None,
+    authority_snapshots: list[dict[str, Any]] | None = None,
 ) -> FreshInventory:
     """Trusted reader's raw responses in memory. Every missing domain must be an issue.
 
@@ -203,12 +207,25 @@ def validate_inventory(
                 holds.setdefault(sid, []).append("backup_protection." + key)
     # Unknown management outcomes remain blockers. Adopted historical explanations are
     # not an ID-only waiver; no resolution-file consumer is introduced.
-    op_view = []
+    op_view: list[tuple[str | None, str, bool]] = []
     for row in operations:
         if row.get("operation_id") == operation_id:
             continue
         if row.get("operation_type") in {"BACKUP", "RETENTION", "RESTORE", "IMPORT"}:
-            if row.get("status") != "SUCCEEDED":
+            reviewed = False
+            if row.get("status") != "SUCCEEDED" and historical_authority:
+                from wishicraft.retention_authority import reviewed_failure
+
+                reviewed = reviewed_failure(
+                    row,
+                    context=context,
+                    region=region,
+                    system=system_id,
+                    snapshots=snapshots if authority_snapshots is None else authority_snapshots,
+                    provenance=provenance_rows,
+                    references=[state, *journals, *games],
+                )
+            if row.get("status") != "SUCCEEDED" and not reviewed:
                 issues.append("unresolved-management-operation")
             op_status = row.get("status")
             if op_status not in {
@@ -221,7 +238,9 @@ def validate_inventory(
             }:
                 issues.append("unknown-management-status")
                 op_status = "UNKNOWN"
-            op_view.append([identifier(row.get("operation_id"), OPERATION), op_status])
+            op_view.append(
+                (identifier(row.get("operation_id"), OPERATION), str(op_status), reviewed)
+            )
             for key in ("source_snapshot_id", "backup_snapshot_id", "snapshot_id"):
                 sid = identifier(row.get(key), SNAPSHOT)
                 if sid:
@@ -283,7 +302,7 @@ def validate_inventory(
         own_pending = (
             sid in deletes
             and deletes[sid].retention_operation_id == operation_id
-            and sid in present
+            and (sid in present or sid == recovery_snapshot_id)
             and result == "DELETION_OUTCOME_UNKNOWN"
         )
         if result in {"ANOMALY", "DELETION_OUTCOME_UNKNOWN"} and not own_pending:
@@ -311,4 +330,5 @@ def validate_inventory(
         reference_revision,
         aws_revision,
         tuple(issues),
+        tuple(op_view),
     )

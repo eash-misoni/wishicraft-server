@@ -24,7 +24,12 @@ def test_cdk_environment_initializes_both_real_handlers_and_renders_v2(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     app = build_app(
-        ROOT, "dev", phase=8, deployment="control-plane", daily_backup_validation="legacy"
+        ROOT,
+        "dev",
+        phase=8,
+        deployment="control-plane",
+        daily_backup_validation="legacy",
+        retention_validation="disabled",
     )
     template = Template.from_stack(
         cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))

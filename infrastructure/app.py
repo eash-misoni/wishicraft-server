@@ -17,6 +17,7 @@ from wishicraft.config import (
     load_daily_backup_configuration,
     validate_stage_for_action,
 )
+from wishicraft.retention_release import RetentionRelease, load_retention_release
 from wishicraft.runtime_catalog import RuntimeCatalog
 
 
@@ -32,8 +33,11 @@ def build_app(
     game_creation: bool = False,
     web_domain_phase: str = "canonical",
     daily_backup_validation: str | None = None,
+    retention_validation: str | None = None,
 ) -> App:
     """Build an environment-agnostic CDK app after phase-specific validation."""
+    if retention_validation is not None and deployment != "control-plane":
+        raise ValueError("retention_validation requires control-plane")
     if daily_backup_validation is not None and deployment != "control-plane":
         raise ValueError("daily_backup_validation requires the control-plane")
     configuration = load_configuration(repository_root, stage)
@@ -61,6 +65,9 @@ def build_app(
             project=configuration.project,
             secrets=configuration.secrets,
             phase=phase,
+            retention_release=retention_input(
+                repository_root, stage, validation=retention_validation, action=action
+            ),
             daily_backup=daily_backup_input(
                 repository_root, stage, validation=daily_backup_validation, action=action
             ),
@@ -89,6 +96,11 @@ def main() -> None:
     phase_context = app.node.try_get_context("phase") or "0"
     validation_action = app.node.try_get_context("validation_action") or "synth"
     deployment = app.node.try_get_context("deployment") or "phase1"
+    retention_validation = app.node.try_get_context("retention_validation")
+    if retention_validation is not None and (
+        app.node.try_get_context("validation_action") != "synth" or deployment != "control-plane"
+    ):
+        raise ValueError("retention_validation requires explicit synth control-plane")
     daily_validation = app.node.try_get_context("daily_backup_validation")
     if daily_validation is not None and (
         app.node.try_get_context("validation_action") != "synth" or deployment != "control-plane"
@@ -127,6 +139,9 @@ def main() -> None:
             project=configuration.project,
             secrets=configuration.secrets,
             phase=phase,
+            retention_release=retention_input(
+                repository_root, stage, validation=retention_validation, action=validation_action
+            ),
             daily_backup=daily_backup_input(
                 repository_root, stage, validation=daily_validation, action=validation_action
             ),
@@ -180,6 +195,27 @@ def _reset_policies(root: Path, stage: str) -> dict[str, dict[str, int]]:
 
 def _games(root: Path, stage: str) -> tuple[str, ...]:
     return RuntimeCatalog.parse((root / "config" / f"two-game-{stage}.json").read_text()).game_ids
+
+
+def retention_input(
+    root: Path, stage: str, *, validation: str | None = None, action: str = "synth"
+) -> RetentionRelease:
+    if validation is None:
+        flags = load_retention_release(root, stage)
+        path = root / "config" / f"retention-execution-{stage}.json"
+        source = str(path) if path.exists() else "missing-stage-supplement:default-disabled"
+    else:
+        if action != "synth" or validation not in {"disabled", "provisioned", "enabled"}:
+            raise ValueError("invalid synth-only retention validation")
+        flags = RetentionRelease(validation != "disabled", validation == "enabled")
+        source = "validation-only:" + validation
+    print(
+        json.dumps(
+            {"retention_input": source, "provision": flags.provision, "enabled": flags.enabled}
+        ),
+        file=sys.stderr,
+    )
+    return flags
 
 
 if __name__ == "__main__":

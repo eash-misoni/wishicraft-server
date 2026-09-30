@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "f168dd14f6bba7b650e6512a159d12ff4d15c1da",
+  "implementation_commit": "db5e67ba57946eb60b5adcb0a204685f5fcc3c2a",
+  "canonical_cp": {
+    "resources": 155,
+    "before_template_sha256": "b88707ff86e4e7c6d8097639f84db2abc1582c0b9a56cd8d4d1f57d9c58ee70d",
+    "after_template_sha256": "6b0d7f57a1edeaa411293b1949a24fa078b30da88fc2f29a758c56b9d713a551",
+    "property_paths": [
+      "/AdmissionFunction23082B67/Properties/Code/S3Key",
+      "/AutoStopEvaluatorFunctionF85F8B50/Properties/Code/S3Key",
+      "/BackupTaskFunctionA44639DC/Properties/Code/S3Key",
+      "/DailyBackupAdmissionFunctionBFD7AF72/Properties/Code/S3Key",
+      "/DailyBackupEvaluatorFunction2CAEBD5D/Properties/Code/S3Key",
+      "/DiscordCommandFunction7D25102A/Properties/Code/S3Key",
+      "/DiscordMessageFunction78FA388B/Properties/Code/S3Key",
+      "/MonitoringObserverFunction584DA7C7/Properties/Code/S3Key",
+      "/ReconcileFunction30829CB6/Properties/Code/S3Key",
+      "/RetentionTaskFunction9F285CE4/Properties/Code/S3Key",
+      "/StartTaskFunction8C564C4A/Properties/Code/S3Key",
+      "/StatusExecutorFunction6E5C9869/Properties/Code/S3Key",
+      "/StopTaskFunction11473A8C/Properties/Code/S3Key"
+    ],
+    "metadata_paths": [
+      "/AdmissionFunction23082B67/Metadata/aws:asset:path",
+      "/AutoStopEvaluatorFunctionF85F8B50/Metadata/aws:asset:path",
+      "/BackupTaskFunctionA44639DC/Metadata/aws:asset:path",
+      "/DailyBackupAdmissionFunctionBFD7AF72/Metadata/aws:asset:path",
+      "/DailyBackupEvaluatorFunction2CAEBD5D/Metadata/aws:asset:path",
+      "/DiscordCommandFunction7D25102A/Metadata/aws:asset:path",
+      "/DiscordMessageFunction78FA388B/Metadata/aws:asset:path",
+      "/MonitoringObserverFunction584DA7C7/Metadata/aws:asset:path",
+      "/ReconcileFunction30829CB6/Metadata/aws:asset:path",
+      "/RetentionTaskFunction9F285CE4/Metadata/aws:asset:path",
+      "/StartTaskFunction8C564C4A/Metadata/aws:asset:path",
+      "/StatusExecutorFunction6E5C9869/Metadata/aws:asset:path",
+      "/StopTaskFunction11473A8C/Metadata/aws:asset:path"
+    ],
+    "state_machines": [
+      {
+        "logical_id": "StartStateMachine",
+        "raw_equal": true,
+        "offline_resolved_equal": true,
+        "canonical_asl_equal": true,
+        "canonical_asl_sha256": "44ae4df0083ce5d38968877fa358b8a7b9c6e2b90c1cab9b0c9da6d824f109d8"
+      },
+      {
+        "logical_id": "StopStateMachine",
+        "raw_equal": true,
+        "offline_resolved_equal": true,
+        "canonical_asl_equal": true,
+        "canonical_asl_sha256": "9800a9cf27fbcc9c6754f2d108f774736530681d0c7a05c89406a01d8f13575f"
+      },
+      {
+        "logical_id": "BackupStateMachine",
+        "raw_equal": true,
+        "offline_resolved_equal": true,
+        "canonical_asl_equal": true,
+        "canonical_asl_sha256": "7cc3531a1abfee004c6c968678fd64bccee7d02fd20ad854ff510b8385879213"
+      },
+      {
+        "logical_id": "RetentionStateMachine",
+        "raw_equal": true,
+        "offline_resolved_equal": true,
+        "canonical_asl_equal": true,
+        "canonical_asl_sha256": "6d4e57760a32c2d3787f8fd136ddf02f698fd793b806dc157424ce181bcc932e"
+      },
+      {
+        "logical_id": "SwitchWorkflow",
+        "raw_equal": true,
+        "offline_resolved_equal": true,
+        "canonical_asl_equal": true,
+        "canonical_asl_sha256": "49aa5311bedb03f5a86f957546d8276748da078224cca90d6eebe251b9079ef2"
+      },
+      {
+        "logical_id": "ResetWorkflow",
+        "raw_equal": true,
+        "offline_resolved_equal": true,
+        "canonical_asl_equal": true,
+        "canonical_asl_sha256": "8764d59ff54396bef3464587a2285b98817748f42d0fd50cdbd622b0c97388ce"
+      }
+    ]
+  },
+  "canonical_web": {
+    "resources": 26,
+    "before_template_sha256": "483a5ab8d8aa9b918f764d72ce8603f376de883eaa22d0984dbaf8e88ee0b4b8",
+    "after_template_sha256": "7d49c688577d4e5a3444edc28fc94d6d68dc09ea15a5d4f5472ba9db79219385",
+    "property_paths": [
+      "/AuthC256A5EC/Properties/Code/S3Key",
+      "/Web3C8945DB/Properties/Code/S3Key"
+    ]
+  },
+  "future_validation_only": {
+    "stage_a_template_sha256": "458a778b5bc0b54e61defb2e377b8e4f6bcb7e5f9378f56dc7c9afa43c8c2c16",
+    "stage_b_template_sha256": "6012536aa44744a52f9e29ea6052887e6bd9d2e9fc3062a67aff275cb25a763a",
+    "canonical_to_a_paths": [
+      "/RetentionTaskFunction9F285CE4/Properties/Environment/Variables/RETENTION_DELETE_ENABLED",
+      "/RetentionTaskFunction9F285CE4/Properties/Environment/Variables/RETENTION_PROVISIONED",
+      "/RetentionTaskFunction9F285CE4/Properties/Environment/Variables/RETENTION_WORKFLOW_NAME",
+      "/RetentionTaskFunctionServiceRoleDefaultPolicy8FD8FE69/Properties/PolicyDocument/Statement"
+    ],
+    "a_to_b_paths": [
+      "/RetentionStateMachine/Properties/Definition/States/RunRetentionDryRun/Parameters/Payload/execution_mode",
+      "/RetentionTaskFunction9F285CE4/Properties/Environment/Variables/RETENTION_DELETE_ENABLED",
+      "/RetentionTaskFunctionServiceRoleDefaultPolicy8FD8FE69/Properties/PolicyDocument/Statement"
+    ]
+  },
+  "canonical_delete_permission": false,
+  "canonical_enabled": false,
+  "no_aws_deploy": true,
+  "resolution_scope": "offline template identities only, not live ASL or ChangeSet evaluation",
+  "future_vs_reviewed_head": [
+    {
+      "configuration": "final-stage-a-cp",
+      "property_paths": [
+        "/AdmissionFunction23082B67/Properties/Code/S3Key",
+        "/AutoStopEvaluatorFunctionF85F8B50/Properties/Code/S3Key",
+        "/BackupTaskFunctionA44639DC/Properties/Code/S3Key",
+        "/DailyBackupAdmissionFunctionBFD7AF72/Properties/Code/S3Key",
+        "/DailyBackupEvaluatorFunction2CAEBD5D/Properties/Code/S3Key",
+        "/DiscordCommandFunction7D25102A/Properties/Code/S3Key",
+        "/DiscordMessageFunction78FA388B/Properties/Code/S3Key",
+        "/MonitoringObserverFunction584DA7C7/Properties/Code/S3Key",
+        "/ReconcileFunction30829CB6/Properties/Code/S3Key",
+        "/RetentionTaskFunction9F285CE4/Properties/Code/S3Key",
+        "/StartTaskFunction8C564C4A/Properties/Code/S3Key",
+        "/StatusExecutorFunction6E5C9869/Properties/Code/S3Key",
+        "/StopTaskFunction11473A8C/Properties/Code/S3Key"
+      ],
+      "only_source_code_changes": true
+    },
+    {
+      "configuration": "final-stage-b-cp",
+      "property_paths": [
+        "/AdmissionFunction23082B67/Properties/Code/S3Key",
+        "/AutoStopEvaluatorFunctionF85F8B50/Properties/Code/S3Key",
+        "/BackupTaskFunctionA44639DC/Properties/Code/S3Key",
+        "/DailyBackupAdmissionFunctionBFD7AF72/Properties/Code/S3Key",
+        "/DailyBackupEvaluatorFunction2CAEBD5D/Properties/Code/S3Key",
+        "/DiscordCommandFunction7D25102A/Properties/Code/S3Key",
+        "/DiscordMessageFunction78FA388B/Properties/Code/S3Key",
+        "/MonitoringObserverFunction584DA7C7/Properties/Code/S3Key",
+        "/ReconcileFunction30829CB6/Properties/Code/S3Key",
+        "/RetentionTaskFunction9F285CE4/Properties/Code/S3Key",
+        "/StartTaskFunction8C564C4A/Properties/Code/S3Key",
+        "/StatusExecutorFunction6E5C9869/Properties/Code/S3Key",
+        "/StopTaskFunction11473A8C/Properties/Code/S3Key"
+      ],
+      "only_source_code_changes": true
+    }
+  ]
+}

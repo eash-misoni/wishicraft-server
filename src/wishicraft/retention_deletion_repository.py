@@ -239,3 +239,151 @@ class DeletionRepository:
             # A committed response update can be acknowledged without dispatching again.
             if self.read_snapshot(before.snapshot_id) != after:
                 raise ValueError("DELETION_WRITE_UNKNOWN_OR_CONFLICT") from None
+
+    def resume_reconciliation(
+        self,
+        before: DeletionRecord,
+        after: DeletionRecord,
+        old: LeaseProof,
+        new: LeaseProof,
+        now: datetime,
+    ) -> None:
+        """Only called after quiescence/reference proof; atomically re-own SAME pending op.
+
+        Never removes pending, changes the target, increments attempt or dispatches.
+        Lost transaction response is unknown and requires read-back, not another request.
+        """
+        mutable = {
+            "revision",
+            "phase",
+            "request_outcome",
+            "reconciliation",
+            "first_absent_at",
+            "last_observed_at",
+        }
+        if (
+            before.execution_arn is None
+            or before.phase in {DeletionPhase.FORMALLY_DELETED, DeletionPhase.NO_MUTATION}
+            or after.phase != DeletionPhase.RESPONSE_RECORDED
+            or after.revision != before.revision + 1
+            or any(v != after.item()[k] for k, v in before.item().items() if k not in mutable)
+            or after.request_outcome
+            != (
+                "OUTCOME_UNKNOWN"
+                if before.request_outcome == "NOT_RECORDED"
+                else before.request_outcome
+            )
+            or (old.resource_id, old.owner_operation_id)
+            != (new.resource_id, new.owner_operation_id)
+            or new.owner_operation_id != before.retention_operation_id
+            or new.resource_id != before.system_id
+            or new.lease_id == old.lease_id
+            or new.lease_expires_at != int(now.timestamp()) + 900
+        ):
+            raise ValueError("RECOVERY_CAS_CONFLICT")
+        values = encode(
+            {
+                ":op": before.retention_operation_id,
+                ":system": before.system_id,
+                ":old": old.lease_id,
+                ":new": new.lease_id,
+                ":old_expiry": old.lease_expires_at,
+                ":expiry": new.lease_expires_at,
+                ":snapshot": before.snapshot_id,
+                ":type": "RETENTION",
+            }
+        )
+        try:
+            self.api.transact_write_items(
+                TransactItems=[
+                    {
+                        "Update": {
+                            "TableName": self.locks,
+                            "Key": encode({"lock_name": self.lock_name}),
+                            "ConditionExpression": (
+                                "resource_id = :system AND owner_operation_id = :op AND lease_id "
+                                "= :old AND lease_expires_at = :old_expiry AND "
+                                "retention_delete_pending = :snapshot AND operation_type = :type"
+                            ),
+                            "UpdateExpression": "SET lease_id = :new, lease_expires_at = :expiry",
+                            "ExpressionAttributeValues": values,
+                        }
+                    },
+                    {
+                        "Put": {
+                            "TableName": self.backups,
+                            "Item": encode(after.item()),
+                            "ConditionExpression": (
+                                "#revision = :revision AND #phase = :phase AND attempt = :attempt "
+                                "AND retention_operation_id = :op AND predicate_id = :predicate"
+                            ),
+                            "ExpressionAttributeNames": {
+                                "#revision": "revision",
+                                "#phase": "phase",
+                            },
+                            "ExpressionAttributeValues": encode(
+                                {
+                                    ":revision": before.revision,
+                                    ":phase": before.phase.value,
+                                    ":attempt": before.attempt,
+                                    ":op": before.retention_operation_id,
+                                    ":predicate": before.predicate_id,
+                                }
+                            ),
+                        }
+                    },
+                    {
+                        "ConditionCheck": {
+                            "TableName": self.backups,
+                            "Key": encode(
+                                {"provenance_key": "RETENTION#" + before.retention_operation_id}
+                            ),
+                            "ConditionExpression": (
+                                "snapshot_id = :snapshot AND retention_operation_id = :op"
+                            ),
+                            "ExpressionAttributeValues": encode(
+                                {
+                                    ":snapshot": before.snapshot_id,
+                                    ":op": before.retention_operation_id,
+                                }
+                            ),
+                        }
+                    },
+                    {
+                        "ConditionCheck": {
+                            "TableName": self.states,
+                            "Key": encode({"system_id": before.system_id}),
+                            "ConditionExpression": (
+                                "current_operation_id = :op AND "
+                                "(attribute_not_exists(maintenance) OR maintenance.#status = "
+                                ":ended)"
+                            ),
+                            "ExpressionAttributeNames": {"#status": "status"},
+                            "ExpressionAttributeValues": encode(
+                                {":op": before.retention_operation_id, ":ended": "ENDED"}
+                            ),
+                        }
+                    },
+                    {
+                        "Update": {
+                            "TableName": self.operations,
+                            "Key": encode({"operation_id": before.retention_operation_id}),
+                            "ConditionExpression": (
+                                "operation_type = :type AND workflow_execution_arn = :execution "
+                                "AND lease_id = :old"
+                            ),
+                            "UpdateExpression": "SET lease_id = :new",
+                            "ExpressionAttributeValues": encode(
+                                {
+                                    ":type": "RETENTION",
+                                    ":execution": before.execution_arn,
+                                    ":old": old.lease_id,
+                                    ":new": new.lease_id,
+                                }
+                            ),
+                        }
+                    },
+                ]
+            )
+        except Exception:
+            raise ValueError("RECOVERY_WRITE_UNCONFIRMED") from None

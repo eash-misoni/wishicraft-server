@@ -28,6 +28,7 @@ def resources(root: Path, *, validation: str | None, shared: bool = True) -> dic
         deployment="control-plane",
         two_games=shared,
         daily_backup_validation=validation,
+        retention_validation="disabled",
     )
     stack = cast(Stack, app.node.find_child("WishicraftControlPlaneStack-dev"))
     return cast(dict[str, Any], Template.from_stack(stack).to_json()["Resources"])
@@ -98,7 +99,9 @@ def test_canonical_invalid_flags_are_not_coerced(tmp_path: Path, flags: dict[str
         daily_backup_input(tmp_path, "dev")
 
 
-def cli(tmp_path: Path, context: dict[str, str]) -> subprocess.CompletedProcess[str]:
+def cli(
+    tmp_path: Path, context: dict[str, str], *, root: Path = ROOT
+) -> subprocess.CompletedProcess[str]:
     # Child-scoped CDK input, never a process-wide test mutation; no environment is logged.
     environment = {
         **os.environ,
@@ -107,7 +110,7 @@ def cli(tmp_path: Path, context: dict[str, str]) -> subprocess.CompletedProcess[
     }
     return subprocess.run(
         [sys.executable, "-m", "infrastructure.app"],
-        cwd=ROOT,
+        cwd=root,
         env=environment,
         text=True,
         capture_output=True,
@@ -185,6 +188,7 @@ def test_cli_single_game_enabled_still_rejects(tmp_path: Path) -> None:
             "deployment": "control-plane",
             "validation_action": "synth",
             "daily_backup_validation": "enabled",
+            "retention_validation": "disabled",
         },
     )
     assert result.returncode != 0

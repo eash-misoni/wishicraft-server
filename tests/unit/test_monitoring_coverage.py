@@ -20,6 +20,7 @@ def resources(deployment: str, phase: int = 8) -> dict[str, Any]:
         phase=phase,
         deployment=deployment,
         daily_backup_validation="legacy" if deployment == "control-plane" else None,
+        retention_validation="disabled" if deployment == "control-plane" else None,
     )
     name = "WishicraftWebStack-dev" if deployment == "web" else "WishicraftControlPlaneStack-dev"
     return cast(

@@ -42,7 +42,12 @@ def test_control_plane_runtime_heartbeats_table_is_retained_ttl_enabled_and_mini
         cast(
             Stack,
             build_app(
-                ROOT, "dev", phase=8, deployment="control-plane", daily_backup_validation="legacy"
+                ROOT,
+                "dev",
+                phase=8,
+                deployment="control-plane",
+                daily_backup_validation="legacy",
+                retention_validation="disabled",
             ).node.find_child("WishicraftControlPlaneStack-dev"),
         )
     ).to_json()
