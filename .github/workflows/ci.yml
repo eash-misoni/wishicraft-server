@@ -199,6 +199,17 @@ jobs:
           --assembly "$ARTIFACT_ROOT/current" --assembly "$ARTIFACT_ROOT/web"
           --old-assembly "$ARTIFACT_ROOT/previous" --fixture "$ARTIFACT_ROOT/recovery.json"
           --output "$ARTIFACT_ROOT/results"
+      - name: Preserve the exact qualified canonical Control Plane assembly
+        run: |
+          tar -C "$ARTIFACT_ROOT/current" -czf "$ARTIFACT_ROOT/qualified-control-plane.tgz" .
+          sha256sum "$ARTIFACT_ROOT/qualified-control-plane.tgz" > "$ARTIFACT_ROOT/qualified-control-plane.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qualified-control-plane-assembly
+          path: |
+            ${{ env.ARTIFACT_ROOT }}/qualified-control-plane.tgz
+            ${{ env.ARTIFACT_ROOT }}/qualified-control-plane.sha256
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
