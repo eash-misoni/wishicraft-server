@@ -426,8 +426,14 @@ def main() -> None:
         raise AssertionError("unknown scenario")
     for name, module in tuple(sys.modules.items()):
         if name.startswith("wishicraft"):
-            assert module.__file__ is not None
-            assert Path(module.__file__).is_relative_to("/asset")
+            if module.__file__ is None:
+                # Resource-only namespace packages have no __file__; every search
+                # location must still be exclusively in this same selected asset.
+                assert module.__spec__ is not None
+                locations = module.__spec__.submodule_search_locations
+                assert locations and all(Path(p).is_relative_to("/asset") for p in locations)
+            else:
+                assert Path(module.__file__).is_relative_to("/asset")
     if mode != "old":
         assert "wishicraft.maintenance_operator" not in sys.modules
         assert "wishicraft.config" not in sys.modules and "yaml" not in sys.modules
