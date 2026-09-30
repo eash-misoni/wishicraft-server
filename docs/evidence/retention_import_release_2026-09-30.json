@@ -1,0 +1,1994 @@
+{
+  "schema_version": 1,
+  "scope": "D-115 import correction deployment, disabled gate and formal DRY_RUN; no Stage B",
+  "account": "385526546525",
+  "region": "ap-northeast-1",
+  "system": "wishicraft-main",
+  "git": {
+    "15": {
+      "review_or_local_fix_head": {
+        "commit": "a328572e2dba159eee0eda62f65672262973cbce",
+        "tree": "dce2416c0b31f1a1c4e95fa899e48502f9f894bb"
+      },
+      "ci_synthetic_merge": {
+        "commit": "a89310c0c68c8e945a0cfa5c459b945dbe2c27e6",
+        "tree": "dce2416c0b31f1a1c4e95fa899e48502f9f894bb"
+      },
+      "actual_merge": {
+        "commit": "e7af67980d2243c080c94ded5aec1af4a0eb8cb5",
+        "tree": "dce2416c0b31f1a1c4e95fa899e48502f9f894bb"
+      }
+    },
+    "16": {
+      "review_or_local_fix_head": {
+        "commit": "4373912d831bb7a1bacbaa5deaf8fa3abcd0a7f1",
+        "tree": "79846130db10959d4c88db4159888b20641ee73e"
+      },
+      "ci_synthetic_merge": {
+        "commit": "62117c643bdd2ad51c60fbbd9ee0a124baefa683",
+        "tree": "79846130db10959d4c88db4159888b20641ee73e"
+      },
+      "actual_merge": {
+        "commit": "601ba1f98f77f1782f5042477da05acc14064e3d",
+        "tree": "79846130db10959d4c88db4159888b20641ee73e"
+      }
+    }
+  },
+  "assembly": {
+    "commit": "601ba1f98f77f1782f5042477da05acc14064e3d",
+    "tree": "79846130db10959d4c88db4159888b20641ee73e",
+    "archive_sha256": "3d582cff4feb0477828c6aa1d9dcc24223dae268ba002ab87b9b9158e28faf4c",
+    "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308",
+    "code_asset_ids": [
+      "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902",
+      "546b16d99bffb11cb7cba79050cd8c6086e716b6ab50c8d46ebd6e8f4ae0f8a0"
+    ],
+    "ci_run": 36725278044,
+    "isolated_scenarios_passed": 19,
+    "source_bytes_match_clean_worktree": true,
+    "base_image": "python@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f",
+    "local_runtime_image": "sha256:1c24fb4afb8e399f65b0161d10a88abc4ec16a0d11defff58fb2a46ee159f40c",
+    "canonical_no_validation_override": true
+  },
+  "deployment_ci": [
+    {
+      "conclusion": "success",
+      "databaseId": 36725278444,
+      "name": "Paper same-runtime import integration",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 36725278044,
+      "name": "CI",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 36725278094,
+      "name": "NeoForge runtime integration",
+      "status": "completed"
+    }
+  ],
+  "pr15_postmerge_ci": {
+    "CI": 36722884399,
+    "NeoForge": 36722884512,
+    "Paper": 36722884307,
+    "conclusion": "success"
+  },
+  "baseline": {
+    "started_at": "2026-09-30T13:39:40.170884+00:00",
+    "ended_at": "2026-09-30T13:39:57.591684+00:00",
+    "state": {
+      "system_id": "wishicraft-main",
+      "desired_state": "STOPPED",
+      "health": "HEALTHY",
+      "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+      "target_instance_id": "i-04fc0629dc4ea466e",
+      "observed_at": "2026-09-30T13:38:04.661172Z",
+      "desired_revision": 79
+    },
+    "backup_protection": {
+      "schema_version": 1,
+      "boundary": 2,
+      "protected_boundary": 2,
+      "attempts": 0,
+      "oldest_at": null,
+      "unknown_since": null,
+      "stopped_at": null,
+      "intent": {
+        "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+        "status": "SUCCEEDED",
+        "boundary": 2
+      },
+      "last_success": {
+        "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+        "snapshot_id": "snap-0212d6f8613b684ac",
+        "boundary": 2,
+        "acquired_at": "2026-09-27T05:27:20.322000Z",
+        "verified_at": "2026-09-27T05:31:22.833615Z"
+      }
+    },
+    "locks": [],
+    "maintenance": {
+      "status": "ENDED",
+      "expires_at": 1790358269,
+      "ended_at": 1790352212
+    }
+  },
+  "live_candidate_comparison": {
+    "at": "2026-09-30T13:59:04.003922+00:00",
+    "candidate_commit": "601ba1f98f77f1782f5042477da05acc14064e3d",
+    "resource_additions": [],
+    "resource_removals": [],
+    "property_changes": {
+      "ReconcileFunction30829CB6": [
+        "Code"
+      ],
+      "StartTaskFunction8C564C4A": [
+        "Code"
+      ],
+      "StopTaskFunction11473A8C": [
+        "Code"
+      ],
+      "BackupTaskFunctionA44639DC": [
+        "Code"
+      ],
+      "RetentionTaskFunction9F285CE4": [
+        "Code"
+      ],
+      "AdmissionFunction23082B67": [
+        "Code"
+      ],
+      "DiscordCommandFunction7D25102A": [
+        "Code"
+      ],
+      "StatusExecutorFunction6E5C9869": [
+        "Code"
+      ],
+      "DiscordMessageFunction78FA388B": [
+        "Code"
+      ],
+      "AutoStopEvaluatorFunctionF85F8B50": [
+        "Code"
+      ],
+      "MonitoringObserverFunction584DA7C7": [
+        "Code"
+      ],
+      "DailyBackupAdmissionFunctionBFD7AF72": [
+        "Code"
+      ],
+      "DailyBackupEvaluatorFunction2CAEBD5D": [
+        "Code"
+      ]
+    },
+    "metadata_changes": [
+      "ReconcileFunction30829CB6",
+      "StartTaskFunction8C564C4A",
+      "StopTaskFunction11473A8C",
+      "BackupTaskFunctionA44639DC",
+      "RetentionTaskFunction9F285CE4",
+      "AdmissionFunction23082B67",
+      "DiscordCommandFunction7D25102A",
+      "StatusExecutorFunction6E5C9869",
+      "DiscordMessageFunction78FA388B",
+      "AutoStopEvaluatorFunctionF85F8B50",
+      "MonitoringObserverFunction584DA7C7",
+      "DailyBackupAdmissionFunctionBFD7AF72",
+      "DailyBackupEvaluatorFunction2CAEBD5D"
+    ],
+    "workflows": {
+      "BackupStateMachine": {
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "canonical_asl_equal": true,
+        "live_asl_equal": true,
+        "role_equal": true,
+        "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+        "roleArn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-BackupWorkflowRoleD9C2948-9xDR3CHieV10",
+        "definition_sha256": "88caa2c58de8e0f651d18fc3dbc3b01264bf8755c95ba8ddede5546fe5fa1c62",
+        "revision": "abd31155-2ef5-46b7-8473-76c160542e4d"
+      },
+      "ResetWorkflow": {
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "canonical_asl_equal": true,
+        "live_asl_equal": true,
+        "role_equal": true,
+        "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+        "roleArn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6",
+        "definition_sha256": "a7a350d84036902bd242ca7579f09f927f964a1622c866bda523b4c54c7eb668",
+        "revision": null
+      },
+      "RetentionStateMachine": {
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "canonical_asl_equal": true,
+        "live_asl_equal": true,
+        "role_equal": true,
+        "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+        "roleArn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-RetentionWorkflowRole90B8-3nnywDAwMfE9",
+        "definition_sha256": "7105af7f613e8a1022ff045edd560d8822802fb1c9e4d10b0004beebc274d3b7",
+        "revision": null
+      },
+      "StartStateMachine": {
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "canonical_asl_equal": true,
+        "live_asl_equal": true,
+        "role_equal": true,
+        "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+        "roleArn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-StartWorkflowRoleA360C95C-5Gthd08pXog9",
+        "definition_sha256": "8faa26107c6a0e305bafedf2b0255629be87795325d9e7b86351e5d1f513ad94",
+        "revision": null
+      },
+      "StopStateMachine": {
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "canonical_asl_equal": true,
+        "live_asl_equal": true,
+        "role_equal": true,
+        "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+        "roleArn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneStac-StopWorkflowRole2C1543AC-mkRlbbJIBLjV",
+        "definition_sha256": "7e0129f68c639a3d37923bf4953da9948009fa16dc9c8f12eb1fb1a9a64919cc",
+        "revision": "1c2ff03e-9c99-4268-8592-e621c9709308"
+      },
+      "SwitchWorkflow": {
+        "raw_properties_equal": true,
+        "resolved_asl_equal": true,
+        "canonical_asl_equal": true,
+        "live_asl_equal": true,
+        "role_equal": true,
+        "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+        "roleArn": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-SwitchWorkflowRoleB026EAE-ZA3PpXU98QB6",
+        "definition_sha256": "4a8b8a6dacd2998cd98db61968d7f5578202eaad784de37913c3ebfad035a3d5",
+        "revision": null
+      }
+    },
+    "source_comparison": {
+      "wc-dev-retention-task": {
+        "deployed_CodeSha256": "lsdotyksawtJMWlUQT/CAMPCjITA91uswnTE+jHSHFo=",
+        "changed_source_files": [
+          "wishicraft/dynamodb_read.py",
+          "wishicraft/maintenance_operator.py",
+          "wishicraft/retention_deletion_repository.py",
+          "wishicraft/retention_recovery_reads.py",
+          "wishicraft/retention_release.py",
+          "wishicraft/retention_runtime.py",
+          "wishicraft/retention_workflow_lambda.py"
+        ],
+        "external_file_changes": [],
+        "dependency_versions_unchanged": true
+      },
+      "wc-dev-discord-command": {
+        "deployed_CodeSha256": "eLQs+DzhsvEV+TXSJtrKyY6nJtlc05anpZ2Dh1K9iIY=",
+        "changed_source_files": [
+          "wishicraft/dynamodb_read.py",
+          "wishicraft/maintenance_operator.py",
+          "wishicraft/retention_deletion_repository.py",
+          "wishicraft/retention_recovery_reads.py",
+          "wishicraft/retention_release.py",
+          "wishicraft/retention_runtime.py",
+          "wishicraft/retention_workflow_lambda.py"
+        ],
+        "external_file_changes": [
+          "bin/cffi-gen-src",
+          "cffi-2.1.1.dist-info/RECORD"
+        ],
+        "dependency_versions_unchanged": true
+      }
+    },
+    "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308"
+  },
+  "changeset": {
+    "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d115-import-code-20260930/aeac7af3-1fd9-4f79-b4bc-e77d099a67bb",
+    "include_property_values_pages": {
+      "False": 1,
+      "True": 1
+    },
+    "parameters": [
+      {
+        "ParameterKey": "BootstrapVersion",
+        "ParameterValue": "/cdk-bootstrap/hnb659fds/version",
+        "ResolvedValue": "32"
+      }
+    ],
+    "guard": {
+      "at": "2026-09-30T14:00:34.136158+00:00",
+      "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d115-import-code-20260930/aeac7af3-1fd9-4f79-b4bc-e77d099a67bb",
+      "template_sha256": "fde7d5bb2b8d23470db3f1d824a204ffffce363cd326ddee2d9c34062ce5e308",
+      "changes": [
+        {
+          "LogicalResourceId": "AdmissionFunction23082B67",
+          "PhysicalResourceId": "wc-dev-admission",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "AutoStopEvaluatorFunctionF85F8B50",
+          "PhysicalResourceId": "wc-dev-auto-stop-evaluator",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "BackupStateMachine",
+          "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-backup",
+          "ResourceType": "AWS::StepFunctions::StateMachine",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Properties"
+          ],
+          "raw_properties_and_live_asl_match": true,
+          "non_evaluated_updated_dependency_intrinsics": [
+            "ReconcileFunction30829CB6.Arn",
+            "BackupTaskFunctionA44639DC.Arn"
+          ]
+        },
+        {
+          "LogicalResourceId": "BackupTaskFunctionA44639DC",
+          "PhysicalResourceId": "wc-dev-backup-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "DailyBackupAdmissionFunctionBFD7AF72",
+          "PhysicalResourceId": "wc-dev-daily-backup-admission",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "DailyBackupEvaluatorFunction2CAEBD5D",
+          "PhysicalResourceId": "wc-dev-daily-backup-evaluator",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "DiscordCommandFunction7D25102A",
+          "PhysicalResourceId": "wc-dev-discord-command",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "DiscordMessageFunction78FA388B",
+          "PhysicalResourceId": "wc-dev-discord-message",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "MonitoringObserverFunction584DA7C7",
+          "PhysicalResourceId": "wc-dev-monitoring-observer",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "ReconcileFunction30829CB6",
+          "PhysicalResourceId": "wc-dev-reconcile",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "ResetWorkflow",
+          "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-reset",
+          "ResourceType": "AWS::StepFunctions::StateMachine",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Properties"
+          ],
+          "raw_properties_and_live_asl_match": true,
+          "non_evaluated_updated_dependency_intrinsics": [
+            "StopTaskFunction11473A8C.Arn",
+            "ReconcileFunction30829CB6.Arn",
+            "StartTaskFunction8C564C4A.Arn"
+          ]
+        },
+        {
+          "LogicalResourceId": "RetentionTaskFunction9F285CE4",
+          "PhysicalResourceId": "wc-dev-retention-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "StartStateMachine",
+          "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-start",
+          "ResourceType": "AWS::StepFunctions::StateMachine",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Properties"
+          ],
+          "raw_properties_and_live_asl_match": true,
+          "non_evaluated_updated_dependency_intrinsics": [
+            "ReconcileFunction30829CB6.Arn",
+            "StartTaskFunction8C564C4A.Arn"
+          ]
+        },
+        {
+          "LogicalResourceId": "StartTaskFunction8C564C4A",
+          "PhysicalResourceId": "wc-dev-start-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "StatusExecutorFunction6E5C9869",
+          "PhysicalResourceId": "wc-dev-status-executor",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "StopStateMachine",
+          "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-stop",
+          "ResourceType": "AWS::StepFunctions::StateMachine",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Properties"
+          ],
+          "raw_properties_and_live_asl_match": true,
+          "non_evaluated_updated_dependency_intrinsics": [
+            "StopTaskFunction11473A8C.Arn",
+            "ReconcileFunction30829CB6.Arn"
+          ]
+        },
+        {
+          "LogicalResourceId": "StopTaskFunction11473A8C",
+          "PhysicalResourceId": "wc-dev-stop-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Metadata",
+            "Properties"
+          ]
+        },
+        {
+          "LogicalResourceId": "SwitchWorkflow",
+          "PhysicalResourceId": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-switch",
+          "ResourceType": "AWS::StepFunctions::StateMachine",
+          "Action": "Modify",
+          "Replacement": "False",
+          "Scope": [
+            "Properties"
+          ],
+          "raw_properties_and_live_asl_match": true,
+          "non_evaluated_updated_dependency_intrinsics": [
+            "StopTaskFunction11473A8C.Arn",
+            "ReconcileFunction30829CB6.Arn",
+            "StartTaskFunction8C564C4A.Arn"
+          ]
+        }
+      ],
+      "errors": [],
+      "case_d_condition_3": true,
+      "allowed_workflows": [
+        "BackupStateMachine",
+        "ResetWorkflow",
+        "StartStateMachine",
+        "StopStateMachine",
+        "SwitchWorkflow"
+      ],
+      "pass": true
+    },
+    "workflow_identity": {
+      "at": "2026-09-30T14:01:28.238493+00:00",
+      "workflows": {
+        "BackupStateMachine": {
+          "checks": {
+            "identity": true,
+            "name": true,
+            "type": true,
+            "logging": true,
+            "tracing": true,
+            "tags": true
+          },
+          "revisionId": "abd31155-2ef5-46b7-8473-76c160542e4d"
+        },
+        "ResetWorkflow": {
+          "checks": {
+            "identity": true,
+            "name": true,
+            "type": true,
+            "logging": true,
+            "tracing": true,
+            "tags": true
+          },
+          "revisionId": null
+        },
+        "RetentionStateMachine": {
+          "checks": {
+            "identity": true,
+            "name": true,
+            "type": true,
+            "logging": true,
+            "tracing": true,
+            "tags": true
+          },
+          "revisionId": null
+        },
+        "StartStateMachine": {
+          "checks": {
+            "identity": true,
+            "name": true,
+            "type": true,
+            "logging": true,
+            "tracing": true,
+            "tags": true
+          },
+          "revisionId": null
+        },
+        "StopStateMachine": {
+          "checks": {
+            "identity": true,
+            "name": true,
+            "type": true,
+            "logging": true,
+            "tracing": true,
+            "tags": true
+          },
+          "revisionId": "1c2ff03e-9c99-4268-8592-e621c9709308"
+        },
+        "SwitchWorkflow": {
+          "checks": {
+            "identity": true,
+            "name": true,
+            "type": true,
+            "logging": true,
+            "tracing": true,
+            "tags": true
+          },
+          "revisionId": null
+        }
+      }
+    }
+  },
+  "execute": {
+    "at": "2026-09-30T14:09:24.541231+00:00",
+    "arn": "arn:aws:cloudformation:ap-northeast-1:385526546525:changeSet/d115-import-code-20260930/aeac7af3-1fd9-4f79-b4bc-e77d099a67bb",
+    "safety_window_pass": true,
+    "intake_closed": [
+      "wc-dev-discord-command",
+      "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp",
+      "wc-dev-admission"
+    ],
+    "stack_last_updated": "2026-09-30 11:02:38.821000+00:00",
+    "candidate_commit": "601ba1f98f77f1782f5042477da05acc14064e3d"
+  },
+  "stack_result": {
+    "at": "2026-09-30T14:10:35.967980+00:00",
+    "status": "UPDATE_COMPLETE",
+    "last_updated": "2026-09-30 14:09:24.980000+00:00"
+  },
+  "readback": {
+    "at": "2026-09-30T14:11:13.000276+00:00",
+    "candidate_commit": "601ba1f98f77f1782f5042477da05acc14064e3d",
+    "template_equal": true,
+    "resource_identities_unchanged": true,
+    "functions": {
+      "wc-dev-admission": {
+        "FunctionName": "wc-dev-admission",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-admission",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.admission_lambda.handler",
+        "Timeout": 30,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:45.000+0000",
+        "RevisionId": "bade446c-ebe6-4c98-87a3-5d2c5e6cedbf",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-AdmissionFunctionServiceR-suBKK7xkxwkV",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "ADMISSION_ADMIN_ROLE_ID",
+          "ADMISSION_APPLICATION_ID",
+          "ADMISSION_GUILD_ID",
+          "ADMISSION_PLAYER_ROLE_ID",
+          "BACKUP_STATE_MACHINE_ARN",
+          "BACKUP_TIMEOUT_SECONDS",
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_CREATION_DEFAULTS",
+          "GAME_ID",
+          "GAME_PACKAGES",
+          "GLOBAL_LOCK_NAME",
+          "IDEMPOTENCY_TABLE",
+          "LOCKS_TABLE",
+          "LOCK_LEASE_SECONDS",
+          "MAINTENANCE_SCHEMA_VERSION",
+          "OPERATIONS_TABLE",
+          "PROTECTION_VOLUME_ID",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RESET_STATE_MACHINE_ARN",
+          "RESET_TIMEOUT_SECONDS",
+          "RETENTION_STATE_MACHINE_ARN",
+          "RETENTION_TIMEOUT_SECONDS",
+          "RUNTIME_GAMES",
+          "START_STATE_MACHINE_ARN",
+          "START_TIMEOUT_SECONDS",
+          "STATUS_TIMEOUT_SECONDS",
+          "STOP_STATE_MACHINE_ARN",
+          "STOP_TIMEOUT_SECONDS",
+          "SWITCH_STATE_MACHINE_ARN",
+          "SWITCH_TIMEOUT_SECONDS",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE",
+          "WHITELIST_MANAGEMENT"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games",
+          "SYSTEM_ID": "wishicraft-main",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-auto-stop-evaluator": {
+        "FunctionName": "wc-dev-auto-stop-evaluator",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-auto-stop-evaluator",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.auto_stop_evaluator_lambda.handler",
+        "Timeout": 30,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:10:21.000+0000",
+        "RevisionId": "d165fb69-b1d7-4f04-bfbb-e9491db4c6c3",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-AutoStopEvaluatorFunction-KmgI9e2CLPNG",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "ADMISSION_FUNCTION_NAME",
+          "AUTO_STOP_INTENTS_TABLE",
+          "DISCORD_MESSAGE_FUNCTION_NAME",
+          "DISCORD_OPERATION_CHANNEL_ID",
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_ID",
+          "GAME_PACKAGES",
+          "METRIC_NAMESPACE",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_GAMES",
+          "RUNTIME_HEARTBEATS_TABLE",
+          "STAGE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games",
+          "SYSTEM_ID": "wishicraft-main",
+          "STAGE": "dev",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-backup-task": {
+        "FunctionName": "wc-dev-backup-task",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-backup-task",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.backup_workflow_lambda.handler",
+        "Timeout": 60,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:32.000+0000",
+        "RevisionId": "04b91795-7bce-4e69-8ca1-18c415345c18",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-BackupTaskFunctionService-CVjc1TALn08x",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "AVAILABILITY_ZONE",
+          "AWS_ACCOUNT_ID",
+          "BACKUPS_TABLE",
+          "DATA_VOLUME_ID",
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_ID",
+          "GAME_PACKAGES",
+          "GLOBAL_LOCK_NAME",
+          "LOCKS_TABLE",
+          "LOCK_LEASE_SECONDS",
+          "OPERATIONS_TABLE",
+          "PROJECT",
+          "PROTECTION_VOLUME_ID",
+          "RECOVERY_RUNTIME_COMPRESSION",
+          "RECOVERY_RUNTIME_ZLIB_BASE64",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_GAMES",
+          "STAGE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE",
+          "WHITELIST_MANAGEMENT"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games",
+          "SYSTEM_ID": "wishicraft-main",
+          "BACKUPS_TABLE": "wc-dev-backups",
+          "STAGE": "dev",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "DATA_VOLUME_ID": "vol-03ac9f534326c345c",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-daily-backup-admission": {
+        "FunctionName": "wc-dev-daily-backup-admission",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-daily-backup-admission",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.daily_backup_lambda.admit",
+        "Timeout": 60,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:43.000+0000",
+        "RevisionId": "3acb90d3-7afa-4fb7-b2c6-a215c0900416",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-DailyBackupAdmissionFunct-xLgD2Mg12EQF",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "BACKUP_STATE_MACHINE_ARN",
+          "BACKUP_TIMEOUT_SECONDS",
+          "DAILY_BACKUP_ENABLED",
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_ID",
+          "GLOBAL_LOCK_NAME",
+          "IDEMPOTENCY_TABLE",
+          "LOCKS_TABLE",
+          "LOCK_LEASE_SECONDS",
+          "OPERATIONS_TABLE",
+          "PROTECTION_VOLUME_ID",
+          "RETENTION_TIMEOUT_SECONDS",
+          "RUNTIME_GAMES",
+          "STAGE",
+          "START_TIMEOUT_SECONDS",
+          "STATUS_TIMEOUT_SECONDS",
+          "STOP_TIMEOUT_SECONDS",
+          "SWITCH_TIMEOUT_SECONDS",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games",
+          "SYSTEM_ID": "wishicraft-main",
+          "STAGE": "dev",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "DAILY_BACKUP_ENABLED": "1",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-daily-backup-evaluator": {
+        "FunctionName": "wc-dev-daily-backup-evaluator",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-daily-backup-evaluator",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.daily_backup_lambda.handler",
+        "Timeout": 60,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:53.000+0000",
+        "RevisionId": "65b6b5e4-587e-4cf6-a03d-388211c25fb6",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-DailyBackupEvaluatorFunct-rnwzh04Mocv3",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "DAILY_BACKUP_ADMISSION_FUNCTION",
+          "DAILY_BACKUP_ENABLED",
+          "GLOBAL_LOCK_NAME",
+          "LOCKS_TABLE",
+          "OPERATIONS_TABLE",
+          "PROTECTION_VOLUME_ID",
+          "STAGE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "SYSTEM_ID": "wishicraft-main",
+          "STAGE": "dev",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "DAILY_BACKUP_ENABLED": "1",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-discord-command": {
+        "FunctionName": "wc-dev-discord-command",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-command",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.discord_command_lambda.handler",
+        "Timeout": 10,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:10:20.000+0000",
+        "RevisionId": "74fd7cea-11fe-4a4b-b616-9ae30b8a4a9b",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-DiscordCommandFunctionSer-ZVhqLbLtGe7m",
+        "CodeSha256": "B8XLadT9PgqzQ/r1/3M3GIpzQVnqJRmFQAc9RdF6c5E=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "ADMISSION_FUNCTION_NAME",
+          "DISCORD_ADMIN_ROLE_ID",
+          "DISCORD_APPLICATION_ID",
+          "DISCORD_GUILD_ID",
+          "DISCORD_OPERATION_CHANNEL_ID",
+          "DISCORD_PLAYER_ROLE_ID",
+          "DISCORD_PUBLIC_KEY",
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_PACKAGES",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_GAMES"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-discord-message": {
+        "FunctionName": "wc-dev-discord-message",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-discord-message",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.discord_message_lambda.handler",
+        "Timeout": 30,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:34.000+0000",
+        "RevisionId": "c09d3f26-ef26-43d3-8bd9-65a89ff4ee4d",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-DiscordMessageFunctionSer-AFogjTEXI0tq",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "AUTO_STOP_INTENTS_TABLE",
+          "BOT_TOKEN_PARAMETER_NAME",
+          "DELIVERY_RETRY_QUEUE_URL",
+          "MANAGEMENT_WEB_URL",
+          "OPERATIONS_TABLE",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_GAMES",
+          "RUNTIME_HEARTBEATS_TABLE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "SYSTEM_ID": "wishicraft-main",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-monitoring-observer": {
+        "FunctionName": "wc-dev-monitoring-observer",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-monitoring-observer",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.monitoring_lambda.handler",
+        "Timeout": 30,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:32.000+0000",
+        "RevisionId": "4619de1c-7f14-4ceb-91d1-2f432ceea507",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-MonitoringObserverFunctio-edzk1ODym2GA",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "DATA_FILESYSTEM_UUID",
+          "DATA_MOUNT_PATH",
+          "DATA_USAGE_WARNING_PERCENT",
+          "DATA_VOLUME_ID",
+          "DESIRED_RUNNING_NOT_READY_WARNING_SECONDS",
+          "DESIRED_STOPPED_RUNNING_WARNING_SECONDS",
+          "EC2_RUNNING_WARNING_SECONDS",
+          "GAME_ID",
+          "GLOBAL_LOCK_NAME",
+          "LOCKS_TABLE",
+          "METRIC_NAMESPACE",
+          "MONITORING_SHUTDOWN_GRACE_SECONDS",
+          "MONITORING_STARTUP_GRACE_SECONDS",
+          "OBSERVATION_FRESHNESS_SECONDS",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_GAMES",
+          "RUNTIME_HEARTBEATS_TABLE",
+          "STAGE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "SYSTEM_ID": "wishicraft-main",
+          "STAGE": "dev",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "DATA_VOLUME_ID": "vol-03ac9f534326c345c",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-reconcile": {
+        "FunctionName": "wc-dev-reconcile",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-reconcile",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.reconcile_lambda.handler",
+        "Timeout": 120,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:32.000+0000",
+        "RevisionId": "fd76f6d3-51d4-4732-b01b-fa7b7b631807",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-ReconcileFunctionServiceR-8O9aXlVZ26Yp",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_ID",
+          "GAME_PACKAGES",
+          "GLOBAL_LOCK_NAME",
+          "HOSTED_ZONE_ID",
+          "LOCKS_TABLE",
+          "PROJECT",
+          "RECORD_NAME",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_GAMES",
+          "SSM_PROBE_TIMEOUT_SECONDS",
+          "STAGE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games",
+          "SYSTEM_ID": "wishicraft-main",
+          "STAGE": "dev",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-retention-task": {
+        "FunctionName": "wc-dev-retention-task",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-retention-task",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.retention_workflow_lambda.handler",
+        "Timeout": 120,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:32.000+0000",
+        "RevisionId": "e80ceda1-2294-4583-b36a-5d35a99fec35",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-RetentionTaskFunctionServ-zQhVIzoKts3N",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "AVAILABILITY_ZONE",
+          "AWS_ACCOUNT_ID",
+          "BACKUPS_TABLE",
+          "DATA_VOLUME_DEVICE",
+          "DATA_VOLUME_ID",
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_ID",
+          "GAME_PACKAGES",
+          "GLOBAL_LOCK_NAME",
+          "LOCKS_TABLE",
+          "LOCK_LEASE_SECONDS",
+          "OPERATIONS_TABLE",
+          "PROJECT",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RETENTION_DELETE_ENABLED",
+          "RETENTION_PROVISIONED",
+          "RETENTION_WORKFLOW_NAME",
+          "RUNTIME_GAMES",
+          "STAGE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games",
+          "RETENTION_WORKFLOW_NAME": "wc-dev-retention",
+          "SYSTEM_ID": "wishicraft-main",
+          "BACKUPS_TABLE": "wc-dev-backups",
+          "STAGE": "dev",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "RETENTION_PROVISIONED": "1",
+          "DATA_VOLUME_ID": "vol-03ac9f534326c345c",
+          "RETENTION_DELETE_ENABLED": "0",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-start-task": {
+        "FunctionName": "wc-dev-start-task",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-start-task",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.start_workflow_lambda.handler",
+        "Timeout": 60,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:33.000+0000",
+        "RevisionId": "1390e5f9-a9c2-4e2f-ab70-ad823716b311",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-StartTaskFunctionServiceR-FEk4Q9qAOZpm",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_ID",
+          "GAME_PACKAGES",
+          "GLOBAL_LOCK_NAME",
+          "HOSTED_ZONE_ID",
+          "HOST_START_TIMEOUT_SECONDS",
+          "LOCKS_TABLE",
+          "LOCK_LEASE_SECONDS",
+          "OPERATIONS_TABLE",
+          "PROJECT",
+          "RECORD_NAME",
+          "RECORD_TTL_SECONDS",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_CONFIG_DIGEST",
+          "RUNTIME_DATA_SOURCE",
+          "RUNTIME_GAMES",
+          "STAGE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games",
+          "SYSTEM_ID": "wishicraft-main",
+          "STAGE": "dev",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-status-executor": {
+        "FunctionName": "wc-dev-status-executor",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-status-executor",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.status_executor_lambda.handler",
+        "Timeout": 150,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:42.000+0000",
+        "RevisionId": "5f6ba842-066f-4bb3-93bd-3a4fd9c643ca",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-StatusExecutorFunctionSer-f1TtXyevBcZn",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "GLOBAL_LOCK_NAME",
+          "LOCKS_TABLE",
+          "OPERATIONS_TABLE",
+          "RECONCILE_FUNCTION_NAME",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_GAMES",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "SYSTEM_ID": "wishicraft-main",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      },
+      "wc-dev-stop-task": {
+        "FunctionName": "wc-dev-stop-task",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:385526546525:function:wc-dev-stop-task",
+        "Runtime": "python3.12",
+        "Handler": "wishicraft.stop_workflow_lambda.handler",
+        "Timeout": 60,
+        "Version": "$LATEST",
+        "LastModified": "2026-09-30T14:09:32.000+0000",
+        "RevisionId": "d6ed2c02-82f1-4c45-9815-912fe6001d79",
+        "Role": "arn:aws:iam::385526546525:role/WishicraftControlPlaneSta-StopTaskFunctionServiceRo-kqI0DKwGYw3s",
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "State": "Active",
+        "LastUpdateStatus": "Successful",
+        "environment_names": [
+          "AUTO_STOP_INTENTS_TABLE",
+          "DATA_VOLUME_DEVICE",
+          "DATA_VOLUME_ID",
+          "GAMES_TABLE",
+          "GAME_CREATION",
+          "GAME_ID",
+          "GAME_PACKAGES",
+          "GLOBAL_LOCK_NAME",
+          "HOSTED_ZONE_ID",
+          "HOST_STOP_TIMEOUT_SECONDS",
+          "LOCKS_TABLE",
+          "LOCK_LEASE_SECONDS",
+          "METRIC_NAMESPACE",
+          "OPERATIONS_TABLE",
+          "PROJECT",
+          "PROTECTION_VOLUME_ID",
+          "RECORD_NAME",
+          "RESET_CONTRACT",
+          "RESET_POLICIES",
+          "RUNTIME_CONFIG_DIGEST",
+          "RUNTIME_DATA_SOURCE",
+          "RUNTIME_GAMES",
+          "RUNTIME_HEARTBEATS_TABLE",
+          "SSM_PROBE_TIMEOUT_SECONDS",
+          "STAGE",
+          "SYSTEM_ID",
+          "SYSTEM_STATE_TABLE"
+        ],
+        "public_binding": {
+          "GAMES_TABLE": "wc-dev-games",
+          "SYSTEM_ID": "wishicraft-main",
+          "STAGE": "dev",
+          "LOCKS_TABLE": "wc-dev-locks",
+          "OPERATIONS_TABLE": "wc-dev-operations",
+          "DATA_VOLUME_ID": "vol-03ac9f534326c345c",
+          "SYSTEM_STATE_TABLE": "wc-dev-system-state"
+        },
+        "all_environment_values_match_in_memory": true,
+        "code_matches_published_asset": true
+      }
+    },
+    "workflows": {
+      "BackupStateMachine": {
+        "raw_properties_equal": true,
+        "resolved_live_canonical_asl_match": true,
+        "role_configuration_identity_equal": true,
+        "tags_match": true,
+        "revisionId": "abd31155-2ef5-46b7-8473-76c160542e4d",
+        "definition_sha256": "88caa2c58de8e0f651d18fc3dbc3b01264bf8755c95ba8ddede5546fe5fa1c62"
+      },
+      "ResetWorkflow": {
+        "raw_properties_equal": true,
+        "resolved_live_canonical_asl_match": true,
+        "role_configuration_identity_equal": true,
+        "tags_match": true,
+        "revisionId": null,
+        "definition_sha256": "a7a350d84036902bd242ca7579f09f927f964a1622c866bda523b4c54c7eb668"
+      },
+      "RetentionStateMachine": {
+        "raw_properties_equal": true,
+        "resolved_live_canonical_asl_match": true,
+        "role_configuration_identity_equal": true,
+        "tags_match": true,
+        "revisionId": null,
+        "definition_sha256": "7105af7f613e8a1022ff045edd560d8822802fb1c9e4d10b0004beebc274d3b7"
+      },
+      "StartStateMachine": {
+        "raw_properties_equal": true,
+        "resolved_live_canonical_asl_match": true,
+        "role_configuration_identity_equal": true,
+        "tags_match": true,
+        "revisionId": null,
+        "definition_sha256": "8faa26107c6a0e305bafedf2b0255629be87795325d9e7b86351e5d1f513ad94"
+      },
+      "StopStateMachine": {
+        "raw_properties_equal": true,
+        "resolved_live_canonical_asl_match": true,
+        "role_configuration_identity_equal": true,
+        "tags_match": true,
+        "revisionId": "1c2ff03e-9c99-4268-8592-e621c9709308",
+        "definition_sha256": "7e0129f68c639a3d37923bf4953da9948009fa16dc9c8f12eb1fb1a9a64919cc"
+      },
+      "SwitchWorkflow": {
+        "raw_properties_equal": true,
+        "resolved_live_canonical_asl_match": true,
+        "role_configuration_identity_equal": true,
+        "tags_match": true,
+        "revisionId": null,
+        "definition_sha256": "4a8b8a6dacd2998cd98db61968d7f5578202eaad784de37913c3ebfad035a3d5"
+      }
+    },
+    "code_assets": {
+      "2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902.zip": {
+        "CodeSha256": "sZQIGbSsZ7ih82CnZFTxFbA5WiZGKUyLOlk1r+O87N8=",
+        "source_bytes_match_immutable_assembly": true,
+        "file_count": 131
+      },
+      "546b16d99bffb11cb7cba79050cd8c6086e716b6ab50c8d46ebd6e8f4ae0f8a0.zip": {
+        "CodeSha256": "B8XLadT9PgqzQ/r1/3M3GIpzQVnqJRmFQAc9RdF6c5E=",
+        "source_bytes_match_immutable_assembly": true,
+        "file_count": 222
+      }
+    },
+    "DeleteSnapshot_allowed": false
+  },
+  "deployment_business_data_comparison": {
+    "at": "2026-09-30T14:10:47.438693+00:00",
+    "comparisons": {
+      "games": true,
+      "backups": true,
+      "snapshots": true,
+      "journals": true,
+      "no_new_operations": true,
+      "remaining_operations_unchanged": true
+    },
+    "ttl_disappeared_operation_ids": [],
+    "raw_values_saved": false
+  },
+  "diagnostic": {
+    "payload": {
+      "schema_version": 1,
+      "action": "run",
+      "execution_mode": "DELETE_ONE",
+      "operation_id": "op-diagnostic-eeab15d9-122b-4b51-b834-54260a52557f",
+      "lease_id": "lease-diagnostic-0e217d67-69b6-41e6-a018-630160c36993"
+    },
+    "response": {
+      "at": "2026-09-30T14:11:49.919227+00:00",
+      "api_request_id": "60f06afd-9381-4cab-8820-1015b9dd98ea",
+      "lambda_request_ids": [
+        "60f06afd-9381-4cab-8820-1015b9dd98ea"
+      ],
+      "status_code": 200,
+      "function_error_present": false,
+      "expected_response": {
+        "status": "NO_DELETE",
+        "reason": "DELETE_ONE_NOT_RELEASED",
+        "deletion_authorized": false,
+        "planned_delete_ids": [],
+        "delete_action_count": 0
+      },
+      "passed": true,
+      "raw_payload_or_logs_saved": false
+    },
+    "business_data_comparison": {
+      "at": "2026-09-30T14:12:00.021434+00:00",
+      "checks": {
+        "games": true,
+        "backups": true,
+        "snapshots": true,
+        "locks": true,
+        "no_new_operations": true,
+        "existing_operations_unchanged": true
+      }
+    }
+  },
+  "formal_retention": {
+    "request": {
+      "at": "2026-09-30T14:12:35.893218+00:00",
+      "idempotency_key": "retention:d115-import-qualified-20260930",
+      "entry": "wishicraft.retention_operator.admit_retention",
+      "function": "wc-dev-admission",
+      "send_attempt_limit": 1,
+      "mode": "DRY_RUN (unchanged ASL)"
+    },
+    "admission": {
+      "at": "2026-09-30T14:12:40.161933+00:00",
+      "schema_version": 1,
+      "operation_id": "op-a98f0ab5-efe4-472d-b0d8-fe7cd33a05f6",
+      "created": true,
+      "lease_id": "lease-d9a40d5d-a4d7-4a55-87cc-b266ec072d95"
+    },
+    "result": {
+      "observed_at": "2026-09-30T14:13:18.380359+00:00",
+      "operation": {
+        "operation_id": "op-a98f0ab5-efe4-472d-b0d8-fe7cd33a05f6",
+        "operation_type": "RETENTION",
+        "status": "SUCCEEDED",
+        "current_step": "RETENTION_INVENTORY",
+        "requested_at": "2026-09-30T14:12:39.558212Z",
+        "completed_at": "2026-09-30T14:12:50.146525Z",
+        "requested_by": {
+          "display_name": null,
+          "source": "ADMIN",
+          "discord_user_id": null
+        },
+        "workflow_execution_arn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-a98f0ab5-efe4-472d-b0d8-fe7cd33a05f6"
+      },
+      "result": {
+        "kind": "RETENTION_DRY_RUN",
+        "reason": "planned",
+        "inventory_count": 14,
+        "keep_count": 7,
+        "candidate_count": 1,
+        "excluded_count": 6,
+        "anomaly_count": 0,
+        "deletion_plan_count": 1,
+        "delete_action_count": 0,
+        "recycle_bin_rule_count": 0,
+        "matching_recycle_bin_rule_count": 0
+      },
+      "workflow": {
+        "executionArn": "arn:aws:states:ap-northeast-1:385526546525:execution:wc-dev-retention:op-a98f0ab5-efe4-472d-b0d8-fe7cd33a05f6",
+        "stateMachineArn": "arn:aws:states:ap-northeast-1:385526546525:stateMachine:wc-dev-retention",
+        "name": "op-a98f0ab5-efe4-472d-b0d8-fe7cd33a05f6",
+        "status": "SUCCEEDED",
+        "startDate": "2026-09-30 23:12:40.189000+09:00",
+        "stopDate": "2026-09-30 23:12:51.560000+09:00"
+      },
+      "history": [
+        {
+          "id": 1,
+          "type": "ExecutionStarted",
+          "timestamp": "2026-09-30 23:12:40.189000+09:00"
+        },
+        {
+          "id": 2,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-30 23:12:40.212000+09:00",
+          "state_name": "ReconcileBeforeRetention"
+        },
+        {
+          "id": 3,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-30 23:12:40.212000+09:00"
+        },
+        {
+          "id": 4,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-30 23:12:40.271000+09:00"
+        },
+        {
+          "id": 5,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-30 23:12:46.614000+09:00"
+        },
+        {
+          "id": 6,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-30 23:12:46.630000+09:00"
+        },
+        {
+          "id": 7,
+          "type": "TaskStateEntered",
+          "timestamp": "2026-09-30 23:12:46.630000+09:00",
+          "state_name": "RunRetentionDryRun"
+        },
+        {
+          "id": 8,
+          "type": "TaskScheduled",
+          "timestamp": "2026-09-30 23:12:46.630000+09:00"
+        },
+        {
+          "id": 9,
+          "type": "TaskStarted",
+          "timestamp": "2026-09-30 23:12:46.697000+09:00"
+        },
+        {
+          "id": 10,
+          "type": "TaskSucceeded",
+          "timestamp": "2026-09-30 23:12:51.506000+09:00"
+        },
+        {
+          "id": 11,
+          "type": "TaskStateExited",
+          "timestamp": "2026-09-30 23:12:51.522000+09:00"
+        },
+        {
+          "id": 12,
+          "type": "ChoiceStateEntered",
+          "timestamp": "2026-09-30 23:12:51.522000+09:00",
+          "state_name": "RetentionSafe"
+        },
+        {
+          "id": 13,
+          "type": "ChoiceStateExited",
+          "timestamp": "2026-09-30 23:12:51.522000+09:00"
+        },
+        {
+          "id": 14,
+          "type": "SucceedStateEntered",
+          "timestamp": "2026-09-30 23:12:51.522000+09:00",
+          "state_name": "RetentionSucceeded"
+        },
+        {
+          "id": 15,
+          "type": "SucceedStateExited",
+          "timestamp": "2026-09-30 23:12:51.522000+09:00"
+        },
+        {
+          "id": 16,
+          "type": "ExecutionSucceeded",
+          "timestamp": "2026-09-30 23:12:51.560000+09:00"
+        }
+      ],
+      "current_operation_id": null,
+      "locks_present": false
+    },
+    "policy": "existing newest-seven DRY_RUN; not DELETE_ONE release or deletion authority"
+  },
+  "daily_backup": {
+    "observed_at": "2026-09-30T14:13:24.509569+00:00",
+    "start_after_stack_completed": "2026-09-30T14:10:35.967980+00:00",
+    "natural_completed_protected_evaluations": [
+      {
+        "request_id": "74683ae1-bcd0-4f1f-82c8-af63955c4834",
+        "started_at_ms": 1790777526558,
+        "evaluation": {
+          "reason": "PROTECTED",
+          "unprotected": false,
+          "stopped_warning": false,
+          "interval_warning": false
+        },
+        "evaluation_at_ms": 1790777528970,
+        "event_id": "39935673380814261386438549342144823256444487174097141760",
+        "completed_at_ms": 1790777528993,
+        "log_stream": "2026/09/30/wc-dev-daily-backup-evaluator[$LATEST]71f62d69af0d432f8c883f38e166c1ed",
+        "report_error": false
+      }
+    ],
+    "metrics": {
+      "DailyBackupHeartbeat": [
+        {
+          "Timestamp": "2026-09-30 23:12:00+09:00",
+          "Minimum": 1.0,
+          "Maximum": 1.0,
+          "Unit": "Count"
+        }
+      ],
+      "DailyBackupStoppedOverdue": [
+        {
+          "Timestamp": "2026-09-30 23:12:00+09:00",
+          "Minimum": 0.0,
+          "Maximum": 0.0,
+          "Unit": "Count"
+        }
+      ],
+      "DailyBackupIntervalOverdue": [
+        {
+          "Timestamp": "2026-09-30 23:12:00+09:00",
+          "Minimum": 0.0,
+          "Maximum": 0.0,
+          "Unit": "Count"
+        }
+      ],
+      "DailyBackupNeedsOperator": [
+        {
+          "Timestamp": "2026-09-30 23:12:00+09:00",
+          "Minimum": 0.0,
+          "Maximum": 0.0,
+          "Unit": "Count"
+        }
+      ],
+      "DailyBackupObservationUnknown": [
+        {
+          "Timestamp": "2026-09-30 23:12:00+09:00",
+          "Minimum": 0.0,
+          "Maximum": 0.0,
+          "Unit": "Count"
+        }
+      ]
+    },
+    "manual_invoke_count": 0
+  },
+  "intake": {
+    "original": {
+      "at": "2026-09-30T14:09:03.193940+00:00",
+      "values": {
+        "wc-dev-discord-command": "UNSET",
+        "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": "UNSET",
+        "wc-dev-admission": "UNSET"
+      }
+    },
+    "admission_restored": {
+      "at": "2026-09-30T14:12:35.891758+00:00",
+      "function": "wc-dev-admission",
+      "original": "UNSET",
+      "request_id": "e034f674-c73b-4b45-8185-d2168d30a91e"
+    },
+    "all_restored": {
+      "at": "2026-09-30T14:14:05.262967+00:00",
+      "values": {
+        "wc-dev-discord-command": "UNSET",
+        "WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": "UNSET",
+        "wc-dev-admission": "UNSET"
+      }
+    }
+  },
+  "final": {
+    "captured_at": "2026-09-30T14:15:02.151859+00:00",
+    "state": {
+      "system_id": "wishicraft-main",
+      "desired_state": "STOPPED",
+      "health": "HEALTHY",
+      "game_id": "game-bfd8409b3f8a4d1b591231c3490d9b646f546294ca11837cad74616ed33eaf21",
+      "target_instance_id": "i-04fc0629dc4ea466e",
+      "observed_at": "2026-09-30T14:13:04.937735Z",
+      "desired_revision": 79
+    },
+    "instance": {
+      "id": "i-04fc0629dc4ea466e",
+      "state": "stopped",
+      "volume_ids": [
+        "vol-092c04a633ffc6010",
+        "vol-03ac9f534326c345c"
+      ]
+    },
+    "backup_protection": {
+      "schema_version": 1,
+      "boundary": 2,
+      "protected_boundary": 2,
+      "attempts": 0,
+      "oldest_at": null,
+      "unknown_since": null,
+      "stopped_at": null,
+      "intent": {
+        "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+        "status": "SUCCEEDED",
+        "boundary": 2
+      },
+      "last_success": {
+        "operation_id": "op-80573487-0ca4-450d-b57a-e9160a3b17f9",
+        "snapshot_id": "snap-0212d6f8613b684ac",
+        "boundary": 2,
+        "acquired_at": "2026-09-27T05:27:20.322000Z",
+        "verified_at": "2026-09-27T05:31:22.833615Z"
+      }
+    },
+    "verification": {
+      "at": "2026-09-30T14:15:09.099256+00:00",
+      "checks": {
+        "snapshots": true,
+        "games": true,
+        "deletion_record_keys": true,
+        "backup_protection": true,
+        "maintenance": true,
+        "queues": true,
+        "schedules": true,
+        "dns": true,
+        "state_identity": true,
+        "alarm_configuration": true,
+        "all_alarms_ok": true,
+        "no_locks": true,
+        "no_running_workflow": true,
+        "no_active_ssm": true,
+        "retention_policies": true,
+        "only_formal_retention_added": true,
+        "existing_operations_unchanged": true,
+        "intake_restored": true,
+        "web_not_deployed_WishicraftWebStack-dev-AuthC256A5EC-prADam04L0hd": true,
+        "web_not_deployed_WishicraftWebStack-dev-Web3C8945DB-4RwUKj0PEQqp": true
+      },
+      "added_operation_ids": [
+        "op-a98f0ab5-efe4-472d-b0d8-fe7cd33a05f6"
+      ],
+      "ttl_disappeared": [],
+      "snapshot_count": 14,
+      "alarm_count": 56
+    },
+    "events": {
+      "at": "2026-09-30T14:14:50.710025+00:00",
+      "stack_events": [
+        {
+          "EventId": "b222d0e0-bcd8-11f1-b7d0-06cbb13482bb",
+          "LogicalResourceId": "WishicraftControlPlaneStack-dev",
+          "PhysicalResourceId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd",
+          "ResourceType": "AWS::CloudFormation::Stack",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:10:31.250000+00:00"
+        },
+        {
+          "EventId": "b158a310-bcd8-11f1-9994-0e096225f769",
+          "LogicalResourceId": "WishicraftControlPlaneStack-dev",
+          "PhysicalResourceId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd",
+          "ResourceType": "AWS::CloudFormation::Stack",
+          "ResourceStatus": "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:10:29.946000+00:00"
+        },
+        {
+          "EventId": "AutoStopEvaluatorFunctionF85F8B50-UPDATE_COMPLETE-2026-09-30T14:10:23.239Z",
+          "LogicalResourceId": "AutoStopEvaluatorFunctionF85F8B50",
+          "PhysicalResourceId": "wc-dev-auto-stop-evaluator",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:10:23.239000+00:00"
+        },
+        {
+          "EventId": "DiscordCommandFunction7D25102A-UPDATE_COMPLETE-2026-09-30T14:10:22.668Z",
+          "LogicalResourceId": "DiscordCommandFunction7D25102A",
+          "PhysicalResourceId": "wc-dev-discord-command",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:10:22.668000+00:00"
+        },
+        {
+          "EventId": "AutoStopEvaluatorFunctionF85F8B50-d9c341b3-602c-4a05-8ae4-d2b7c6d24a07",
+          "LogicalResourceId": "AutoStopEvaluatorFunctionF85F8B50",
+          "PhysicalResourceId": "wc-dev-auto-stop-evaluator",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:10:22.441000+00:00"
+        },
+        {
+          "EventId": "DiscordCommandFunction7D25102A-f1bbbf8b-907d-4ccd-a8be-384d08d26794",
+          "LogicalResourceId": "DiscordCommandFunction7D25102A",
+          "PhysicalResourceId": "wc-dev-discord-command",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:10:21.718000+00:00"
+        },
+        {
+          "EventId": "AutoStopEvaluatorFunctionF85F8B50-UPDATE_IN_PROGRESS-2026-09-30T14:10:19.291Z",
+          "LogicalResourceId": "AutoStopEvaluatorFunctionF85F8B50",
+          "PhysicalResourceId": "wc-dev-auto-stop-evaluator",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:10:19.291000+00:00"
+        },
+        {
+          "EventId": "DiscordCommandFunction7D25102A-UPDATE_IN_PROGRESS-2026-09-30T14:10:18.503Z",
+          "LogicalResourceId": "DiscordCommandFunction7D25102A",
+          "PhysicalResourceId": "wc-dev-discord-command",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:10:18.503000+00:00"
+        },
+        {
+          "EventId": "DailyBackupEvaluatorFunction2CAEBD5D-UPDATE_COMPLETE-2026-09-30T14:09:57.977Z",
+          "LogicalResourceId": "DailyBackupEvaluatorFunction2CAEBD5D",
+          "PhysicalResourceId": "wc-dev-daily-backup-evaluator",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:57.977000+00:00"
+        },
+        {
+          "EventId": "DailyBackupEvaluatorFunction2CAEBD5D-d63819c9-79f0-41d7-b85f-519dddc2d9d7",
+          "LogicalResourceId": "DailyBackupEvaluatorFunction2CAEBD5D",
+          "PhysicalResourceId": "wc-dev-daily-backup-evaluator",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:57.212000+00:00"
+        },
+        {
+          "EventId": "DailyBackupEvaluatorFunction2CAEBD5D-UPDATE_IN_PROGRESS-2026-09-30T14:09:51.678Z",
+          "LogicalResourceId": "DailyBackupEvaluatorFunction2CAEBD5D",
+          "PhysicalResourceId": "wc-dev-daily-backup-evaluator",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:51.678000+00:00"
+        },
+        {
+          "EventId": "AdmissionFunction23082B67-UPDATE_COMPLETE-2026-09-30T14:09:51.032Z",
+          "LogicalResourceId": "AdmissionFunction23082B67",
+          "PhysicalResourceId": "wc-dev-admission",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:51.032000+00:00"
+        },
+        {
+          "EventId": "AdmissionFunction23082B67-f3116919-8d60-4a7c-92d0-3d6d8cd29e18",
+          "LogicalResourceId": "AdmissionFunction23082B67",
+          "PhysicalResourceId": "wc-dev-admission",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:50.160000+00:00"
+        },
+        {
+          "EventId": "StatusExecutorFunction6E5C9869-UPDATE_COMPLETE-2026-09-30T14:09:47.459Z",
+          "LogicalResourceId": "StatusExecutorFunction6E5C9869",
+          "PhysicalResourceId": "wc-dev-status-executor",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:47.459000+00:00"
+        },
+        {
+          "EventId": "StatusExecutorFunction6E5C9869-abe7b7e6-a74e-4e9a-930c-cb646026fae4",
+          "LogicalResourceId": "StatusExecutorFunction6E5C9869",
+          "PhysicalResourceId": "wc-dev-status-executor",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:46.723000+00:00"
+        },
+        {
+          "EventId": "DailyBackupAdmissionFunctionBFD7AF72-UPDATE_COMPLETE-2026-09-30T14:09:45.944Z",
+          "LogicalResourceId": "DailyBackupAdmissionFunctionBFD7AF72",
+          "PhysicalResourceId": "wc-dev-daily-backup-admission",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:45.944000+00:00"
+        },
+        {
+          "EventId": "DailyBackupAdmissionFunctionBFD7AF72-f4fd11b5-b60b-4e0f-8c62-5d989e7a2c32",
+          "LogicalResourceId": "DailyBackupAdmissionFunctionBFD7AF72",
+          "PhysicalResourceId": "wc-dev-daily-backup-admission",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:45.132000+00:00"
+        },
+        {
+          "EventId": "AdmissionFunction23082B67-UPDATE_IN_PROGRESS-2026-09-30T14:09:44.199Z",
+          "LogicalResourceId": "AdmissionFunction23082B67",
+          "PhysicalResourceId": "wc-dev-admission",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:44.199000+00:00"
+        },
+        {
+          "EventId": "DailyBackupAdmissionFunctionBFD7AF72-UPDATE_IN_PROGRESS-2026-09-30T14:09:41.939Z",
+          "LogicalResourceId": "DailyBackupAdmissionFunctionBFD7AF72",
+          "PhysicalResourceId": "wc-dev-daily-backup-admission",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:41.939000+00:00"
+        },
+        {
+          "EventId": "StatusExecutorFunction6E5C9869-UPDATE_IN_PROGRESS-2026-09-30T14:09:41.162Z",
+          "LogicalResourceId": "StatusExecutorFunction6E5C9869",
+          "PhysicalResourceId": "wc-dev-status-executor",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:41.162000+00:00"
+        },
+        {
+          "EventId": "DiscordMessageFunction78FA388B-UPDATE_COMPLETE-2026-09-30T14:09:36.436Z",
+          "LogicalResourceId": "DiscordMessageFunction78FA388B",
+          "PhysicalResourceId": "wc-dev-discord-message",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:36.436000+00:00"
+        },
+        {
+          "EventId": "DiscordMessageFunction78FA388B-87987bb1-91e4-46cd-ba99-6de31d09d7de",
+          "LogicalResourceId": "DiscordMessageFunction78FA388B",
+          "PhysicalResourceId": "wc-dev-discord-message",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:35.556000+00:00"
+        },
+        {
+          "EventId": "StartTaskFunction8C564C4A-UPDATE_COMPLETE-2026-09-30T14:09:35.462Z",
+          "LogicalResourceId": "StartTaskFunction8C564C4A",
+          "PhysicalResourceId": "wc-dev-start-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:35.462000+00:00"
+        },
+        {
+          "EventId": "BackupTaskFunctionA44639DC-UPDATE_COMPLETE-2026-09-30T14:09:35.243Z",
+          "LogicalResourceId": "BackupTaskFunctionA44639DC",
+          "PhysicalResourceId": "wc-dev-backup-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:35.243000+00:00"
+        },
+        {
+          "EventId": "MonitoringObserverFunction584DA7C7-UPDATE_COMPLETE-2026-09-30T14:09:35.241Z",
+          "LogicalResourceId": "MonitoringObserverFunction584DA7C7",
+          "PhysicalResourceId": "wc-dev-monitoring-observer",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:35.241000+00:00"
+        },
+        {
+          "EventId": "StopTaskFunction11473A8C-UPDATE_COMPLETE-2026-09-30T14:09:35.183Z",
+          "LogicalResourceId": "StopTaskFunction11473A8C",
+          "PhysicalResourceId": "wc-dev-stop-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:35.183000+00:00"
+        },
+        {
+          "EventId": "ReconcileFunction30829CB6-UPDATE_COMPLETE-2026-09-30T14:09:34.984Z",
+          "LogicalResourceId": "ReconcileFunction30829CB6",
+          "PhysicalResourceId": "wc-dev-reconcile",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:34.984000+00:00"
+        },
+        {
+          "EventId": "RetentionTaskFunction9F285CE4-UPDATE_COMPLETE-2026-09-30T14:09:34.950Z",
+          "LogicalResourceId": "RetentionTaskFunction9F285CE4",
+          "PhysicalResourceId": "wc-dev-retention-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_COMPLETE",
+          "Timestamp": "2026-09-30 14:09:34.950000+00:00"
+        },
+        {
+          "EventId": "StartTaskFunction8C564C4A-f5a85d8b-da38-4deb-a1a1-b1a5d5c34ef8",
+          "LogicalResourceId": "StartTaskFunction8C564C4A",
+          "PhysicalResourceId": "wc-dev-start-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:34.639000+00:00"
+        },
+        {
+          "EventId": "BackupTaskFunctionA44639DC-2a6a93c2-de57-42e3-9539-5369d664151d",
+          "LogicalResourceId": "BackupTaskFunctionA44639DC",
+          "PhysicalResourceId": "wc-dev-backup-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:34.393000+00:00"
+        },
+        {
+          "EventId": "MonitoringObserverFunction584DA7C7-d1aee3a2-07c2-4584-85c2-312364369d93",
+          "LogicalResourceId": "MonitoringObserverFunction584DA7C7",
+          "PhysicalResourceId": "wc-dev-monitoring-observer",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:34.374000+00:00"
+        },
+        {
+          "EventId": "StopTaskFunction11473A8C-befb2bdc-0c8a-47af-9b3d-24e490b9f0ab",
+          "LogicalResourceId": "StopTaskFunction11473A8C",
+          "PhysicalResourceId": "wc-dev-stop-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:34.250000+00:00"
+        },
+        {
+          "EventId": "ReconcileFunction30829CB6-aac19aed-da9a-4d25-a262-80d0ec129631",
+          "LogicalResourceId": "ReconcileFunction30829CB6",
+          "PhysicalResourceId": "wc-dev-reconcile",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:34.211000+00:00"
+        },
+        {
+          "EventId": "RetentionTaskFunction9F285CE4-6952b962-c068-46d2-9ea8-5b963130ab67",
+          "LogicalResourceId": "RetentionTaskFunction9F285CE4",
+          "PhysicalResourceId": "wc-dev-retention-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:34.167000+00:00"
+        },
+        {
+          "EventId": "StartTaskFunction8C564C4A-UPDATE_IN_PROGRESS-2026-09-30T14:09:31.433Z",
+          "LogicalResourceId": "StartTaskFunction8C564C4A",
+          "PhysicalResourceId": "wc-dev-start-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:31.433000+00:00"
+        },
+        {
+          "EventId": "MonitoringObserverFunction584DA7C7-UPDATE_IN_PROGRESS-2026-09-30T14:09:31.193Z",
+          "LogicalResourceId": "MonitoringObserverFunction584DA7C7",
+          "PhysicalResourceId": "wc-dev-monitoring-observer",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:31.193000+00:00"
+        },
+        {
+          "EventId": "ReconcileFunction30829CB6-UPDATE_IN_PROGRESS-2026-09-30T14:09:31.175Z",
+          "LogicalResourceId": "ReconcileFunction30829CB6",
+          "PhysicalResourceId": "wc-dev-reconcile",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:31.175000+00:00"
+        },
+        {
+          "EventId": "DiscordMessageFunction78FA388B-UPDATE_IN_PROGRESS-2026-09-30T14:09:31.102Z",
+          "LogicalResourceId": "DiscordMessageFunction78FA388B",
+          "PhysicalResourceId": "wc-dev-discord-message",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:31.102000+00:00"
+        },
+        {
+          "EventId": "RetentionTaskFunction9F285CE4-UPDATE_IN_PROGRESS-2026-09-30T14:09:31.099Z",
+          "LogicalResourceId": "RetentionTaskFunction9F285CE4",
+          "PhysicalResourceId": "wc-dev-retention-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:31.099000+00:00"
+        },
+        {
+          "EventId": "BackupTaskFunctionA44639DC-UPDATE_IN_PROGRESS-2026-09-30T14:09:31.081Z",
+          "LogicalResourceId": "BackupTaskFunctionA44639DC",
+          "PhysicalResourceId": "wc-dev-backup-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:31.081000+00:00"
+        },
+        {
+          "EventId": "StopTaskFunction11473A8C-UPDATE_IN_PROGRESS-2026-09-30T14:09:31.048Z",
+          "LogicalResourceId": "StopTaskFunction11473A8C",
+          "PhysicalResourceId": "wc-dev-stop-task",
+          "ResourceType": "AWS::Lambda::Function",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:31.048000+00:00"
+        },
+        {
+          "EventId": "8aa17170-bcd8-11f1-bdad-0effc35b5af9",
+          "LogicalResourceId": "WishicraftControlPlaneStack-dev",
+          "PhysicalResourceId": "arn:aws:cloudformation:ap-northeast-1:385526546525:stack/WishicraftControlPlaneStack-dev/47538c60-a2c9-11f1-9471-0603aa9dc7dd",
+          "ResourceType": "AWS::CloudFormation::Stack",
+          "ResourceStatus": "UPDATE_IN_PROGRESS",
+          "Timestamp": "2026-09-30 14:09:24.980000+00:00"
+        }
+      ],
+      "available_changesets": [],
+      "alarm_state_transitions_since_execution": []
+    }
+  },
+  "operation_accounting": {
+    "direct_disabled_diagnostic_invokes": 1,
+    "formal_retention_dry_run": 1,
+    "new_backups": 0,
+    "snapshot_create_delete_copy_tag_lock": 0,
+    "hold_releases": 0,
+    "new_deletion_journals": 0,
+    "pending_recovery": 0,
+    "code_deployments": 1,
+    "aws_mutations_performed": [
+      "asset publication",
+      "ChangeSet creation/execution",
+      "13 Lambda Code updates",
+      "temporary normal intake concurrency and restoration",
+      "formal Admission Operation/Lock/state lifecycle"
+    ]
+  },
+  "limits": [
+    "No Stage B or DeleteSnapshot API/permission qualification",
+    "No actual pending recovery or fault injection",
+    "No whole-world hash or restore/content verification",
+    "Local Linux artifact runtime is not claimed identical to managed Lambda runtime",
+    "No new 14-day retention execution qualification; DRY_RUN uses existing deployed policy",
+    "No full stack drift detection API; targeted configuration and restored intake checked"
+  ],
+  "privacy": "positive projections before save; live environment values only compared in memory; no raw Lambda/config maps, recovery/Compose, credentials, raw exceptions or execution IO saved"
+}
