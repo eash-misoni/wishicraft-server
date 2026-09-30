@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from wishicraft.maintenance_operator import item
+from wishicraft.dynamodb_read import item
 from wishicraft.maintenance_repository import encode
 from wishicraft.operation import LeaseProof
 from wishicraft.retention_deletion import DeletionPhase, DeletionRecord

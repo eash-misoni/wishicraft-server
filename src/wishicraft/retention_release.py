@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -37,3 +38,10 @@ def load_retention_release(root: Path, stage: str) -> RetentionRelease:
         if path.exists()
         else RetentionRelease()
     )
+
+
+def environment_release() -> RetentionRelease:
+    values = [os.environ.get(k, "0") for k in ("RETENTION_PROVISIONED", "RETENTION_DELETE_ENABLED")]
+    if any(v not in {"0", "1"} for v in values):
+        raise ValueError("INVALID_RETENTION_RUNTIME_FLAGS")
+    return RetentionRelease(*(v == "1" for v in values))

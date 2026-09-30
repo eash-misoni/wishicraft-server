@@ -9,23 +9,15 @@ from pathlib import Path
 from typing import Any
 
 import boto3  # type: ignore[import-untyped]
-from boto3.dynamodb.types import TypeDeserializer  # type: ignore[import-untyped]
 
 from wishicraft.config import load_configuration
+from wishicraft.dynamodb_read import item as item
 from wishicraft.endpoint import DnsState, Route53Observer
 from wishicraft.maintenance import lease_active, new_lease
 from wishicraft.maintenance_repository import transition
 from wishicraft.monitoring_telemetry import fresh
 from wishicraft.naming import resource_name
 from wishicraft.reconcile import TargetResolver
-
-
-def item(api: Any, table: str, key: str, value: str) -> dict[str, Any]:
-    raw = api.get_item(TableName=table, Key={key: {"S": value}}, ConsistentRead=True).get(
-        "Item", {}
-    )
-    decoder = TypeDeserializer()
-    return {k: decoder.deserialize(v) for k, v in raw.items()}
 
 
 def invoke(api: Any, function: str) -> dict[str, Any]:
