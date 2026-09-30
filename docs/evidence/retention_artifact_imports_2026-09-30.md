@@ -1,5 +1,7 @@
 # D-115 RETENTION artifact import boundary (repository review candidate)
 
+[Draft PR #15](https://github.com/eash-misoni/wishicraft-server/pull/15), unmerged and undeployed.
+
 Base main: `cfc48adfdf5f5ea3edbeb5c0c31302868a6f2bc2`.
 Deployed code remains `51fa628179c43c2ca1559077d3b196e9797822e9`.
 The [Stage A PARTIAL](retention_disabled_stage_a_2026-09-30.md) and diagnostic
@@ -60,7 +62,46 @@ The existing wider wire-format and safety regressions remain required source-lev
 
 ## Validation and difference record
 
-Validation is in progress on this Draft. Linux artifact results must pass before handoff; local
-macOS has no Docker and cannot stand in for Python 3.12/Linux qualification. Source tests and
-synth success are reported separately. Final CI identities and comparison will be appended after
-verification. Canonical retention remains true/false; D-114 remains unchanged.
+Source-level verification: **2,263 full tests**, focused 122 tests, lint, format (411 files),
+strict mypy (298 files), and all 12 existing quality-job CLI synth configurations passed locally.
+The previous DynamoDB wire/numeric and safety regressions remain included. No Docker is installed
+on the local macOS host; Linux artifact qualification ran inside GitHub CI, not on that host.
+
+[Isolation evidence](retention_artifact_isolation_2026-09-30.json), CI run
+[36717871652](https://github.com/eash-misoni/wishicraft-server/actions/runs/36717871652), records
+**19 successful isolated processes**: predecessor diagnostic, new disabled flags, DRY_RUN,
+recovery/reconcile/future binding, and 15 handler imports (13 Control Plane + two Web).
+Python 3.12.14 / Linux x86_64, boto3 and botocore 1.43.91 from the SDK-only image.
+Base image `python@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f`;
+local built image `sha256:bda6940ce3eb7293bfc299d7ac710ae4e0674d3d2d8deb884bcfbc71a7300c99`.
+These are container qualification identities, not a read-back of managed Lambda's runtime.
+
+The regenerated predecessor shared asset was exactly
+`f3eba1d0d9971f79928f14a10e7a8be37b54a736ab893766e31b2a7eefdde90c`, matching the saved Stage A
+asset identity, and reproduced missing yaml with the fixed diagnostic payload. Corrected shared
+asset `2b34ff7c33e8d6267edd2418073b0cfa8d13b000de4c99d6d45866e6b8a6a902` returned the exact
+NO_DELETE / DELETE_ONE_NOT_RELEASED / false / [] / 0 result before any SDK client construction.
+DRY_RUN used a valid zero-inventory synthetic case and real Runtime/Lease/Operation repositories;
+only SDK methods were fake. Recovery used real wire decoding, pair lookup, ExecutionReads,
+read_recovery and verify; normal explicit-success reconciliation required two observations before
+pending removal. No EC2 mutation was sent. Future enabled binding constructed an adapter with
+fake clients but did not dispatch. This is import/call-path qualification, not live deletion/IAM.
+
+Initial CI run 36717398066 passed old/new diagnostic and DRY_RUN, then failed its final origin
+assertion after recovery because a resource namespace has no __file__. The harness was corrected
+to require every namespace search location inside the selected asset. It did not relax recovery
+or application safety checks, hide a failure or modify the old result. The successful follow-up
+record is separate. Final Draft HEAD CI is linked in the PR/handoff; documentation-only updates
+do not alter the recorded Code assets.
+
+[Canonical synth/package comparison](retention_artifact_synth_2026-09-30.json): Control Plane
+13 Lambda Code properties and Web two Lambda Code properties change. All other deployable
+Properties, resource identities, six workflow raw definitions, IAM, alarms, schedules and flags
+are identical. Baseline main's src/infrastructure/config/dependency tree is identical to the
+saved deployed-commit assembly; that equivalence is checked separately from artifact loading.
+The three assets change only seven Wishicraft source paths (one new shared helper); all external
+dependency files are unchanged. No runtime dependency, layer, SDK or PyYAML is added to deployment.
+
+Canonical retention remains true/false and D-114 true/true unchanged. The PR is Draft/unmerged.
+The deployed import failure remains until a separately approved corrected Code release and
+at-most-one disabled-gate qualification; no Stage B, snapshot deletion or live recovery is qualified.
