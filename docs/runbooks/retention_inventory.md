@@ -269,3 +269,24 @@ independent legacy checks. Single-Game provision and false/true remain errors. S
 [review correction evidence](../evidence/retention_release_review_2026-09-28.md) for wire-format
 reconcile/recovery tests and template comparison. This correction grants no deployment or
 snapshot permission; PR #12 stays Draft pending review.
+
+## 2026-09-30 disabled Stage A: deployed, diagnostic failed
+
+PR #12 and the configuration-only PR #13 are normally merged. Deployed commit is
+`51fa628179c43c2ca1559077d3b196e9797822e9`; canonical dev is provision=true/enabled=false.
+Code/config/IAM and all six workflows read back correctly; no DeleteSnapshot permission,
+RETENTION ASL still DRY_RUN. D-114 remains enabled and naturally PROTECTED.
+
+The one authorized direct disabled-gate diagnostic failed with ModuleNotFoundError (`yaml`)
+before _get_runtime, rather than returning NO_DELETE. The import chain loads the local
+configuration dependency before checking the disabled flag. This is a runtime artifact
+qualification failure despite passing source-local tests. No second Invoke, formal RETENTION,
+fix, permission expansion or redeployment was attempted. The existing task Errors alarm
+correctly notified this actual failure. Natural alarm recovery does not repair RETENTION.
+
+Keep deletion disabled. Do not use this deployment as authority for Stage B, a formal
+RETENTION trial or live pending recovery. A separately reviewed import/dependency correction,
+artifact-level test and separately approved release/qualification are next; no historical
+FAILED re-investigation or hold change is needed. [Exact ChangeSet, diagnostic, notification,
+retained data and final intake state](../evidence/retention_disabled_stage_a_2026-09-30.md)
+are the current checkpoint. The original preparation/review evidence is retained.

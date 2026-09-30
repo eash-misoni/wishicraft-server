@@ -1,5 +1,12 @@
 # D-115 retention live-release preparation
 
+> 2026-09-30 deployment checkpoint: PR #12 and canonical dev Stage A are merged;
+> provision=true/enabled=false is deployed with no DeleteSnapshot grant. Code/config/IAM
+> read-back passed, but the single disabled-gate diagnostic failed on a missing `yaml`
+> import before _get_runtime. **PARTIAL, not release qualification complete.** No fix or
+> retry was performed. [Execution and remaining boundary](../evidence/retention_disabled_stage_a_2026-09-30.md).
+> The false/false and undeployed statements below describe the original preparation checkpoint.
+
 This continues the [disabled execution core](retention_execution.md) after actual merge
 `29cff405d83efb25ef67fb98de8b03e7ee9568f6`. Repository preparation only: no deployment,
 ChangeSet, DeleteSnapshot (including DryRun), snapshot/hold/journal change or D-114 pause.

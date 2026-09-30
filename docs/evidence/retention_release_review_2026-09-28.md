@@ -1,5 +1,9 @@
 # D-115 PR #12 review corrections — repository only
 
+> Subsequent execution: [2026-09-30 disabled Stage A](retention_disabled_stage_a_2026-09-30.md).
+> This review record remains historical. The later deploy/read-back succeeded but the
+> single live disabled-gate diagnostic failed; this does not retroactively qualify it.
+
 Reviewed baseline: `f168dd14f6bba7b650e6512a159d12ff4d15c1da`, base main
 `29cff405d83efb25ef67fb98de8b03e7ee9568f6`. The PR was OPEN/Draft with all five checks
 successful before this correction. No merge, AWS connection, read-only refresh, mutation,
