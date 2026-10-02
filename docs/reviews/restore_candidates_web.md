@@ -86,5 +86,6 @@ list/detail, pagination, escaped DOM text and read failure states.
 
 Local results and any unavailable CI checks are recorded in the task checkpoint; running
 local unit tests is not live Snapshot or restoration qualification. Docker/runtime tests
-remain separate because no runtime contract changes here. No GitHub writes/manual CI runs
-are authorized in this task.
+remain separate because no runtime contract changes here. Repository commit/push and draft PR creation, with ordinary push/PR-triggered CI,
+are authorized. Manual workflow dispatch, merge, marking the PR ready for review, deploy
+and live environment operations remain outside this task.
