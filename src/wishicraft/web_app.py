@@ -70,15 +70,19 @@ class WebApp:
         operations: Callable[[], Any] | None = None,
         origin: str = "",
         discovery: Callable[[], list[dict[str, Any]]] | None = None,
+        candidates: Callable[[], Any] | None = None,
     ) -> None:
         self.assets, self.sessions, self.status = assets, sessions, status
         self.operations, self.origin = operations, origin
+        self.candidates = candidates
         self.discovery = discovery
         self.allowlist = set(json.loads((assets / "routes.json").read_text()))
 
     def handle(self, event: dict[str, Any], now: datetime) -> dict[str, Any]:
         path = event.get("rawPath", "")
         method = event.get("requestContext", {}).get("http", {}).get("method")
+        if path == "/api/restore-candidates" or path.startswith("/api/restore-candidates/"):
+            return self.candidate_request(event, now)
         if path.startswith("/api/operations") or path == "/api/capabilities":
             return self.operation_request(event, now)
         if method != "GET":
@@ -143,6 +147,42 @@ class WebApp:
             # Chrome form POST must retain a same-origin Origin for logout validation.
             result["headers"]["referrer-policy"] = "same-origin"
         return result
+
+    def candidate_request(self, event: dict[str, Any], now: datetime) -> dict[str, Any]:
+        from wishicraft.web_operations import WebRejected, principal
+
+        def reply(status: int, body: dict[str, Any]) -> dict[str, Any]:
+            return response(status, json.dumps(body), content_type="application/json")
+
+        try:
+            auth = self.sessions()
+            record = auth.authenticate(cookies(event).get(SESSION_COOKIE, ""), int(now.timestamp()))
+            principal(record, auth.policy)
+            if event.get("requestContext", {}).get("http", {}).get("method") != "GET":
+                return reply(405, {"error": "method_not_allowed"})
+            if self.candidates is None:
+                return reply(503, {"error": "temporarily_unavailable"})
+            path = event["rawPath"]
+            raw_query = event.get("rawQueryString", "")
+            if not isinstance(raw_query, str) or len(raw_query) > 512:
+                return reply(400, {"error": "invalid_input"})
+            query = parse_qs(raw_query, keep_blank_values=True)
+            if path == "/api/restore-candidates":
+                if set(query) - {"cursor"} or ("cursor" in query and len(query["cursor"]) != 1):
+                    return reply(400, {"error": "invalid_input"})
+                cursor = query["cursor"][0] if "cursor" in query else None
+                return reply(200, self.candidates().listing(cursor, now))
+            if query:
+                return reply(400, {"error": "invalid_input"})
+            return reply(
+                200, self.candidates().detail(path.removeprefix("/api/restore-candidates/"))
+            )
+        except AuthRejected:
+            return reply(401, {"error": "authentication_required"})
+        except WebRejected as error:
+            return reply(error.status, {"error": error.code})
+        except Exception:
+            return reply(503, {"error": "temporarily_unavailable"})
 
     def operation_request(self, event: dict[str, Any], now: datetime) -> dict[str, Any]:
         from wishicraft.web_operations import WebRejected, principal

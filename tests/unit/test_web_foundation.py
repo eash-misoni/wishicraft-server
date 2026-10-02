@@ -334,12 +334,29 @@ def test_synthesized_environment_initializes_handler(monkeypatch: pytest.MonkeyP
     }
     assert not actions.intersection(
         {
-            "dynamodb:Scan",
             "dynamodb:UpdateItem",
             "ssm:SendCommand",
             "states:StartExecution",
         }
     )
+    scan = [s for s in statements if "dynamodb:Scan" in s["Action"]]
+    assert len(scan) == 1
+    assert set(scan[0]["Action"]) == {"dynamodb:Scan", "dynamodb:GetItem"}
+    assert scan[0]["Resource"] == {
+        "Fn::Join": [
+            "",
+            [
+                "arn:",
+                {"Ref": "AWS::Partition"},
+                ":dynamodb:ap-northeast-1:385526546525:table/wc-dev-backups",
+            ],
+        ]
+    }
+    candidate_reader = web_lambda.candidates()
+    assert candidate_reader.table == env["WEB_BACKUPS_TABLE"]
+    assert env["WEB_BACKUPS_TABLE"] == "wc-dev-backups"
+    assert env["WEB_STAGE"] == "dev" and env["WEB_PROJECT"] == "wishicraft"
+    assert env["WEB_OWNER"] == "385526546525"
     assert "WEB_OAUTH_PARAMETER" not in env
     assert not any(
         v["Type"] in {"AWS::S3::Bucket", "AWS::CloudFront::Distribution", "AWS::Route53::RecordSet"}

@@ -13,6 +13,13 @@
 <button id="refresh" type="button">表示を更新</button>
 <div id="status" class="listing"></div>
 <section class="card"><h2>登録済みGame</h2><div id="registered-games"></div></section>
+<section class="card" aria-labelledby="candidates-title"><h2 id="candidates-title">復元候補の記録</h2>
+<p>バックアップ取得時点の保存済み情報です。Snapshotの現存・復元可能性は未確認です。未起動Gameはworld未生成の場合があります。</p>
+<p>1ページは最大10件の評価範囲です。ページ内だけ取得時刻順に表示し、全履歴の新しい順ではありません。共有Data EBSの記録であり、Game単独のバックアップではありません。</p>
+<button id="candidates-refresh" type="button">候補を読み直す</button>
+<button id="candidates-next" type="button" hidden>次の範囲を読む</button>
+<p id="candidates-notice" role="status" aria-live="polite">候補を読み込み中です。</p>
+<div id="candidates-list"></div><div id="candidate-detail" aria-live="polite"></div></section>
 <section class="card" id="common-whitelist" hidden><h2>Common whitelist</h2><p>Commonの人は全Gameへ参加できます。Game固有設定は追加許可です。</p><p>Webが正本です。保存した変更は次のSTART／SWITCH／RESET起動時に適用します。稼働中への反映は行いません。ゲーム内変更は次回起動でWebの設定へ戻ります。</p><div id="common-players"></div></section>
 <section class="card" aria-labelledby="operations-title"><h2 id="operations-title">操作</h2>
 <p>受付後に実行結果を確認してください。表示された人数は安全判定の代わりにはなりません。</p>

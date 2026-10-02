@@ -85,7 +85,7 @@ Web Foundationは認証/認可のsecurity boundaryを持つ。**read-only status
 以下は上記の直列依存から外す。必要条件を満たした時に独立sliceとして扱い、他trackの完了をWebやGame作成の前提にしない。
 
 - **RETENTION実削除release:** D-097 shared-volume v2の保持群と復旧条件が自然にrelease条件を満たした時のdestructive-operation gate。Snapshot総数だけで開始しない。dry-run-onlyを維持し、既存の保護・provenance・復旧・独立承認条件を緩和しない。
-- **Restore UI:** operator隔離復元能力はD-095とD-098の別sliceで確認済み。実証範囲は各closeoutを参照し、UIは実際に必要になった時の管理Web拡張とする。
+- **Restore UI:** 2026-10-02の限定repository sliceは[保存済み復元候補のread-only一覧・詳細](reviews/restore_candidates_web.md)。既存Backups限定Scan/GetItemのcode定義を含み、現存・復元可能性は未確認、復元実行・本番反映は含めない。operator隔離復元能力はD-095とD-098の別sliceで確認済み。実証範囲は各closeoutを参照し、UIは実際に必要になった時の管理Web拡張とする。
 - **Discord↔Minecraft chat:** 具体的需要と対応runtime/pluginが決まった時に開始する。管理WebやGame作成の前提にしない。
 - **高度なPackage/Preset/Template管理、自動upgrade、archive、汎用hooks等:** 要求は維持し、具体的要求が出るまで先行実装しない。upload、汎用wizard、delete等も個別scopeと安全条件を決める。
 

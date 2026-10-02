@@ -245,7 +245,27 @@ class WebFoundationStack(Stack):
             env["GAME_CREATION"] = "1"
             if self.node.try_get_context("create_disabled") == "true":
                 env["CREATE_DISABLED"] = "1"
+        env.update(
+            {
+                "WEB_BACKUPS_TABLE": resource_name(project.resource_prefix, stage.stage, "backups"),
+                "WEB_PROJECT": project.project_slug,
+                "WEB_STAGE": stage.stage,
+                "WEB_OWNER": str(stage.aws_account_id),
+            }
+        )
         web = function("Web", "handler", env)
+        web.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["dynamodb:Scan", "dynamodb:GetItem"],
+                resources=[
+                    self.format_arn(
+                        service="dynamodb",
+                        resource="table",
+                        resource_name=env["WEB_BACKUPS_TABLE"],
+                    )
+                ],
+            )
+        )
         web.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["lambda:InvokeFunction"],

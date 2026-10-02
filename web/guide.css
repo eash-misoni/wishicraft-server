@@ -71,3 +71,5 @@ footer { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem 1.5rem; color: 
   .arguments td:nth-child(4)::before { content: "許容値："; }
 }
 @media print { header nav, .toc, button, .copy-feedback, .skip { display: none; } main { border: 0; } .card { box-shadow: none; } }
+
+#candidates-list dd, #candidate-detail dd { overflow-wrap: anywhere; }

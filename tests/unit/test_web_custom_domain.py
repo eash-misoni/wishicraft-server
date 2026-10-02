@@ -54,7 +54,32 @@ def test_staged_resources_and_handler_environment(
         for r in resources.values()
     )
     policies = json.dumps([r for r in resources.values() if r["Type"] == "AWS::IAM::Policy"])
-    assert "route53:" not in policies and "acm:" not in policies and "dynamodb:Scan" not in policies
+    assert "route53:" not in policies and "acm:" not in policies
+    scan_policies = [
+        r["Properties"]
+        for r in resources.values()
+        if r["Type"] == "AWS::IAM::Policy"
+        and any(
+            "dynamodb:Scan" in s["Action"] for s in r["Properties"]["PolicyDocument"]["Statement"]
+        )
+    ]
+    assert len(scan_policies) == 1
+    assert len(scan_policies[0]["Roles"]) == 1
+    assert scan_policies[0]["Roles"][0]["Ref"].startswith("WebServiceRole")
+    scan = [
+        s for s in scan_policies[0]["PolicyDocument"]["Statement"] if "dynamodb:Scan" in s["Action"]
+    ]
+    assert len(scan) == 1 and set(scan[0]["Action"]) == {"dynamodb:Scan", "dynamodb:GetItem"}
+    assert scan[0]["Resource"] == {
+        "Fn::Join": [
+            "",
+            [
+                "arn:",
+                {"Ref": "AWS::Partition"},
+                ":dynamodb:ap-northeast-1:385526546525:table/wc-dev-backups",
+            ],
+        ]
+    }
     functions = [
         r["Properties"] for r in resources.values() if r["Type"] == "AWS::Lambda::Function"
     ]
