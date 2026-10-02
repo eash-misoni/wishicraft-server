@@ -35,6 +35,43 @@ try {
                        scenario === 'stopped' ? '現在は観測対象外' : '不明';
       await expect(page.locator('dt').filter({hasText: /^人数$/}).locator('+ dd')).toHaveText(expected);
       if (scenario === 'transition') await expect(page.locator('#status')).toContainText('SWITCH');
+      if (scenario === 'stopped') {
+        // HTTP/session authorization is covered server-side; exercise candidate DOM states here.
+        const candidate = {key:'U05BUFNIT1Qjc25hcC0wMDAwMDAwMA', acquired_at:'2026-09-08T01:02:03.000000Z',
+          recorded_at:'2026-09-08T01:02:06.000000Z', provenance_version:2, coverage:'shared_volume',
+          games:[{key:'historical-game', name:'<img src=x onerror=alert(1)>', generation:1, materialization:'MATERIALIZED'},
+            {key:'other-game', name:'Other saved Game', generation:null, materialization:'UNMATERIALIZED'}],
+          snapshot_presence:'unknown', restorability:'unknown'};
+        await expect(page.locator('#candidates-notice')).toContainText('候補を取得できません');
+        let candidateReads = 0;
+        await page.route('**/api/restore-candidates**', async route => {
+          candidateReads++;
+          const url = new URL(route.request().url());
+          await new Promise(resolve => setTimeout(resolve, 100));
+          const body = url.pathname.endsWith('/' + candidate.key) ? {schema_version:1, candidate} :
+            {schema_version:1, items:url.search ? [candidate] : [], next_cursor:url.search ? null : 'next-range', order:'page_time_desc', page_limit:10};
+          await route.fulfill({status:200, contentType:'application/json', body:JSON.stringify(body)});
+        });
+        await page.locator('#candidates-refresh').evaluate(button => {button.click(); button.click();});
+        await expect(page.locator('#candidates-notice')).toContainText('続きの範囲があります');
+        expect(candidateReads).toBe(1);
+        await page.locator('#candidates-next').click();
+        await expect(page.locator('#candidates-list')).toContainText('Other saved Game');
+        await expect(page.locator('#candidates-list')).toContainText('<img src=x onerror=alert(1)>');
+        await expect(page.locator('#candidates-list img')).toHaveCount(0);
+        await expect(page.locator('#candidates-list')).toContainText('保存時点の世代');
+        await page.getByRole('button', {name:'記録の詳細', exact:true}).click();
+        await expect(page.locator('#candidate-detail')).toContainText('候補記録の詳細');
+        await expect(page.locator('#candidate-detail')).toContainText('記録時刻（UTC）');
+        await expect(page.locator('#candidate-detail')).toContainText('未確認');
+        await expect(page.locator('#candidate-detail')).toContainText('未生成の記録');
+        await page.unroute('**/api/restore-candidates**');
+        await page.route('**/api/restore-candidates**', route => route.fulfill({status:503, body:'{"error":"temporarily_unavailable"}'}));
+        await page.locator('#candidates-refresh').click();
+        await expect(page.locator('#candidates-notice')).toContainText('候補なしとは判断できません');
+        await expect(page.locator('#candidates-list')).toBeEmpty();
+        await expect(page.locator('#candidate-detail')).toBeEmpty();
+      }
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
       await page.screenshot({path: join(evidence, `${scenario}.png`), fullPage: true});
       await page.setViewportSize({width: 1440, height: 1000});

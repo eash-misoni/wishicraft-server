@@ -130,6 +130,7 @@ def web_app() -> WebApp:
         status=lambda now: status_reader().read(now),
         operations=operations,
         discovery=lambda: discovery().read(),
+        candidates=candidates,
         origin=os.environ.get("WEB_CANONICAL_ORIGIN", ""),
     )
 
@@ -211,4 +212,16 @@ def discovery() -> Any:
         os.environ["WEB_GAMES_TABLE"],
         catalog.game_ids,
         policies(os.environ["WEB_RESET_POLICIES"], catalog),
+    )
+
+
+def candidates() -> Any:
+    from wishicraft.web_restore_candidates import Candidates
+
+    return Candidates(
+        client("dynamodb"),
+        os.environ["WEB_BACKUPS_TABLE"],
+        project=os.environ["WEB_PROJECT"],
+        stage=os.environ["WEB_STAGE"],
+        owner=os.environ["WEB_OWNER"],
     )

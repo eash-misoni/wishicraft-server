@@ -1,5 +1,7 @@
 # 05. Data and Interface Contracts
 
+> 2026-10-02 repository-only read projection: [Restore candidate list/detail](reviews/restore_candidates_web.md). Bounded Backups reads, existing Web authorization, historical Game/time/generation, no restoration verdict or execution.
+
 > D-114/D-115 repository preparation (2026-09-26): [shared-volume daily BACKUP authority, periodic Admission and monitoring](reviews/daily_shared_backup.md); [independent 14-day OR newest-seven dry-run](reviews/daily_backup_retention.md). All Games are covered; SWITCH/RESET do not wait for BACKUP. Stage flags default disabled; existing deployed newest-seven and snapshot deletion gate remain separate. [Dev release plan and validation limits](runbooks/daily_shared_backup.md). No AWS application or execution in this slice.
 
 

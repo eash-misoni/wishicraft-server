@@ -272,3 +272,65 @@ function whitelistPanel(parent, game, policy) {
   form.addEventListener('submit', event => {event.preventDefault(); action('add', input.value, `${input.value}を追加`);}); parent.append(form);
   const save = document.createElement('button'); save.type = 'button'; save.textContent = '現在の設定を再保存'; save.addEventListener('click', () => action('save', null, '参加許可を変えずに再保存')); parent.append(save);
 }
+
+const candidateList = document.querySelector('#candidates-list');
+const candidateDetail = document.querySelector('#candidate-detail');
+const candidateNotice = document.querySelector('#candidates-notice');
+const candidateRefresh = document.querySelector('#candidates-refresh');
+const candidateNext = document.querySelector('#candidates-next');
+let candidateBusy = false, candidateCursor = null;
+function candidateRows(candidate, destination, detailed = false) {
+  const dl = document.createElement('dl');
+  const rows = [['取得時刻（UTC）', candidate.acquired_at],
+    ...(detailed ? [['記録時刻（UTC）', candidate.recorded_at], ['保存形式', `v${candidate.provenance_version}`]] : []),
+    ['保存範囲', candidate.coverage === 'shared_volume' ? '共有Data EBS' : '旧形式・全Gameの収録範囲は不明'],
+    ['現存・復元可能性', '未確認']];
+  for (const game of candidate.games) {
+    rows.push(['Game', `${game.name ?? '保存時点の名前は不明'} (${game.key})`],
+      ['保存時点の世代', game.generation ?? '不明'],
+      ['保存時点のworld生成', game.materialization === 'MATERIALIZED' ? '生成済みの記録' :
+        game.materialization === 'UNMATERIALIZED' ? '未生成の記録' : '不明']);
+  }
+  for (const [label, value] of rows) {
+    const dt = document.createElement('dt'); dt.textContent = label;
+    const dd = document.createElement('dd'); dd.textContent = String(value ?? '不明'); dl.append(dt, dd);
+  }
+  destination.append(dl);
+}
+async function readCandidates(cursor = null) {
+  if (candidateBusy) return;
+  candidateBusy = true; candidateRefresh.disabled = true; candidateNext.disabled = true;
+  candidateList.replaceChildren(); candidateDetail.replaceChildren(); candidateNotice.textContent = '候補を読み込み中です。';
+  try {
+    const result = await opFetch('/api/restore-candidates' + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''));
+    if (!result.ok) throw new Error('read');
+    candidateCursor = result.body.next_cursor; candidateNext.hidden = !candidateCursor;
+    candidateNotice.textContent = result.body.items.length ? 'この範囲内の記録です。全履歴の新しい順ではありません。' :
+      candidateCursor ? 'この範囲に候補記録はありません。続きの範囲があります。' : 'この範囲に候補記録はありません。末尾まで読みました。';
+    for (const candidate of result.body.items) {
+      const card = document.createElement('article'); card.className = 'card';
+      candidateRows(candidate, card);
+      const detail = document.createElement('button'); detail.type = 'button'; detail.textContent = '記録の詳細';
+      detail.addEventListener('click', () => readCandidate(candidate.key)); card.append(detail); candidateList.append(card);
+    }
+  } catch {
+    candidateCursor = null; candidateNext.hidden = true;
+    candidateNotice.textContent = '候補を取得できません。候補なしとは判断できません。読み直してください。';
+  } finally { candidateBusy = false; candidateRefresh.disabled = false; candidateNext.disabled = false; }
+}
+async function readCandidate(key) {
+  if (candidateBusy) return;
+  candidateBusy = true; candidateRefresh.disabled = true; candidateNext.disabled = true;
+  candidateDetail.replaceChildren(); candidateNotice.textContent = '詳細を読み込み中です。';
+  try {
+    const result = await opFetch('/api/restore-candidates/' + encodeURIComponent(key));
+    if (!result.ok) throw new Error('read');
+    const heading = document.createElement('h3'); heading.textContent = '候補記録の詳細'; candidateDetail.append(heading);
+    candidateRows(result.body.candidate, candidateDetail, true);
+    candidateNotice.textContent = '保存された記録を読み直しました。現存・復元可能性は未確認です。';
+  } catch { candidateNotice.textContent = '詳細を取得できません。現存・復元可能性は不明です。'; }
+  finally { candidateBusy = false; candidateRefresh.disabled = false; candidateNext.disabled = false; }
+}
+candidateRefresh.addEventListener('click', () => readCandidates());
+candidateNext.addEventListener('click', () => readCandidates(candidateCursor));
+readCandidates();
