@@ -279,6 +279,10 @@ const candidateNotice = document.querySelector('#candidates-notice');
 const candidateRefresh = document.querySelector('#candidates-refresh');
 const candidateNext = document.querySelector('#candidates-next');
 let candidateBusy = false, candidateCursor = null;
+function candidateControls(busy) {
+  candidateRefresh.disabled = busy; candidateNext.disabled = busy;
+  candidateList.querySelectorAll('button').forEach(button => {button.disabled = busy;});
+}
 function candidateRows(candidate, destination, detailed = false) {
   const dl = document.createElement('dl');
   const rows = [['取得時刻（UTC）', candidate.acquired_at],
@@ -299,8 +303,10 @@ function candidateRows(candidate, destination, detailed = false) {
 }
 async function readCandidates(cursor = null) {
   if (candidateBusy) return;
-  candidateBusy = true; candidateRefresh.disabled = true; candidateNext.disabled = true;
-  candidateList.replaceChildren(); candidateDetail.replaceChildren(); candidateNotice.textContent = '候補を読み込み中です。';
+  candidateBusy = true; candidateControls(true);
+  // Keep the shared detail region when its selected card is removed.
+  candidateList.after(candidateDetail); candidateDetail.hidden = true; candidateDetail.replaceChildren();
+  candidateList.replaceChildren(); candidateNotice.textContent = '候補を読み込み中です。';
   try {
     const result = await opFetch('/api/restore-candidates' + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''));
     if (!result.ok) throw new Error('read');
@@ -311,25 +317,30 @@ async function readCandidates(cursor = null) {
       const card = document.createElement('article'); card.className = 'card';
       candidateRows(candidate, card);
       const detail = document.createElement('button'); detail.type = 'button'; detail.textContent = '記録の詳細';
-      detail.addEventListener('click', () => readCandidate(candidate.key)); card.append(detail); candidateList.append(card);
+      detail.setAttribute('aria-controls', 'candidate-detail'); detail.setAttribute('aria-expanded', 'false');
+      detail.addEventListener('click', () => readCandidate(candidate.key, card, detail)); card.append(detail); candidateList.append(card);
     }
   } catch {
     candidateCursor = null; candidateNext.hidden = true;
     candidateNotice.textContent = '候補を取得できません。候補なしとは判断できません。読み直してください。';
-  } finally { candidateBusy = false; candidateRefresh.disabled = false; candidateNext.disabled = false; }
+  } finally { candidateBusy = false; candidateControls(false); }
 }
-async function readCandidate(key) {
+async function readCandidate(key, card, button) {
   if (candidateBusy) return;
-  candidateBusy = true; candidateRefresh.disabled = true; candidateNext.disabled = true;
-  candidateDetail.replaceChildren(); candidateNotice.textContent = '詳細を読み込み中です。';
+  candidateBusy = true; candidateControls(true);
+  candidateList.querySelectorAll('button').forEach(other => {other.setAttribute('aria-expanded', String(other === button));});
+  const heading = document.createElement('h3'); heading.textContent = '候補記録の詳細'; heading.tabIndex = -1;
+  const notice = document.createElement('p'); notice.setAttribute('role', 'status'); notice.textContent = '詳細を読み込み中です。';
+  candidateDetail.replaceChildren(heading, notice); candidateDetail.hidden = false;
+  card.append(candidateDetail); candidateDetail.setAttribute('aria-busy', 'true');
+  heading.focus({preventScroll:true}); heading.scrollIntoView({block:'start'});
   try {
     const result = await opFetch('/api/restore-candidates/' + encodeURIComponent(key));
     if (!result.ok) throw new Error('read');
-    const heading = document.createElement('h3'); heading.textContent = '候補記録の詳細'; candidateDetail.append(heading);
     candidateRows(result.body.candidate, candidateDetail, true);
-    candidateNotice.textContent = '保存された記録を読み直しました。現存・復元可能性は未確認です。';
-  } catch { candidateNotice.textContent = '詳細を取得できません。現存・復元可能性は不明です。'; }
-  finally { candidateBusy = false; candidateRefresh.disabled = false; candidateNext.disabled = false; }
+    notice.textContent = '保存された記録を読み直しました。現存・復元可能性は未確認です。';
+  } catch { notice.textContent = '詳細を取得できません。現存・復元可能性は不明です。記録の詳細を押して読み直してください。'; }
+  finally { candidateBusy = false; candidateControls(false); candidateDetail.setAttribute('aria-busy', 'false'); }
 }
 candidateRefresh.addEventListener('click', () => readCandidates());
 candidateNext.addEventListener('click', () => readCandidates(candidateCursor));

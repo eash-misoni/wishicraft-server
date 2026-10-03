@@ -65,6 +65,20 @@ backups globally and never treats a failed read as no candidates. Empty-page and
 messages are distinct. Pagination is manual, with one in-flight candidate request and no
 background scan/prefetch. Refresh restarts from the beginning. Detail is fetched afresh.
 
+### Detail placement UX (2026-10-03 repository improvement)
+
+The detail region sits directly below the selected card's button, rather than below the
+entire candidate list. Opening a record immediately shows a local loading message and
+focuses/scrolls its detail heading into view. Success and failure update the same local
+region without moving focus again. The selected button exposes its expanded state and
+controls the shared detail region; only one record is expanded at a time. All candidate
+buttons, refresh and next-page controls are disabled during the existing single in-flight
+read. A failed read clears the previous record and offers a retry with the same button.
+Changing selection, refreshing or changing page removes stale details.
+
+This improves discoverability of a functioning detail read on long lists and narrow screens;
+it does not change HTTP, authorization, pagination, provenance or restoration contracts.
+
 ## Repository IAM / release boundary
 
 Only the Web Lambda role gains `dynamodb:Scan` and `dynamodb:GetItem` on the exact stage
@@ -83,6 +97,9 @@ and Admin access, invalid-role/expired-session rejection, and non-GET rejection 
 The existing synthesized Web IAM test requires the sole Scan grant to be the exact Backups
 ARN with only Scan/GetItem. The existing CI Chromium management check includes candidate
 list/detail, pagination, escaped DOM text and read failure states.
+It also covers ten-record lists at 390/320/1440px widths, detail ownership, actual viewport
+visibility and keyboard focus, pending reads and duplicate clicks, switching candidates,
+404/503 detail failures and retry, and clearing details on refresh/page change.
 
 Local results and any unavailable CI checks are recorded in the task checkpoint; running
 local unit tests is not live Snapshot or restoration qualification. Docker/runtime tests
