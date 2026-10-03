@@ -265,9 +265,12 @@ def load_pages(root: Path) -> dict[str, GuidePage]:
         values = {}
         for shared in ("access", "connection"):
             if "{{" + shared + "}}" in body:
+                shared_body = (root / CONTENT / "shared" / f"{shared}.md").read_text().strip()
+                if route == "join":
+                    shared_body = shared_body.replace("(../help.md)", "(help.md)")
                 body = body.replace(
                     "{{" + shared + "}}",
-                    (root / CONTENT / "shared" / f"{shared}.md").read_text().strip(),
+                    shared_body,
                 )
         name = route.rsplit("/", 1)[-1]
         if route.startswith("commands/"):
