@@ -83,6 +83,42 @@ def test_reproducible_closed_artifact_and_links(tmp_path: Path) -> None:
     assert "fetch(" not in output and "XMLHttpRequest" not in output
 
 
+def test_unknown_host_help_and_shared_links_survive_build(tmp_path: Path) -> None:
+    site = tmp_path / "site"
+    build(ROOT, site)
+    help_path = site / "help/index.html"
+    help_html = help_path.read_text()
+    for guidance in (
+        "不明なホスト",
+        "原因を断定はできません",
+        "私的に受け取った接続先",
+        "選択Game・観測Gameと現在の状態",
+        "端末から名前解決できた保証にはなりません",
+        "少し時間を置いて",
+        "固定の待ち時間は保証できません",
+        "正確なエラー表示",
+        "おおよその発生時刻",
+        "確認した状態を管理者へ私的に",
+        "再起動・Reset・削除を行わない",
+    ):
+        assert guidance in help_html
+    for route in ("join", *(r for r in routes(ROOT) if r.startswith("games/"))):
+        document = site / route / "index.html"
+        html = document.read_text()
+        help_url = "../help/" if route == "join" else "../../help/"
+        assert (
+            f'「不明なホスト」と表示された場合は、<a href="{help_url}">困ったとき</a>'
+            "の確認順序に従ってください。"
+        ) in html
+        parser = Links()
+        parser.feed(html)
+        assert any(
+            (document.parent / url / "index.html").resolve() == help_path.resolve()
+            for url in parser.urls
+            if url.endswith("/")
+        )
+
+
 def test_sources_are_explicit_and_complete() -> None:
     pages = load_pages(ROOT)
     assert tuple(pages) == routes(ROOT)
