@@ -2,6 +2,8 @@
 
 > 2026-10-02 repository candidate: [管理Webの復元候補記録](reviews/restore_candidates_web.md)。既存ログイン後に取得時点のGame・UTC取得時刻・既知の世代を比較し、次の範囲と詳細を明示操作で読む。空範囲と取得失敗を区別し、現存・復元可能性は未確認と表示する。公開・復元実行はこのsliceに含めない。
 
+> 2026-10-03 repository UX改善: 「記録の詳細」を押すと、その候補カードの直下で読み込み・詳細・失敗を確認する。詳細見出しへfocusと表示位置を合わせ、取得中は候補操作を無効化する。別候補・ページ切替・読み直しでは古い詳細を残さない。API・認可・復元契約は変更しない。
+
 > D-111 planned host maintenance: Accepted / dev deployed and qualified (2026-09-22). Independent SystemState maintenance lease, atomic Admission fence, unchanged
 > observation metrics, three narrowly suppressed notification composites, absolute expiry
 > and safe closeout. [Canonical contract and all 45 alarms](reviews/planned_host_maintenance.md);
