@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const evidence = await mkdtemp(join(tmpdir(), 'wishicraft-operations-browser-'));
 const browser = await chromium.launch(process.argv.includes('--chrome') ? {channel:'chrome'} : {});
-const report = {evidence, browser:browser.version(), cases:[]};
+const report = {evidence, browser:browser.version(), cases:[], selectionChecks:[]};
 try {
   for (const [scenario, kind] of [['creation','CREATE'],['stopped','START'],['stopped','STOP'],['stopped','SWITCH'],['stopped','BACKUP'],['stopped','RESET'],['conflict','START'],['rejection','START'],['failure','START'],['players','SWITCH'],['player-role','START']]) {
     const child = spawn('tools/dev-env',['run','--','uv','run','python','-m','web.local','--port','0','--scenario',scenario]);
@@ -18,6 +18,7 @@ try {
       });
       const context = await browser.newContext({viewport:{width:390,height:844}});
       const page = await context.newPage(); const errors = []; page.on('pageerror',e=>errors.push(e.message));
+      let posts = 0; page.on('request',r=>{if(r.method()==='POST' && r.url().endsWith('/api/operations'))posts++;});
       await page.goto(origin+'/manage/');
       await page.getByRole('link',{name:'Discordでログイン',exact:true}).click();
       await expect(page.locator(`[data-operation="${kind}"]`)).toBeVisible();
@@ -31,8 +32,38 @@ try {
       if(kind === 'CREATE') { await page.locator('#creation-name').fill('Third Game'); await page.locator('#creation-seed').fill('9223372036854775807'); }
       await page.locator('#review-operation').click();
       await expect(page.locator('#operation-confirmation')).toBeVisible();
+      if(scenario === 'stopped') {
+        const originalGame = await page.locator('#operation-game').inputValue();
+        await page.locator('#back-operation').click();
+        for(const value of ['missing-game', '']) {
+          // Simulate stale selection after a valid confirmation, before capabilityDetail reruns.
+          await page.locator('#operation-game').evaluate((select,value)=>{
+            const option = document.createElement('option'); option.value = value;
+            option.textContent = 'Stale selection'; select.append(option); select.value = value;
+          },value);
+          await page.locator('#review-operation').click();
+          if(['START','SWITCH','RESET'].includes(kind)) {
+            await expect(page.locator('#operation-confirmation')).toBeHidden();
+            await expect(page.locator('#operation-form')).toBeVisible();
+            await expect(page.locator('#operations-notice')).toContainText('Gameを選び直してください');
+            await expect(page.locator('#operation-game')).toBeFocused();
+            await expect(page.locator('#submit-operation')).toBeDisabled();
+          } else {
+            await expect(page.locator('#operation-confirmation')).toBeVisible();
+            await expect(page.locator('#confirmation-detail')).toContainText(kind === 'STOP' ? '実runtimeの正常停止' : '共有volumeのSnapshot');
+            await page.locator('#back-operation').click();
+          }
+          expect(posts).toBe(0); expect(errors).toEqual([]);
+          expect(await page.evaluate(()=>localStorage.getItem('wishicraft-pending-operation-v1'))).toBeNull();
+          report.selectionChecks.push({kind,value,confirmation:['STOP','BACKUP'].includes(kind),success:true});
+        }
+        if(['START','SWITCH','RESET'].includes(kind)) await page.locator('#operation-game').selectOption(originalGame);
+        else await page.locator('#operation-game').evaluate((select,value)=>{select.value = value;},originalGame);
+        await page.locator('#review-operation').click();
+        await expect(page.locator('#operation-confirmation')).toBeVisible();
+        await expect(page.locator('#submit-operation')).toBeEnabled();
+      }
       if(kind === 'RESET') await expect(page.locator('#confirmation-detail')).toContainText('最後の外部BACKUP以降');
-      let posts = 0; page.on('request',r=>{if(r.method()==='POST' && r.url().endsWith('/api/operations'))posts++;});
       await page.locator('#submit-operation').evaluate(b=>{b.click();b.click();});
       if(['conflict','rejection','players'].includes(scenario)) {
         await expect(page.locator('#operations-notice')).toContainText(scenario === 'rejection' ? '入力を確認' : '別の操作');
