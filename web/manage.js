@@ -82,7 +82,7 @@ let capabilities, chosen, draft, pending, opBusy = false, opTimer, terminal = fa
 try { pending = JSON.parse(localStorage.getItem(storageKey) || 'null'); } catch { pending = null; }
 const opNames = {CREATE:'Gameを作成', START:'起動', STOP:'停止', SWITCH:'Game切替', BACKUP:'バックアップ', RESET:'ワールドリセット'};
 const help = {
-  CREATE:'persistent metadataとして登録します。EC2・Minecraftの起動、world生成は行いません。後からSTARTまたはSWITCHしてください。公開ガイドへは掲載されません。',
+  CREATE:'persistent metadataとして登録します。EC2・Minecraftの起動、world生成は行いません。後からSTARTまたはSWITCHしてください。有効なACTIVE登録Gameは、公開一覧に名前・パッケージ種別・Minecraftバージョン・RESET可否が表示されます。seedや実行者情報は公開されません。',
 
   START:'登録済みGameを起動します。別Gameの稼働中は切り替えません。',
   STOP:'backendが実runtimeを確認し、保存・正常停止します。選択Gameから停止対象を推測しません。',
@@ -193,7 +193,7 @@ opForm.addEventListener('submit', e => {
   }
   draft = {type:chosen, game:['START','SWITCH','RESET'].includes(chosen) ? gameSelect.value : null, confirm:['SWITCH','RESET'].includes(chosen), seed:chosen === 'RESET' ? seedSelect.value : null};
   const g = capabilities.games.find(g => g.key === gameSelect.value);
-  document.querySelector('#confirmation-detail').textContent = `${opNames[chosen]} / 観測Game: ${latestStatus?.observed_game.name ?? '不明'} → ${draft.game ? g.name : chosen === 'STOP' ? '実runtimeの正常停止' : '共有volumeのSnapshot'}。${help[chosen]} ` + (chosen === 'RESET' ? `seed: ${draft.seed}。旧worldは直近${g.retain_previous}個を保持し、それ以前は整理します。初期anchorは保持します。` : '');
+  document.querySelector('#confirmation-detail').textContent = `${opNames[chosen]} / 観測Game: ${latestStatus?.observed_game.name ?? '不明'} → ${draft.game ? gameLabel(g) : chosen === 'STOP' ? '実runtimeの正常停止' : '共有volumeのSnapshot'}。${help[chosen]} ` + (chosen === 'RESET' ? `seed: ${draft.seed}。旧worldは直近${g.retain_previous}個を保持し、それ以前は整理します。初期anchorは保持します。` : '');
   confirmation.hidden = false; opForm.hidden = true; document.querySelector('#submit-operation').disabled = false;
   document.querySelector('#submit-operation').focus();
 });
