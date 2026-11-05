@@ -191,8 +191,13 @@ opForm.addEventListener('submit', e => {
     confirmation.hidden = false; opForm.hidden = true; document.querySelector('#submit-operation').disabled = false;
     document.querySelector('#submit-operation').focus(); return;
   }
-  draft = {type:chosen, game:['START','SWITCH','RESET'].includes(chosen) ? gameSelect.value : null, confirm:['SWITCH','RESET'].includes(chosen), seed:chosen === 'RESET' ? seedSelect.value : null};
   const g = capabilities.games.find(g => g.key === gameSelect.value);
+  if (['START','SWITCH','RESET'].includes(chosen) && !g) {
+    draft = null; confirmation.hidden = true; document.querySelector('#submit-operation').disabled = true;
+    opNotice.textContent = '対象のGameを確認できません。Gameを選び直してください。';
+    gameSelect.focus(); return;
+  }
+  draft = {type:chosen, game:['START','SWITCH','RESET'].includes(chosen) ? gameSelect.value : null, confirm:['SWITCH','RESET'].includes(chosen), seed:chosen === 'RESET' ? seedSelect.value : null};
   document.querySelector('#confirmation-detail').textContent = `${opNames[chosen]} / 観測Game: ${latestStatus?.observed_game.name ?? '不明'} → ${draft.game ? gameLabel(g) : chosen === 'STOP' ? '実runtimeの正常停止' : '共有volumeのSnapshot'}。${help[chosen]} ` + (chosen === 'RESET' ? `seed: ${draft.seed}。旧worldは直近${g.retain_previous}個を保持し、それ以前は整理します。初期anchorは保持します。` : '');
   confirmation.hidden = false; opForm.hidden = true; document.querySelector('#submit-operation').disabled = false;
   document.querySelector('#submit-operation').focus();
