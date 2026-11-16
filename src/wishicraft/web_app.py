@@ -11,13 +11,16 @@ from typing import Any
 from urllib.parse import parse_qs
 
 from wishicraft.web_auth import (
+    DISCORD_ISSUER,
     SESSION_COOKIE,
     STATE_COOKIE,
     AuthRejected,
+    AuthRejectionStage,
     DiscordOAuth,
     Sessions,
     cookie,
     cookies,
+    log_auth_rejection,
 )
 
 CSP = (
@@ -258,6 +261,7 @@ class AuthApp:
         path = event.get("rawPath")
         method = event.get("requestContext", {}).get("http", {}).get("method")
         jar, timestamp = cookies(event), int(now.timestamp())
+        rejection_stage = None
         try:
             if path == "/auth/login" and method == "GET":
                 state, state_cookie = self.sessions.begin(timestamp)
@@ -265,14 +269,19 @@ class AuthApp:
                     302, location=self.oauth.authorization_url(state), set_cookies=[state_cookie]
                 )
             if path == "/auth/callback" and method == "GET":
+                rejection_stage = AuthRejectionStage.CALLBACK_SHAPE
                 query = parse_qs(
                     event.get("rawQueryString", ""), keep_blank_values=True, max_num_fields=4
                 )
-                if set(query) != {"state", "code"} or any(
-                    len(v) != 1 or not v[0] or len(v[0]) > 2048 for v in query.values()
+                if (
+                    set(query) != {"state", "code", "iss"}
+                    or any(len(v) != 1 or not v[0] or len(v[0]) > 2048 for v in query.values())
+                    or query["iss"][0] != DISCORD_ISSUER
                 ):
                     raise AuthRejected("invalid callback")
+                rejection_stage = AuthRejectionStage.STATE_COOKIE
                 self.sessions.consume(query["state"][0], jar.get(STATE_COOKIE, ""), timestamp)
+                rejection_stage = None  # The real OAuth adapter labels its own rejection paths.
                 principal = self.oauth.exchange(query["code"][0])
                 self.sessions.logout(jar.get(SESSION_COOKIE, ""))
                 session_cookie = self.sessions.create(timestamp, principal)
@@ -289,6 +298,8 @@ class AuthApp:
                 return response(303, location="/", set_cookies=[cookie(SESSION_COOKIE, "", 0)])
             return response(405)
         except (AuthRejected, ValueError):
+            if rejection_stage is not None:
+                log_auth_rejection(rejection_stage)
             return response(
                 403,
                 login_page("ログインまたは利用権限を確認できませんでした。"),
