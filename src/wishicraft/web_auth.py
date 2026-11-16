@@ -5,9 +5,11 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import logging
 import re
 import secrets
 from dataclasses import dataclass
+from enum import StrEnum
 from http.cookies import SimpleCookie
 from typing import Any, Protocol
 from urllib.parse import urlencode
@@ -16,10 +18,34 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 from wishicraft.authorization import role_authorized
 
 SCOPES = "identify guilds.members.read"
+DISCORD_ISSUER = "https://discord.com"
 SESSION_SECONDS = 900
 STATE_SECONDS = 300
 SESSION_COOKIE = "__Host-wishicraft"
 STATE_COOKIE = "__Host-wishicraft-state"
+
+
+class AuthRejectionStage(StrEnum):
+    CALLBACK_SHAPE = "callback_shape"
+    STATE_COOKIE = "state_cookie"
+    TOKEN_EXCHANGE = "token_exchange"
+    TOKEN_RESPONSE = "token_response"
+    GRANT_VALIDATION = "grant_validation"
+    IDENTITY_LOOKUP = "identity_lookup"
+    MEMBER_LOOKUP = "member_lookup"
+    MEMBER_POLICY = "member_policy"
+    REVOKE = "revoke"
+
+
+def log_auth_rejection(stage: AuthRejectionStage) -> None:
+    """Only fixed labels cross this boundary; never log the rejected input or exception."""
+    try:
+        logging.getLogger(__name__).warning(
+            '{"component":"web-auth","event":"rejected","stage":"%s"}', stage.value
+        )
+    except Exception:
+        # A diagnostic sink failure must not change authentication or token revocation.
+        pass
 
 
 class AuthRejected(ValueError):
@@ -202,6 +228,16 @@ class DiscordOAuth:
                     raise ValueError
                 return result
         except Exception:
+            stage = {
+                "/oauth2/token": AuthRejectionStage.TOKEN_EXCHANGE,
+                "/users/@me": AuthRejectionStage.IDENTITY_LOOKUP,
+                f"/users/@me/guilds/{self.policy.guild_id}/member": (
+                    AuthRejectionStage.MEMBER_LOOKUP
+                ),
+                "/oauth2/token/revoke": AuthRejectionStage.REVOKE,
+            }.get(path)
+            if stage is not None:
+                log_auth_rejection(stage)
             raise AuthRejected("Discord authentication unavailable") from None
 
     def exchange(self, code: str) -> dict[str, Any]:
@@ -217,6 +253,7 @@ class DiscordOAuth:
         )
         token = token_response.get("access_token")
         if not isinstance(token, str) or not token:
+            log_auth_rejection(AuthRejectionStage.TOKEN_RESPONSE)
             raise AuthRejected("invalid OAuth grant")
         try:
             token_type, scope = token_response.get("token_type"), token_response.get("scope")
@@ -226,10 +263,15 @@ class DiscordOAuth:
                 or not isinstance(scope, str)
                 or set(scope.split()) != set(SCOPES.split())
             ):
+                log_auth_rejection(AuthRejectionStage.GRANT_VALIDATION)
                 raise AuthRejected("invalid OAuth grant")
             identity = self.request("/users/@me", token=token)
             member = self.request(f"/users/@me/guilds/{self.policy.guild_id}/member", token=token)
-            self.policy.authorize(identity, member)
+            try:
+                self.policy.authorize(identity, member)
+            except AuthRejected:
+                log_auth_rejection(AuthRejectionStage.MEMBER_POLICY)
+                raise
         finally:
             # Revocation invalidates the associated refresh token as well. Fail closed on failure.
             self.request(

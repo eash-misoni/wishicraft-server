@@ -54,6 +54,12 @@ Origin/callbackを変更する際は固定登録URI・Lambda設定・既存sessi
 ## OAuth / authorization / session
 
 - Discord Authorization Code Grant、scopeは`identify guilds.members.read`だけ。
+- 成功callbackは`state`・`code`・`iss`を各1個、非空・2048文字以下で必須とする。
+  `iss`はform URL decode後に固定issuer `https://discord.com`と文字列完全一致で検証する。
+  4 fieldのparse上限と未知項目・重複の拒否を維持し、issuer欠落・不一致はcode交換前に拒否する。
+  [Discord issuer仕様](https://docs.discord.com/developers/topics/oauth2#issuer-identification)、
+  [公開metadata](https://discord.com/.well-known/oauth-authorization-server)、
+  [RFC 9207 §2.4](https://www.rfc-editor.org/rfc/rfc9207.html#section-2.4)に対応する。
 - `/users/@me`と、**stage canonical Guildだけ**の`/users/@me/guilds/{guild_id}/member`をuser tokenで読む。
   同user identity、member存在、membership screening完了、player/admin roleのいずれかが必要。
   Discord loginだけでは許可しない。Guild一覧・email・connections・bot scopeは要求しない。

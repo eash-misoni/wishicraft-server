@@ -10,11 +10,11 @@ from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 
 from web.foundation import build_foundation
 from wishicraft.web_app import AuthApp, WebApp
-from wishicraft.web_auth import DiscordOAuth, Policy, Sessions
+from wishicraft.web_auth import DISCORD_ISSUER, DiscordOAuth, Policy, Sessions
 from wishicraft.web_status import project
 
 
@@ -34,7 +34,9 @@ class MemoryStore:
 
 class FakeOAuth(DiscordOAuth):
     def authorization_url(self, state: str) -> str:
-        return "/auth/callback?code=local-only&state=" + state
+        return "/auth/callback?" + urlencode(
+            {"code": "local-only", "state": state, "iss": DISCORD_ISSUER}
+        )
 
     def exchange(self, code: str) -> dict[str, Any]:
         if code != "local-only":

@@ -18,6 +18,7 @@ from web.local import FakeOAuth, MemoryStore, fixture
 from wishicraft.system_state import _to_attribute
 from wishicraft.web_app import AuthApp, WebApp
 from wishicraft.web_auth import (
+    DISCORD_ISSUER,
     SESSION_COOKIE,
     AuthRejected,
     DiscordOAuth,
@@ -438,7 +439,7 @@ def test_deployed_handlers_use_real_cookie_store_and_packaged_assets(
             event(
                 "/auth/callback",
                 jar=start["cookies"][0].split(";")[0],
-                query=urlencode({"state": state_value, "code": "code"}),
+                query=urlencode({"state": state_value, "code": "code", "iss": DISCORD_ISSUER}),
             ),
             None,
         )
@@ -512,7 +513,7 @@ def test_oauth_authorization_failure_never_issues_session(failure: str) -> None:
         event(
             "/auth/callback",
             jar=header.split(";")[0],
-            query=urlencode({"state": state, "code": "code"}),
+            query=urlencode({"state": state, "code": "code", "iss": DISCORD_ISSUER}),
         ),
         NOW,
     )
@@ -607,7 +608,7 @@ def test_callback_revokes_every_acquired_token_before_session(
         event(
             "/auth/callback",
             jar=header.split(";")[0],
-            query=urlencode({"state": state, "code": "code"}),
+            query=urlencode({"state": state, "code": "code", "iss": DISCORD_ISSUER}),
         ),
         NOW,
     )
