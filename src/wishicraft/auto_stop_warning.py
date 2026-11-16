@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
 from wishicraft.discord_delivery import (
@@ -30,8 +31,10 @@ class WarningDelivery:
         system_table: str | None = None,
         heartbeat_table: str | None = None,
         system_id: str | None = None,
+        clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.ddb, self.messages, self.table = dynamodb, messages, table_name
+        self.clock = clock or (lambda: datetime.now(UTC))
         self.system_table, self.heartbeat_table, self.system_id = (
             system_table,
             heartbeat_table,
@@ -49,6 +52,9 @@ class WarningDelivery:
         if attempts >= MAX_DELIVERY_ATTEMPTS:
             self._mark_failed(game_id, intent_id, attempts, "DISCORD_WARNING_RETRY_EXHAUSTED", now)
             return {"state": "FAILED", "created": False}
+        retry_at = _retry_at(item)
+        if retry_at is not None and now < retry_at:
+            return {"state": state, "created": False}
         next_attempt = attempts + 1
         try:
             self.ddb.update_item(
@@ -56,7 +62,8 @@ class WarningDelivery:
                 Key=_key(game_id, intent_id),
                 UpdateExpression=(
                     "SET warning_delivery_state = :pending, "
-                    "warning_attempt_count = :count, updated_at = :now"
+                    "warning_attempt_count = :count, updated_at = :now, "
+                    "warning_next_attempt_at = :none"
                 ),
                 ConditionExpression=(
                     "#status = :warning_pending AND warning_attempt_count = :previous AND "
@@ -71,6 +78,7 @@ class WarningDelivery:
                     ":retryable": {"S": "RETRYABLE_FAILED"},
                     ":warning_pending": {"S": "WARNING_PENDING"},
                     ":now": {"S": _time(now)},
+                    ":none": {"NULL": True},
                 },
             )
         except Exception as error:
@@ -95,6 +103,15 @@ class WarningDelivery:
                 and not failure.outcome_unknown
                 and next_attempt < MAX_DELIVERY_ATTEMPTS
             )
+            # Server delay starts after the response, not before the HTTP request.
+            next_attempt_at = (
+                _next_attempt_at(max(now, self.clock()), failure.retry_after_seconds)
+                if retry
+                else None
+            )
+            invalid_retry_delay = retry and next_attempt_at is None
+            if invalid_retry_delay:
+                retry = False
             state = "RETRYABLE_FAILED" if retry else "FAILED"
             try:
                 self.ddb.update_item(
@@ -102,7 +119,8 @@ class WarningDelivery:
                     Key=_key(game_id, intent_id),
                     UpdateExpression=(
                         "SET warning_delivery_state = :state, "
-                        "warning_delivery_error = :code, updated_at = :now"
+                        "warning_delivery_error = :code, updated_at = :now, "
+                        "warning_next_attempt_at = :retry_at"
                     ),
                     ConditionExpression=(
                         "#status = :warning_pending AND "
@@ -112,7 +130,18 @@ class WarningDelivery:
                     ExpressionAttributeNames={"#status": "status"},
                     ExpressionAttributeValues={
                         ":state": {"S": state},
-                        ":code": {"S": failure.code},
+                        ":code": {
+                            "S": (
+                                "DISCORD_WARNING_RETRY_DELAY_INVALID"
+                                if invalid_retry_delay
+                                else failure.code
+                            )
+                        },
+                        ":retry_at": (
+                            {"S": _time(next_attempt_at)}
+                            if next_attempt_at is not None
+                            else {"NULL": True}
+                        ),
                         ":now": {"S": _time(now)},
                         ":pending": {"S": "PENDING"},
                         ":count": {"N": str(next_attempt)},
@@ -130,7 +159,7 @@ class WarningDelivery:
                 UpdateExpression=(
                     "SET warning_delivery_state = :delivered, warning_delivered_at = :now, "
                     "warning_message_id = :message, #status = :delivered_status, "
-                    "updated_at = :now"
+                    "updated_at = :now, warning_next_attempt_at = :none"
                 ),
                 ConditionExpression=(
                     "#status = :warning_pending AND "
@@ -140,6 +169,7 @@ class WarningDelivery:
                 ExpressionAttributeValues={
                     ":delivered": {"S": "DELIVERED"},
                     ":now": {"S": _time(now)},
+                    ":none": {"NULL": True},
                     ":message": {"S": message_id},
                     ":delivered_status": {"S": "WARNING_DELIVERED"},
                     ":warning_pending": {"S": "WARNING_PENDING"},
@@ -215,7 +245,7 @@ class WarningDelivery:
             Key=_key(game_id, intent_id),
             UpdateExpression=(
                 "SET warning_delivery_state = :failed, warning_delivery_error = :code, "
-                "#status = :status, updated_at = :now"
+                "#status = :status, updated_at = :now, warning_next_attempt_at = :none"
             ),
             ConditionExpression="warning_attempt_count = :attempts",
             ExpressionAttributeNames={"#status": "status"},
@@ -224,6 +254,7 @@ class WarningDelivery:
                 ":code": {"S": code},
                 ":status": {"S": "WARNING_FAILED"},
                 ":now": {"S": _time(now)},
+                ":none": {"NULL": True},
                 ":attempts": {"N": str(attempts)},
             },
         )
@@ -245,6 +276,30 @@ def _integer(item: dict[str, object], name: str) -> int:
     if not isinstance(value, int) or isinstance(value, bool) or value < 0:
         raise RuntimeError(f"invalid {name}")
     return value
+
+
+def _retry_at(item: dict[str, object]) -> datetime | None:
+    value = item.get("warning_next_attempt_at")
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise RuntimeError("invalid warning retry deadline")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        raise RuntimeError("invalid warning retry deadline") from None
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise RuntimeError("invalid warning retry deadline")
+    return parsed.astimezone(UTC)
+
+
+def _next_attempt_at(now: datetime, seconds: int) -> datetime | None:
+    if not isinstance(seconds, int) or isinstance(seconds, bool) or seconds <= 0:
+        return None
+    try:
+        return now + timedelta(seconds=seconds)
+    except OverflowError:
+        return None
 
 
 def _time(value: datetime) -> str:

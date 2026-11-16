@@ -26,13 +26,27 @@ class Dynamo:
         assert isinstance(values, dict)
         if ":warning_pending" in values and self.item["status"] != values[":warning_pending"]:
             raise ConditionalFailure
-        if ":pending" in values and values.get(":delivered") is None:
-            self.item["warning_delivery_state"] = {"S": "PENDING"}
-            self.item["warning_attempt_count"] = values[":count"]
-        elif ":delivered" in values:
-            self.item["warning_delivery_state"] = {"S": "DELIVERED"}
-            self.item["warning_delivered_at"] = values[":now"]
-            self.item["warning_message_id"] = values[":message"]
+        condition = str(kwargs.get("ConditionExpression"))
+        if ":previous" in values:
+            if self.item["warning_attempt_count"] != values[":previous"] or self.item[
+                "warning_delivery_state"
+            ] not in (values[":not_started"], values[":retryable"]):
+                raise ConditionalFailure
+        elif "warning_delivery_state = :pending" in condition:
+            if (
+                self.item["warning_delivery_state"] != values[":pending"]
+                or self.item["warning_attempt_count"] != values[":count"]
+            ):
+                raise ConditionalFailure
+        if ":attempts" in values and self.item["warning_attempt_count"] != values[":attempts"]:
+            raise ConditionalFailure
+        names = kwargs.get("ExpressionAttributeNames", {})
+        assert isinstance(names, dict)
+        expression = str(kwargs["UpdateExpression"])
+        assert expression.startswith("SET ")
+        for assignment in expression[4:].split(","):
+            key, value = assignment.strip().split(" = ")
+            self.item[names.get(key, key)] = values[value]
         return {}
 
 
