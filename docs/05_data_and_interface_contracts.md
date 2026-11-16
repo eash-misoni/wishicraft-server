@@ -1259,6 +1259,22 @@ Route 53 observerはcanonical Hosted Zone/FQDNに対するread-only ListResource
 
 D-093の停止予告はRuntimeHeartbeats/SystemState/Operationsへ混在させず、専用tableの`game_id` partition keyと`intent_id` sort keyでdurableに保持する。`intent_id`はGame ID、boot ID、`empty_since`から決定的に導出し、同じempty periodのEvaluator再実行で増殖しない。warning delivery identity/state/attempt、`warning_delivered_at`、idle/warning policy、created/updated、block/cancel reason、STOP Operation IDを保持する。TTLは設定せず、freshnessやeligibilityは必ずsource heartbeatとtimestampを再検証する。
 
+AutoStop warning retry timing (repository correction, production not yet applied):
+`warning_next_attempt_at` is an optional UTC timestamp on the same intent. A known,
+retryable non-creation failure persists `response_time + retry_after_seconds` (never
+earlier than the supplied evaluation time); subsequent invocations
+return without a send or claim before that deadline, and may claim at equality. No Lambda
+sleeps. Delays longer than one evaluator period are retained without shortening them.
+Missing/NULL deadlines on legacy records retain their existing immediate eligibility.
+Malformed stored deadlines prevent delivery; invalid/non-positive/unrepresentable adapter
+delays terminally fail delivery. An omitted adapter delay retains its existing 5-second default.
+The attempt ceiling remains three total claimed sends including the initial send; waiting
+does not consume an attempt. Claim/success/terminal failure clears the deadline to NULL.
+New intents start without a deadline; cancelled/terminal intents are not reactivated.
+Unknown create outcomes are still not retried. Candidate revalidation, conditional claims,
+deterministic nonce, delivered-warning time and all Admission/final STOP gates are unchanged;
+STOP must still wait at least five minutes after actual successful warning delivery.
+
 ## BACKUP create reservation
 
 2026-09-11 safety fix, deployed/read-back verified in the isolated-restore slice. This implements the
