@@ -2,7 +2,7 @@ from dataclasses import replace
 
 import pytest
 
-from wishicraft.dedicated_game import (
+from infrastructure.dedicated.game import (
     Backend,
     Binding,
     ContractError,

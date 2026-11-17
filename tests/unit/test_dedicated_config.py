@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from wishicraft.dedicated_config import (
+from infrastructure.dedicated.deployment import (
     DeploymentIdentity,
     LegacyBoundaries,
     SandboxReferences,

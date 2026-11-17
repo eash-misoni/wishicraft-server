@@ -1,12 +1,12 @@
 # Game別EC2: 検証用の境界と状態モデル (Phase 1)
 
-この段階はリポジトリ上の契約とテストだけ。既存環境の SYS-002（単一実行）、
+この段階はリポジトリ上の契約とテストだけ。新規モデルは従来のLambda配布物に含めない。既存環境の SYS-002（単一実行）、
 既存の設定・CDK入口・API・Discord・実行経路は変更しない。新しいAWSリソースや
 権限、DNS、認証情報は作成・検証しない。
 
 ## 環境の境界
 
-`dedicated_config.validate_sandbox` は要求値と、信頼できる設定から渡される
+`infrastructure.dedicated.deployment.validate_sandbox` は要求値と、信頼できる設定から渡される
 期待値の環境・アカウント・リージョン・名前空間がすべて一致する場合のみ通す。
 どれも省略できず、別アカウントの `dedicated-sandbox` /
 `wc2-sandbox` 系以外は対象外。従来の `dev` は実利用環境であり、既定値にしない。
